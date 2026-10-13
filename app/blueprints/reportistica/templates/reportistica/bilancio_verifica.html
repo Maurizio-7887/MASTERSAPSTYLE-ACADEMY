@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Libri e bilancio → Bilancio di verifica #}
+{% block contenuto %}
+  <p class="msa-intro">Saldi di tutti i conti: Dare e Avere devono coincidere.</p>
+  {% include "reportistica/_sezioni/bilancio.html" %}
+{% endblock %}

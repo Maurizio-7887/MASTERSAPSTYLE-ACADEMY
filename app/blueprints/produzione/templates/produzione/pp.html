@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Produzione PP → Launchpad PP #}
+{% block contenuto %}
+  <p class="msa-intro">Ordini di produzione Taglio → Piegatura → Saldatura: 261, CO11N, 101, MRP e chiusura di periodo CO88.</p>
+  {% include "produzione/_sezioni/pp.html" %}
+{% endblock %}

@@ -4,3 +4,5 @@ __pycache__/
 .venv/
 tests/risultati.json
 tests/stato-finale.json
+tests/_pagina-*.html
+tests/_pagine/

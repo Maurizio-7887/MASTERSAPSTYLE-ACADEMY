@@ -1,0 +1,15 @@
+/* Navigazione a pagine del portale: si appoggia ai colori del simulatore (:root). */
+.msa-barra{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;margin-bottom:10px;font-family:"Segoe UI",Arial,sans-serif;font-size:12.5px}
+.msa-brand{color:#7dd3c8;font-weight:800;letter-spacing:.14em;text-decoration:none}
+.msa-versione{color:#b9c3d1}
+.msa-cambia{color:#cdd8e6;margin-left:auto}
+nav.tabs a{font-family:inherit;font-size:13.5px;background:var(--inchiostro-2);color:#cdd8e6;border-bottom:3px solid transparent;padding:10px 16px;text-decoration:none;display:inline-block}
+nav.tabs a:hover{color:#fff}
+nav.tabs a.attivo{background:var(--carta);color:var(--inchiostro);border-bottom:3px solid var(--oro);font-weight:700}
+/* il pulsante aggiunto dal modulo Fabbisogno resta disponibile come voce di menu "Pianificazione" */
+nav.tabs > button{display:none}
+.msa-pagine{display:flex;flex-wrap:wrap;gap:4px;max-width:1180px;margin:0 auto;padding:14px 32px 0}
+.msa-pagine a{font-size:13px;color:var(--inchiostro);text-decoration:none;padding:6px 12px;border:1px solid var(--riga);border-radius:16px;background:#fff}
+.msa-pagine a.attivo{background:var(--inchiostro);color:var(--carta);border-color:var(--inchiostro)}
+.msa-intro{margin:0 0 18px;color:var(--testo-attenuato);font-size:13.5px;max-width:80ch}
+@media (max-width:800px){.msa-pagine{padding:12px 16px 0}.msa-cambia{margin-left:0}}

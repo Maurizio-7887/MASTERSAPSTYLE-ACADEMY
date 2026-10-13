@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Contabilità FI → IVA e imposte #}
+{% block contenuto %}
+  <p class="msa-intro">Liquidazione IVA, acconti e IRES didattica di competenza.</p>
+  {% include "contabilita/_sezioni/fi.html" %}
+{% endblock %}

@@ -1,0 +1,47 @@
+{# Generato da tools/split_simulatore.py — non modificare a mano #}
+{% raw %}<section class="vista" data-vista="mensile">
+    <h2 class="titolo-vista">Controllo Mensile — Budget vs Reale</h2>
+    <p class="intro">Il Budget Annuo, da solo, non basta per un controllo a fine mese: bisogna prima MENSILIZZARLO (dividerlo
+      in 12 quote, qui a quote costanti di default, modificabili se l'attività non è uniforme durante l'anno), poi
+      confrontare il pezzo di budget del mese con il Conto Economico REALE di quello stesso mese, letto dalle scritture
+      davvero registrate nel Libro Giornale — non dalla proiezione teorica del Bilancio Previsionale.</p>
+
+    <div class="riquadro">
+      <h3>1. Mensilizzazione del Budget Annuo</h3>
+      <p class="aiuto">Peso % di ciascun mese sul totale dell'anno — di default uguale per tutti (100% ÷ 12). Cambia i pesi
+        se la produzione/vendita non è uniforme (es. più alta in certi mesi): il totale dei pesi deve restare 100%.</p>
+      <table class="registro" id="tab-mensilizzazione"></table>
+    </div>
+
+    <div class="riquadro">
+      <div class="riga-campi" style="align-items:flex-end">
+        <div class="campo" style="max-width:260px">
+          <label>Mese da analizzare</label>
+          <select id="mensile-mese" onchange="renderControlloMensile()">
+            <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+            <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+            <option value="6">Luglio</option><option value="7">Agosto</option><option value="8" selected>Settembre</option>
+            <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="griglia-2">
+      <div class="riquadro">
+        <h3>2. Budget del mese (target)</h3>
+        <p class="aiuto">Quota del Budget Annuo assegnata a questo mese secondo i pesi qui sopra.</p>
+        <table class="registro" id="tab-budget-mese"></table>
+      </div>
+      <div class="riquadro">
+        <h3>3. Conto Economico REALE del mese</h3>
+        <p class="aiuto">Calcolato dalle scritture del Libro Giornale con data in questo mese — non dal budget.</p>
+        <table class="registro" id="tab-ce-reale-mese"></table>
+      </div>
+    </div>
+
+    <div class="riquadro">
+      <h3>4. Lo stiamo ottenendo? — Confronto Budget vs Reale</h3>
+      <table class="registro" id="tab-confronto-mensile"></table>
+    </div>
+  </section>{% endraw %}

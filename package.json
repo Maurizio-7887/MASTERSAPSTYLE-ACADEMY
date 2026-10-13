@@ -2,6 +2,15 @@
   "name": "mastersapstyle-academy-tests",
   "private": true,
   "description": "Test di regressione: esegue l'esercizio guidato dentro il simulatore e verifica i numeri della guida",
-  "scripts": { "test": "node tests/esercizio.js" },
-  "devDependencies": { "jsdom": "24.1.3" }
+  "scripts": {
+    "test": "npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte",
+    "test:rotte": "python3 tests/test_rotte.py",
+    "test:file-unico": "node tests/esercizio.js sorgenti/simulatore-vuoto.html",
+    "test:blueprint": "python3 tests/componi_pagina.py /vuoto/tutto tests/_pagina-tutto.html && node tests/esercizio.js tests/_pagina-tutto.html",
+    "test:multipagina": "python3 tests/componi_tutte.py > /dev/null && node tests/esercizio.js tests/_pagine",
+    "test:ponte": "node tests/ponte.js tests/_pagine"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3"
+  }
 }

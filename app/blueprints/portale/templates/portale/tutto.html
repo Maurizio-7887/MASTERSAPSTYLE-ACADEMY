@@ -1,0 +1,7 @@
+{% extends "simulatore/base.html" %}
+{# Pagina unica: tutte le schede insieme, come nel file originale. #}
+{% block contenuto %}
+  {% for bp, scheda in schede %}
+  {% include bp ~ "/_sezioni/" ~ scheda ~ ".html" %}
+  {% endfor %}
+{% endblock %}

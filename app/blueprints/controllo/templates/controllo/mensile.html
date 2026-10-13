@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Controllo CO → Controllo mensile #}
+{% block contenuto %}
+  <p class="msa-intro">Il budget mensilizzato confrontato con il conto economico reale del mese.</p>
+  {% include "controllo/_sezioni/mensile.html" %}
+{% endblock %}

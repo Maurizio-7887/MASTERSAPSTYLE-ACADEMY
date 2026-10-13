@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>MASTERSAPSTYLE Academy</title>
+<meta name="description" content="Simulatori didattici in stile SAP: contabilità generale, controllo di gestione, produzione, vendite e acquisti.">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/portale.css') }}">
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">MASTERSAPSTYLE ACADEMY</div>
+  <h1>Impara la contabilità e il controllo di gestione come in un'azienda vera</h1>
+  <p>Simulatori didattici in stile SAP: ogni documento logistico genera la sua scrittura in partita doppia, ogni ora lavorata finisce su un centro di costo, ogni varianza ha un perché.</p>
+</div></header>
+<main><div class="wrap">
+  <div class="grid">
+  {% for v, testo in versioni.items() %}
+    <article class="card">
+      <h2>Ferro &amp; Transenne — {{ v }}</h2>
+      <p>{{ testo }}.</p>
+      <a class="btn" href="{{ url_for('portale.ingresso', versione=v) }}">Apri il simulatore</a>
+    </article>
+  {% endfor %}
+  {% for m in materiali[:1] %}
+    <article class="card doc">
+      <h2>{{ m.titolo }}</h2>
+      <p>{{ m.testo }}</p>
+      <a class="btn" href="{{ url_for('portale.materiale', file=m.file) }}">Apri il PDF</a>
+    </article>
+  {% endfor %}
+  </div>
+
+  <h3>Le attività — una pagina per ogni funzione</h3>
+  <div class="attivita">
+  {% for a in attivita %}
+    <section>
+      <h4>{{ a.titolo }}</h4>
+      <ul>{% for p in a.pagine %}<li><a href="{{ url_for(a.blueprint ~ '.' ~ p.endpoint, versione='vuoto') }}">{{ p.titolo }}</a></li>{% endfor %}</ul>
+    </section>
+  {% endfor %}
+  </div>
+
+  <h3>Materiali</h3>
+  <ul class="materiali">
+  {% for m in materiali %}<li><a href="{{ url_for('portale.materiale', file=m.file) }}">{{ m.titolo }}</a> — {{ m.testo }}</li>{% endfor %}
+    <li><a href="{{ url_for('portale.tutto', versione='vuoto') }}">Tutte le schede in una pagina</a> — come il file originale, con le linguette.</li>
+  </ul>
+  <p class="nota">I dati che inserisci restano salvati solo nel tuo browser, separati per versione: nessun account e nessun invio al server. Le pagine della stessa versione condividono gli stessi dati. Prima di cambiare computer o browser usa <b>Contabilità FI → Impostazioni FI e backup → Esporta backup JSON</b>. Il programma è didattico: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
+</div></main>
+<footer><div class="wrap">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div></footer>
+</body>
+</html>

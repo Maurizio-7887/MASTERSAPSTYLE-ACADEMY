@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Controllo CO → Report commesse #}
+{% block contenuto %}
+  <p class="msa-intro">Ferro, ore e ricavi di ogni commessa: standard contro reale, dalla produzione all'incasso.</p>
+  {% include "controllo/_sezioni/commesse-report.html" %}
+{% endblock %}

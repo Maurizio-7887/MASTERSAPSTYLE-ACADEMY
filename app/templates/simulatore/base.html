@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
+<title>{{ pagina.titolo }} · {{ attivita.titolo | replace('📖 ','') }} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='sim/' ~ config.versione ~ '/css/simulatore.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navigazione.css') }}">
+</head>
+<body>
+
+<header class="app">
+  <div class="msa-barra">
+    <a class="msa-brand" href="{{ url_for('portale.home') }}">MASTERSAPSTYLE ACADEMY</a>
+    <span class="msa-versione">{{ versioni[config.versione] }}</span>
+    {% for v in versioni %}{% if v != config.versione %}
+      <a class="msa-cambia" href="{{ url_for(config.pagina, versione=v) }}">Passa alla versione {{ v }}</a>
+    {% endif %}{% endfor %}
+  </div>
+  <h1>{{ meta.h1 | safe }}</h1>
+  <div class="sotto">{{ meta.sotto | safe }}</div>
+  <nav class="tabs msa-attivita" aria-label="Attività">
+    {% for a in attivita_tutte %}
+      <a href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint) }}" class="{{ 'attivo' if a.blueprint == attivita.blueprint }}">{{ a.titolo }}</a>
+    {% endfor %}
+  </nav>
+</header>
+{% if attivita.pagine | length > 1 %}
+<nav class="msa-pagine" aria-label="Pagine di {{ attivita.titolo }}">
+  {% for p in attivita.pagine %}
+    <a href="{{ url_for(attivita.blueprint ~ '.' ~ p.endpoint) }}" class="{{ 'attivo' if p.endpoint == pagina.endpoint }}" {% if p.modulo %}data-modulo="{{ p.modulo }}"{% endif %}>{{ p.titolo }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+<main>
+  {% block contenuto %}{% endblock %}
+</main>
+
+<div class="filigrana">Simulatore didattico — dati salvati solo in questo browser (localStorage), nessun collegamento a nessun sistema esterno.</div>
+<div class="toast" id="toast"></div>
+
+<script>window.PAGINA = {{ config | tojson }};</script>
+<script src="{{ url_for('static', filename='js/ponte-fantasmi.js') }}"></script>
+{% for s in meta.script %}
+<script src="{{ url_for(s.bp ~ '.static', filename=config.versione ~ '/' ~ s.file) }}"></script>
+{% endfor %}
+<script src="{{ url_for('static', filename='js/ponte-pagine.js') }}"></script>
+</body>
+</html>

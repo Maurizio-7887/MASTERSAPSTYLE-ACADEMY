@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Contabilità FI → Scrittura libera FB50 #}
+{% block contenuto %}
+  <p class="msa-intro">Scrittura generica in partita doppia, solo per i fatti senza una procedura guidata.</p>
+  {% include "contabilita/_sezioni/registrazione.html" %}
+{% endblock %}

@@ -3,7 +3,7 @@ const H = require('./harness');
 let W = H.boot();
 const out = {};             // numeri di controllo
 const steps = [];           // log passi
-const E = s => W.eval(s);
+const E = s => { const r = W.eval(s); if(H.MULTI && W.__navPending) W = H.segui(); return r; };   // multipagina: segue i cambi pagina
 const S = () => E('STATO');
 const r2 = n => Math.round(n*100)/100;
 
@@ -42,7 +42,7 @@ step('0 preset azienda nuova', () => {
   E("cambiaVista('fi')");
   setFI('fi-costituzione', '2026-12-01');
   E('FI.newCompany()');
-  W = H.reload();
+  W = H.reload(); W = H.segui();
   if(S().fi.costituzione !== '2026-12-01' || S().fi.preset !== 'nuova') throw Error('costituzione non salvata');
   out.preset = {registrazioni:S().registrazioni.length, fornitori:S().sdmm.fornitori.length, clienti:S().sdmm.clienti.length, centri:S().centriDiCosto.map(c=>c.nome+' '+E(`tariffaOraria(STATO.centriDiCosto.find(x=>x.id==${c.id}))`)).join(', ')};
 });
@@ -354,3 +354,8 @@ const reale = {varTot:out.varTot, utile:out.bilancio.utile, ires:out.ires.calc.t
 const diff = Object.keys(atteso).filter(k => Math.abs(atteso[k] - reale[k]) > 0.005);
 if(diff.length || out.readiness.length){ console.error('❌ Numeri diversi dalla guida:', diff.map(k => `${k} atteso ${atteso[k]} reale ${reale[k]}`).join('; '), out.readiness); process.exit(1); }
 console.log('✅ Numeri della guida confermati:', JSON.stringify(reale));
+if(H.MULTI){
+  console.log('✅ Pagine attraversate (' + H.visitate.length + '): ' + H.visitate.join(' → '));
+  const errJS = H.log.filter(x => !/Not implemented/.test(x));
+  if(errJS.length){ console.error('❌ Errori JS nelle pagine:\n' + errJS.slice(0,15).join('\n')); process.exit(1); }
+}

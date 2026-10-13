@@ -1,0 +1,161 @@
+{
+ "versione": "vuoto",
+ "titolo": "Tre fasi · Ferro & Transenne — Simulatore di Ragioneria e Controllo di Gestione (versione vuota: clienti, ordini e commesse li crei tu)",
+ "h1": "Ferro &amp; Transenne S.r.l. — a scopo didattico",
+ "sotto": "Compriamo ferro, produciamo e vendiamo transenne grezze — un'azienda semplice per imparare la ragioneria vera",
+ "script": [
+  {
+   "bp": "vendite_acquisti",
+   "file": "01-sd-mm-vendite-acquisti.js"
+  },
+  {
+   "bp": "produzione",
+   "file": "02-pp-produzione.js"
+  },
+  {
+   "bp": "portale",
+   "file": "03-stato-e-costi-standard.js"
+  },
+  {
+   "bp": "impostazioni",
+   "file": "04-impostazioni-budget-previsionale.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "05-registrazione-fb50.js"
+  },
+  {
+   "bp": "reportistica",
+   "file": "06-giornale-mastro-bilancio.js"
+  },
+  {
+   "bp": "controllo",
+   "file": "07-report-centri-commesse-mensile.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "08-fi-ragioneria.js"
+  },
+  {
+   "bp": "controllo",
+   "file": "09-co-budget-pool.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "10-fiscale-iva-ires-chiusura.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "11-tesoreria-ar-ap-bl.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "12-fi-moduli-navigazione.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "13-cespiti-cessioni-sopravvenienze.js"
+  },
+  {
+   "bp": "produzione",
+   "file": "14-tre-fasi-fabbisogno-piegatura.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "15-operativita-guida-moduli.js"
+  },
+  {
+   "bp": "portale",
+   "file": "16-avvio.js"
+  },
+  {
+   "bp": "pianificazione",
+   "file": "17-fabbisogno-pp-mm.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "18-riba-factoring-addizionali.js"
+  },
+  {
+   "bp": "contabilita",
+   "file": "19-civilistico-competenza-servizi.js"
+  }
+ ],
+ "id_statici": {
+  "fi-body": "div",
+  "tab-piano-conti": "table",
+  "lista-centri-costo": "div",
+  "form-centro-costo": "div",
+  "lista-centri-ricavo": "div",
+  "nuovo-centro-ricavo": "input",
+  "dm-kg-ferro": "input",
+  "dm-costo-ferro": "input",
+  "dm-costo-materiale": "td",
+  "tab-ciclo-lavoro": "tbody",
+  "ciclo-avvisi": "div",
+  "riep-costo-materiale": "div",
+  "riep-costo-lavorazione": "div",
+  "riep-costo-standard": "div",
+  "riep-composizione": "p",
+  "tab-commesse": "table",
+  "spi-cassa": "input",
+  "spi-clienti": "input",
+  "spi-mp-kg": "input",
+  "spi-pf-unita": "input",
+  "spi-fornitori": "input",
+  "spi-attivo": "div",
+  "spi-passivo": "div",
+  "spi-netto": "div",
+  "bud-volume": "input",
+  "bud-prezzo": "input",
+  "bud-spese-generali": "input",
+  "bud-rimanenza-mp": "input",
+  "bud-giorni-incasso": "input",
+  "bud-giorni-pagamento": "input",
+  "bud-aliquota-iva": "input",
+  "tab-capacita-centri": "table",
+  "tab-budget-acquisti": "table",
+  "avviso-capacita-previsionale": "div",
+  "tab-stato-patrimoniale-iniziale-previsionale": "table",
+  "tab-conto-economico-previsionale": "table",
+  "tab-ponte-patrimoniale": "table",
+  "reg-tipo": "select",
+  "reg-data": "input",
+  "reg-descrizione": "input",
+  "reg-campi-specifici": "div",
+  "reg-righe": "div",
+  "reg-tot-dare": "div",
+  "reg-tot-avere": "div",
+  "reg-quadratura": "div",
+  "sdmm-host": "div",
+  "pp-host": "div",
+  "lista-giornale": "div",
+  "mastro-conto": "select",
+  "mastro-tabella": "div",
+  "tab-bilancio": "div",
+  "cc-report-mese": "select",
+  "tab-centri-costo-report": "div",
+  "tab-commesse-report": "div",
+  "tab-mensilizzazione": "table",
+  "mensile-mese": "select",
+  "tab-budget-mese": "table",
+  "tab-ce-reale-mese": "table",
+  "tab-confronto-mensile": "table",
+  "toast": "div"
+ },
+ "sezioni": [
+  "bilancio",
+  "budget",
+  "centri-costo",
+  "commesse-report",
+  "fi",
+  "giornale",
+  "impostazioni",
+  "mastro",
+  "mensile",
+  "pp",
+  "previsionale",
+  "registrazione",
+  "sdmm"
+ ]
+}

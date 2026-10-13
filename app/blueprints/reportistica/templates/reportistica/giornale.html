@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Libri e bilancio → Libro giornale #}
+{% block contenuto %}
+  <p class="msa-intro">Tutte le scritture in ordine cronologico.</p>
+  {% include "reportistica/_sezioni/giornale.html" %}
+{% endblock %}

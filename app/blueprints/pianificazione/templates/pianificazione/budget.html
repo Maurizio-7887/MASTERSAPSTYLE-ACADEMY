@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Pianificazione → Budget annuo #}
+{% block contenuto %}
+  <p class="msa-intro">Il piano dell'anno: volumi, prezzo standard, capacità dei centri e budget acquisti del ferro.</p>
+  {% include "pianificazione/_sezioni/budget.html" %}
+{% endblock %}

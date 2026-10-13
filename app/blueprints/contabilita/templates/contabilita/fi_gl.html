@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Contabilità FI → FI-GL Contabilità generale #}
+{% block contenuto %}
+  <p class="msa-intro">Capitale, ratei e risconti, sopravvenienze, prestazioni da fatturare, storni, bilancio, epilogo e riapertura.</p>
+  {% include "contabilita/_sezioni/fi.html" %}
+{% endblock %}

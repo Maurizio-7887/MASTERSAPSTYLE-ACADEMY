@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Controllo CO → Report centri di costo #}
+{% block contenuto %}
+  <p class="msa-intro">Costi caricati e assorbiti dai centri, confronto standard e reale.</p>
+  {% include "controllo/_sezioni/centri-costo.html" %}
+{% endblock %}

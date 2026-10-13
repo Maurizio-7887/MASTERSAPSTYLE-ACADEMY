@@ -1,0 +1,111 @@
+{# Generato da tools/split_simulatore.py — non modificare a mano #}
+{% raw %}<section class="vista" data-vista="impostazioni">
+    <h2 class="titolo-vista">Impostazioni</h2>
+    <p class="intro">Prima di registrare qualunque fattura, l'azienda va "costruita": il piano dei conti, i centri di costo con il
+      loro standard annuo, i centri di ricavo, e la distinta base della transenna con il suo ciclo di lavoro.</p>
+
+    <div class="riquadro" style="border-color:var(--oro)">
+      <h3>Dati salvati in questo browser</h3>
+      <p class="aiuto">Tutto quello che inserisci (budget, assunzioni, registrazioni...) resta salvato in QUESTO browser
+        anche chiudendo la pagina — utile per continuare da dove hai lasciato, ma significa anche che aprendo di nuovo
+        questo file ritrovi i dati dell'ultima volta, non quelli di partenza. Prima di iniziare una nuova esercitazione
+        da zero, usa questo pulsante.</p>
+      <button class="azione secondaria" style="border-color:var(--rosso);color:var(--rosso)" onclick="ripristinaDatiDiDefault()">🔄 Ripristina tutto ai valori di partenza</button>
+    </div>
+
+    <div class="riquadro" style="border-color:var(--rosso);background:rgba(156,59,59,.06)">
+      <h3>🧹 Nuovo giro — azzera l'esercizio, tiene l'azienda</h3>
+      <p class="aiuto">Usa QUESTO prima di ogni nuova esercitazione, sessione o gruppo di studenti diverso.</p>
+      <p class="aiuto"><b>Cancella:</b> Libro Giornale, Budget Annuo, ordini di produzione PP (con chiusure di periodo, MRP e
+        documenti materiale), ordini di vendita, DDT, fatture, ordini d'acquisto, MIGO, MIRO e tutte le commesse.
+        Le numerazioni dei documenti ripartono da capo (ordini PP da 1000001, documenti materiale da 4900000001).</p>
+      <p class="aiuto"><b>Tiene:</b> Centri di Costo, Distinta Base e ciclo con i tempi di routing, Piano dei Conti, i clienti
+        e i fornitori che hai creato, Stato Patrimoniale Iniziale.</p>
+      <button class="azione secondaria" style="border-color:var(--rosso);color:var(--rosso)" onclick="nuovoGiroStudente()">🧹 Nuovo giro — azzera l'esercizio</button>
+    </div>
+
+    <div class="riquadro">
+      <h3>Piano dei Conti</h3>
+      <table class="registro" id="tab-piano-conti"></table>
+    </div>
+
+    <div class="griglia-2">
+      <div class="riquadro">
+        <h3>Centri di Costo — standard annuo</h3>
+        <p class="aiuto">Per ogni centro, non inserisci più il costo del personale o le ore annue a mano: dici quante persone
+          ci lavorano, quanto costa al mese ciascuna a standard e quante ore standard fa in un anno — costo personale e
+          capacità totale si calcolano da soli. La tariffa oraria standard nasce da lì — è il costo "a preventivo" di
+          un'ora di quel centro, la stessa logica di un centro di costo SAP CO, con la capacità pianificabile come in LTP.</p>
+        <div id="lista-centri-costo"></div>
+        <button class="azione secondaria" onclick="apriFormCentroCosto()">➕ Nuovo centro di costo</button>
+        <div id="form-centro-costo" style="display:none;margin-top:14px;border-top:1px solid var(--riga);padding-top:14px"></div>
+      </div>
+
+      <div class="riquadro">
+        <h3>Centri di Ricavo</h3>
+        <p class="aiuto">Dove finiscono le vendite — anche un'azienda che vende una sola linea di prodotto può avere più centri
+          di ricavo (es. Vendite Italia / Vendite Estero).</p>
+        <div id="lista-centri-ricavo"></div>
+        <div class="riga-campi" style="margin-top:10px">
+          <div class="campo"><input type="text" id="nuovo-centro-ricavo" placeholder="Nome nuovo centro di ricavo"></div>
+          <div style="flex:0 0 auto;align-self:flex-end"><button class="azione secondaria" onclick="aggiungiCentroRicavo()">➕ Aggiungi</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="riquadro">
+      <h3>Distinta Base — Transenna Standard (costo standard di prodotto)</h3>
+      <p class="aiuto">Quanto ferro serve, e quante ore di ciascun centro di costo — da qui si calcola il COSTO STANDARD di
+        una transenna, il numero con cui poi confrontiamo il costo reale (varianza).</p>
+      <table class="registro" style="margin-bottom:12px">
+        <thead><tr><th>Materiale</th><th class="num">Kg per transenna</th><th class="num">Costo std. ferro (€/kg)</th><th class="num">Costo materiale</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Ferro grezzo</td>
+            <td><input class="cifre cella-editabile" type="number" step="0.01" id="dm-kg-ferro" onchange="ricalcolaDistintaBase()"></td>
+            <td><input class="cifre cella-editabile" type="number" step="0.01" id="dm-costo-ferro" onchange="ricalcolaDistintaBase()"></td>
+            <td class="num cifre" id="dm-costo-materiale">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="registro" style="margin-bottom:12px">
+        <thead><tr><th>Operazione (ID · descrizione)</th><th>Centro di costo</th><th>Produce</th><th class="num">Ore standard per transenna</th><th class="num">Tariffa personale (51)</th><th class="num">Tariffa generali (52)</th><th class="num">Costo lavorazione</th></tr></thead>
+        <tbody id="tab-ciclo-lavoro"></tbody>
+      </table>
+      <div id="ciclo-avvisi"></div>
+      <div class="stat-riga">
+        <div class="stat"><div class="label">Costo materiale</div><div class="valore cifre" id="riep-costo-materiale">€ 0,00</div></div>
+        <div class="stat"><div class="label">Costo lavorazione</div><div class="valore cifre" id="riep-costo-lavorazione">€ 0,00</div></div>
+        <div class="stat" style="background:var(--inchiostro);color:var(--carta)"><div class="label" style="color:#b9c3d1">Costo Standard Unitario</div><div class="valore cifre" id="riep-costo-standard">€ 0,00</div></div>
+      </div>
+      <p class="aiuto" id="riep-composizione" style="margin-top:8px"></p>
+    </div>
+
+    <div class="riquadro">
+      <h3>Commesse</h3>
+      <p class="aiuto">Ogni commessa è un lotto di produzione. <b>Non si apre qui</b>: si apre in <b>PP → CO01</b>, dal riquadro
+        «Nuova commessa», dopo che l'ordine di vendita e il controllo di disponibilità hanno detto quanti pezzi mancano
+        (fabbisogno netto). Qui trovi l'elenco: quando un lotto è concluso, chiudilo con il pulsante della sua riga. Sparisce
+        dalle scelte per nuovi ordini ma resta nello storico e nel Report Commesse.</p>
+      <table class="registro" id="tab-commesse"></table>
+      <p class="aiuto" style="margin-top:10px"><button class="azione secondaria" onclick="cambiaVista('pp'); PP.vai('co01')">🏭 Apri una commessa da PP → CO01</button></p>
+    </div>
+
+    <div class="riquadro">
+      <h3>Stato Patrimoniale Iniziale — il punto di partenza dell'anno</h3>
+      <p class="aiuto">Da qui parte il Bilancio Previsionale: il Patrimonio Netto si calcola da solo (Attivo − Passivo), non si
+        inserisce — così lo stato patrimoniale di apertura quadra sempre per costruzione.</p>
+      <div class="riga-campi">
+        <div class="campo"><label>Cassa e Banche (€)</label><input class="cifre" type="number" id="spi-cassa" onchange="salvaStatoPatrimonialeIniziale()"></div>
+        <div class="campo"><label>Clienti (€)</label><input class="cifre" type="number" id="spi-clienti" onchange="salvaStatoPatrimonialeIniziale()"></div>
+        <div class="campo"><label>Magazzino Materie Prime (kg di ferro)</label><input class="cifre" type="number" step="0.01" id="spi-mp-kg" onchange="salvaStatoPatrimonialeIniziale()"></div>
+        <div class="campo"><label>Magazzino Prodotti Finiti (pezzi)</label><input class="cifre" type="number" id="spi-pf-unita" onchange="salvaStatoPatrimonialeIniziale()"></div>
+        <div class="campo"><label>Fornitori (€)</label><input class="cifre" type="number" id="spi-fornitori" onchange="salvaStatoPatrimonialeIniziale()"></div>
+      </div>
+      <div class="stat-riga">
+        <div class="stat"><div class="label">Attivo Totale</div><div class="valore cifre" id="spi-attivo">—</div></div>
+        <div class="stat"><div class="label">Passivo (Fornitori)</div><div class="valore cifre" id="spi-passivo">—</div></div>
+        <div class="stat" style="background:var(--inchiostro);color:var(--carta)"><div class="label" style="color:#b9c3d1">Patrimonio Netto (calcolato)</div><div class="valore cifre" id="spi-netto">—</div></div>
+      </div>
+    </div>
+  </section>{% endraw %}

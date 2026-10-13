@@ -1,0 +1,31 @@
+{# Generato da tools/split_simulatore.py — non modificare a mano #}
+{% raw %}<section class="vista" data-vista="previsionale">
+    <h2 class="titolo-vista">Bilancio Previsionale</h2>
+    <p class="intro">Partendo dallo Stato Patrimoniale Iniziale (Impostazioni) e dal Budget Annuo appena impostato: il conto
+      economico e lo stato patrimoniale attesi a fine anno — lo stesso lavoro che un vero ufficio controllo di gestione fa
+      prima che l'anno cominci. Prima il punto di partenza, poi il conto economico dell'anno, poi — voce per voce — come si
+      passa dall'uno all'altro: uno stato patrimoniale finale non si legge mai da solo, si legge insieme a cosa lo ha
+      cambiato.</p>
+    <div id="avviso-capacita-previsionale"></div>
+
+    <div class="griglia-2">
+      <div class="riquadro">
+        <h3>1. Stato Patrimoniale Iniziale — il punto di partenza</h3>
+        <p class="aiuto">Gli stessi valori impostati in Impostazioni: da qui parte l'anno.</p>
+        <table class="registro" id="tab-stato-patrimoniale-iniziale-previsionale"></table>
+      </div>
+      <div class="riquadro">
+        <h3>2. Conto Economico Previsionale — il risultato dell'anno</h3>
+        <p class="aiuto">Il Reddito Operativo qui sotto è l'unico movimento che tocca il Patrimonio Netto nel ponte a destra.</p>
+        <table class="registro" id="tab-conto-economico-previsionale"></table>
+      </div>
+    </div>
+
+    <div class="riquadro">
+      <h3>3. Dall'Iniziale al Previsionale — cosa cambia, voce per voce, e perché</h3>
+      <p class="aiuto">Ogni riga dello stato patrimoniale finale è l'iniziale più i movimenti che il Budget Annuo genera in
+        quell'anno — incassi, pagamenti, acquisti, consumi, il reddito dell'anno. Nessun numero finale nasce dal nulla:
+        si vede sempre da dove viene.</p>
+      <table class="registro" id="tab-ponte-patrimoniale"></table>
+    </div>
+  </section>{% endraw %}

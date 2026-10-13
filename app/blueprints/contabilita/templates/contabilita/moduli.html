@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Contabilità FI → Tutti i moduli #}
+{% block contenuto %}
+  <p class="msa-intro">Tutte le aree della contabilità: scegli il modulo. I dati sono condivisi, un solo documento contabile per ogni fatto.</p>
+  {% include "contabilita/_sezioni/fi.html" %}
+{% endblock %}

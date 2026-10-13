@@ -1,0 +1,42 @@
+{# Generato da tools/split_simulatore.py — non modificare a mano #}
+{% raw %}<section class="vista" data-vista="registrazione">
+    <h2 class="titolo-vista">Nuova Registrazione (FB50 — scrittura generica)</h2>
+    <p class="intro">Ogni fattura è una scrittura in partita doppia: il totale del Dare deve sempre essere uguale al totale
+      dell'Avere. Scegli il tipo di operazione per farti proporre le righe giuste — puoi comunque modificarle a mano.</p>
+    <div class="riquadro" style="border-color:var(--oro)"><b>Le fatture non si registrano più da qui.</b> La fattura di acquisto (MIRO) e quella di vendita (VF01) nascono dal modulo <b>SD / MM</b>, che scrive da solo la partita doppia nel Libro Giornale — come in SAP, dove FI riceve la scrittura dal documento logistico. Da questa scheda restano il caricamento storico dei costi e le scritture libere; la produzione si registra dal modulo PP. Il nuovo budget mensile è in Ragioneria FI (3a). <button class="piccolo" onclick="cambiaVista('sdmm')">🏢 Vai a SD / MM</button></div>
+    <div class="riquadro" style="border-color:var(--oro)"><b>Scrittura G/L didattica ispirata a FB50: l'inserimento libero, da usare quando non esiste una procedura guidata dedicata (regola didattica locale, non una regola SAP generale).</b> Capitale, cespiti, ammortamenti, paghe, ratei e risconti hanno già il loro «transazione guidata» — il capitale è patrimonio netto, i cespiti appartengono ad Asset Accounting (acquisto con fornitore ispirato a F-90 e ammortamento ad AFAB), le paghe arrivano dal posting run HR→FI (ispirato a PC00_M99_CIPE), i ratei/risconti da documenti guidati ispirati a FBS1 (non Accrual Engine SAP) — e NON si inseriscono qui: il sistema li blocca comunque se ci provi. <button class="piccolo" onclick="cambiaVista('fi')">🏛️ Vai a Ragioneria FI</button></div>
+
+    <div class="riquadro">
+      <div class="riga-campi">
+        <div class="campo">
+          <label>Tipo di operazione</label>
+          <select id="reg-tipo" onchange="cambiaTipoRegistrazione()">
+            <option value="CARICAMENTO_CENTRI">Caricamento pool semplificato PP / costi generali</option>
+            <option value="GENERICA">Scrittura generica — FB50 (solo senza funzione dedicata)</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Data</label>
+          <input type="date" id="reg-data">
+        </div>
+        <div class="campo">
+          <label>Descrizione</label>
+          <input type="text" id="reg-descrizione" placeholder="es. Fattura fornitore Acciaierie Rossi n. 118">
+        </div>
+      </div>
+
+      <div id="reg-campi-specifici"></div>
+
+      <h3 style="margin-top:18px">Righe della scrittura</h3>
+      <div id="reg-righe"></div>
+      <button class="piccolo" onclick="aggiungiRigaScrittura()">➕ Aggiungi riga</button>
+
+      <div class="stat-riga" style="margin-top:16px">
+        <div class="stat"><div class="label">Totale Dare</div><div class="valore cifre" id="reg-tot-dare">€ 0,00</div></div>
+        <div class="stat"><div class="label">Totale Avere</div><div class="valore cifre" id="reg-tot-avere">€ 0,00</div></div>
+        <div class="stat"><div class="label">Quadratura</div><div class="valore" id="reg-quadratura"><span class="badge no">Non quadra</span></div></div>
+      </div>
+
+      <button class="azione" style="margin-top:16px" onclick="registraScrittura()">💾 Registra in Libro Giornale</button>
+    </div>
+  </section>{% endraw %}

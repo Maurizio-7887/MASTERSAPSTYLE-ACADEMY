@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Vendite e acquisti SD / MM → Launchpad SD / MM #}
+{% block contenuto %}
+  <p class="msa-intro">Ciclo attivo (ordini, ATP, credito, picking, DDT, fatture) e passivo (RFQ, ordini d'acquisto, MIGO, MIRO).</p>
+  {% include "vendite_acquisti/_sezioni/sdmm.html" %}
+{% endblock %}

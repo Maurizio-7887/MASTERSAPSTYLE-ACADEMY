@@ -1,0 +1,6 @@
+{% extends "simulatore/base.html" %}
+{# Contabilità FI → FI-BL Banche, RiBa, factoring #}
+{% block contenuto %}
+  <p class="msa-intro">Conto corrente unico: regolamenti, anticipo su fattura, RiBa salvo buon fine, factoring, rimborsi.</p>
+  {% include "contabilita/_sezioni/fi.html" %}
+{% endblock %}

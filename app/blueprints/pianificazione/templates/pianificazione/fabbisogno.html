@@ -1,0 +1,8 @@
+{% extends "simulatore/base.html" %}
+{# Pianificazione → Fabbisogno PP / MM #}
+{% block contenuto %}
+  <p class="msa-intro">Pianificazione senza scritture: prima la carenza da ordini cliente, poi commessa, fasi di produzione e acquisti.</p>
+  <p class="msa-intro">Il modulo Fabbisogno compare qui sotto: calcola, poi conferma le proposte una alla volta.</p>
+  {# punto di aggancio: il modulo Fabbisogno inserisce qui sotto la sua scheda #}
+  <section class="vista" data-vista="fabbisogno-aggancio" hidden></section>
+{% endblock %}

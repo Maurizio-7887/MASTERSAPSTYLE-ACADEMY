@@ -1,0 +1,20 @@
+{# Generato da tools/split_simulatore.py — non modificare a mano #}
+{% raw %}<section class="vista" data-vista="centri-costo">
+    <h2 class="titolo-vista">Report Centri di Costo — Standard vs Reale</h2>
+    <p class="intro">Il report mostra il meccanismo del centro di costo in stile SAP: i costi dei dipendenti e gli altri costi
+      del centro vengono prima caricati in DARE nel loro “malloppo”; le ore dichiarate sulle commesse li scaricano
+      progressivamente in AVERE. Il residuo resta sul centro. Sotto, lo stesso assorbimento viene confrontato con lo standard
+      del volume pianificato.</p>
+    <div class="riquadro">
+      <div class="campo" style="max-width:260px">
+        <label>Mese da analizzare</label>
+        <select id="cc-report-mese" onchange="renderReportCentriCosto()">
+          <option value="0">Gennaio</option><option value="1">Febbraio</option><option value="2">Marzo</option>
+          <option value="3">Aprile</option><option value="4">Maggio</option><option value="5">Giugno</option>
+          <option value="6">Luglio</option><option value="7">Agosto</option><option value="8" selected>Settembre</option>
+          <option value="9">Ottobre</option><option value="10">Novembre</option><option value="11">Dicembre</option>
+        </select>
+      </div>
+    </div>
+    <div id="tab-centri-costo-report"></div>
+  </section>{% endraw %}
