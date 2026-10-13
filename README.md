@@ -10,11 +10,14 @@ app/
   __init__.py            create_app(): registra i blueprint
   pagine.py              REGISTRO di attività e pagine (menu, URL, aree FI) — si parte da qui
   simulatore.py          versione nell'URL (/vuoto/… /completo/…) e rendering comune
-  templates/simulatore/base.html   testata, menu, caricamento ordinato dei JS
+  templates/simulatore/base.html   shell Fiori, menu attività, caricamento ordinato dei JS
+  templates/simulatore/_shell.html shell bar in stile SAP Fiori (comune a launchpad e pagine)
+  static/css/fiori.css             shell, launchpad a mattonelle e pelle Fiori delle schede
+  static/js/launchpad.js           indicatori delle mattonelle letti dai dati dello studente
   static/js/ponte-fantasmi.js      prima del simulatore: elementi delle altre pagine
   static/js/ponte-pagine.js        dopo il simulatore: passaggio fra pagine con coda delle azioni
   blueprints/
-    portale/         pagina iniziale, materiali, /<versione>/tutto, motore comune (stato, avvio)
+    portale/         pagina iniziale e launchpad a mattonelle (/<versione>/), materiali, /<versione>/tutto, motore comune (stato, avvio)
     impostazioni/    azienda, centri di costo, distinta base, stato patrimoniale iniziale
     pianificazione/  budget annuo, bilancio previsionale, fabbisogno PP/MM
     contabilita/     FI-GL, FI-AA, FI-AR, FI-AP, FI-BL (RiBa, factoring), area fiscale, impostazioni FI, FB50
