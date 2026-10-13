@@ -32,5 +32,28 @@ for url in ["/", "/health", "/vuoto/tutto", "/vuoto/", "/materiali/Guida-eserciz
     n += 1
     if c.get(url).status_code != 200:
         errori.append(f"{url}: non risponde")
+# launchpad a due livelli: ogni modulo e ogni sua app
+from app.pagine import MODULI, app_modulo  # noqa: E402
+for v in VERSIONI:
+    for m in MODULI:
+        n += 1
+        url = f"/{v}/m/{m['codice']}"
+        r = c.get(url)
+        if r.status_code != 200:
+            errori.append(f"{url}: HTTP {r.status_code}")
+            continue
+        for t in app_modulo(m):
+            with app.test_request_context():
+                g.versione = v
+                u = url_for(t["endpoint"], versione=v, **t["args"])
+            n += 1
+            if u.replace("&", "&amp;") not in r.get_data(as_text=True):
+                errori.append(f"{url}: manca la mattonella {u}")
+            rr = c.get(u)
+            if rr.status_code != 200:
+                errori.append(f"{u}: HTTP {rr.status_code}")
+            for k in ("sd", "pp"):
+                if k in t["args"] and f'"{k}": "{t["args"][k]}"' not in rr.get_data(as_text=True):
+                    errori.append(f"{u}: la pagina non apre la schermata {t['args'][k]}")
 print("\n".join(errori) or f"✅ {n} rotte verificate")
 sys.exit(1 if errori else 0)

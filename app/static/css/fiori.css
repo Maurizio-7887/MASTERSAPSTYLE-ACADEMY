@@ -134,3 +134,32 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 .msa-risposta{white-space:pre-wrap;background:#FFFDF0;border:1px solid #E6D9A8;border-radius:4px;padding:10px 12px}
 .msa-filtro{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.msa-filtro label{margin:0}.msa-filtro .msa-btn{margin:0}
 @media (max-width:700px){.msa-ac main{padding-left:16px;padding-right:16px}}
+
+/* ── Launchpad a due livelli: moduli → app ───────────── */
+.msa-sigla{font-family:Consolas,monospace;font-size:11.5px;background:#EEF1F5;border-radius:3px;padding:1px 5px;margin-right:2px;color:var(--f-blu-scuro)}
+.msa-attivita a.attivo .msa-sigla{background:var(--f-blu);color:#fff}
+.msa-moduli{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.msa-modulo{--c:var(--f-blu);display:grid;grid-template-columns:54px 1fr;grid-template-rows:1fr auto;gap:4px 12px;background:#fff;border:1px solid var(--f-bordo);
+  border-left:5px solid var(--c);border-radius:8px;padding:11px 12px;text-decoration:none;color:var(--f-testo);box-shadow:0 1px 3px rgba(0,0,0,.08);transition:box-shadow .15s,transform .15s}
+.msa-modulo:hover{box-shadow:0 3px 10px rgba(0,0,0,.18);transform:translateY(-1px)}
+.msa-modulo:focus-visible{outline:2px solid var(--f-blu);outline-offset:2px}
+.msa-modulo .sigla,.msa-intro-modulo .sigla{grid-row:1 / 3;align-self:center;display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:8px;
+  background:var(--c);color:#fff;font:700 17px/1 Consolas,monospace;letter-spacing:.5px}
+.msa-modulo .testo b{display:block;font-size:14px;font-weight:600}
+.msa-modulo .testo small{display:block;font-size:11.5px;color:var(--f-attenuato);line-height:1.35;margin-top:1px}
+.msa-modulo .piede{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:11.5px;color:var(--f-attenuato)}
+.msa-modulo .piede .kpi strong{font-size:16px;font-weight:400;color:var(--f-testo);margin-right:3px;font-variant-numeric:tabular-nums}
+.msa-modulo .piede .n{color:var(--f-blu-scuro);white-space:nowrap}
+.g-contabilita{--c:var(--f-blu)}.g-controllo,.g-reportistica{--c:var(--f-verde)}.g-vendite_acquisti{--c:var(--f-arancio)}.g-produzione{--c:#C35500}.g-personale{--c:#C0399F}.g-pianificazione{--c:var(--f-viola)}.g-impostazioni{--c:#5B738B}
+.g-acquisti{--c:#8D6E00}
+.msa-tiles.compatte .msa-tile{border-top-color:var(--c,var(--f-blu))}
+.msa-intro-modulo{display:flex;align-items:center;gap:14px;border-left-color:var(--c)}
+.msa-intro-modulo h1{margin:0}
+.msa-indietro{margin-left:auto;color:var(--f-blu-scuro);text-decoration:none;font-size:12.5px;white-space:nowrap}
+.msa-tiles.compatte{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-top:12px}
+.msa-tiles.compatte .msa-tile{min-height:104px;padding:10px 11px 9px;border-radius:6px}
+.msa-tiles.compatte .msa-tile .ic{font-size:19px}
+.msa-tiles.compatte .msa-tile b{font-size:12.8px;line-height:1.3}
+.msa-tiles.compatte .msa-tile .kpi strong{font-size:18px}
+@media (max-width:700px){.msa-moduli{grid-template-columns:1fr}.msa-tiles.compatte{grid-template-columns:repeat(2,1fr)}}
+.msa-attivita[aria-label="Moduli"] a{padding:10px 9px 8px;font-size:12.8px}

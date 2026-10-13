@@ -8,7 +8,7 @@
     <span class="msa-dx">
       {% if versione %}
         <span class="msa-versione-badge">Versione {{ versione }}</span>
-        {% for v in versioni %}{% if v != versione %}<a href="{{ url_for(endpoint_corrente, versione=v) }}">passa a {{ v }}</a>{% endif %}{% endfor %}
+        {% for v in versioni %}{% if v != versione %}<a href="{{ url_for(endpoint_corrente, versione=v, **(parametri_correnti or {})) }}">passa a {{ v }}</a>{% endif %}{% endfor %}
       {% endif %}
       {% set u = utente_corrente() %}
       {% if u %}
@@ -22,11 +22,18 @@
 </header>
 {% if versione %}
 {# classe "tabs": il modulo Fabbisogno del simulatore vi aggancia la sua voce (nascosta, il menu è già qui) #}
-<nav class="msa-attivita tabs" aria-label="Attività">
+<nav class="msa-attivita tabs" aria-label="{{ 'Moduli' if moduli is defined else 'Attività' }}">
   <div class="msa-riga">
+    {% if moduli is defined %}
+    <a href="{{ url_for('portale.ingresso', versione=versione) }}" class="{{ 'attivo' if not modulo_attivo }}" title="Tutti i moduli">⊞ Moduli</a>
+    {% for m in moduli %}
+      <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}" class="{{ 'attivo' if modulo_attivo and modulo_attivo.codice == m.codice }}"><b class="msa-sigla">{{ m.sigla }}</b> {{ m.breve }}</a>
+    {% endfor %}
+    {% else %}
     {% for a in attivita_tutte %}
       <a href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint, versione=versione) }}" class="{{ 'attivo' if attivita and a.blueprint == attivita.blueprint }}">{{ a.titolo }}</a>
     {% endfor %}
+    {% endif %}
   </div>
 </nav>
 {% endif %}

@@ -8,7 +8,7 @@ Primo simulatore: **Ferro & Transenne** — contabilità generale, controllo di 
 ```
 app/
   __init__.py            create_app(): registra i blueprint
-  pagine.py              REGISTRO di attività e pagine (menu, URL, aree FI) — si parte da qui
+  pagine.py              REGISTRO di attività e pagine (menu, URL, aree FI) e dei MODULI del launchpad — si parte da qui
   simulatore.py          versione nell'URL (/vuoto/… /completo/…) e rendering comune
   templates/simulatore/base.html   shell Fiori, menu attività, caricamento ordinato dei JS
   templates/simulatore/_shell.html shell bar in stile SAP Fiori (comune a launchpad e pagine)
@@ -25,7 +25,7 @@ app/
     sincronia/       /api/stato/<versione> e /api/battito + static/sincronia.js (lavoro sul server, tempo di collegamento)
     allievo/         /area/: tempo, lavoro salvato, consegna, risposte del docente
     docente/         /docente/: allievi, tempi e costi (CSV), correzione, report stampabile, risposta (anche via email)
-    portale/         pagina iniziale e launchpad a mattonelle (/<versione>/), materiali, /<versione>/tutto, motore comune (stato, avvio)
+    portale/         pagina iniziale e launchpad a due livelli: moduli FI CO SD MM PP HR… (/<versione>/) → app del modulo (/<versione>/m/<modulo>), materiali, /<versione>/tutto, motore comune (stato, avvio)
     impostazioni/    azienda, centri di costo, distinta base, stato patrimoniale iniziale
     pianificazione/  budget annuo, bilancio previsionale, fabbisogno PP/MM
     contabilita/     FI-GL, FI-AA, FI-AR, FI-AP, FI-BL (RiBa, factoring), area fiscale, impostazioni FI, FB50

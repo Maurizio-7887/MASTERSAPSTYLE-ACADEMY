@@ -3,7 +3,7 @@ import json
 
 from flask import Blueprint, abort, g, redirect, render_template, send_from_directory, url_for
 
-from ...pagine import ATTIVITA, VERSIONI, tile
+from ...pagine import ATTIVITA, MODULI, VERSIONI, app_modulo, modulo
 from ...simulatore import STATIC, mappa_url, meta
 
 bp = Blueprint("portale", __name__, template_folder="templates", static_folder="static", static_url_path="/static/portale")
@@ -27,15 +27,28 @@ def home():
     return render_template("portale/home.html", versioni=VERSIONI, attivita=ATTIVITA, materiali=MATERIALI)
 
 
+def _lp(versione, **extra):
+    return render_template(extra.pop("template"), versione=versione, versioni=VERSIONI, attivita_tutte=ATTIVITA, attivita=None,
+                           moduli=MODULI, materiali=MATERIALI, chiave_storage=f"ferro-transenne-fi-2026-{versione}-civilistico", **extra)
+
+
 @bp.route("/<versione>/")
 def ingresso(versione):
-    """Launchpad in stile SAP Fiori: un gruppo per attività, una mattonella per ogni pagina."""
+    """Launchpad in stile SAP Fiori, primo livello: si sceglie il modulo (FI, CO, SD, MM, PP, HR…)."""
     if versione not in VERSIONI:
         abort(404)
-    gruppi = [{"attivita": a, "tiles": [dict(p, **tile(p["endpoint"])) for p in a["pagine"]]} for a in ATTIVITA]
-    return render_template("portale/launchpad.html", versione=versione, versioni=VERSIONI, attivita_tutte=ATTIVITA,
-                           attivita=None, gruppi=gruppi, materiali=MATERIALI, endpoint_corrente="portale.ingresso",
-                           chiave_storage=f"ferro-transenne-fi-2026-{versione}-civilistico")
+    return _lp(versione, template="portale/launchpad.html", modulo_attivo=None, endpoint_corrente="portale.ingresso")
+
+
+@bp.route("/<versione>/m/<codice>")
+def modulo_lp(versione, codice):
+    """Secondo livello: le app (transazioni) del modulo scelto, a mattonelle compatte."""
+    m = modulo(codice)
+    if versione not in VERSIONI or m is None:
+        abort(404)
+    g.versione = versione
+    return _lp(versione, template="portale/modulo.html", modulo_attivo=m, app=app_modulo(m), endpoint_corrente="portale.modulo_lp",
+               parametri_correnti={"codice": codice})
 
 
 @bp.route("/<versione>/tutto")

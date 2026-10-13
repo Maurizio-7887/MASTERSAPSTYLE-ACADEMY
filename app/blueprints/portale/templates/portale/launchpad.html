@@ -12,31 +12,27 @@
 <main class="msa-lp">
   <div class="msa-lp-intro">
     <h1>Launchpad — Ferro &amp; Transenne, versione {{ versione }}</h1>
-    <p>{{ versioni[versione] }}. Ogni mattonella apre una transazione; i numeri in basso sono i tuoi dati.</p>
+    <p>Scegli il modulo: dentro trovi le sue transazioni. {{ versioni[versione] }}.</p>
   </div>
-  {% for g in gruppi %}
-    <div class="msa-gruppo">{{ g.attivita.titolo }}</div>
-    <div class="msa-tiles">
-    {% for t in g.tiles %}
-      <a class="msa-tile g-{{ g.attivita.blueprint }}" href="{{ url_for(g.attivita.blueprint ~ '.' ~ t.endpoint, versione=versione) }}">
-        <span class="ic" aria-hidden="true">{{ t.icona }}</span>
-        <b>{{ t.titolo }}</b>
-        <span class="tc">{{ t.tcode }}</span>
-        <span class="kpi" data-kpi="{{ t.kpi }}"><strong>—</strong><span></span></span>
-      </a>
-    {% endfor %}
-    </div>
+  <div class="msa-gruppo">Moduli</div>
+  <div class="msa-moduli">
+  {% for m in moduli %}
+    <a class="msa-modulo g-{{ m.colore }}" href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}">
+      <span class="sigla">{{ m.sigla }}</span>
+      <span class="testo"><b>{{ m.titolo }}</b><small>{{ m.descrizione }}</small></span>
+      <span class="piede"><span class="kpi" data-kpi="{{ m.kpi }}"><strong>—</strong><span></span></span><span class="n">{{ m.app | length }} app ›</span></span>
+    </a>
   {% endfor %}
+  </div>
   <div class="msa-gruppo">📎 Materiali</div>
-  <div class="msa-tiles">
+  <div class="msa-tiles compatte">
     {% for m in materiali %}
       <a class="msa-tile g-materiali" href="{{ url_for('portale.materiale', file=m.file) }}">
-        <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span>
-        <b>{{ m.titolo }}</b><p>{{ m.testo }}</p>
+        <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span><b>{{ m.titolo }}</b>
       </a>
     {% endfor %}
     <a class="msa-tile g-materiali" href="{{ url_for('portale.tutto', versione=versione) }}">
-      <span class="ic" aria-hidden="true">🗂️</span><b>Tutte le schede in una pagina</b><p>Come il file originale, con le linguette.</p>
+      <span class="ic" aria-hidden="true">🗂️</span><b>Tutte le schede in una pagina</b>
     </a>
   </div>
   <p class="msa-lp-nota">Il lavoro si salva da solo sul portale, separato per versione: lo ritrovi accedendo da qualsiasi computer. Quando hai finito un esercizio consegnalo dalla tua area (👤 in alto) per ricevere la correzione. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>

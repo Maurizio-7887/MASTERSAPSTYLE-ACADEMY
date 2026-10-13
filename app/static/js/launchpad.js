@@ -1,5 +1,5 @@
 /* Indicatori delle mattonelle del launchpad: letti (solo lettura) dallo stato del simulatore
-   salvato nel localStorage di questo browser. Nessun dato esce dal browser. */
+   portato nel browser dal portale (sincronia.js). */
 (function () {
   'use strict';
   let S = null;
@@ -33,6 +33,12 @@
     commesse: () => [n((S.commesse || []).length), 'commesse'],
     dipendenti: () => [n(((S.fi || {}).dipendenti || []).length), 'dipendenti'],
     ordiniSD: () => [n(((S.sdmm || {}).ordini || []).length), 'ordini di vendita'],
+    ddt: () => [n(((S.sdmm || {}).ddt || []).length), 'DDT'],
+    fatture: () => [n(((S.sdmm || {}).fatture || []).length), 'fatture emesse'],
+    rfq: () => [n(((S.sdmm || {}).rfq || []).length), 'richieste di offerta'],
+    po: () => [n(((S.sdmm || {}).po || []).length), 'ordini di acquisto'],
+    migo: () => [n(((S.sdmm || {}).migo || []).length), 'entrate merci'],
+    miro: () => [n(((S.sdmm || {}).miro || []).length), 'fatture fornitore'],
     ordiniPP: () => [n(((S.pp || {}).ordini || []).length), 'ordini di produzione'],
     quadratura: () => {
       let d = 0, a = 0; regs().forEach(r => (r.righe || []).forEach(x => { if (x.dareAvere === 'DARE') d += Number(x.importo) || 0; else a += Number(x.importo) || 0; }));

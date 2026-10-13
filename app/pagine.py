@@ -111,3 +111,107 @@ TILE = {
 def tile(endpoint):
     icona, tcode, kpi = TILE.get(endpoint, ("▫️", "", ""))
     return {"icona": icona, "tcode": tcode, "kpi": kpi}
+
+
+# ── Launchpad a due livelli: prima si sceglie il MODULO, poi l'app (stile SAP Fiori «spaces») ──
+# app: (blueprint.endpoint, schermata interna o None, titolo, icona, transazioni, indicatore)
+#   la schermata interna apre direttamente una funzione del launchpad SD/MM (?sd=…) o PP (?pp=…)
+SD, PP_ = "vendite_acquisti.sdmm", "produzione.pp"
+SCHERMATE_SD = {"home", "ordini", "ctrl", "pick", "ddt", "fatt", "rfq", "po", "migo", "miro", "tm", "flusso", "anag", "credit"}
+SCHERMATE_PP = {"home", "md01", "md04", "md16", "cm01", "anag", "co01", "coois", "co03", "mb261", "co11n", "mb101", "co88", "mb51", "mb52"}
+
+MODULI = [
+    {"codice": "fi", "breve": "Contabilità", "sigla": "FI", "titolo": "Contabilità finanziaria", "icona": "🏛️", "colore": "contabilita", "kpi": "registrazioni",
+     "descrizione": "Contabilità generale, cespiti, clienti, fornitori, banche, IVA e imposte", "app": [
+        ("contabilita.moduli", None, "Panoramica FI", "🏛️", "FI · CO · HR", "registrazioni"),
+        ("contabilita.fi_gl", None, "Contabilità generale", "📒", "FB50 · F.01 · AJAB", "risultato"),
+        ("contabilita.registrazione", None, "Scrittura libera", "✍️", "FB50", "registrazioni"),
+        ("contabilita.fi_aa", None, "Cespiti", "🏭", "AS01 · F-90 · AFAB", "cespiti"),
+        ("contabilita.fi_ar", None, "Clienti", "👥", "FBL5N · F-28", "clienti"),
+        ("contabilita.fi_ap", None, "Fornitori", "🧾", "FBL1N · F-53", "fornitori"),
+        ("contabilita.fi_bl", None, "Banche, RiBa, factoring", "🏦", "FF7A · F-36", "banca"),
+        ("contabilita.fiscale", None, "IVA e imposte", "⚖️", "FB41 · IVA · IRES", "iva"),
+     ]},
+    {"codice": "co", "breve": "Controllo", "sigla": "CO", "titolo": "Controllo di gestione", "icona": "📊", "colore": "controllo", "kpi": "centri",
+     "descrizione": "Budget dei centri, report centri di costo, commesse, controllo mensile", "app": [
+        ("controllo.co_cca", None, "Budget dei centri", "📊", "KP06 · KSB1", "budgetCO"),
+        ("controllo.centri_costo", None, "Report centri di costo", "🎯", "S_ALR_87013611", "centri"),
+        ("controllo.commesse", None, "Report commesse", "📋", "CJI3 · KKBC", "commesse"),
+        ("controllo.mensile", None, "Controllo mensile", "📆", "Budget vs reale", "registrazioni"),
+        (PP_, "co88", "Chiusura di periodo PP", "🧮", "CO88 · KKAX · KKS2", "ordiniPP"),
+     ]},
+    {"codice": "sd", "breve": "Vendite", "sigla": "SD", "titolo": "Vendite", "icona": "🛍️", "colore": "vendite_acquisti", "kpi": "ordiniSD",
+     "descrizione": "Ordine di vendita, ATP e credito, picking, DDT, fattura", "app": [
+        (SD, "ordini", "Ordini di vendita", "📋", "VA01 · VA03", "ordiniSD"),
+        (SD, "ctrl", "ATP, credito, conferma", "🔍", "VA02 · VKM4", "ordiniSD"),
+        (SD, "credit", "Credit Manager", "💳", "VKM4 · UKM_CASE · FD32", "clienti"),
+        (SD, "pick", "Picking", "📦", "LT03 · VL02N", None),
+        (SD, "ddt", "DDT e uscita merci", "🚚", "VL01N · 601", "ddt"),
+        (SD, "fatt", "Fatturazione attiva", "🧾", "VF01 · VF03", "fatture"),
+        (SD, "anag", "Anagrafiche clienti", "👥", "XD01", "clienti"),
+        (SD, "home", "Launchpad SD / MM", "🏢", "tutto il ciclo", None),
+     ]},
+    {"codice": "mm", "breve": "Acquisti", "sigla": "MM", "titolo": "Acquisti e magazzino", "icona": "🛒", "colore": "acquisti", "kpi": "po",
+     "descrizione": "Richieste di offerta, ordini d'acquisto, entrata merci, fattura fornitore, giacenze", "app": [
+        (SD, "rfq", "RFQ e offerte", "✉️", "ME41 · ME47 · ME49", "rfq"),
+        (SD, "po", "Ordini di acquisto", "🛒", "ME21N · ME23N", "po"),
+        (SD, "migo", "Entrata merci", "📥", "MIGO 101", "migo"),
+        (SD, "miro", "Fattura fornitore", "🧮", "MIRO", "miro"),
+        (SD, "tm", "Triple match e controlli", "🔗", "TM", None),
+        (PP_, "mb52", "Giacenze", "🏬", "MB52 · MMBE", None),
+        (PP_, "mb51", "Documenti materiale", "🧾", "MB51", None),
+        (SD, "anag", "Anagrafiche fornitori", "🏷️", "XK01", "fornitori"),
+     ]},
+    {"codice": "pp", "breve": "Produzione", "sigla": "PP", "titolo": "Produzione", "icona": "🏭", "colore": "produzione", "kpi": "ordiniPP",
+     "descrizione": "Dati di base, MRP, ordine di produzione in tre fasi, conferme, chiusura", "app": [
+        (PP_, "anag", "Materiali, distinta, ciclo", "📋", "MM03 · CK11N · CS03", None),
+        (PP_, "md01", "Pianificazione MRP", "🧠", "MD01", None),
+        (PP_, "md04", "Lista fabbisogni", "📈", "MD04", None),
+        (PP_, "md16", "Ordini pianificati", "🗓️", "MD16 · CO40 · ME59N", None),
+        (PP_, "cm01", "Carico dei centri", "⚙️", "CM01", None),
+        (PP_, "co01", "Crea ordine", "🆕", "CO01", "ordiniPP"),
+        (PP_, "coois", "Lista ordini", "📑", "COOIS · CO03", "ordiniPP"),
+        (PP_, "mb261", "Prelievo componenti", "📤", "MIGO 261", None),
+        (PP_, "co11n", "Conferma", "⏱️", "CO11N", None),
+        (PP_, "mb101", "Entrata merci da ordine", "📥", "MIGO 101", None),
+        (PP_, "co88", "Chiusura di periodo", "📆", "CO88", None),
+        ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
+     ]},
+    {"codice": "hr", "breve": "Personale", "sigla": "HR", "titolo": "Personale", "icona": "👤", "colore": "personale", "kpi": "dipendenti",
+     "descrizione": "Dipendenti, paghe, contributi e TFR verso FI e CO", "app": [
+        ("personale.hr", None, "Dipendenti e paghe", "👤", "PA30 · PC00_M99_CIPE", "dipendenti"),
+     ]},
+    {"codice": "pian", "breve": "Pianificazione", "sigla": "BPC", "titolo": "Pianificazione", "icona": "📈", "colore": "pianificazione", "kpi": "budget",
+     "descrizione": "Budget annuo, bilancio previsionale, fabbisogno", "app": [
+        ("pianificazione.budget", None, "Budget annuo", "📈", "KP06 · LTP", "budget"),
+        ("pianificazione.previsionale", None, "Bilancio previsionale", "📑", "CE · SP previsionali", "budget"),
+        ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
+     ]},
+    {"codice": "rep", "breve": "Libri e bilancio", "sigla": "REP", "titolo": "Libri e bilancio", "icona": "📚", "colore": "reportistica", "kpi": "quadratura",
+     "descrizione": "Libro giornale, mastro, bilancio di verifica, flusso documenti", "app": [
+        ("reportistica.giornale", None, "Libro giornale", "📚", "FB03 · S_ALR_87012287", "registrazioni"),
+        ("reportistica.mastro", None, "Mastro", "📇", "FAGLL03", "registrazioni"),
+        ("reportistica.bilancio_verifica", None, "Bilancio di verifica", "⚖️", "F.08", "quadratura"),
+        (SD, "flusso", "Flusso documenti SD / MM", "🗂️", "FB03", None),
+     ]},
+    {"codice": "img", "breve": "Impostazioni", "sigla": "IMG", "titolo": "Impostazioni", "icona": "⚙️", "colore": "impostazioni", "kpi": "costituzione",
+     "descrizione": "Azienda, centri di costo, distinta base, impostazioni FI e backup", "app": [
+        ("impostazioni.impostazioni", None, "Azienda, centri, distinta base", "🏗️", "OKKP · KS01 · CS01 · CA01", "centri"),
+        ("contabilita.sicurezza", None, "Impostazioni FI e backup", "🛡️", "Backup · Azienda nuova", "costituzione"),
+     ]},
+]
+
+
+def modulo(codice):
+    return next((m for m in MODULI if m["codice"] == codice), None)
+
+
+def app_modulo(m):
+    """Le app di un modulo pronte per il template: endpoint, parametri dell'URL, testi."""
+    out = []
+    for endpoint, schermata, titolo, icona, tcode, kpi in m["app"]:
+        args = {}
+        if schermata:
+            args["sd" if endpoint == SD else "pp"] = schermata
+        out.append({"endpoint": endpoint, "args": args, "titolo": titolo, "icona": icona, "tcode": tcode, "kpi": kpi or ""})
+    return out

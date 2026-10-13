@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>{{ modulo_attivo.sigla }} {{ modulo_attivo.titolo }} · versione {{ versione }} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+</head>
+<body class="msa-launchpad">
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro msa-intro-modulo g-{{ modulo_attivo.colore }}">
+    <span class="sigla">{{ modulo_attivo.sigla }}</span>
+    <div><h1>{{ modulo_attivo.titolo }}</h1><p>{{ modulo_attivo.descrizione }}</p></div>
+    <a class="msa-indietro" href="{{ url_for('portale.ingresso', versione=versione) }}">‹ Tutti i moduli</a>
+  </div>
+  <div class="msa-tiles compatte">
+  {% for t in app %}
+    <a class="msa-tile g-{{ modulo_attivo.colore }}" href="{{ url_for(t.endpoint, versione=versione, **t.args) }}">
+      <span class="ic" aria-hidden="true">{{ t.icona }}</span>
+      <b>{{ t.titolo }}</b>
+      <span class="tc">{{ t.tcode }}</span>
+      {% if t.kpi %}<span class="kpi" data-kpi="{{ t.kpi }}"><strong>—</strong><span></span></span>{% endif %}
+    </a>
+  {% endfor %}
+  </div>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% include "sincronia/_stato.html" %}
+<script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
+<script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
+</body>
+</html>
