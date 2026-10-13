@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Launchpad · versione {{ versione }} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+</head>
+<body class="msa-launchpad">
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro">
+    <h1>Launchpad — Ferro &amp; Transenne, versione {{ versione }}</h1>
+    <p>{{ versioni[versione] }}. Ogni mattonella apre una transazione; i numeri in basso sono i tuoi dati, letti da questo browser.</p>
+  </div>
+  {% for g in gruppi %}
+    <div class="msa-gruppo">{{ g.attivita.titolo }}</div>
+    <div class="msa-tiles">
+    {% for t in g.tiles %}
+      <a class="msa-tile g-{{ g.attivita.blueprint }}" href="{{ url_for(g.attivita.blueprint ~ '.' ~ t.endpoint, versione=versione) }}">
+        <span class="ic" aria-hidden="true">{{ t.icona }}</span>
+        <b>{{ t.titolo }}</b>
+        <span class="tc">{{ t.tcode }}</span>
+        <span class="kpi" data-kpi="{{ t.kpi }}"><strong>—</strong><span></span></span>
+      </a>
+    {% endfor %}
+    </div>
+  {% endfor %}
+  <div class="msa-gruppo">📎 Materiali</div>
+  <div class="msa-tiles">
+    {% for m in materiali %}
+      <a class="msa-tile g-materiali" href="{{ url_for('portale.materiale', file=m.file) }}">
+        <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span>
+        <b>{{ m.titolo }}</b><p>{{ m.testo }}</p>
+      </a>
+    {% endfor %}
+    <a class="msa-tile g-materiali" href="{{ url_for('portale.tutto', versione=versione) }}">
+      <span class="ic" aria-hidden="true">🗂️</span><b>Tutte le schede in una pagina</b><p>Come il file originale, con le linguette.</p>
+    </a>
+  </div>
+  <p class="msa-lp-nota">I dati restano solo in questo browser, separati per versione. Prima di cambiare computer usa <b>Contabilità FI → Impostazioni FI e backup → Esporta backup JSON</b>. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+<script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
+<script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
+</body>
+</html>

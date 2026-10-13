@@ -10,6 +10,11 @@ Campi di una pagina:
   vista      scheda del simulatore originale mostrata dalla pagina (data-vista)
   modulo     per le pagine FI/CO/HR: area di FIModules da aprire (gl, aa, ar…)
   sd / pp    schermata iniziale del launchpad SD/MM o PP (facoltativa)
+
+Mattonelle (tile) del launchpad, stile SAP Fiori — dizionario TILE qui sotto:
+  icona      simbolo della mattonella
+  tcode      transazioni SAP di riferimento (sottotitolo)
+  kpi        indicatore calcolato dal browser sui dati dello studente (static/js/launchpad.js)
 """
 
 VERSIONI = {
@@ -73,3 +78,36 @@ def tutte_le_pagine():
     for a in ATTIVITA:
         for p in a["pagine"]:
             yield a, p
+
+
+# endpoint -> (icona, transazioni, indicatore). Indicatori: vedi static/js/launchpad.js
+TILE = {
+    "impostazioni": ("🏗️", "OKKP · KS01 · CS01 · CA01", "centri"),
+    "budget": ("📈", "KP06 · LTP", "budget"),
+    "previsionale": ("📑", "CE · SP previsionali", "budget"),
+    "fabbisogno": ("🧭", "MD04 · ME51N", "ordiniSD"),
+    "moduli": ("🏛️", "FI · CO · HR", "registrazioni"),
+    "fi_gl": ("📒", "FB50 · F.01 · AJAB", "risultato"),
+    "fi_aa": ("🏭", "AS01 · F-90 · AFAB · ABAVN", "cespiti"),
+    "fi_ar": ("👥", "FBL5N · F-28", "clienti"),
+    "fi_ap": ("🧾", "FBL1N · F-53", "fornitori"),
+    "fi_bl": ("🏦", "FF7A · F-36 · RiBa · factoring", "banca"),
+    "fiscale": ("⚖️", "FB41 · IVA · IRES", "iva"),
+    "sicurezza": ("🛡️", "Backup · Azienda nuova", "costituzione"),
+    "registrazione": ("✍️", "FB50", "registrazioni"),
+    "co_cca": ("📊", "KP06 · KSB1", "budgetCO"),
+    "centri_costo": ("🎯", "S_ALR_87013611", "centri"),
+    "commesse": ("📋", "CJI3 · KKBC", "commesse"),
+    "mensile": ("📆", "Budget vs reale", "registrazioni"),
+    "hr": ("👤", "PA30 · PC00_M99_CIPE", "dipendenti"),
+    "sdmm": ("🏢", "VA01 · VL02N · VF01 · ME21N · MIGO · MIRO", "ordiniSD"),
+    "pp": ("🏭", "CO01 · CO11N · MB31 · CO88", "ordiniPP"),
+    "giornale": ("📚", "FB03 · S_ALR_87012287", "registrazioni"),
+    "mastro": ("📇", "FAGLL03", "registrazioni"),
+    "bilancio_verifica": ("⚖️", "F.08 · S_ALR_87012277", "quadratura"),
+}
+
+
+def tile(endpoint):
+    icona, tcode, kpi = TILE.get(endpoint, ("▫️", "", ""))
+    return {"icona": icona, "tcode": tcode, "kpi": kpi}

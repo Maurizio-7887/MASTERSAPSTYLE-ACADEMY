@@ -1,0 +1,97 @@
+/* MASTERSAPSTYLE Academy — shell e launchpad in stile SAP Fiori (barra superiore, gruppi, mattonelle).
+   Gli stessi colori del launchpad interno di SD/MM e PP, così tutto il portale parla la stessa lingua. */
+:root{--f-shell:#1B3A5C;--f-shell2:#24496f;--f-blu:#0070F2;--f-blu-scuro:#0854A0;--f-sfondo:#E5E8EE;--f-bordo:#D1D5DB;
+  --f-testo:#32363A;--f-attenuato:#6A6D70;--f-verde:#107E3E;--f-arancio:#E9730C;--f-viola:#7C3AED;--f-rosso:#BB0000}
+
+/* ── Shell bar ───────────────────────────────────────── */
+.msa-shell{background:var(--f-shell);color:#fff;font-family:"Segoe UI",Arial,sans-serif;font-size:13px}
+.msa-shell .msa-riga{max-width:1280px;margin:0 auto;padding:8px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.msa-logo{background:var(--f-blu);color:#fff;font-weight:800;padding:3px 9px;border-radius:3px;letter-spacing:1px;text-decoration:none;font-size:13px}
+.msa-titolo{color:#fff;text-decoration:none;font-size:14px}
+.msa-titolo b{font-weight:700}
+.msa-home{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:4px 10px;font-size:12.5px}
+.msa-home:hover{background:rgba(255,255,255,.12)}
+.msa-dx{margin-left:auto;display:flex;gap:12px;align-items:center;color:#b9c9dd;font-size:12px}
+.msa-dx a{color:#cfe0f3}
+.msa-versione-badge{background:rgba(255,255,255,.12);border-radius:10px;padding:2px 9px;color:#fff}
+
+/* barra delle attività (come la barra degli spazi del launchpad) */
+.msa-attivita{background:#fff;border-bottom:1px solid var(--f-bordo);font-family:"Segoe UI",Arial,sans-serif}
+.msa-attivita .msa-riga{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;gap:2px;flex-wrap:wrap}
+.msa-attivita a{display:inline-block;padding:11px 14px 9px;color:var(--f-testo);text-decoration:none;font-size:13.5px;border-bottom:3px solid transparent}
+.msa-attivita a:hover{color:var(--f-blu-scuro);background:#F5F6FA}
+.msa-attivita a.attivo{color:var(--f-blu-scuro);font-weight:700;border-bottom-color:var(--f-blu)}
+
+/* pagine dell'attività: pulsanti segmentati + percorso */
+.msa-sottobarra{background:#F5F6FA;border-bottom:1px solid var(--f-bordo);font-family:"Segoe UI",Arial,sans-serif}
+.msa-sottobarra .msa-riga{max-width:1280px;margin:0 auto;padding:8px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.msa-percorso{font-size:12.5px;color:var(--f-attenuato)}
+.msa-percorso a{color:var(--f-blu-scuro);text-decoration:none}
+.msa-percorso b{color:var(--f-testo)}
+.msa-pagine{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.msa-pagine a{font-size:12.5px;color:var(--f-blu);text-decoration:none;padding:5px 12px;border:1px solid var(--f-blu);border-radius:4px;background:#fff}
+.msa-pagine a:hover{background:#E8F4FD}
+.msa-pagine a.attivo{background:var(--f-blu);color:#fff}
+.msa-intro{margin:0 0 18px;color:var(--testo-attenuato,#6A6D70);font-size:13.5px;max-width:80ch}
+
+/* ── Launchpad ───────────────────────────────────────── */
+body.msa-launchpad{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family:"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.45}
+.msa-lp{max-width:1280px;margin:0 auto;padding:18px 24px 50px}
+.msa-lp-intro{background:#fff;border:1px solid var(--f-bordo);border-left:4px solid var(--f-blu);border-radius:4px;padding:12px 16px;margin:6px 0 4px}
+.msa-lp-intro h1{font-size:18px;margin:0 0 4px;font-weight:600}
+.msa-lp-intro p{margin:0;color:var(--f-attenuato)}
+.msa-gruppo{font-size:12px;font-weight:700;color:var(--f-attenuato);text-transform:uppercase;letter-spacing:.6px;margin:22px 0 8px;display:flex;gap:8px;align-items:center}
+.msa-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px}
+.msa-tile{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:13px 13px 11px;min-height:150px;display:flex;flex-direction:column;gap:3px;
+  text-decoration:none;color:var(--f-testo);border-top:4px solid var(--f-blu);box-shadow:0 1px 3px rgba(0,0,0,.08);transition:box-shadow .15s,transform .15s}
+.msa-tile:hover{box-shadow:0 3px 10px rgba(0,0,0,.18);transform:translateY(-1px)}
+.msa-tile:focus-visible{outline:2px solid var(--f-blu);outline-offset:2px}
+.msa-tile .ic{font-size:23px;line-height:1}
+.msa-tile b{font-size:13.5px;font-weight:600}
+.msa-tile .tc{font-family:Consolas,monospace;font-size:10.5px;color:var(--f-blu-scuro)}
+.msa-tile .kpi{margin-top:auto;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 5px;color:var(--f-attenuato);font-size:11.5px}
+.msa-tile .kpi strong{font-size:22px;font-weight:300;color:var(--f-testo);font-variant-numeric:tabular-nums}
+.msa-tile.g-impostazioni{border-top-color:#5B738B}
+.msa-tile.g-pianificazione{border-top-color:var(--f-viola)}
+.msa-tile.g-contabilita{border-top-color:var(--f-blu)}
+.msa-tile.g-controllo,.msa-tile.g-reportistica{border-top-color:var(--f-verde)}
+.msa-tile.g-personale{border-top-color:#C0399F}
+.msa-tile.g-vendite_acquisti,.msa-tile.g-produzione{border-top-color:var(--f-arancio)}
+.msa-tile.g-materiali{border-top-color:#8A6D3B}
+.msa-tile.grande{min-height:170px}
+.msa-tile.grande b{font-size:15px}
+.msa-tile p{margin:2px 0 0;font-size:12px;color:var(--f-attenuato)}
+.msa-lp-nota{margin-top:26px;font-size:12px;color:var(--f-attenuato);max-width:90ch}
+.msa-lp-piede{border-top:1px solid var(--f-bordo);padding:12px 24px;font-size:11.5px;color:var(--f-attenuato);text-align:center}
+@media (max-width:700px){.msa-shell .msa-riga,.msa-attivita .msa-riga,.msa-sottobarra .msa-riga,.msa-lp{padding-left:16px;padding-right:16px}.msa-dx{margin-left:0}.msa-pagine{margin-left:0}}
+/* il simulatore aggiunge al menu un pulsante «Fabbisogno»: nel portale la voce è già in Pianificazione */
+nav.msa-attivita{display:block}
+nav.msa-attivita > button{display:none}
+
+/* ── Pelle Fiori per le schede del simulatore (solo aspetto, nessuna logica) ──
+   Il simulatore originale usa "carta e inchiostro"; nel portale le stesse classi prendono i colori SAP Fiori. */
+body.msa-sim{--inchiostro:#1B3A5C;--inchiostro-2:#24496f;--carta:#F5F6FA;--carta-scura:#EEF1F5;--riga:#D1D5DB;--oro:#0070F2;
+  --verde:#107E3E;--rosso:#BB0000;--testo:#32363A;--testo-attenuato:#6A6D70;
+  background:var(--f-sfondo);font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;color:var(--testo)}
+body.msa-sim main{max-width:1280px;padding:18px 24px 60px}
+body.msa-sim h2.titolo-vista{font-size:17px;font-weight:600;border-bottom:1px solid var(--riga);color:var(--testo)}
+body.msa-sim h2,body.msa-sim h3,body.msa-sim h4{font-family:"Segoe UI",Arial,sans-serif}
+body.msa-sim .riquadro{background:#fff;border:1px solid var(--riga);border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+body.msa-sim .riquadro h3{font-size:14.5px;font-weight:600;color:var(--testo)}
+body.msa-sim details.riquadro > summary{cursor:pointer;color:var(--f-blu-scuro)}
+body.msa-sim input,body.msa-sim select,body.msa-sim textarea{font-family:"Segoe UI",Arial,sans-serif;border-radius:4px;border-color:var(--riga)}
+body.msa-sim input:focus,body.msa-sim select:focus{outline:2px solid #89BFFF;border-color:var(--f-blu)}
+body.msa-sim button.azione{background:var(--f-blu);color:#fff;border-radius:4px;font-weight:600;font-family:"Segoe UI",Arial,sans-serif}
+body.msa-sim button.azione:hover{background:var(--f-blu-scuro)}
+body.msa-sim button.azione.secondaria{background:#fff;color:var(--f-blu);border:1px solid var(--f-blu)}
+body.msa-sim button.azione.secondaria:hover{background:#E8F4FD}
+body.msa-sim button.piccolo{border-radius:4px;border-color:var(--f-blu);color:var(--f-blu);background:#fff}
+body.msa-sim table.registro th{color:var(--f-attenuato);background:#F5F6FA;border-bottom:1px solid var(--riga)}
+body.msa-sim table.registro tr:last-child td{border-bottom:1px solid var(--riga)}
+body.msa-sim .stat{background:#fff;border-radius:6px;border-left:4px solid var(--f-blu)}
+body.msa-sim .stat .valore{font-weight:300}
+body.msa-sim .fi-module-tile{border-radius:8px;border-top-color:var(--f-blu);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+body.msa-sim .fi-module-bar button[aria-pressed=true]{background:var(--f-blu);color:#fff}
+body.msa-sim .filigrana{font-family:"Segoe UI",Arial,sans-serif}
+/* nelle pagine FI il menu dei moduli è già nella barra del portale: niente doppione */
+body.msa-sim #fi-mod-nav > h2,body.msa-sim #fi-mod-nav > p.aiuto,body.msa-sim #fi-mod-nav > .fi-module-bar:not(#fi-module-links){display:none}

@@ -6,49 +6,45 @@
 <link rel="icon" href="data:,">
 <title>MASTERSAPSTYLE Academy</title>
 <meta name="description" content="Simulatori didattici in stile SAP: contabilità generale, controllo di gestione, produzione, vendite e acquisti.">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/portale.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
 </head>
-<body>
-<header><div class="wrap">
-  <div class="brand">MASTERSAPSTYLE ACADEMY</div>
-  <h1>Impara la contabilità e il controllo di gestione come in un'azienda vera</h1>
-  <p>Simulatori didattici in stile SAP: ogni documento logistico genera la sua scrittura in partita doppia, ogni ora lavorata finisce su un centro di costo, ogni varianza ha un perché.</p>
-</div></header>
-<main><div class="wrap">
-  <div class="grid">
+<body class="msa-launchpad">
+{% set versione = None %}
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro">
+    <h1>Impara la contabilità e il controllo di gestione come in un'azienda vera</h1>
+    <p>Simulatori didattici in stile SAP: ogni documento logistico genera la sua scrittura in partita doppia, ogni ora lavorata finisce su un centro di costo, ogni varianza ha un perché.</p>
+  </div>
+  <div class="msa-gruppo">🏭 Ferro &amp; Transenne S.r.l. — scegli la versione</div>
+  <div class="msa-tiles">
   {% for v, testo in versioni.items() %}
-    <article class="card">
-      <h2>Ferro &amp; Transenne — {{ v }}</h2>
-      <p>{{ testo }}.</p>
-      <a class="btn" href="{{ url_for('portale.ingresso', versione=v) }}">Apri il simulatore</a>
-    </article>
-  {% endfor %}
-  {% for m in materiali[:1] %}
-    <article class="card doc">
-      <h2>{{ m.titolo }}</h2>
-      <p>{{ m.testo }}</p>
-      <a class="btn" href="{{ url_for('portale.materiale', file=m.file) }}">Apri il PDF</a>
-    </article>
+    <a class="msa-tile grande g-{{ 'contabilita' if v == 'vuoto' else 'vendite_acquisti' }}" href="{{ url_for('portale.ingresso', versione=v) }}">
+      <span class="ic" aria-hidden="true">{{ '🧱' if v == 'vuoto' else '🏢' }}</span>
+      <b>Versione {{ v }}</b><p>{{ testo }}.</p>
+      <span class="tc">Launchpad · {{ attivita | length }} attività</span>
+    </a>
   {% endfor %}
   </div>
-
-  <h3>Le attività — una pagina per ogni funzione</h3>
-  <div class="attivita">
+  <div class="msa-gruppo">📎 Materiali</div>
+  <div class="msa-tiles">
+  {% for m in materiali %}
+    <a class="msa-tile g-materiali" href="{{ url_for('portale.materiale', file=m.file) }}">
+      <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span>
+      <b>{{ m.titolo }}</b><p>{{ m.testo }}</p>
+    </a>
+  {% endfor %}
+  </div>
+  <div class="msa-gruppo">🧩 Le attività del simulatore</div>
+  <div class="msa-tiles">
   {% for a in attivita %}
-    <section>
-      <h4>{{ a.titolo }}</h4>
-      <ul>{% for p in a.pagine %}<li><a href="{{ url_for(a.blueprint ~ '.' ~ p.endpoint, versione='vuoto') }}">{{ p.titolo }}</a></li>{% endfor %}</ul>
-    </section>
+    <a class="msa-tile g-{{ a.blueprint }}" href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint, versione='vuoto') }}">
+      <b>{{ a.titolo }}</b><p>{{ a.pagine | map(attribute='titolo') | join(' · ') }}</p>
+    </a>
   {% endfor %}
   </div>
-
-  <h3>Materiali</h3>
-  <ul class="materiali">
-  {% for m in materiali %}<li><a href="{{ url_for('portale.materiale', file=m.file) }}">{{ m.titolo }}</a> — {{ m.testo }}</li>{% endfor %}
-    <li><a href="{{ url_for('portale.tutto', versione='vuoto') }}">Tutte le schede in una pagina</a> — come il file originale, con le linguette.</li>
-  </ul>
-  <p class="nota">I dati che inserisci restano salvati solo nel tuo browser, separati per versione: nessun account e nessun invio al server. Le pagine della stessa versione condividono gli stessi dati. Prima di cambiare computer o browser usa <b>Contabilità FI → Impostazioni FI e backup → Esporta backup JSON</b>. Il programma è didattico: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
-</div></main>
-<footer><div class="wrap">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div></footer>
+  <p class="msa-lp-nota">I dati che inserisci restano salvati solo nel tuo browser, separati per versione: nessun account e nessun invio al server. Le pagine della stessa versione condividono gli stessi dati. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div>
 </body>
 </html>

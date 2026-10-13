@@ -1,0 +1,26 @@
+{# Shell bar in stile SAP Fiori, comune a launchpad e pagine.
+   Variabili: versione (o None), versioni, attivita_tutte, attivita (o None), pagina (o None), endpoint_corrente (per cambiare versione) #}
+<header class="msa-shell">
+  <div class="msa-riga">
+    <a class="msa-logo" href="{{ url_for('portale.home') }}" title="MASTERSAPSTYLE Academy — pagina iniziale">MSA</a>
+    <a class="msa-titolo" href="{{ url_for('portale.ingresso', versione=versione) if versione else url_for('portale.home') }}"><b>MASTERSAPSTYLE Academy</b> · Ferro &amp; Transenne S.r.l.</a>
+    {% if versione %}<a class="msa-home" href="{{ url_for('portale.ingresso', versione=versione) }}">🏠 Launchpad</a>{% endif %}
+    <span class="msa-dx">
+      {% if versione %}
+        <span class="msa-versione-badge">Versione {{ versione }}</span>
+        {% for v in versioni %}{% if v != versione %}<a href="{{ url_for(endpoint_corrente, versione=v) }}">passa a {{ v }}</a>{% endif %}{% endfor %}
+      {% endif %}
+      <span>Client 800 · Plant 1000</span>
+    </span>
+  </div>
+</header>
+{% if versione %}
+{# classe "tabs": il modulo Fabbisogno del simulatore vi aggancia la sua voce (nascosta, il menu è già qui) #}
+<nav class="msa-attivita tabs" aria-label="Attività">
+  <div class="msa-riga">
+    {% for a in attivita_tutte %}
+      <a href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint, versione=versione) }}" class="{{ 'attivo' if attivita and a.blueprint == attivita.blueprint }}">{{ a.titolo }}</a>
+    {% endfor %}
+  </div>
+</nav>
+{% endif %}
