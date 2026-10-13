@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8">
+<title>01-Guida-esercizio-integrato</title>
+<style>
+@page{size:A4;margin:18mm 16mm 18mm 16mm}
+body{font-family:"DejaVu Sans",Arial,sans-serif;font-size:10.2pt;line-height:1.42;color:#1f2a37}
+h1{font-size:23pt;color:#1c3550;margin:0 0 6px;line-height:1.15}
+h1 small{display:block;font-size:12pt;color:#0f766e;font-weight:600;margin-top:6px}
+h2{font-size:14pt;color:#0f766e;margin:20px 0 6px;break-after:avoid;border-bottom:1.5px solid #cfe3e1;padding-bottom:3px}
+h3{font-size:11pt;color:#1c3550;margin:12px 0 4px;break-after:avoid}
+p{margin:5px 0}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:9.2pt;break-inside:auto}
+tr{break-inside:avoid}
+th{background:#1c3550;color:#fff;text-align:left;padding:5px 7px;font-weight:600}
+td{padding:4px 7px;border-bottom:1px solid #d7dde4;vertical-align:top}
+tr:nth-child(even) td{background:#f4f7fa}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.box{border-left:4px solid #0f766e;background:#eef8f6;padding:7px 10px;margin:8px 0;break-inside:avoid}
+.warn{border-left:4px solid #b45309;background:#fff6e8;padding:7px 10px;margin:8px 0;break-inside:avoid}
+.new{display:inline-block;background:#b45309;color:#fff;font-size:7.5pt;font-weight:700;padding:1px 5px;border-radius:3px;vertical-align:middle;margin-left:4px}
+.k{font-family:"DejaVu Sans Mono",monospace;font-size:8.8pt;background:#eef1f4;padding:0 3px;border-radius:2px}
+ol,ul{margin:4px 0 6px 20px;padding:0}
+li{margin:2px 0}
+.chk{font-weight:700;color:#0f5132}
+.small{font-size:8.6pt;color:#4b5563}
+.pb{break-before:page}
+</style></head><body>
+
+<h1>Ferro &amp; Transenne — esercizio guidato passo passo<small>Versione per il simulatore rinnovato: tre ordini di produzione, RiBa, anticipo su fattura, factoring, fatture da emettere/ricevere</small></h1>
+
+<h2>Prima di cominciare</h2>
+<p>L'azienda nasce il <b>1 dicembre 2026</b>, senza saldi né scorte. Compra ferro, produce <b>200 transenne</b> con tre ordini distinti (Taglio → Piegatura → Saldatura), vende a <b>due clienti</b>, finanzia i crediti con tre strumenti diversi (RiBa salvo buon fine, anticipo su fattura, factoring pro soluto), rinnova due impianti, chiude il 2026 e lo riapre nel 2027. Usa <b>simulatore-ragioneria-tre-fasi-vuoto.html</b>.</p>
+<p>Regola d'oro di ogni operazione: <b>compila → leggi l'anteprima → controlla Dare = Avere → conferma una sola volta → verifica nel Libro Giornale</b>. I pulsanti hanno un'etichetta colorata: <span class="k">ANTEPRIMA</span> non registra nulla; <span class="k">REGISTRA FI</span> scrive nel Libro Giornale; <span class="k">REGISTRA + BANCA</span> muove anche il conto corrente; <span class="k">SALVA BUDGET CO</span> non tocca la contabilità generale. Il costo non è un pagamento, il ricavo non è un incasso, l'anticipo della banca non è l'incasso del cliente.</p>
+<p>Compila sempre la <b>data indicata</b> nel passo, mai la data di oggi che il programma propone. I nomi delle transazioni SAP sono orientativi: il programma è didattico, non è SAP né un servizio di adempimenti fiscali.</p>
+
+<div class="box"><b>Cosa cambia rispetto alla versione precedente dell'esercizio</b>
+<ul>
+<li><b>Produzione su tre ordini PP distinti</b>, creati a mano uno dopo l'altro: SL-TAGLIO (conto 16), SL-PIEGA (conto 161), TRANSENNA (conto 13). Ogni ordine fa 261 → CO11N → 101; la fase successiva si crea solo dopo il 101 della precedente.</li>
+<li><b>Due clienti</b>: Beta (120 pezzi a 60 €) e Delta (80 pezzi a 62 €: nasce una variazione favorevole del prezzo di vendita sul conto 63).</li>
+<li><b>RiBa salvo buon fine</b> sulla fattura Beta (anticipo sul conto 3602), <b>anticipo su fattura</b> per Delta (conto 36), <b>factoring pro soluto</b> sulla fattura servizi SV-1 (conto 1601).</li>
+<li><b>Cessione dei cespiti in due fasi</b>: prima l'ammortamento fino alla data di cessione, poi la vendita. La vendita non calcola più l'ammortamento da sola.</li>
+<li><b>Incremento del cespite prima dell'uso</b> (installazione della Piegatrice), <b>fatture da ricevere / da emettere</b> per prestazioni concluse, <b>esposizione civilistica</b> art. 2424/2425.</li>
+<li>Gli interessi sul rimborso dell'anticipo si registrano solo come <b>costo nuovo documentato</b> (documento e motivazione obbligatori).</li>
+</ul></div>
+
+<h2>Passo 0 — prepara l'azienda nuova</h2>
+<ol>
+<li>Apri <b>Moduli FI / CO → Impostazioni FI</b>. Se nel browser ci sono dati da conservare, premi <b>Esporta backup JSON</b> e conserva il file.</li>
+<li>Compila <b>Data di costituzione</b> con <b>01/12/2026</b> <i>prima</i> del preset.</li>
+<li>Premi <b>Preset Azienda nuova — azzera con conferma</b>, accetta la conferma e attendi il ricaricamento della pagina.</li>
+<li>Controlla: data di costituzione 01/12/2026 salvata, Libro Giornale vuoto, banca 0, <b>nessun cliente e nessun fornitore</b> (il preset cancella anche i 4 fornitori di esempio), nessuna scorta, cespite, dipendente, ordine o commessa.</li>
+<li>Anche la versione completa può svolgere l'esercizio, ma solo dopo questo azzeramento: tenere i suoi saldi significherebbe un'azienda preesistente, non una nuova costituzione.</li>
+</ol>
+
+<h3>Calendario da seguire</h3>
+<p>I passi sono raggruppati per argomento: usa il calendario per non anticipare o saltare operazioni.</p>
+<table><thead><tr><th style="width:17%">Data</th><th>Operazioni</th></tr></thead>
+<tr><td>01/12/2026</td><td>Standard e budget; budget CO di dicembre; capitale; tre cespiti; fatture ASS-1 e SV-1; anagrafiche; ordini Beta e Delta; carenza ATP; commessa COM-200</td></tr>
+<tr><td>02/12</td><td>Pagamento ASS-1</td></tr>
+<tr><td>03/12</td><td>Incremento della Piegatrice (installazione, prima dell'uso)</td></tr>
+<tr><td>10/12</td><td>Pagamento macchine; ordine, MIGO e MIRO del ferro; factoring pro soluto di SV-1 e commissione</td></tr>
+<tr><td>15/12</td><td>Ordine Taglio: 261 ferro → CO11N → 101 SL-TAGLIO</td></tr>
+<tr><td>18/12</td><td>Ordine Piegatura: 261 tagliati → CO11N → 101 SL-PIEGA</td></tr>
+<tr><td>20/12</td><td>Accredito del factor su SV-1, chiusura contratto; pagamento parziale ferro 1.000</td></tr>
+<tr><td>21/12 e 29/12</td><td>Ordine Saldatura: 261 piegati il 21/12; CO11N e 101 TRANSENNA il 29/12</td></tr>
+<tr><td>28/12</td><td>Acconto IRES 100</td></tr>
+<tr><td>29/12</td><td>Conferma, picking, DDT e fattura Beta e Delta; RiBa Beta con anticipo; anticipo fattura Delta</td></tr>
+<tr><td>30/12</td><td>Incasso parziale Delta; ammortamento alla cessione e vendita di Sega e Saldatrice</td></tr>
+<tr><td>31/12</td><td>Rimborso parziale anticipo; paghe; energia; sopravvenienze; fatture da ricevere/emettere; AFAB; ratei e risconti; TECO e CO88 con prova annulla/richiudi; IVA, IRES, bilancio, chiusura</td></tr>
+<tr><td>01/01/2027</td><td>Riapertura</td></tr>
+<tr><td>02/01</td><td>Storno dei quattro ratei/risconti</td></tr>
+<tr><td>10/01 e 12/01</td><td>Fatture collegate alle prestazioni di dicembre</td></tr>
+<tr><td>15/01</td><td>Incassi residui, pagamenti fornitori e netto paghe, rimborso finale anticipo Delta con interessi</td></tr>
+<tr><td>18/01</td><td>Ritenute, INPS e IVA</td></tr>
+<tr><td>28/01</td><td>Scadenza RiBa, incasso con compensazione dell'anticipo, interessi, chiusura</td></tr>
+<tr><td>30/06</td><td>Saldo IRES</td></tr></table>
+
+<h2>Passo 1 — standard e budget, prima degli ordini</h2>
+<p>In <b>Impostazioni → Centri di Costo</b> controlla che <b>Taglio, Piegatura e Saldatura</b> abbiano già: 1 addetto, costo azienda mensile standard 3.000, 1.500 ore standard/anno, costi generali annui 6.000. Se un valore è diverso, premi <b>Modifica organico e standard</b>, correggi e <b>Salva modifiche</b>. 3.000 è il costo azienda pianificato per persona e mese, né netto né lordo. Verifica la tariffa: 24 €/h personale + 4 €/h generali = <b>28 €/h</b> per ogni centro. Il centro Spese Generali resta senza ore.</p>
+<p>In <b>Distinta Base</b> verifica: ferro 8 kg a 0,95 €/kg; OP0010 Taglio 0,25 h (produce SL); OP0015 Piegatura 0,20 h (produce PIEGA); OP0020 Saldatura 0,40 h (produce PF). Il costo standard cresce fase per fase:</p>
+<table><thead><tr><th>Materiale</th><th>Composizione</th><th class="n">Costo standard €/pz</th></tr></thead>
+<tr><td>SL-TAGLIO (conto 16)</td><td>ferro 7,60 + taglio 7,00</td><td class="n">14,60</td></tr>
+<tr><td>SL-PIEGA (conto 161)</td><td>14,60 + piegatura 5,60</td><td class="n">20,20</td></tr>
+<tr><td>TRANSENNA (conto 13)</td><td>20,20 + saldatura 11,20</td><td class="n">31,40</td></tr></table>
+<p>Gli ammortamenti (conto 54) restano costi del periodo: non entrano nel costo standard né nei pool 51/52.</p>
+<p>In <b>Budget Annuo</b>: Volume annuo pianificato <b>200</b>, Prezzo di vendita standard <b>60</b> → <b>Salva Budget e aggiorna Capacità/Acquisti/Previsionale</b>.</p>
+<p>In <b>Moduli FI / CO → CO-CCA</b>, riquadro <b>3a · Budget mensile dei centri</b>: Mese budget <b>2026-12</b> → <b>Anteprima budget mensile</b> → controlla per ciascun centro personale 3.000, generali 500, 125 ore → <b>Conferma budget gestionale (nessuna scrittura FI)</b>. Il Libro Giornale deve restare vuoto: il budget è un tetto gestionale. Durante dicembre le conferme di produzione accrediteranno l'attività al conto <b>75</b>; le paghe reali arriveranno il 31/12 sul 51. Budget e costi reali non si sommano.</p>
+
+<h2>Passo 2 — capitale, tre cespiti e incremento della Piegatrice</h2>
+<p><b>FI-GL → 2 · Capitale sociale versato</b>: Data 01/12/2026; Capitale versato 80.000; Riferimento univoco <b>COSTITUZIONE-2026</b>; non spuntare la conferma di aumento (è il primo versamento). <b>Mostra anteprima</b> → D 10 / A 30 € 80.000 → <b>Conferma e registra nel Libro Giornale</b>. Banca 80.000: non è un ricavo.</p>
+<p><b>FI-AA → 4 · Asset Accounting</b>, tre fatture separate. Campi comuni: Data fattura 01/12/2026; Fornitore <b>Macchine Alfa Srl</b>; IVA detraibile 22; Aliquota annua 10.</p>
+<table><thead><tr><th>Campo</th><th>Sega</th><th>Saldatrice</th><th>Piegatrice</th></tr></thead>
+<tr><td>Codice cespite</td><td>SEG-1</td><td>SAL-1</td><td>PIE-1</td></tr>
+<tr><td>Descrizione</td><td>Sega automatica tubi</td><td>Saldatrice</td><td>Piegatrice</td></tr>
+<tr><td>Numero fattura</td><td>M-SEG-1</td><td>M-SAL-1</td><td>M-PIE-1</td></tr>
+<tr><td>Imponibile (€)</td><td>12.000</td><td>8.000</td><td>6.000</td></tr>
+<tr><td>Entrata in funzione</td><td>01/12/2026</td><td>01/12/2026</td><td><b>05/12/2026</b></td></tr>
+<tr><td>Centro informativo</td><td>Taglio</td><td>Saldatura</td><td>Piegatura</td></tr></table>
+<p>Per ciascuna: <b>Anteprima fattura cespite (F-90)</b> → D 01 costo, D 14 IVA, A 20 debito → <b>Conferma</b>. Debiti: 14.640 + 9.760 + 7.320. Non eseguire ora l'AFAB.</p>
+<h3>Incremento prima dell'uso — 03/12 <span class="new">NUOVO</span></h3>
+<p>Nel riquadro <b>Estensioni didattiche: factoring, RiBa, addizionali, registro cespiti</b> scegli <b>Capitalizza incremento PRIMA dell'uso</b> e compila: Data operazione 03/12/2026; Riferimento <b>INST-PIE-1</b>; Cespite PIE-1; Importo 400; IVA 22; Fornitore Macchine Alfa Srl; Documento <b>M-INST-1</b>; Disponibilità all'uso <b>05/12/2026</b> (deve coincidere con l'anagrafica). <b>Anteprima operazione</b> → D 01 400, D 14 88, A 20 488 → <b>Conferma registrazione</b>. L'installazione è costo accessorio del bene: è ammessa solo prima dell'entrata in funzione e prima di qualsiasi ammortamento. Costo storico della Piegatrice: <b>6.400</b>.</p>
+
+<h2>Passo 3 — fatture servizi iniziali e primo pagamento</h2>
+<p>In <b>FI-AP</b> (ASS-1) e <b>FI-AR</b> (SV-1), riquadro <b>4 · Fattura servizi dedicata</b>:</p>
+<table><thead><tr><th>Campo</th><th>ASS-1</th><th>SV-1</th></tr></thead>
+<tr><td>Tipo</td><td>Acquisto servizi</td><td>Vendita servizi</td></tr>
+<tr><td>Natura prestazione venduta</td><td>—</td><td>Accessoria — A5</td></tr>
+<tr><td>Data fattura / Scadenza</td><td>01/12/2026 / 31/12/2026</td><td>01/12/2026 / 31/12/2026</td></tr>
+<tr><td>Fornitore / cliente</td><td>Assicurazioni Gamma SpA</td><td>Eventi Sigma Srl</td></tr>
+<tr><td>Numero fattura</td><td>ASS-1</td><td>SV-1</td></tr>
+<tr><td>Conto</td><td>53</td><td>42</td></tr>
+<tr><td>Imponibile / IVA %</td><td>1.200 / 0</td><td>620 / 22</td></tr>
+<tr><td>Centro di costo</td><td>nessuno</td><td>nessuno</td></tr></table>
+<p><b>Anteprima fattura servizi</b> → ASS-1: D 53 / A 20 € 1.200; SV-1: D 11 756,40 / A 42 620 / A 21 136,40 → <b>Conferma nel Libro Giornale</b>. L'assicurazione copre 01/12/2026–30/11/2027; il servizio SV-1 copre 01/12/2026–31/01/2027: serviranno agli assestamenti.</p>
+<div class="box"><b>Come regolare una partita (vale per tutto l'esercizio).</b> In FI-AR, FI-AP o FI-BL: <b>Data di consultazione partite</b> = data del movimento → <b>Aggiorna partite alla data</b> → nella colonna <b>Allocazione (€)</b> scrivi l'importo sulla riga giusta → compila <b>Data regolamento</b> e <b>Riferimento univoco regolamento</b> → <b>Anteprima regolamento selezionato</b> → <b>Conferma nel Libro Giornale</b>. Non mescolare incassi e pagamenti nella stessa operazione.</div>
+<p>02/12: paga ASS-1, allocazione 1.200, riferimento <b>PAG-ASS</b> → D 20 / A 10. Banca 78.800.</p>
+
+<h2>Passo 4 — anagrafiche, due ordini, carenza, commessa</h2>
+<p><b>SD / MM → Anagrafiche</b>: <b>Aggiungi fornitore</b> Ferro Rossi Srl, città Perugia, pagamento 30 gg. <b>Aggiungi cliente</b>:</p>
+<table><thead><tr><th>Cliente</th><th>Città</th><th>Pagamento</th><th>Incoterms</th><th class="n">Fido</th><th>Rischio</th></tr></thead>
+<tr><td>Beta Costruzioni Srl</td><td>Perugia</td><td>30 gg</td><td>EXW</td><td class="n">30.000</td><td>B</td></tr>
+<tr><td>Delta Noleggi Srl</td><td>Firenze</td><td>30 gg</td><td>DAP</td><td class="n">20.000</td><td>B</td></tr></table>
+<p><b>Ordini di vendita (VA01)</b>, due ordini con Data consegna richiesta 29/12/2026, Centro di ricavo Vendite Italia, Commessa collegata vuota:</p>
+<table><thead><tr><th>Cliente</th><th>Rif. ordine cliente</th><th class="n">Transenne</th><th class="n">Prezzo</th><th class="n">Totale IVA incl.</th></tr></thead>
+<tr><td>Beta Costruzioni Srl</td><td>BETA-120</td><td class="n">120</td><td class="n">60,00</td><td class="n">8.784,00</td></tr>
+<tr><td>Delta Noleggi Srl</td><td>DELTA-80</td><td class="n">80</td><td class="n">62,00</td><td class="n">6.051,20</td></tr></table>
+<p>Per Delta il programma segnala già la variazione prezzo prevista: <b>+160 favorevole</b>. In <b>ATP, credito e conferma d'ordine</b> scegli ogni ordine → <b>Esegui controlli ATP + credito</b>: il credito è superato, ma la disponibilità risulta <b>NON DISPONIBILE</b>. Non confermare una disponibilità che non esiste.</p>
+<p>Solo ora apri <b>PP → CO01</b>, riquadro <b>Nuova commessa</b>: il programma mostra il fabbisogno netto = ordini 200 − giacenza 0 − produzione aperta 0 = <b>200</b>. Codice <b>COM-200</b>; Descrizione <i>Produzione 200 transenne — Beta 120 + Delta 80</i>; Quantità pianificata 200 → <b>Crea commessa</b>. Una sola commessa per il fabbisogno netto; quantità superiori sono bloccate.</p>
+
+<h2>Passo 5 — pagamento macchine e ferro, 10/12</h2>
+<p><b>FI-AP</b>, 10/12, riferimento <b>PAG-MACCHINE</b>: allocazioni 14.640 + 9.760 + 7.320 + 488 (incremento) = <b>32.208</b> → D 20 / A 10. Banca 46.592.</p>
+<p><b>Ordini di acquisto (ME21N)</b>: Fornitore Ferro Rossi; Quantità 2.400 kg; Prezzo concordato 1 €/kg; Data consegna 10/12/2026 → <b>Crea ordine di acquisto</b>.</p>
+<p><b>MIGO</b>: stesso ordine; Quantità ricevuta 2.400; N° DDT fornitore <b>DDT-10</b>; Data 10/12 → <b>Registra entrata merci</b>: D 12 2.280 (a standard 0,95) · D 62 120 · A 24 2.400.</p>
+<p><b>MIRO</b>: N° fattura <b>F-10</b>; Data 10/12; Kg 2.400; Prezzo 1 → <b>Registra fattura fornitore</b>: D 24 2.400 · D 14 528 · A 20 2.928. Il conto ponte GR/IR torna a zero.</p>
+
+<h2>Passo 6 — factoring pro soluto della fattura SV-1 <span class="new">NUOVO</span></h2>
+<p>Nel riquadro <b>Estensioni didattiche</b> (visibile in FI-BL), quattro operazioni in sequenza. Ognuna: compila → <b>Anteprima operazione</b> → <b>Conferma registrazione</b>.</p>
+<table><thead><tr><th>Operazione</th><th>Campi</th><th>Scrittura attesa</th></tr></thead>
+<tr><td>Factoring — cedi / affida una fattura</td><td>10/12/2026; Rif. <b>FACT-SV1</b>; Fattura cliente aperta: SV-1 (Eventi Sigma); Importo 756,40; Regime <b>Pro soluto</b>; Società factor Factor Italia SpA; spunta il trasferimento sostanziale dei rischi; Documento: <i>Contratto pro soluto FI-2026-07: rischio di insolvenza trasferito al factor</i>; prezzo trasferimento vuoto</td><td>D 1601 / A 11 € 756,40</td></tr>
+<tr><td>Registra nuovi oneri documentati</td><td>10/12; Rif. ONERI-FACT-SV1; Contratto FACT-SV1; Importo 15; Documento NC-FACT-1210; Motivazione <i>Commissione factoring pro soluto</i>; spunta costo nuovo; Pagamento immediato da banca</td><td>D 55 / A 10 € 15</td></tr>
+<tr><td>Factoring — incasso effettivo</td><td>20/12; Rif. INC-FACT-SV1; Contratto FACT-SV1; Importo 756,40; Flusso: <b>Accredito lordo REALE</b></td><td>D 10 / A 1601 € 756,40</td></tr>
+<tr><td>Chiudi contratto interamente regolato</td><td>20/12; Rif. CHIUSO-FACT-SV1; Contratto FACT-SV1</td><td>nessuna riga</td></tr></table>
+<p>Con il pro soluto il credito verso Eventi Sigma esce dal conto 11 subito: il rischio passa al factor e l'azienda vanta un credito verso il factor (1601). Il simulatore accetta il pro soluto solo al valore nominale: lo sconto si registra come onere separato e documentato. Con il pro solvendo, invece, il credito resterebbe sul conto 11 fino all'incasso.</p>
+
+<h2>Passo 7 — produzione: tre ordini distinti <span class="new">NUOVO</span></h2>
+<p>In <b>PP → CO01</b>, riquadro <b>Crea UN ordine della fase scelta</b>: scegli la fase, la commessa COM-200 (sempre la stessa), i pezzi e le date → <b>Crea e rilascia solo questa fase</b>. Dopo il 101 di una fase, la tabella <b>Avanzamento catene</b> propone il pulsante <b>Prossimo passo</b>. Nella conferma <b>CO11N</b> le ore proposte sono lo STANDARD: cancellale e scrivi le ore reali, poi spunta <b>conferma finale</b>. Nel 101 lascia spuntato <b>consegna completata</b>.</p>
+<table><thead><tr><th style="width:15%">Data</th><th style="width:38%">Operazione e campi</th><th>Scrittura attesa</th></tr></thead>
+<tr><td>15/12</td><td>CO01: <b>1 · Taglio</b>, 200 pz, inizio e fine 15/12</td><td>nessuna (ordine rilasciato REL)</td></tr>
+<tr><td>15/12</td><td>261: prelievo FERRO 1.600 kg</td><td>D 70 / A 12 € 1.520</td></tr>
+<tr><td>15/12</td><td>CO11N: buoni 200, scarto 0, OP0010 <b>55 h</b></td><td>D 72 1.540 / A 75 Taglio 1.320 + 220</td></tr>
+<tr><td>15/12</td><td>101: 200 SL-TAGLIO</td><td>D 16 / A 73 € 2.920</td></tr>
+<tr><td>18/12</td><td>CO01: <b>2 · Piegatura</b>, 200 pz, inizio e fine 18/12</td><td>nessuna</td></tr>
+<tr><td>18/12</td><td>261: prelievo SL-TAGLIO 200 pz</td><td>D 71 / A 16 € 2.920</td></tr>
+<tr><td>18/12</td><td>CO11N: buoni 200, OP0015 <b>44 h</b></td><td>D 72 1.232 / A 75 Piegatura 1.056 + 176</td></tr>
+<tr><td>18/12</td><td>101: 200 SL-PIEGA</td><td>D 161 / A 73 € 4.040</td></tr>
+<tr><td>21/12</td><td>CO01: <b>3 · Saldatura</b>, 200 pz, inizio 21/12; poi 261 SL-PIEGA 200 pz</td><td>D 71 / A 161 € 4.040</td></tr>
+<tr><td>29/12</td><td>CO11N: buoni 200, OP0020 <b>88 h</b></td><td>D 72 2.464 / A 75 Saldatura 2.112 + 352</td></tr>
+<tr><td>29/12</td><td>101: 200 TRANSENNA</td><td>D 13 / A 73 € 6.280</td></tr></table>
+<p>Ore standard per 200 pezzi: Taglio 50, Piegatura 40, Saldatura 80; ore reali 55 / 44 / 88. Il ferro si preleva una sola volta (nell'ordine Taglio). Il programma blocca: una fase creata prima del 101 precedente, un prelievo con data anteriore all'entrata merci, quantità oltre la carenza. A fine produzione: ferro 800 kg / 760 €, SL-TAGLIO 0, SL-PIEGA 0, transenne 200 (6.280 €).</p>
+<p>20/12, <b>FI-AP</b>: regola 1.000 sulla partita F-10, riferimento <b>PAG-FERRO-PARZIALE</b>. Residuo 1.928. Non registrare un secondo acquisto.</p>
+<p>28/12, <b>Area fiscale FI → Acconti e imposte</b>: Data versamento 28/12/2026; Acconto 100; Riferimento <b>ACC-IRES</b> → <b>Anteprima acconto imposte</b> → D 39 / A 10 € 100 → <b>Conferma operazione</b>. È un versamento anticipato, non un costo.</p>
+
+<h2>Passo 8 — vendite 29/12</h2>
+<p>Per <b>Beta</b> (120 pezzi) e poi per <b>Delta</b> (80 pezzi):</p>
+<ol>
+<li><b>ATP, credito e conferma d'ordine</b>: scegli l'ordine → <b>Esegui controlli ATP + credito</b> → quantità confermata 120 (Delta 80), data 29/12 → <b>Conferma l'ordine</b>.</li>
+<li><b>Picking</b>: stessi pezzi, data 29/12 → <b>Esegui picking</b>. Nessuna scrittura: è un trasferimento interno.</li>
+<li><b>DDT</b>: stessi pezzi, data 29/12, vettore Trasporti Gamma → <b>Registra DDT e uscita merci</b>: Beta D 41 / A 13 € 3.768; Delta € 2.512.</li>
+<li><b>Fatturazione</b>: data fattura 29/12 → <b>Genera fattura (VF01)</b> → <b>Rilascia in contabilità</b>.</li></ol>
+<table><thead><tr><th>Fattura</th><th class="n">D 11 Clienti</th><th class="n">A 40 Ricavi (std)</th><th class="n">A 63 Var. prezzo</th><th class="n">A 21 IVA</th></tr></thead>
+<tr><td>Beta Costruzioni Srl</td><td class="n">8.784,00</td><td class="n">7.200,00</td><td class="n">—</td><td class="n">1.584,00</td></tr>
+<tr><td>Delta Noleggi Srl</td><td class="n">6.051,20</td><td class="n">4.800,00</td><td class="n">160,00</td><td class="n">1.091,20</td></tr></table>
+<p>Il costo del venduto è già nato con il DDT: non va ripetuto in fattura. Magazzino transenne a zero.</p>
+
+<h3>RiBa salvo buon fine sulla fattura Beta <span class="new">NUOVO</span></h3>
+<table><thead><tr><th>Operazione (Estensioni didattiche)</th><th>Campi</th><th>Scrittura attesa</th></tr></thead>
+<tr><td>RiBa — presenta per incasso</td><td>29/12; Rif. <b>RIBA-BETA</b>; Fattura cliente aperta: Beta; Importo 8.784; Scadenza RiBa <b>28/01/2027</b></td><td>evento gestionale, nessuna riga</td></tr>
+<tr><td>RiBa — ricevi anticipo separato</td><td>29/12; Rif. ANT-RIBA-BETA; Contratto RIBA-BETA; Importo <b>7.000</b></td><td>D 10 / A 3602 € 7.000</td></tr>
+<tr><td>Registra nuovi oneri documentati</td><td>29/12; Rif. ONERI-RIBA-BETA; Contratto RIBA-BETA; Importo 15; Documento CONT-RIBA-1229; Motivazione <i>Commissioni presentazione RiBa</i>; costo nuovo spuntato; pagamento immediato</td><td>D 55 / A 10 € 15</td></tr></table>
+<p>Presentare la RiBa non incassa il credito: il conto 11 di Beta resta aperto per 8.784. L'anticipo "salvo buon fine" è un debito verso la banca (3602). Finché il contratto è aperto, la fattura Beta <b>non si può regolare</b> da FI-AR: il programma lo blocca.</p>
+
+<h3>Anticipo su fattura Delta</h3>
+<p><b>FI-BL → 2 · Anticipo bancario su fattura cliente</b>: Fattura Delta (anticipabile 6.051,20); Data 29/12/2026; Anticipo lordo <b>4.800</b>; Commissione 30; Riferimento <b>ANT-DELTA</b> → <b>Anteprima anticipo bancario</b> → D 10 4.770 · D 55 30 · A 36 4.800 → <b>Conferma</b>. Il credito Delta non si riduce. Banca a fine giornata: 57.988,40.</p>
+
+<h2>Passo 9 — incasso parziale, cessioni e rimborso</h2>
+<p>30/12, <b>FI-AR</b>: incassa 2.000 sulla fattura Delta, riferimento <b>INC-DELTA-PARZIALE</b> → D 10 / A 11. Residuo Delta 4.051,20 (l'anticipo bancario non vincola la partita).</p>
+<h3>Cessione di Sega e Saldatrice — 30/12, in due fasi <span class="new">NUOVO</span></h3>
+<p><b>FI-AA → 7 · Cessione e dismissione cespiti</b>. Per ogni cespite: scegli Cespite attivo e Data uscita 30/12/2026, poi:</p>
+<ol><li><b>Fase 1 · Anteprima ammortamento alla data cessione</b> → conferma: Sega D 54 / A 02 € 100; Saldatrice € 66,67 (dicembre incluso).</li>
+<li><b>Fase 2</b>: compila i campi della vendita e premi <b>Anteprima vendita / radiazione SENZA ammortamento</b> → conferma.</li></ol>
+<table><thead><tr><th>Campo</th><th>Sega</th><th>Saldatrice</th></tr></thead>
+<tr><td>Operazione</td><td colspan="2">Cessione con corrispettivo documentato</td></tr>
+<tr><td>Riferimento / N° fattura vendita</td><td>CESS-SEG</td><td>CESS-SAL</td></tr>
+<tr><td>Cliente / acquirente</td><td colspan="2">Usato Epsilon Srl — scadenza 15/01/2027 — IVA 22%</td></tr>
+<tr><td>Corrispettivo imponibile</td><td>15.000</td><td>6.000</td></tr>
+<tr><td>Descrizione</td><td colspan="2">Rinnovo impianti dopo completamento produzione</td></tr>
+<tr><td>Fondo / valore netto</td><td>100 / 11.900</td><td>66,67 / 7.933,33</td></tr>
+<tr><td>Plus / minusvalenza</td><td>plusvalenza 3.100 (A 45)</td><td>minusvalenza 1.933,33 (D 46)</td></tr>
+<tr><td>Credito verso l'acquirente</td><td>18.300</td><td>7.320</td></tr></table>
+<p>La vendita deve mostrare "ammortamento in questa vendita: 0": la quota è già stata registrata nella fase 1. La Piegatrice resta attiva. Non creare un'altra fattura in SD.</p>
+<p>31/12, <b>FI-BL → 3 · Rimborso anticipo e interessi</b>: anticipo ANT-DELTA; Data 31/12/2026; Capitale rimborsato <b>2.000</b>; Ulteriori costi 0; Riferimento <b>RIM-DELTA-PARZIALE</b> → D 36 / A 10. Anticipo residuo 2.800. Le commissioni iniziali sono già rilevate: non vanno ripetute.</p>
+
+<h2>Passo 10 — paghe ed energia, 31/12</h2>
+<p><b>HR → FI/CO</b>, <b>Aggiungi dipendente</b> per Ada/Taglio, Bea/Saldatura, Ciro/Piegatura: Lordo mensile 2.000; IRPEF 20; INPS dipendente 9,19; INPS azienda 30; TFR 7,407407. Seleziona tutti e tre; Mese di competenza <b>2026-12</b> → <b>Anteprima paghe selezionate (posting HR→FI)</b> → conferma.</p>
+<table><thead><tr><th>Per ciascun dipendente</th><th class="n">€</th><th>Totale tre dipendenti</th><th class="n">€</th></tr></thead>
+<tr><td>INPS dipendente / IRPEF</td><td class="n">183,80 / 363,24</td><td>Costo D 51 (sul centro)</td><td class="n">8.244,45</td></tr>
+<tr><td>Netto (A 22)</td><td class="n">1.452,96</td><td>Netto A 22 / Ritenute A 25</td><td class="n">4.358,88 / 1.089,72</td></tr>
+<tr><td>INPS azienda / TFR</td><td class="n">600,00 / 148,15</td><td>INPS A 26 / TFR A 27</td><td class="n">2.351,40 / 444,45</td></tr></table>
+<p>La banca non cambia: le paghe sono costo e debito. <b>FI-AP → Fattura servizi dedicata</b>, tre fatture: Acquisto servizi; 31/12/2026; scadenza 15/01/2027; Energia Gamma SpA; conto 52; imponibile 500; IVA 22; numero e centro E-T/Taglio, E-P/Piegatura, E-S/Saldatura (centro obbligatorio) → per ciascuna D 52 500 · D 14 110 · A 20 610.</p>
+
+<h2>Passo 11 — sopravvenienze e prestazioni concluse, 31/12</h2>
+<p><b>FI-GL → 8 · Sopravvenienze documentate</b>: Causa <i>Nuovo diritto / obbligazione documentato nell'esercizio corrente</i>; Data contabile e del fatto 31/12/2026; scadenza 15/01/2027.</p>
+<table><thead><tr><th>Campo</th><th>Attiva</th><th>Passiva</th></tr></thead>
+<tr><td>Natura</td><td>nuovo credito documentato</td><td>nuova obbligazione documentata</td></tr>
+<tr><td>Controparte</td><td>Assicurazioni Gamma SpA</td><td>Trasporti Gamma Srl</td></tr>
+<tr><td>Documento = Riferimento</td><td>IND-ATT</td><td>IND-PASS</td></tr>
+<tr><td>Importo netto</td><td>500</td><td>200</td></tr>
+<tr><td>Descrizione</td><td>Indennizzo documentato fuori campo IVA (ipotesi)</td><td>Risarcimento documentato fuori campo IVA (ipotesi)</td></tr>
+<tr><td>Scrittura</td><td>D 11 / A 43 € 500</td><td>D 44 / A 20 € 200</td></tr></table>
+<h3>Fatture da ricevere / da emettere <span class="new">NUOVO</span></h3>
+<p><b>FI-GL → 9 · Prestazioni concluse</b>. Non sono ratei: la prestazione è finita, manca solo il documento. Si registra l'imponibile senza IVA; l'IVA arriverà con la fattura.</p>
+<table><thead><tr><th>Campo</th><th>Fattura da ricevere</th><th>Fattura da emettere</th></tr></thead>
+<tr><td>Data registrazione</td><td>31/12/2026</td><td>31/12/2026</td></tr>
+<tr><td>Riferimento</td><td>MAN-DIC</td><td>COLL-BETA</td></tr>
+<tr><td>Controparte</td><td>Officina Rossi Impianti</td><td>Beta Costruzioni Srl</td></tr>
+<tr><td>Prova / motivazione</td><td>Rapporto intervento n. 58 del 28/12 firmato</td><td>Verbale di collaudo transenne firmato 30/12</td></tr>
+<tr><td>Data conclusione</td><td>28/12/2026</td><td>30/12/2026</td></tr>
+<tr><td>Imponibile / conto</td><td>300 / 53</td><td>250 / 42</td></tr>
+<tr><td>Scrittura</td><td>D 53 / A 241 € 300</td><td>D 171 / A 42 € 250</td></tr></table>
+
+<h2>Passo 12 — assestamenti, 31/12</h2>
+<p><b>FI-AA</b>: Anno ammortamento 2026 → <b>Anteprima ammortamenti al 31/12 (AFAB)</b> → solo la Piegatrice: 6.400 × 10% × 1/12 = <b>53,33</b> (D 54 / A 02). Sega e Saldatrice sono già dismesse.</p>
+<p><b>FI-GL → 5 · Ratei e risconti</b>, Data assestamento 31/12/2026, una alla volta → <b>Calcola e mostra anteprima (FBS1)</b> → conferma:</p>
+<table><thead><tr><th>Operazione</th><th>Competenza</th><th class="n">Importo</th><th>Rif. / conto / fonte</th><th class="n">Esito</th></tr></thead>
+<tr><td>RISCONTO ATTIVO</td><td>01/12/2026–30/11/2027</td><td class="n">1.200</td><td>ASS-1 / 53 / fattura ASS-1</td><td class="n">1.098,08 (D 17)</td></tr>
+<tr><td>RISCONTO PASSIVO</td><td>01/12/2026–31/01/2027</td><td class="n">620</td><td>SV-1 / 42 / fattura SV-1</td><td class="n">310 (A 34)</td></tr>
+<tr><td>RATEO ATTIVO</td><td>01/12/2026–31/01/2027</td><td class="n">620</td><td>SV-2 / 42 / nessuna fonte</td><td class="n">310 (D 18)</td></tr>
+<tr><td>RATEO PASSIVO</td><td>01/12/2026–31/01/2027</td><td class="n">620</td><td>NOL-1 / 53 / nessuna fonte</td><td class="n">310 (A 33)</td></tr></table>
+<p>SV-2 è un canone di assistenza a Eventi Sigma fatturato a fine contratto; NOL-1 un noleggio di carrello elevatore pagato a fine periodo. Sono quote di tempo maturate: per questo sono ratei. La fattura factorizzata SV-1 resta la fonte corretta del risconto: il factoring ha spostato il credito, non il ricavo.</p>
+
+<h2>Passo 13 — TECO, CO88 e checkpoint</h2>
+<p><b>PP → Lista ordini</b>: per i tre ordini (SL-TAGLIO, SL-PIEGA, TRANSENNA) premi <b>Apri</b>, Data TECO 31/12/2026 → <b>Chiudi tecnicamente (TECO)</b>. <b>CO88</b>: Periodo 2026-12 → <b>Esegui chiusura del periodo</b>. Nessun WIP (tutti gli ordini sono completati). Varianze di efficienza, sfavorevoli, sul conto 61 per centro:</p>
+<table><thead><tr><th>Ordine</th><th class="n">Std</th><th class="n">Reale</th><th class="n">Varianza</th></tr></thead>
+<tr><td>SL-TAGLIO (Taglio)</td><td class="n">50 h · 1.400</td><td class="n">55 h · 1.540</td><td class="n">140</td></tr>
+<tr><td>SL-PIEGA (Piegatura)</td><td class="n">40 h · 1.120</td><td class="n">44 h · 1.232</td><td class="n">112</td></tr>
+<tr><td>TRANSENNA (Saldatura)</td><td class="n">80 h · 2.240</td><td class="n">88 h · 2.464</td><td class="n">224</td></tr>
+<tr><td><b>Totale</b></td><td></td><td></td><td class="n"><b>476</b></td></tr></table>
+<p>Le transenne restano valorizzate a standard (31,40): le ore in più non le rivalutano. Prima delle imposte <b>esporta un backup</b>. Poi, nella stessa schermata, premi <b>Annulla chiusura 2026-12</b> → <b>Conferma annullamento chiusura</b> (non "Non annullare") → <b>Esegui chiusura del periodo</b> di nuovo. Controlla che tornino le varianze 476 e lo stesso risultato prima delle imposte, <b>2.120,30</b>: produzione, vendite e paghe non si cancellano.</p>
+
+<h2>Passo 14 — IVA, IRES, bilancio, chiusura e riapertura</h2>
+<p><b>Area fiscale FI</b>: Esercizio 2026; Periodo IVA 2026-12 → <b>Anteprima liquidazione IVA</b> → IVA a debito 7.431,60, a credito 6.666,00 → debito <b>765,60</b> sul conto 28 → <b>Conferma operazione</b>. Non pagare ora: il versamento è il 18/01/2027.</p>
+<p>Imposte: IRES 24; variazioni in aumento 0; in diminuzione 0; perdite 0; ipotesi <i>IRES didattica; variazioni manuali da validare</i> → <b>Calcola e mostra imposte di competenza</b> → base 2.120,30; IRES <b>508,87</b>; acconto 100; debito <b>408,87</b> (D 56 508,87 / A 39 100 / A 29 408,87) → <b>Conferma operazione</b>.</p>
+<p><b>FI-GL → Bilancio e chiusura</b>: <b>Aggiorna CE / SP al 31 dicembre</b>. Il riquadro <b>Esposizione per schemi art. 2425 CE / art. 2424 SP</b> deve quadrare con differenza 0.</p>
+<table><thead><tr><th>Conto economico (art. 2425)</th><th class="n">€</th><th>Stato patrimoniale (art. 2424)</th><th class="n">€</th></tr></thead>
+<tr><td>A1 Ricavi vendite (12.000 + 160)</td><td class="n">12.160,00</td><td>BII2 Piegatrice netta</td><td class="n">6.346,67</td></tr>
+<tr><td>A5 Altri ricavi (servizi 870, indennizzo 500, plusvalenza 3.100)</td><td class="n">4.470,00</td><td>CI1 Ferro 800 kg</td><td class="n">760,00</td></tr>
+<tr><td>B6 Materie prime (2.280 + var. prezzo 120)</td><td class="n">−2.400,00</td><td>CII1 Clienti (Beta, Delta, da emettere)</td><td class="n">13.085,20</td></tr>
+<tr><td>B11 Variazione rimanenze materie prime</td><td class="n">+760,00</td><td>CII5-quater Crediti verso altri (cessioni, indennizzo)</td><td class="n">26.120,00</td></tr>
+<tr><td>B7 Servizi (energia 1.500, assic./manut./noleggio 711,92)</td><td class="n">−2.211,92</td><td>CIV1 Banca</td><td class="n">57.988,40</td></tr>
+<tr><td>B9 Personale</td><td class="n">−8.244,45</td><td>D Ratei e risconti attivi</td><td class="n">1.408,08</td></tr>
+<tr><td>B10b Ammortamenti (100 + 66,67 + 53,33)</td><td class="n">−220,00</td><td><b>Totale attivo</b></td><td class="n"><b>105.708,35</b></td></tr>
+<tr><td>B14 Oneri diversi (risarcimento 200, minusvalenza 1.933,33)</td><td class="n">−2.133,33</td><td>D4 Banche (anticipo 2.800 + RiBa 7.000)</td><td class="n">9.800,00</td></tr>
+<tr><td>C17 Oneri finanziari (15 + 15 + 30)</td><td class="n">−60,00</td><td>D7 Fornitori (ferro, energia, da ricevere)</td><td class="n">4.058,00</td></tr>
+<tr><td><b>Risultato prima delle imposte</b></td><td class="n"><b>2.120,30</b></td><td>D12 Tributari (ritenute, IVA, IRES)</td><td class="n">2.264,19</td></tr>
+<tr><td>20 Imposte sul reddito</td><td class="n">−508,87</td><td>D13 INPS · D14 Altri (netto paghe, risarcimento)</td><td class="n">2.351,40 · 4.558,88</td></tr>
+<tr><td><b>Utile d'esercizio</b></td><td class="n"><b>1.611,43</b></td><td>C TFR · E Ratei e risconti passivi</td><td class="n">444,45 · 620,00</td></tr>
+<tr><td></td><td></td><td>A Capitale + utile</td><td class="n">80.000 + 1.611,43</td></tr></table>
+<p class="small">La fotografia FI degli stessi saldi riporta "Attivo netto 104.942,75 = Passivo 23.331,32 + PN 80.000 + Risultato 1.611,43": cambia solo la presentazione, perché il debito IVA (conto 28) è sottratto dall'attivo invece di comparire tra i debiti. Le varianze CO e gli accrediti interni 70–75 non compaiono nel CE civilistico: sono neutralizzati nel ponte A2. Il programma avvisa che i due ratei non hanno una fattura di origine: è previsto, sono quote di tempo da contratto.</p>
+<p>Esporta il backup → <b>Anteprima epilogo e chiusura annuale</b> → controlla che non ci siano problemi di prontezza → <b>Conferma operazione</b>. Poi <b>Anteprima riapertura al 1 gennaio</b> → controlla i saldi patrimoniali → <b>Conferma operazione</b> una sola volta. La riapertura non ricrea quantità, cespiti o costi e ricavi.</p>
+
+<h2>Passo 15 — 2027: storni, fatture collegate, incassi e pagamenti</h2>
+<p>02/01, <b>FI-GL → Ratei e risconti</b>, una rettifica alla volta: Scrittura guidata da stornare (RISCONTO ATTIVO ASS-1, RISCONTO PASSIVO SV-1, RATEO ATTIVO SV-2, RATEO PASSIVO NOL-1); Data storno 02/01/2027 → <b>Anteprima storno</b> → conferma. Non stornare paghe, cespiti o chiusure.</p>
+<p><b>9 · Prestazioni concluse → Fattura completa collegata</b>:</p>
+<table><thead><tr><th>Data</th><th>Prestazione da collegare</th><th>Campi</th><th>Scrittura</th></tr></thead>
+<tr><td>10/01/2027</td><td>COLL-BETA</td><td>Rif. FV-COLL-BETA; controparte Beta Costruzioni Srl; Numero fattura FV-27-001; Scadenza 31/01/2027; IVA 22</td><td>D 11 305 / A 171 250 / A 21 55</td></tr>
+<tr><td>12/01/2027</td><td>MAN-DIC</td><td>Rif. FR-MAN-DIC; controparte Officina Rossi Impianti; Numero fattura MAN-27-01; Scadenza 31/01/2027; IVA 22</td><td>D 241 300 / D 14 66 / A 20 366</td></tr></table>
+<p>La controparte deve essere scritta esattamente come nella prestazione. Il costo e il ricavo non si ripetono: la fattura sposta solo il credito/debito sui conti 11/20 e aggiunge l'IVA.</p>
+<table><thead><tr><th>Data / riferimento</th><th>Allocazioni</th><th class="n">Totale</th></tr></thead>
+<tr><td>15/01 FI-AR · INCASSI-SALDI-2027</td><td>Delta 4.051,20; cessione Sega 18.300; cessione Saldatrice 7.320; IND-ATT 500; collaudo Beta 305</td><td class="n">30.476,20</td></tr>
+<tr><td>15/01 FI-BL · PAGAMENTI-FORNITORI-PAGHE-2027</td><td>Ferro 1.928; energia 610 × 3; IND-PASS 200; manutenzione 366; netto paghe 1.452,96 × 3</td><td class="n">8.682,88</td></tr>
+<tr><td>18/01 FI-BL · PAGAMENTI-ENTI-IVA-2027</td><td>Ritenute 363,24 × 3; INPS 783,80 × 3; IVA 765,60</td><td class="n">4.206,72</td></tr>
+<tr><td>30/06 FI-BL · SALDO-IRES-2026</td><td>Debito IRES</td><td class="n">408,87</td></tr></table>
+<p>15/01, <b>FI-BL → Rimborso anticipo e interessi</b>: ANT-DELTA; Data 15/01/2027; Capitale <b>2.800</b>; Ulteriori costi NUOVI <b>20</b>; Riferimento RIM-DELTA-SALDO; spunta la conferma dei costi nuovi; Documento <b>EC-ANT-0115</b>; Motivazione <i>Interessi anticipo fattura da estratto conto</i> → D 36 2.800 · D 55 20 · A 10 2.820. Debito 36 a zero. Senza documento e motivazione il programma rifiuta gli interessi: evita di addebitare due volte le commissioni.</p>
+<h3>RiBa alla scadenza — 28/01/2027 <span class="new">NUOVO</span></h3>
+<table><thead><tr><th>Operazione</th><th>Campi</th><th>Scrittura</th></tr></thead>
+<tr><td>RiBa — registra raggiungimento scadenza</td><td>28/01/2027; Rif. SCAD-RIBA-BETA; Contratto RIBA-BETA</td><td>evento, nessuna riga</td></tr>
+<tr><td>RiBa — incasso effettivo</td><td>28/01; Rif. INC-RIBA-BETA; Importo 8.784; Flusso <b>Compensa anticipo e accredita solo saldo netto</b></td><td>D 3602 7.000 · D 10 1.784 · A 11 8.784</td></tr>
+<tr><td>Registra nuovi oneri documentati</td><td>28/01; Rif. INT-RIBA-BETA; Importo 35; Documento EC-RIBA-0128; Motivazione <i>Interessi anticipo SBF da estratto conto</i>; costo nuovo; pagamento immediato</td><td>D 55 / A 10 € 35</td></tr>
+<tr><td>Chiudi contratto interamente regolato</td><td>28/01; Rif. CHIUSO-RIBA-BETA; Contratto RIBA-BETA</td><td>nessuna riga</td></tr></table>
+<p>Il "buon fine" chiude insieme il credito verso Beta e il debito verso la banca: in banca entra solo la differenza. Se Beta non pagasse, si registrerebbe <i>RiBa — insoluto</i> dopo aver restituito l'anticipo, e il credito resterebbe aperto.</p>
+
+<h2>Numeri di controllo finali</h2>
+<table><thead><tr><th>Controllo</th><th class="n">Valore atteso</th></tr></thead>
+<tr><td>Banca al 10/12 dopo pagamento macchine · al 20/12 · al 31/12/2026</td><td class="n">46.592,00 · 46.333,40 · 57.988,40</td></tr>
+<tr><td>Banca al 15/01/2027 (dopo incassi, pagamenti, rimborso)</td><td class="n">76.961,72</td></tr>
+<tr><td>Banca al 18/01 · al 28/01 · al 30/06/2027</td><td class="n">72.755,00 · 74.504,00 · 74.095,13</td></tr>
+<tr><td>Costo standard SL-TAGLIO / SL-PIEGA / TRANSENNA</td><td class="n">14,60 / 20,20 / 31,40</td></tr>
+<tr><td>Varianze CO88 totali (61)</td><td class="n">476,00</td></tr>
+<tr><td>Risultato prima delle imposte · IRES · utile 2026</td><td class="n">2.120,30 · 508,87 · 1.611,43</td></tr>
+<tr><td>Patrimonio netto al 31/12/2026</td><td class="n">81.611,43</td></tr>
+<tr><td>Registro cespiti FIQuattro: costo 6.400, fondo 53,33, differenze con conti 01/02</td><td class="n">0,00</td></tr>
+<tr><td>Contratti factoring e RiBa</td><td class="n">tutti chiusi</td></tr>
+<tr><td>Partite aperte al 30/06/2027</td><td class="n">solo TFR 148,15 × 3</td></tr></table>
+<p>Il bilancio 2026 non cambia con i movimenti 2027. A fine gennaio restano IVA a credito 66 e a debito 55, delle fatture collegate di gennaio: si liquidano con il periodo 2027-01, fuori da questo esercizio. Il TFR 444,45 resta a fondo. Per la consegna: <b>Esporta bilancio e dettaglio JSON</b> e <b>Stampa bilancio / salva PDF</b>; nel registro cespiti c'è anche <b>Esporta registro CSV alla data</b>.</p>
+
+<h2>Assunzioni e limiti</h2>
+<p>IVA 22% interamente detraibile sugli acquisti imponibili; assicurazione, indennizzi e risarcimenti senza IVA per ipotesi esplicita. Ammortamento mensile didattico, mese di entrata e di uscita inclusi, senza fiscalità automatica dei cespiti (il prospetto fiscale è extracontabile e manuale). Paghe ad aliquote medie didattiche, non un cedolino legale; le addizionali regionali e comunali sono disponibili come piano di rate manuale ma non servono a un'azienda appena costituita. IRES 24% con variazioni zero solo per questo caso; IRAP e imposte differite non calcolate. Date 2027 orientative: 18 gennaio sostituisce il 16 (sabato); saldo IRES al 30 giugno. Nessun invio F24.</p>
+<p>Factoring pro soluto solo al valore nominale; RiBa e factoring vincolano la fattura finché il contratto non è chiuso. Acconti commerciali (19/37), note di credito, cessioni parziali e storno integrato di una cessione non sono implementati. Le prove distruttive (annullamenti, reset) vanno fatte su copie, dopo aver esportato il backup.</p>
+</body></html>

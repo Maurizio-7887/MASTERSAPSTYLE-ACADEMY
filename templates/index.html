@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MASTERSAPSTYLE Academy</title>
+<meta name="description" content="Simulatori didattici in stile SAP: contabilità generale, controllo di gestione, produzione, vendite e acquisti.">
+<style>
+:root{--ink:#16273b;--ink2:#24405e;--teal:#0f766e;--paper:#f5f3ee;--line:#d6dbe1;--muted:#5b6673;--gold:#b45309}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;line-height:1.5}
+header{background:var(--ink);color:#fff;padding:44px 20px 52px}
+.wrap{max-width:1040px;margin:0 auto}
+.brand{font-weight:800;letter-spacing:.14em;font-size:13px;color:#7dd3c8}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:10px 0 12px;font-weight:700}
+header p{max-width:62ch;color:#c9d4e0;margin:0;font-size:17px}
+main{padding:0 20px 60px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px;margin-top:-28px}
+.card{background:#fff;border:1px solid var(--line);border-top:4px solid var(--teal);border-radius:8px;padding:20px 22px;display:flex;flex-direction:column;gap:8px}
+.card.doc{border-top-color:var(--gold)}
+.card h2{font-size:18px;margin:0}
+.card p{margin:0;color:var(--muted);font-size:14.5px;flex:1}
+.btn{align-self:flex-start;margin-top:8px;background:var(--ink);color:#fff;text-decoration:none;padding:9px 16px;border-radius:5px;font-weight:600;font-size:14px}
+.btn:hover{background:var(--ink2)}
+h3{margin:40px 0 10px;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.moduli{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none;margin:0}
+.moduli li{background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13.5px}
+.nota{margin-top:26px;font-size:13.5px;color:var(--muted);border-left:3px solid var(--line);padding-left:12px;max-width:75ch}
+footer{border-top:1px solid var(--line);padding:18px 20px;font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">MASTERSAPSTYLE ACADEMY</div>
+  <h1>Impara la contabilità e il controllo di gestione come in un'azienda vera</h1>
+  <p>Simulatori didattici in stile SAP: ogni documento logistico genera la sua scrittura in partita doppia, ogni ora lavorata finisce su un centro di costo, ogni varianza ha un perché.</p>
+</div></header>
+<main><div class="wrap">
+  <div class="grid">
+  {% for key, s in simulatori.items() %}
+    <article class="card">
+      <h2>{{ s.titolo }}</h2>
+      <p>{{ s.testo }}</p>
+      <a class="btn" href="{{ url_for('simulatore', nome=key) }}">Apri il simulatore</a>
+    </article>
+  {% endfor %}
+  {% for m in materiali %}
+    <article class="card doc">
+      <h2>{{ m.titolo }}</h2>
+      <p>{{ m.testo }}</p>
+      <a class="btn" href="{{ url_for('materiale', file=m.file) }}">Scarica il PDF</a>
+    </article>
+  {% endfor %}
+  </div>
+
+  <h3>Moduli del simulatore</h3>
+  <ul class="moduli">
+    <li>FI-GL contabilità generale</li><li>FI-AA cespiti</li><li>FI-AR / FI-AP partite aperte</li><li>FI-BL tesoreria</li>
+    <li>RiBa, anticipo fatture, factoring</li><li>CO-CCA centri di costo e budget</li><li>HR → FI paghe</li><li>SD vendite</li>
+    <li>MM acquisti, MIGO, MIRO</li><li>PP tre fasi, CO88</li><li>IVA e IRES</li><li>Bilancio art. 2424/2425</li>
+  </ul>
+  <p class="nota">I dati che inserisci restano salvati solo nel tuo browser: nessun account e nessun invio al server. Prima di cambiare computer o browser usa <b>Moduli FI / CO → Impostazioni FI → Esporta backup JSON</b>. Il programma è didattico: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
+</div></main>
+<footer><div class="wrap">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div></footer>
+</body>
+</html>

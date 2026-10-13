@@ -1,0 +1,7 @@
+{
+  "name": "mastersapstyle-academy-tests",
+  "private": true,
+  "description": "Test di regressione: esegue l'esercizio guidato dentro il simulatore e verifica i numeri della guida",
+  "scripts": { "test": "node tests/esercizio.js" },
+  "devDependencies": { "jsdom": "24.1.3" }
+}
