@@ -1,0 +1,55 @@
+{% extends "academy/base.html" %}
+{% block titolo %}{{ u.nome }}{% endblock %}
+{% block contenuto %}
+<h1>{{ u.nome }} <span style="font-size:13px;color:var(--f-attenuato)">({{ u.username }})</span></h1>
+{% include "docente/_menu.html" %}
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Tempo collegato totale</div><div class="v">{{ durata(secondi) }}</div></div>
+  <div class="msa-card" style="border-top-color:var(--f-arancio)"><div class="l">Costo potenziale (€)</div><div class="v">{{ costo | euro }}</div></div>
+  <div class="msa-card"><div class="l">Costo orario applicato</div><div class="v">{{ u.tariffa() | euro }}</div></div>
+  <div class="msa-card"><div class="l">Ultimo accesso</div><div class="v" style="font-size:17px">{{ ora_italiana(u.ultimo_accesso) }}</div></div>
+</div>
+
+<h2>Consegne</h2>
+{% if consegne %}
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Consegnata</th><th>Esercizio</th><th>Versione</th><th>Stato</th><th>Voto</th><th></th></tr>
+  {% for c in consegne %}
+  <tr><td>{{ ora_italiana(c.consegnata) }}</td><td>{{ esercizi.get(c.esercizio, esercizi['libero']).titolo }}</td><td>{{ c.versione }}</td>
+      <td><span class="msa-stato {{ c.stato }}">{{ c.stato | replace('_', ' ') }}</span></td><td>{{ c.voto or '—' }}</td>
+      <td><a href="{{ url_for('docente.consegna', cid=c.id) }}">Apri</a> · <a href="{{ url_for('docente.stampa', cid=c.id) }}" target="_blank">Stampa</a></td></tr>
+  {% endfor %}
+</table></div>
+{% else %}<p>Nessuna consegna.</p>{% endif %}
+
+<h2>Dati e costo orario</h2>
+<div class="msa-card" style="max-width:720px">
+<form method="post" class="msa-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <div class="riga">
+    <div><label for="nome">Nome e cognome</label><input id="nome" name="nome" value="{{ u.nome }}" required></div>
+    <div><label for="email">Email</label><input id="email" name="email" type="email" value="{{ u.email or '' }}"></div>
+  </div>
+  <div class="riga">
+    <div><label for="costo_orario">Costo orario € (vuoto = generale, {{ tariffa_generale | euro }})</label><input id="costo_orario" name="costo_orario" inputmode="decimal" value="{{ '%.2f' | format(u.costo_orario) if u.costo_orario is not none else '' }}"></div>
+    <div><label for="attivo">Accesso</label><select id="attivo" name="attivo"><option value="1" {{ 'selected' if u.attivo }}>attivo</option><option value="0" {{ 'selected' if not u.attivo }}>disattivato</option></select></div>
+  </div>
+  <button class="msa-btn" type="submit">Salva</button>
+</form>
+<form method="post" action="{{ url_for('docente.reimposta_password', uid=u.id) }}" onsubmit="return confirm('Generare una nuova password temporanea per {{ u.nome }}?')">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <button class="msa-btn rosso" type="submit">Reimposta password</button>
+</form>
+</div>
+
+<h2>Collegamenti (ultimi 100)</h2>
+{% if sessioni %}
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Inizio</th><th>Fine</th><th class="n">Tempo attivo</th><th class="n">Costo €</th><th>Ultima pagina</th></tr>
+  {% for s in sessioni %}
+  <tr><td>{{ ora_italiana(s.inizio) }}</td><td>{{ ora_italiana(s.ultimo, '%H:%M') }}</td><td class="n">{{ durata(s.secondi_attivi) }}</td>
+      <td class="n">{{ costo_f(s.secondi_attivi, u.tariffa()) | euro }}</td><td>{{ s.ultima_pagina }}</td></tr>
+  {% endfor %}
+</table></div>
+{% else %}<p>Nessun collegamento registrato.</p>{% endif %}
+{% endblock %}

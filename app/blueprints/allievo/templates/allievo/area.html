@@ -1,0 +1,58 @@
+{% extends "academy/base.html" %}
+{% block titolo %}La mia area{% endblock %}
+{% block contenuto %}
+<h1>Ciao {{ u.nome }}</h1>
+{% if nuove %}<div class="msa-msg ok">📬 Hai {{ nuove }} {{ 'nuova risposta' if nuove == 1 else 'nuove risposte' }} del docente: guarda le consegne qui sotto.</div>{% endif %}
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Tempo di collegamento oggi</div><div class="v">{{ durata(oggi) }}</div></div>
+  <div class="msa-card"><div class="l">Tempo di collegamento totale</div><div class="v">{{ durata(totale) }}</div></div>
+  <div class="msa-card"><div class="l">Consegne</div><div class="v">{{ consegne | length }}</div></div>
+  <div class="msa-card"><div class="l">Ultimo accesso</div><div class="v" style="font-size:17px">{{ ora_italiana(u.ultimo_accesso) }}</div></div>
+</div>
+
+<h2>Il mio lavoro</h2>
+<div class="msa-tiles">
+{% for v, testo in versioni.items() %}
+  {% set l = (lavori | selectattr('versione', 'equalto', v) | list | first) %}
+  <a class="msa-tile g-{{ 'contabilita' if v == 'vuoto' else 'vendite_acquisti' }}" href="{{ url_for('portale.ingresso', versione=v) }}">
+    <span class="ic" aria-hidden="true">{{ '🧱' if v == 'vuoto' else '🏢' }}</span>
+    <b>Versione {{ v }}</b>
+    <p>{% if l %}Salvato {{ ora_italiana(l.aggiornato) }}{% else %}Non ancora iniziata{% endif %}</p>
+    <span class="kpi"><strong>{{ l.scritture if l else 0 }}</strong><span>scritture{% if l and l.ultima_data %} · fino al {{ l.ultima_data }}{% endif %}</span></span>
+  </a>
+{% endfor %}
+  <a class="msa-tile g-personale" href="{{ url_for('allievo.consegna') }}">
+    <span class="ic" aria-hidden="true">📤</span><b>Consegna il lavoro</b>
+    <p>Invia al docente una fotografia del tuo lavoro: la correggerà e ti risponderà qui.</p>
+  </a>
+</div>
+
+<h2>Le mie consegne</h2>
+{% if consegne %}
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Consegnata</th><th>Esercizio</th><th>Versione</th><th>Stato</th><th>Voto</th><th></th></tr>
+  {% for c in consegne %}
+  <tr>
+    <td>{{ ora_italiana(c.consegnata) }}</td>
+    <td>{{ esercizi.get(c.esercizio, esercizi['libero']).titolo }}</td>
+    <td>{{ c.versione }}</td>
+    <td><span class="msa-stato {{ c.stato }}">{{ 'corretta' if c.stato == 'corretta' else 'in correzione' }}</span>{% if c.stato == 'corretta' and not c.letta %} <b>nuova</b>{% endif %}</td>
+    <td>{{ c.voto or '—' }}</td>
+    <td><a href="{{ url_for('allievo.vedi', cid=c.id) }}">Apri</a></td>
+  </tr>
+  {% endfor %}
+</table></div>
+{% else %}<p>Nessuna consegna per ora.</p>{% endif %}
+
+<h2>Ultimi collegamenti</h2>
+{% if sessioni %}
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Inizio</th><th>Fine</th><th class="n">Tempo attivo</th><th>Ultima pagina</th></tr>
+  {% for s in sessioni %}
+  <tr><td>{{ ora_italiana(s.inizio) }}</td><td>{{ ora_italiana(s.ultimo, '%H:%M') }}</td><td class="n">{{ durata(s.secondi_attivi) }}</td><td>{{ s.ultima_pagina }}</td></tr>
+  {% endfor %}
+</table></div>
+{% else %}<p>Ancora nessun collegamento registrato.</p>{% endif %}
+<p style="font-size:12px;color:var(--f-attenuato)">Il tempo conta solo mentre una pagina del portale è aperta in primo piano e la stai usando: dopo 10 minuti senza mouse né tastiera si ferma.</p>
+<p><a href="{{ url_for('accessi.password') }}">Cambia password</a></p>
+{% endblock %}

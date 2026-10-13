@@ -1,0 +1,16 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Costo orario{% endblock %}
+{% block contenuto %}
+<h1>Costo orario del collegamento</h1>
+{% include "docente/_menu.html" %}
+<div class="msa-card" style="max-width:560px">
+<form method="post" class="msa-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label for="costo_orario">Costo orario generale € (vale per gli allievi senza un costo proprio)</label>
+  <input id="costo_orario" name="costo_orario" inputmode="decimal" value="{{ '%.2f' | format(tariffa) }}">
+  <button class="msa-btn" type="submit">Salva</button>
+</form>
+</div>
+<p style="font-size:12px;color:var(--f-attenuato)">Serve a quantificare il costo potenziale del collegamento (ad esempio il valore di un'ora di lezione o di tutoraggio). Si applica a tutto il tempo registrato, anche passato.</p>
+<p><a href="{{ url_for('accessi.password') }}">Cambia la tua password</a></p>
+{% endblock %}

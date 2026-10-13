@@ -2,4 +2,4 @@
 providers = ["python"]
 
 [start]
-cmd = "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2"
+cmd = "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --preload --timeout 60"

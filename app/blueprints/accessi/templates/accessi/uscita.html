@@ -1,0 +1,23 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Uscita{% endblock %}
+{% block contenuto %}
+<div class="msa-card stretta">
+  <h1>Sei uscito</h1>
+  <p>Il tuo lavoro è salvato sul portale. Per sicurezza i dati del simulatore sono stati tolti da questo browser.</p>
+  <a class="msa-btn" href="{{ url_for('accessi.accesso') }}">Accedi di nuovo</a>
+  <a class="msa-btn sec" href="{{ url_for('portale.home') }}">Pagina iniziale</a>
+</div>
+<script>
+// toglie il lavoro dal browser, tranne quello non ancora arrivato al server (msa-sporco-…): al prossimo accesso verrà caricato
+try {
+  var tieni = {};
+  for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i);
+    if (k && k.indexOf('msa-sporco-') === 0) tieni['ferro-transenne-fi-2026-' + k.slice(11) + '-civilistico'] = 1; }
+  var resta = Object.keys(tieni).length > 0;
+  for (var j = localStorage.length - 1; j >= 0; j--) { var c = localStorage.key(j);
+    if (!c || tieni[c] || c.indexOf('msa-sporco-') === 0 || (resta && c === 'msa-utente')) continue;
+    if (c.indexOf('ferro-transenne-') === 0 || c.indexOf('msa-') === 0) localStorage.removeItem(c); }
+} catch (e) {}
+try { sessionStorage.clear(); } catch (e) {}
+</script>
+{% endblock %}

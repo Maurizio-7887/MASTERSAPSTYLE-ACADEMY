@@ -95,3 +95,42 @@ body.msa-sim .fi-module-bar button[aria-pressed=true]{background:var(--f-blu);co
 body.msa-sim .filigrana{font-family:"Segoe UI",Arial,sans-serif}
 /* nelle pagine FI il menu dei moduli è già nella barra del portale: niente doppione */
 body.msa-sim #fi-mod-nav > h2,body.msa-sim #fi-mod-nav > p.aiuto,body.msa-sim #fi-mod-nav > .fi-module-bar:not(#fi-module-links){display:none}
+
+/* ── Accessi, area allievo, pannello docente ─────────── */
+.msa-utente{color:#fff!important;text-decoration:none;border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:3px 9px}
+.msa-esci{margin:0;display:inline}
+.msa-esci button{background:none;border:0;color:#cfe0f3;cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family:"Segoe UI",Arial,sans-serif;font-size:13.5px;line-height:1.45}
+.msa-ac main{max-width:1280px;margin:0 auto;padding:18px 24px 50px}
+.msa-ac h1{font-size:19px;font-weight:600;margin:6px 0 12px}
+.msa-ac h2{font-size:15px;font-weight:600;margin:22px 0 8px}
+.msa-card{background:#fff;border:1px solid var(--f-bordo);border-radius:6px;padding:14px 16px;margin:0 0 14px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.msa-card.stretta{max-width:420px;margin:40px auto}
+.msa-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+.msa-kpis .msa-card{margin:0;border-top:4px solid var(--f-blu)}
+.msa-kpis .v{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums}
+.msa-kpis .l{font-size:12px;color:var(--f-attenuato)}
+.msa-form label{display:block;font-size:12.5px;color:var(--f-attenuato);margin:10px 0 3px}
+.msa-form input,.msa-form select,.msa-form textarea{width:100%;box-sizing:border-box;padding:7px 9px;border:1px solid #89919A;border-radius:4px;font:inherit;background:#fff}
+.msa-form textarea{min-height:140px}
+.msa-form .riga{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 14px}
+.msa-btn{display:inline-block;background:var(--f-blu);color:#fff;border:1px solid var(--f-blu);border-radius:4px;padding:7px 14px;font:inherit;cursor:pointer;text-decoration:none;margin-top:12px}
+.msa-btn:hover{background:var(--f-blu-scuro)}
+.msa-btn.sec{background:#fff;color:var(--f-blu)}
+.msa-btn.sec:hover{background:#E8F4FD}
+.msa-btn.rosso{background:#fff;color:var(--f-rosso);border-color:var(--f-rosso)}
+.msa-tab{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
+.msa-tab th{text-align:left;background:#F5F6FA;color:var(--f-attenuato);font-weight:600;border-bottom:1px solid var(--f-bordo);padding:7px 9px}
+.msa-tab td{border-bottom:1px solid #EDEFF2;padding:6px 9px;vertical-align:top}
+.msa-tab td.n,.msa-tab th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.msa-scroll{overflow-x:auto}
+.msa-msg{padding:9px 12px;border-radius:4px;margin:0 0 12px;border-left:4px solid var(--f-blu);background:#E8F4FD}
+.msa-msg.errore{border-color:var(--f-rosso);background:#FFEBEB}
+.msa-msg.ok{border-color:var(--f-verde);background:#F1FDF6}
+.msa-stato{display:inline-block;border-radius:10px;padding:1px 9px;font-size:12px}
+.msa-stato.da_correggere{background:#FEF7F1;color:var(--f-arancio);border:1px solid var(--f-arancio)}
+.msa-stato.corretta{background:#F1FDF6;color:var(--f-verde);border:1px solid var(--f-verde)}
+.ok-si{color:var(--f-verde);font-weight:700}.ok-no{color:var(--f-rosso);font-weight:700}
+.msa-risposta{white-space:pre-wrap;background:#FFFDF0;border:1px solid #E6D9A8;border-radius:4px;padding:10px 12px}
+.msa-filtro{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.msa-filtro label{margin:0}.msa-filtro .msa-btn{margin:0}
+@media (max-width:700px){.msa-ac main{padding-left:16px;padding-right:16px}}

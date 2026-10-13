@@ -1,0 +1,34 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Correzione · {{ c.utente.nome }}{% endblock %}
+{% block contenuto %}
+<p><a href="{{ url_for('docente.pannello') }}">← Pannello</a> · <a href="{{ url_for('docente.allievo', uid=c.utente.id) }}">Scheda di {{ c.utente.nome }}</a></p>
+<h1>{{ c.utente.nome }} — {{ esercizio.titolo }}</h1>
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Consegnata</div><div class="v" style="font-size:17px">{{ ora_italiana(c.consegnata) }}</div></div>
+  <div class="msa-card"><div class="l">Versione</div><div class="v" style="font-size:17px">{{ c.versione }}</div></div>
+  <div class="msa-card"><div class="l">Collegato fino alla consegna</div><div class="v">{{ durata(c.secondi_collegato) }}</div></div>
+  <div class="msa-card" style="border-top-color:var(--f-arancio)"><div class="l">Costo potenziale (€)</div><div class="v">{{ costo | euro }}</div></div>
+  {% if r.confronto %}<div class="msa-card" style="border-top-color:{{ 'var(--f-verde)' if r.esatti == r.confronto | length else 'var(--f-rosso)' }}"><div class="l">Numeri esatti</div><div class="v">{{ r.esatti }} / {{ r.confronto | length }}</div></div>{% endif %}
+</div>
+<p>
+  <a class="msa-btn" href="{{ url_for('docente.stampa', cid=c.id) }}" target="_blank">🖨️ Stampa il report</a>
+  <a class="msa-btn sec" href="{{ url_for('docente.backup', cid=c.id) }}">⬇ Backup JSON della consegna</a>
+</p>
+{% if c.nota %}<h2>Messaggio dell'allievo</h2><div class="msa-card" style="white-space:pre-wrap">{{ c.nota }}</div>{% endif %}
+
+<h2>La tua risposta {% if c.stato == 'corretta' %}<span class="msa-stato corretta">inviata {{ ora_italiana(c.corretta_il) }}{{ ' · letta' if c.letta }}</span>{% else %}<span class="msa-stato da_correggere">da correggere</span>{% endif %}</h2>
+<div class="msa-card">
+<form method="post" class="msa-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label for="risposta">Correzione e commento per l'allievo</label>
+  <textarea id="risposta" name="risposta" style="min-height:200px" placeholder="Cosa va bene, cosa correggere, quali scritture rivedere…">{{ c.risposta or '' }}</textarea>
+  <div class="riga"><div><label for="voto">Valutazione (facoltativa)</label><input id="voto" name="voto" value="{{ c.voto or '' }}" placeholder="es. 8/10, ottimo, da rifare"></div></div>
+  {% if c.stato == 'corretta' %}<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="rinvia" value="1" style="width:auto"> segnala all'allievo come nuova risposta</label>{% endif %}
+  <button class="msa-btn" type="submit" name="azione" value="invia">📨 {{ 'Aggiorna la correzione' if c.stato == 'corretta' else "Invia la correzione all'allievo" }}</button>
+  <button class="msa-btn sec" type="submit" name="azione" value="bozza">Salva bozza</button>
+  {% if mailto and c.stato == 'corretta' %}<a class="msa-btn sec" href="{{ mailto }}">✉️ Invia anche per email</a>{% elif not c.utente.email %}<span style="font-size:12px;color:var(--f-attenuato)">Per inviarla anche per email aggiungi l'indirizzo nella scheda dell'allievo.</span>{% endif %}
+</form>
+</div>
+
+<div class="msa-scroll">{% with giornale = true %}{% include "docente/_report.html" %}{% endwith %}</div>
+{% endblock %}

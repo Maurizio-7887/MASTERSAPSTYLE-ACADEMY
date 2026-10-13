@@ -1,0 +1,23 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Nuovo allievo{% endblock %}
+{% block contenuto %}
+<h1>Nuovo allievo</h1>
+{% include "docente/_menu.html" %}
+<div class="msa-card" style="max-width:720px">
+<form method="post" class="msa-form" autocomplete="off">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <div class="riga">
+    <div><label for="nome">Nome e cognome</label><input id="nome" name="nome" value="{{ dati.nome }}" required></div>
+    <div><label for="username">Nome utente (per accedere)</label><input id="username" name="username" value="{{ dati.username }}" placeholder="mario.rossi" pattern="[a-z0-9._\-]{3,60}" autocapitalize="none" required></div>
+  </div>
+  <div class="riga">
+    <div><label for="email">Email (per inviargli la correzione)</label><input id="email" name="email" type="email" value="{{ dati.email }}"></div>
+    <div><label for="costo_orario">Costo orario € (vuoto = generale, {{ tariffa | euro }})</label><input id="costo_orario" name="costo_orario" inputmode="decimal" value="{{ dati.costo_orario }}"></div>
+  </div>
+  <label for="password">Password iniziale (vuoto = la genera il portale)</label>
+  <input id="password" name="password" autocomplete="new-password">
+  <button class="msa-btn" type="submit">Crea l'allievo</button>
+</form>
+</div>
+<p style="font-size:12px;color:var(--f-attenuato)">Al primo accesso l'allievo deve scegliere una sua password.</p>
+{% endblock %}

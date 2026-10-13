@@ -1,0 +1,18 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Credenziali{% endblock %}
+{% block contenuto %}
+<h1>{{ 'Allievo creato' if nuovo else 'Password reimpostata' }}</h1>
+{% include "docente/_menu.html" %}
+<div class="msa-card" style="max-width:620px">
+  <p>Comunica a <b>{{ u.nome }}</b> queste credenziali. La password si vede <b>solo ora</b>; al primo accesso l'allievo ne sceglierà una sua.</p>
+  <table class="msa-tab">
+    <tr><td>Indirizzo</td><td><code>{{ url_for('accessi.accesso', _external=True) }}</code></td></tr>
+    <tr><td>Nome utente</td><td><code>{{ u.username }}</code></td></tr>
+    <tr><td>Password temporanea</td><td><code style="font-size:16px">{{ password }}</code></td></tr>
+  </table>
+  {% if u.email %}
+  <a class="msa-btn" href="mailto:{{ u.email | urlencode }}?subject={{ 'Accesso a MASTERSAPSTYLE Academy' | urlencode }}&body={{ ('Ciao ' ~ u.nome ~ ',\n\necco il tuo accesso al simulatore:\n' ~ url_for('accessi.accesso', _external=True) ~ '\nNome utente: ' ~ u.username ~ '\nPassword temporanea: ' ~ password ~ '\n\nAl primo accesso ti verrà chiesto di sceglierne una tua.\n') | urlencode }}">✉️ Invia per email</a>
+  {% endif %}
+  <a class="msa-btn sec" href="{{ url_for('docente.allievo', uid=u.id) }}">Scheda allievo</a>
+</div>
+{% endblock %}

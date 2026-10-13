@@ -1,0 +1,26 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Consegna del {{ ora_italiana(c.consegnata, '%d/%m/%Y') }}{% endblock %}
+{% block contenuto %}
+<p><a href="{{ url_for('allievo.area') }}">← La mia area</a></p>
+<h1>{{ esercizio.titolo }}</h1>
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Consegnata</div><div class="v" style="font-size:17px">{{ ora_italiana(c.consegnata) }}</div></div>
+  <div class="msa-card"><div class="l">Stato</div><div class="v" style="font-size:17px"><span class="msa-stato {{ c.stato }}">{{ 'corretta' if c.stato == 'corretta' else 'in correzione' }}</span></div></div>
+  <div class="msa-card"><div class="l">Voto</div><div class="v">{{ c.voto or '—' }}</div></div>
+  <div class="msa-card"><div class="l">Scritture consegnate</div><div class="v">{{ ind.scritture }}</div></div>
+</div>
+{% if c.stato == 'corretta' %}
+  <h2>Risposta del docente{% if c.corretta_il %} · {{ ora_italiana(c.corretta_il) }}{% endif %}</h2>
+  <div class="msa-risposta">{{ c.risposta or '—' }}</div>
+{% else %}
+  <div class="msa-msg">Il docente non ha ancora corretto questa consegna. Quando lo farà troverai qui la sua risposta.</div>
+{% endif %}
+{% if c.nota %}<h2>Il tuo messaggio</h2><div class="msa-card" style="white-space:pre-wrap">{{ c.nota }}</div>{% endif %}
+<h2>I tuoi numeri principali</h2>
+<div class="msa-scroll"><table class="msa-tab" style="max-width:640px">
+  <tr><td>Data di costituzione</td><td class="n">{{ ind.costituzione or '—' }}</td></tr>
+  <tr><td>Utile d'esercizio {{ ind.anno }}</td><td class="n">{{ ind.utile | euro }}</td></tr>
+  <tr><td>Banca all'ultima data registrata ({{ ind.ultima_data or '—' }})</td><td class="n">{{ ind.banca_finale | euro }}</td></tr>
+  <tr><td>Esercizio chiuso e riaperto</td><td class="n">{{ ind.chiusura }}</td></tr>
+</table></div>
+{% endblock %}

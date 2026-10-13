@@ -1,0 +1,21 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Tempi e costi{% endblock %}
+{% block contenuto %}
+<h1>Tempi di collegamento e costi</h1>
+{% include "docente/_menu.html" %}
+<form class="msa-form msa-filtro msa-card" method="get">
+  <div><label for="dal">Dal</label><input id="dal" name="dal" type="date" value="{{ dal }}"></div>
+  <div><label for="al">Al</label><input id="al" name="al" type="date" value="{{ al }}"></div>
+  <button class="msa-btn" type="submit">Filtra</button>
+  <a class="msa-btn sec" href="{{ url_for('docente.tempi_pagina', dal=dal or None, al=al or None, formato='csv') }}">⬇ Scarica CSV (Excel)</a>
+</form>
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Allievo</th><th class="n">Sessioni</th><th class="n">Tempo</th><th class="n">Ore</th><th class="n">€/ora</th><th class="n">Costo €</th><th>Ultimo accesso</th></tr>
+  {% for x in righe %}
+  <tr><td><a href="{{ url_for('docente.allievo', uid=x.u.id) }}">{{ x.u.nome }}</a></td><td class="n">{{ x.sessioni }}</td><td class="n">{{ durata(x.secondi) }}</td>
+      <td class="n">{{ '%.2f' | format(x.secondi / 3600) | replace('.', ',') }}</td><td class="n">{{ x.tariffa | euro }}</td><td class="n">{{ x.costo | euro }}</td><td>{{ ora_italiana(x.u.ultimo_accesso) }}</td></tr>
+  {% endfor %}
+  <tr style="font-weight:700"><td>Totale</td><td></td><td class="n">{{ durata(tot_secondi) }}</td><td class="n">{{ '%.2f' | format(tot_secondi / 3600) | replace('.', ',') }}</td><td></td><td class="n">{{ tot_costo | euro }}</td><td></td></tr>
+</table></div>
+<p style="font-size:12px;color:var(--f-attenuato)">Il periodo considera le sessioni di collegamento iniziate fra le due date (ora italiana).</p>
+{% endblock %}

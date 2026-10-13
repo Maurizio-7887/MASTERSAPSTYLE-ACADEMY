@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>{% block titolo %}{% endblock %} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+{% block testa %}{% endblock %}
+</head>
+<body class="msa-ac">
+{% set versione = None %}
+{% include "simulatore/_shell.html" %}
+<main>
+  {% with messaggi = get_flashed_messages(with_categories=true) %}
+    {% for cat, m in messaggi %}<div class="msa-msg {{ cat }}">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% block contenuto %}{% endblock %}
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% if utente_corrente() %}{% include "sincronia/_battito.html" %}{% endif %}
+</body>
+</html>

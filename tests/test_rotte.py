@@ -8,10 +8,10 @@ from flask import g, url_for  # noqa: E402
 
 from app.pagine import VERSIONI, tutte_le_pagine  # noqa: E402
 from app.simulatore import meta  # noqa: E402
-from wsgi import app  # noqa: E402
+from tests._client import app, docente  # noqa: E402
 
 errori, n = [], 0
-c = app.test_client()
+c = docente()
 for v in VERSIONI:
     with app.test_request_context():
         g.versione = v
@@ -28,7 +28,7 @@ for v in VERSIONI:
         mancanti = [s["file"] for s in meta(v)["script"] if s["file"] not in html]
         if mancanti:
             errori.append(f"{url}: script mancanti {mancanti}")
-for url in ["/", "/health", "/vuoto/tutto", "/materiali/Guida-esercizio-integrato.pdf"]:
+for url in ["/", "/health", "/vuoto/tutto", "/vuoto/", "/materiali/Guida-esercizio-integrato.pdf", "/docente/", "/docente/tempi"]:
     n += 1
     if c.get(url).status_code != 200:
         errori.append(f"{url}: non risponde")

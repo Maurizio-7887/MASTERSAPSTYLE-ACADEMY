@@ -1,0 +1,18 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Accedi{% endblock %}
+{% block contenuto %}
+<div class="msa-card stretta">
+  <h1>Accedi a MASTERSAPSTYLE Academy</h1>
+  <p style="color:var(--f-attenuato);margin-top:0">Usa il nome utente e la password che ti ha dato il docente.</p>
+  <form method="post" class="msa-form" autocomplete="on">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    {% if prossima %}<input type="hidden" name="prossima" value="{{ prossima }}">{% endif %}
+    <label for="username">Nome utente</label>
+    <input id="username" name="username" value="{{ username }}" autocomplete="username" autocapitalize="none" required autofocus>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="msa-btn" type="submit">Accedi</button>
+  </form>
+  <p style="font-size:12px;color:var(--f-attenuato);margin-bottom:0">Password dimenticata? Chiedila al docente: può impostarne una nuova dal suo pannello.</p>
+</div>
+{% endblock %}

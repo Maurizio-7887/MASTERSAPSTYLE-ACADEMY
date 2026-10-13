@@ -16,7 +16,15 @@ app/
   static/js/launchpad.js           indicatori delle mattonelle letti dai dati dello studente
   static/js/ponte-fantasmi.js      prima del simulatore: elementi delle altre pagine
   static/js/ponte-pagine.js        dopo il simulatore: passaggio fra pagine con coda delle azioni
+  db.py                  database: utenti, sessioni di collegamento, lavoro salvato, consegne (PostgreSQL su Railway, SQLite in locale)
+  accesso.py             chi è collegato, pagine pubbliche, protezione CSRF, solo_docente
+  report.py              report del lavoro dallo stato del simulatore: confronto con i numeri attesi, controlli, verifica, giornale
+  esercizi.py            esercizi consegnabili e loro numeri di controllo
   blueprints/
+    accessi/         /accesso, /esci, /password (blocco dopo 5 tentativi, cambio password al primo accesso)
+    sincronia/       /api/stato/<versione> e /api/battito + static/sincronia.js (lavoro sul server, tempo di collegamento)
+    allievo/         /area/: tempo, lavoro salvato, consegna, risposte del docente
+    docente/         /docente/: allievi, tempi e costi (CSV), correzione, report stampabile, risposta (anche via email)
     portale/         pagina iniziale e launchpad a mattonelle (/<versione>/), materiali, /<versione>/tutto, motore comune (stato, avvio)
     impostazioni/    azienda, centri di costo, distinta base, stato patrimoniale iniziale
     pianificazione/  budget annuo, bilancio previsionale, fabbisogno PP/MM
@@ -51,21 +59,35 @@ npm test
 ```
 | Test | Cosa verifica |
 |---|---|
-| `test:rotte` | tutte le 50 pagine rispondono, con la loro scheda e tutti i JS |
+| `test:rotte` | tutte le pagine rispondono, con la loro scheda e tutti i JS |
 | `test:file-unico` | i 48 passi dell'esercizio guidato nel file originale |
 | `test:blueprint` | gli stessi 48 passi con i JS spezzati (pagina /vuoto/tutto) |
 | `test:multipagina` | gli stessi 48 passi passando davvero da una pagina all'altra |
 | `test:ponte` | i salti fra pagine (SD → FI-AR, Fabbisogno → PP, Giornale → MIRO…) arrivano a destinazione |
+| `test:accessi` | accesso, cambio password, blocco, tempo e costo, salvataggio del lavoro, consegna, report 15/15, stampa, risposta |
+| `test:sincronia` | sincronia.js: stato dal server, salvataggio, lavoro non ancora salvato, cambio di allievo sullo stesso browser |
 
 I numeri di controllo della guida (varianze 476, utile 1.611,43, IRES 508,87, banca finale 74.095,13) sono verificati a ogni esecuzione: se il simulatore cambia, il test dice se la guida va aggiornata. Il sorgente della guida è `app/static/docs/guida-sorgente.html`.
 
+## Accessi, tempo di collegamento e correzioni
+- **Docente**: crea gli allievi (nome utente + password temporanea, cambiata al primo accesso), imposta il costo orario generale o per allievo, vede tempo e costo potenziale (ore × €/ora, filtrabile per periodo, CSV per Excel).
+- **Tempo**: ogni pagina aperta in primo piano manda un battito al minuto; conta solo se l'allievo ha usato mouse o tastiera negli ultimi 10 minuti, un battito vale al massimo 2 minuti, dopo 5 minuti di silenzio si apre una nuova sessione.
+- **Lavoro**: lo stato del simulatore (lo stesso del backup JSON) si salva sul server a ogni modifica; l'allievo lo ritrova da qualsiasi computer. Uscendo, i dati vengono tolti dal browser.
+- **Consegna**: l'allievo consegna una fotografia del lavoro (o un backup JSON del file offline) scegliendo l'esercizio. Il docente apre il report — numeri attesi ✓/✗, controlli Dare = Avere, bilancio di verifica, libro giornale — lo stampa in A4 o PDF, scrive correzione e voto: l'allievo li legge nella sua area, e con un clic partono anche per email.
+
 ## Avvio e deploy
 ```bash
-python wsgi.py           # http://localhost:5000
+DOCENTE_PASSWORD=una-password python wsgi.py     # http://localhost:5000 — database SQLite academy.sqlite3
 ```
-Railway: Nixpacks + gunicorn (`railway.json`), controllo su `/health`.
+Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health`. Variabili del servizio:
+
+| Variabile | A cosa serve |
+|---|---|
+| `DATABASE_URL` | riferimento al servizio PostgreSQL (`${{Postgres.DATABASE_URL}}`) |
+| `SECRET_KEY` | firma dei cookie di accesso (stringa lunga casuale) |
+| `DOCENTE_USERNAME`, `DOCENTE_PASSWORD`, `DOCENTE_NOME` | primo accesso docente (creato solo se non esiste nessun docente) |
+| `COSTO_ORARIO` | costo orario iniziale in € (poi si cambia dal pannello) |
 
 ## Prossimi passi
-- accessi per docenti e studenti
-- consegna dei backup JSON e report di correzione automatica
+- altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite

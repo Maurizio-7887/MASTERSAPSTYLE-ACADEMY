@@ -1,0 +1,6 @@
+{# Prima degli script del simulatore: porta in localStorage il lavoro salvato sul server e lo tiene allineato #}
+{% set sync = config_sincronia(versione) %}
+{% if sync %}
+<script>window.MSA_SYNC = {{ sync | tojson }};</script>
+<script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>
+{% endif %}

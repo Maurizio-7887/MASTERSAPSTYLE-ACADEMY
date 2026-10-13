@@ -16,6 +16,25 @@
     <h1>Impara la contabilità e il controllo di gestione come in un'azienda vera</h1>
     <p>Simulatori didattici in stile SAP: ogni documento logistico genera la sua scrittura in partita doppia, ogni ora lavorata finisce su un centro di costo, ogni varianza ha un perché.</p>
   </div>
+  {% set u = utente_corrente() %}
+  {% if not u %}
+  <div class="msa-gruppo">🔐 Accesso</div>
+  <div class="msa-tiles">
+    <a class="msa-tile grande g-contabilita" href="{{ url_for('accessi.accesso') }}">
+      <span class="ic" aria-hidden="true">🔑</span><b>Accedi</b>
+      <p>Con le credenziali ricevute dal docente. Il tuo lavoro si salva sul portale e lo ritrovi da qualsiasi computer.</p>
+    </a>
+  </div>
+  {% else %}
+  <div class="msa-gruppo">👤 {{ u.nome }}</div>
+  <div class="msa-tiles">
+    <a class="msa-tile grande g-personale" href="{{ url_for('docente.pannello' if u.docente else 'allievo.area') }}">
+      <span class="ic" aria-hidden="true">{{ '🎓' if u.docente else '📒' }}</span>
+      <b>{{ 'Pannello docente' if u.docente else 'La mia area' }}</b>
+      <p>{{ 'Allievi, tempi di collegamento, costi, consegne da correggere.' if u.docente else 'Tempo di collegamento, consegne e risposte del docente.' }}</p>
+    </a>
+  </div>
+  {% endif %}
   <div class="msa-gruppo">🏭 Ferro &amp; Transenne S.r.l. — scegli la versione</div>
   <div class="msa-tiles">
   {% for v, testo in versioni.items() %}
@@ -43,7 +62,7 @@
     </a>
   {% endfor %}
   </div>
-  <p class="msa-lp-nota">I dati che inserisci restano salvati solo nel tuo browser, separati per versione: nessun account e nessun invio al server. Le pagine della stessa versione condividono gli stessi dati. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
+  <p class="msa-lp-nota">Ogni allievo ha il suo accesso: il lavoro si salva sul portale, separato per versione, e il docente riceve le consegne da correggere. Le pagine della stessa versione condividono gli stessi dati. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div>
 </body>

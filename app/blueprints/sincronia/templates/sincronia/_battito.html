@@ -1,0 +1,4 @@
+{# Solo battito (pagine senza simulatore: area allievo, pannello docente) #}
+<script>window.MSA_SYNC = {{ {"csrf": csrf_token(), "urlBattito": "/api/battito", "battito": not utente_corrente().docente, "utente": utente_corrente().id} | tojson }};</script>
+{# niente stato qui: sincronia.js carica solo l'eventuale lavoro rimasto in sospeso nel browser #}
+<script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>

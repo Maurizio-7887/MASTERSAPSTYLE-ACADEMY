@@ -1,0 +1,30 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Consegna il lavoro{% endblock %}
+{% block contenuto %}
+<h1>Consegna il lavoro al docente</h1>
+<div class="msa-card" style="max-width:720px">
+<form method="post" class="msa-form" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <label for="versione">Versione del simulatore</label>
+  <select id="versione" name="versione" required>
+    {% for v in versioni %}
+      {% set l = (lavori | selectattr('versione', 'equalto', v) | list | first) %}
+      <option value="{{ v }}">{{ v }} — {% if l %}{{ l.scritture }} scritture, salvato {{ ora_italiana(l.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</option>
+    {% endfor %}
+  </select>
+  <label for="esercizio">Esercizio</label>
+  <select id="esercizio" name="esercizio">
+    {% for v, lista in scelte.items() %}
+      <optgroup label="Versione {{ v }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
+    {% endfor %}
+  </select>
+  <label for="nota">Messaggio per il docente (facoltativo)</label>
+  <textarea id="nota" name="nota" placeholder="Dubbi, passaggi che non ti tornano, cosa vuoi che controlli…"></textarea>
+  <label for="backup">Oppure carica un backup JSON (se hai lavorato con il file offline)</label>
+  <input id="backup" name="backup" type="file" accept=".json,application/json">
+  <button class="msa-btn" type="submit">📤 Consegna</button>
+  <a class="msa-btn sec" href="{{ url_for('allievo.area') }}">Annulla</a>
+</form>
+</div>
+<p style="font-size:12px;color:var(--f-attenuato)">Si consegna una fotografia del lavoro di quel momento: puoi continuare a lavorare e consegnare di nuovo quando vuoi.</p>
+{% endblock %}

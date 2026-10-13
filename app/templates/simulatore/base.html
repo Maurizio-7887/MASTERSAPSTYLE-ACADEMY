@@ -27,9 +27,10 @@
   {% block contenuto %}{% endblock %}
 </main>
 
-<div class="filigrana">Simulatore didattico — dati salvati solo in questo browser (localStorage), nessun collegamento a nessun sistema esterno.</div>
+<div class="filigrana">Simulatore didattico — il tuo lavoro si salva sul portale MASTERSAPSTYLE Academy e lo ritrovi da qualsiasi computer.</div>
 <div class="toast" id="toast"></div>
 
+{% include "sincronia/_stato.html" %}
 <script>window.PAGINA = {{ config | tojson }};</script>
 <script src="{{ url_for('static', filename='js/ponte-fantasmi.js') }}"></script>
 {% for s in meta.script %}

@@ -10,7 +10,7 @@ from flask import g, url_for  # noqa: E402
 
 from app.pagine import tutte_le_pagine  # noqa: E402
 from tests.componi_pagina import main as componi  # noqa: E402
-from wsgi import app  # noqa: E402
+from tests._client import app  # noqa: E402
 
 DEST = Path(__file__).resolve().parent / "_pagine"
 DEST.mkdir(exist_ok=True)

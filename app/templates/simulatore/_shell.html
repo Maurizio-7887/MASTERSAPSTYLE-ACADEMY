@@ -10,7 +10,13 @@
         <span class="msa-versione-badge">Versione {{ versione }}</span>
         {% for v in versioni %}{% if v != versione %}<a href="{{ url_for(endpoint_corrente, versione=v) }}">passa a {{ v }}</a>{% endif %}{% endfor %}
       {% endif %}
-      <span>Client 800 · Plant 1000</span>
+      {% set u = utente_corrente() %}
+      {% if u %}
+        <a href="{{ url_for('docente.pannello' if u.docente else 'allievo.area') }}" class="msa-utente" title="{{ 'Pannello docente' if u.docente else 'La mia area: tempo, consegne e risposte' }}">👤 {{ u.nome }}{% if u.docente %} · docente{% endif %}</a>
+        <form method="post" action="{{ url_for('accessi.esci') }}" class="msa-esci"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button type="submit">Esci</button></form>
+      {% else %}
+        <a href="{{ url_for('accessi.accesso') }}" class="msa-utente">Accedi</a>
+      {% endif %}
     </span>
   </div>
 </header>

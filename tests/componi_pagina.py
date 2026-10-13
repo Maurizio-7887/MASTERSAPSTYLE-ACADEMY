@@ -8,21 +8,21 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from wsgi import app  # noqa: E402
+from tests._client import app, docente  # noqa: E402
 
 STATIC = Path(app.static_folder)
 
 
 def statico(url):
     """Contenuto di un file statico (dell'app o di un blueprint), letto attraverso Flask come lo riceve il browser."""
-    r = app.test_client().get(url)
+    r = docente().get(url)
     if r.status_code != 200:
         sys.exit(f"{url}: HTTP {r.status_code}")
     return r.get_data(as_text=True)
 
 
 def main(url, destinazione):
-    r = app.test_client().get(url)
+    r = docente().get(url)
     if r.status_code != 200:
         sys.exit(f"{url}: HTTP {r.status_code}")
     html = r.get_data(as_text=True)

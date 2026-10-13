@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Report {{ c.utente.nome }} · consegna {{ c.id }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<style>
+  body{margin:0;background:#E5E8EE;font-family:"Segoe UI",Arial,sans-serif;font-size:11.5px;color:#222;line-height:1.35}
+  .foglio{background:#fff;max-width:190mm;margin:14px auto;padding:14mm 12mm;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+  .comandi{max-width:190mm;margin:14px auto 0;display:flex;gap:8px;align-items:center}
+  .comandi .msa-btn{margin:0}
+  h1{font-size:17px;margin:0 0 2px} h2{font-size:13px;margin:16px 0 6px;border-bottom:1.5px solid #1B3A5C;padding-bottom:2px;color:#1B3A5C}
+  .testata{display:flex;justify-content:space-between;gap:12px;border-bottom:3px solid #0070F2;padding-bottom:8px;margin-bottom:8px}
+  .testata .marchio{font-weight:800;color:#1B3A5C;letter-spacing:.5px;text-align:right}
+  .dati{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin:8px 0}
+  .dati div span{color:#666}
+  .msa-tab{font-size:10.5px}.msa-tab th,.msa-tab td{padding:3px 6px}
+  .giornale .testa-scrittura td{border-top:1px solid #c9ced6;background:#fafbfc}
+  .correzione{border:1.5px solid #1B3A5C;border-radius:4px;padding:8px 10px;min-height:60mm;white-space:pre-wrap}
+  .righe{background:repeating-linear-gradient(#fff 0 7.4mm,#cfd5dd 7.4mm 7.6mm)}
+  .firma{display:flex;justify-content:space-between;margin-top:14px;color:#555}
+  @page{size:A4;margin:12mm}
+  @media print{body{background:#fff}.foglio{box-shadow:none;margin:0;padding:0;max-width:none}.comandi{display:none}
+    h2{break-after:avoid}.nuova-pagina{break-before:page}tr{break-inside:avoid}.ok-si,.ok-no{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="comandi">
+  <button class="msa-btn" onclick="window.print()">🖨️ Stampa / salva PDF</button>
+  <label style="display:flex;gap:5px;align-items:center"><input type="checkbox" id="conGiornale" checked> includi il libro giornale</label>
+  <a class="msa-btn sec" href="{{ url_for('docente.consegna', cid=c.id) }}">← Torna alla correzione</a>
+</div>
+<div class="foglio">
+  <div class="testata">
+    <div><h1>Report del lavoro — {{ c.utente.nome }}</h1><div>{{ esercizio.titolo }}</div></div>
+    <div class="marchio">MASTERSAPSTYLE ACADEMY<br><span style="font-weight:400;color:#666">Ferro &amp; Transenne S.r.l. · versione {{ c.versione }}</span></div>
+  </div>
+  <div class="dati">
+    <div><span>Allievo:</span> {{ c.utente.nome }} ({{ c.utente.username }})</div>
+    <div><span>Consegna n.:</span> {{ c.id }} del {{ ora_italiana(c.consegnata) }}</div>
+    <div><span>Tempo di collegamento alla consegna:</span> {{ durata(c.secondi_collegato) }}</div>
+    <div><span>Costo potenziale:</span> € {{ costo | euro }}</div>
+    <div><span>Scritture:</span> {{ r.indicatori.scritture }} (fino al {{ r.indicatori.ultima_data or '—' }})</div>
+    <div><span>Stampato il:</span> {{ ora_italiana(stampato) }}</div>
+  </div>
+  {% if c.nota %}<h2>Messaggio dell'allievo</h2><div style="white-space:pre-wrap">{{ c.nota }}</div>{% endif %}
+
+  <h2>Correzione del docente{% if c.voto %} — valutazione: {{ c.voto }}{% endif %}</h2>
+  <div class="correzione {{ '' if c.risposta else 'righe' }}">{{ c.risposta or '' }}</div>
+  <div class="firma"><span>Data ____________________</span><span>Firma del docente ______________________________</span></div>
+
+  {% with giornale = true %}{% include "docente/_report.html" %}{% endwith %}
+</div>
+<script>
+document.getElementById('conGiornale').addEventListener('change', function () {
+  var t = document.querySelector('.giornale'), h = document.querySelector('h2.nuova-pagina');
+  if (t) t.style.display = this.checked ? '' : 'none'; if (h) h.style.display = this.checked ? '' : 'none';
+});
+</script>
+</body>
+</html>

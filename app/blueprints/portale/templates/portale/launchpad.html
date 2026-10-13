@@ -12,7 +12,7 @@
 <main class="msa-lp">
   <div class="msa-lp-intro">
     <h1>Launchpad — Ferro &amp; Transenne, versione {{ versione }}</h1>
-    <p>{{ versioni[versione] }}. Ogni mattonella apre una transazione; i numeri in basso sono i tuoi dati, letti da questo browser.</p>
+    <p>{{ versioni[versione] }}. Ogni mattonella apre una transazione; i numeri in basso sono i tuoi dati.</p>
   </div>
   {% for g in gruppi %}
     <div class="msa-gruppo">{{ g.attivita.titolo }}</div>
@@ -39,9 +39,10 @@
       <span class="ic" aria-hidden="true">🗂️</span><b>Tutte le schede in una pagina</b><p>Come il file originale, con le linguette.</p>
     </a>
   </div>
-  <p class="msa-lp-nota">I dati restano solo in questo browser, separati per versione. Prima di cambiare computer usa <b>Contabilità FI → Impostazioni FI e backup → Esporta backup JSON</b>. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
+  <p class="msa-lp-nota">Il lavoro si salva da solo sul portale, separato per versione: lo ritrovi accedendo da qualsiasi computer. Quando hai finito un esercizio consegnalo dalla tua area (👤 in alto) per ricevere la correzione. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
 </body>

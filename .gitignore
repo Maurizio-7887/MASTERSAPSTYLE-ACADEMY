@@ -6,3 +6,4 @@ tests/risultati.json
 tests/stato-finale.json
 tests/_pagina-*.html
 tests/_pagine/
+academy.sqlite3

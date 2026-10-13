@@ -1,0 +1,59 @@
+{# Report del lavoro: confronto con i numeri attesi, controlli formali, bilancio di verifica, libro giornale.
+   Variabili: r (report.report), giornale (bool) #}
+{% if r.confronto %}
+<h2>Confronto con i numeri dell'esercizio — {{ r.esatti }} su {{ r.confronto | length }} esatti</h2>
+<table class="msa-tab">
+  <tr><th>Controllo</th><th class="n">Atteso</th><th class="n">Allievo</th><th class="n">Differenza</th><th class="n">Esito</th></tr>
+  {% for x in r.confronto %}
+  <tr><td>{{ x.etichetta }}</td>
+      <td class="n">{{ (x.atteso | euro) if x.numero and x.atteso is float else x.atteso }}</td>
+      <td class="n">{{ (x.reale | euro) if x.numero and x.reale is float else (x.reale if x.reale not in (None, '') else '—') }}</td>
+      <td class="n">{{ (x.diff | euro) if x.diff else '' }}</td>
+      <td class="n">{% if x.ok %}<span class="ok-si">✓</span>{% else %}<span class="ok-no">✗</span>{% endif %}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<h2>Numeri principali</h2>
+<table class="msa-tab">
+  <tr><td>Data di costituzione</td><td class="n">{{ r.indicatori.costituzione or '—' }}</td></tr>
+  <tr><td>Scritture registrate</td><td class="n">{{ r.indicatori.scritture }}</td></tr>
+  <tr><td>Ultima data registrata</td><td class="n">{{ r.indicatori.ultima_data or '—' }}</td></tr>
+  <tr><td>Risultato d'esercizio {{ r.anno }}</td><td class="n">{{ r.indicatori.utile | euro }}</td></tr>
+  <tr><td>IRES {{ r.anno }}</td><td class="n">{{ r.indicatori.ires | euro }}</td></tr>
+  <tr><td>Banca al 31/12/{{ r.anno }}</td><td class="n">{{ r.indicatori.banca_fine_anno | euro }}</td></tr>
+  <tr><td>Banca all'ultima data</td><td class="n">{{ r.indicatori.banca_finale | euro }}</td></tr>
+  <tr><td>Chiusura dell'esercizio</td><td class="n">{{ r.indicatori.chiusura }}</td></tr>
+</table>
+{% endif %}
+
+<h2>Controlli formali</h2>
+<table class="msa-tab"><colgroup><col style="width:42%"><col></colgroup>
+  <tr><td>Ogni scrittura quadra (Dare = Avere)</td><td class="n">{% if not r.controlli.non_quadrate %}<span class="ok-si">✓ tutte</span>{% else %}<span class="ok-no">✗ non quadrano: {{ r.controlli.non_quadrate | join(', ') }}</span>{% endif %}</td></tr>
+  <tr><td>Totale Dare = totale Avere (bilancio di verifica)</td><td class="n">{% if r.controlli.quadra %}<span class="ok-si">✓</span>{% else %}<span class="ok-no">✗</span>{% endif %}</td></tr>
+  <tr><td>Storni effettuati</td><td class="n">{{ r.controlli.storni }}</td></tr>
+  <tr><td>Contratti RiBa / factoring</td><td class="n">{% for k in r.controlli.contratti %}{{ k.tipo }} {{ k.ref }} {{ 'chiuso' if k.chiuso else 'APERTO' }}{{ ', ' if not loop.last }}{% else %}nessuno{% endfor %}</td></tr>
+  <tr><td>Scritture per tipo</td><td class="n" style="white-space:normal">{% for t, n in r.controlli.per_tipo %}{{ t }} {{ n }}{{ ' · ' if not loop.last }}{% endfor %}</td></tr>
+</table>
+
+<h2>Bilancio di verifica al 31/12/{{ r.anno }}</h2>
+<table class="msa-tab">
+  <tr><th>Conto</th><th>Descrizione</th><th class="n">Dare</th><th class="n">Avere</th></tr>
+  {% for x in r.verifica %}
+  <tr><td>{{ x.conto }}</td><td>{{ x.nome }}</td><td class="n">{{ (x.dare | euro) if x.dare }}</td><td class="n">{{ (x.avere | euro) if x.avere }}</td></tr>
+  {% endfor %}
+  <tr style="font-weight:700"><td></td><td>Totali</td><td class="n">{{ r.verifica | sum(attribute='dare') | euro }}</td><td class="n">{{ r.verifica | sum(attribute='avere') | euro }}</td></tr>
+</table>
+
+{% if giornale %}
+<h2 class="nuova-pagina">Libro giornale ({{ r.giornale | length }} scritture)</h2>
+<table class="msa-tab giornale">
+  <tr><th>N.</th><th>Data</th><th>Descrizione / conto</th><th class="n">Dare</th><th class="n">Avere</th></tr>
+  {% for g in r.giornale %}
+  <tr class="testa-scrittura"><td>{{ g.id }}</td><td>{{ g.data }}</td><td colspan="3"><b>{{ g.descrizione }}</b> <span style="color:var(--f-attenuato)">{{ g.tipo }}</span>{% if g.stornata %} <span class="ok-no">STORNATA</span>{% endif %}</td></tr>
+  {% for x in g.righe %}
+  <tr><td></td><td></td><td style="padding-left:{{ 22 if x.segno == 'DARE' else 60 }}px">{{ x.conto }} {{ x.nome }}</td>
+      <td class="n">{{ (x.importo | euro) if x.segno == 'DARE' }}</td><td class="n">{{ (x.importo | euro) if x.segno == 'AVERE' }}</td></tr>
+  {% endfor %}
+  {% endfor %}
+</table>
+{% endif %}
