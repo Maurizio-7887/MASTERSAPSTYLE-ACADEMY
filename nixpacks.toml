@@ -1,0 +1,5 @@
+# Il sito è Python/Flask: package.json serve solo ai test in locale (jsdom), non al deploy.
+providers = ["python"]
+
+[start]
+cmd = "gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2"
