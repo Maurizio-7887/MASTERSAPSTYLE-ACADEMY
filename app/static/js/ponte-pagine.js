@@ -76,6 +76,19 @@
     };
   }
 
+  // un solo launchpad: il «🏠 Launchpad» interno di SD/MM e PP torna alle mattonelle del modulo sul portale
+  function launchpadUnico() {
+    ['SDMM', 'PP'].forEach(function (n) {
+      const o = window[n];
+      if (!o || typeof o.vai !== 'function' || !P.urlModuloLp) return;
+      const vaiInterno = o.vai;
+      o.vai = function (s) {
+        if (s === 'home') { if (window.__msaNaviga) window.__msaNaviga(P.urlModuloLp); else window.location.href = P.urlModuloLp; return; }
+        return vaiInterno.apply(this, arguments);
+      };
+    });
+  }
+
   function avvia() {
     let arrivo = [];
     try { arrivo = JSON.parse(sessionStorage.getItem(CHIAVE) || '[]'); sessionStorage.removeItem(CHIAVE); } catch (e) { arrivo = []; }
@@ -84,6 +97,11 @@
     if (P.vista === 'fabbisogno-pm' && window.FabbisognoPM) window.FabbisognoPM.render();
     if (P.sd && window.SDMM) window.SDMM.vai(P.sd);
     if (P.pp && window.PP) window.PP.vai(P.pp);
+    launchpadUnico();
+    // SD/MM o PP aperti senza una transazione precisa: si va alle mattonelle del modulo (niente launchpad doppio)
+    if ((P.vista === 'sdmm' || P.vista === 'pp') && !P.sd && !P.pp && !arrivo.length && P.urlModuloLp && !window.__msaNaviga) {
+      window.location.replace(P.urlModuloLp); return;
+    }
     for (const [oggetto, metodo, args] of arrivo) {
       try {
         const bersaglio = oggetto ? window[oggetto] : window;

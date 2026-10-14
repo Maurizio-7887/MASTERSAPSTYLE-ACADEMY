@@ -149,7 +149,6 @@ MODULI = [
         (SD, "ddt", "DDT e uscita merci", "🚚", "VL01N · 601", "ddt"),
         (SD, "fatt", "Fatturazione attiva", "🧾", "VF01 · VF03", "fatture"),
         (SD, "anag", "Anagrafiche clienti", "👥", "XD01", "clienti"),
-        (SD, "home", "Launchpad SD / MM", "🏢", "tutto il ciclo", None),
      ]},
     {"codice": "mm", "breve": "Acquisti", "sigla": "MM", "titolo": "Acquisti e magazzino", "icona": "🛒", "colore": "acquisti", "kpi": "po",
      "descrizione": "Richieste di offerta, ordini d'acquisto, entrata merci, fattura fornitore, giacenze", "app": [
@@ -176,7 +175,6 @@ MODULI = [
         (PP_, "mb101", "Entrata merci da ordine", "📥", "MIGO 101", None),
         (PP_, "co88", "Chiusura di periodo", "📆", "CO88", None),
         ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
-        (PP_, "home", "Launchpad PP", "🏭", "tutte le transazioni PP", "ordiniPP"),
      ]},
     {"codice": "hr", "breve": "Personale", "sigla": "HR", "titolo": "Personale", "icona": "👤", "colore": "personale", "kpi": "dipendenti",
      "descrizione": "Dipendenti, paghe, contributi e TFR verso FI e CO", "app": [

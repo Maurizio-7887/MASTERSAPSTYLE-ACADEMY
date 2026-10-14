@@ -58,6 +58,8 @@ def render_pagina(blueprint, endpoint, sezioni=None, **extra):
         "idStatici": m["id_statici"],
     }
     modulo_attivo, app_attiva = modulo_di(f"{blueprint}.{endpoint}", config["sd"] or config["pp"])
+    # il pulsante «Launchpad» interno di SD/MM e PP riporta alle mattonelle del modulo del portale
+    config["urlModuloLp"] = url_for("portale.modulo_lp", versione=g.versione, codice=modulo_attivo["codice"]) if modulo_attivo else None
     return render_template(
         f"{blueprint}/{endpoint}.html",
         moduli=MODULI, modulo_attivo=modulo_attivo, app_attiva=app_attiva or p["titolo"],
