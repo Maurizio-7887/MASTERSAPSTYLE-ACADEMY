@@ -359,3 +359,4 @@ if(H.MULTI){
   const errJS = H.log.filter(x => !/Not implemented/.test(x));
   if(errJS.length){ console.error('❌ Errori JS nelle pagine:\n' + errJS.slice(0,15).join('\n')); process.exit(1); }
 }
+process.exit(0);   // le finestre jsdom hanno timer attivi (sincronia, guida): si chiude qui

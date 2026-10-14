@@ -1,0 +1,51 @@
+/* Finestra «Esercizio passo passo»: pulsante in basso a destra, pannello laterale che non copre il lavoro */
+#msa-guida{--g-blu:#0070F2;--g-scuro:#1B3A5C;--g-bordo:#D1D5DB;--g-att:#6A6D70;--g-verde:#107E3E;font-family:"Segoe UI",Arial,sans-serif;font-size:13px;color:#32363A;line-height:1.4}
+#msa-guida .msa-g-apri{position:fixed;right:18px;bottom:18px;z-index:9990;display:flex;align-items:center;gap:8px;background:var(--g-scuro);color:#fff;border:0;border-radius:22px;
+  padding:9px 16px 9px 12px;font:600 13.5px "Segoe UI",Arial,sans-serif;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.28)}
+#msa-guida .msa-g-apri:hover{background:#24496f}
+#msa-guida .msa-g-apri .ico{font-size:18px}
+#msa-guida .msa-g-apri .prog{background:rgba(255,255,255,.18);border-radius:10px;padding:1px 8px;font-weight:400;font-size:12px}
+#msa-guida .msa-g-pannello{position:fixed;top:10px;right:10px;bottom:10px;width:370px;z-index:9991;background:#fff;border:1px solid var(--g-bordo);border-radius:8px;
+  box-shadow:0 6px 24px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+#msa-guida .msa-g-pannello[hidden]{display:none}
+#msa-guida header{background:var(--g-scuro);color:#fff;padding:9px 10px 9px 14px;display:flex;align-items:center;gap:8px}
+#msa-guida header div{flex:1;min-width:0}
+#msa-guida header b{display:block;font-size:13.5px}
+#msa-guida header small{display:block;color:#b9c9dd;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#msa-guida .msa-g-chiudi{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:4px;width:30px;height:26px;cursor:pointer;font-weight:700}
+#msa-guida .msa-g-barra{height:5px;background:#E5E8EE}
+#msa-guida .msa-g-barra span{display:block;height:100%;background:var(--g-verde);width:0;transition:width .4s}
+#msa-guida .msa-g-elenco{display:block;padding:8px 12px 4px}
+#msa-guida .msa-g-elenco .vis{position:absolute;left:-9999px}
+#msa-guida select{width:100%;padding:5px 6px;border:1px solid #89919A;border-radius:4px;font:inherit;font-size:12.5px;background:#fff}
+#msa-guida .msa-g-corpo{flex:1;overflow:auto;padding:6px 14px 12px}
+#msa-guida .msa-g-gruppo{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g-att);margin-top:4px}
+#msa-guida h3{font-size:16px;margin:3px 0 8px;font-weight:600}
+#msa-guida .msa-g-data{display:inline-block;background:#E8F4FD;color:#0854A0;border-radius:4px;padding:1px 7px;font-size:12px;font-weight:600;margin-right:7px;vertical-align:2px}
+#msa-guida .msa-g-dove{display:flex;gap:8px;align-items:center;background:#F5F6FA;border:1px solid #E5E8EE;border-radius:5px;padding:7px 9px;margin-bottom:9px;font-size:12.5px}
+#msa-guida .msa-g-dove span{flex:1}
+#msa-guida .msa-g-vai{background:var(--g-blu);color:#fff;border:0;border-radius:4px;padding:5px 10px;cursor:pointer;font:600 12px "Segoe UI",Arial,sans-serif;white-space:nowrap}
+#msa-guida .msa-g-vai.qui{background:#fff;color:var(--g-verde);border:1px solid var(--g-verde)}
+#msa-guida .msa-g-campi{width:100%;border-collapse:collapse;margin-bottom:9px}
+#msa-guida .msa-g-campi th{text-align:left;font-weight:400;color:var(--g-att);font-size:12px;padding:4px 8px 4px 0;vertical-align:top;width:42%;border-bottom:1px solid #EDEFF2}
+#msa-guida .msa-g-campi td{padding:3px 0;border-bottom:1px solid #EDEFF2}
+#msa-guida .msa-g-val{all:unset;cursor:copy;font-weight:600;font-family:Consolas,"Segoe UI",monospace;font-size:12.5px;padding:1px 4px;border-radius:3px;display:inline}
+#msa-guida .msa-g-val:hover{background:#FFF8D6}
+#msa-guida .msa-g-val.copiato{background:#DFF5E5}
+#msa-guida .msa-g-val.copiato::after{content:" ✓ copiato";font-family:"Segoe UI",Arial,sans-serif;font-weight:400;color:var(--g-verde);font-size:11px}
+#msa-guida .msa-g-attesa{border-left:3px solid var(--g-blu);background:#F5FAFF;padding:6px 9px;margin-bottom:8px;font-size:12.5px}
+#msa-guida .msa-g-attesa b{display:block;font-size:11px;color:#0854A0;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+#msa-guida .msa-g-nota{margin:0 0 8px;font-size:12.5px;color:#4a4d50}
+#msa-guida .msa-g-esito{border-radius:5px;padding:7px 9px;background:#FEF7F1;border:1px solid #F5C9A0;font-size:12.5px}
+#msa-guida .msa-g-esito.ok{background:#F1FDF6;border-color:#9ED8B3;color:var(--g-verde);font-weight:600}
+#msa-guida .msa-g-esito button{background:none;border:0;color:#0854A0;text-decoration:underline;cursor:pointer;font:inherit;font-weight:400;padding:0 0 0 4px}
+#msa-guida footer{display:flex;align-items:center;gap:8px;border-top:1px solid var(--g-bordo);padding:8px 10px}
+#msa-guida footer button{background:#fff;color:var(--g-blu);border:1px solid var(--g-blu);border-radius:4px;padding:6px 12px;cursor:pointer;font:600 12.5px "Segoe UI",Arial,sans-serif}
+#msa-guida footer button:disabled{opacity:.4;cursor:default}
+#msa-guida footer .msa-g-av{margin-left:auto}
+#msa-guida footer .msa-g-av.pronto{background:var(--g-verde);border-color:var(--g-verde);color:#fff}
+#msa-guida .msa-g-num{font-size:12px;color:var(--g-att)}
+/* su schermi larghi il pannello sta di fianco: il simulatore si restringe e resta tutto visibile */
+@media (min-width:1180px){html.msa-guida-aperta body{margin-right:390px!important}}
+@media (max-width:700px){#msa-guida .msa-g-pannello{left:6px;right:6px;top:auto;height:62vh;width:auto}}
+@media print{#msa-guida{display:none}html.msa-guida-aperta body{margin-right:0!important}}

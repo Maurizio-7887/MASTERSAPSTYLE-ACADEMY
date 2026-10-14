@@ -1,0 +1,54 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Passa il lavoro{% endblock %}
+{% block contenuto %}
+<h1>Passa il lavoro</h1>
+{% include "docente/_menu.html" %}
+<form method="get" class="msa-form msa-filtro msa-card">
+  <div><label for="versione">Versione</label>
+    <select id="versione" name="versione" onchange="this.form.submit()">{% for v in versioni %}<option value="{{ v }}" {{ 'selected' if v == versione }}>{{ v }}</option>{% endfor %}</select></div>
+  <p style="margin:0;color:var(--f-attenuato);font-size:12.5px;max-width:70ch">Esegui l'esercizio alla lavagna, poi cedi il comando: l'allievo scelto riparte esattamente dal punto in cui sei arrivato, e la finestra «Esercizio passo passo» gli mostra il passo successivo. Il lavoro che l'allievo aveva prima resta in archivio e si può ripristinare.</p>
+</form>
+
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Il tuo lavoro ({{ versione }})</div>
+    <div class="v">{{ mio.scritture if mio else 0 }} <span style="font-size:13px">scritture</span></div>
+    <div class="l">{% if mio %}fino al {{ mio.ultima or '—' }} · salvato {{ ora_italiana(mio.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</div></div>
+</div>
+
+<h2>➜ Dal docente agli allievi</h2>
+<form method="post" class="msa-card msa-form" onsubmit="return confirm('Il lavoro degli allievi scelti verrà sostituito dal tuo (il loro resta in archivio). Procedere?')">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="verso" value="a_allievi"><input type="hidden" name="versione" value="{{ versione }}">
+  {% if righe %}
+  <table class="msa-tab">
+    <tr><th style="width:30px"></th><th>Allievo</th><th class="n">Scritture</th><th>Fino al</th><th>Salvato</th></tr>
+    {% for r in righe %}
+    <tr><td><input type="checkbox" name="allievi" value="{{ r.u.id }}" id="a{{ r.u.id }}" style="width:auto"></td>
+        <td><label for="a{{ r.u.id }}" style="margin:0;color:inherit;font-size:13px">{{ r.u.nome }}</label></td>
+        <td class="n">{{ r.lavoro.scritture if r.lavoro else 0 }}</td><td>{{ r.lavoro.ultima if r.lavoro else '—' }}</td><td>{{ ora_italiana(r.lavoro.aggiornato) if r.lavoro else '—' }}</td></tr>
+    {% endfor %}
+  </table>
+  <button class="msa-btn" type="submit" {{ 'disabled' if not mio }}>⇄ Passa il mio lavoro agli allievi scelti</button>
+  {% else %}<p>Nessun allievo attivo.</p>{% endif %}
+</form>
+
+<h2>⬅ Da un allievo al docente</h2>
+<form method="post" class="msa-card msa-form" onsubmit="return confirm('Il tuo lavoro verrà sostituito da quello dell\'allievo (il tuo resta in archivio). Procedere?')">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="verso" value="da_allievo"><input type="hidden" name="versione" value="{{ versione }}">
+  <div class="riga"><div><label for="allievo">Prendi il lavoro di</label>
+    <select id="allievo" name="allievo">{% for r in righe %}<option value="{{ r.u.id }}">{{ r.u.nome }} — {{ r.lavoro.scritture if r.lavoro else 0 }} scritture</option>{% endfor %}</select></div></div>
+  <button class="msa-btn sec" type="submit">⬅ Carica nel mio simulatore</button>
+  <p style="font-size:12px;color:var(--f-attenuato);margin-bottom:0">Utile per proiettare alla classe il lavoro di un'allieva e continuare da lì.</p>
+</form>
+
+{% if archivio %}
+<h2>Archivio (ultime 20 copie di sicurezza)</h2>
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Salvato</th><th>Di</th><th>Versione</th><th>Motivo</th><th></th></tr>
+  {% for a in archivio %}
+  <tr><td>{{ ora_italiana(a.creato) }}</td><td>{{ nomi.get(a.utente_id, '?') }}</td><td>{{ a.versione }}</td><td>{{ a.motivo }}</td>
+      <td><form method="post" action="{{ url_for('docente.ripristina', aid=a.id) }}" onsubmit="return confirm('Ripristinare questa copia?')" style="margin:0">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}"><button type="submit" class="msa-btn sec" style="margin:0;padding:3px 9px">Ripristina</button></form></td></tr>
+  {% endfor %}
+</table></div>
+{% endif %}
+{% endblock %}

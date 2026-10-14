@@ -11,6 +11,7 @@ from .blueprints.allievo import bp as allievo
 from .blueprints.contabilita import bp as contabilita
 from .blueprints.controllo import bp as controllo
 from .blueprints.docente import bp as docente
+from .blueprints.guida import bp as guida
 from .blueprints.impostazioni import bp as impostazioni
 from .blueprints.personale import bp as personale
 from .blueprints.pianificazione import bp as pianificazione
@@ -21,7 +22,7 @@ from .blueprints.sincronia import bp as sincronia
 from .blueprints.vendite_acquisti import bp as vendite_acquisti
 from .db import inizializza, ora_italiana
 
-BLUEPRINT = [portale, accessi, sincronia, allievo, docente,
+BLUEPRINT = [portale, accessi, sincronia, guida, allievo, docente,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica]
 

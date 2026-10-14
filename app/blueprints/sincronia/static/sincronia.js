@@ -29,10 +29,13 @@
     }
     set(CHI, String(C.utente));
 
-    var locale = get(C.chiave);
+    var locale = get(C.chiave), REV = 'msa-rev-' + C.versione;
+    var revVista = parseInt(get(REV) || '0', 10) || 0;
     var daCaricare = false;
-    if (get(SPORCO) && locale) daCaricare = true;              // modifiche locali non ancora salvate: vincono
-    else if (C.stato) { if (locale !== C.stato) set(C.chiave, C.stato); rem(SPORCO); }
+    // il lavoro sul server è cambiato altrove (es. il docente ha passato il suo lavoro all'allievo): vince il server
+    var cambiatoAltrove = C.stato && C.rev > revVista && revVista > 0;
+    if (get(SPORCO) && locale && !cambiatoAltrove) daCaricare = true;   // modifiche locali non ancora salvate: vincono
+    else if (C.stato) { if (locale !== C.stato) set(C.chiave, C.stato); rem(SPORCO); set(REV, String(C.rev)); }
     else if (locale) daCaricare = true;                       // primo accesso con lavoro già nel browser: lo adottiamo
 
     var timer = null, inVolo = false, ancora = false;
@@ -45,7 +48,7 @@
       return fetch(C.urlStato, {method: 'POST', credentials: 'same-origin', keepalive: !!keep && corpo.length < 60000,
                                 headers: {'Content-Type': 'text/plain;charset=UTF-8', 'X-CSRF': C.csrf}, body: corpo})
         .then(function (r) {
-          if (r.ok && get(C.chiave) === dati) rem(SPORCO);
+          if (r.ok) { if (get(C.chiave) === dati) rem(SPORCO); return r.json().then(function (j) { if (j && j.rev) set(REV, String(j.rev)); }, function () {}); }
           if (r.status === 401) avviso('Accesso scaduto: il lavoro resta in questo browser. Rientra per salvarlo sul server.');
         })
         .catch(function () {})
@@ -78,7 +81,8 @@
         if (dati == null) return null;
         return fetch('/api/stato/' + encodeURIComponent(v), {method: 'POST', credentials: 'same-origin',
           headers: {'Content-Type': 'text/plain;charset=UTF-8', 'X-CSRF': C.csrf}, body: JSON.stringify({csrf: C.csrf, stato: dati})})
-          .then(function (r) { if (r.ok && get0(chiave) === dati) ls.removeItem('msa-sporco-' + v); })
+          .then(function (r) { if (!r.ok) return; if (get0(chiave) === dati) ls.removeItem('msa-sporco-' + v);
+            return r.json().then(function (j) { if (j && j.rev) ls.setItem('msa-rev-' + v, String(j.rev)); }, function () {}); })
           .catch(function () {});
       }));
       window.MSA_SALVA = function () { return tutti; };

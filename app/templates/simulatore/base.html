@@ -37,5 +37,6 @@
 <script src="{{ url_for(s.bp ~ '.static', filename=config.versione ~ '/' ~ s.file) }}"></script>
 {% endfor %}
 <script src="{{ url_for('static', filename='js/ponte-pagine.js') }}"></script>
+{% include "guida/_pannello.html" %}
 </body>
 </html>

@@ -169,6 +169,28 @@ d.post(f"/docente/allievo/{lid}", data={"csrf": tok(d, f"/docente/allievo/{lid}"
 y = app.test_client()
 ok(y.post("/accesso", data={"csrf": tok(y, "/accesso"), "username": "luca", "password": nuova}).status_code == 401, "allievo disattivato non entra")
 
+# ── passa il lavoro: docente → allievo e ritorno ──
+sd = sync(d.get("/vuoto/").get_data(as_text=True))
+lavoro_docente = json.dumps({**FINALE, "notaDocente": "lavagna"}, ensure_ascii=False)
+d.post("/api/stato/vuoto", data=json.dumps({"csrf": sd["csrf"], "stato": lavoro_docente}))
+with app.app_context():
+    aid = Utente.query.filter_by(username="anna.verdi").first().id
+r = d.post("/docente/passa", data={"csrf": tok(d, "/docente/passa"), "verso": "a_allievi", "versione": "vuoto", "allievi": [str(aid)]})
+ok(r.status_code == 302, "lavoro del docente passato all'allievo")
+s3 = sync(a.get("/vuoto/").get_data(as_text=True))
+ok(s3["stato"] == lavoro_docente and s3["rev"] == 2, "l'allievo riparte dal lavoro del docente (rev 2)")
+html = d.get("/docente/passa").get_data(as_text=True)
+ok("sostituito dal lavoro del docente" in html, "il lavoro precedente dell'allievo è in archivio")
+arch = re.search(r'/docente/archivio/(\d+)/ripristina', html).group(1)
+d.post(f"/docente/archivio/{arch}/ripristina", data={"csrf": tok(d, "/docente/passa")})
+ok(sync(a.get("/vuoto/").get_data(as_text=True))["stato"] == dati, "ripristino dall'archivio")
+r = d.post("/docente/passa", data={"csrf": tok(d, "/docente/passa"), "verso": "da_allievo", "versione": "vuoto", "allievo": str(aid)})
+ok(r.status_code == 302 and sync(d.get("/vuoto/").get_data(as_text=True))["stato"] == dati, "il docente carica il lavoro dell'allievo")
+ok(a.get("/docente/passa").status_code == 403, "l'allievo non può passare lavori")
+html = a.get("/vuoto/contabilita/fi-gl").get_data(as_text=True)
+ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizio passo passo» nelle pagine del simulatore")
+ok("pannello.js" not in a.get("/completo/").get_data(as_text=True), "nessuna finestra nella versione completa")
+
 # ── uscita ──
 r = a.post("/esci", data={"csrf": tok(a, "/area/")})
 ok(r.status_code == 200 and "Sei uscito" in r.get_data(as_text=True), "uscita")

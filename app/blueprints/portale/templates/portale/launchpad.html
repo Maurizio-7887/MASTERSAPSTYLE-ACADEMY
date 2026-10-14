@@ -41,5 +41,6 @@
 {% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
+{% include "guida/_pannello.html" %}
 </body>
 </html>

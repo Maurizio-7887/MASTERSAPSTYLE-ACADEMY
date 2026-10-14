@@ -9,7 +9,9 @@ from urllib.parse import quote
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 
 from ...accesso import solo_docente, utente_corrente
-from ...db import ROMA, Consegna, Impostazione, Sessione, Utente, adesso, costo_orario_generale, db, ora_italiana
+from ...db import ROMA, ArchivioLavoro, Consegna, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
+from ...pagine import VERSIONI
+from ...report import report as report_lavoro
 from ...esercizi import ESERCIZI
 from ...report import report
 
@@ -247,3 +249,82 @@ def impostazioni():
         flash("Costo orario generale salvato.", "ok")
         return redirect(url_for("docente.pannello"))
     return render_template("docente/impostazioni.html", tariffa=costo_orario_generale(), u=utente_corrente())
+
+
+def _riassunto(stato):
+    if stato is None:
+        return None
+    try:
+        ind = report_lavoro(stato.dati)["indicatori"]
+    except Exception:  # noqa: BLE001
+        ind = {}
+    return {"scritture": ind.get("scritture", 0), "ultima": ind.get("ultima_data", ""), "aggiornato": stato.aggiornato}
+
+
+def copia_lavoro(da, a, versione, motivo):
+    """Il lavoro di «da» diventa il lavoro di «a» (il precedente di «a» va in archivio). Ritorna False se «da» non ha lavoro."""
+    sorgente = StatoLavoro.query.filter_by(utente_id=da.id, versione=versione).first()
+    if sorgente is None:
+        return False
+    dest = StatoLavoro.query.filter_by(utente_id=a.id, versione=versione).first()
+    if dest is None:
+        db.session.add(StatoLavoro(utente_id=a.id, versione=versione, dati=sorgente.dati, rev=1))
+    elif dest.dati != sorgente.dati:
+        db.session.add(ArchivioLavoro(utente_id=a.id, versione=versione, dati=dest.dati, motivo=motivo[:200]))
+        dest.dati, dest.rev, dest.aggiornato = sorgente.dati, dest.rev + 1, adesso()
+    return True
+
+
+@bp.route("/passa", methods=["GET", "POST"])
+def passa():
+    """Passa il comando: il lavoro del docente va a uno o più allievi (o quello di un allievo al docente)."""
+    io = utente_corrente()
+    allievi = Utente.query.filter_by(ruolo="allievo", attivo=True).order_by(Utente.nome).all()
+    versione = request.values.get("versione") if request.values.get("versione") in VERSIONI else "vuoto"
+    if request.method == "POST":
+        verso = request.form.get("verso")
+        if verso == "a_allievi":
+            scelti = [u for u in allievi if str(u.id) in request.form.getlist("allievi")]
+            if not scelti:
+                flash("Scegli almeno un allievo.", "errore")
+            elif not StatoLavoro.query.filter_by(utente_id=io.id, versione=versione).first():
+                flash(f"Non hai ancora lavoro salvato nella versione {versione}.", "errore")
+            else:
+                for u in scelti:
+                    copia_lavoro(io, u, versione, f"sostituito dal lavoro del docente {ora_italiana(adesso())}")
+                db.session.commit()
+                flash(f"Lavoro passato a {', '.join(u.nome for u in scelti)}: alla prossima pagina che aprono riprendono da qui, "
+                      "e la finestra «Esercizio passo passo» riparte dal passo giusto.", "ok")
+                return redirect(url_for("docente.passa", versione=versione))
+        elif verso == "da_allievo":
+            u = next((x for x in allievi if str(x.id) == request.form.get("allievo")), None)
+            if u is None:
+                flash("Scegli l'allievo.", "errore")
+            elif not copia_lavoro(u, io, versione, f"sostituito dal lavoro di {u.nome} {ora_italiana(adesso())}"):
+                flash(f"{u.nome} non ha ancora lavoro salvato nella versione {versione}.", "errore")
+            else:
+                db.session.commit()
+                flash(f"Ora il tuo simulatore ha il lavoro di {u.nome}. Il tuo precedente è in archivio.", "ok")
+                return redirect(url_for("docente.passa", versione=versione))
+    mio = _riassunto(StatoLavoro.query.filter_by(utente_id=io.id, versione=versione).first())
+    righe = [{"u": u, "lavoro": _riassunto(StatoLavoro.query.filter_by(utente_id=u.id, versione=versione).first())} for u in allievi]
+    archivio = ArchivioLavoro.query.order_by(ArchivioLavoro.creato.desc()).limit(20).all()
+    nomi = {u.id: u.nome for u in Utente.query.all()}
+    return render_template("docente/passa.html", versione=versione, versioni=VERSIONI, mio=mio, righe=righe, archivio=archivio, nomi=nomi)
+
+
+@bp.route("/archivio/<int:aid>/ripristina", methods=["POST"])
+def ripristina(aid):
+    a = db.session.get(ArchivioLavoro, aid)
+    if a is None:
+        abort(404)
+    u = db.session.get(Utente, a.utente_id)
+    dest = StatoLavoro.query.filter_by(utente_id=a.utente_id, versione=a.versione).first()
+    if dest is None:
+        db.session.add(StatoLavoro(utente_id=a.utente_id, versione=a.versione, dati=a.dati, rev=1))
+    else:
+        db.session.add(ArchivioLavoro(utente_id=a.utente_id, versione=a.versione, dati=dest.dati, motivo=f"prima del ripristino {ora_italiana(adesso())}"))
+        dest.dati, dest.rev, dest.aggiornato = a.dati, dest.rev + 1, adesso()
+    db.session.commit()
+    flash(f"Ripristinato il lavoro di {u.nome} del {ora_italiana(a.creato)}.", "ok")
+    return redirect(url_for("docente.passa", versione=a.versione))

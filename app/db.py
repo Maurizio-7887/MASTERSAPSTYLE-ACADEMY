@@ -89,6 +89,16 @@ class StatoLavoro(db.Model):
     __table_args__ = (db.UniqueConstraint("utente_id", "versione", name="uq_stato_utente_versione"),)
 
 
+class ArchivioLavoro(db.Model):
+    """Copia di sicurezza del lavoro di un utente, salvata prima che il docente lo sostituisca."""
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)
+    versione = db.Column(db.String(20), nullable=False)
+    dati = db.Column(db.Text, nullable=False)
+    creato = db.Column(db.DateTime, default=adesso, nullable=False)
+    motivo = db.Column(db.String(200), default="")
+
+
 class Consegna(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)

@@ -3,7 +3,7 @@ const {JSDOM} = require('jsdom');
 const fs = require('fs');
 const JS = fs.readFileSync(__dirname + '/../app/blueprints/sincronia/static/sincronia.js', 'utf8');
 const K = 'ferro-transenne-fi-2026-vuoto-civilistico';
-let errori = 0, store = {};
+let errori = 0, store = {}, revServer = 3;
 const ok = (c, m) => { if (!c) { errori++; console.log('✗', m); } };
 const attesa = ms => new Promise(r => setTimeout(r, ms));
 
@@ -12,7 +12,8 @@ function pagina(sync, rispostaStato = 200) {
   const dom = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/', runScripts: 'outside-only', pretendToBeVisual: true});
   const w = dom.window;
   Object.entries(store).forEach(([k, v]) => w.localStorage.setItem(k, v));
-  w.fetch = (url, o) => { inviati.push({url, corpo: JSON.parse(o.body), csrf: o.headers['X-CSRF']}); return Promise.resolve({ok: rispostaStato === 200, status: rispostaStato}); };
+  w.fetch = (url, o) => { inviati.push({url, corpo: JSON.parse(o.body), csrf: o.headers['X-CSRF']}); if (url.includes('/api/stato')) revServer++;
+    return Promise.resolve({ok: rispostaStato === 200, status: rispostaStato, json: () => Promise.resolve({rev: revServer})}); };
   w.MSA_SYNC = Object.assign({versione: 'vuoto', chiave: K, utente: 7, csrf: 'T', rev: 0, stato: null, urlStato: '/api/stato/vuoto', urlBattito: '/api/battito', battito: true}, sync);
   w.eval(JS);
   const salva = () => { store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); } };
@@ -34,10 +35,16 @@ function pagina(sync, rispostaStato = 200) {
   // 3. salvataggio interrotto dal cambio pagina: alla pagina dopo vince il lavoro locale e riparte l'invio
   p.w.localStorage.setItem(K, '{"n":3}');
   p.chiudi();
-  p = pagina({stato: '{"n":2}', rev: 4});
+  p = pagina({stato: '{"n":2}', rev: revServer});
   ok(p.w.localStorage.getItem(K) === '{"n":3}', 'il lavoro locale non salvato non viene sovrascritto');
   await attesa(1700);
   ok(p.inviati.some(x => x.url === '/api/stato/vuoto' && x.corpo.stato === '{"n":3}'), 'il lavoro locale viene ricaricato sul server');
+  p.chiudi();
+  // 3b. il docente ha passato il suo lavoro all'allievo: il server è più nuovo del browser e vince anche sul lavoro in sospeso
+  store[K] = '{"n":4}'; store['msa-sporco-vuoto'] = '1';
+  p = pagina({stato: '{"docente":1}', rev: revServer + 5});
+  ok(p.w.localStorage.getItem(K) === '{"docente":1}', 'lavoro passato dal docente: vince sul browser');
+  ok(p.w.localStorage.getItem('msa-sporco-vuoto') === null, 'lavoro passato dal docente: niente da ricaricare');
   p.chiudi();
   // 4. un altro allievo sullo stesso browser non eredita il lavoro
   store[K] = '{"altro":1}'; store['msa-sporco-vuoto'] = '1';
