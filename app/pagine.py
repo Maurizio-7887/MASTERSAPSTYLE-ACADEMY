@@ -176,6 +176,7 @@ MODULI = [
         (PP_, "mb101", "Entrata merci da ordine", "📥", "MIGO 101", None),
         (PP_, "co88", "Chiusura di periodo", "📆", "CO88", None),
         ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
+        (PP_, "home", "Launchpad PP", "🏭", "tutte le transazioni PP", "ordiniPP"),
      ]},
     {"codice": "hr", "breve": "Personale", "sigla": "HR", "titolo": "Personale", "icona": "👤", "colore": "personale", "kpi": "dipendenti",
      "descrizione": "Dipendenti, paghe, contributi e TFR verso FI e CO", "app": [
@@ -215,3 +216,24 @@ def app_modulo(m):
             args["sd" if endpoint == SD else "pp"] = schermata
         out.append({"endpoint": endpoint, "args": args, "titolo": titolo, "icona": icona, "tcode": tcode, "kpi": kpi or ""})
     return out
+
+
+CASA = {PP_: "pp", SD: "sd", "pianificazione.fabbisogno": "pian"}   # a parità di app, il modulo «di casa» della pagina
+
+
+def modulo_di(endpoint, schermata=None):
+    """Modulo e app del launchpad a cui appartiene una pagina (con l'eventuale schermata SD/PP).
+    Serve alla barra dei moduli e al percorso in cima a ogni pagina del simulatore."""
+    def scegli(cand):
+        return next((c for c in cand if c[0]["codice"] == CASA.get(endpoint)), cand[0]) if cand else None
+    esatti, base, vicini = [], [], []
+    for m in MODULI:
+        for a in m["app"]:
+            if a[0] != endpoint:
+                continue
+            if a[1] == schermata:
+                esatti.append((m, a[2]))
+            elif a[1] in (None, "home"):
+                base.append((m, a[2]))
+            vicini.append((m, None))
+    return scegli(esatti) or scegli(base) or scegli(vicini) or (None, None)

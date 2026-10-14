@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
-<title>{{ pagina.titolo }} · {{ attivita.titolo | replace('📖 ','') }} · MASTERSAPSTYLE Academy</title>
+<title>{{ app_attiva or pagina.titolo }}{% if modulo_attivo %} · {{ modulo_attivo.sigla }}{% endif %} · MASTERSAPSTYLE Academy</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='sim/' ~ config.versione ~ '/css/simulatore.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
 </head>
@@ -13,14 +13,10 @@
 {% set versione = config.versione %}{% set endpoint_corrente = config.pagina %}
 {% include "simulatore/_shell.html" %}
 <div class="msa-sottobarra"><div class="msa-riga">
-  <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=config.versione) }}">Launchpad</a> › {{ attivita.titolo }} › <b>{{ pagina.titolo }}</b></span>
-  {% if attivita.pagine | length > 1 %}
-  <nav class="msa-pagine" aria-label="Pagine di {{ attivita.titolo }}">
-    {% for p in attivita.pagine %}
-      <a href="{{ url_for(attivita.blueprint ~ '.' ~ p.endpoint) }}" class="{{ 'attivo' if p.endpoint == pagina.endpoint }}" {% if p.modulo %}data-modulo="{{ p.modulo }}"{% endif %}>{{ p.titolo }}</a>
-    {% endfor %}
-  </nav>
-  {% endif %}
+  <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=config.versione) }}">Launchpad</a>
+    {% if modulo_attivo %} › <a href="{{ url_for('portale.modulo_lp', versione=config.versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>{% endif %}
+    › <b>{{ app_attiva or pagina.titolo }}</b></span>
+  {% if modulo_attivo %}<a class="msa-torna" href="{{ url_for('portale.modulo_lp', versione=config.versione, codice=modulo_attivo.codice) }}">‹ App di {{ modulo_attivo.sigla }}</a>{% endif %}
 </div></div>
 
 <main>

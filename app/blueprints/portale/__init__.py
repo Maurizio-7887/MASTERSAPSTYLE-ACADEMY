@@ -64,6 +64,7 @@ def tutto(versione):
     attivita = {"blueprint": "portale", "titolo": "Tutto in una pagina", "pagine": []}
     pagina = {"endpoint": "tutto", "titolo": "Tutte le schede"}
     return render_template("portale/tutto.html", attivita=attivita, pagina=pagina, attivita_tutte=ATTIVITA,
+                           moduli=MODULI, modulo_attivo=None, app_attiva="Tutte le schede in una pagina",
                            versioni=VERSIONI, meta=m, config=config, schede=SCHEDE_TUTTO)
 
 

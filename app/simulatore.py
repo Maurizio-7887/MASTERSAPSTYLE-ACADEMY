@@ -5,7 +5,7 @@ from pathlib import Path
 
 from flask import abort, current_app, g, render_template, url_for
 
-from .pagine import ATTIVITA, VERSIONI, pagina, tutte_le_pagine
+from .pagine import ATTIVITA, MODULI, VERSIONI, modulo_di, pagina, tutte_le_pagine
 
 STATIC = Path(__file__).resolve().parent / "static"
 
@@ -57,7 +57,9 @@ def render_pagina(blueprint, endpoint, sezioni=None, **extra):
         "urlModulo": url_modulo,
         "idStatici": m["id_statici"],
     }
+    modulo_attivo, app_attiva = modulo_di(f"{blueprint}.{endpoint}", config["sd"] or config["pp"])
     return render_template(
         f"{blueprint}/{endpoint}.html",
+        moduli=MODULI, modulo_attivo=modulo_attivo, app_attiva=app_attiva or p["titolo"],
         attivita=attivita, pagina=p, attivita_tutte=ATTIVITA, versioni=VERSIONI,
         meta=m, config=config, **extra)
