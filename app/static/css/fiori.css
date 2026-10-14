@@ -166,3 +166,5 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 .msa-torna{margin-left:auto;font-size:12.5px;color:var(--f-blu);text-decoration:none;border:1px solid var(--f-blu);border-radius:4px;padding:4px 11px;background:#fff}
 .msa-torna:hover{background:#E8F4FD}
 .msa-percorso .msa-sigla{font-size:10.5px}
+.g-laboratorio{--c:#8D4FD8}
+.msa-tile.g-laboratorio{border-top-color:#8D4FD8}

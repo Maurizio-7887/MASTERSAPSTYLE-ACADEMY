@@ -8,6 +8,7 @@ from flask import Flask
 from . import accesso
 from .blueprints.accessi import bp as accessi
 from .blueprints.allievo import bp as allievo
+from .blueprints.alta_varieta import bp as alta_varieta
 from .blueprints.contabilita import bp as contabilita
 from .blueprints.controllo import bp as controllo
 from .blueprints.docente import bp as docente
@@ -18,13 +19,14 @@ from .blueprints.pianificazione import bp as pianificazione
 from .blueprints.portale import bp as portale
 from .blueprints.produzione import bp as produzione
 from .blueprints.reportistica import bp as reportistica
+from .blueprints.ripetitiva import bp as ripetitiva
 from .blueprints.sincronia import bp as sincronia
 from .blueprints.vendite_acquisti import bp as vendite_acquisti
 from .db import inizializza, ora_italiana
 
 BLUEPRINT = [portale, accessi, sincronia, guida, allievo, docente,
              impostazioni, pianificazione, contabilita, controllo, personale,
-             vendite_acquisti, produzione, reportistica]
+             vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva]
 
 
 def create_app():

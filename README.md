@@ -20,10 +20,13 @@ app/
   accesso.py             chi è collegato, pagine pubbliche, protezione CSRF, solo_docente
   report.py              report del lavoro dallo stato del simulatore: confronto con i numeri attesi, controlli, verifica, giornale
   esercizi.py            esercizi consegnabili e loro numeri di controllo
+  laboratori.py          pagine dei laboratori (static/js/lab-motore.js: motore comune, libro giornale proprio)
   blueprints/
     accessi/         /accesso, /esci, /password (blocco dopo 5 tentativi, cambio password al primo accesso)
     sincronia/       /api/stato/<versione> e /api/battito + static/sincronia.js (lavoro sul server, tempo di collegamento)
     allievo/         /area/: tempo, lavoro salvato, consegna, risposte del docente
+    alta_varieta/    LABORATORIO Alta varietà: tre transenne sullo stesso telaio, strategia 70/50, WIP, varianze KKS2, cruscotto, buffer DDMRP, confronto con la commessa lunga
+    ripetitiva/      LABORATORIO Produzione ripetitiva (modello trattore): budget 4.000, versioni di produzione, collettori KKF6N, MFBF con backflush, WIP al target, KKS6/KK87
     guida/           finestra «Esercizio passo passo» sopra il simulatore: static/esercizi/<esercizio>.js (passi + spunta automatica), pannello.js/.css
     docente/         /docente/: allievi, tempi e costi (CSV), correzione, report stampabile, risposta (anche via email)
     portale/         pagina iniziale e launchpad a due livelli: moduli FI CO SD MM PP HR… (/<versione>/) → app del modulo (/<versione>/m/<modulo>), materiali, /<versione>/tutto, motore comune (stato, avvio)
@@ -65,6 +68,7 @@ npm test
 | `test:blueprint` | gli stessi 48 passi con i JS spezzati (pagina /vuoto/tutto) |
 | `test:multipagina` | gli stessi 48 passi passando davvero da una pagina all'altra |
 | `test:ponte` | i salti fra pagine (SD → FI-AR, Fabbisogno → PP, Giornale → MIRO…) arrivano a destinazione |
+| `test:laboratori` | i due laboratori eseguiti per intero: WIP 3.900, varianze 252, buffer 225/525/725; piano 167/100/67, WIP 404, varianze 132,20 |
 | `test:accessi` | accesso, cambio password, blocco, tempo e costo, salvataggio del lavoro, consegna, report 15/15, stampa, risposta |
 | `test:guida` | i passi della finestra si spuntano tutti sullo stato finale dell'esercizio e nessuno su un'azienda nuova |
 | `test:sincronia` | sincronia.js: stato dal server, salvataggio, lavoro non ancora salvato, cambio di allievo sullo stesso browser |

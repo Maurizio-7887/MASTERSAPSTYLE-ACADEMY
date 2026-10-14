@@ -1,0 +1,56 @@
+/* Laboratori di produzione: schede, moduli e tabelle in stile Fiori */
+.msa-lab .lab{display:block}
+.lab-tc{font:12px Consolas,monospace;color:var(--f-blu-scuro);background:#E8F4FD;border-radius:4px;padding:2px 7px;vertical-align:3px;margin-left:6px}
+.lab-griglia{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px;align-items:start}
+.lab-card{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.lab-griglia .lab-card{margin:12px 0 0}
+.lab-card header{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #EDEFF2;background:#FAFBFC}
+.lab-card header .ic{font-size:18px}
+.lab-card header h2{font-size:14.5px;margin:0;font-weight:600;flex:1}
+.lab-card header .tc{font:11px Consolas,monospace;color:var(--f-blu-scuro);background:#E8F4FD;border-radius:10px;padding:2px 8px}
+.lab-card .cb{padding:12px 14px}
+.lab-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
+.lab-form label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--f-attenuato)}
+.lab-form label.chk{flex-direction:row;align-items:center}
+.lab-form input,.lab-form select{padding:6px 8px;border:1px solid #89919A;border-radius:4px;font:13px "Segoe UI",Arial,sans-serif;background:#fff;color:var(--f-testo);min-width:0}
+.lab-azioni{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.lab-btn{background:var(--f-blu);color:#fff;border:1px solid var(--f-blu);border-radius:4px;padding:7px 14px;font:600 13px "Segoe UI",Arial,sans-serif;cursor:pointer}
+.lab-btn:hover{background:var(--f-blu-scuro)}
+.lab-btn.sec{background:#fff;color:var(--f-blu)}
+.lab-btn.rosso{background:#fff;color:var(--f-rosso);border-color:var(--f-rosso)}
+.lab-esito{margin-top:8px;font-size:13px}
+.lab-esito.ok{border-left:4px solid var(--f-verde);background:#F1FDF6;padding:8px 10px;border-radius:4px}
+.lab-esito.ko{border-left:4px solid var(--f-rosso);background:#FFEBEB;padding:8px 10px;border-radius:4px}
+.lab-scroll{overflow-x:auto}
+.lab-tab{width:100%;border-collapse:collapse;font-size:12.8px;background:#fff}
+.lab-tab th{text-align:left;background:#F5F6FA;color:var(--f-attenuato);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--f-bordo);white-space:nowrap}
+.lab-tab td{padding:5px 8px;border-bottom:1px solid #EDEFF2;vertical-align:top}
+.lab-tab .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lab-tab tr.tot td{font-weight:700;border-top:2px solid var(--f-bordo)}
+.lab-tab tr.allarme td{background:#FFF1F1}
+.lab-vuoto{color:var(--f-attenuato);font-style:italic}
+.lab-nota{font-size:12.5px;color:#4a4d50;margin:8px 0 0}
+.lab-h3{font-size:13.5px;margin:14px 0 6px}
+.lab-scr{border:1px solid #EDEFF2;border-radius:4px;padding:6px 9px;margin:6px 0;font-size:12.5px;background:#FCFCFD}
+.lab-scr ul{margin:4px 0 0;padding:0;list-style:none}
+.lab-scr li{display:flex;gap:6px;font-variant-numeric:tabular-nums}
+.lab-scr li.a{padding-left:34px}
+.lab-scr li span{margin-left:auto}
+.lab-bd{display:inline-block;border-radius:10px;padding:1px 8px;font-size:11.5px;border:1px solid}
+.lab-bd.blu{color:var(--f-blu-scuro);border-color:#9CC8F0;background:#E8F4FD}
+.lab-bd.verde{color:var(--f-verde);border-color:#9ED8B3;background:#F1FDF6}
+.lab-bd.arancio{color:#B35300;border-color:#F5C9A0;background:#FEF7F1}
+.lab-bd.grigio{color:#555;border-color:#ccc;background:#f3f3f3}
+.lab-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:12px 0}
+.lab-kpi>div{background:#fff;border:1px solid var(--f-bordo);border-top:4px solid #8D4FD8;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.lab-kpi span{font-size:12px;color:var(--f-attenuato)}
+.lab-kpi b{font-size:24px;font-weight:300;font-variant-numeric:tabular-nums}
+.lab-kpi small{font-size:11.5px;color:var(--f-attenuato)}
+.lab-filtro{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 10px;font-size:13px}
+.lab-filtro input{padding:5px 8px;border:1px solid #89919A;border-radius:4px;font:inherit;vertical-align:middle}
+.lab-buffer{position:relative;display:flex;height:30px;border-radius:5px;overflow:visible;margin:14px 0 26px;background:#EEF1F5}
+.lab-buffer .z{display:block;height:100%}
+.lab-buffer .r{background:#E5484D}.lab-buffer .g{background:#F5C518}.lab-buffer .v{background:#30A46C}
+.lab-buffer .nfp{position:absolute;top:30px;transform:translateX(-50%);font:600 12px "Segoe UI",Arial,sans-serif;white-space:nowrap;color:var(--f-testo)}
+.msa-modulo.g-laboratorio,.msa-tile.g-laboratorio,.msa-intro-modulo.g-laboratorio{--c:#8D4FD8}
+@media (max-width:700px){.lab-griglia{grid-template-columns:1fr}}

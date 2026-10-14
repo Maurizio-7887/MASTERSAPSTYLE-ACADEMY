@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>{{ pagina.titolo }} · {{ lab.sigla }} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/laboratori.css') }}">
+</head>
+<body class="msa-launchpad msa-lab">
+{% include "simulatore/_shell.html" %}
+<div class="msa-sottobarra"><div class="msa-riga">
+  <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
+    › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
+    › <b>{{ pagina.titolo }}</b></span>
+  <nav class="msa-pagine" aria-label="Pagine del laboratorio">
+    {% for p in lab.pagine %}<a href="{{ url_for(blueprint ~ '.' ~ p.endpoint) }}" class="{{ 'attivo' if p.endpoint == pagina.endpoint }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
+  </nav>
+</div></div>
+<main class="msa-lp">
+  <div class="msa-lp-intro">
+    <h1>{{ pagina.icona }} {{ pagina.titolo }} <span class="lab-tc">{{ pagina.tcode }}</span></h1>
+    <p>{% block intro %}{% endblock %}</p>
+  </div>
+  <div id="lab" class="lab"></div>
+  <p class="msa-lp-nota">Laboratorio della Ferro &amp; Transenne con un proprio libro giornale: non modifica il simulatore principale. Il lavoro si salva sul portale e si consegna dalla tua area.</p>
+</main>
+{% set sync = config_sincronia(config.slot) %}
+{% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}
+<script>window.LAB_PAGINA = {{ config | tojson }};</script>
+<script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
+{% for s in js %}<script src="{{ s }}"></script>{% endfor %}
+{% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
+{% include "guida/_pannello.html" %}
+</body>
+</html>

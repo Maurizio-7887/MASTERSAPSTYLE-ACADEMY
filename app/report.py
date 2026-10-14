@@ -4,6 +4,7 @@ Il report non ricalcola la contabilità: legge le scritture del Libro Giornale d
 saldi, bilancio di verifica, controlli formali e il confronto con i numeri attesi dell'esercizio.
 """
 import json
+from datetime import date
 from collections import defaultdict
 
 from .esercizi import ESERCIZI
@@ -108,7 +109,33 @@ class Lavoro:
                             "importo": float((e.get("input") or {}).get("amount") or 0)})
         return out
 
+    def indicatori_lab(self):
+        """Laboratori di produzione: numeri propri, più i campi generici del report."""
+        s, lab = self.s, self.s.get("lab")
+        periodo = lambda p: next((x for x in s.get("periodi") or [] if x.get("periodo") == p and not x.get("annullato")), None)
+        somma = lambda p, k: round(sum((r.get(k) or 0) for r in (periodo(p) or {}).get("righe", [])), 2) if periodo(p) else None
+        base = {"costituzione": "", "scritture": len(self.regs), "ultima_data": self.regs[-1]["data"] if self.regs else "", "anno": "",
+                "utile": 0, "ires": 0, "banca_fine_anno": 0, "banca_finale": 0, "chiusura": "—",
+                "varianze_61": self.saldo("61"), "ferro_finale": (s.get("giacenze") or {}).get("FERRO", 0)}
+        if lab == "hmlv":
+            st = s.get("strategie") or {}
+            oc = s.get("ordiniCliente") or []
+            lt = [(date.fromisoformat(c["consegne"][-1]["data"]) - date.fromisoformat(c["data"])).days for c in oc if c.get("consegne")]
+            base.update({"strategie": "sì" if st.get("SL-PIEGA") == "70" and all(st.get(m) == "50" for m in ("TR-STD", "TR-ALTA", "TR-PED")) else "no",
+                         "wip_novembre": somma("2026-11", "wip"), "costo_venduto": self.saldo("41"), "lead_time": max(lt) if lt else None,
+                         "telai_scaffale": (s.get("giacenze") or {}).get("SL-PIEGA", 0), "wip_finale": self.saldo("15"),
+                         "buffer_rifornito": "sì" if len([o for o in s.get("ordini") or [] if o.get("mat") == "SL-PIEGA"]) >= 2 else "no"})
+        elif lab == "rem":
+            b = s.get("budget") or {}
+            piano = b.get("pianoMensile") or {}
+            base.update({"budget_totale": b.get("totale", 0), "piano": "/".join(str(piano.get(m, "")) for m in ("TR-STD", "TR-ALTA", "TR-PED")),
+                         "collettori": len(s.get("collettori") or {}), "wip_gennaio": somma("2027-01", "wip"), "varianze_gennaio": somma("2027-01", "varianza"),
+                         "output_gennaio": somma("2027-01", "output"), "varianze_febbraio": somma("2027-02", "varianza"), "wip_finale": self.saldo("15")})
+        return base
+
     def indicatori(self):
+        if self.s.get("lab"):
+            return self.indicatori_lab()
         a = self.anno
         fine = f"{a}-12-31"
         chiuso = self.anni_chiusi.get(a)

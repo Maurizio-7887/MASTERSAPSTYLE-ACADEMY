@@ -7,7 +7,7 @@
 from flask import Blueprint, url_for
 
 from ...accesso import utente_corrente
-from ...pagine import tutte_le_pagine
+from ...pagine import LABORATORI, tutte_le_pagine
 
 bp = Blueprint("guida", __name__, template_folder="templates", static_folder="static", static_url_path="/static/guida")
 
@@ -16,10 +16,22 @@ ESERCIZIO_PER_VERSIONE = {"vuoto": "guidato-dic-2026", "completo": "guidato-dic-
 
 
 @bp.app_template_global()
-def config_guida(versione):
-    esercizio = ESERCIZIO_PER_VERSIONE.get(versione)
+def config_guida(versione, esercizio=None, chiave=None):
+    esercizio = esercizio or ESERCIZIO_PER_VERSIONE.get(versione)
     if not esercizio or utente_corrente() is None:
         return None
     url = {f"{a['blueprint']}.{p['endpoint']}": url_for(f"{a['blueprint']}.{p['endpoint']}", versione=versione) for a, p in tutte_le_pagine()}
+    for bp_lab, lab in LABORATORI.items():
+        for p in lab["pagine"]:
+            url[f"{bp_lab}.{p['endpoint']}"] = url_for(f"{bp_lab}.{p['endpoint']}", versione=versione)
     url["allievo.consegna"] = url_for("allievo.consegna")
-    return {"esercizio": esercizio, "versione": versione, "chiave": f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url}
+    return {"esercizio": esercizio, "versione": versione, "chiave": chiave or f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url}
+
+
+@bp.app_template_global()
+def config_guida_modulo(versione, codice):
+    """Sulle mattonelle di un laboratorio la finestra mostra l'esercizio di quel laboratorio."""
+    for lab in LABORATORI.values():
+        if lab["sigla"].lower() == codice:
+            return config_guida(versione, esercizio=lab["esercizio"], chiave=f"ferro-transenne-fi-2026-{lab['slot']}-civilistico")
+    return config_guida(versione)

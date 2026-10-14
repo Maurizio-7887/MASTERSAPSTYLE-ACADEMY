@@ -191,6 +191,20 @@ html = a.get("/vuoto/contabilita/fi-gl").get_data(as_text=True)
 ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizio passo passo» nelle pagine del simulatore")
 ok("pannello.js" in a.get("/completo/").get_data(as_text=True), "finestra anche nella versione completa")
 
+# ── laboratori: lavoro salvato nel proprio slot, consegna e report ──
+for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-finale.json", 8), ("lab-rem", "rem-trattore", "lab-rem-finale.json", 8)]:
+    lab = (Path(__file__).parent / file).read_text(encoding="utf-8")
+    pagina = "/vuoto/alta-varieta/" if slot == "lab-hmlv" else "/vuoto/ripetitiva/"
+    sl = sync(a.get(pagina).get_data(as_text=True))
+    ok(sl and sl["chiave"].endswith(slot + "-civilistico"), f"{slot}: pagina con sincronia del laboratorio")
+    r = a.post(f"/api/stato/{slot}", data=json.dumps({"csrf": sl["csrf"], "stato": lab}))
+    ok(r.status_code == 200, f"{slot}: lavoro salvato")
+    r = a.post("/area/consegna", data={"csrf": tok(a, "/area/consegna"), "versione": slot, "esercizio": es, "nota": "laboratorio"})
+    ok(r.status_code == 302, f"{slot}: consegnato")
+    lid = int(r.headers["Location"].rstrip("/").split("/")[-1])
+    ok(f"{attesi} su {attesi} esatti" in d.get(f"/docente/consegna/{lid}").get_data(as_text=True), f"{slot}: report {attesi} su {attesi}")
+    ok(d.get(f"/docente/consegna/{lid}/stampa").status_code == 200, f"{slot}: stampa")
+
 # ── uscita ──
 r = a.post("/esci", data={"csrf": tok(a, "/area/")})
 ok(r.status_code == 200 and "Sei uscito" in r.get_data(as_text=True), "uscita")

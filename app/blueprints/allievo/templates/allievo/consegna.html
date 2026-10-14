@@ -5,17 +5,17 @@
 <div class="msa-card" style="max-width:720px">
 <form method="post" class="msa-form" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
-  <label for="versione">Versione del simulatore</label>
+  <label for="versione">Lavoro da consegnare</label>
   <select id="versione" name="versione" required>
     {% for v in versioni %}
       {% set l = (lavori | selectattr('versione', 'equalto', v) | list | first) %}
-      <option value="{{ v }}">{{ v }} — {% if l %}{{ l.scritture }} scritture, salvato {{ ora_italiana(l.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</option>
+      <option value="{{ v }}">{{ versioni[v] if v.startswith('lab-') else 'Simulatore, versione ' ~ v }} — {% if l %}{{ l.scritture }} scritture, salvato {{ ora_italiana(l.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</option>
     {% endfor %}
   </select>
   <label for="esercizio">Esercizio</label>
   <select id="esercizio" name="esercizio">
     {% for v, lista in scelte.items() %}
-      <optgroup label="Versione {{ v }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
+      <optgroup label="{{ versioni[v] if v.startswith('lab-') else 'Versione ' ~ v }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
     {% endfor %}
   </select>
   <label for="nota">Messaggio per il docente (facoltativo)</label>

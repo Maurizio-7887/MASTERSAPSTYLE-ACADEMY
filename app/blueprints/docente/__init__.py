@@ -10,7 +10,9 @@ from flask import Blueprint, Response, abort, flash, redirect, render_template, 
 
 from ...accesso import solo_docente, utente_corrente
 from ...db import ROMA, ArchivioLavoro, Consegna, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
-from ...pagine import VERSIONI
+from ...pagine import LAB_SLOTS, VERSIONI
+
+LAVORI = {**{v: v for v in VERSIONI}, **{k: 'lab ' + v for k, v in LAB_SLOTS.items()}}
 from ...report import report as report_lavoro
 from ...esercizi import ESERCIZI
 from ...report import report
@@ -280,7 +282,7 @@ def passa():
     """Passa il comando: il lavoro del docente va a uno o più allievi (o quello di un allievo al docente)."""
     io = utente_corrente()
     allievi = Utente.query.filter_by(ruolo="allievo", attivo=True).order_by(Utente.nome).all()
-    versione = request.values.get("versione") if request.values.get("versione") in VERSIONI else "vuoto"
+    versione = request.values.get("versione") if request.values.get("versione") in LAVORI else "vuoto"
     if request.method == "POST":
         verso = request.form.get("verso")
         if verso == "a_allievi":
@@ -310,7 +312,7 @@ def passa():
     righe = [{"u": u, "lavoro": _riassunto(StatoLavoro.query.filter_by(utente_id=u.id, versione=versione).first())} for u in allievi]
     archivio = ArchivioLavoro.query.order_by(ArchivioLavoro.creato.desc()).limit(20).all()
     nomi = {u.id: u.nome for u in Utente.query.all()}
-    return render_template("docente/passa.html", versione=versione, versioni=VERSIONI, mio=mio, righe=righe, archivio=archivio, nomi=nomi)
+    return render_template("docente/passa.html", versione=versione, versioni=LAVORI, mio=mio, righe=righe, archivio=archivio, nomi=nomi)
 
 
 @bp.route("/archivio/<int:aid>/ripristina", methods=["POST"])

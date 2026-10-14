@@ -7,7 +7,9 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from ...accesso import utente_corrente
 from ...db import ROMA, Consegna, Sessione, StatoLavoro, db
 from ...esercizi import ESERCIZI, scelte
-from ...pagine import VERSIONI
+from ...pagine import LAB_SLOTS, VERSIONI
+
+LAVORI = {**VERSIONI, **{k: 'Laboratorio ' + v for k, v in LAB_SLOTS.items()}}   # dove si può consegnare
 from ...report import report
 
 bp = Blueprint("allievo", __name__, url_prefix="/area", template_folder="templates")
@@ -52,7 +54,7 @@ def consegna():
         versione = request.form.get("versione")
         esercizio = request.form.get("esercizio") or "libero"
         nota = (request.form.get("nota") or "").strip()[:4000]
-        if versione not in VERSIONI or esercizio not in ESERCIZI:
+        if versione not in LAVORI or esercizio not in ESERCIZI:
             abort(400)
         dati = None
         f = request.files.get("backup")
@@ -78,8 +80,8 @@ def consegna():
         db.session.commit()
         flash("Consegna inviata al docente. Riceverai qui la sua risposta.", "ok")
         return redirect(url_for("allievo.vedi", cid=c.id))
-    return render_template("allievo/consegna.html", lavori=riepilogo_lavori(u), versioni=VERSIONI,
-                           scelte={v: scelte(v) for v in VERSIONI})
+    return render_template("allievo/consegna.html", lavori=riepilogo_lavori(u), versioni=LAVORI,
+                           scelte={v: scelte(v) for v in LAVORI})
 
 
 @bp.route("/consegna/<int:cid>")

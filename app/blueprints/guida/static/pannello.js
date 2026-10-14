@@ -15,6 +15,7 @@
 
   // ── stato del simulatore ──
   function stato() {
+    if (typeof window.MSA_STATO_CORRENTE === 'function') { try { var x = window.MSA_STATO_CORRENTE(); if (x) return x; } catch (e) { /* stato non pronto */ } }   // laboratori
     try { if (typeof STATO !== 'undefined' && STATO) return STATO; } catch (e) { /* pagina senza simulatore */ }
     try { return JSON.parse(localStorage.getItem(chiave) || 'null') || {}; } catch (e) { return {}; }
   }
@@ -45,6 +46,7 @@
     S.msaGuida = S.msaGuida || {};
     var m = S.msaGuida[E.codice] = S.msaGuida[E.codice] || {};
     if (valore) m[p.titolo] = 1; else delete m[p.titolo];
+    if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); return; } catch (e) { /* ripiego */ } }
     try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
   }
 
@@ -76,7 +78,13 @@
   var barra = radice.querySelector('.msa-g-barra span'), num = radice.querySelector('.msa-g-num'), progB = radice.querySelector('.prog');
 
   var stati = esiti();
-  var primoDaFare = function () { for (var i = 0; i < N; i++) if (!stati[i]) return i; return N - 1; };
+  // il primo passo da fare DOPO l'ultimo già fatto (i passi introduttivi a mano non bloccano chi riprende a metà)
+  var primoDaFare = function () {
+    var ult = -1; for (var j = 0; j < N; j++) if (stati[j]) ult = j;
+    for (var i = ult + 1; i < N; i++) if (!stati[i]) return i;
+    for (i = 0; i < N; i++) if (!stati[i]) return i;
+    return N - 1;
+  };
   var pos = parseInt(ss(POS), 10);
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
 

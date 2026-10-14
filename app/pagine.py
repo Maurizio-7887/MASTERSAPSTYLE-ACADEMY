@@ -235,3 +235,37 @@ def modulo_di(endpoint, schermata=None):
                 base.append((m, a[2]))
             vicini.append((m, None))
     return scegli(esatti) or scegli(base) or scegli(vicini) or (None, None)
+
+
+# ── Laboratori di produzione: stessa azienda, motore a parte (non toccano il simulatore principale) ──
+# slot = nome con cui il lavoro si salva sul portale (come «vuoto» e «completo»)
+LABORATORI = {
+    "alta_varieta": {"slot": "lab-hmlv", "titolo": "Alta varietà e disaccoppiamento", "sigla": "HMLV", "esercizio": "hmlv-disaccoppiamento",
+                     "js": ["hmlv-logica.js", "hmlv-pagine.js"], "pagine": [
+        {"endpoint": "anagrafica", "titolo": "Anagrafica e strategie", "icona": "🎯", "tcode": "MM03 · MRP 3 · CK11N"},
+        {"endpoint": "ordini", "titolo": "Ordini di produzione", "icona": "🏭", "tcode": "CO01 · 261 · CO11N · 101 · TECO"},
+        {"endpoint": "vendite", "titolo": "Ordini cliente e consegne", "icona": "📋", "tcode": "VA01 · ATP · 601"},
+        {"endpoint": "chiusura", "titolo": "Chiusura di periodo", "icona": "📆", "tcode": "CO88 · KKAX · KKS2"},
+        {"endpoint": "cruscotto", "titolo": "Cruscotto e buffer DDMRP", "icona": "🛟", "tcode": "KPI · DDMRP"},
+        {"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03 · F.08"},
+    ]},
+    "ripetitiva": {"slot": "lab-rem", "titolo": "Produzione ripetitiva (modello trattore)", "sigla": "REM", "esercizio": "rem-trattore",
+                   "js": ["rem-logica.js", "rem-pagine.js"], "pagine": [
+        {"endpoint": "pianificazione", "titolo": "Budget, piano e versioni", "icona": "📈", "tcode": "MD61 · C223 · MF50"},
+        {"endpoint": "collettori", "titolo": "Collettori costi", "icona": "🗂️", "tcode": "KKF6N"},
+        {"endpoint": "consuntivazione", "titolo": "Conferma a consuntivo", "icona": "✅", "tcode": "MFBF · MB1A"},
+        {"endpoint": "chiusura", "titolo": "Chiusura di periodo", "icona": "📆", "tcode": "KKS6 · KK87"},
+        {"endpoint": "cruscotto", "titolo": "Cruscotto e confronto", "icona": "📊", "tcode": "KPI"},
+        {"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03 · F.08"},
+    ]},
+}
+LAB_SLOTS = {v["slot"]: v["titolo"] for v in LABORATORI.values()}
+
+MODULI += [
+    {"codice": "hmlv", "sigla": "HMLV", "breve": "Alta varietà", "titolo": "Alta varietà e disaccoppiamento", "icona": "🧩", "colore": "laboratorio", "kpi": None,
+     "descrizione": "Laboratorio: tre transenne sullo stesso telaio, semilavorati a scorta (strategia 70), WIP, varianze, buffer DDMRP",
+     "app": [(f"alta_varieta.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["alta_varieta"]["pagine"]]},
+    {"codice": "rem", "sigla": "REM", "breve": "Ripetitiva", "titolo": "Produzione ripetitiva (modello trattore)", "icona": "🚜", "colore": "laboratorio", "kpi": None,
+     "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
+     "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
+]

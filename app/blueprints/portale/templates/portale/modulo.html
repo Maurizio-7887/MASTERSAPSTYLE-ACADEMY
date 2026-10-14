@@ -30,6 +30,7 @@
 {% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
+{% set guida = config_guida_modulo(versione, modulo_attivo.codice) %}
 {% include "guida/_pannello.html" %}
 </body>
 </html>

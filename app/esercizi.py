@@ -27,6 +27,34 @@ ESERCIZI = {
             ("contratti_aperti", "Contratti RiBa / factoring ancora aperti", 0, 0),
         ],
     },
+    "hmlv-disaccoppiamento": {
+        "titolo": "Laboratorio Alta varietà — semilavorati a scorta e disaccoppiamento",
+        "versione": "lab-hmlv",
+        "attesi": [
+            ("strategie", "Strategie: SL-PIEGA 70, transenne 50", "sì", None),
+            ("wip_novembre", "WIP a fine novembre (telaio in lavorazione)", 3900.00, 0.005),
+            ("costo_venduto", "Costo del venduto delle tre consegne", 17790.00, 0.005),
+            ("lead_time", "Lead time verso il cliente (giorni)", 5, 0),
+            ("wip_finale", "WIP dopo la chiusura di dicembre", 0.00, 0.005),
+            ("varianze_61", "Varianze di produzione totali (conto 61)", 252.00, 0.005),
+            ("ferro_finale", "Ferro rimasto (kg)", 300, 0.005),
+            ("buffer_rifornito", "Buffer DDMRP del telaio rifornito (675 pz)", "sì", None),
+        ],
+    },
+    "rem-trattore": {
+        "titolo": "Laboratorio Produzione ripetitiva — modello trattore (4.000 transenne)",
+        "versione": "lab-rem",
+        "attesi": [
+            ("budget_totale", "Budget annuo", 4000, 0),
+            ("piano", "Piano mensile TR-STD/TR-ALTA/TR-PED", "167/100/67", None),
+            ("collettori", "Collettori costi aperti", 3, 0),
+            ("wip_gennaio", "WIP al target a fine gennaio", 404.00, 0.005),
+            ("varianze_gennaio", "Varianze di periodo di gennaio", 132.20, 0.005),
+            ("output_gennaio", "Output di gennaio a costo standard", 10698.65, 0.005),
+            ("varianze_febbraio", "Varianze di periodo di febbraio", 0.00, 0.005),
+            ("ferro_finale", "Ferro rimasto (kg)", 733, 0.005),
+        ],
+    },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
 }
 

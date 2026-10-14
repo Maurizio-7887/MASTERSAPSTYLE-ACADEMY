@@ -5,7 +5,7 @@
 {% include "docente/_menu.html" %}
 <form method="get" class="msa-form msa-filtro msa-card">
   <div><label for="versione">Versione</label>
-    <select id="versione" name="versione" onchange="this.form.submit()">{% for v in versioni %}<option value="{{ v }}" {{ 'selected' if v == versione }}>{{ v }}</option>{% endfor %}</select></div>
+    <select id="versione" name="versione" onchange="this.form.submit()">{% for v in versioni %}<option value="{{ v }}" {{ 'selected' if v == versione }}>{{ versioni[v] }}</option>{% endfor %}</select></div>
   <p style="margin:0;color:var(--f-attenuato);font-size:12.5px;max-width:70ch">Esegui l'esercizio alla lavagna, poi cedi il comando: l'allievo scelto riparte esattamente dal punto in cui sei arrivato, e la finestra «Esercizio passo passo» gli mostra il passo successivo. Il lavoro che l'allievo aveva prima resta in archivio e si può ripristinare.</p>
 </form>
 

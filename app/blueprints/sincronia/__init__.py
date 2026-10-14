@@ -9,7 +9,9 @@ from flask import Blueprint, jsonify, request
 
 from ...accesso import csrf_valido, utente_corrente
 from ...db import Sessione, StatoLavoro, adesso, db
-from ...pagine import VERSIONI
+from ...pagine import LAB_SLOTS, VERSIONI
+
+SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS)   # versioni del simulatore e laboratori
 
 bp = Blueprint("sincronia", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sincronia")
 
@@ -31,7 +33,7 @@ def stato_salvato(utente, versione):
 def config_sincronia(versione):
     """Dati per sincronia.js: incorporati nella pagina, così lo stato è in localStorage prima che parta il simulatore."""
     u = utente_corrente()
-    if u is None or versione not in VERSIONI:
+    if u is None or versione not in SLOT_VALIDI:
         return None
     s = stato_salvato(u, versione)
     return {"versione": versione, "chiave": chiave_storage(versione), "utente": u.id, "csrf": _csrf(),
@@ -58,7 +60,7 @@ def _controlla(corpo):
 
 @bp.route("/api/stato/<versione>", methods=["GET", "POST"])
 def stato(versione):
-    if versione not in VERSIONI:
+    if versione not in SLOT_VALIDI:
         return jsonify(errore="versione sconosciuta"), 404
     u = utente_corrente()
     s = stato_salvato(u, versione)

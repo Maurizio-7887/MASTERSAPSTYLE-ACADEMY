@@ -1,5 +1,5 @@
 {# Finestra «Esercizio passo passo»: va incluso DOPO gli script del simulatore (legge STATO) #}
-{% set guida = config_guida(versione) %}
+{% if guida is not defined or not guida %}{% set guida = config_guida(versione) %}{% endif %}
 {% if guida %}
 <link rel="stylesheet" href="{{ url_for('guida.static', filename='pannello.css') }}">
 <script>window.MSA_GUIDA = {{ guida | tojson }};</script>
