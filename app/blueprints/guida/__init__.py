@@ -12,7 +12,7 @@ from ...pagine import tutte_le_pagine
 bp = Blueprint("guida", __name__, template_folder="templates", static_folder="static", static_url_path="/static/guida")
 
 # esercizio guidato disponibile per ogni versione del simulatore
-ESERCIZIO_PER_VERSIONE = {"vuoto": "guidato-dic-2026"}
+ESERCIZIO_PER_VERSIONE = {"vuoto": "guidato-dic-2026", "completo": "guidato-dic-2026"}   # nella completa dopo il preset «Azienda nuova»
 
 
 @bp.app_template_global()
@@ -22,4 +22,4 @@ def config_guida(versione):
         return None
     url = {f"{a['blueprint']}.{p['endpoint']}": url_for(f"{a['blueprint']}.{p['endpoint']}", versione=versione) for a, p in tutte_le_pagine()}
     url["allievo.consegna"] = url_for("allievo.consegna")
-    return {"esercizio": esercizio, "chiave": f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url}
+    return {"esercizio": esercizio, "versione": versione, "chiave": f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url}

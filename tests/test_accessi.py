@@ -189,7 +189,7 @@ ok(r.status_code == 302 and sync(d.get("/vuoto/").get_data(as_text=True))["stato
 ok(a.get("/docente/passa").status_code == 403, "l'allievo non può passare lavori")
 html = a.get("/vuoto/contabilita/fi-gl").get_data(as_text=True)
 ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizio passo passo» nelle pagine del simulatore")
-ok("pannello.js" not in a.get("/completo/").get_data(as_text=True), "nessuna finestra nella versione completa")
+ok("pannello.js" in a.get("/completo/").get_data(as_text=True), "finestra anche nella versione completa")
 
 # ── uscita ──
 r = a.post("/esci", data={"csrf": tok(a, "/area/")})

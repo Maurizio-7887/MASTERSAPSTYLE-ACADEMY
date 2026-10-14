@@ -64,6 +64,14 @@
     '</aside>';
   (document.body || document.documentElement).appendChild(radice);
   var bottone = radice.querySelector('.msa-g-apri'), pannello = radice.querySelector('.msa-g-pannello');
+  // anche nella barra blu in alto, ben visibile
+  var dx = document.querySelector('.msa-shell .msa-dx');
+  if (dx) {
+    var b2 = document.createElement('button');
+    b2.type = 'button'; b2.className = 'msa-g-shell'; b2.textContent = '📘 Esercizio passo passo';
+    b2.addEventListener('click', function () { apri(pannello.hidden); });
+    dx.insertBefore(b2, dx.firstChild);
+  }
   var corpo = radice.querySelector('.msa-g-corpo'), sel = radice.querySelector('select');
   var barra = radice.querySelector('.msa-g-barra span'), num = radice.querySelector('.msa-g-num'), progB = radice.querySelector('.prog');
 
@@ -111,10 +119,12 @@
     progB.textContent = fatti + '/' + N;
     num.textContent = (pos + 1) + ' / ' + N;
     var qui = suQuestaPagina(p);
+    var avvisoCompleto = (C.versione === 'completo' && pos === 0) ? '<div class="msa-g-esito">⚠️ Sei nella versione <b>completa</b>: il preset «Azienda nuova» cancella i dati di esempio. Per l\'esercizio è più comodo la <a href="' + location.pathname.replace('/completo/', '/vuoto/') + '">versione vuota</a>.</div>' : '';
     var h = '<div class="msa-g-gruppo">' + esc(p.g) + '</div>' +
       '<h3>' + (p.data ? '<span class="msa-g-data">' + esc(p.data) + '</span>' : '') + esc(p.titolo) + '</h3>' +
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
+    h += avvisoCompleto;
     if (p.campi && p.campi.length) {
       h += '<table class="msa-g-campi">' + p.campi.map(function (c) {
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';

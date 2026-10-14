@@ -49,3 +49,6 @@
 @media (min-width:1180px){html.msa-guida-aperta body{margin-right:390px!important}}
 @media (max-width:700px){#msa-guida .msa-g-pannello{left:6px;right:6px;top:auto;height:62vh;width:auto}}
 @media print{#msa-guida{display:none}html.msa-guida-aperta body{margin-right:0!important}}
+.msa-g-shell{background:#0070F2;color:#fff;border:0;border-radius:4px;padding:4px 11px;font:600 12.5px "Segoe UI",Arial,sans-serif;cursor:pointer}
+.msa-g-shell:hover{background:#0854A0}
+#msa-guida .msa-g-esito a{color:#0854A0}
