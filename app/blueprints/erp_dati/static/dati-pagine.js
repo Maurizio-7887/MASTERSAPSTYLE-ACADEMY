@@ -56,6 +56,19 @@
       L.collega(radice, 'si', {si: function (v) { var p = SD.prezzi(v.cliente, v.materiale, L.num(v.qta, 'Quantità', 1));
         return '<!--info--><p class="lab-nota">Traccia della sequenza di accesso PR00: ' + p.traccia.map(function (t) { return t.accesso + ' → ' + t.esito; }).join(' · ') + '</p>' + U.righePrezzi(p); }});
     },
+    ruoli: function () {
+      var AU = window.AU4, a = AU.stato(), R = AU.RUOLI, ruoli = Object.keys(R), ogg = Object.keys(AU.A);
+      radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+        L.scheda('🔐', 'Autorizzazioni e ruolo in uso', 'SU01 · PFCG', L.modulo('au', [['attivo', 'Controllo delle autorizzazioni', 'select', a.attivo ? 'si' : 'no', [['no', 'spento: tutti fanno tutto'], ['si', 'attivo: ogni ruolo fa solo il suo']]],
+          ['ruolo', 'Ruolo in uso', 'select', a.ruolo, ruoli.map(function (r) { return [r, R[r].icona + ' ' + R[r].nome]; })]], [['au', 'Applica']]) +
+          '<p class="lab-nota">In azienda ognuno ha il suo utente con i suoi ruoli: chi vende non rilascia i crediti, chi compra non approva le proprie richieste, chi conta in magazzino non registra le differenze. Qui lavori da solo, ma «indossi» un ruolo alla volta: con il controllo attivo, in cima a ogni pagina scegli chi sei.</p>') +
+        L.scheda('👥', 'Ruoli', 'PFCG', '<ul class="lab-elenco">' + ruoli.map(function (r) { return '<li><b>' + R[r].icona + ' ' + R[r].nome + '</b> — ' + e(R[r].descr) + '</li>'; }).join('') + '</ul>') + '</div>' +
+        L.scheda('🧩', 'Matrice ruoli × transazioni', 'SUIM · S_TCODE', L.tabella(['Transazione'].concat(ruoli.filter(function (r) { return r !== 'ADMIN'; }).map(function (r) { return '<span title="' + e(R[r].nome) + '">' + R[r].icona + '</span>'; })), ogg.map(function (k) {
+          return ['<b>' + e(AU.A[k][0]) + '</b>'].concat(ruoli.filter(function (r) { return r !== 'ADMIN'; }).map(function (r) { return AU.puo(r, k) ? '✓' : ''; })); })) +
+          '<p class="lab-nota">Legenda: ' + ruoli.filter(function (r) { return r !== 'ADMIN'; }).map(function (r) { return R[r].icona + ' ' + R[r].nome; }).join(' · ') + '. L\'amministratore (SAP_ALL) può tutto.</p>') +
+        L.scheda('⛔', 'Ultimi controlli falliti', 'SU53', L.tabella(['Quando', 'Ruolo', 'Transazione', 'Oggetto'], (a.su53 || []).slice().reverse().map(function (x) { return [x.quando, R[x.ruolo].nome, x.tcode, '<code>' + x.oggetto + '</code>']; }), 'Nessun controllo fallito.'));
+      L.collega(radice, 'au', {au: AU.imposta}, rendi);
+    },
   };
   function rendi() { (PAGINE[C.pagina] || PAGINE.avvio)(); }
   rendi();

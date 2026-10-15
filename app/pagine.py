@@ -263,7 +263,7 @@ LABORATORI = {
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
-               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("static", "js/lab-copioni.js"),
+               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
@@ -275,7 +275,8 @@ _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_a
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
-                 {"endpoint": "condizioni", "titolo": "Condizioni di prezzo", "icona": "🏷️", "tcode": "VK11 · VK13 · V/08"}],
+                 {"endpoint": "condizioni", "titolo": "Condizioni di prezzo", "icona": "🏷️", "tcode": "VK11 · VK13 · V/08"},
+                 {"endpoint": "ruoli", "titolo": "Ruoli e autorizzazioni", "icona": "🔐", "tcode": "PFCG · SU01 · SU53"}],
     "erp_vendite": [{"endpoint": "ordini", "titolo": "Ordini cliente", "icona": "📝", "tcode": "VA01 · VA05"},
                     {"endpoint": "crediti", "titolo": "Gestione crediti e disponibilità", "icona": "💳", "tcode": "VKM1 · FD32 · FD33 · V_V2"},
                     {"endpoint": "acconti", "titolo": "Acconti clienti", "icona": "💰", "tcode": "F-37 · F-29"},

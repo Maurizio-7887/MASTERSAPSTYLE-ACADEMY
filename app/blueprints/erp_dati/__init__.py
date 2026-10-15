@@ -21,3 +21,8 @@ def anagrafiche():
 @bp.route("/condizioni")
 def condizioni():
     return render_lab("erp_dati", "condizioni")
+
+
+@bp.route("/ruoli")
+def ruoli():
+    return render_lab("erp_dati", "ruoli")
