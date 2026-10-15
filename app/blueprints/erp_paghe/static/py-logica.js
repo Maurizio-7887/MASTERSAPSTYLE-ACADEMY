@@ -2,18 +2,22 @@
    cedolino (PC00_M15_CEDT), registrazione in contabilità (PC00_M99_CIPE) con centri di costo, pagamento dei netti e F24.
    Parametri DIDATTICI e modificabili: IRPEF 2026 (23% fino a 28.000 · 33% fino a 50.000 · 43% oltre), detrazioni lavoro dipendente
    (art. 13 TUIR), cuneo fiscale semplificato, INPS 9,19% dipendente, contributi ditta e INAIL indicativi, TFR = retribuzione / 13,5
-   meno 0,50% di contributo aggiuntivo. Metodo mensile: imposta sull'imponibile annualizzato ÷ 12, conguaglio a fine anno (non qui). */
+   meno 0,50% di contributo aggiuntivo. Metodo mensile: imposta sull'imponibile annualizzato ÷ 12; a dicembre tredicesima (tassata ad aliquota marginale)
+   e conguaglio IRPEF di fine anno sull'imponibile reale dell'anno. Ratei di 13ª, ferie (26 gg/anno) e permessi ROL (72 h/anno) maturano ogni mese.
+   I mesi dell'anno elaborati prima dell'avvio delle paghe nel sistema entrano nei progressivi come «storico» (paga base, senza variabili). */
 window.PY4 = (function () {
   'use strict';
   var L = window.LabMotore, r2 = L.r2;
   var N = function () { return window.SD4.N; }, S = function () { return N().S; };
-  var PARAMETRI = {inpsDip: 9.19, inpsDitta: 29.58, inail: 1.50, tfrDivisore: 13.5, tfrContributo: 0.50, mensilita: 13, oreMese: 173, maggStraord: 25,
+  var PARAMETRI = {inpsDip: 9.19, inpsDitta: 29.58, inail: 1.50, tfrDivisore: 13.5, tfrContributo: 0.50, mensilita: 13, oreMese: 173, maggStraord: 25, ferieAnno: 26, rolAnno: 72,
     scaglioni: [[28000, 23], [50000, 33], [1e12, 43]]};
   var DIPENDENTI = [
-    {matricola: '00001', nome: 'Marco Rossi', mansione: 'Magazziniere carrellista', livello: 'C2 (CCNL metalmeccanico, didattico)', cdc: '4100', cdcNome: 'Magazzino', lordo: 2100.00, addizionali: 28.00, tempo: 'indeterminato'},
-    {matricola: '00002', nome: 'Sara Bianchi', mansione: 'Saldatrice', livello: 'C3 (CCNL metalmeccanico, didattico)', cdc: '4200', cdcNome: 'Produzione', lordo: 2250.00, addizionali: 30.00, tempo: 'indeterminato'},
-    {matricola: '00003', nome: 'Giulia Verdi', mansione: 'Impiegata amministrativa', livello: 'C3 (CCNL metalmeccanico, didattico)', cdc: '4300', cdcNome: 'Amministrazione', lordo: 2600.00, addizionali: 38.00, tempo: 'indeterminato'}];
+    {matricola: '00001', nome: 'Marco Rossi', mansione: 'Magazziniere carrellista', livello: 'C2 (CCNL metalmeccanico, didattico)', cdc: '4100', cdcNome: 'Magazzino', lordo: 2100.00, addizionali: 28.00, tempo: 'indeterminato', ferieAP: 6, rolAP: 12},
+    {matricola: '00002', nome: 'Sara Bianchi', mansione: 'Saldatrice', livello: 'C3 (CCNL metalmeccanico, didattico)', cdc: '4200', cdcNome: 'Produzione', lordo: 2250.00, addizionali: 30.00, tempo: 'indeterminato', ferieAP: 3, rolAP: 8},
+    {matricola: '00003', nome: 'Giulia Verdi', mansione: 'Impiegata amministrativa', livello: 'C3 (CCNL metalmeccanico, didattico)', cdc: '4300', cdcNome: 'Amministrazione', lordo: 2600.00, addizionali: 38.00, tempo: 'indeterminato', ferieAP: 8, rolAP: 20}];
   var H = function () { var s = S(); if (!s.hr) s.hr = {parametri: JSON.parse(JSON.stringify(PARAMETRI)), dipendenti: JSON.parse(JSON.stringify(DIPENDENTI)), presenze: {}, cedolini: [], registrati: []}; return s.hr; };
+  (function () { var vecchio = H; H = function () { var h = vecchio(); if (h.parametri.ferieAnno == null) { h.parametri.ferieAnno = 26; h.parametri.rolAnno = 72; }
+    h.dipendenti.forEach(function (d) { var x = DIPENDENTI.find(function (y) { return y.matricola === d.matricola; }) || {}; if (d.ferieAP == null) { d.ferieAP = x.ferieAP || 0; d.rolAP = x.rolAP || 0; } }); return h; }; })();
   var dip = function (m) { var d = H().dipendenti.find(function (x) { return x.matricola === String(m); }); if (!d) throw Error('Matricola ' + m + ' inesistente.'); return d; };
   function irpefAnnua(r) { var t = 0, prima = 0; H().parametri.scaglioni.forEach(function (s) { if (r > prima) { t += (Math.min(r, s[0]) - prima) * s[1] / 100; } prima = s[0]; }); return t; }
   function detrazione(r) {   // art. 13 c. 1 TUIR
@@ -31,24 +35,53 @@ window.PY4 = (function () {
   }
   function presenze(i) {
     var d = dip(i.matricola), per = String(i.periodo || ''); if (!/^\d{4}-\d{2}$/.test(per)) throw Error('Periodo AAAA-MM.');
-    H().presenze[per + '/' + d.matricola] = {straordinari: L.num(i.straordinari || 0, 'Ore di straordinario', 0), assenze: L.num(i.assenze || 0, 'Ore di assenza non retribuita', 0)};
+    H().presenze[per + '/' + d.matricola] = {straordinari: L.num(i.straordinari || 0, 'Ore di straordinario', 0), assenze: L.num(i.assenze || 0, 'Ore di assenza non retribuita', 0), ferie: L.num(i.ferie || 0, 'Giorni di ferie godute', 0), rol: L.num(i.rol || 0, 'Ore di permesso ROL godute', 0)};
     N().salva(); return '<p class="lab-nota">Presenze di ' + L.esc(d.nome) + ' per ' + per + ': straordinari ' + L.n0(H().presenze[per + '/' + d.matricola].straordinari) + ' h.</p>';
   }
-  function calcolaUno(d, per) {
-    var p = H().parametri, pr = H().presenze[per + '/' + d.matricola] || {straordinari: 0, assenze: 0};
+  // aliquota marginale per la tassazione della 13ª
+  var marginale = function (r) { var a = 0, prima = 0; H().parametri.scaglioni.forEach(function (x) { if (r > prima) a = x[1]; prima = x[0]; }); return a; };
+  // i mesi precedenti dello stesso anno: cedolini già calcolati o, prima dell'avvio delle paghe nel sistema, «storico» a paga base
+  function precedenti(d, per) {
+    var anno = per.slice(0, 4), m = +per.slice(5, 7), out = [];
+    for (var k = 1; k < m; k++) { var p = anno + '-' + String(k).padStart(2, '0'), c = H().cedolini.find(function (x) { return x.periodo === p && x.matricola === d.matricola; });
+      out.push(c || Object.assign(calcolaUno(d, p, true), {storico: true})); }
+    return out;
+  }
+  function calcolaUno(d, per, semplice) {
+    var p = H().parametri, pr = H().presenze[per + '/' + d.matricola] || {straordinari: 0, assenze: 0, ferie: 0, rol: 0}, mese = +per.slice(5, 7);
     var oraria = d.lordo / p.oreMese, straord = r2(pr.straordinari * oraria * (1 + p.maggStraord / 100)), assenze = r2(pr.assenze * oraria);
-    var lordo = r2(d.lordo + straord - assenze), inpsDip = r2(lordo * p.inpsDip / 100), imponibile = r2(lordo - inpsDip);
+    var ordinario = r2(d.lordo + straord - assenze), tredicesima = !semplice && mese === 12 ? r2(d.lordo * 12 / 12) : 0;
+    var lordo = r2(ordinario + tredicesima), inpsDip = r2(lordo * p.inpsDip / 100), inpsOrd = r2(ordinario * p.inpsDip / 100), imponibile = r2(ordinario - inpsOrd);
     var annuo = imponibile * p.mensilita, cu = cuneo(annuo), imponibileFisc = r2(imponibile - cu.esente / p.mensilita);
     var irpefLorda = r2(irpefAnnua(imponibileFisc * 12) / 12);
     var detr = r2(detrazione(annuo - cu.esente) / 12), ulter = r2(cu.detrazione / 12);
-    var irpef = r2(Math.max(0, irpefLorda - detr - ulter)), addiz = r2(d.addizionali || 0);
-    var netto = r2(lordo - inpsDip - irpef - addiz);
+    var irpefOrd = r2(Math.max(0, irpefLorda - detr - ulter)), addiz = r2(d.addizionali || 0);
+    var imp13 = r2(tredicesima - (inpsDip - inpsOrd)), irpef13 = tredicesima ? r2(imp13 * marginale(annuo) / 100) : 0;
+    var c = {periodo: per, matricola: d.matricola, nome: d.nome, cdc: d.cdc, cdcNome: d.cdcNome, base: d.lordo, oreStraord: pr.straordinari, straordinari: straord, assenze: assenze, tredicesima: tredicesima, lordo: lordo,
+      inpsDip: inpsDip, imponibile: r2(imponibile + imp13), sommaEsente: r2(cu.esente / p.mensilita), imponibileFiscale: r2(imponibileFisc + imp13), irpefLorda: irpefLorda, detrazioni: detr, ulterioreDetrazione: ulter,
+      irpefOrdinaria: irpefOrd, irpef13: irpef13, conguaglio: 0, irpef: r2(irpefOrd + irpef13), addizionali: addiz, redditoAnnuoPresunto: r2(annuo)};
+    if (!semplice) {
+      var prec = precedenti(d, per), somma = function (k) { return r2(prec.reduce(function (t, x) { return t + (x[k] || 0); }, 0)); };
+      // conguaglio di fine anno: imposta vera sull'imponibile dell'anno, meno quanto già trattenuto
+      if (mese === 12) {
+        var R = r2(somma('imponibile') + c.imponibile), cuA = cuneo(R), impA = r2(R - cuA.esente), lorda = r2(irpefAnnua(impA)), dt = r2(detrazione(impA)), ud = r2(cuA.detrazione);
+        var dovuta = r2(Math.max(0, lorda - dt - ud)), trattenuta = r2(somma('irpef') + c.irpef);
+        c.conguaglio = r2(dovuta - trattenuta); c.irpef = r2(c.irpef + c.conguaglio);
+        c.conguaglioDettaglio = {reddito: R, sommaEsente: r2(cuA.esente), imponibile: impA, lorda: lorda, detrazioni: dt, ulteriore: ud, dovuta: dovuta, trattenuta: trattenuta};
+      }
+      c.progressivi = {mesi: prec.length + 1, storico: prec.filter(function (x) { return x.storico; }).length, imponibileInps: r2(somma('lordo') + c.lordo), imponibileFiscale: r2(somma('imponibileFiscale') + c.imponibileFiscale), irpef: r2(somma('irpef') + c.irpef),
+        inpsDip: r2(somma('inpsDip') + c.inpsDip), tfr: r2(somma('tfrLordo') + r2(lordo / p.tfrDivisore))};
+      // ratei e ferie maturati nell'anno fino a questo mese
+      var godF = r2(prec.reduce(function (t, x) { return t + ((H().presenze[x.periodo + '/' + d.matricola] || {}).ferie || 0); }, 0) + (pr.ferie || 0));
+      var godR = r2(prec.reduce(function (t, x) { return t + ((H().presenze[x.periodo + '/' + d.matricola] || {}).rol || 0); }, 0) + (pr.rol || 0));
+      c.ratei = {mesi: mese, tredicesima: r2(d.lordo * mese / 12), tredicesimaPagata: tredicesima, ferieMaturate: r2(p.ferieAnno * mese / 12), ferieGodute: godF, ferieMese: pr.ferie || 0, ferieAP: d.ferieAP || 0,
+        ferieResidue: r2((d.ferieAP || 0) + p.ferieAnno * mese / 12 - godF), rolMaturati: r2(p.rolAnno * mese / 12), rolGoduti: godR, rolMese: pr.rol || 0, rolAP: d.rolAP || 0, rolResidui: r2((d.rolAP || 0) + p.rolAnno * mese / 12 - godR)};
+    }
+    c.netto = r2(lordo - inpsDip - c.irpef - addiz);
     var inpsDitta = r2(lordo * p.inpsDitta / 100), inail = r2(lordo * p.inail / 100);
     var tfrLordo = r2(lordo / p.tfrDivisore), tfrContr = r2(lordo * p.tfrContributo / 100), tfrNetto = r2(tfrLordo - tfrContr);
-    return {periodo: per, matricola: d.matricola, nome: d.nome, cdc: d.cdc, cdcNome: d.cdcNome, base: d.lordo, oreStraord: pr.straordinari, straordinari: straord, assenze: assenze, lordo: lordo,
-      inpsDip: inpsDip, imponibile: imponibile, sommaEsente: r2(cu.esente / p.mensilita), imponibileFiscale: imponibileFisc, irpefLorda: irpefLorda, detrazioni: detr, ulterioreDetrazione: ulter, irpef: irpef,
-      addizionali: addiz, netto: netto, inpsDitta: inpsDitta, inail: inail, tfrLordo: tfrLordo, tfrContributo: tfrContr, tfrNetto: tfrNetto,
-      costo: r2(lordo + inpsDitta + inail + tfrLordo), redditoAnnuoPresunto: r2(annuo)};
+    c.inpsDitta = inpsDitta; c.inail = inail; c.tfrLordo = tfrLordo; c.tfrContributo = tfrContr; c.tfrNetto = tfrNetto; c.costo = r2(lordo + inpsDitta + inail + tfrLordo);
+    return c;
   }
   function calcola(i) {
     var per = String(i.periodo || ''); if (!/^\d{4}-\d{2}$/.test(per)) throw Error('Periodo AAAA-MM.');

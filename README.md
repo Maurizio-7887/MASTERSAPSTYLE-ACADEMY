@@ -27,20 +27,20 @@ app/
     allievo/         /area/: tempo, lavoro salvato, consegna, risposte del docente
     alta_varieta/    LABORATORIO Alta varietà: tre transenne sullo stesso telaio, strategia 70/50, WIP, varianze KKS2, cruscotto, buffer DDMRP, confronto con la commessa lunga
     ripetitiva/      LABORATORIO Produzione ripetitiva (modello trattore): budget 4.000, versioni di produzione, collettori KKF6N, MFBF con backflush, WIP al target, KKS6/KK87
-    erp_dati/        SISTEMA INTEGRATO S/4 · Dati di base: avvio (saldi di apertura), clienti e materiali, condizioni VK11/VK13 e procedura ZFT001 (V/08)
-    erp_vendite/     S/4 · Vendite: VA01 con determinazione prezzi, acconti F-37/F-29 (CoGe speciale, AZWB), VL01N 601, VF01, resi RE/651, abbuoni G2 con blocco, F-28/FBL5N, flusso documenti
+    erp_dati/        SISTEMA INTEGRATO S/4 · Dati di base: avvio (saldi di apertura), clienti e materiali, condizioni VK11/VK13 e procedura ZFT001 (V/08), ruoli e autorizzazioni PFCG/SU53 (static/js/erp/ruoli.js)
+    erp_vendite/     S/4 · Vendite: VA01 con determinazione prezzi, acconti F-37/F-29 (CoGe speciale, AZWB), VL01N 601, VF01, resi RE/651, abbuoni G2 con blocco, F-28/FBL5N, flusso documenti, controllo di disponibilità ATP (V_V2) e controllo crediti (fido, VKM1, FD32)
     erp_copa/        S/4 · CO-PA: KE30 margine di contribuzione I e II per cliente/materiale/regione/canale, KE24 righe singole
-    erp_acquisti/    S/4 · Acquisti: ME21N, MIGO 101 a standard con differenza prezzo (conto 63), MIRO con WE/RE
+    erp_acquisti/    S/4 · Acquisti: richieste ME51N con approvazione ME54N, ME21N con rilascio ME29N sopra soglia, MIGO 101 a standard con differenza prezzo (conto 63), MIRO con WE/RE
     erp_produzione/  S/4 · Produzione: CO01 con costi pianificati, 261, CO11N (attrezzaggio + lavorazione), 101, TECO
     erp_costi/       S/4 · CO-PC: scheda di calcolo con sovraccosti, CK11N/CK24 con rivalutazione, KGI2, KKS2 (anche varianza di lotto), KO88, Material Ledger CKM3/CKMLCP a più livelli
-    erp_magazzino/   S/4 · WMS in logica SAP: W100, tipi magazzino 902/001/002/100/916/999, ubicazioni, quanti, UdC, compiti con strategie, pistola RF (pistola vera in modalità tastiera o fotocamera), monitor, etichette Code 128 / QR
+    erp_magazzino/   S/4 · WMS in logica SAP: W100, tipi magazzino 902/001/002/100/916/999, ubicazioni, quanti, UdC, compiti con strategie, pistola RF (pistola vera in modalità tastiera o fotocamera), monitor, etichette Code 128 / QR, lotti (colata, lotto di produzione) e tracciabilità a monte e a valle
     erp_inventario/  S/4 · Inventari fisici e contabili (UF 9): documenti annuale / a rotazione ABC / ubicazione vuota, lista cieca, conta e riconta, 999, LI21, valorizzazione FIFO-LIFO-CMP-standard
     erp_spedizione/  S/4 · Spedizione (UF 10): monitor VL06O con stati A/B/C, lista di prelievo FIFO, imballo in colli con SSCC GS1 ed etichette GS1-128, trasporto VT01N, carico con lettura degli SSCC (RF), uscita merci del trasporto, DDT (D.P.R. 472/96)
     erp_innovazione/ S/4 · Innovazione logistica (UF 11): KPI di magazzino, slotting ABC per righe di prelievo, prelievo a ondate a serpentina, cross-docking, varco RFID (EPC SSCC-96)
     erp_tesoreria/   S/4 · Tesoreria: partite aperte con scadenze e anzianità, posizione e previsione di liquidità, F110 con file SEPA pain.001, estratto conto elettronico con abbinamento automatico e FEBAN
     erp_valute/      S/4 · Valute: tassi OB08, fatture FB70/FB60 in USD (art. 7-ter, reverse charge TD17), differenze cambio realizzate, valutazione FAGL_FCV con storno
-    erp_paghe/       S/4 · Paghe: dipendenti, presenze, cedolino (IRPEF 2026, detrazioni, cuneo, INPS, INAIL, TFR), registrazione per centro di costo, stipendi, F24
-    erp_fi/          S/4 · Contabilità: libro giornale e bilancio di verifica del sistema integrato
+    erp_paghe/       S/4 · Paghe: dipendenti, presenze, cedolino (IRPEF 2026, detrazioni, cuneo, INPS, INAIL, TFR, ferie e ROL, ratei, progressivi, tredicesima, conguaglio di fine anno), registrazione per centro di costo, stipendi, F24
+    erp_fi/          S/4 · Contabilità: libro giornale, bilancio di verifica, fattura elettronica SdI (FatturaPA), storni VF11/VL09/MBST/MR8M/CO13/LT15/FB08 (dopo lo SdI solo nota di credito)
                      (un solo stato «erp-ft» e un solo libro giornale per tutti i moduli S/4: static/js/erp/nucleo.js)
     formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
     guida/           finestra «Esercizio passo passo» sopra il simulatore: static/esercizi/<esercizio>.js (passi + spunta automatica), pannello.js/.css

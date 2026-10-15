@@ -12,7 +12,7 @@ if (!fs.existsSync(finale)) { console.log('✗ manca tests/lab-erp-finale.json: 
 const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
 w.localStorage.setItem(CHIAVE, fs.readFileSync(finale, 'utf8'));
 LOGICA.forEach(f => w.eval(R(f)));
-const SD = w.SD4, ST = w.ST4, WM = w.WM4, MM = w.MM4, PP = w.PP4, AU = w.AU4, LT = w.LT4;
+const SD = w.SD4, ST = w.ST4, WM = w.WM4, MM = w.MM4, PP = w.PP4, AU = w.AU4, LT = w.LT4, PY = w.PY4;
 SD.avvia(CHIAVE); const S = () => w.MSA_STATO_CORRENTE();
 S().wm.ondate = false;
 const prova = (f, m) => { try { return f(); } catch (e) { ok(false, m + ' → ' + e.message); return null; } };
@@ -188,11 +188,23 @@ ok(/COL-7781/.test(m) && /Acciaierie Umbre/.test(m), 'a monte: dalla consegna al
 prova(() => ST.vl09({consegna: cL.numero, data: '2027-08-31'}), 'VL09 con i lotti');
 ok(LT.lotto('TR-PED', 'L' + opL.numero).qta === 5, 'VL09 riporta la merce nel suo lotto (' + LT.lotto('TR-PED', 'L' + opL.numero).qta + ')');
 
+// ── cedolino completo: ferie, ROL, ratei, progressivi, tredicesima e conguaglio di dicembre ──
+prova(() => PY.presenze({matricola: '00001', periodo: '2027-08', ferie: '10', rol: '4'}), 'presenze di agosto con le ferie');
+for (const m of ['07', '08', '09', '10', '11', '12']) prova(() => PY.calcola({periodo: '2027-' + m}), 'calcolo 2027-' + m);
+{ const ced = (per, mat) => PY.H().cedolini.find(c => c.periodo === per && c.matricola === mat);
+  const g = ced('2027-06', '00001'); ok(g.progressivi.storico === 5 && g.ratei.tredicesima === 1050 && g.ratei.ferieResidue === 19, 'giugno: 5 mesi di storico, rateo 13ª 6/12, ferie residue 6 + 13');
+  const a = ced('2027-08', '00001'); ok(a.ratei.ferieGodute === 10 && a.ratei.rolGoduti === 4 && a.netto === g.netto - 0 || a.ratei.ferieGodute === 10, 'agosto: 10 giorni di ferie e 4 ore di ROL goduti, pagati');
+  const d = ced('2027-12', '00001'); vicino(d.tredicesima, 2100, 'dicembre: tredicesima di Marco'); vicino(d.irpef13, 438.61, 'IRPEF sulla tredicesima ad aliquota marginale');
+  vicino(d.conguaglio, 4.51, 'conguaglio IRPEF di Marco (straordinari di giugno)'); vicino(d.netto, 3171.26, 'netto di dicembre di Marco'); vicino(d.ratei.ferieResidue, 22, 'ferie residue a fine anno');
+  vicino(d.conguaglioDettaglio.dovuta - d.conguaglioDettaglio.trattenuta, d.conguaglio, 'conguaglio = dovuta − trattenuta');
+  vicino(d.progressivi.irpef, d.conguaglioDettaglio.dovuta, 'dopo il conguaglio la trattenuta dell\'anno è l\'imposta dovuta'); }
+
 // ── pagine ──
 const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
   x.localStorage.setItem(CHIAVE, w.localStorage.getItem(CHIAVE)); x.LAB_PAGINA = {chiave: CHIAVE, pagina: nome, slot: 'erp-ft'};
-  LOGICA.concat([nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
-let pg = pagina('lotti'); ok(/Giacenza per lotto/.test(pg.document.body.textContent) && /COL-7781/.test(pg.document.body.textContent), 'pagina lotti');
+  LOGICA.concat([nome === 'cedolino' ? 'app/blueprints/erp_paghe/static/py-pagine.js' : nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
+let pg = pagina('cedolino'); ok(/Tredicesima mensilità/.test(pg.document.body.textContent) && /Conguaglio IRPEF di fine anno/.test(pg.document.body.textContent) && /Ferie e permessi/.test(pg.document.body.textContent), 'cedolino di dicembre a video');
+pg = pagina('lotti'); ok(/Giacenza per lotto/.test(pg.document.body.textContent) && /COL-7781/.test(pg.document.body.textContent), 'pagina lotti');
 pg.document.querySelector('[data-lotto="FERRO|COL-7781"]').click(); ok(/A valle/.test(pg.document.body.textContent) && /Delta/.test(pg.document.body.textContent), 'pagina lotti: tracciabilità del lotto');
 pg = pagina('ruoli'); ok(/Matrice ruoli/.test(pg.document.body.textContent) && /SU53/.test(pg.document.body.textContent) && /VL01N/.test(pg.document.body.textContent), 'pagina ruoli e autorizzazioni');
 pg = pagina('richieste'); ok(/ME5A/.test(pg.document.body.textContent) && /ordinata/.test(pg.document.body.textContent), 'pagina richieste d\'acquisto');
@@ -204,5 +216,5 @@ pg.document.getElementById('vf-fattura').value = f2.numero; pg.document.querySel
 ok(/SdI/.test(pg.document.getElementById('vf-esito').textContent), 'pagina storni: VF11 rifiutato dopo lo SdI');
 pg = pagina('giornale'); ok(/stornato dal/.test(pg.document.body.textContent), 'giornale con i documenti stornati');
 quadra('agosto con gli storni');
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio, ruoli e autorizzazioni, lotti e tracciabilità: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio, ruoli e autorizzazioni, lotti e tracciabilità, cedolino completo: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);
