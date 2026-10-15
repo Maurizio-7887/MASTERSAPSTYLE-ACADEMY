@@ -110,7 +110,6 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 
 ## Prossimi passi
 - corso FORMAS (Pistoia): UF 10 spedizione con WMS (prelievo, imballo, DDT, carico) · UF 11 innovazione (slotting, ondate, KPI, RFID)
-- corso FORMAS (Pistoia): UF 10 spedizione con WMS (prelievo, imballo, DDT, carico) · UF 11 innovazione (slotting, ondate, KPI, RFID)
 - sistema integrato S/4, tappe successive: tesoreria, valute, infragruppo e consolidato, cedolino
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite
