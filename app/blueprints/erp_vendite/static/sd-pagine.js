@@ -15,9 +15,33 @@
           ['qta', 'Quantità (pz)', 'num'], ['rif', 'Riferimento cliente', 'text'], ['data', 'Data documento', 'date']], [['prezzi', 'Mostra condizioni', 'sec'], ['va', 'Salva ordine']])) +
         L.scheda('💡', 'Come legge i prezzi', '', '<p class="lab-nota">Il prezzo non si scrive: il sistema lo <b>determina</b> leggendo le tabelle condizioni con la procedura ZFT001 (Dati di base → Condizioni). Premi «Mostra condizioni» per vedere la videata prezzi prima di salvare.</p>') +
         '</div>' +
-        L.scheda('📑', 'Ordini cliente', 'VA05', L.tabella(['Ordine', 'Tipo', 'Data', 'Cliente', 'Materiale', 'Q.tà›', 'Netto›', 'Totale›', 'Margine›', 'Consegnato›', 'Fatturato›'], S().ordini.map(function (o) {
-          return [o.numero, o.tipo, fd(o.data), nome(o.cliente), o.materiale, n0(o.qta), o.prezzi ? eur(o.prezzi.netto) : eur(o.importo), o.prezzi ? eur(o.prezzi.totale) : '', o.prezzi && o.prezzi.margine != null ? eur(o.prezzi.margine) : '', n0(o.consegnato || 0), n0(o.fatturato || 0)]; }), 'Nessun ordine.'));
+        L.scheda('📑', 'Ordini cliente', 'VA05', L.tabella(['Ordine', 'Tipo', 'Data', 'Cliente', 'Materiale', 'Q.tà›', 'Confermata (ATP)›', 'Crediti', 'Netto›', 'Totale›', 'Margine›', 'Consegnato›', 'Fatturato›'], S().ordini.map(function (o) {
+          var cr = o.rifiutato ? '<span class="lab-bd arancio">rifiutato</span>' : !o.credito ? '' : o.credito.stato === 'B' ? '<span class="lab-bd arancio">B bloccato</span>' : o.credito.stato === 'D' ? '<span class="lab-bd giallo">D rilasciato</span>' : '<span class="lab-bd verde">A ok</span>';
+          return [o.numero, o.tipo, fd(o.data), nome(o.cliente), o.materiale, n0(o.qta), o.confermata == null ? '' : (o.confermata < o.qta ? '<b>' + n0(o.confermata) + '</b>' : n0(o.confermata)), cr, o.prezzi ? eur(o.prezzi.netto) : eur(o.importo), o.prezzi ? eur(o.prezzi.totale) : '', o.prezzi && o.prezzi.margine != null ? eur(o.prezzi.margine) : '', n0(o.consegnato || 0), n0(o.fatturato || 0)]; }), 'Nessun ordine.'));
       L.collega(radice, 'va', {va: SD.ordine, prezzi: function (v) { return '<!--info-->' + U.righePrezzi(SD.prezzi(v.cliente, v.materiale, L.num(v.qta, 'Quantità', 1))); }}, rendi);
+    },
+    crediti: function () {
+      var cli = Object.keys(S().clienti), bloccati = ordiniOR().filter(function (o) { return o.credito && o.credito.stato === 'B' && !o.rifiutato; });
+      var mat = radice.dataset.mat || 'TR-STD', a = SD.atp(mat);
+      radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+        L.scheda('🔓', 'Ordini bloccati per crediti', 'VKM1 · responsabile crediti', L.modulo('vk', [['ordine', 'Ordine bloccato', 'select', '', U.lista(bloccati, function (o) { return o.numero + ' · ' + U.nome(S(), o.cliente) + ' · ' + eur(o.prezzi.totale) + ' · ' + o.credito.motivo; }, '— nessun ordine bloccato —')],
+          ['decisione', 'Decisione', 'select', 'rilascia', [['rilascia', 'Autorizza lo sforamento (solo questo ordine)'], ['fido', 'Aumenta il fido (FD32) e rilascia'], ['rifiuta', 'Non autorizzato per ora'], ['definitivo', 'Blocco definitivo: rifiuta l\'ordine']]],
+          ['fido', 'Nuovo fido € (se aumenti)', 'num'], ['nota', 'Nota', 'text'], ['data', 'Data', 'date']], [['vk', 'Registra la decisione']]) +
+          '<p class="lab-nota">Chi vende non sblocca da solo: decide il <b>responsabile crediti</b>. Esposizione = crediti aperti (conto 11) + ordini non ancora fatturati.</p>') +
+        L.scheda('💳', 'Fido e rischio del cliente', 'FD32', L.modulo('fd', [['cliente', 'Cliente', 'select', 'C100', U.clienti(S())], ['fido', 'Fido €', 'num'], ['rischio', 'Classe di rischio', 'select', 'B', [['A', 'A — basso'], ['B', 'B — medio'], ['C', 'C — alto']]],
+          ['bloccato', 'Blocco del cliente', 'select', 'no', [['no', 'non bloccato'], ['si', 'BLOCCATO: nessun ordine si consegna']]], ['motivo', 'Motivo', 'text']], [['fd', 'Salva']])) + '</div>' +
+        L.scheda('📊', 'Esposizione dei clienti', 'FD33 · F.31', L.tabella(['Cliente', 'Rischio', 'Fido›', 'Crediti aperti›', 'Ordini non fatturati›', 'Esposizione›', 'Utilizzo›', 'Disponibile›', 'Stato'], cli.map(function (k) {
+          var c = S().clienti[k], x = SD.esposizione(k), u = c.fido ? Math.round(x.totale / c.fido * 100) : 0;
+          return [k + ' ' + e(c.nome), c.rischio || '', eur(c.fido || 0), eur(x.crediti), eur(x.ordini), '<b>' + eur(x.totale) + '</b>', u + '%', eur((c.fido || 0) - x.totale), c.bloccato ? '<span class="lab-bd arancio">bloccato</span>' : u > 100 ? '<span class="lab-bd arancio">oltre il fido</span>' : u > 80 ? '<span class="lab-bd giallo">vicino al limite</span>' : '<span class="lab-bd verde">ok</span>']; }))) +
+        L.scheda('📦', 'Disponibilità per materiale', 'CO09 · V_V2', '<div class="lab-filtro"><label>Materiale <select id="mat">' + ['TR-STD', 'TR-ALTA', 'TR-PED'].map(function (m) { return '<option' + (m === mat ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></label></div>' +
+          '<p>Giacenza <b>' + n0(a.giacenza) + '</b> − già in consegna <b>' + n0(a.inConsegna) + '</b> − confermata agli ordini aperti <b>' + n0(a.riservato) + '</b> = disponibile per nuovi ordini <b>' + n0(a.disponibile) + '</b> pz.</p>' +
+          L.tabella(['Ordine', 'Data', 'Cliente', 'Ordinata›', 'Confermata›', 'Consegnata›', 'Da confermare›'], ordiniOR().filter(function (o) { return o.materiale === mat && !o.rifiutato && o.consegnato < o.qta; }).map(function (o) {
+            return [o.numero, fd(o.data), nome(o.cliente), n0(o.qta), n0(o.confermata == null ? o.qta : o.confermata), n0(o.consegnato), n0(o.qta - (o.confermata == null ? o.qta : o.confermata))]; }), 'Nessun ordine aperto.') +
+          L.modulo('vv', [], [['vv', 'Riprogramma gli ordini (V_V2)']]) + '<p class="lab-nota">V_V2 riassegna la disponibilità agli ordini aperti in ordine di data: chi ha ordinato prima è servito prima. Si esegue anche da solo a ogni entrata di produzione.</p>') +
+        L.scheda('📜', 'Registro delle decisioni', 'log crediti', L.tabella(['Data', 'Cliente', 'Ordine', 'Decisione', 'Nota'], (S().creditiLog || []).slice().reverse().map(function (x) { return [fd(x.data), nome(x.cliente), x.ordine, e(x.decisione), e(x.nota)]; }), 'Nessuna decisione.'));
+      L.collega(radice, 'vk', {vk: SD.decisioneCredito}, rendi); L.collega(radice, 'fd', {fd: SD.anagraficaCredito}, rendi);
+      L.collega(radice, 'vv', {vv: function () { var r = SD.riconferma(); return '<p class="lab-nota">' + (r.length ? 'Riprogrammati: ' + r.join(' · ') : 'Nessuna variazione: le conferme erano già aggiornate.') + '</p>'; }}, rendi);
+      var m = radice.querySelector('#mat'); if (m) m.onchange = function () { radice.dataset.mat = this.value; rendi(); };
     },
     acconti: function () {
       radice.innerHTML = U.avviso(S()) +
@@ -34,7 +58,7 @@
     },
     consegne: function () {
       var inPrelievo = function (o) { return S().consegne.filter(function (c) { return c.ordine === o.numero && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0); };
-      var daConsegnare = ordiniOR().filter(function (o) { return o.consegnato + inPrelievo(o) < o.qta; });
+      var daConsegnare = ordiniOR().filter(function (o) { return !o.rifiutato && o.consegnato + inPrelievo(o) < o.qta; });
       radice.innerHTML = U.avviso(S()) +
         L.scheda('🚚', 'Consegna con uscita merci', 'VL01N · 601', L.modulo('vl', [['ordine', 'Ordine cliente', 'select', '', U.lista(daConsegnare, function (o) { return o.numero + ' · ' + U.nome(S(), o.cliente) + ' · ' + o.qta + ' ' + o.materiale; }, '— niente da consegnare —')],
           ['data', 'Data uscita merci', 'date']], [['vl', window.WM4 && window.WM4.attivo() ? 'Crea consegna (con prelievo a magazzino)' : 'Crea consegna e registra uscita merci']]) + '<p class="lab-nota">L\'uscita merci (601) scarica il magazzino a costo standard: D 41 Costo del venduto / A 13 Prodotti finiti.</p>') +

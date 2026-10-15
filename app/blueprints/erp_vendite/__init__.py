@@ -41,3 +41,8 @@ def incassi():
 @bp.route("/flusso")
 def flusso():
     return render_lab("erp_vendite", "flusso")
+
+
+@bp.route("/crediti")
+def crediti():
+    return render_lab("erp_vendite", "crediti")

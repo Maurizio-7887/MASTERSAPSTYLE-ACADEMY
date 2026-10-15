@@ -46,6 +46,7 @@ window.PP4 = (function () {
     n.movimento(o.materiale, q, data, '101', o.numero);
     if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, q, data, doc, '101 produzione');
     o.eventi.push({tipo: '101', data: data, qta: q, valore: val, doc: doc, std: m.std});
+    if (window.SD4 && window.SD4.riconferma) window.SD4.riconferma(o.materiale);   // i pezzi nuovi confermano gli ordini cliente in attesa
     var r = n.post({data: data, tipo: 'ENTRATA_PRODUZIONE', rif: o.numero, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + q + ' pz ' + o.materiale + ' dall\'ordine ' + o.numero + ' a standard ' + L.eur(m.std),
       righe: [{conto: '13', dareAvere: 'DARE', importo: val}, {conto: '73', dareAvere: 'AVERE', importo: val, partner: o.numero}]});
     n.salva(); return r;

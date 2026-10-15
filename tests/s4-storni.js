@@ -110,16 +110,40 @@ prova(() => ST.produzione({ordine: op.numero, evento: 0, data: '2027-08-17'}), '
 ok(S().giacenze.FERRO === gF2 + 100 && PP.effettivi(op).mat === 0 && WM.inUbic('PSA-L1').some(q => q.mat === 'FERRO'), '262: ferro di nuovo nel PSA');
 vicino(saldo('70', op.numero) + saldo('72', op.numero), 0, 'ordine senza costi');
 
+// ── controllo crediti (fido) e disponibilità (ATP) ──
+prova(() => SD.anagraficaCredito({cliente: 'C400', fido: '1000', rischio: 'C', data: '2027-08-18'}), 'FD32 fido basso');
+prova(() => SD.ordine({cliente: 'C400', materiale: 'TR-PED', qta: '2', data: '2027-08-18'}), 'VA01 oltre il fido');
+const ob = S().ordini.slice(-1)[0]; ok(ob.credito.stato === 'B' && /fido superato/.test(ob.credito.motivo), 'blocco crediti B');
+rifiuta(() => SD.consegna({ordine: ob.numero, data: '2027-08-18'}), /VKM1/, 'consegna di un ordine bloccato');
+prova(() => SD.decisioneCredito({ordine: ob.numero, decisione: 'rifiuta', data: '2027-08-18'}), 'VKM1 non autorizzato'); ok(ob.credito.stato === 'B', 'resta bloccato');
+prova(() => SD.decisioneCredito({ordine: ob.numero, decisione: 'fido', fido: '100000', data: '2027-08-19'}), 'VKM1 aumento del fido');
+ok(ob.credito.stato === 'A' && S().clienti.C400.fido === 100000 && S().creditiLog.length === 3, 'ordine rilasciato con il nuovo fido, decisioni registrate');
+prova(() => SD.anagraficaCredito({cliente: 'C300', bloccato: 'si', motivo: 'ritardi di pagamento', data: '2027-08-19'}), 'FD32 blocco cliente');
+prova(() => SD.ordine({cliente: 'C300', materiale: 'TR-PED', qta: '1', data: '2027-08-19'}), 'VA01 cliente bloccato');
+const og = S().ordini.slice(-1)[0]; ok(og.credito.stato === 'B' && /bloccato/.test(og.credito.motivo), 'cliente bloccato → ordine bloccato');
+prova(() => SD.decisioneCredito({ordine: og.numero, decisione: 'definitivo', data: '2027-08-19'}), 'VKM1 blocco definitivo');
+rifiuta(() => SD.consegna({ordine: og.numero, data: '2027-08-19'}), /rifiutato/, 'ordine rifiutato non si consegna');
+const gA = SD.atp('TR-ALTA').disponibile; ok(SD.atp('TR-ALTA').riservato === 4, 'ATP: 4 pezzi confermati all\'ordine di Sigma');
+prova(() => SD.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: String(gA + 20), data: '2027-08-20'}), 'VA01 oltre la disponibilità');
+const oD = S().ordini.slice(-1)[0]; ok(oD.confermata === gA, 'ATP: confermata solo la giacenza (' + oD.confermata + ' su ' + oD.qta + ')');
+prova(() => SD.ordine({cliente: 'C100', materiale: 'TR-ALTA', qta: '5', data: '2027-08-21'}), 'VA01 Beta TR-ALTA');
+const oB = S().ordini.slice(-1)[0]; ok(oB.confermata === 0, 'ATP: niente per Beta, tutto confermato a Delta');
+rifiuta(() => SD.consegna({ordine: oB.numero, data: '2027-08-21'}), /disponibilità/, 'consegna senza disponibilità');
+prova(() => PP.ordine({materiale: 'TR-ALTA', qta: '30', data: '2027-08-22'}), 'CO01 TR-ALTA');
+prova(() => PP.entrata({ordine: S().produzione.slice(-1)[0].numero, qta: '30', data: '2027-08-23'}), '101 di 30 pezzi');
+ok(oD.confermata === oD.qta && oB.confermata === 5, 'conferma automatica all\'entrata di produzione (Delta prima, poi Beta)');
+
 // ── pagine ──
 const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
   x.localStorage.setItem(CHIAVE, w.localStorage.getItem(CHIAVE)); x.LAB_PAGINA = {chiave: CHIAVE, pagina: nome, slot: 'erp-ft'};
-  LOGICA.concat(['app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
-let pg = pagina('sdi'); ok(/Trasmissione allo SdI/.test(pg.document.body.textContent) && /consegnata/.test(pg.document.body.textContent) && /FatturaElettronica/.test(pg.document.body.textContent), 'pagina SdI');
+  LOGICA.concat([nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
+let pg = pagina('crediti'); ok(/VKM1/.test(pg.document.body.textContent) && /Edil Sigma/.test(pg.document.body.textContent) && /bloccato/.test(pg.document.body.textContent), 'pagina gestione crediti');
+pg = pagina('sdi'); ok(/Trasmissione allo SdI/.test(pg.document.body.textContent) && /consegnata/.test(pg.document.body.textContent) && /FatturaElettronica/.test(pg.document.body.textContent), 'pagina SdI');
 pg = pagina('storni'); const tx = pg.document.body.textContent;
 ok(/VF11/.test(tx) && /MBST/.test(tx) && /LT15/.test(tx) && /Documenti stornati/.test(tx) && new RegExp(f1.contabile).test(tx), 'pagina storni');
 pg.document.getElementById('vf-fattura').value = f2.numero; pg.document.querySelector('[data-azione="vf"]').click();
 ok(/SdI/.test(pg.document.getElementById('vf-esito').textContent), 'pagina storni: VF11 rifiutato dopo lo SdI');
 pg = pagina('giornale'); ok(/stornato dal/.test(pg.document.body.textContent), 'giornale con i documenti stornati');
 quadra('agosto con gli storni');
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni e fattura elettronica: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP): ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

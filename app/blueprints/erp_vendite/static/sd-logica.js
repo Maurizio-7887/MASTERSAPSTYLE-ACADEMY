@@ -68,12 +68,82 @@ window.SD4 = (function () {
             provvPerc: erb ? erb.valore : 0, provvigione: provv, traccia: traccia};
   }
 
+  // ── controllo di disponibilità (ATP) e controllo crediti (fido) ──
+  var inPrelievo = function (o) { return S().consegne.filter(function (c) { return c.ordine === o.numero && c.tipo === 'LF' && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0); };
+  var apertoOrd = function (o) { return Math.max(0, o.qta - o.consegnato - inPrelievo(o)); };
+  var vivo = function (o) { return o.tipo === 'OR' && !o.rifiutato; };
+  // ATP = giacenza − merce già in consegna (non ancora uscita) − quantità confermate agli altri ordini aperti (precedenti)
+  function atp(mat, escludi) {
+    var g = S().giacenze[mat] || 0, ris = 0, cons = 0;
+    S().ordini.forEach(function (o) { if (!vivo(o) || o.materiale !== mat) return; cons += inPrelievo(o);
+      if (o === escludi) return; if (escludi && (o.data > escludi.data || (o.data === escludi.data && +o.numero > +escludi.numero))) return;
+      ris += Math.min(apertoOrd(o), Math.max(0, (o.confermata == null ? o.qta : o.confermata) - o.consegnato - inPrelievo(o))); });
+    return {giacenza: r2(g), inConsegna: r2(cons), riservato: r2(ris), disponibile: r2(Math.max(0, g - cons - ris))};
+  }
+  // V_V2: riprogramma gli ordini aperti in ordine di data (chi ha ordinato prima è servito prima)
+  function riconferma(mat) {
+    var liberi = {}, out = [];
+    S().ordini.filter(function (o) { return vivo(o) && (!mat || o.materiale === mat); }).sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : (+a.numero) - (+b.numero); }).forEach(function (o) {
+      var m = o.materiale; if (liberi[m] == null) { var a = atp(m); liberi[m] = r2((S().giacenze[m] || 0) - a.inConsegna); }
+      var serve = apertoOrd(o), c = Math.min(serve, Math.max(0, liberi[m])), prima = o.confermata;
+      o.confermata = r2(o.consegnato + inPrelievo(o) + c); liberi[m] = r2(liberi[m] - c);
+      if (prima !== o.confermata) out.push(o.numero + ' ' + m + ': confermati ' + o.confermata + ' su ' + o.qta);
+    });
+    N.salva(); return out;
+  }
+  function esposizione(cliente) {
+    var aperto = S().ordini.filter(function (o) { return vivo(o) && o.cliente === cliente && o.prezzi && o.fatturato < o.qta; })
+      .reduce(function (t, o) { return t + o.prezzi.totale * (o.qta - o.fatturato) / o.qta; }, 0);
+    var crediti = N.saldo('11', cliente);
+    return {crediti: r2(crediti), ordini: r2(aperto), totale: r2(crediti + aperto)};
+  }
+  function controlloCredito(o) {
+    var c = N.cliente(o.cliente), es = esposizione(o.cliente), fido = c.fido == null ? Infinity : c.fido;
+    if (c.bloccato) return {stato: 'B', motivo: 'cliente bloccato dal responsabile crediti' + (c.bloccoMotivo ? ': ' + c.bloccoMotivo : ''), esposizione: es.totale, fido: c.fido};
+    if (es.totale > fido + 0.004) return {stato: 'B', motivo: 'fido superato di ' + L.eur(es.totale - fido) + ' €', esposizione: es.totale, fido: c.fido};
+    return {stato: 'A', esposizione: es.totale, fido: c.fido};
+  }
+
   function ordine(i) {
     var data = N.data(i.data), cliente = i.cliente, mat = i.materiale, qta = L.num(i.qta, 'Quantità', 1);
     var p = prezzi(cliente, mat, qta);
     var o = {numero: N.numero('ordine'), tipo: 'OR', data: data, cliente: cliente, materiale: mat, qta: qta, rif: String(i.rif || '').trim(), prezzi: p, consegnato: 0, fatturato: 0};
-    S().ordini.push(o); N.salva();
-    return '<p class="lab-nota">Ordine cliente <b>' + o.numero + '</b> (tipo OR) creato. Netto ' + L.eur(p.netto) + ' € + IVA ' + L.eur(p.iva) + ' = ' + L.eur(p.totale) + ' €. Margine a costo standard ' + L.eur(p.margine) + ' €. Nessuna scrittura contabile.</p>';
+    var a = atp(mat, o); o.confermata = Math.min(qta, a.disponibile); o.atp = a;
+    S().ordini.push(o);
+    o.credito = controlloCredito(o);
+    N.salva();
+    var cli = N.cliente(cliente);
+    return '<p class="lab-nota">Ordine cliente <b>' + o.numero + '</b> (tipo OR) creato. Netto ' + L.eur(p.netto) + ' € + IVA ' + L.eur(p.iva) + ' = ' + L.eur(p.totale) + ' €. Margine a costo standard ' + L.eur(p.margine) + ' €. Nessuna scrittura contabile.</p>' +
+      '<p class="lab-nota">📦 <b>Disponibilità (ATP)</b>: giacenza ' + L.n0(a.giacenza) + ' − già in consegna ' + L.n0(a.inConsegna) + ' − confermato ad altri ordini ' + L.n0(a.riservato) + ' = <b>' + L.n0(a.disponibile) + '</b> pz. ' +
+        (o.confermata >= qta ? 'Ordine <b>confermato per intero</b>.' : '<b>Confermati ' + L.n0(o.confermata) + ' pz su ' + L.n0(qta) + '</b>: il resto aspetta la produzione (si conferma da solo all\'entrata dei pezzi, o con V_V2).') + '</p>' +
+      (o.credito.stato === 'B' ? '<p class="lab-nota">⛔ <b>Blocco crediti</b> (stato B): ' + o.credito.motivo + ' — esposizione ' + L.eur(o.credito.esposizione) + ' € su un fido di ' + L.eur(cli.fido) + ' €. L\'ordine è salvato ma <b>non si consegna</b> finché il responsabile crediti non lo rilascia (VKM1, Vendite → Gestione crediti).</p>'
+        : '<p class="lab-nota">💳 <b>Controllo crediti superato</b>: esposizione ' + L.eur(o.credito.esposizione) + ' € su un fido di ' + L.eur(cli.fido) + ' €.</p>');
+  }
+  // VKM1: decisione del responsabile crediti sull'ordine bloccato
+  function decisioneCredito(i) {
+    var o = ord(i.ordine), c = N.cliente(o.cliente), data = N.data(i.data || o.data), d = i.decisione;
+    if (!o.credito || o.credito.stato !== 'B') throw Error('L\'ordine ' + o.numero + ' non è bloccato per crediti.');
+    var log = function (testo) { (S().creditiLog = S().creditiLog || []).push({data: data, ordine: o.numero, cliente: o.cliente, decisione: testo, nota: String(i.nota || '')}); };
+    if (d === 'rilascia') { o.credito.stato = 'D'; o.credito.rilascio = data; log('Sforamento autorizzato (solo questo ordine)'); }
+    else if (d === 'fido') { var f = L.num(i.fido, 'Nuovo fido', 0); var vecchio = c.fido; c.fido = f; var x = controlloCredito(o); log('Fido aumentato da ' + L.eur(vecchio) + ' a ' + L.eur(f) + ' €');
+      if (x.stato === 'B') { o.credito = x; N.salva(); return '<p class="lab-nota">Fido portato a ' + L.eur(f) + ' €, ma l\'ordine resta bloccato: ' + x.motivo + '.</p>'; }
+      o.credito = x; o.credito.rilascio = data; }
+    else if (d === 'rifiuta') { log('Non autorizzato per ora: l\'ordine resta bloccato'); N.salva(); return '<p class="lab-nota">Decisione registrata: l\'ordine ' + o.numero + ' resta bloccato.</p>'; }
+    else if (d === 'definitivo') { o.rifiutato = 'Z1 rifiutato per rischio di credito'; o.credito.stato = 'R'; log('Blocco definitivo: ordine rifiutato'); }
+    else throw Error('Decisione sconosciuta.');
+    if (d !== 'definitivo') riconferma(o.materiale);
+    N.salva();
+    return '<p class="lab-nota">VKM1 — ordine ' + o.numero + ': ' + (d === 'definitivo' ? 'rifiutato (motivo di rifiuto Z1): non si consegna più.' : 'rilasciato, ora si può consegnare.') + '</p>';
+  }
+  // FD32: fido, classe di rischio, blocco del cliente
+  function anagraficaCredito(i) {
+    var c = N.cliente(i.cliente), prima = {fido: c.fido, bloccato: c.bloccato};
+    if (i.fido !== undefined && i.fido !== '') c.fido = L.num(i.fido, 'Fido', 0);
+    if (i.rischio) c.rischio = i.rischio;
+    if (i.bloccato !== undefined) { c.bloccato = i.bloccato === true || i.bloccato === 'si'; c.bloccoMotivo = c.bloccato ? String(i.motivo || '') : ''; }
+    (S().creditiLog = S().creditiLog || []).push({data: N.data(i.data || S().avviato), ordine: '', cliente: i.cliente, decisione: 'FD32: fido ' + L.eur(c.fido) + ' · rischio ' + (c.rischio || '') + (c.bloccato ? ' · CLIENTE BLOCCATO' : prima.bloccato ? ' · cliente sbloccato' : ''), nota: String(i.motivo || '')});
+    N.salva();
+    return '<p class="lab-nota">FD32 — ' + c.nome + ': fido ' + L.eur(c.fido) + ' €, classe di rischio ' + (c.rischio || '—') + (c.bloccato ? ', <b>cliente bloccato</b>: nessun nuovo ordine si consegna' : '') + '.</p>';
   }
   var ord = function (n) { var o = S().ordini.find(function (x) { return x.numero === String(n); }); if (!o) throw Error('Ordine ' + n + ' inesistente.'); return o; };
 
@@ -101,6 +171,9 @@ window.SD4 = (function () {
     if (data < o.data) throw Error('Consegna anteriore all\'ordine.');
     var aperte = S().consegne.filter(function (c) { return c.ordine === o.numero && c.tipo === 'LF' && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0);
     var q = o.qta - o.consegnato - aperte; if (q <= 0) throw Error('Ordine già consegnato (o con una consegna in prelievo).');
+    if (o.rifiutato) throw Error('Ordine rifiutato (' + o.rifiutato + '): non si consegna.');
+    if (o.credito && o.credito.stato === 'B') throw Error('Ordine bloccato dal controllo crediti (' + o.credito.motivo + '): serve il rilascio del responsabile crediti (VKM1).');
+    var disp = atp(o.materiale, o); if (disp.disponibile < q - 1e-9) throw Error('Controllo di disponibilità: per ' + o.materiale + ' sono disponibili ' + L.n0(disp.disponibile) + ' pz (giacenza ' + L.n0(disp.giacenza) + ' − in consegna ' + L.n0(disp.inConsegna) + ' − confermati a ordini precedenti ' + L.n0(disp.riservato) + '), ne servono ' + L.n0(q) + '.');
     var WM = window.WM4;
     if (WM && WM.attivo(data)) {
       if ((S().giacenze[o.materiale] || 0) < q) throw Error('Giacenza insufficiente di ' + o.materiale + ': disponibili ' + L.n0(S().giacenze[o.materiale]) + ' pz.');
@@ -258,7 +331,7 @@ window.SD4 = (function () {
       return {data: r.data, numero: r.numero, descrizione: r.descrizione, importo: r2(v)};
     });
   }
-  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, richiestaAcconto: richiestaAcconto,
+  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
     incassoAcconto: incassoAcconto, consegna: consegna, uscitaMerci: uscitaMerci, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
     richiestaAbbuono: richiestaAbbuono, approvaAbbuono: approvaAbbuono, notaCreditoAbbuono: notaCreditoAbbuono, incasso: incasso, flusso: flusso, partite: partite,
     avviaSistema: function (i) { return N.avvia(i); }};
