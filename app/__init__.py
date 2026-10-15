@@ -12,9 +12,12 @@ from .blueprints.alta_varieta import bp as alta_varieta
 from .blueprints.contabilita import bp as contabilita
 from .blueprints.controllo import bp as controllo
 from .blueprints.docente import bp as docente
+from .blueprints.erp_acquisti import bp as erp_acquisti
 from .blueprints.erp_copa import bp as erp_copa
+from .blueprints.erp_costi import bp as erp_costi
 from .blueprints.erp_dati import bp as erp_dati
 from .blueprints.erp_fi import bp as erp_fi
+from .blueprints.erp_produzione import bp as erp_produzione
 from .blueprints.erp_vendite import bp as erp_vendite
 from .blueprints.formazione import bp as formazione
 from .blueprints.guida import bp as guida
@@ -32,7 +35,7 @@ from .db import inizializza, ora_italiana
 BLUEPRINT = [portale, accessi, sincronia, guida, allievo, docente,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
-             erp_dati, erp_vendite, erp_copa, erp_fi]
+             erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_costi, erp_copa, erp_fi]
 
 
 def create_app():

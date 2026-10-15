@@ -15,16 +15,21 @@
         L.scheda('🧭', 'Cosa c\'è in questo sistema', 'S/4 didattico', '<ul class="lab-elenco"><li><b>Un solo libro giornale</b> per tutti i moduli: ogni documento logistico genera la sua scrittura.</li>' +
           '<li><b>Numerazione dei documenti</b> come in SAP: ordini 1000xxxx, consegne 8000xxxx, fatture 9000xxxx, resi 6000xxxx, contabili 1000xxxxx.</li>' +
           '<li><b>Flusso documenti</b> (VA03): ordine → consegna → fattura → nota di credito.</li><li><b>CO-PA</b>: ogni fattura scrive i campi valore per cliente, materiale, regione, canale.</li></ul>') +
+        L.scheda('⏩', 'Parti da febbraio', 'situazione pronta', '<button type="button" class="lab-btn sec" id="gennaio">Carica la situazione di fine gennaio (vendite completate)</button><p class="lab-nota">Esegue in automatico tutto gennaio dell\'esercizio (avvio, condizioni, quattro ordini, acconto, resi, abbuono, incasso): serve per cominciare dai costi del prodotto. Sostituisce il lavoro attuale del sistema integrato.</p>') +
         L.scheda('♻️', 'Ricomincia', '', '<button type="button" class="lab-btn rosso" id="azzera">Azzera il sistema integrato</button><p class="lab-nota">Cancella documenti e scritture di questo sistema; il simulatore principale e i laboratori non cambiano.</p>');
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
+      radice.querySelector('#gennaio').onclick = function () { if (confirm('Sostituire il lavoro del sistema integrato con la situazione di fine gennaio?')) { window.LabCopioni.esegui(window.LabCopioni.SD4, SD, 'Febbraio:'); if (window.MSA_SALVA) window.MSA_SALVA(); rendi(); } };
       radice.querySelector('#azzera').onclick = function () { if (confirm('Azzerare il sistema integrato?')) { N.azzera(); rendi(); } };
     },
     anagrafiche: function () {
       radice.innerHTML = U.avviso(S()) +
         L.scheda('👥', 'Clienti', 'XD03', L.tabella(['Cliente', 'Nome', 'Regione', 'Canale', 'Gruppo clienti', 'Pagamento', 'Partite aperte €›'], Object.keys(S().clienti).map(function (k) {
           var c = S().clienti[k]; return [k, e(c.nome), c.regione, c.canale, c.gruppo, c.pagamento, eur(N.saldo('11', k))]; }))) +
-        L.scheda('📦', 'Materiali e giacenze', 'MM03 · MMBE', L.tabella(['Materiale', 'Descrizione', 'Costo standard (S)›', 'Giacenza›', 'Valore›'], Object.keys(S().materiali).map(function (k) {
-          var m = S().materiali[k]; return [k, e(m.nome), eur(m.std), n0(S().giacenze[k]) + ' pz', eur(S().giacenze[k] * m.std)]; })));
+        L.scheda('🏭', 'Fornitori', 'XK03', L.tabella(['Fornitore', 'Nome', 'Regione', 'Pagamento', 'Debito aperto €›'], Object.keys(S().fornitori || {}).map(function (k) {
+          var f = S().fornitori[k]; return [k, e(f.nome), f.regione, f.pagamento, eur(-N.saldo('20', k))]; }))) +
+        L.scheda('📦', 'Materiali e giacenze', 'MM03 · MMBE', L.tabella(['Materiale', 'Tipo', 'Descrizione', 'Controllo prezzo', 'Costo standard›', 'Giacenza›', 'Valore a standard›'], Object.keys(S().materiali).map(function (k) {
+          var m = S().materiali[k]; return [k, m.tipo || '', e(m.nome), 'S standard', eur(m.std), n0(S().giacenze[k]) + ' ' + (m.um || 'pz'), eur(S().giacenze[k] * m.std)]; })) +
+          '<p class="lab-nota">Prodotti finiti (FERT) e materia prima (ROH). Il valore di bilancio dopo la chiusura del Material Ledger è al prezzo effettivo: vedi Costi del prodotto → Material Ledger.</p>');
     },
     condizioni: function () {
       var tipi = Object.keys(SD.TIPI).filter(function (t) { return ['PR00', 'K007', 'KF00'].indexOf(t) >= 0; });

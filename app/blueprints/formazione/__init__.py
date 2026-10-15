@@ -34,6 +34,12 @@ CASI = [
      "↩️", "erp_vendite", "Reso:"),
     ("redditivita-clienti", "Non sai quanto guadagni su ogni cliente?", "Il fatturato per cliente c'è, il margine no: sconti, resi, trasporti e provvigioni si perdono nel conto economico.",
      "📊", "erp_copa", "KE30"),
+    ("sovraccosti", "Il costo standard non copre i costi generali?", "Lo standard è «ferro + ore»: magazzino, acquisti, capireparto e manutenzione restano fuori e il margine sembra più alto di quello che è.",
+     "🧮", "erp_costi", "KZZ2"),
+    ("varianza-lotto", "I lotti piccoli costano di più e nessuno lo vede?", "Lo stesso prodotto, con la stessa efficienza, costa di più quando si fanno pochi pezzi: la varianza finisce in un unico numero.",
+     "📏", "erp_costi", "KKS2: leggi"),
+    ("material-ledger", "Il costo standard non è il costo vero?", "Il ferro si paga più dello standard, gli ordini hanno varianze: a fine mese nessuno sa quanto è costato davvero quello che hai venduto.",
+     "📒", "erp_costi", "CKMLCP"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]

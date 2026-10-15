@@ -208,11 +208,11 @@ def modulo(codice):
 def app_modulo(m):
     """Le app di un modulo pronte per il template: endpoint, parametri dell'URL, testi."""
     out = []
-    for endpoint, schermata, titolo, icona, tcode, kpi in m["app"]:
+    for endpoint, schermata, titolo, icona, tcode, kpi, *gruppo in m["app"]:
         args = {}
         if schermata:
             args["sd" if endpoint == SD else "pp"] = schermata
-        out.append({"endpoint": endpoint, "args": args, "titolo": titolo, "icona": icona, "tcode": tcode, "kpi": kpi or ""})
+        out.append({"endpoint": endpoint, "args": args, "titolo": titolo, "icona": icona, "tcode": tcode, "kpi": kpi or "", "gruppo": gruppo[0] if gruppo else ""})
     return out
 
 
@@ -260,7 +260,11 @@ LABORATORI = {
     ]},
 }
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
-_ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js")]
+_ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
+               ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("static", "js/lab-copioni.js")]
+# gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
+_ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
+               "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -272,19 +276,30 @@ _ERP_PAGINE = {
                     {"endpoint": "resi", "titolo": "Resi e note di credito", "icona": "↩️", "tcode": "RE · 651 · G2"},
                     {"endpoint": "incassi", "titolo": "Incassi e partite", "icona": "🏦", "tcode": "F-28 · FBL5N"},
                     {"endpoint": "flusso", "titolo": "Flusso documenti", "icona": "🔗", "tcode": "VA03"}],
+    "erp_acquisti": [{"endpoint": "ordini", "titolo": "Ordini d'acquisto", "icona": "🛒", "tcode": "ME21N · ME2N"},
+                     {"endpoint": "entrate", "titolo": "Entrata merci", "icona": "📥", "tcode": "MIGO 101 · MMBE"},
+                     {"endpoint": "fatture", "titolo": "Fatture fornitore", "icona": "🧾", "tcode": "MIRO"}],
+    "erp_produzione": [{"endpoint": "ordini", "titolo": "Ordini di produzione", "icona": "🏭", "tcode": "CO01 · COOIS"},
+                       {"endpoint": "avanzamento", "titolo": "Prelievi, conferme, entrate", "icona": "⏱️", "tcode": "261 · CO11N · 101 · TECO"}],
+    "erp_costi": [{"endpoint": "scheda", "titolo": "Scheda di calcolo e sovraccosti", "icona": "🧮", "tcode": "KZS2 · KZZ2 · KP26"},
+                  {"endpoint": "calcolo", "titolo": "Calcolo del costo standard", "icona": "🏷️", "tcode": "CK11N · CK24 · CK13N"},
+                  {"endpoint": "chiusura", "titolo": "Chiusura degli ordini e varianze", "icona": "⚖️", "tcode": "KGI2 · KKS2 · KO88"},
+                  {"endpoint": "ml", "titolo": "Material Ledger", "icona": "📒", "tcode": "CKM3 · CKMLCP"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"}],
 }
-_ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js"}
+_ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
+           "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js"}
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
-_ERP_NAV = [p for pp in _ERP_PAGINE.values() for p in pp]
+        _p["gruppo"] = _ERP_GRUPPI[_bp]
+_ERP_NAV = [p for g in _ERP_GRUPPI for p in _ERP_PAGINE[g]]   # mattonelle del modulo, nell'ordine dei gruppi
 for _bp, _pp in _ERP_PAGINE.items():
-    LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "s4", "esercizio": "s4-vendite-copa",
-                       "js": _ERP_COMUNI + [(f"{_bp}.static", _ERP_JS[_bp])], "pagine": _pp, "nav": _ERP_NAV, "copione": "SD4"}
+    LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "s4", "esercizio": "s4-integrato",
+                       "js": _ERP_COMUNI + [(f"{_bp}.static", _ERP_JS[_bp])], "pagine": _pp, "nav": _pp, "copione": "SD4", "area": _ERP_GRUPPI[_bp]}
 for _k, _lab in LABORATORI.items():
     for _p in _lab["pagine"]:
         _p.setdefault("ep", f"{_k}.{_p['endpoint']}")
@@ -298,9 +313,9 @@ MODULI += [
     {"codice": "rem", "sigla": "REM", "breve": "Ripetitiva", "titolo": "Produzione ripetitiva (modello trattore)", "icona": "🚜", "colore": "laboratorio", "kpi": None,
      "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
      "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
-    {"codice": "s4", "sigla": "S/4", "breve": "Sistema integrato", "titolo": "Sistema integrato S/4 — vendite e redditività", "icona": "🏢", "colore": "laboratorio", "kpi": None,
-     "descrizione": "Un solo libro giornale: condizioni di prezzo, acconti, consegne, fatture, resi e note di credito, CO-PA per cliente",
-     "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None) for p in _ERP_NAV]},
+    {"codice": "s4", "sigla": "S/4", "breve": "Sistema integrato", "titolo": "Sistema integrato S/4", "icona": "🏢", "colore": "laboratorio", "kpi": None,
+     "descrizione": "Un solo libro giornale: vendite e resi, acconti, CO-PA per cliente; acquisti, produzione, costo standard con sovraccosti, varianze di lotto, Material Ledger",
+     "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None, p["gruppo"]) for p in _ERP_NAV]},
 ]
 
 # ── «Che situazione hai?»: lezioni che portano ai laboratori (prima la spiegazione, poi la prova) ──
@@ -318,4 +333,7 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.acconti", None, "Acconti dai clienti?", "💰", "F-37 · F-29 · AZWB", None),
             ("formazione.resi_abbuoni", None, "Resi e abbuoni?", "↩️", "RE · 651 · G2", None),
             ("formazione.redditivita_clienti", None, "Quanto guadagni per cliente?", "📊", "CO-PA · KE30", None),
+            ("formazione.sovraccosti", None, "Lo standard non copre i costi generali?", "🧮", "CK11N · sovraccosti", None),
+            ("formazione.varianza_lotto", None, "I lotti piccoli costano di più?", "📏", "KKS2 · varianza di lotto", None),
+            ("formazione.material_ledger", None, "Il costo standard non è quello vero?", "📒", "Material Ledger · CKMLCP", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

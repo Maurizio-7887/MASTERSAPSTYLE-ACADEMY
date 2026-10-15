@@ -4,17 +4,18 @@
    Schema di margine (KE30):
      Ricavi lordi − Sconti quantità − Sconti cliente + Trasporti addebitati = Ricavi netti
      − Resi e abbuoni = Ricavi netti dopo rettifiche
-     − Costo del venduto a standard = MARGINE DI CONTRIBUZIONE I
+     − Costo del venduto a standard − Differenze di prezzo dal Material Ledger = MARGINE DI CONTRIBUZIONE I (a costo effettivo)
      − Provvigioni agenti = MARGINE DI CONTRIBUZIONE II */
 window.COPA = (function () {
   'use strict';
   var r2 = window.LabMotore.r2;
   var DIMENSIONI = {cliente: 'Cliente', materiale: 'Materiale', regione: 'Regione', canale: 'Canale di distribuzione', gruppo: 'Gruppo clienti'};
-  var CAMPI = ['qta', 'ricaviLordi', 'scontiQuantita', 'scontiCliente', 'trasporti', 'abbuoni', 'costoVenduto', 'provvigioni'];
+  var CAMPI = ['qta', 'ricaviLordi', 'scontiQuantita', 'scontiCliente', 'trasporti', 'abbuoni', 'costoVenduto', 'diffPrezzo', 'provvigioni'];
   function margini(x) {
     x.ricaviNetti = r2(x.ricaviLordi - x.scontiQuantita - x.scontiCliente + x.trasporti);
     x.ricaviRettificati = r2(x.ricaviNetti + x.abbuoni);              // gli abbuoni sono negativi
-    x.mdc1 = r2(x.ricaviRettificati - x.costoVenduto);
+    x.mdc1Std = r2(x.ricaviRettificati - x.costoVenduto);
+    x.mdc1 = r2(x.mdc1Std - (x.diffPrezzo || 0));
     x.mdc2 = r2(x.mdc1 - x.provvigioni);
     x.mdc1Perc = x.ricaviRettificati ? r2(x.mdc1 / x.ricaviRettificati * 100) : 0;
     x.mdc2Perc = x.ricaviRettificati ? r2(x.mdc2 / x.ricaviRettificati * 100) : 0;

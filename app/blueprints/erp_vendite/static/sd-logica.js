@@ -101,7 +101,7 @@ window.SD4 = (function () {
     var q = o.qta - o.consegnato; if (q <= 0) throw Error('Ordine già consegnato.');
     var std = N.materiale(o.materiale).std, val = r2(q * std);
     N.movimento(o.materiale, -q, data, '601', o.numero);
-    var c = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false};
+    var c = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val};
     S().consegne.push(c); o.consegnato += q;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + o.materiale + ' (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
@@ -121,6 +121,7 @@ window.SD4 = (function () {
     if (c.fatturata) throw Error('Consegna già fatturata.');
     var data = N.data(i.data); if (data < c.data) throw Error('Fattura anteriore alla consegna.');
     var o = ord(c.ordine), p = c.qta === o.qta ? o.prezzi : prezzi(o.cliente, o.materiale, c.qta);
+    if (c.valore != null && Math.abs(c.valore - p.costo) > 0.004) { p = JSON.parse(JSON.stringify(p)); p.costo = c.valore; p.margine = r2(p.netto - c.valore); }   // VPRS ripreso dall'uscita merci
     var acc = S().acconti.filter(function (a) { return a.ordine === o.numero && a.pagato && a.imponibile - a.dedotto > 0.004; });
     var dedotto = 0; acc.forEach(function (a) { var d = Math.min(a.imponibile - a.dedotto, p.netto - dedotto); a.dedotto = r2(a.dedotto + d); dedotto = r2(dedotto + d); });
     var ivaDovuta = r2((p.netto - dedotto) * IVA / 100), daIncassare = r2(p.netto - dedotto + ivaDovuta);

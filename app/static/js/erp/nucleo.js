@@ -13,10 +13,23 @@
     ['30', 'Capitale e riserve', 'PASSIVO'],
     ['40', 'Ricavi di vendita (prezzo lordo PR00)', 'RICAVO'], ['47', 'Sconti su vendite (K007, ZSCA)', 'RICAVO'], ['48', 'Ricavi per trasporti addebitati (KF00)', 'RICAVO'],
     ['49', 'Resi e abbuoni su vendite', 'RICAVO'], ['41', 'Costo del venduto a standard (VPRS)', 'COSTO'], ['57', 'Provvigioni passive', 'COSTO'],
+    // dalla tappa CO-PC: acquisti, produzione, costi del prodotto, Material Ledger
+    ['12', 'Magazzino ferro (materie prime)', 'ATTIVO'], ['14', 'IVA a credito', 'ATTIVO'], ['20', 'Debiti verso fornitori', 'PASSIVO'],
+    ['22', 'Fatture da ricevere (conto WE/RE)', 'PASSIVO'], ['42', 'Differenze di prezzo sul venduto (Material Ledger)', 'COSTO'],
+    ['61', 'Varianze di produzione (liquidazione ordini)', 'COSTO'], ['63', 'Differenze prezzo materiali (PRD)', 'COSTO'],
+    ['64', 'Rivalutazione magazzino per nuovo costo standard', 'RICAVO'], ['70', 'Consumi di materie prime', 'COSTO'],
+    ['72', 'Attività addebitate agli ordini (costi secondari)', 'COSTO'], ['78', 'Sovraccosti addebitati agli ordini', 'COSTO'],
+    ['73', 'Output di produzione (accredito ordini)', 'RICAVO'], ['75', 'Attività accreditate dai centri di costo', 'RICAVO'],
+    ['76', 'Sovraccosti accreditati ai centri di costo', 'RICAVO'],
   ];
+  // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
-    'TR-STD': {nome: 'Transenna standard', std: 31.40}, 'TR-ALTA': {nome: 'Transenna alta (prolunga)', std: 36.10}, 'TR-PED': {nome: 'Transenna pedonale (base)', std: 29.55},
+    'TR-STD': {nome: 'Transenna standard', tipo: 'FERT', um: 'pz', std: 31.40, ferro: 8, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.40}, attrezzaggio: 3},
+    'TR-ALTA': {nome: 'Transenna alta (prolunga)', tipo: 'FERT', um: 'pz', std: 36.10, ferro: 10, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.50}, attrezzaggio: 3},
+    'TR-PED': {nome: 'Transenna pedonale (base)', tipo: 'FERT', um: 'pz', std: 29.55, ferro: 9, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.30}, attrezzaggio: 3},
+    'FERRO': {nome: 'Tubo di ferro', tipo: 'ROH', um: 'kg', std: 0.95},
   };
+  var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg'}};
   var CLIENTI = {
     'C100': {nome: 'Beta Costruzioni Srl', regione: 'Umbria', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: '30 gg'},
     'C200': {nome: 'Delta Noleggi Srl', regione: 'Toscana', canale: '20 Noleggio', gruppo: 'Noleggiatori', pagamento: '30 gg'},
@@ -24,25 +37,42 @@
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg'},
   };
   // intervalli di numerazione come in SAP
-  var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000};
+  var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
+    acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',
       pianoDeiConti: CONTI.map(function (c) { return {codice: c[0], nome: c[1], tipo: c[2]}; }),
       registrazioni: [], prossimoIdRegistrazione: 1, numeri: JSON.parse(JSON.stringify(NUMERI)),
       materiali: JSON.parse(JSON.stringify(MATERIALI)), clienti: JSON.parse(JSON.stringify(CLIENTI)),
-      giacenze: {'TR-STD': 0, 'TR-ALTA': 0, 'TR-PED': 0}, movimenti: [],
-      condizioni: [], ordini: [], consegne: [], fatture: [], acconti: [], copa: [], partite: [], avviato: false};
+      giacenze: {'TR-STD': 0, 'TR-ALTA': 0, 'TR-PED': 0, 'FERRO': 0}, movimenti: [],
+      condizioni: [], ordini: [], consegne: [], fatture: [], acconti: [], copa: [], partite: [], avviato: false,
+      fornitori: JSON.parse(JSON.stringify(FORNITORI)), acquisti: [], fattureFornitore: [], produzione: [], mlPD: [],
+      costing: {scheda: {sovrMat: 5, sovrProd: 10, tariffa: 28, lotto: 300, confermata: false}, stime: {}, rilasci: [], ml: []}};
+  }
+  // stati salvati prima di una nuova tappa: si completano senza perdere il lavoro
+  function completa(S) {
+    var n = statoNuovo();
+    CONTI.forEach(function (c) { if (!S.pianoDeiConti.some(function (x) { return x.codice === c[0]; })) S.pianoDeiConti.push({codice: c[0], nome: c[1], tipo: c[2]}); });
+    Object.keys(n.numeri).forEach(function (k) { if (S.numeri[k] == null) S.numeri[k] = n.numeri[k]; });
+    Object.keys(MATERIALI).forEach(function (m) {
+      if (!S.materiali[m]) S.materiali[m] = JSON.parse(JSON.stringify(MATERIALI[m]));
+      ['tipo', 'um', 'ferro', 'ore', 'attrezzaggio'].forEach(function (k) { if (S.materiali[m][k] == null && MATERIALI[m][k] != null) S.materiali[m][k] = JSON.parse(JSON.stringify(MATERIALI[m][k])); });
+      if (S.giacenze[m] == null) S.giacenze[m] = 0;
+    });
+    ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
+    return S;
   }
 
   function crea(chiave) {
     var S = null;
     try { S = JSON.parse(localStorage.getItem(chiave) || 'null'); } catch (e) { S = null; }
-    if (!S || S.lab !== 'erp') S = statoNuovo();
+    if (!S || S.lab !== 'erp') S = statoNuovo(); else completa(S);
     var N = {
       get S() { return S; },
       salva: function () { try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { throw Error('Memoria del browser piena.'); } },
       azzera: function () { S = statoNuovo(); N.salva(); return S; },
+      fornitore: function (f) { var x = S.fornitori[f]; if (!x) throw Error('Fornitore ' + f + ' inesistente.'); return x; },
       numero: function (tipo) { return String(++S.numeri[tipo]); },
       data: function (d) { L.dataOk(d); if (!S.avviato) throw Error('Prima avvia il sistema (Dati di base → Avvia).'); if (d < S.avviato) throw Error('Data anteriore all\'avvio del sistema (' + L.fd(S.avviato) + ').'); return d; },
       cliente: function (c) { var x = S.clienti[c]; if (!x) throw Error('Cliente ' + c + ' inesistente.'); return x; },

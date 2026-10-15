@@ -83,7 +83,35 @@
     ['Approva l', function (X) { X.approvaAbbuono({richiesta: o(X, 'C300', 'G2')}); }],
     ['Nota di credito G2', function (X) { X.notaCreditoAbbuono({richiesta: o(X, 'C300', 'G2'), data: '2027-01-29'}); }],
     ['F-28', function (X) { X.incasso({cliente: 'C200', importo: 12553.8, rif: 'BONIFICO DELTA', data: '2027-01-31'}); }],
+    ['Flusso documenti', null], ['KE30: quanto', null], ['Bilancio di verifica', null], ['Consegna gennaio', null],
+    ['Febbraio:', null],
+    ['KZZ2', function () { window.PC4.scheda({sovrMat: 5, sovrProd: 10, tariffa: 28, lotto: 300}); }],
+    ['CK11N: costo standard della TR-STD', function () { window.PC4.calcola({materiale: 'TR-STD', data: '2027-02-01'}); }],
+    ['CK11N: costo standard della TR-ALTA', function () { window.PC4.calcola({materiale: 'TR-ALTA', data: '2027-02-01'}); }],
+    ['CK11N: costo standard della TR-PED', function () { window.PC4.calcola({materiale: 'TR-PED', data: '2027-02-01'}); }],
+    ['CK24', function () { window.PC4.marca({}); window.PC4.rilascia({data: '2027-02-01'}); }],
+    ['ME21N', function () { window.MM4.ordine({fornitore: 'F100', materiale: 'FERRO', qta: 9000, prezzo: 1, data: '2027-02-02'}); }],
+    ['MIGO 101', function (X) { window.MM4.entrata({ordine: X.N.S.acquisti[0].numero, data: '2027-02-03'}); }],
+    ['MIRO', function (X) { window.MM4.fattura({ordine: X.N.S.acquisti[0].numero, rif: 'FT 245/2027', data: '2027-02-05'}); }],
   ];
+  var po = function (X, m) { return X.N.S.produzione.filter(function (o) { return o.materiale === m; })[0].numero; };
+  [['TR-STD', 300, 2400, 255], ['TR-ALTA', 100, 1000, 95], ['TR-PED', 300, 2790, 240]].forEach(function (x) {
+    var m = x[0];
+    SD4.push(['CO01: ordine di produzione ' + x[1] + ' ' + m, function () { window.PP4.ordine({materiale: m, qta: x[1], data: '2027-02-06'}); }],
+      ['261: ferro all\'ordine ' + m, function (X) { window.PP4.prelievo({ordine: po(X, m), kg: x[2], data: '2027-02-08'}); }],
+      ['CO11N: ore dell\'ordine ' + m, function (X) { window.PP4.conferma({ordine: po(X, m), attrezzaggio: 3, ore: x[3], data: '2027-02-10'}); }],
+      ['101: entrata ' + x[1] + ' ' + m, function (X) { window.PP4.entrata({ordine: po(X, m), data: '2027-02-12'}); }]);
+  });
+  var feb = function (X) { return X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01'; }); };
+  SD4.push(
+    ['Febbraio — VA01: Beta', function (X) { X.ordine({cliente: 'C100', materiale: 'TR-STD', qta: 300, rif: 'BETA-FEB', data: '2027-02-15'}); }],
+    ['Febbraio — VA01: Delta', function (X) { X.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: 120, rif: 'DELTA-FEB', data: '2027-02-15'}); }],
+    ['Febbraio — VL01N', function (X) { feb(X).forEach(function (o) { X.consegna({ordine: o.numero, data: '2027-02-20'}); }); }],
+    ['Febbraio — VF01', function (X) { X.N.S.consegne.filter(function (c) { return c.tipo === 'LF' && !c.fatturata; }).forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-02-21'}); }); }],
+    ['KGI2', function () { window.PC4.sovraccosti({data: '2027-02-28'}); }],
+    ['KO88', function () { window.PC4.liquida({data: '2027-02-28'}); }],
+    ['KKS2: leggi', null],
+    ['CKMLCP', function () { window.PC4.chiusuraML({periodo: '2027-02', data: '2027-02-28'}); }]);
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();

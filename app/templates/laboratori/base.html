@@ -13,7 +13,7 @@
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
     › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
-    › <b>{{ pagina.titolo }}</b></span>
+    {% if lab.area %}› {{ lab.area }} {% endif %}› <b>{{ pagina.titolo }}</b></span>
   <nav class="msa-pagine" aria-label="Pagine del laboratorio">
     {% for p in lab.nav %}<a href="{{ url_for(p.ep) }}" class="{{ 'attivo' if p.ep == pagina.ep }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
   </nav>

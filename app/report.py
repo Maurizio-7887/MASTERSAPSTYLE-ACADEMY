@@ -132,15 +132,32 @@ class Lavoro:
                          "collettori": len(s.get("collettori") or {}), "wip_gennaio": somma("2027-01", "wip"), "varianze_gennaio": somma("2027-01", "varianza"),
                          "output_gennaio": somma("2027-01", "output"), "varianze_febbraio": somma("2027-02", "varianza"), "wip_finale": self.saldo("15")})
         elif lab == "erp":
+            gen = "2027-01-31"   # gennaio: vendite e redditività · febbraio: costi del prodotto e Material Ledger
             cp = s.get("copa") or []
-            tot = lambda k: sum((r.get(k) or 0) for r in cp)
-            netti = tot("ricaviLordi") - tot("scontiQuantita") - tot("scontiCliente") + tot("trasporti") + tot("abbuoni")
-            mdc1 = round(netti - tot("costoVenduto"), 2)
+            def margini(dal, al):
+                tot = lambda k: sum((r.get(k) or 0) for r in cp if dal <= (r.get("data") or "") <= al)
+                netti = tot("ricaviLordi") - tot("scontiQuantita") - tot("scontiCliente") + tot("trasporti") + tot("abbuoni")
+                mdc1 = round(netti - tot("costoVenduto") - tot("diffPrezzo"), 2)
+                return round(netti, 2), mdc1, round(mdc1 - tot("provvigioni"), 2)
+            netti, mdc1, mdc2 = margini("", gen)
             ordini = s.get("ordini") or []
-            base.update({"ordini_or": sum(1 for o in ordini if o.get("tipo") == "OR"), "acconti_chiusi": self.saldo("19"),
-                         "ricavi_netti_copa": round(netti, 2), "mdc1": mdc1, "mdc2": round(mdc1 - tot("provvigioni"), 2),
-                         "crediti_clienti": self.saldo("11"), "banca_finale": self.saldo("10"),
-                         "note_credito": sum(1 for f in s.get("fatture") or [] if f.get("tipo") in ("RE", "G2"))})
+            costing = s.get("costing") or {}
+            prod = s.get("produzione") or []
+            ml = next((c for c in costing.get("ml") or [] if c.get("periodo") == "2027-02"), None)
+            lotto = next((c.get("v") for o in prod if o.get("materiale") == "TR-ALTA" for c in (o.get("liquidazione") or {}).get("categorie") or []
+                          if str(c.get("cat", "")).startswith("Varianza di LOTTO")), None)
+            base.update({"ordini_or": sum(1 for o in ordini if o.get("tipo") == "OR" and (o.get("data") or "") <= gen),
+                         "acconti_chiusi": self.saldo("19", fino=gen), "ricavi_netti_copa": netti, "mdc1": mdc1, "mdc2": mdc2,
+                         "crediti_clienti": self.saldo("11", fino=gen), "banca_finale": self.saldo("10", fino=gen),
+                         "note_credito": sum(1 for f in s.get("fatture") or [] if f.get("tipo") in ("RE", "G2") and (f.get("data") or "") <= gen),
+                         "std_tr_std": (s.get("materiali") or {}).get("TR-STD", {}).get("std"),
+                         "rivalutazione": round(-self.saldo("64"), 2),
+                         "pd_acquisti": round(sum(p.get("pd", 0) for p in s.get("mlPD") or [] if p.get("mat") == "FERRO"), 2),
+                         "varianza_lotto": lotto,
+                         "varianze_ordini": round(sum((o.get("liquidazione") or {}).get("varianza", 0) for o in prod), 2),
+                         "ml_venduto": self.saldo("42"),
+                         "prezzo_effettivo_ped": ((ml or {}).get("materiali") or {}).get("TR-PED", {}).get("prezzoEffettivo"),
+                         "mdc1_febbraio": margini("2027-02-01", "2027-02-28")[1]})
         return base
 
     def indicatori(self):

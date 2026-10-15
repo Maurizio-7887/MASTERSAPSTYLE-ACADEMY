@@ -56,7 +56,7 @@ ESERCIZI = {
         ],
     },
     "s4-vendite-copa": {
-        "titolo": "Sistema integrato S/4 — vendite, resi, acconti e redditività (CO-PA)",
+        "titolo": "Sistema integrato S/4 — vendite, resi, acconti e redditività (gennaio)",
         "versione": "erp-ft",
         "attesi": [
             ("ordini_or", "Ordini cliente (VA01)", 4, 0),
@@ -67,6 +67,20 @@ ESERCIZI = {
             ("mdc2", "Margine di contribuzione II (KE30)", 18593.81, 0.005),
             ("crediti_clienti", "Crediti verso clienti aperti (conto 11)", 35969.26, 0.005),
             ("banca_finale", "Banca a fine gennaio", 68653.80, 0.005),
+        ],
+    },
+    "s4-costi-ml": {
+        "titolo": "Sistema integrato S/4 — costi del prodotto e Material Ledger (febbraio)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("std_tr_std", "Nuovo costo standard TR-STD con i sovraccosti (CK24)", 34.47, 0.005),
+            ("rivalutazione", "Rivalutazione del magazzino al rilascio (conto 64)", 670.90, 0.005),
+            ("pd_acquisti", "Differenze prezzo sull'acquisto del ferro", 450.00, 0.005),
+            ("varianza_lotto", "Varianza di lotto dell'ordine TR-ALTA (100 pz)", 61.60, 0.005),
+            ("varianze_ordini", "Varianze liquidate sugli ordini (KO88)", 611.73, 0.005),
+            ("ml_venduto", "Differenze prezzo al venduto (conto 42)", 186.33, 0.005),
+            ("prezzo_effettivo_ped", "Prezzo effettivo periodico TR-PED (Material Ledger)", 34.11, 0.005),
+            ("mdc1_febbraio", "MdC I di febbraio a costo effettivo (KE30)", 9339.87, 0.005),
         ],
     },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},

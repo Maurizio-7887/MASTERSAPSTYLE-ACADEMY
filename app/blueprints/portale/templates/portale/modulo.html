@@ -15,8 +15,10 @@
     <div><h1>{{ modulo_attivo.titolo }}</h1><p>{{ modulo_attivo.descrizione }}</p></div>
     <a class="msa-indietro" href="{{ url_for('portale.ingresso', versione=versione) }}">‹ Tutti i moduli</a>
   </div>
-  <div class="msa-tiles compatte">
+  {% set ns = namespace(gruppo=None) %}
+  {% if not (app and app[0].gruppo) %}<div class="msa-tiles compatte">{% endif %}
   {% for t in app %}
+    {% if t.gruppo and t.gruppo != ns.gruppo %}{% if ns.gruppo is not none %}</div>{% endif %}<h2 class="msa-tiles-gruppo">{{ t.gruppo }}</h2><div class="msa-tiles compatte">{% set ns.gruppo = t.gruppo %}{% endif %}
     <a class="msa-tile g-{{ modulo_attivo.colore }}" href="{{ url_for(t.endpoint, versione=versione, **t.args) }}">
       <span class="ic" aria-hidden="true">{{ t.icona }}</span>
       <b>{{ t.titolo }}</b>

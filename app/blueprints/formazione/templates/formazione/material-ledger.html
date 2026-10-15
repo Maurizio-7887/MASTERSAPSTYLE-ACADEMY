@@ -1,0 +1,39 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il ferro si paga più del costo standard: la differenza finisce in un conto di costo generico.</li>
+  <li>Le varianze degli ordini restano in un altro conto, separate dal prodotto.</li>
+  <li>Il magazzino è a standard e il costo del venduto anche: nessuno sa quanto è costato davvero quello che hai venduto.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il <b>Material Ledger</b> raccoglie per ogni materiale e periodo tutte le <b>differenze di prezzo</b> (acquisti, fatture, varianze degli ordini) e a fine mese (CKMLCP) calcola il <b>prezzo effettivo periodico</b>. Le differenze si ripartiscono tra <b>consumato</b> e <b>rimanenza</b>; quelle del consumato <b>salgono di livello</b> sui prodotti che hanno usato il materiale.</p>
+<p class="lez-chiave">Durante il mese: standard (semplice, stabile). A fine mese: costo effettivo (vero), in bilancio e nel CO-PA.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Differenza di prezzo</dt><dd>Valore effettivo − valore a standard di un'entrata (acquisto, fattura, varianza dell'ordine).</dd>
+<dt>Un livello</dt><dd>Prezzo effettivo di un materiale con le sue sole differenze.</dd>
+<dt>Più livelli</dt><dd>Le differenze del ferro consumato passano ai prodotti degli ordini che l'hanno prelevato.</dd>
+<dt>Prezzo effettivo periodico</dt><dd>(valore a standard + differenze cumulate) / quantità cumulata.</dd>
+<dt>Chiusura (CKMLCP)</dt><dd>Rivaluta rimanenze e venduto e azzera i conti delle differenze.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Materiale</th><th class="n">Differenze</th><th class="n">Al consumato / venduto</th><th class="n">Alla rimanenza</th><th class="n">Standard</th><th class="n">Effettivo</th></tr>
+<tr><td>Ferro (9.000 kg a 1,00)</td><td class="n">450,00</td><td class="n">309,50 → ai 3 ordini</td><td class="n">140,50</td><td class="n">0,95</td><td class="n">1,00</td></tr>
+<tr><td>TR-STD</td><td class="n">−0,60 + 120,00</td><td class="n">96,81 (300 venduti)</td><td class="n">22,59</td><td class="n">34,47</td><td class="n">34,79</td></tr>
+<tr><td>TR-ALTA</td><td class="n">61,90 + 50,00</td><td class="n">89,52 (120 venduti)</td><td class="n">22,38</td><td class="n">39,54</td><td class="n">40,29</td></tr>
+<tr><td>TR-PED</td><td class="n">550,43 + 139,50</td><td class="n">0</td><td class="n">689,93</td><td class="n">32,39</td><td class="n">34,11</td></tr></table>
+<p>Scrittura di chiusura: D 12 140,50 · D 13 734,90 · D 42 186,33 / A 63 450 · A 61 611,73. Nel CO-PA i 186,33 vanno ai clienti: Beta 96,81, Delta 89,52.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>MIGO / MIRO</b>differenze d'acquisto</span><span class="f">+</span><span class="b"><b>KO88</b>varianze degli ordini</span><span class="f">→</span><span class="b mag"><b>Material Ledger</b>per materiale e periodo</span><span class="f">→</span><span class="b"><b>CKMLCP</b>un livello · più livelli</span><span class="f">→</span><span class="b"><b>Venduto e rimanenze</b>a costo effettivo · CO-PA</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Analisi del materiale</td><td>CKM3 (Material Price Analysis)</td></tr>
+<tr><td>Chiusura del periodo</td><td>CKMLCP (cockpit di contabilità effettiva) · in S/4 anche CKMLCPAVR</td></tr>
+<tr><td>Differenze al CO-PA</td><td>KE27 · KEU5</td></tr>
+<tr><td>In S/4HANA</td><td>Material Ledger sempre attivo per la valutazione; la contabilità effettiva si attiva a parte</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché le differenze del ferro arrivano alla TR-PED?</summary><p>Perché il ferro consumato dall'ordine TR-PED era costato più dello standard: la differenza segue il materiale lungo la distinta (più livelli).</p></details>
+<details><summary>Perché la TR-PED ha 689,93 tutti sulla rimanenza?</summary><p>Perché a febbraio non se n'è venduta nessuna: il costo effettivo resta in magazzino e passerà al venduto quando si venderà.</p></details>
+<details><summary>Lo standard serve ancora?</summary><p>Sì: durante il mese valorizza tutto in modo stabile; il Material Ledger corregge al costo vero solo a fine periodo.</p></details>
+{% endblock %}

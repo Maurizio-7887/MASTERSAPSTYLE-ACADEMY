@@ -170,3 +170,6 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 .msa-tile.g-laboratorio{border-top-color:#8D4FD8}
 .g-formazione{--c:#0F7B6C}
 .msa-tile.g-formazione{border-top-color:#0F7B6C}
+
+.msa-tiles-gruppo{font-size:14px;font-weight:600;color:var(--f-attenuato,#556B82);margin:18px 0 6px;letter-spacing:.2px}
+.msa-tiles-gruppo:first-of-type{margin-top:4px}

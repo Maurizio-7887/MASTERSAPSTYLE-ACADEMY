@@ -1,0 +1,43 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il costo standard è «materia prima + ore di reparto» e basta.</li>
+  <li>Acquisti, ricevimento, magazzino, capireparto, manutenzione: costi veri che il prodotto non vede.</li>
+  <li>I margini per prodotto sembrano buoni, ma a fine anno l'utile non torna.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Manca la <b>scheda di calcolo</b> (costing sheet): le righe che aggiungono ai costi diretti i <b>sovraccosti</b>, cioè i costi indiretti attribuiti in percentuale. In SAP la scheda (KZS2) dice su quale base si calcola ogni sovraccosto e le percentuali (KZZ2) dicono quanto.</p>
+<p class="lez-chiave">Lo stesso calcolo (CK11N) produce il nuovo costo standard; il rilascio (CK24) lo rende ufficiale e rivaluta il magazzino.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Scheda di calcolo</dt><dd>Righe di base (elementi di costo) e righe di sovraccosto con la loro base («da riga – a riga»).</dd>
+<dt>Sovraccosto materiale</dt><dd>% sul materiale diretto: copre acquisti, ricevimento, magazzino.</dd>
+<dt>Sovraccosto di produzione</dt><dd>% sulle attività: copre i costi di reparto non legati alle ore (capireparto, manutenzione, servizi).</dd>
+<dt>Lotto di calcolo</dt><dd>Il lotto su cui si spalma l'attrezzaggio (fisso) nello standard.</dd>
+<dt>Marca / rilascia (CK24)</dt><dd>Il prezzo futuro diventa il prezzo standard; il magazzino in giacenza si rivaluta (giacenza × differenza).</dd>
+{% endblock %}
+{% block esempio %}
+<p>TR-STD, lotto di calcolo 300 pezzi, sovraccosto materiale 5%, di produzione 10%, tariffa 28 €/h.</p>
+<table class="lez-tab"><tr><th>Riga</th><th>Elemento</th><th class="n">Lotto 300</th><th class="n">Per pezzo</th></tr>
+<tr><td>10</td><td>Ferro 2.400 kg × 0,95</td><td class="n">2.280,00</td><td class="n">7,60</td></tr>
+<tr><td>20</td><td>Sovraccosto materiale 5%</td><td class="n">114,00</td><td class="n">0,38</td></tr>
+<tr><td>30</td><td>Lavorazione 255 h × 28</td><td class="n">7.140,00</td><td class="n">23,80</td></tr>
+<tr><td>40</td><td>Attrezzaggio 3 h × 28 (fisso)</td><td class="n">84,00</td><td class="n">0,28</td></tr>
+<tr><td>50</td><td>Sovraccosto di produzione 10% di 30+40</td><td class="n">722,40</td><td class="n">2,41</td></tr>
+<tr class="tot"><td></td><td>Costo di produzione</td><td class="n">10.340,40</td><td class="n">34,47</td></tr></table>
+<p>Lo standard di gennaio era 31,40: ogni TR-STD venduta a gennaio aveva 3,07 € di costi che il margine non vedeva. Al rilascio i 70 pezzi in magazzino si rivalutano di 214,90 (D 13 / A 64); in tutto, con TR-ALTA e TR-PED, 670,90.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Distinta + ciclo</b>ferro · ore · attrezzaggio</span><span class="f">→</span><span class="b"><b>Scheda di calcolo</b>+ 5% materiale · + 10% produzione</span><span class="f">→</span><span class="b mag"><b>CK11N</b>stima KA</span><span class="f">→</span><span class="b"><b>CK24</b>marca VO · rilascia FR</span><span class="f">→</span><span class="b"><b>Nuovo standard</b>magazzino rivalutato</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Scheda di calcolo e percentuali</td><td>KZS2 · KZZ2 (customizing)</td></tr>
+<tr><td>Tariffe delle attività</td><td>KP26</td></tr>
+<tr><td>Calcolo del costo standard</td><td>CK11N · CK40N (di massa) · CK13N (visualizza)</td></tr>
+<tr><td>Marca e rilascio</td><td>CK24</td></tr>
+<tr><td>Sovraccosti sugli ordini a fine mese</td><td>KGI2 · CO43</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il sovraccosto si calcola in percentuale?</summary><p>Perché quei costi non si misurano per pezzo: si attribuiscono con una base che li approssima (il materiale per acquisti e magazzino, le ore per i servizi di reparto).</p></details>
+<details><summary>La rivalutazione al rilascio è un ricavo vero?</summary><p>No: è l'adeguamento del valore del magazzino al nuovo costo standard. Rende coerente il bilancio con il nuovo standard.</p></details>
+<details><summary>Che cosa cambia nel margine CO-PA?</summary><p>Da febbraio il costo del venduto (VPRS) contiene i sovraccosti: il margine per cliente diventa più realistico.</p></details>
+{% endblock %}

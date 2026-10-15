@@ -30,6 +30,9 @@ app/
     erp_dati/        SISTEMA INTEGRATO S/4 · Dati di base: avvio (saldi di apertura), clienti e materiali, condizioni VK11/VK13 e procedura ZFT001 (V/08)
     erp_vendite/     S/4 · Vendite: VA01 con determinazione prezzi, acconti F-37/F-29 (CoGe speciale, AZWB), VL01N 601, VF01, resi RE/651, abbuoni G2 con blocco, F-28/FBL5N, flusso documenti
     erp_copa/        S/4 · CO-PA: KE30 margine di contribuzione I e II per cliente/materiale/regione/canale, KE24 righe singole
+    erp_acquisti/    S/4 · Acquisti: ME21N, MIGO 101 a standard con differenza prezzo (conto 63), MIRO con WE/RE
+    erp_produzione/  S/4 · Produzione: CO01 con costi pianificati, 261, CO11N (attrezzaggio + lavorazione), 101, TECO
+    erp_costi/       S/4 · CO-PC: scheda di calcolo con sovraccosti, CK11N/CK24 con rivalutazione, KGI2, KKS2 (anche varianza di lotto), KO88, Material Ledger CKM3/CKMLCP a più livelli
     erp_fi/          S/4 · Contabilità: libro giornale e bilancio di verifica del sistema integrato
                      (un solo stato «erp-ft» e un solo libro giornale per tutti i moduli S/4: static/js/erp/nucleo.js)
     formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
@@ -75,7 +78,7 @@ npm test
 | `test:multipagina` | gli stessi 48 passi passando davvero da una pagina all'altra |
 | `test:ponte` | i salti fra pagine (SD → FI-AR, Fabbisogno → PP, Giornale → MIRO…) arrivano a destinazione |
 | `test:laboratori` | i due laboratori eseguiti per intero: WIP 3.900, varianze 252, buffer 225/525/725; piano 167/100/67, WIP 404, varianze 132,20 |
-| `test:s4` | il sistema integrato S/4 eseguito dalle pagine (moduli e pulsanti): saldi, CO-PA (MdC I 19.946, MdC II 18.593,81), guida, lezioni |
+| `test:s4` | il sistema integrato S/4 eseguito dalle pagine (moduli e pulsanti): gennaio (MdC I 19.946, MdC II 18.593,81) e febbraio (standard 34,47, varianze 611,73, lotto 61,60, Material Ledger 186,33 al venduto, MdC I effettivo 9.339,87), guida, lezioni |
 | `test:accessi` | accesso, cambio password, blocco, tempo e costo, salvataggio del lavoro, consegna, report 15/15, stampa, risposta |
 | `test:guida` | i passi della finestra si spuntano tutti sullo stato finale dell'esercizio e nessuno su un'azienda nuova |
 | `test:sincronia` | sincronia.js: stato dal server, salvataggio, lavoro non ancora salvato, cambio di allievo sullo stesso browser |
@@ -104,6 +107,6 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 | `COSTO_ORARIO` | costo orario iniziale in € (poi si cambia dal pannello) |
 
 ## Prossimi passi
-- sistema integrato S/4, tappe successive: CO-PC (scheda di calcolo con sovraccosti, varianze di lotto, Material Ledger), PS, WM, tesoreria, valute, infragruppo e consolidato, cedolino
+- sistema integrato S/4, tappe successive: PS, WM, tesoreria, valute, infragruppo e consolidato, cedolino
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite

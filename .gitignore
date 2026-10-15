@@ -8,3 +8,4 @@ tests/_pagina-*.html
 tests/_pagine/
 academy.sqlite3
 tests/lab-*-finale.json
+tests/lab-erp-gennaio.json

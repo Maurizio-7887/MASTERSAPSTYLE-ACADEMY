@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Lo stesso prodotto, fatto bene, «costa di più» quando l'ordine è piccolo.</li>
+  <li>La varianza dell'ordine è un numero solo: nessuno sa se è efficienza, materiale o lotto.</li>
+  <li>Il commerciale accetta ordini da 50 pezzi allo stesso prezzo di quelli da 500.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il costo standard spalma l'<b>attrezzaggio</b> (costo fisso per lotto) sul <b>lotto di calcolo</b>. Se l'ordine è più piccolo, l'attrezzaggio resta uguale ma si divide su meno pezzi: nasce la <b>varianza di lotto</b>. SAP la separa nel calcolo delle varianze (KKS2) confrontando i <b>costi pianificati</b> del lotto reale con i <b>costi obiettivo</b> (standard × pezzi versati).</p>
+<p class="lez-chiave">Costi effettivi − costi pianificati = varianze di input (quantità, efficienza, sovraccosti). Costi pianificati − costi obiettivo = varianza di lotto. Costi obiettivo − accredito = prezzo dell'output.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Costi pianificati</dt><dd>Calcolati sull'ordine (CO01) per il suo lotto: l'attrezzaggio c'è tutto.</dd>
+<dt>Costi obiettivo</dt><dd>Costo standard × quantità versata: l'attrezzaggio c'è in proporzione al lotto di calcolo.</dd>
+<dt>Varianza di lotto</dt><dd>La parte di costi fissi dovuta al lotto diverso da quello di calcolo.</dd>
+<dt>Varianze di input</dt><dd>Quantità di materiale, ore, sovraccosti in più o in meno rispetto al piano.</dd>
+<dt>Prezzo dell'output</dt><dd>Differenza tra costi obiettivo e accredito a standard (es. arrotondamento del prezzo).</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Ordine</th><th class="n">Pezzi</th><th class="n">Varianza</th><th>Categorie</th></tr>
+<tr><td>TR-STD</td><td class="n">300</td><td class="n">−0,60</td><td>solo prezzo dell'output (34,47 arrotonda 34,468)</td></tr>
+<tr><td>TR-ALTA</td><td class="n">100</td><td class="n">61,90</td><td><b>lotto 61,60</b> = (84 − 84 × 100/300) × 1,10 · output 0,30</td></tr>
+<tr><td>TR-PED</td><td class="n">300</td><td class="n">550,43</td><td>ferro 85,50 (90 kg) · ore 420 (15 h) · sovraccosti 46,28 · output −1,35</td></tr></table>
+<p>La TR-ALTA è stata prodotta con la stessa efficienza dello standard: i 61,60 € (0,62 €/pz) sono il prezzo del lotto piccolo. La TR-PED invece ha un problema di efficienza: sfrido e ore.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Effettivi</b>4.015,90</span><span class="f">− input 0 →</span><span class="b"><b>Pianificati lotto 100</b>4.015,90</span><span class="f">− lotto 61,60 →</span><span class="b mag"><b>Obiettivo</b>3.954,30</span><span class="f">− output 0,30 →</span><span class="b"><b>Accredito 101</b>100 × 39,54 = 3.954</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Costi pianificati / effettivi dell'ordine</td><td>KKBC_ORD · CO03 → Costi</td></tr>
+<tr><td>Calcolo delle varianze</td><td>KKS2 (singolo) · KKS1 (collettivo)</td></tr>
+<tr><td>Categorie di varianza</td><td>chiave di varianza nell'anagrafica materiale (MRP 4 / Costing 1)</td></tr>
+<tr><td>Liquidazione</td><td>KO88 · CO88</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Se l'ordine fosse stato di 600 pezzi?</summary><p>Varianza di lotto negativa (favorevole): l'attrezzaggio si divide su più pezzi di quelli dello standard.</p></details>
+<details><summary>A chi va mostrata la varianza di lotto?</summary><p>Al commerciale e alla pianificazione: dice quanto costa accettare lotti piccoli e aiuta a fissare un prezzo o un lotto minimo.</p></details>
+{% endblock %}
