@@ -94,16 +94,44 @@ window.SD4 = (function () {
     N.salva(); return r;
   }
 
-  // VL01N con uscita merci (601)
+  // VL01N con uscita merci (601). Con il WMS attivo la consegna nasce senza uscita merci: prima il prelievo (compiti di magazzino),
+  // poi l'uscita merci (VL02N) dalla zona di spedizione, per la quantità prelevata.
   function consegna(i) {
     var o = ord(i.ordine), data = N.data(i.data);
     if (data < o.data) throw Error('Consegna anteriore all\'ordine.');
-    var q = o.qta - o.consegnato; if (q <= 0) throw Error('Ordine già consegnato.');
+    var aperte = S().consegne.filter(function (c) { return c.ordine === o.numero && c.tipo === 'LF' && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0);
+    var q = o.qta - o.consegnato - aperte; if (q <= 0) throw Error('Ordine già consegnato (o con una consegna in prelievo).');
+    var WM = window.WM4;
+    if (WM && WM.attivo(data)) {
+      if ((S().giacenze[o.materiale] || 0) < q) throw Error('Giacenza insufficiente di ' + o.materiale + ': disponibili ' + L.n0(S().giacenze[o.materiale]) + ' pz.');
+      var c = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, pgi: false, wm: true};
+      S().consegne.push(c);
+      var t = WM.creaPrelievo(c, data);
+      N.salva();
+      return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino è gestito a ubicazioni (WMS), quindi nessuna uscita merci per ora. Creati ' + t.length + ' compiti di prelievo (FIFO) verso la zona di spedizione: confermali dalla pistola RF, poi registra l\'uscita merci.</p>';
+    }
     var std = N.materiale(o.materiale).std, val = r2(q * std);
     N.movimento(o.materiale, -q, data, '601', o.numero);
-    var c = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val};
-    S().consegne.push(c); o.consegnato += q;
-    var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + o.materiale + ' (ordine ' + o.numero + ')',
+    var c2 = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val};
+    S().consegne.push(c2); o.consegnato += q;
+    var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c2.numero, descrizione: 'Consegna ' + c2.numero + ' — uscita merci 601 ' + q + ' pz ' + o.materiale + ' (ordine ' + o.numero + ')',
+      righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
+    N.salva(); return r;
+  }
+  // VL02N uscita merci di una consegna prelevata a magazzino (stato prelievo C)
+  function uscitaMerci(i) {
+    var c = S().consegne.find(function (x) { return x.numero === String(i.consegna); }); if (!c) throw Error('Consegna inesistente.');
+    if (c.pgi !== false) throw Error('Uscita merci già registrata.');
+    var data = N.data(i.data); if (data < c.data) throw Error('Uscita merci anteriore alla consegna.');
+    var WM = window.WM4, prel = WM.statoPrelievo(c);
+    if (prel.stato !== 'C') throw Error('Prelievo non completato (stato ' + prel.stato + '): ' + prel.aperti + ' compiti ancora aperti.');
+    var o = ord(c.ordine), q = prel.prelevato;
+    if (q <= 0) throw Error('Niente di prelevato.');
+    var std = N.materiale(c.materiale).std, val = r2(q * std);
+    WM.uscitaSpedizione(c, q);
+    N.movimento(c.materiale, -q, data, '601', o.numero);
+    c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q;
+    var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + c.materiale + ' dalla zona di spedizione (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
     N.salva(); return r;
   }
@@ -119,6 +147,7 @@ window.SD4 = (function () {
   function fattura(i) {
     var c = S().consegne.find(function (x) { return x.numero === String(i.consegna); }); if (!c) throw Error('Consegna inesistente.');
     if (c.fatturata) throw Error('Consegna già fatturata.');
+    if (c.pgi === false) throw Error('Consegna senza uscita merci: prima il prelievo e l\'uscita merci (VL02N).');
     var data = N.data(i.data); if (data < c.data) throw Error('Fattura anteriore alla consegna.');
     var o = ord(c.ordine), p = c.qta === o.qta ? o.prezzi : prezzi(o.cliente, o.materiale, c.qta);
     if (c.valore != null && Math.abs(c.valore - p.costo) > 0.004) { p = JSON.parse(JSON.stringify(p)); p.costo = c.valore; p.margine = r2(p.netto - c.valore); }   // VPRS ripreso dall'uscita merci
@@ -155,6 +184,7 @@ window.SD4 = (function () {
     if (o.rientrato) throw Error('Merce già rientrata.');
     var data = N.data(i.data), val = r2(o.qta * N.materiale(o.materiale).std);
     N.movimento(o.materiale, o.qta, data, '651', o.numero); o.rientrato = data;
+    if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, o.qta, data, o.numero, '651');
     var c = {numero: N.numero('consegna'), tipo: 'LR', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: o.qta, data: data};
     S().consegne.push(c);
     var r = N.post({data: data, tipo: 'ENTRATA_RESO', rif: c.numero, descrizione: 'Consegna di reso ' + c.numero + ' — entrata merci 651 ' + o.qta + ' pz ' + o.materiale + ' (reso ' + o.numero + ')',
@@ -211,7 +241,8 @@ window.SD4 = (function () {
     var s = S(), o = ord(numero), out = [{livello: 0, tipo: o.tipo === 'OR' ? 'Ordine cliente' : o.tipo === 'RE' ? 'Ordine di reso' : 'Richiesta nota di credito', numero: o.numero, data: o.data, stato: ''}];
     s.acconti.filter(function (a) { return a.ordine === o.numero; }).forEach(function (a) { out.push({livello: 1, tipo: 'Richiesta di acconto (F-37)', numero: a.numero, data: a.data, stato: a.pagato ? 'incassata ' + L.fd(a.pagato) : 'aperta'}); });
     s.consegne.filter(function (c) { return c.ordine === o.numero; }).forEach(function (c) {
-      out.push({livello: 1, tipo: c.tipo === 'LR' ? 'Consegna di reso (651)' : 'Consegna (601)', numero: c.numero, data: c.data, stato: c.tipo === 'LF' ? (c.fatturata ? 'fatturata' : 'da fatturare') : ''});
+      out.push({livello: 1, tipo: c.tipo === 'LR' ? 'Consegna di reso (651)' : 'Consegna (601)', numero: c.numero, data: c.data, stato: c.tipo === 'LF' ? (c.pgi === false ? 'in prelievo (WMS)' : c.fatturata ? 'fatturata' : 'da fatturare') : ''});
+      if (window.WM4) window.WM4.compitiDi(c.numero).forEach(function (t) { out.push({livello: 2, tipo: 'Compito di magazzino ' + t.tipo, numero: t.numero, data: t.confermato || t.creato, stato: t.stato + (t.da ? ' · ' + t.da + ' → ' + t.a : '')}); });
       s.fatture.filter(function (f) { return f.consegna === c.numero; }).forEach(function (f) {
         out.push({livello: 2, tipo: 'Fattura (F2)', numero: f.numero, data: f.data, stato: 'contabile ' + f.contabile});
         s.ordini.filter(function (r) { return r.fattura === f.numero; }).forEach(function (r) { out.push({livello: 3, tipo: r.tipo === 'RE' ? 'Ordine di reso' : 'Richiesta nota di credito', numero: r.numero, data: r.data, stato: r.accreditato ? 'accreditato' : 'aperto'}); });
@@ -227,7 +258,7 @@ window.SD4 = (function () {
     });
   }
   return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, richiestaAcconto: richiestaAcconto,
-    incassoAcconto: incassoAcconto, consegna: consegna, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
+    incassoAcconto: incassoAcconto, consegna: consegna, uscitaMerci: uscitaMerci, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
     richiestaAbbuono: richiestaAbbuono, approvaAbbuono: approvaAbbuono, notaCreditoAbbuono: notaCreditoAbbuono, incasso: incasso, flusso: flusso, partite: partite,
     avviaSistema: function (i) { return N.avvia(i); }};
 })();

@@ -21,6 +21,7 @@ window.PP4 = (function () {
     var n = N(), o = ord(i.ordine); aperto(o);
     var data = n.data(i.data), kg = L.num(i.kg, 'Quantità ferro (kg)', 0.001); if (data < o.data) throw Error('Prelievo anteriore all\'ordine.');
     var val = r2(kg * n.materiale('FERRO').std), doc = n.numero('materiale');
+    if (window.WM4 && window.WM4.attivo(data)) window.WM4.consumaPSA('FERRO', kg, o.numero);
     n.movimento('FERRO', -kg, data, '261', o.numero);
     o.eventi.push({tipo: '261', data: data, kg: kg, valore: val, doc: doc});
     var r = n.post({data: data, tipo: 'PRELIEVO_261', rif: o.numero, descrizione: 'MIGO 261 doc. ' + doc + ' — ' + L.n0(kg) + ' kg di ferro all\'ordine ' + o.numero + ' (' + o.materiale + ')',
@@ -43,6 +44,7 @@ window.PP4 = (function () {
     if (q > o.qta - somma(o, '101', 'qta') + 1e-9) throw Error('Restano da versare ' + (o.qta - somma(o, '101', 'qta')) + ' pz.');
     var m = n.materiale(o.materiale), val = r2(q * m.std), doc = n.numero('materiale');
     n.movimento(o.materiale, q, data, '101', o.numero);
+    if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, q, data, doc, '101 produzione');
     o.eventi.push({tipo: '101', data: data, qta: q, valore: val, doc: doc, std: m.std});
     var r = n.post({data: data, tipo: 'ENTRATA_PRODUZIONE', rif: o.numero, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + q + ' pz ' + o.materiale + ' dall\'ordine ' + o.numero + ' a standard ' + L.eur(m.std),
       righe: [{conto: '13', dareAvere: 'DARE', importo: val}, {conto: '73', dareAvere: 'AVERE', importo: val, partner: o.numero}]});

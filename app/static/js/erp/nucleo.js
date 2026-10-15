@@ -21,6 +21,8 @@
     ['72', 'Attività addebitate agli ordini (costi secondari)', 'COSTO'], ['78', 'Sovraccosti addebitati agli ordini', 'COSTO'],
     ['73', 'Output di produzione (accredito ordini)', 'RICAVO'], ['75', 'Attività accreditate dai centri di costo', 'RICAVO'],
     ['76', 'Sovraccosti accreditati ai centri di costo', 'RICAVO'],
+    // dalla tappa WMS
+    ['65', 'Differenze inventariali di magazzino', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
@@ -38,7 +40,8 @@
   };
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
-    acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000};
+    acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
+    compito: 100000, udc: 1000000, inventario: 1};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',

@@ -23,6 +23,7 @@ window.MM4 = (function () {
     var m = n.materiale(o.materiale), std = r2(q * m.std), ord = r2(q * o.prezzo), pd = r2(ord - std);
     var doc = n.numero('materiale');
     n.movimento(o.materiale, q, data, '101', o.numero);
+    if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, q, data, doc, '101 acquisto');
     o.entrato = r2(o.entrato + q); o.valoreEntrato = r2(o.valoreEntrato + ord);
     var r = n.post({data: data, tipo: 'ENTRATA_ACQUISTO', rif: doc, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + L.n0(q) + ' ' + m.um + ' ' + o.materiale + ' da ordine ' + o.numero,
       righe: [{conto: '12', dareAvere: 'DARE', importo: std, testo: 'a standard ' + L.eur(m.std)}, {conto: '63', dareAvere: 'DARE', importo: pd, testo: 'differenza prezzo ' + o.materiale},
