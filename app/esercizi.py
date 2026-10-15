@@ -111,6 +111,20 @@ ESERCIZI = {
             ("giacenza_tr_ped", "Giacenza TR-PED dopo la spedizione", 148, 0),
         ],
     },
+    "s4-innovazione": {
+        "titolo": "Sistema integrato S/4 — innovazione del magazzino: slotting, ondate, RFID (maggio, UF 11)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("slotting", "Trasferimenti di slotting confermati", 3, 0),
+            ("ondata_compiti", "Compiti dell'ondata", 4, 0),
+            ("ondata_metri", "Metri del giro a ondata", 22, 0.005),
+            ("ondata_metri_ordine", "Metri con un giro per consegna", 34, 0.005),
+            ("rfid_letture", "Colli letti dal varco RFID", 4, 0),
+            ("colli_maggio", "Colli imballati a maggio", 4, 0),
+            ("consegne_maggio", "Consegne di maggio uscite", 2, 0),
+            ("giacenza_tr_ped_maggio", "Giacenza TR-PED a fine maggio", 28, 0),
+        ],
+    },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
 }
 

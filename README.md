@@ -36,6 +36,7 @@ app/
     erp_magazzino/   S/4 · WMS in logica SAP: W100, tipi magazzino 902/001/002/100/916/999, ubicazioni, quanti, UdC, compiti con strategie, pistola RF (pistola vera in modalità tastiera o fotocamera), monitor, etichette Code 128 / QR
     erp_inventario/  S/4 · Inventari fisici e contabili (UF 9): documenti annuale / a rotazione ABC / ubicazione vuota, lista cieca, conta e riconta, 999, LI21, valorizzazione FIFO-LIFO-CMP-standard
     erp_spedizione/  S/4 · Spedizione (UF 10): monitor VL06O con stati A/B/C, lista di prelievo FIFO, imballo in colli con SSCC GS1 ed etichette GS1-128, trasporto VT01N, carico con lettura degli SSCC (RF), uscita merci del trasporto, DDT (D.P.R. 472/96)
+    erp_innovazione/ S/4 · Innovazione logistica (UF 11): KPI di magazzino, slotting ABC per righe di prelievo, prelievo a ondate a serpentina, cross-docking, varco RFID (EPC SSCC-96)
     erp_fi/          S/4 · Contabilità: libro giornale e bilancio di verifica del sistema integrato
                      (un solo stato «erp-ft» e un solo libro giornale per tutti i moduli S/4: static/js/erp/nucleo.js)
     formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
@@ -110,7 +111,7 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 | `COSTO_ORARIO` | costo orario iniziale in € (poi si cambia dal pannello) |
 
 ## Prossimi passi
-- corso FORMAS (Pistoia): UF 11 innovazione (slotting ABC, prelievo a ondate, cross-docking, KPI di magazzino, RFID)
+- corso FORMAS (Pistoia): percorso UF 8–11 in /<versione>/formazione/formas
 - sistema integrato S/4, tappe successive: tesoreria, valute, infragruppo e consolidato, cedolino
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite

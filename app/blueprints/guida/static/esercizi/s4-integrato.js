@@ -3,7 +3,10 @@
 (function () {
   var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.', M = 'erp_magazzino.', I = 'erp_inventario.';
   var inv = function (h) { return ((h.S.wm || {}).inventari || [])[0]; };
-  var X = 'erp_spedizione.';
+  var X = 'erp_spedizione.', Z = 'erp_innovazione.';
+  var trasf = function (h) { return ((h.S.wm || {}).compiti || []).filter(function (t) { return t.tipo === 'TRASF' && /slotting/.test(t.motivo || ''); }); };
+  var magO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-05-01'; }); };
+  var magC = function (h) { return (h.S.consegne || []).filter(function (k) { return k.wm && k.data >= '2027-05-01'; }); };
   var aprO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-04-01'; }); };
   var aprC = function (h, c) { return (h.S.consegne || []).filter(function (k) { return k.cliente === c && k.wm; })[0]; };
   var prelevato = function (h, c) { var k = aprC(h, c); if (!k) return false; var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.consegna === k.numero; }); return t.length > 0 && t.every(function (x) { return x.stato === 'confermato'; }); };
@@ -46,7 +49,7 @@
       campi: [['Committente', c], ['Materiale', m], ['Quantità', String(q)], ['Riferimento', rif], ['Data', '15/02/2027']], attesa: attesa, fatto: function (h) { return ord(h, c, 'OR', true).length > 0; }};
   };
   window.MSA_ESERCIZIO = {
-    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gennaio), costi (febbraio), magazzino e inventario (marzo), spedizione (aprile)', versione: 'erp-ft',
+    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gen), costi (feb), magazzino e inventario (mar), spedizione (apr), innovazione (mag)', versione: 'erp-ft',
     passi: [
       {g: 'Prima di cominciare', data: '', titolo: 'Che cosa è il sistema integrato', dove: {ep: D + 'avvio'}, percorso: 'Launchpad → S/4 Sistema integrato → Avvio del sistema',
        campi: [['Un solo libro giornale', 'ogni documento logistico scrive la sua registrazione'], ['Prezzi', 'non si digitano: li determina la procedura ZFT001 dalle condizioni'],
@@ -242,7 +245,7 @@
        attesa: 'Un trasporto, un giro: Umbria e Lazio. Due destinatari = due DDT.', fatto: function (h) { return ((h.S.sped || {}).trasporti || []).length > 0; }},
       {g: 'Aprile — carico', data: '08/04/2027', titolo: 'RF: carica i 7 colli leggendo gli SSCC', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Carico',
        campi: [['Per ogni collo', 'leggi l\'SSCC sull\'etichetta'], ['Controllo', 'un collo di un altro camion viene rifiutato']],
-       fatto: function (h) { var c = ((h.S.sped || {}).colli || []); return c.length >= 7 && c.every(function (x) { return x.caricato; }); }},
+       fatto: function (h) { var c = ((h.S.sped || {}).colli || []).filter(function (x) { return x.data <= '2027-04-30'; }); return c.length >= 7 && c.every(function (x) { return x.caricato; }); }},
       {g: 'Aprile — carico', data: '', titolo: 'Prova: leggi un codice che non è un SSCC', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Carico', campi: [['Prova', 'leggi l\'etichetta di un\'ubicazione invece del collo']], nota: 'La pistola rifiuta: spunta a mano.'},
       {g: 'Aprile — carico', data: '08/04/2027', titolo: 'Partenza: uscita merci del trasporto', dove: {ep: X + 'trasporti'}, percorso: 'Spedizione → Trasporti · Fine carico e uscita merci',
        campi: [['Trasporto', 'quello di oggi'], ['Data', '08/04/2027']], attesa: 'Uscita merci 601 per le due consegne: D 41 / A 13 8.097,50 (TR-PED) e 2.068,20 (TR-STD). DDT n. 1 e 2.',
@@ -256,6 +259,46 @@
       {g: 'Aprile — documenti', data: '', titolo: 'Monitor VL06O: tutto in stato C', dove: {ep: X + 'monitor'}, percorso: 'Spedizione → Monitor', campi: [['Le due consegne', 'prelievo C · imballo C · carico C · uscita C · fattura C']], nota: 'Spunta a mano.'},
       {g: 'Fine di aprile', data: '', titolo: 'Consegna il lavoro di aprile al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
        campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — spedizione']]},
+      // ═══ MAGGIO — innovazione del magazzino (UF 11) ═══
+      {g: 'Maggio — innovazione (UF 11)', data: '', titolo: 'Maggio: innovare il magazzino', dove: {ep: Z + 'kpi'}, percorso: 'S/4 → Innovazione logistica',
+       campi: [['Misurare', 'KPI dai dati veri del sistema'], ['Camminare meno', 'slotting e prelievo a ondate'], ['Leggere di più', 'varco RFID al carico']]},
+      {g: 'Maggio — innovazione (UF 11)', data: '', titolo: 'KPI di maggio: la fotografia di partenza', dove: {ep: Z + 'kpi'}, percorso: 'Innovazione → KPI di magazzino',
+       campi: [['Accuratezza', '66,67 % (3 posizioni, una sbagliata)'], ['Ordini perfetti', '100 %'], ['Metri per riga', '19,25 m']], nota: 'Annota i numeri: li confronti a fine mese. Spunta a mano.'},
+      {g: 'Maggio — slotting', data: '03/05/2027', titolo: 'Slotting: avvicina alla porta gli articoli più prelevati', dove: {ep: Z + 'slotting'}, percorso: 'Innovazione → Slotting ABC',
+       campi: [['Classi per righe', 'TR-PED A · TR-STD B · TR-ALTA C'], ['Proposta', 'TR-PED 01-05-2 → 01-01-1 · 01-05-1 → 01-02-2 · 02-01-1 → 01-03-1'], ['Data', '03/05/2027']],
+       attesa: '3 compiti di trasferimento: 46 m in meno a ogni giro (andata e ritorno).', fatto: function (h) { return trasf(h).length >= 3; }},
+      {g: 'Maggio — slotting', data: '03/05/2027', titolo: 'RF: conferma i 3 trasferimenti di slotting', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti',
+       campi: [['Risorsa', 'MAG01 Marco']], fatto: function (h) { var t = trasf(h); return t.length >= 3 && t.every(function (x) { return x.stato === 'confermato'; }); }},
+      {g: 'Maggio — ondate', data: '05/05/2027', titolo: 'Attiva il prelievo a ondate', dove: {ep: Z + 'ondate'}, percorso: 'Innovazione → Prelievo a ondate e cross-docking',
+       campi: [['Prelievo a ondate', 'sì'], ['Cross-docking', 'no (per ora)']], fatto: function (h) { return !!(h.S.wm && h.S.wm.ondate); }},
+      {g: 'Maggio — ondate', data: '05/05/2027', titolo: 'Maggio — VA01: Beta 120 TR-PED', dove: {ep: V + 'ordini'}, percorso: 'S/4 → Ordini cliente',
+       campi: [['Committente', 'C100'], ['Materiale', 'TR-PED'], ['Quantità', '120'], ['Riferimento', 'BETA-MAG'], ['Data', '05/05/2027']], fatto: function (h) { return magO(h, 'C100'); }},
+      {g: 'Maggio — ondate', data: '05/05/2027', titolo: 'Maggio — VA01: Delta 20 TR-ALTA', dove: {ep: V + 'ordini'}, percorso: 'S/4 → Ordini cliente',
+       campi: [['Committente', 'C200'], ['Materiale', 'TR-ALTA'], ['Quantità', '20'], ['Riferimento', 'DELTA-MAG'], ['Data', '05/05/2027']], fatto: function (h) { return magO(h, 'C200'); }},
+      {g: 'Maggio — ondate', data: '06/05/2027', titolo: 'Maggio — VL01N: due consegne in attesa d\'ondata', dove: {ep: V + 'consegne'}, percorso: 'S/4 → Consegne',
+       campi: [['Ordini', 'i due di maggio'], ['Data', '06/05/2027']], attesa: 'Nessun compito: le consegne aspettano l\'ondata.', fatto: function (h) { return magC(h).length >= 2; }},
+      {g: 'Maggio — ondate', data: '06/05/2027', titolo: 'Rilascia l\'ondata ONDA-1', dove: {ep: Z + 'ondate'}, percorso: 'Innovazione → Rilascia l\'ondata',
+       campi: [['Data', '06/05/2027']], attesa: '4 compiti in un solo giro a serpentina: 22 m invece di 34 m con un giro per consegna (−35 %).',
+       fatto: function (h) { return ((h.S.wm || {}).ondateRilasciate || []).length > 0; }},
+      {g: 'Maggio — ondate', data: '07/05/2027', titolo: 'RF: preleva l\'ondata nell\'ordine del percorso', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti',
+       campi: [['Risorsa', 'MAG04 Giulia'], ['Ordine', '01-01-1 → 01-02-1 → 01-02-2 → 01-03-1: la coda segue il percorso']],
+       fatto: function (h) { var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.ondata; }); return t.length >= 4 && t.every(function (x) { return x.stato === 'confermato'; }); }},
+      {g: 'Maggio — carico RFID', data: '07/05/2027', titolo: 'Maggio — imballo delle due consegne', dove: {ep: X + 'imballo'}, percorso: 'Spedizione → Imballo',
+       campi: [['Beta', '3 colli: 50 · 50 · 20'], ['Delta', '1 collo da 20']], fatto: function (h) { var c = magC(h); return c.length >= 2 && c.every(function (k) { return ((h.S.sped || {}).colli || []).some(function (x) { return x.consegna === k.numero; }); }); }},
+      {g: 'Maggio — carico RFID', data: '08/05/2027', titolo: 'Maggio — VT01N: un trasporto per l\'ondata', dove: {ep: X + 'trasporti'}, percorso: 'Spedizione → Trasporti',
+       campi: [['Consegne', 'le due di maggio'], ['Vettore', 'V20 Corriere Centro Italia'], ['Targa', 'PT 456 CD'], ['Data', '08/05/2027']], fatto: function (h) { return ((h.S.sped || {}).trasporti || []).length >= 2; }},
+      {g: 'Maggio — carico RFID', data: '08/05/2027', titolo: 'Varco RFID: carica tutto in un passaggio', dove: {ep: Z + 'rfid'}, percorso: 'Innovazione → Varco RFID',
+       campi: [['Trasporto', 'quello di maggio'], ['Data', '08/05/2027']], attesa: '4 tag letti insieme: urn:epc:id:sscc:8012345.3000000008 …',
+       fatto: function (h) { return ((h.S.sped || {}).colli || []).some(function (x) { return x.rfid; }); }},
+      {g: 'Maggio — carico RFID', data: '08/05/2027', titolo: 'Maggio — partenza e uscita merci', dove: {ep: X + 'trasporti'}, percorso: 'Spedizione → Fine carico e uscita merci',
+       campi: [['Trasporto', 'quello di maggio'], ['Data', '08/05/2027']], attesa: 'DDT 3 (Beta) e 4 (Delta).', fatto: function (h) { var t = (h.S.sped || {}).trasporti || []; return t.length >= 2 && !!t[t.length - 1].partenza; }},
+      {g: 'Maggio — carico RFID', data: '10/05/2027', titolo: 'Maggio — VF01: fattura le due consegne', dove: {ep: V + 'fatture'}, percorso: 'S/4 → Fatturazione',
+       campi: [['Consegne', 'le due di maggio'], ['Data', '10/05/2027']], fatto: function (h) { var c = magC(h); return c.length >= 2 && c.every(function (k) { return k.fatturata; }); }},
+      {g: 'Maggio — chiusura', data: '', titolo: 'Cross-docking: come funziona', dove: {ep: Z + 'ondate'}, percorso: 'Innovazione → Prelievo a ondate e cross-docking',
+       campi: [['Con il cross-docking attivo', 'se una consegna trova merce in zona di ricevimento, il sistema annulla la messa a posto e la porta subito in spedizione']], nota: 'Spunta quando l\'hai spiegato.'},
+      {g: 'Maggio — chiusura', data: '', titolo: 'KPI di fine maggio: confronta', dove: {ep: Z + 'kpi'}, percorso: 'Innovazione → KPI', campi: [['Metri per riga', 'scendono dopo slotting e ondata'], ['Produttività', 'compiti per risorsa']], nota: 'Spunta a mano.'},
+      {g: 'Fine di maggio', data: '', titolo: 'Consegna il lavoro di maggio al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+       campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — innovazione del magazzino']]},
     ]),
   };
 })();

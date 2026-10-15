@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Corso FORMAS · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<link rel="stylesheet" href="{{ url_for('formazione.static', filename='formazione.css') }}">
+<style>
+.uf{background:#fff;border:1px solid #c8d6e3;border-radius:10px;padding:14px 16px;margin:12px 0}
+.uf h2{margin:0 0 4px;font-size:18px}.uf .date{color:#556B82;font-size:13px}
+.uf-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:10px}
+.uf ul{margin:4px 0;padding-left:18px;line-height:1.6}.uf h3{font-size:13px;margin:6px 0 2px;color:#0F7B6C;text-transform:uppercase;letter-spacing:.3px}
+</style>
+</head>
+<body class="msa-launchpad">
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro" style="border-left-color:#0F7B6C">
+    <h1>🗓️ Corso FORMAS — Addetto alle operazioni di spedizione</h1>
+    <p>Toscana Formazione · Fondazione Conservatorio San Giovanni Battista, Pistoia. Le unità formative del docente con, per ognuna, le lezioni da spiegare e le pagine del sistema integrato S/4 da usare in laboratorio.</p>
+  </div>
+  {% for u in formas %}
+  <section class="uf">
+    <h2>{{ u.uf }} · {{ u.titolo }}</h2>
+    <div class="date">{{ u.date }} · verifica {{ u.verifica }}</div>
+    <div class="uf-col">
+      <div><h3>Lezioni «Che situazione hai?»</h3><ul>
+        {% for l in u.lezioni %}<li><a href="{{ url_for('formazione.' ~ l | replace('-', '_')) }}">{{ caso_per[l][3] }} {{ caso_per[l][1] }}</a></li>{% endfor %}
+      </ul></div>
+      <div><h3>Laboratorio nel sistema S/4</h3><ul>
+        {% for ep, t in u.pagine %}<li><a href="{{ url_for(ep) }}">{{ t }}</a></li>{% endfor %}
+      </ul>{% if u.esercizio %}<p class="date">Esercizio: {{ u.esercizio }} — finestra «📘 Esercizio passo passo».</p>{% endif %}</div>
+    </div>
+  </section>
+  {% endfor %}
+  <p class="msa-lp-nota">Per partire da una situazione pronta: ogni lezione ha in fondo il pulsante «Prepara la situazione nel laboratorio». Le allieve consegnano il lavoro dalla loro area; il report confronta i numeri di controllo.</p>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% include "sincronia/_battito.html" %}
+</body>
+</html>

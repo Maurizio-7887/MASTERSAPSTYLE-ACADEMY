@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>«Il magazzino funziona» o «è un disastro»: nessuno ha un numero.</li>
+  <li>Gli errori di spedizione si scoprono dai reclami.</li>
+  <li>Non si sa se una novità (scaffali, pistole, ondate) ha migliorato qualcosa.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>I <b>KPI di magazzino</b> si calcolano dai dati che il sistema già registra (compiti, inventari, consegne, giacenze): accuratezza dell'inventario, ordini perfetti, tempi di ciclo, dock-to-stock, metri per riga, saturazione, rotazione e copertura. Si misurano prima e dopo ogni cambiamento.</p>
+<p class="lez-chiave">Quello che non si misura non si migliora: ogni innovazione si giudica dai KPI.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Accuratezza dell'inventario</dt><dd>Posizioni contate senza differenze / posizioni contate (obiettivo tipico ≥ 98%).</dd>
+<dt>Ordine perfetto</dt><dd>Completo, puntuale, senza danni e con documenti giusti.</dd>
+<dt>Tempo di ciclo</dt><dd>Dall'ordine all'uscita merci.</dd>
+<dt>Dock-to-stock</dt><dd>Dall'arrivo della merce alla disponibilità a scaffale.</dd>
+<dt>Saturazione</dt><dd>Ubicazioni occupate / ubicazioni disponibili.</dd>
+<dt>Rotazione e copertura</dt><dd>Quante volte la giacenza «gira» e quanti giorni di consumo copre.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>KPI</th><th class="n">Inizio maggio</th><th>Lettura</th></tr>
+<tr><td>Accuratezza dell'inventario</td><td class="n">66,67 %</td><td>1 posizione su 3 con differenza: troppo bassa, contare più spesso</td></tr>
+<tr><td>Ordini perfetti</td><td class="n">100 %</td><td>le differenze di prelievo sono state compensate</td></tr>
+<tr><td>Tempo medio di ciclo</td><td class="n">3 gg</td><td>ordine il 5, partenza l'8</td></tr>
+<tr><td>Metri per riga di prelievo</td><td class="n">19,25 m</td><td>dopo slotting e ondate scende</td></tr>
+<tr><td>Saturazione scaffali</td><td class="n">16,67 %</td><td>magazzino molto libero: spazio per crescere</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Dati</b>compiti · inventari · consegne</span><span class="f">→</span><span class="b mag"><b>KPI</b>calcolati dal sistema</span><span class="f">→</span><span class="b"><b>Azione</b>slotting · ondate · conte</span><span class="f">→</span><span class="b"><b>KPI dopo</b>è migliorato?</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Strumento</th></tr>
+<tr><td>Monitor e KPI di magazzino</td><td>/SCWM/MON · app Fiori «Warehouse KPIs» · Embedded Analytics</td></tr>
+<tr><td>Analisi delle prestazioni</td><td>Labour Management (EWM) · MC.9 / LIS in ECC</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché l'accuratezza è così bassa con una sola differenza?</summary><p>Perché le posizioni contate sono poche: con pochi dati un errore pesa molto. Servono conte regolari.</p></details>
+<details><summary>Quale KPI guarderesti per decidere se comprare un altro scaffale?</summary><p>La saturazione, insieme alla rotazione: uno scaffale pieno di merce che non gira è un problema di scorte, non di spazio.</p></details>
+{% endblock %}

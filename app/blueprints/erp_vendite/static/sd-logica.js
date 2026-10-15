@@ -108,7 +108,8 @@ window.SD4 = (function () {
       S().consegne.push(c);
       var t = WM.creaPrelievo(c, data);
       N.salva();
-      return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino è gestito a ubicazioni (WMS), quindi nessuna uscita merci per ora. Creati ' + t.length + ' compiti di prelievo (FIFO) verso la zona di spedizione: confermali dalla pistola RF, poi registra l\'uscita merci.</p>';
+      if (c.ondata === 'in attesa') return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino lavora <b>a ondate</b>, quindi i compiti di prelievo nascono quando rilasci l\'ondata (Innovazione → Prelievo a ondate).</p>';
+      return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino è gestito a ubicazioni (WMS), quindi nessuna uscita merci per ora. Creati ' + t.length + ' compiti di prelievo (' + (t.some(function (x) { return x.crossDock; }) ? 'anche in cross-docking dalla zona di ricevimento' : 'FIFO') + ') verso la zona di spedizione: confermali dalla pistola RF, poi registra l\'uscita merci.</p>';
     }
     var std = N.materiale(o.materiale).std, val = r2(q * std);
     N.movimento(o.materiale, -q, data, '601', o.numero);

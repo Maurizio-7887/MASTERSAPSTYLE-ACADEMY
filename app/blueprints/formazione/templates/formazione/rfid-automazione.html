@@ -1,0 +1,36 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Al carico si leggono i colli uno per uno, girando i pallet per trovare l'etichetta.</li>
+  <li>La merce arrivata per un ordine urgente va prima a scaffale e poi torna indietro.</li>
+  <li>Le novità (RFID, automazione) sembrano lontane e costose.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>L'<b>RFID</b> mette nel collo un tag con un codice <b>EPC</b> (per i colli: SSCC-96, derivato dall'SSCC): un <b>varco</b> alla porta legge tutti i tag insieme, senza vederli. Il <b>cross-docking</b> porta la merce appena ricevuta direttamente alla spedizione, saltando la messa a posto. Intorno ci sono le altre innovazioni: <b>voice picking</b>, <b>pick-to-light</b>, <b>magazzini automatici verticali</b>, <b>AGV/AMR</b> (carrelli autonomi), <b>visione artificiale</b> per contare i colli.</p>
+<p class="lez-chiave">L'innovazione funziona solo su dati puliti: ubicazioni, UdC, SSCC e compiti sono la base su cui si appoggia.</p>
+{% endblock %}
+{% block concetti %}
+<dt>RFID UHF</dt><dd>Lettura a distanza (metri), di molti tag insieme, anche coperti.</dd>
+<dt>EPC</dt><dd>Electronic Product Code: urn:epc:id:sscc:prefisso.estensione+seriale per i colli; SGTIN per i singoli articoli.</dd>
+<dt>Varco</dt><dd>Antenne sulla porta che leggono i colli al passaggio del carrello e confermano il carico.</dd>
+<dt>Cross-docking</dt><dd>Pianificato (la merce arriva già destinata a un cliente) od opportunistico (il sistema la intercetta in ricezione).</dd>
+<dt>Automazione</dt><dd>Voice picking, pick-to-light, magazzini verticali, AGV/AMR: si integrano con il WMS tramite i compiti.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Carico di maggio</th><th>Barcode</th><th>RFID</th></tr>
+<tr><td>Colli</td><td colspan="2">4 (Beta 3, Delta 1)</td></tr>
+<tr><td>Letture</td><td>4, una per volta</td><td>1 passaggio</td></tr>
+<tr><td>Tempo</td><td>circa 60 s</td><td>circa 1 s</td></tr>
+<tr><td>Codice</td><td>SSCC 380123450000000082</td><td>urn:epc:id:sscc:8012345.3000000008</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>SSCC</b>etichetta</span><span class="f">→</span><span class="b"><b>EPC</b>tag RFID</span><span class="f">→</span><span class="b mag"><b>Varco</b>lettura di massa</span><span class="f">→</span><span class="b"><b>Carico</b>confermato nel WMS</span><span class="f">→</span><span class="b"><b>Partenza</b>DDT</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Strumento</th></tr>
+<tr><td>RFID</td><td>SAP Auto-ID Infrastructure (AII) · EWM RFID enablement</td></tr>
+<tr><td>Cross-docking</td><td>EWM: opportunistic / planned cross-docking · WM: LX49</td></tr>
+<tr><td>Automazione</td><td>EWM MFS (Material Flow System) · interfacce con robot e AGV</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché l'EPC non contiene la cifra di controllo dell'SSCC?</summary><p>Perché il chip ha già i suoi controlli: l'EPC tiene prefisso, estensione e seriale; la cifra di controllo serve solo al barcode.</p></details>
+<details><summary>Quando il cross-docking non conviene?</summary><p>Quando la merce in arrivo deve essere controllata (qualità, quantità) prima di spedirla, o quando non c'è una consegna che la aspetta.</p></details>
+{% endblock %}

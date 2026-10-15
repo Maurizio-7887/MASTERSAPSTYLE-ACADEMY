@@ -262,12 +262,13 @@ LABORATORI = {
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
-               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("static", "js/lab-copioni.js"),
+               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
                "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
-               "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
+               "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)",
+               "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -304,6 +305,10 @@ _ERP_PAGINE = {
                        {"endpoint": "imballo", "titolo": "Imballo e etichette SSCC", "icona": "📦", "tcode": "VL02N · /SCWM/PACK"},
                        {"endpoint": "trasporti", "titolo": "Trasporti e carico", "icona": "🚛", "tcode": "VT01N · VT02N"},
                        {"endpoint": "ddt", "titolo": "Documento di trasporto (DDT)", "icona": "📄", "tcode": "DDT · D.P.R. 472/96"}],
+    "erp_innovazione": [{"endpoint": "kpi", "titolo": "KPI di magazzino", "icona": "📈", "tcode": "accuratezza · ordini perfetti · dock-to-stock"},
+                        {"endpoint": "slotting", "titolo": "Slotting ABC", "icona": "🧭", "tcode": "/SCWM/SLOT · ricollocazione"},
+                        {"endpoint": "ondate", "titolo": "Prelievo a ondate e cross-docking", "icona": "🌊", "tcode": "/SCWM/WAVE · VL35"},
+                        {"endpoint": "rfid", "titolo": "Varco RFID", "icona": "📡", "tcode": "EPC SSCC-96 · SAP AII"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
@@ -311,7 +316,7 @@ _ERP_PAGINE = {
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
-           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js"}
+           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js"}
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
@@ -342,7 +347,8 @@ MODULI += [
 MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione hai?", "titolo": "Che situazione hai? — lezioni e casi aziendali", "icona": "🎓",
     "colore": "formazione", "kpi": None,
     "descrizione": "Riconosci la situazione dell'azienda: prima la lezione da spiegare, poi il laboratorio pronto al punto giusto",
-    "app": [("formazione.ordini_lunghi", None, "Ordini aperti per mesi?", "⏳", "commessa lunga · disaccoppiamento", None),
+    "app": [("formazione.formas", None, "Corso FORMAS · il percorso", "🗓️", "UF 8 · 9 · 10 · 11", None),
+            ("formazione.ordini_lunghi", None, "Ordini aperti per mesi?", "⏳", "commessa lunga · disaccoppiamento", None),
             ("formazione.wip_fine_mese", None, "Costi senza ricavi a fine mese?", "📆", "WIP · CO88 · KKAX", None),
             ("formazione.varianze", None, "Varianze che nessuno spiega?", "🔬", "KKS2 · categorie", None),
             ("formazione.lead_time", None, "Il cliente aspetta troppo?", "🚚", "ATO · strategia 50/70", None),
@@ -363,4 +369,7 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.processo_spedizione", None, "Spedisci senza sapere cosa sale sul camion?", "🚛", "consegna · carico · uscita merci", None),
             ("formazione.prelievo_errori", None, "Il prelievo è lento e pieno di errori?", "📋", "FIFO · RF · differenze", None),
             ("formazione.ddt_sscc", None, "DDT ed etichette scritti a mano?", "📄", "DDT · SSCC · GS1-128", None),
+            ("formazione.magazziniere_cammina", None, "Il magazziniere cammina troppo?", "🧭", "slotting · ondate", None),
+            ("formazione.misurare_magazzino", None, "Come misuri il tuo magazzino?", "📈", "KPI di magazzino", None),
+            ("formazione.rfid_automazione", None, "Leggere tutto in un colpo?", "📡", "RFID · automazione · cross-docking", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

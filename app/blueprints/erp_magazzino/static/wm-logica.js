@@ -28,7 +28,8 @@ window.WM4 = (function () {
   var tipoMat = function (m) { return N().materiale(m).tipo; };
   var quanti = function (f) { return W().quant.filter(function (q) { return Math.abs(q.qta) > 1e-9 && (!f || f(q)); }); };   // nella 999 un quanto può essere negativo (eccedenza)
   var inUbic = function (b) { return quanti(function (q) { return q.ubic === b; }); };
-  var aperti = function () { return W().compiti.filter(function (t) { return t.stato === 'aperto'; }); };
+  // compiti aperti; quelli di un'ondata nell'ordine del percorso
+  var aperti = function () { return W().compiti.filter(function (t) { return t.stato === 'aperto'; }).sort(function (a, b) { return (a.seq || 1e9) - (b.seq || 1e9) || (+a.numero) - (+b.numero); }); };
   var riservato = function (qid) { return r2(aperti().filter(function (t) { return t.quant === qid; }).reduce(function (s, t) { return s + t.qta; }, 0)); };
   var occupazione = function (b) {   // UdC presenti + UdC in arrivo (compiti aperti verso l'ubicazione)
     var udc = {}; inUbic(b).forEach(function (q) { udc[q.udc || q.id] = 1; });
@@ -85,16 +86,32 @@ window.WM4 = (function () {
     return out;
   }
   // ── prelievo per una consegna (FIFO) verso la zona di spedizione ──
-  function creaPrelievo(c, data) {
+  function creaPrelievo(c, data, ondata) {
+    var w = W();
+    if (w.ondate && !ondata) { c.ondata = 'in attesa'; return []; }   // prelievo a ondate: i compiti nascono al rilascio dell'ondata
+    // cross-docking opportunistico: si prende prima la merce appena entrata (in GR-ZONE, ancora da mettere a posto)
+    if (w.crossDock) {
+      var xd = [], resto = c.qta;
+      quanti(function (q) { return q.ubic === 'GR-ZONE' && q.mat === c.materiale && q.qta > 0; }).forEach(function (q) {
+        if (resto <= 1e-9) return;
+        var pa = aperti().find(function (t) { return t.quant === q.id && t.tipo === 'PUTAWAY'; });
+        if (!pa) return;
+        pa.stato = 'annullato'; pa.confermato = data; pa.motivo = 'cross-docking verso la consegna ' + c.numero;
+        var x = Math.min(q.qta, resto); resto = r2(resto - x);
+        xd.push(compito({tipo: 'PICK', mat: c.materiale, qta: x, quant: q.id, udc: q.udc, da: 'GR-ZONE', a: 'GI-ZONE', creato: data, rif: c.numero, consegna: c.numero, crossDock: true}));
+      });
+      if (xd.length) { if (resto <= 1e-9) return xd; var f0 = fifo(c.materiale, resto, ['001', '002']); if (f0.mancante > 1e-9) throw Error('A magazzino mancano ' + L.n0(f0.mancante) + ' ' + c.materiale + '.');
+        return xd.concat(f0.righe.map(function (x) { return compito({tipo: 'PICK', mat: c.materiale, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'GI-ZONE', creato: data, rif: c.numero, consegna: c.numero, ondata: ondata || ''}); })); }
+    }
     var f = fifo(c.materiale, c.qta, ['001', '002']);
     if (f.mancante > 1e-9) throw Error('A magazzino (scaffali) mancano ' + L.n0(f.mancante) + ' ' + c.materiale + ' disponibili: controlla le messe a posto aperte.');
-    return f.righe.map(function (x) { return compito({tipo: 'PICK', mat: c.materiale, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'GI-ZONE', creato: data, rif: c.numero, consegna: c.numero}); });
+    return f.righe.map(function (x) { return compito({tipo: 'PICK', mat: c.materiale, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'GI-ZONE', creato: data, rif: c.numero, consegna: c.numero, ondata: ondata || ''}); });
   }
   function compitiDi(rif) { return attivo() ? W().compiti.filter(function (t) { return t.rif === rif; }) : []; }
   function statoPrelievo(c) {
     var t = W().compiti.filter(function (x) { return x.consegna === c.numero && x.tipo === 'PICK'; });
     var ap = t.filter(function (x) { return x.stato === 'aperto'; }).length, prel = r2(t.filter(function (x) { return x.stato === 'confermato'; }).reduce(function (s, x) { return s + x.qtaEff; }, 0));
-    return {stato: !t.length ? '' : ap === 0 ? 'C' : prel > 0 ? 'B' : 'A', aperti: ap, prelevato: prel, compiti: t};
+    return {stato: !t.length ? (c.ondata === 'in attesa' ? 'A' : '') : ap === 0 ? 'C' : prel > 0 ? 'B' : 'A', aperti: ap, prelevato: prel, compiti: t};
   }
   function uscitaSpedizione(c, q) {
     var resto = q;
@@ -172,5 +189,5 @@ window.WM4 = (function () {
   function ubicazione(b) { b = String(b || '').trim().toUpperCase(); var x = W().ubicazioni[b]; if (!x) throw Error('Ubicazione ' + b + ' inesistente.'); return {id: b, tipo: x.tipo, cap: x.cap, blocco: x.blocco, quanti: inUbic(b), occupazione: occupazione(b)}; }
   return {TIPI: TIPI, TIPI_COMPITO: TIPI_COMPITO, UDC: UDC, attivo: attivo, attiva: attiva, entrata: entrata, creaPrelievo: creaPrelievo, compitiDi: compitiDi, statoPrelievo: statoPrelievo,
     uscitaSpedizione: uscitaSpedizione, approvvigiona: approvvigiona, consumaPSA: consumaPSA, trasferisci: trasferisci, conferma: conferma, quadratura: quadratura,
-    ubicazione: ubicazione, quanti: quanti, inUbic: inUbic, aperti: aperti, occupazione: occupazione, nuovoQuant: nuovoQuant, libera: libera, richiesto: richiesto};
+    ubicazione: ubicazione, quanti: quanti, inUbic: inUbic, aperti: aperti, occupazione: occupazione, nuovoQuant: nuovoQuant, libera: libera, richiesto: richiesto, compito: compito, fifo: fifo, riservato: riservato};
 })();

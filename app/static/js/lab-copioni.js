@@ -102,6 +102,7 @@
       ['CO11N: ore dell\'ordine ' + m, function (X) { window.PP4.conferma({ordine: po(X, m), attrezzaggio: 3, ore: x[3], data: '2027-02-10'}); }],
       ['101: entrata ' + x[1] + ' ' + m, function (X) { window.PP4.entrata({ordine: po(X, m), data: '2027-02-12'}); }]);
   });
+  var mag = function (X) { return X.N.S.consegne.filter(function (k) { return k.wm && k.data >= '2027-05-01'; }); };
   var apr = function (X, c) { return X.N.S.consegne.filter(function (k) { return k.cliente === c && k.wm; }).slice(-1)[0]; };
   var feb = function (X) { return X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01' && o.data < '2027-03-01'; }); };
   SD4.push(
@@ -150,7 +151,23 @@
     ['Partenza', function () { window.SP4.parti({trasporto: window.SP4.SP().trasporti[0].numero, data: '2027-04-08'}); }],
     ['Stampa i due DDT', null],
     ['Aprile — VF01', function (X) { [apr(X, 'C300'), apr(X, 'C400')].forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-04-09'}); }); }],
-    ['Registra la differenza di prelievo', function () { window.IV4.registra({data: '2027-04-10'}); }]);
+    ['Registra la differenza di prelievo', function () { window.IV4.registra({data: '2027-04-10'}); }],
+    ['Monitor VL06O', null], ['Consegna il lavoro di aprile', null],
+    // maggio — innovazione (UF 11)
+    ['Maggio:', null], ['KPI di maggio', null],
+    ['Slotting', function () { window.IN4.applicaSlotting({data: '2027-05-03'}); }],
+    ['RF: conferma i 3 trasferimenti', function () { window.WM4.aperti().filter(function (t) { return t.tipo === 'TRASF'; }).forEach(function (t) { window.WM4.conferma({compito: t.numero, da: t.da, udc: t.udc, a: t.a, risorsa: 'MAG01 Marco', data: '2027-05-03'}); }); }],
+    ['Attiva il prelievo a ondate', function () { window.IN4.impostazioni({ondate: 'si', crossDock: 'no'}); }],
+    ['Maggio — VA01: Beta', function (X) { X.ordine({cliente: 'C100', materiale: 'TR-PED', qta: 120, rif: 'BETA-MAG', data: '2027-05-05'}); }],
+    ['Maggio — VA01: Delta', function (X) { X.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: 20, rif: 'DELTA-MAG', data: '2027-05-05'}); }],
+    ['Maggio — VL01N', function (X) { X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-05-01'; }).forEach(function (o) { X.consegna({ordine: o.numero, data: '2027-05-06'}); }); }],
+    ['Rilascia l', function () { window.IN4.rilasciaOndata({data: '2027-05-06'}); }],
+    ['RF: preleva l', function () { window.WM4.aperti().filter(function (t) { return t.ondata; }).forEach(function (t) { window.WM4.conferma({compito: t.numero, da: t.da, udc: t.udc, a: t.a, risorsa: 'MAG04 Giulia', data: '2027-05-07'}); }); }],
+    ['Maggio — imballo', function (X) { mag(X).forEach(function (c) { window.SP4.imballa({consegna: c.numero, imballo: 'EUR', data: '2027-05-07'}); }); }],
+    ['Maggio — VT01N', function (X) { window.SP4.creaTrasporto({consegne: mag(X).map(function (c) { return c.numero; }).join(','), vettore: 'V20', targa: 'PT 456 CD', autista: 'Anna Neri', porto: 'franco', data: '2027-05-08'}); }],
+    ['Varco RFID', function () { window.IN4.varco({trasporto: window.SP4.SP().trasporti.slice(-1)[0].numero, data: '2027-05-08'}); }],
+    ['Maggio — partenza', function () { window.SP4.parti({trasporto: window.SP4.SP().trasporti.slice(-1)[0].numero, data: '2027-05-08'}); }],
+    ['Maggio — VF01', function (X) { mag(X).forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-05-10'}); }); }]);
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();

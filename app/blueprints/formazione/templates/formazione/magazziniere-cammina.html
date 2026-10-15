@@ -1,0 +1,39 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Gli articoli che escono tutti i giorni sono in fondo al magazzino o in alto.</li>
+  <li>Ogni consegna è un giro a parte: lo stesso corridoio si fa tre volte in un'ora.</li>
+  <li>Il prelievo occupa più della metà del tempo del magazziniere, quasi tutto camminando.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Due leve. Lo <b>slotting</b>: si decide <b>dove</b> mettere ogni articolo in base a <b>quante volte</b> si preleva (ABC sulle righe, non sul valore): i più richiesti vicino alla porta e ad altezza d'uomo. Il <b>prelievo a ondate</b>: si raggruppano più consegne e il sistema mette i compiti in <b>ordine di percorso</b> (a serpentina), così si fa un solo giro.</p>
+<p class="lez-chiave">Meno metri per riga di prelievo = più righe all'ora, meno fatica, meno errori.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Slotting</dt><dd>Assegnazione ragionata delle ubicazioni agli articoli (in EWM: /SCWM/SLOT e ricollocazione).</dd>
+<dt>ABC per frequenza</dt><dd>Classi per numero di righe di prelievo: A molto prelevati, C quasi mai.</dd>
+<dt>Golden zone</dt><dd>Le ubicazioni più vicine alla porta e al livello di presa più comodo.</dd>
+<dt>Ondata</dt><dd>Gruppo di consegne prelevate insieme, rilasciate in un momento deciso (per vettore, per ora di partenza…).</dd>
+<dt>Percorso a serpentina</dt><dd>Corsie in ordine, avanti in una e indietro nella successiva: nessun corridoio rifatto.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Slotting</th><th>Da</th><th>A</th><th class="n">Metri risparmiati a viaggio</th></tr>
+<tr><td>TR-PED (classe A)</td><td>01-05-2</td><td>01-01-1</td><td class="n">28</td></tr>
+<tr><td>TR-PED</td><td>01-05-1</td><td>01-02-2</td><td class="n">14</td></tr>
+<tr><td>TR-PED</td><td>02-01-1</td><td>01-03-1</td><td class="n">4</td></tr></table>
+<p>Ondata di maggio: Beta 120 TR-PED + Delta 20 TR-ALTA. Un giro per consegna: <b>34 m</b>. Ondata a serpentina 01-01-1 → 01-02-1 → 01-02-2 → 01-03-1: <b>22 m</b> (−35%).</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-due">
+  <div><h3>🚶 Prima</h3><ul><li>articoli dove capita</li><li>un giro per consegna</li><li>34 m per due consegne</li></ul></div>
+  <div><h3>🧭 Dopo</h3><ul><li>A vicino alla porta</li><li>un giro per ondata, in ordine di percorso</li><li>22 m</li></ul></div>
+</div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Slotting e ricollocazione</td><td>/SCWM/SLOT · /SCWM/REARR (EWM) · LX45 (WM)</td></tr>
+<tr><td>Ondate</td><td>/SCWM/WAVE (EWM) · VL35 / VL35_ST (WM)</td></tr>
+<tr><td>Sequenza di prelievo</td><td>percorso di prelievo nell'ubicazione (sort sequence) · /SCWM/SBST</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché lo slotting usa le righe e non il valore?</summary><p>Perché il costo del prelievo dipende da quante volte si va all'ubicazione, non da quanto vale l'articolo.</p></details>
+<details><summary>Quando conviene l'ondata?</summary><p>Con molte consegne piccole verso lo stesso vettore o la stessa ora di partenza; con consegne urgenti singole si rilascia subito.</p></details>
+{% endblock %}

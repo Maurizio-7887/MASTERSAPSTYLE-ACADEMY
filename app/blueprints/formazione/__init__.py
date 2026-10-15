@@ -54,6 +54,12 @@ CASI = [
      "📋", "erp_spedizione", "RF: preleva la consegna del Comune"),
     ("ddt-sscc", "DDT ed etichette scritti a mano?", "Numeri di DDT saltati, pesi stimati, colli senza etichetta: al ricevimento del cliente nessuno sa cosa ha in mano.",
      "📄", "erp_spedizione", "Imballo: 5 pallet"),
+    ("magazziniere-cammina", "Il magazziniere cammina troppo?", "Gli articoli più richiesti sono in fondo al magazzino e ogni consegna è un giro a parte.",
+     "🧭", "erp_innovazione", "Slotting"),
+    ("misurare-magazzino", "Come misuri il tuo magazzino?", "Si dice «funziona» o «è un disastro», ma nessuno sa quanti errori, quanti metri, quanti giorni.",
+     "📈", "erp_innovazione", "KPI di maggio"),
+    ("rfid-automazione", "Leggere tutto in un colpo?", "Al carico si leggono i colli uno per uno; la merce in arrivo per un ordine urgente va prima a scaffale e poi torna indietro.",
+     "📡", "erp_innovazione", "Varco RFID"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]
@@ -66,6 +72,31 @@ def _url_lab(versione, caso):
         return url_for("contabilita.sicurezza", versione=versione, passo=passo)
     # la prima pagina del laboratorio; la finestra passo passo porta poi alla pagina giusta
     return url_for(f"{lab}.{LABORATORI[lab]['pagine'][0]['endpoint']}", versione=versione, passo=passo)
+
+
+# Corso FORMAS «Addetto alle operazioni di spedizione» (Pistoia): unità formative del docente, date e materiali del portale
+FORMAS = [
+    {"uf": "UF 8", "titolo": "Introduzione alla contabilità di magazzino", "date": "15 giugno – 28 luglio 2026", "verifica": "14 luglio 2026",
+     "lezioni": ["valorizzazione", "dove-merce"], "pagine": [("erp_inventario.valorizzazione", "Scheda di magazzino e valorizzazione"), ("erp_dati.anagrafiche", "Materiali e giacenze"), ("erp_fi.giornale", "Libro giornale")]},
+    {"uf": "UF 9", "titolo": "Inventari fisici e contabili — procedure operative", "date": "21 ottobre – 3 novembre 2026", "verifica": "3 novembre 2026",
+     "lezioni": ["inventario-differenze", "inventario-rotazione", "valorizzazione", "dove-merce"],
+     "pagine": [("erp_inventario.documenti", "Documenti d'inventario"), ("erp_inventario.lista", "Lista di conta"), ("erp_inventario.differenze", "Differenze"), ("erp_inventario.abc", "Classificazione ABC"), ("erp_magazzino.rf", "Pistola RF")],
+     "esercizio": "marzo 2027 dell'esercizio passo passo (s4-magazzino)"},
+    {"uf": "UF 10", "titolo": "Sistemi informativi applicati al processo logistico", "date": "10 – 26 novembre 2026", "verifica": "26 novembre 2026",
+     "lezioni": ["processo-spedizione", "prelievo-errori", "ddt-sscc", "dove-merce"],
+     "pagine": [("erp_spedizione.monitor", "Monitor delle consegne"), ("erp_spedizione.imballo", "Imballo e SSCC"), ("erp_spedizione.trasporti", "Trasporti e carico"), ("erp_spedizione.ddt", "DDT"), ("erp_magazzino.rf", "Pistola RF")],
+     "esercizio": "aprile 2027 dell'esercizio passo passo (s4-spedizione)"},
+    {"uf": "UF 11", "titolo": "Innovazione dei sistemi logistici e del magazzino", "date": "26 novembre 2026 – 15 marzo 2027", "verifica": "8 gennaio 2027",
+     "lezioni": ["magazziniere-cammina", "misurare-magazzino", "rfid-automazione"],
+     "pagine": [("erp_innovazione.kpi", "KPI di magazzino"), ("erp_innovazione.slotting", "Slotting"), ("erp_innovazione.ondate", "Ondate e cross-docking"), ("erp_innovazione.rfid", "Varco RFID")],
+     "esercizio": "maggio 2027 dell'esercizio passo passo (s4-innovazione)"},
+]
+
+
+@bp.route("/formas")
+def formas():
+    return render_template("formazione/formas.html", formas=FORMAS, caso_per=CASO, versione=versione_corrente(), versioni=VERSIONI,
+                           moduli=MODULI, modulo_attivo=modulo("casi"), endpoint_corrente="formazione.formas")
 
 
 @bp.route("/")
