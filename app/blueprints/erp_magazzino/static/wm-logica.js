@@ -11,13 +11,14 @@ window.WM4 = (function () {
   var TIPI = {
     '902': {nome: 'Zona di ricevimento (interim)', interim: true}, '001': {nome: 'Scaffalatura porta-pallet', interim: false},
     '002': {nome: 'Catasta ferro (a blocchi)', interim: false}, '100': {nome: 'Approvvigionamento produzione (PSA linea 1)', interim: true},
-    '916': {nome: 'Zona di spedizione (interim)', interim: true}, '999': {nome: 'Differenze (interim)', interim: true}};
+    '916': {nome: 'Zona di spedizione (interim)', interim: true}, '999': {nome: 'Differenze (interim)', interim: true},
+    '980': {nome: 'Merce bloccata (quarantena)', interim: true}};
   var UDC = {FERT: 50, ROH: 1000};   // pezzi per pallet · kg per fascio
   var RISORSE = ['MAG01 Marco', 'MAG02 Sara', 'MAG03 Luca', 'MAG04 Giulia'];
-  var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni'};
+  var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni', BLOCCO: 'Porta in quarantena'};
 
   function layout() {
-    var u = {'GR-ZONE': {tipo: '902', cap: 0}, 'PSA-L1': {tipo: '100', cap: 0}, 'GI-ZONE': {tipo: '916', cap: 0}, 'DIFF': {tipo: '999', cap: 0}};
+    var u = {'GR-ZONE': {tipo: '902', cap: 0}, 'PSA-L1': {tipo: '100', cap: 0}, 'GI-ZONE': {tipo: '916', cap: 0}, 'DIFF': {tipo: '999', cap: 0}, 'Q-ZONE': {tipo: '980', cap: 0}};
     for (var c = 1; c <= 3; c++) for (var k = 1; k <= 5; k++) for (var l = 1; l <= 2; l++) u['0' + c + '-0' + k + '-' + l] = {tipo: '001', cap: 1, corsia: '0' + c};
     for (var f = 1; f <= 6; f++) u['F-0' + f] = {tipo: '002', cap: 2, corsia: 'F'};
     Object.keys(u).forEach(function (k) { u[k].blocco = ''; });
@@ -160,9 +161,9 @@ window.WM4 = (function () {
     var q = w.quant.find(function (x) { return x.id === t.quant; });
     var eff = i.qta === undefined || i.qta === '' ? t.qta : L.num(i.qta, 'Quantità', 0);
     if (eff > t.qta + 1e-9) throw Error('Non si conferma più della quantità del compito (' + L.n0(t.qta) + ').');
-    if (eff < t.qta - 1e-9 && (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF')) throw Error('La messa a posto si conferma per l\'intera unità di carico.');
+    if (eff < t.qta - 1e-9 && (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || t.tipo === 'BLOCCO')) throw Error('La messa a posto si conferma per l\'intera unità di carico.');
     var diff = r2(t.qta - eff), nuovo = null;
-    if (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || (eff === q.qta && diff === 0)) { q.ubic = t.a; if (t.consegna) q.rif = t.consegna; }
+    if (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || t.tipo === 'BLOCCO' || (eff === q.qta && diff === 0)) { q.ubic = t.a; if (t.consegna) q.rif = t.consegna; }
     else {
       if (eff > 0) { q.qta = r2(q.qta - eff); nuovoQuant(t.a, t.mat, eff, t.tipo === 'PICK' ? '' : q.udc, q.data, t.consegna || t.ordine || ''); }
       if (diff > 0) {   // differenza: quello che manca va nella 999 e un nuovo compito prende il resto altrove
@@ -178,6 +179,71 @@ window.WM4 = (function () {
     return '<p class="lab-nota">✓ Compito <b>' + t.numero + '</b> confermato' + (t.risorsa ? ' da ' + L.esc(t.risorsa) : '') + ': ' + L.n0(eff) + ' ' + t.mat + ' da ' + t.da + ' a ' + t.a + '.' +
       (diff ? ' Differenza di ' + L.n0(diff) + ' registrata nella 999; nuovo compito ' + nuovo.map(function (x) { return x.numero + ' da ' + x.da; }).join(', ') + '.' : '') + '</p>';
   }
+  // ── merce bloccata (tipo di stock «bloccato»): danneggiata al ricevimento o scoperta a scaffale ──
+  // 344 da libero a bloccato · 343 da bloccato a libero · 555 rottamazione dal bloccato. La merce bloccata resta nella giacenza
+  // contabile (IM) ma non è disponibile per le consegne (ATP) e sta fisicamente nell'area di quarantena Q-ZONE.
+  var assicuraQ = function () { var u = W().ubicazioni; if (!u['Q-ZONE']) u['Q-ZONE'] = {tipo: '980', cap: 0, blocco: ''}; if (!W().blocchi) W().blocchi = []; };
+  var B = function () { var s = S(); s.bloccato = s.bloccato || {}; return s.bloccato; };
+  var bloccato = function (mat) { return r2((S().bloccato || {})[mat] || 0); };
+  var logBlocco = function (x) { assicuraQ(); W().blocchi.push(x); };
+  var registra344 = function (mat, qta, data, tipo, rif) { S().movimenti.push({data: data, mat: mat, qta: 0, tipo: tipo, rif: rif, lotti: [], stock: qta}); };
+  function entrataBloccata(mat, qta, data, rif, motivo, lotto) {
+    assicuraQ(); var size = UDC[tipoMat(mat)] || 50, resto = qta, out = [];
+    while (resto > 1e-9) { var q = Math.min(size, resto), x = nuovoQuant('Q-ZONE', mat, q, numUdc(), data, rif); if (lotto) x.lotto = lotto; out.push(x); resto = r2(resto - q); }
+    B()[mat] = r2(bloccato(mat) + qta);
+    logBlocco({data: data, tipo: '101 in bloccato', mat: mat, qta: qta, udc: out.map(function (x) { return x.udc; }).join(', '), motivo: motivo || 'merce danneggiata al ricevimento', rif: rif});
+    return out;
+  }
+  function blocca(i) {
+    richiesto(); assicuraQ(); var n = N(), data = n.data(i.data), u = W().ubicazioni, motivo = String(i.motivo || '').trim();
+    if (!motivo) throw Error('Scrivi il motivo del blocco (es. «pallet urtato dal carrello»).');
+    var q = quanti(function (x) { return x.udc === String(i.udc || '').trim() && x.qta > 0; })[0];
+    if (!q) throw Error('Unità di carico ' + (i.udc || '') + ' non trovata.');
+    if (['001', '002', '902'].indexOf(u[q.ubic].tipo) < 0) throw Error('Si blocca la merce a scaffale, in catasta o in zona di ricevimento (UdC ' + q.udc + ' in ' + q.ubic + ').');
+    var pa = aperti().filter(function (t) { return t.quant === q.id; });
+    if (pa.some(function (t) { return t.tipo !== 'PUTAWAY'; })) throw Error('L\'UdC ' + q.udc + ' ha un compito aperto (' + pa[0].numero + '): confermalo o annullalo prima.');
+    var x = i.qta == null || i.qta === '' ? q.qta : L.num(i.qta, 'Quantità da bloccare', 0.001);
+    if (x > q.qta + 1e-9) throw Error('Nell\'UdC ' + q.udc + ' ci sono solo ' + L.n0(q.qta) + ' ' + q.mat + '.');
+    var qb = q;
+    if (x < q.qta - 1e-9) { q.qta = r2(q.qta - x); qb = nuovoQuant(q.ubic, q.mat, x, numUdc(), q.data, q.rif); pa.forEach(function (t) { t.qta = q.qta; }); }
+    else pa.forEach(function (t) { t.stato = 'annullato'; t.confermato = data; t.motivo = 'merce bloccata: ' + motivo; });
+    B()[q.mat] = r2(bloccato(q.mat) + x); registra344(q.mat, x, data, '344', qb.udc);
+    var t = compito({tipo: 'BLOCCO', mat: q.mat, qta: x, quant: qb.id, udc: qb.udc, da: qb.ubic, a: 'Q-ZONE', creato: data, rif: 'Q-ZONE', motivo: motivo});
+    logBlocco({data: data, tipo: '344 da libero a bloccato', mat: q.mat, qta: x, udc: qb.udc, motivo: motivo, rif: qb.ubic});
+    n.salva();
+    return '<p class="lab-nota">🚫 ' + L.n0(x) + ' ' + q.mat + ' bloccati (movimento 344): non sono più disponibili per le consegne. Compito ' + t.numero + ': porta l\'UdC <b>' + qb.udc + '</b> da ' + qb.ubic + ' all\'area di quarantena Q-ZONE con la pistola RF. La giacenza contabile non cambia: nessuna scrittura.</p>';
+  }
+  var inQuarantena = function (udc) {
+    var q = quanti(function (x) { return x.udc === String(udc || '').trim() && x.qta > 0; })[0];
+    if (!q) throw Error('Unità di carico ' + (udc || '') + ' non trovata.');
+    if (q.ubic !== 'Q-ZONE') throw Error('L\'UdC ' + q.udc + ' non è ancora nell\'area di quarantena (è in ' + q.ubic + '): prima conferma il compito con la pistola.');
+    if (riservato(q.id) > 0) throw Error('L\'UdC ' + q.udc + ' ha già un compito aperto.');
+    return q;
+  };
+  function sblocca(i) {
+    richiesto(); var n = N(), data = n.data(i.data), q = inQuarantena(i.udc);
+    B()[q.mat] = r2(Math.max(0, bloccato(q.mat) - q.qta)); registra344(q.mat, -q.qta, data, '343', q.udc);
+    var t = compito({tipo: 'PUTAWAY', mat: q.mat, qta: q.qta, quant: q.id, udc: q.udc, da: 'Q-ZONE', a: libera(q.mat), creato: data, rif: 'Q-ZONE', motivo: 'sblocco: ' + String(i.motivo || 'merce controllata, buona')});
+    logBlocco({data: data, tipo: '343 da bloccato a libero', mat: q.mat, qta: q.qta, udc: q.udc, motivo: String(i.motivo || 'merce controllata, buona'), rif: t.a});
+    n.salva();
+    return '<p class="lab-nota">✅ UdC ' + q.udc + ' sbloccata (movimento 343): ' + L.n0(q.qta) + ' ' + q.mat + ' di nuovo disponibili. Compito ' + t.numero + ': rimettila a scaffale in ' + t.a + '.</p>';
+  }
+  function rottama(i) {
+    richiesto(); var n = N(), data = n.data(i.data), q = inQuarantena(i.udc), m = n.materiale(q.mat), motivo = String(i.motivo || '').trim();
+    if (!motivo) throw Error('Scrivi il motivo della rottamazione (es. «tubi piegati, non riparabili»).');
+    var val = r2(q.qta * m.std), qta = q.qta;
+    n.movimento(q.mat, -qta, data, '555', 'rottamazione ' + q.udc, {lotti: q.lotto ? [{lotto: q.lotto, qta: qta}] : null});
+    q.qta = 0; B()[q.mat] = r2(Math.max(0, bloccato(q.mat) - qta));
+    var r = n.post({data: data, tipo: 'ROTTAMAZIONE', rif: q.udc, descrizione: 'Movimento 555 — rottamazione dal bloccato: ' + L.n0(qta) + ' ' + m.um + ' ' + q.mat + ' × ' + L.eur(m.std) + ' (UdC ' + q.udc + ', ' + motivo + ')',
+      righe: [{conto: '69', dareAvere: 'DARE', importo: val, testo: q.mat + ' ' + motivo}, {conto: m.tipo === 'ROH' ? '12' : '13', dareAvere: 'AVERE', importo: val, testo: q.mat}]});
+    logBlocco({data: data, tipo: '555 rottamazione', mat: q.mat, qta: qta, udc: q.udc, motivo: motivo, rif: r.numero});
+    n.salva(); return r;
+  }
+  function bloccati() {
+    var u = W().ubicazioni;
+    return quanti(function (q) { return q.qta > 0 && u[q.ubic] && u[q.ubic].tipo === '980'; }).concat(
+      aperti().filter(function (t) { return t.tipo === 'BLOCCO'; }).map(function (t) { var q = W().quant.find(function (x) { return x.id === t.quant; }); return Object.assign({}, q, {inViaggio: t.numero}); }));
+  }
   // ── quadratura IM–WMS (LX23 / /SCWM/STOCK_COMP) ──
   function quadratura() {
     return Object.keys(S().materiali).map(function (m) {
@@ -189,5 +255,6 @@ window.WM4 = (function () {
   function ubicazione(b) { b = String(b || '').trim().toUpperCase(); var x = W().ubicazioni[b]; if (!x) throw Error('Ubicazione ' + b + ' inesistente.'); return {id: b, tipo: x.tipo, cap: x.cap, blocco: x.blocco, quanti: inUbic(b), occupazione: occupazione(b)}; }
   return {TIPI: TIPI, TIPI_COMPITO: TIPI_COMPITO, UDC: UDC, attivo: attivo, attiva: attiva, entrata: entrata, creaPrelievo: creaPrelievo, compitiDi: compitiDi, statoPrelievo: statoPrelievo,
     uscitaSpedizione: uscitaSpedizione, approvvigiona: approvvigiona, consumaPSA: consumaPSA, trasferisci: trasferisci, conferma: conferma, quadratura: quadratura,
+    entrataBloccata: entrataBloccata, blocca: blocca, sblocca: sblocca, rottama: rottama, bloccati: bloccati, bloccato: bloccato,
     ubicazione: ubicazione, quanti: quanti, inUbic: inUbic, aperti: aperti, occupazione: occupazione, nuovoQuant: nuovoQuant, libera: libera, richiesto: richiesto, compito: compito, fifo: fifo, riservato: riservato};
 })();

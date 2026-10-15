@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Un fascio arriva piegato e finisce a scaffale insieme a quelli buoni.</li>
+  <li>Un pallet urtato dal carrello parte lo stesso per il cliente.</li>
+  <li>In un angolo c'è merce «da vedere» che nessuno ha mai registrato e che a inventario manca o avanza.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>La merce danneggiata o da controllare <b>non si nasconde e non si butta</b>: si mette in <b>stock bloccato</b>. Resta nella giacenza contabile (è ancora nostra o del fornitore), ma <b>non è disponibile</b> per le consegne e sta fisicamente nell'<b>area di quarantena</b>. Poi qualcuno con la responsabilità giusta decide: <b>sblocco</b> (era buona) o <b>rottamazione</b> (da buttare, diventa un costo).</p>
+<p class="lez-chiave">Al ricevimento: conta, confronta con il DDT, registra la parte danneggiata in stock bloccato. A scaffale: blocca (344), porta in quarantena, poi sblocca (343) o rottama (555).</p>
+{% endblock %}
+{% block concetti %}
+<dt>Tipo di stock</dt><dd>Libero (si usa e si spedisce) o bloccato (c'è, ma è fermo). La giacenza contabile è la somma dei due.</dd>
+<dt>Quarantena</dt><dd>Area fisica separata (Q-ZONE, tipo magazzino 980) per la merce bloccata.</dd>
+<dt>344 / 343</dt><dd>Da libero a bloccato e ritorno: cambia il tipo di stock, nessuna scrittura contabile.</dd>
+<dt>555</dt><dd>Rottamazione dallo stock bloccato: la merce esce e il suo valore a standard va a costo (conto 69).</dd>
+<dt>Controllo al ricevimento</dt><dd>Si registra quello che si conta davvero, con il numero del DDT; le differenze e i danni si contestano al fornitore.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Agosto</th><th>Che cosa si fa</th><th>Effetto</th></tr>
+<tr><td>Arrivano 4.000 kg di ferro (DDT AU-0816), un fascio da 1.000 kg è piegato</td><td>MIGO 101: 3.000 kg liberi, 1.000 kg in stock bloccato</td><td>3 compiti di messa a posto; il fascio piegato in Q-ZONE</td></tr>
+<tr><td>Il fascio non si raddrizza</td><td>Rottamazione 555</td><td>D 69 / A 12 950 € (1.000 kg × 0,95)</td></tr>
+<tr><td>Un pallet di 8 TR-PED urtato dal carrello</td><td>Blocco 344, compito verso la quarantena</td><td>ATP 0: non parte per nessun cliente</td></tr>
+<tr><td>Il controllo dice che è integro</td><td>Sblocco 343, compito di messa a posto</td><td>Di nuovo disponibile a scaffale</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Danno</b>al ricevimento o a scaffale</span><span class="f">→</span><span class="b mag"><b>Stock bloccato</b>Q-ZONE</span><span class="f">→</span><span class="b"><b>Controllo</b>capo magazzino</span><span class="f">→</span><span class="b"><b>343</b>torna buono</span><span class="f">·</span><span class="b"><b>555</b>rottamato</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Entrata in stock bloccato</td><td>MIGO 101 con tipo di stock «bloccato»</td></tr>
+<tr><td>Blocco e sblocco</td><td>MIGO 344 / 343 · /SCWM/POST (cambio tipo stock)</td></tr>
+<tr><td>Rottamazione</td><td>MIGO 555 (dal bloccato) · 551 (dal libero)</td></tr>
+<tr><td>Giacenze per tipo di stock</td><td>MMBE · MB52</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché non si butta subito il fascio piegato?</summary><p>Perché va documentato: serve per il reclamo al fornitore e perché la giacenza contabile deve spiegare ogni chilo che esce.</p></details>
+<details><summary>Chi può sbloccare o rottamare?</summary><p>Il capo magazzino (o il controller per la rottamazione): il magazziniere può bloccare, ma non decidere da solo.</p></details>
+{% endblock %}

@@ -38,6 +38,11 @@ def etichette():
     return render_lab("erp_magazzino", "etichette")
 
 
+@bp.route("/bloccato")
+def bloccato():
+    return render_lab("erp_magazzino", "bloccato")
+
+
 @bp.route("/lotti")
 def lotti():
     return render_lab("erp_magazzino", "lotti")

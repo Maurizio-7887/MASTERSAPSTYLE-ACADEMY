@@ -162,7 +162,7 @@ ESERCIZI = {
             ("documenti_sdi", "Documenti trasmessi allo SdI", 3, 0),
             ("nota_credito_td04", "Nota di credito TD04 a Delta (IVA compresa)", 244.00, 0.005),
             ("rda_ordinate", "Richieste d'acquisto approvate e ordinate", 1, 0),
-            ("ferro_colata_0816", "Ferro della colata COL-0816 in giacenza (kg)", 4000, 0.005),
+            ("ferro_colata_0816", "Ferro della colata COL-0816 in giacenza dopo la rottamazione (kg)", 3000, 0.005),
             ("seriali_presso_clienti", "Transenne alte con numero di serie presso i clienti", 320, 0),
             ("tredicesima_dicembre", "Tredicesime pagate a dicembre", 6950.00, 0.005),
         ],

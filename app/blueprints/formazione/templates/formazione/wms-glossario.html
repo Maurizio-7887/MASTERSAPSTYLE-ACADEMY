@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Glossario del magazziniere · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<link rel="stylesheet" href="{{ url_for('formazione.static', filename='formazione.css') }}">
+<style>
+.gl{background:#fff;border:1px solid #c8d6e3;border-radius:10px;padding:10px 16px;margin:12px 0}
+.gl h2{margin:4px 0 8px;font-size:17px;color:#0F7B6C}
+.gl dl{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:6px 16px;margin:0}
+.gl dt{font-weight:700}.gl dt code{display:block;font-weight:400;font-size:12px;color:#556B82;background:none;padding:0}
+.gl dd{margin:0;line-height:1.5}
+.cerca{width:100%;max-width:420px;padding:8px 10px;border:1px solid #b9c7d6;border-radius:6px;font:inherit}
+@media (max-width:640px){.gl dl{grid-template-columns:1fr}.gl dd{margin-bottom:8px}}
+@media print{.msa-shell,.no-stampa{display:none!important}.gl{break-inside:avoid;border:none;padding:0}}
+</style>
+</head>
+<body class="msa-launchpad">
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro" style="border-left-color:#0F7B6C">
+    <h1>📖 Glossario del magazziniere</h1>
+    <p>Le parole del magazzino e le transazioni SAP che le usano, nell'ordine del processo: struttura, entrata, movimenti, inventario, uscita, innovazione.</p>
+    <p class="no-stampa"><input class="cerca" id="cerca" placeholder="Cerca una parola (es. SSCC, quarantena, FIFO)" autocomplete="off">
+      <button type="button" class="lab-btn sec" onclick="window.print()">🖨️ Stampa</button></p>
+  </div>
+  {% for g, voci in gruppi %}
+  <section class="gl"><h2>{{ g }}</h2><dl>
+    {% for _, t, c, d in voci %}<dt data-v>{{ t }}{% if c %}<code>{{ c }}</code>{% endif %}</dt><dd>{{ d }}</dd>{% endfor %}
+  </dl></section>
+  {% endfor %}
+</main>
+<script>
+document.getElementById('cerca').addEventListener('input', function () {
+  var q = this.value.trim().toLowerCase();
+  document.querySelectorAll('.gl').forEach(function (sez) {
+    var vis = 0;
+    sez.querySelectorAll('dt').forEach(function (dt) { var dd = dt.nextElementSibling, ok = !q || (dt.textContent + ' ' + dd.textContent).toLowerCase().indexOf(q) >= 0; dt.style.display = dd.style.display = ok ? '' : 'none'; if (ok) vis++; });
+    sez.style.display = vis ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

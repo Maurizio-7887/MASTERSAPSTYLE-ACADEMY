@@ -48,7 +48,7 @@
         return '<div class="mappa-corsia"><h4>Corsia ' + c + ' · livello 2 (sopra) e 1 (sotto) · campate 1 → 5</h4><div class="mappa-griglia">' + celle.join('') + '</div></div>';
       }).join('');
       var ferro = '<div class="mappa-corsia"><h4>Catasta ferro (tipo 002)</h4><div class="mappa-griglia">' + ['F-01', 'F-02', 'F-03', 'F-04', 'F-05', 'F-06'].map(cella).join('') + '</div></div>';
-      var interim = '<div class="mappa-corsia"><h4>Aree interim</h4><div class="mappa-griglia">' + ['GR-ZONE', 'PSA-L1', 'GI-ZONE', 'DIFF'].map(cella).join('') + '</div></div>';
+      var interim = '<div class="mappa-corsia"><h4>Aree interim</h4><div class="mappa-griglia">' + ['GR-ZONE', 'PSA-L1', 'GI-ZONE', 'DIFF', 'Q-ZONE'].filter(function (b) { return W().ubicazioni[b]; }).map(cella).join('') + '</div></div>';
       var det = '';
       if (sel) {
         var u = WM.ubicazione(sel);
@@ -195,6 +195,25 @@
         '<span class="lab-nota">Code 128 per la pistola, QR per lo smartphone. Fogli A4 adesivi, 3 per riga.</span></div><div class="s4-ets">' + et.join('') + '</div>';
       radice.querySelector('#cosa').onchange = function () { radice.dataset.cosa = this.value; rendi(); };
       radice.querySelector('#stampa').onclick = function () { window.print(); };
+    },
+    bloccato: function () {
+      if (!WM.attivo()) { radice.innerHTML = nonAttivo(); return; }
+      var bl = WM.bloccati(), inQ = bl.filter(function (q) { return !q.inViaggio; });
+      var scaffale = WM.quanti(function (q) { return q.qta > 0 && ['001', '002', '902'].indexOf((W().ubicazioni[q.ubic] || {}).tipo) >= 0 && WM.riservato(q.id) === 0; });
+      var etQ = function (q) { return q.udc + ' · ' + n0(q.qta) + ' ' + um(q.mat) + ' ' + q.mat + ' · ' + q.ubic; };
+      radice.innerHTML = U.avviso(S()) + '<p class="lab-nota">Merce <b>bloccata</b> = c\'è, è nostra, ma non si può spedire né usare finché qualcuno non decide: <b>sblocco</b> (era buona) o <b>rottamazione</b> (da buttare). Nel frattempo sta nell\'area di quarantena <b>Q-ZONE</b>, separata dal resto.</p><div class="lab-griglia">' +
+        L.scheda('🚫', 'Blocca un\'unità di carico', 'MIGO 344 · da libero a bloccato', L.modulo('bl', [['udc', 'Unità di carico (leggi l\'etichetta)', 'select', '', U.lista(scaffale, etQ, '— nessuna UdC bloccabile —', function (q) { return q.udc; })],
+          ['qta', 'Quantità danneggiata (vuoto = tutta l\'UdC)', 'num'], ['motivo', 'Motivo', 'text', 'pallet urtato dal carrello'], ['data', 'Data', 'date']], [['bl', 'Blocca e crea il compito verso la quarantena', 'rosso']]) +
+          '<p class="lab-nota">La giacenza contabile non cambia: cambia il <b>tipo di stock</b> (libero → bloccato). Il compito si conferma con la pistola RF quando il pallet è davvero in quarantena.</p>') +
+        L.scheda('🔎', 'Decisione sulla merce in quarantena', 'MIGO 343 · 555', L.modulo('dq', [['udc', 'UdC in quarantena', 'select', '', U.lista(inQ, etQ, '— quarantena vuota —', function (q) { return q.udc; })],
+          ['motivo', 'Esito del controllo / motivo', 'text'], ['data', 'Data', 'date']], [['sb', 'Sblocca: è buona (343)'], ['ro', 'Rottama: da buttare (555)', 'rosso']]) +
+          '<p class="lab-nota">Sblocco: torna disponibile e nasce il compito per rimetterla a scaffale. Rottamazione: esce dal magazzino e diventa un costo — D 69 Rottamazioni / A 12-13 Magazzino, a costo standard.</p>') + '</div>' +
+        L.scheda('📦', 'Merce bloccata adesso', 'MMBE · stock bloccato', L.tabella(['UdC', 'Materiale', 'Quantità›', 'Dove', 'Lotto / rif.', 'Nota'], bl.map(function (q) {
+          return [q.udc, q.mat, n0(q.qta) + ' ' + um(q.mat), q.inViaggio ? q.ubic + ' → Q-ZONE' : '<b>Q-ZONE</b>', e(q.rif || ''), q.inViaggio ? 'compito ' + q.inViaggio + ' da confermare' : 'in attesa di decisione']; }), 'Nessuna merce bloccata.') +
+          L.tabella(['Materiale', 'Giacenza contabile›', 'di cui bloccata›', 'Libera e disponibile›'], Object.keys(S().materiali).map(function (m) { var b = WM.bloccato(m); return [m, n0(S().giacenze[m]) + ' ' + um(m), b ? '<b>' + n0(b) + '</b>' : '0', n0((S().giacenze[m] || 0) - b)]; }))) +
+        L.scheda('📜', 'Registro dei blocchi', 'MB51 · 101 bloccato · 344 · 343 · 555', L.tabella(['Data', 'Movimento', 'Materiale', 'Q.tà›', 'UdC', 'Motivo', 'Rif.'], (W().blocchi || []).slice().reverse().map(function (x) { return [fd(x.data), x.tipo, x.mat, n0(x.qta), x.udc, e(x.motivo), x.rif]; }), 'Nessun movimento.'));
+      L.collega(radice, 'bl', {bl: WM.blocca}, rendi);
+      L.collega(radice, 'dq', {sb: WM.sblocca, ro: WM.rottama}, rendi);
     },
     lotti: function () {
       var serieCons = function (n) { var c = S().consegne.find(function (k) { return k.numero === n; }); var sn = (c && c.seriali) || []; return sn.length ? '<p class="lab-nota">Numeri di serie consegnati: <b>' + sn[0] + (sn.length > 1 ? ' … ' + sn[sn.length - 1] : '') + '</b> (' + sn.length + ' pezzi).</p>' : ''; };

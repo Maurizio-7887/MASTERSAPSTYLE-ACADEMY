@@ -202,9 +202,9 @@ p = apri('erp_magazzino', 'mappa'); ok(/non è ancora attivo/.test(p.testo()), '
 p = apri('erp_magazzino', 'struttura');
 p.fai('at', {data: '2027-03-01'}); ok(p.S().wm && p.S().wm.attivo === '2027-03-01' && /WMS attivo/.test(p.testo()), 'attivazione W100');
 ok(p.S().wm.carico.length === 14, 'carico iniziale: 14 unità di carico (' + p.S().wm.carico.length + ')');
-p = apri('erp_magazzino', 'mappa'); ok(/01-01-2/.test(p.testo()) && p.lab.querySelectorAll('.ubic[data-u]').length === 40, 'mappa con 40 ubicazioni');
+p = apri('erp_magazzino', 'mappa'); ok(/01-01-2/.test(p.testo()) && p.lab.querySelectorAll('.ubic[data-u]').length === 41, 'mappa con 41 ubicazioni (con la quarantena Q-ZONE)');
 p.lab.querySelector('[data-u="01-01-2"]').click(); ok(/Ubicazione 01-01-2/.test(p.testo()) && /1000002/.test(p.testo()), 'dettaglio ubicazione 01-01-2');
-p = apri('erp_magazzino', 'etichette'); ok(p.lab.querySelectorAll('.s4-et').length === 40 && p.lab.querySelector('.s4-et svg'), 'etichette con barcode');
+p = apri('erp_magazzino', 'etichette'); ok(p.lab.querySelectorAll('.s4-et').length === 41 && p.lab.querySelector('.s4-et svg'), 'etichette con barcode');
 p = apri('erp_acquisti', 'ordini'); bene(p.fai('me', {fornitore: 'F100', materiale: 'FERRO', qta: '5000', prezzo: '0,98', data: '2027-03-02'}), 'ME21N marzo');
 p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: x => x, data: '2027-03-03'}), 'MIGO 101 marzo');
 ok(p.S().wm.compiti.filter(t => t.tipo === 'PUTAWAY').map(t => t.a).join() === 'F-02,F-03,F-03,F-04,F-04', 'strategia aggiunta a scorta: ' + p.S().wm.compiti.map(t => t.a).join());
@@ -426,8 +426,22 @@ ruolo('RESP_ACQ'); p = apri('erp_acquisti', 'richieste'); bene(p.fai('ap', {rda:
 ruolo('BUYER'); p = apri('erp_acquisti', 'ordini'); bene(p.fai('me', {rda: x => x, fornitore: 'F100', prezzo: '0,97', data: '2027-08-11'}), 'ME21N da richiesta');
 const oaA = p.S().acquisti.slice(-1)[0]; ok(oaA.rilascio.stato === 'bloccato', 'ordine sopra soglia bloccato');
 ruolo('RESP_ACQ'); p = apri('erp_acquisti', 'ordini'); bene(p.fai('rl', {ordine: oaA.numero, decisione: 'rilascia', data: '2027-08-11'}), 'ME29N');
-ruolo('CAPO_MAG'); p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: oaA.numero, qta: '4000', lotto: 'COL-0816', data: '2027-08-16'}), 'MIGO colata COL-0816');
+ruolo('CAPO_MAG'); p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: oaA.numero, qta: '4000', ddt: 'AU-0816', lotto: 'COL-0816', danneggiati: '1000', danno: 'fascio piegato in scarico', data: '2027-08-16'}), 'MIGO colata COL-0816 con un fascio danneggiato');
+{ const S9 = ora(); ok(S9.bloccato.FERRO === 1000 && S9.wm.quant.some(q => q.ubic === 'Q-ZONE' && q.qta === 1000 && q.lotto === 'COL-0816'), '1.000 kg in stock bloccato, in quarantena');
+  ok(S9.acquisti.find(o => o.numero === oaA.numero).entrate.slice(-1)[0].ddt === 'AU-0816', 'DDT del fornitore registrato'); }
 rfTutti('2027-08-16');
+ruolo('CAPO_MAG'); p = apri('erp_magazzino', 'bloccato'); ok(/Q-ZONE/.test(p.testo()) && /fascio piegato/.test(p.testo()), 'pagina merce bloccata');
+{ const b69 = ora().registrazioni.length; bene(p.fai('dq', {udc: x => x, motivo: 'tubi piegati, non raddrizzabili', data: '2027-08-17'}, 'ro'), 'rottamazione 555');
+  const S9 = ora(), r = S9.registrazioni.slice(-1)[0]; ok(S9.registrazioni.length === b69 + 1 && r.tipo === 'ROTTAMAZIONE' && r.righe[0].conto === '69' && r.righe[0].importo === 950, 'D 69 / A 12 950 €');
+  ok(S9.lotti.FERRO['COL-0816'].qta === 3000 && !S9.bloccato.FERRO, 'il lotto COL-0816 scende a 3.000 kg, niente più bloccato'); }
+ruolo('MAGAZZINIERE'); p = apri('erp_magazzino', 'bloccato');
+{ const q = ora().wm.quant.find(x => x.mat === 'TR-PED' && x.qta > 0 && /^0/.test(x.ubic)); bene(p.fai('bl', {udc: q.udc, motivo: 'pallet urtato dal carrello', data: '2027-08-18'}), 'blocco 344 del pallet urtato');
+  ok(p.w.SD4.atp('TR-PED').disponibile === 0, 'ATP: la merce bloccata non è disponibile'); }
+ruolo('CAPO_MAG'); p = apri('erp_magazzino', 'bloccato'); ok(/ko/.test(p.fai('dq', {udc: x => x, motivo: 'controllato', data: '2027-08-18'}, 'sb')), 'non si sblocca prima di essere in quarantena');
+rfTutti('2027-08-18');
+ruolo('CAPO_MAG'); p = apri('erp_magazzino', 'bloccato'); bene(p.fai('dq', {udc: x => x, motivo: 'controllato: integro', data: '2027-08-19'}, 'sb'), 'sblocco 343');
+rfTutti('2027-08-19');
+{ const S9 = ora(); ok(S9.wm.quant.some(q => q.mat === 'TR-PED' && q.qta > 0 && /^0/.test(q.ubic)) && !S9.bloccato['TR-PED'], 'pallet di nuovo a scaffale e disponibile'); }
 p = apri('erp_magazzino', 'lotti'); p.lab.querySelector('#lc').value = cAgo().find(c => c.ordine === oDel.numero).numero; p.lab.querySelector('#lc').dispatchEvent(new p.w.Event('change'));
 ok(/L1000004/.test(p.testo()) && /Acciaierie Umbre/.test(p.testo()) && /Numeri di serie consegnati/.test(p.testo()), 'MB56 dal reclamo di Delta');
 p.lab.querySelector('#sn').value = 'SN000291'; p.lab.querySelector('#snv').click(); ok(/presso il cliente/.test(p.testo()) && /Delta/.test(p.testo()), 'IQ03 SN000291');
@@ -442,7 +456,7 @@ if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
 fs.writeFileSync(path.join(__dirname, 'lab-erp-agosto.json'), memoria);
 
 // lezioni «Che situazione hai?»: il copione prepara il sistema fino al passo, la finestra si apre lì
-for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID', 'F110', 'Calcola i cedolini', 'Luglio — F-28', 'VKM1', 'VF11: storna', 'ME29N', 'Calcola le paghe da luglio']) {
+for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID', 'F110', 'Calcola i cedolini', 'Luglio — F-28', 'VKM1', 'VF11: storna', 'ME29N', 'MIGO: prima consegna', 'Calcola le paghe da luglio']) {
   const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/s4/?passo=' + encodeURIComponent(passo), runScripts: 'outside-only'}).window;
   LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4, passo);

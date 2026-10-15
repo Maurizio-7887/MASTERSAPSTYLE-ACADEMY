@@ -21,6 +21,11 @@
     <h1>🗓️ Corso FORMAS — Addetto alle operazioni di spedizione</h1>
     <p>Toscana Formazione · Fondazione Conservatorio San Giovanni Battista, Pistoia. Le unità formative del docente con, per ognuna, le lezioni da spiegare e le pagine del sistema integrato S/4 da usare in laboratorio.</p>
   </div>
+  <section class="uf"><h2>🏬 Per tutte le UF</h2>
+    <div class="uf-col"><div><ul>
+      <li><a href="{{ url_for('portale.modulo_lp', versione=versione, codice='wms') }}">Il modulo WMS: tutte le app del magazzino, nell'ordine del processo</a></li>
+      <li><a href="{{ url_for('formazione.wms_glossario') }}">📖 Glossario del magazziniere</a></li>
+      <li><a href="{{ url_for('formazione.wms_verifica') }}">✅ Verifica: 30 domande con la spiegazione (anche da stampare)</a></li></ul></div></div></section>
   {% for u in formas %}
   <section class="uf">
     <h2>{{ u.uf }} · {{ u.titolo }}</h2>

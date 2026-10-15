@@ -74,7 +74,7 @@ window.SD4 = (function () {
   var vivo = function (o) { return o.tipo === 'OR' && !o.rifiutato; };
   // ATP = giacenza − merce già in consegna (non ancora uscita) − quantità confermate agli altri ordini aperti (precedenti)
   function atp(mat, escludi) {
-    var g = S().giacenze[mat] || 0, ris = 0, cons = 0;
+    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0), ris = 0, cons = 0;   // la merce bloccata non è disponibile
     S().ordini.forEach(function (o) { if (!vivo(o) || o.materiale !== mat) return; cons += inPrelievo(o);
       if (o === escludi) return; if (escludi && (o.data > escludi.data || (o.data === escludi.data && +o.numero > +escludi.numero))) return;
       ris += Math.min(apertoOrd(o), Math.max(0, (o.confermata == null ? o.qta : o.confermata) - o.consegnato - inPrelievo(o))); });

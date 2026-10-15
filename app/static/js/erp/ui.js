@@ -5,7 +5,7 @@
   window.S4UI = {
     clienti: function (S) { return Object.keys(S.clienti).map(function (k) { return [k, k + ' — ' + S.clienti[k].nome + ' (' + S.clienti[k].regione + ')']; }); },
     materiali: function (S, tutti) { return Object.keys(S.materiali).filter(function (k) { return tutti || S.materiali[k].tipo !== 'ROH'; }).map(function (k) { return [k, k + ' — ' + S.materiali[k].nome]; }); },
-    lista: function (arr, etichetta, vuoto) { return arr.length ? arr.map(function (x) { return [x.numero, etichetta(x)]; }) : [['', vuoto || '— nessun documento —']]; },
+    lista: function (arr, etichetta, vuoto, chiave) { return arr.length ? arr.map(function (x) { return [chiave ? chiave(x) : x.numero, etichetta(x)]; }) : [['', vuoto || '— nessun documento —']]; },
     fornitori: function (S) { return Object.keys(S.fornitori || {}).map(function (k) { return [k, k + ' — ' + S.fornitori[k].nome]; }); },
     nome: function (S, c) { return (S.clienti[c] || {}).nome || c; },
     avviso: function (S) { return S.avviato ? '' : '<div class="lab-esito ko">⚠ Il sistema non è ancora avviato: vai su <b>Dati di base → Avvio del sistema</b>.</div>'; },

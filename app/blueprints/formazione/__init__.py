@@ -70,6 +70,8 @@ CASI = [
      "↩️", "erp_fi", "VF11: storna"),
     ("chi-fa-cosa", "Tutti possono fare tutto?", "Chi vende sblocca da solo i clienti sopra fido, chi compra si approva gli ordini, nessuno sa chi ha fatto cosa.",
      "🔐", "erp_dati", "VKM1"),
+    ("merce-danneggiata", "Arriva merce rotta o un pallet si danneggia?", "Il fascio piegato finisce a scaffale con quello buono, il pallet urtato parte lo stesso per il cliente, nessuno sa che cosa è da buttare.",
+     "🚫", "erp_acquisti", "MIGO: prima consegna"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]
@@ -89,8 +91,8 @@ FORMAS = [
     {"uf": "UF 8", "titolo": "Introduzione alla contabilità di magazzino", "date": "15 giugno – 28 luglio 2026", "verifica": "14 luglio 2026",
      "lezioni": ["valorizzazione", "dove-merce"], "pagine": [("erp_inventario.valorizzazione", "Scheda di magazzino e valorizzazione"), ("erp_dati.anagrafiche", "Materiali e giacenze"), ("erp_fi.giornale", "Libro giornale")]},
     {"uf": "UF 9", "titolo": "Inventari fisici e contabili — procedure operative", "date": "21 ottobre – 3 novembre 2026", "verifica": "3 novembre 2026",
-     "lezioni": ["inventario-differenze", "inventario-rotazione", "valorizzazione", "dove-merce"],
-     "pagine": [("erp_inventario.documenti", "Documenti d'inventario"), ("erp_inventario.lista", "Lista di conta"), ("erp_inventario.differenze", "Differenze"), ("erp_inventario.abc", "Classificazione ABC"), ("erp_magazzino.rf", "Pistola RF")],
+     "lezioni": ["inventario-differenze", "inventario-rotazione", "valorizzazione", "dove-merce", "merce-danneggiata"],
+     "pagine": [("erp_inventario.documenti", "Documenti d'inventario"), ("erp_inventario.lista", "Lista di conta"), ("erp_inventario.differenze", "Differenze"), ("erp_inventario.abc", "Classificazione ABC"), ("erp_magazzino.rf", "Pistola RF"), ("erp_magazzino.bloccato", "Merce bloccata e danneggiata")],
      "esercizio": "marzo 2027 dell'esercizio passo passo (s4-magazzino)"},
     {"uf": "UF 10", "titolo": "Sistemi informativi applicati al processo logistico", "date": "10 – 26 novembre 2026", "verifica": "26 novembre 2026",
      "lezioni": ["processo-spedizione", "prelievo-errori", "ddt-sscc", "dove-merce"],
@@ -107,6 +109,26 @@ FORMAS = [
 def formas():
     return render_template("formazione/formas.html", formas=FORMAS, caso_per=CASO, versione=versione_corrente(), versioni=VERSIONI,
                            moduli=MODULI, modulo_attivo=modulo("casi"), endpoint_corrente="formazione.formas")
+
+
+@bp.route("/wms/glossario")
+def wms_glossario():
+    from .wms_testi import GLOSSARIO
+    gruppi = []
+    for x in GLOSSARIO:
+        if not gruppi or gruppi[-1][0] != x[0]:
+            gruppi.append((x[0], []))
+        gruppi[-1][1].append(x)
+    return render_template("formazione/wms-glossario.html", gruppi=gruppi, versione=versione_corrente(), versioni=VERSIONI,
+                           moduli=MODULI, modulo_attivo=modulo("wms"), endpoint_corrente="formazione.wms_glossario")
+
+
+@bp.route("/wms/verifica")
+def wms_verifica():
+    from .wms_testi import VERIFICA
+    domande = [{"uf": d[0], "testo": d[1], "risposte": d[2], "giusta": d[3], "spiega": d[4]} for d in VERIFICA]
+    return render_template("formazione/wms-verifica.html", domande=domande, versione=versione_corrente(), versioni=VERSIONI,
+                           moduli=MODULI, modulo_attivo=modulo("wms"), endpoint_corrente="formazione.wms_verifica")
 
 
 @bp.route("/")

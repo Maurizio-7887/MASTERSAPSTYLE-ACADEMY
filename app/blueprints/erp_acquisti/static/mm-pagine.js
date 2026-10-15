@@ -38,7 +38,9 @@
     entrate: function () {
       var aperti = S().acquisti.filter(function (o) { return o.entrato < o.qta && (!o.rilascio || o.rilascio.stato === 'rilasciato'); });
       radice.innerHTML = U.avviso(S()) + L.scheda('📥', 'Entrata merci da ordine d\'acquisto', 'MIGO · 101', L.modulo('mi', [['ordine', 'Ordine d\'acquisto', 'select', '', U.lista(aperti, etich, '— nessun ordine da ricevere —')],
-        ['qta', 'Quantità (vuoto = tutto il residuo)', 'num'], ['lotto', 'Lotto: colata dal certificato del fornitore (vuoto = automatico)', 'text'], ['data', 'Data di registrazione', 'date']], [['mi', 'Registra entrata']]) +
+        ['qta', 'Quantità contata (vuoto = tutto il residuo)', 'num'], ['ddt', 'Numero DDT del fornitore', 'text'], ['lotto', 'Lotto: colata dal certificato del fornitore (vuoto = automatico)', 'text'],
+        ['danneggiati', 'Di cui danneggiati (vanno in stock bloccato)', 'num'], ['danno', 'Descrizione del danno', 'text'], ['data', 'Data di registrazione', 'date']], [['mi', 'Registra entrata']]) +
+        '<p class="lab-nota">Al ricevimento il magazziniere <b>conta</b> e confronta con il DDT: si registra solo quello che è arrivato davvero. La merce danneggiata entra lo stesso (è del fornitore fino al reclamo) ma in <b>stock bloccato</b>, nell\'area di quarantena.</p>' +
         '<p class="lab-nota">D 12 Magazzino a standard · D/A 63 Differenza prezzo / A 22 WE/RE al prezzo d\'ordine. Il WE/RE si chiude con la fattura (MIRO).</p>') +
         L.scheda('📦', 'Giacenza materie prime', 'MMBE', L.tabella(['Materiale', 'Giacenza›', 'Standard›', 'Valore a standard›'], roh().map(function (x) { var m = S().materiali[x[0]]; return [x[0], n0(S().giacenze[x[0]]) + ' ' + m.um, eur(m.std), eur(S().giacenze[x[0]] * m.std)]; }))) + elenco();
       L.collega(radice, 'mi', {mi: MM.entrata}, rendi);

@@ -219,8 +219,11 @@
     ['ME54N', function () { ru('RESP_ACQ'); window.MM4.approva({rda: window.SD4.N.S.rda.slice(-1)[0].numero, decisione: 'approva', data: '2027-08-10'}); }],
     ['ME21N: ordine con riferimento', function () { ru('BUYER'); window.MM4.ordine({rda: window.SD4.N.S.rda.slice(-1)[0].numero, fornitore: 'F100', prezzo: 0.97, data: '2027-08-11'}); }],
     ['ME29N', function () { ru('RESP_ACQ'); window.MM4.rilascia({ordine: window.SD4.N.S.acquisti.slice(-1)[0].numero, decisione: 'rilascia', data: '2027-08-11'}); }],
-    ['MIGO: prima consegna', function () { ru('CAPO_MAG'); window.MM4.entrata({ordine: window.SD4.N.S.acquisti.slice(-1)[0].numero, qta: 4000, lotto: 'COL-0816', data: '2027-08-16'}); }],
+    ['MIGO: prima consegna', function () { ru('CAPO_MAG'); window.MM4.entrata({ordine: window.SD4.N.S.acquisti.slice(-1)[0].numero, qta: 4000, ddt: 'AU-0816', lotto: 'COL-0816', danneggiati: 1000, danno: 'fascio piegato in scarico', data: '2027-08-16'}); }],
     ['RF: metti a catasta', function () { rf('2027-08-16'); }],
+    ['Quarantena: rottama', function () { ru('CAPO_MAG'); window.WM4.rottama({udc: window.WM4.bloccati()[0].udc, motivo: 'tubi piegati, non raddrizzabili', data: '2027-08-17'}); }],
+    ['Pallet urtato', function () { ru('MAGAZZINIERE'); var q = window.WM4.quanti(function (x) { return x.mat === 'TR-PED' && x.qta > 0 && /^0/.test(x.ubic); })[0]; window.WM4.blocca({udc: q.udc, motivo: 'pallet urtato dal carrello', data: '2027-08-18'}); rf('2027-08-18'); }],
+    ['Controllo: è integro', function () { ru('CAPO_MAG'); window.WM4.sblocca({udc: window.WM4.bloccati()[0].udc, motivo: 'controllato: integro', data: '2027-08-19'}); rf('2027-08-19'); }],
     ['MB56', null], ['IQ03', null],
     ['Calcola le paghe da luglio', function () { ru('PAGHE'); ['07', '08', '09', '10', '11', '12'].forEach(function (m) { window.PY4.calcola({periodo: '2027-' + m}); }); }]);
   var ru = function (r) { window.AU4.imposta({ruolo: r}); };

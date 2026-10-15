@@ -29,7 +29,7 @@
     ['29', 'Erario c/ritenute (IRPEF e addizionali)', 'PASSIVO'], ['31', 'Fondo TFR', 'PASSIVO'],
     ['44', 'Ricavi per servizi', 'RICAVO'], ['54', 'Consulenze e servizi', 'COSTO'], ['58', 'Commissioni e spese bancarie', 'COSTO'], ['59', 'Interessi attivi bancari', 'RICAVO'],
     ['66', 'Utili su cambi', 'RICAVO'], ['67', 'Perdite su cambi', 'COSTO'], ['68', 'Differenze cambio da valutazione', 'COSTO'],
-    ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
+    ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {

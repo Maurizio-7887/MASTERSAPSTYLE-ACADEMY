@@ -57,9 +57,13 @@ window.MM4 = (function () {
     var m = n.materiale(o.materiale), std = r2(q * m.std), ord = r2(q * o.prezzo), pd = r2(ord - std);
     var doc = n.numero('materiale');
     var mv = n.movimento(o.materiale, q, data, '101', o.numero, {lotto: i.lotto ? String(i.lotto).trim().toUpperCase() : '', fornitore: o.fornitore, colata: String(i.lotto || '').trim()});
-    if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, q, data, doc, '101 acquisto');
+    var dann = i.danneggiati == null || i.danneggiati === '' ? 0 : L.num(i.danneggiati, 'Quantità danneggiata', 0);
+    if (dann > q + 1e-9) throw Error('La quantità danneggiata non può superare quella ricevuta.');
+    var ddt = String(i.ddt || '').trim();
+    if (dann > 0 && !(window.WM4 && window.WM4.attivo(data))) throw Error('L\'entrata in stock bloccato si usa con il magazzino W100 attivo.');
+    if (window.WM4 && window.WM4.attivo(data)) { if (q - dann > 1e-9) window.WM4.entrata(o.materiale, r2(q - dann), data, doc, '101 acquisto'); if (dann > 0) window.WM4.entrataBloccata(o.materiale, dann, data, doc, String(i.danno || 'merce danneggiata al ricevimento'), mv.lotti[0].lotto); }
     o.entrato = r2(o.entrato + q); o.valoreEntrato = r2(o.valoreEntrato + ord);
-    (o.entrate = o.entrate || []).push({doc: doc, qta: q, data: data, valoreStd: std, valoreOrdine: ord, pd: pd, lotto: mv.lotti[0].lotto});
+    (o.entrate = o.entrate || []).push({doc: doc, qta: q, data: data, valoreStd: std, valoreOrdine: ord, pd: pd, lotto: mv.lotti[0].lotto, ddt: ddt, danneggiati: dann});
     var r = n.post({data: data, tipo: 'ENTRATA_ACQUISTO', rif: doc, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + L.n0(q) + ' ' + m.um + ' ' + o.materiale + ' lotto ' + mv.lotti[0].lotto + ' da ordine ' + o.numero,
       righe: [{conto: '12', dareAvere: 'DARE', importo: std, testo: 'a standard ' + L.eur(m.std)}, {conto: '63', dareAvere: 'DARE', importo: pd, testo: 'differenza prezzo ' + o.materiale},
               {conto: '22', dareAvere: 'AVERE', importo: ord, partner: o.fornitore, testo: 'WE/RE al prezzo d\'ordine'}]});

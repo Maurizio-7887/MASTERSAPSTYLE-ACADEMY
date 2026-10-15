@@ -176,6 +176,43 @@ MODULI = [
         (PP_, "co88", "Chiusura di periodo", "📆", "CO88", None),
         ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
      ]},
+    {"codice": "wms", "breve": "Magazzino", "sigla": "WMS", "titolo": "Magazzino WMS (logica SAP EWM)", "icona": "🏬", "colore": "laboratorio", "kpi": None,
+     "descrizione": "Il magazzino a ubicazioni come in SAP EWM: entrate, messa a posto, pistola RF, merce bloccata, lotti, inventari, prelievo, imballo, spedizione, innovazione", "app": [
+        ("erp_magazzino.struttura", None, "Struttura e attivazione", "🏬", "W100 · tipi · ubicazioni", None, "1 · Struttura del magazzino"),
+        ("erp_magazzino.mappa", None, "Mappa delle ubicazioni", "🗺️", "LS26 · LX03", None, "1 · Struttura del magazzino"),
+        ("erp_magazzino.etichette", None, "Etichette barcode e QR", "🏷️", "Code 128 · QR", None, "1 · Struttura del magazzino"),
+        ("erp_acquisti.entrate", None, "Entrata merci (controllo DDT e danni)", "📥", "MIGO 101", None, "2 · Entrata merci e messa a posto"),
+        ("erp_magazzino.rf", None, "Pistola RF", "🔫", "LM00 · /SCWM/RFUI", None, "2 · Entrata merci e messa a posto"),
+        ("erp_magazzino.bloccato", None, "Merce bloccata e danneggiata", "🚫", "MIGO 344 · 343 · 555", None, "2 · Entrata merci e messa a posto"),
+        ("erp_magazzino.compiti", None, "Compiti di magazzino", "📋", "LT10 · LT12 · LT22", None, "3 · Giacenze, lotti e movimenti interni"),
+        ("erp_magazzino.monitor", None, "Monitor e quadratura IM–WMS", "📈", "/SCWM/MON · LX23", None, "3 · Giacenze, lotti e movimenti interni"),
+        ("erp_magazzino.lotti", None, "Lotti, numeri di serie, tracciabilità", "🧬", "MSC3N · MB56 · IQ03", None, "3 · Giacenze, lotti e movimenti interni"),
+        ("erp_produzione.avanzamento", None, "Prelievi per la produzione", "🏭", "MIGO 261 · PSA", None, "3 · Giacenze, lotti e movimenti interni"),
+        ("erp_inventario.documenti", None, "Documenti d'inventario", "📝", "LI01N · LI11N · LI14 · LI20", None, "4 · Inventario fisico e contabile (UF 9)"),
+        ("erp_inventario.lista", None, "Lista di conta da stampare", "🖨️", "LI04", None, "4 · Inventario fisico e contabile (UF 9)"),
+        ("erp_inventario.differenze", None, "Differenze inventariali", "⚖️", "LI21 · 711 / 712", None, "4 · Inventario fisico e contabile (UF 9)"),
+        ("erp_inventario.abc", None, "Inventario a rotazione ABC", "🔄", "ABC · ciclo", None, "4 · Inventario fisico e contabile (UF 9)"),
+        ("erp_inventario.valorizzazione", None, "Valorizzazione delle rimanenze", "💶", "FIFO · LIFO · CMP", None, "4 · Inventario fisico e contabile (UF 9)"),
+        ("erp_vendite.consegne", None, "Consegne e uscita merci", "🚚", "VL01N · VL02N · 601", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_spedizione.prelievo", None, "Prelievo", "📦", "LT03 · lista di prelievo", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_spedizione.imballo", None, "Imballo e SSCC", "🎁", "HU · SSCC · GS1-128", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_spedizione.trasporti", None, "Trasporti e carico", "🚛", "VT01N · VT02N", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_spedizione.ddt", None, "DDT", "📄", "DDT · documento di trasporto", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_spedizione.monitor", None, "Monitor della spedizione", "🛰️", "VL06O", None, "5 · Uscita merci e spedizione (UF 10)"),
+        ("erp_innovazione.kpi", None, "KPI di magazzino", "📊", "KPI", None, "6 · Innovazione del magazzino (UF 11)"),
+        ("erp_innovazione.slotting", None, "Slotting ABC", "🧭", "/SCWM/SLOT", None, "6 · Innovazione del magazzino (UF 11)"),
+        ("erp_innovazione.ondate", None, "Prelievo a ondate e cross-docking", "🌊", "/SCWM/WAVE", None, "6 · Innovazione del magazzino (UF 11)"),
+        ("erp_innovazione.rfid", None, "Varco RFID", "📡", "EPC SSCC-96", None, "6 · Innovazione del magazzino (UF 11)"),
+        ("formazione.formas", None, "Il percorso del corso FORMAS", "🗓️", "UF 9 · 10 · 11", None, "7 · Formazione del magazziniere"),
+        ("formazione.wms_glossario", None, "Glossario del magazziniere", "📖", "parole e transazioni", None, "7 · Formazione del magazziniere"),
+        ("formazione.wms_verifica", None, "Verifica: quiz del magazziniere", "✅", "30 domande · UF 9 · 10 · 11", None, "7 · Formazione del magazziniere"),
+        ("formazione.dove_merce", None, "Non sai dove è la merce?", "🗺️", "lezione", None, "7 · Formazione del magazziniere"),
+        ("formazione.merce_danneggiata", None, "Arriva merce rotta?", "🚫", "lezione", None, "7 · Formazione del magazziniere"),
+        ("formazione.inventario_differenze", None, "Lo scaffale non torna col sistema?", "📝", "lezione", None, "7 · Formazione del magazziniere"),
+        ("formazione.prelievo_errori", None, "Il prelievo è lento e pieno di errori?", "📋", "lezione", None, "7 · Formazione del magazziniere"),
+        ("formazione.ddt_sscc", None, "DDT ed etichette scritti a mano?", "📄", "lezione", None, "7 · Formazione del magazziniere"),
+        ("formazione.magazziniere_cammina", None, "Il magazziniere cammina troppo?", "🧭", "lezione", None, "7 · Formazione del magazziniere"),
+     ]},
     {"codice": "hr", "breve": "Personale", "sigla": "HR", "titolo": "Personale", "icona": "👤", "colore": "personale", "kpi": "dipendenti",
      "descrizione": "Dipendenti, paghe, contributi e TFR verso FI e CO", "app": [
         ("personale.hr", None, "Dipendenti e paghe", "👤", "PA30 · PC00_M99_CIPE", "dipendenti"),
@@ -301,6 +338,7 @@ _ERP_PAGINE = {
                       {"endpoint": "compiti", "titolo": "Compiti di magazzino", "icona": "📋", "tcode": "LT10 · LT12 · LT22"},
                       {"endpoint": "monitor", "titolo": "Monitor del magazzino", "icona": "📈", "tcode": "/SCWM/MON · LX23"},
                       {"endpoint": "etichette", "titolo": "Etichette barcode e QR", "icona": "🏷️", "tcode": "Code 128 · QR"},
+                      {"endpoint": "bloccato", "titolo": "Merce bloccata e danneggiata", "icona": "🚫", "tcode": "MIGO 344 · 343 · 555"},
                       {"endpoint": "lotti", "titolo": "Lotti, numeri di serie e tracciabilità", "icona": "🧬", "tcode": "MSC3N · MB56 · IQ03"}],
     "erp_inventario": [{"endpoint": "documenti", "titolo": "Documenti d'inventario", "icona": "📝", "tcode": "LI01N · LI11N · LI14 · LI20"},
                        {"endpoint": "lista", "titolo": "Lista di conta da stampare", "icona": "🖨️", "tcode": "LI04"},
@@ -338,13 +376,14 @@ _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_cop
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
            "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js",
            "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js"}
+_WMS = {"erp_magazzino", "erp_inventario", "erp_spedizione", "erp_innovazione"}   # pagine che stanno «di casa» nel modulo WMS
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
         _p["gruppo"] = _ERP_GRUPPI[_bp]
 _ERP_NAV = [p for g in _ERP_GRUPPI for p in _ERP_PAGINE[g]]   # mattonelle del modulo, nell'ordine dei gruppi
 for _bp, _pp in _ERP_PAGINE.items():
-    LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "s4", "esercizio": "s4-integrato",
+    LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "wms" if _bp in _WMS else "s4", "esercizio": "s4-integrato",
                        "js": _ERP_COMUNI + [(f"{_bp}.static", _ERP_JS[_bp])], "pagine": _pp, "nav": _pp, "copione": "SD4", "area": _ERP_GRUPPI[_bp]}
 for _k, _lab in LABORATORI.items():
     for _p in _lab["pagine"]:
@@ -387,6 +426,7 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.inventario_differenze", None, "Lo scaffale non torna col sistema?", "📝", "inventario fisico · 999", None),
             ("formazione.inventario_rotazione", None, "Fermi tutto per l'inventario?", "🔄", "rotazione · ABC", None),
             ("formazione.valorizzazione", None, "Come valorizzi le rimanenze?", "💶", "FIFO · LIFO · CMP", None),
+            ("formazione.merce_danneggiata", None, "Arriva merce rotta?", "🚫", "stock bloccato · 344 · 555", None),
             ("formazione.processo_spedizione", None, "Spedisci senza sapere cosa sale sul camion?", "🚛", "consegna · carico · uscita merci", None),
             ("formazione.prelievo_errori", None, "Il prelievo è lento e pieno di errori?", "📋", "FIFO · RF · differenze", None),
             ("formazione.ddt_sscc", None, "DDT ed etichette scritti a mano?", "📄", "DDT · SSCC · GS1-128", None),

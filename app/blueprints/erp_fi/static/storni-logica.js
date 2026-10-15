@@ -121,6 +121,7 @@ window.ST4 = (function () {
     if (e.stornato) throw Error('Entrata già stornata.');
     if (o.fatturato > o.entrato - e.qta + 1e-9) throw Error('La merce è già fatturata dal fornitore: prima storna la fattura (MR8M).');
     if ((s.giacenze[o.materiale] || 0) < e.qta - 1e-9) throw Error('A magazzino non c\'è più tutta la merce di questa entrata: è già stata consumata.');
+    if (e.danneggiati) throw Error('Parte di questa entrata è in stock bloccato (danneggiata): sblocca o rottama prima la merce in quarantena, oppure fai un reso al fornitore.');
     if (s.wm && window.WM4.attivo(e.data)) {
       var qs = window.WM4.quanti(function (q) { return q.rif === e.doc && q.qta > 0; });
       if (qs.some(function (q) { return q.ubic !== 'GR-ZONE'; }) || r2(qs.reduce(function (t, q) { return t + q.qta; }, 0)) < e.qta - 1e-9) throw Error('La merce è già stata messa a posto: riportala in zona di ricevimento prima dello storno.');
