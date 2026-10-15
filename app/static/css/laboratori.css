@@ -101,3 +101,5 @@
 body.rf-pieno .msa-shell,body.rf-pieno .msa-attivita,body.rf-pieno .msa-sottobarra,body.rf-pieno .msa-lp-intro,body.rf-pieno .msa-lp-nota{display:none}
 body.rf-pieno .msa-lp{padding-top:6px}
 .rf-testa .rf-pieno-btn{margin-left:auto;align-self:flex-end;background:#123B5C;color:#fff;border:1px solid #5d7d99;border-radius:6px;padding:6px 10px;font-size:14px}
+.s4-et-sscc{font-size:15px!important}
+.lab-bd.verde{background:#E3F5EA;color:#1E6B3A}.lab-bd.giallo{background:#FFF4D6;color:#7A5300}.lab-bd.grigio{background:#EEF1F4;color:#556}

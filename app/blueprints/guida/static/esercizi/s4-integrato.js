@@ -3,6 +3,11 @@
 (function () {
   var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.', M = 'erp_magazzino.', I = 'erp_inventario.';
   var inv = function (h) { return ((h.S.wm || {}).inventari || [])[0]; };
+  var X = 'erp_spedizione.';
+  var aprO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-04-01'; }); };
+  var aprC = function (h, c) { return (h.S.consegne || []).filter(function (k) { return k.cliente === c && k.wm; })[0]; };
+  var prelevato = function (h, c) { var k = aprC(h, c); if (!k) return false; var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.consegna === k.numero; }); return t.length > 0 && t.every(function (x) { return x.stato === 'confermato'; }); };
+  var imballato = function (h, c) { var k = aprC(h, c); return !!k && ((h.S.sped || {}).colli || []).some(function (x) { return x.consegna === k.numero; }); };
   var ord = function (h, c, tipo, feb) { return (h.S.ordini || []).filter(function (o) { return o.cliente === c && o.tipo === (tipo || 'OR') && (feb ? o.data >= '2027-02-01' : o.data < '2027-02-01'); }); };
   var cond = function (h, tipo, c, m) { return (h.S.condizioni || []).some(function (x) { return x.origine === 'VK11' && x.tipo === tipo && x.cliente === c && (!m || x.materiale === m); }); };
   var fatt = function (h, c, tipo) { return (h.S.fatture || []).filter(function (f) { return f.cliente === c && f.tipo === (tipo || 'F2') && f.data < '2027-02-01'; }); };
@@ -12,7 +17,7 @@
       campi: [['Committente', c + ' ' + nomeC], ['Materiale', mat], ['Quantità', String(q)], ['Riferimento cliente', rif], ['Data', c === 'C400' ? '05/01/2027' : '10/01/2027']],
       attesa: attesa, nota: (nota || '') + ' Prima di salvare premi «Mostra condizioni»: è la videata prezzi della posizione.', fatto: function (h) { return ord(h, c).length > 0; }};
   };
-  var feb = function (h) { return (h.S.ordini || []).filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01'; }); };
+  var feb = function (h) { return (h.S.ordini || []).filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01' && o.data < '2027-03-01'; }); };
   var pord = function (h, m) { return (h.S.produzione || []).filter(function (o) { return o.materiale === m; })[0]; };
   var ev = function (h, m, t) { var o = pord(h, m); return !!o && o.eventi.some(function (e) { return e.tipo === t; }); };
   var ck = function (m, attesa) {
@@ -41,7 +46,7 @@
       campi: [['Committente', c], ['Materiale', m], ['Quantità', String(q)], ['Riferimento', rif], ['Data', '15/02/2027']], attesa: attesa, fatto: function (h) { return ord(h, c, 'OR', true).length > 0; }};
   };
   window.MSA_ESERCIZIO = {
-    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gennaio), costi del prodotto (febbraio), magazzino WMS e inventario (marzo)', versione: 'erp-ft',
+    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gennaio), costi (febbraio), magazzino e inventario (marzo), spedizione (aprile)', versione: 'erp-ft',
     passi: [
       {g: 'Prima di cominciare', data: '', titolo: 'Che cosa è il sistema integrato', dove: {ep: D + 'avvio'}, percorso: 'Launchpad → S/4 Sistema integrato → Avvio del sistema',
        campi: [['Un solo libro giornale', 'ogni documento logistico scrive la sua registrazione'], ['Prezzi', 'non si digitano: li determina la procedura ZFT001 dalle condizioni'],
@@ -209,6 +214,48 @@
        campi: [['Esempio da manuale', 'FIFO 1.660 · LIFO 1.360 · CMP 1.560 · standard 1.430'], ['Ferro del sistema', '7.810 kg: FIFO = LIFO = CMP 7.710 (tutto il consumo è avvenuto prima del secondo acquisto) · standard 7.419,50']], nota: 'Spunta quando hai confrontato i metodi (art. 2426 c.c., OIC 13).'},
       {g: 'Fine di marzo', data: '', titolo: 'Consegna il lavoro di marzo al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
        campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — magazzino WMS e inventario']]},
+      // ═══ APRILE — spedizione (UF 10) ═══
+      {g: 'Aprile — spedizione (UF 10)', data: '', titolo: 'Aprile: la spedizione dal magazzino al cliente', dove: {ep: X + 'monitor'}, percorso: 'S/4 → Spedizione → Monitor delle consegne in uscita',
+       campi: [['Due ordini', 'Comune di Gamma 250 TR-PED · Edil Sigma 60 TR-STD'], ['Il percorso', 'consegna → prelievo con la pistola → imballo con SSCC → camion → carico → uscita merci e DDT → fattura'], ['Un imprevisto', 'su un pallet mancano 2 transenne']],
+       nota: 'Se non hai fatto i mesi precedenti: Magazzino → Struttura → «Carica la situazione di fine febbraio», poi rifai marzo, oppure usa la lezione «Spedisci senza sapere cosa sale sul camion?».'},
+      {g: 'Aprile — ordini e consegne', data: '05/04/2027', titolo: 'Aprile — VA01: Comune di Gamma 250 TR-PED', dove: {ep: V + 'ordini'}, percorso: 'S/4 → Ordini cliente',
+       campi: [['Committente', 'C300'], ['Materiale', 'TR-PED'], ['Quantità', '250'], ['Riferimento', 'GAMMA-APR'], ['Data', '05/04/2027']], attesa: '13.750 − ZSCA 2% 275 − K007 3% 412,50 = netto 13.062,50',
+       fatto: function (h) { return aprO(h, 'C300'); }},
+      {g: 'Aprile — ordini e consegne', data: '05/04/2027', titolo: 'Aprile — VA01: Edil Sigma 60 TR-STD', dove: {ep: V + 'ordini'}, percorso: 'S/4 → Ordini cliente',
+       campi: [['Committente', 'C400'], ['Materiale', 'TR-STD'], ['Quantità', '60'], ['Riferimento', 'SIGMA-APR'], ['Data', '05/04/2027']], attesa: '3.600 + trasporto Lazio 90 = netto 3.690', fatto: function (h) { return aprO(h, 'C400'); }},
+      {g: 'Aprile — ordini e consegne', data: '06/04/2027', titolo: 'Aprile — VL01N: crea le due consegne', dove: {ep: V + 'consegne'}, percorso: 'S/4 → Consegne (VL01N)',
+       campi: [['Ordini', 'i due di aprile'], ['Data', '06/04/2027']], attesa: 'Nessuna uscita merci: il WMS crea 7 compiti di prelievo FIFO verso GI-ZONE (5 pallet di TR-PED, 50 + 10 TR-STD).',
+       fatto: function (h) { return aprC(h, 'C300') && aprC(h, 'C400'); }},
+      {g: 'Aprile — prelievo', data: '', titolo: 'Lista di prelievo: stampala', dove: {ep: X + 'prelievo'}, percorso: 'Spedizione → Lista di prelievo', campi: [['Ordine delle ubicazioni', 'FIFO: prima i pallet entrati prima']], nota: 'Facoltativo: chi non ha la pistola preleva con la lista e conferma da scrivania.'},
+      {g: 'Aprile — prelievo', data: '07/04/2027', titolo: 'RF: preleva la consegna del Comune di Gamma', dove: {ep: M + 'rf'}, percorso: 'Magazzino → Pistola RF → Compiti',
+       campi: [['Risorsa', 'MAG02 Sara'], ['5 compiti', '01-02-2 · 01-03-1 · 01-03-2 · 01-04-1 · 01-04-2 → GI-ZONE'], ['In 01-03-2', 'trovi solo 48 pezzi: scrivi 48 nella quantità'], ['Poi', 'il sistema crea un compito per i 2 mancanti da 01-05-1: prelevali']],
+       attesa: 'I 2 pezzi mancanti vanno nella zona 999; prelevati 250.', fatto: function (h) { return prelevato(h, 'C300'); }},
+      {g: 'Aprile — prelievo', data: '07/04/2027', titolo: 'RF: preleva la consegna di Edil Sigma', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti',
+       campi: [['Risorsa', 'MAG03 Luca'], ['Compiti', '01-01-1 (50) · 01-01-2 (10 dei 18)']], fatto: function (h) { return prelevato(h, 'C400'); }},
+      {g: 'Aprile — imballo', data: '07/04/2027', titolo: 'Imballo: 5 pallet per il Comune di Gamma', dove: {ep: X + 'imballo'}, percorso: 'Spedizione → Imballo e etichette SSCC',
+       campi: [['Consegna', 'quella del Comune di Gamma'], ['Imballo', 'Pallet EUR 120×80'], ['Pezzi per collo', 'vuoto (50)']], attesa: '5 colli × (50 × 9 kg + 25 di tara) = 2.375 kg lordi', fatto: function (h) { return imballato(h, 'C300'); }},
+      {g: 'Aprile — imballo', data: '07/04/2027', titolo: 'Imballo: 2 pallet per Edil Sigma', dove: {ep: X + 'imballo'}, percorso: 'Spedizione → Imballo',
+       campi: [['Consegna', 'quella di Edil Sigma'], ['Imballo', 'Pallet EUR']], attesa: '2 colli: 50 pz 625 kg · 10 pz 145 kg', fatto: function (h) { return imballato(h, 'C400'); }},
+      {g: 'Aprile — imballo', data: '', titolo: 'Stampa le etichette SSCC', dove: {ep: X + 'imballo'}, percorso: 'Imballo · Stampa le etichette', campi: [['SSCC', '18 cifre, GS1-128 «(00)»'], ['Sull\'etichetta', 'destinatario, pezzi, peso, collo n di m']], nota: 'Spunta a mano.'},
+      {g: 'Aprile — carico', data: '08/04/2027', titolo: 'VT01N: un camion per le due consegne', dove: {ep: X + 'trasporti'}, percorso: 'Spedizione → Trasporti e carico',
+       campi: [['Consegne', 'le due di aprile'], ['Vettore', 'V10 Trasporti Toscani'], ['Targa', 'FI 123 AB'], ['Autista', 'Paolo Bini'], ['Porto', 'franco'], ['Data', '08/04/2027']],
+       attesa: 'Un trasporto, un giro: Umbria e Lazio. Due destinatari = due DDT.', fatto: function (h) { return ((h.S.sped || {}).trasporti || []).length > 0; }},
+      {g: 'Aprile — carico', data: '08/04/2027', titolo: 'RF: carica i 7 colli leggendo gli SSCC', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Carico',
+       campi: [['Per ogni collo', 'leggi l\'SSCC sull\'etichetta'], ['Controllo', 'un collo di un altro camion viene rifiutato']],
+       fatto: function (h) { var c = ((h.S.sped || {}).colli || []); return c.length >= 7 && c.every(function (x) { return x.caricato; }); }},
+      {g: 'Aprile — carico', data: '', titolo: 'Prova: leggi un codice che non è un SSCC', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Carico', campi: [['Prova', 'leggi l\'etichetta di un\'ubicazione invece del collo']], nota: 'La pistola rifiuta: spunta a mano.'},
+      {g: 'Aprile — carico', data: '08/04/2027', titolo: 'Partenza: uscita merci del trasporto', dove: {ep: X + 'trasporti'}, percorso: 'Spedizione → Trasporti · Fine carico e uscita merci',
+       campi: [['Trasporto', 'quello di oggi'], ['Data', '08/04/2027']], attesa: 'Uscita merci 601 per le due consegne: D 41 / A 13 8.097,50 (TR-PED) e 2.068,20 (TR-STD). DDT n. 1 e 2.',
+       fatto: function (h) { return ((h.S.sped || {}).trasporti || []).some(function (t) { return t.partenza; }); }},
+      {g: 'Aprile — documenti', data: '', titolo: 'Stampa i due DDT', dove: {ep: X + 'ddt'}, percorso: 'Spedizione → Documento di trasporto',
+       campi: [['DDT 1', 'Comune di Gamma · 250 pz · 5 colli · 2.375 kg'], ['DDT 2', 'Edil Sigma · 60 pz · 2 colli · 770 kg']], nota: 'Firma del conducente alla partenza. Spunta a mano.'},
+      {g: 'Aprile — documenti', data: '09/04/2027', titolo: 'Aprile — VF01: fattura le due consegne', dove: {ep: V + 'fatture'}, percorso: 'S/4 → Fatturazione',
+       campi: [['Consegne', 'le due di aprile'], ['Data', '09/04/2027']], attesa: 'Gamma 15.936,25 · Sigma 4.501,80', fatto: function (h) { return aprC(h, 'C300') && aprC(h, 'C300').fatturata && aprC(h, 'C400') && aprC(h, 'C400').fatturata; }},
+      {g: 'Aprile — documenti', data: '10/04/2027', titolo: 'Registra la differenza di prelievo (2 TR-PED)', dove: {ep: I + 'differenze'}, percorso: 'Inventari → Differenze inventariali',
+       campi: [['Data', '10/04/2027']], attesa: 'Movimento 711: D 65 / A 13 64,78 (2 × 32,39). Conto 65 a 133,72.', fatto: function (h) { return (((h.S.wm || {}).registrazioni) || []).length >= 2; }},
+      {g: 'Aprile — documenti', data: '', titolo: 'Monitor VL06O: tutto in stato C', dove: {ep: X + 'monitor'}, percorso: 'Spedizione → Monitor', campi: [['Le due consegne', 'prelievo C · imballo C · carico C · uscita C · fattura C']], nota: 'Spunta a mano.'},
+      {g: 'Fine di aprile', data: '', titolo: 'Consegna il lavoro di aprile al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+       campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — spedizione']]},
     ]),
   };
 })();

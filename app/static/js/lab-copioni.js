@@ -102,7 +102,8 @@
       ['CO11N: ore dell\'ordine ' + m, function (X) { window.PP4.conferma({ordine: po(X, m), attrezzaggio: 3, ore: x[3], data: '2027-02-10'}); }],
       ['101: entrata ' + x[1] + ' ' + m, function (X) { window.PP4.entrata({ordine: po(X, m), data: '2027-02-12'}); }]);
   });
-  var feb = function (X) { return X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01'; }); };
+  var apr = function (X, c) { return X.N.S.consegne.filter(function (k) { return k.cliente === c && k.wm; }).slice(-1)[0]; };
+  var feb = function (X) { return X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-02-01' && o.data < '2027-03-01'; }); };
   SD4.push(
     ['Febbraio — VA01: Beta', function (X) { X.ordine({cliente: 'C100', materiale: 'TR-STD', qta: 300, rif: 'BETA-FEB', data: '2027-02-15'}); }],
     ['Febbraio — VA01: Delta', function (X) { X.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: 120, rif: 'DELTA-FEB', data: '2027-02-15'}); }],
@@ -128,7 +129,28 @@
     ['Riconta', function (X) { var d = X.N.S.wm.inventari[0], v = {numero: d.numero, contatore: 'MAG03 Luca'};
       d.righe.forEach(function (r, k) { if (r.riconta) v['r' + k] = r.ubic === '01-01-2' ? 18 : 30; }); window.IV4.conta(v); }],
     ['LI20', function (X) { window.IV4.chiudi({numero: X.N.S.wm.inventari[0].numero, data: '2027-03-11'}); }],
-    ['LI21', function () { window.IV4.registra({data: '2027-03-12'}); }]);
+    ['LI21', function () { window.IV4.registra({data: '2027-03-12'}); }],
+    ['LX23', null], ['Valorizzazione', null], ['Consegna il lavoro di marzo', null],
+    // aprile — spedizione (UF 10)
+    ['Aprile:', null],
+    ['Aprile — VA01: Comune', function (X) { X.ordine({cliente: 'C300', materiale: 'TR-PED', qta: 250, rif: 'GAMMA-APR', data: '2027-04-05'}); }],
+    ['Aprile — VA01: Edil Sigma', function (X) { X.ordine({cliente: 'C400', materiale: 'TR-STD', qta: 60, rif: 'SIGMA-APR', data: '2027-04-05'}); }],
+    ['Aprile — VL01N', function (X) { X.N.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.data >= '2027-04-01'; }).forEach(function (o) { X.consegna({ordine: o.numero, data: '2027-04-06'}); }); }],
+    ['Lista di prelievo', null],
+    ['RF: preleva la consegna del Comune', function (X) { var c = apr(X, 'C300'); var giro = function () { window.WM4.aperti().filter(function (t) { return t.consegna === c.numero; }).forEach(function (t) {
+      window.WM4.conferma({compito: t.numero, da: t.da, udc: t.udc, qta: t.da === '01-03-2' && !t.origine ? 48 : t.qta, a: t.a, risorsa: 'MAG02 Sara', data: '2027-04-07'}); }); }; giro(); giro(); }],
+    ['RF: preleva la consegna di Edil', function (X) { var c = apr(X, 'C400'); window.WM4.aperti().filter(function (t) { return t.consegna === c.numero; }).forEach(function (t) {
+      window.WM4.conferma({compito: t.numero, da: t.da, udc: t.udc, a: t.a, risorsa: 'MAG03 Luca', data: '2027-04-07'}); }); }],
+    ['Imballo: 5 pallet', function (X) { window.SP4.imballa({consegna: apr(X, 'C300').numero, imballo: 'EUR', data: '2027-04-07'}); }],
+    ['Imballo: 2 pallet', function (X) { window.SP4.imballa({consegna: apr(X, 'C400').numero, imballo: 'EUR', data: '2027-04-07'}); }],
+    ['Stampa le etichette SSCC', null],
+    ['VT01N', function (X) { window.SP4.creaTrasporto({consegne: [apr(X, 'C300').numero, apr(X, 'C400').numero].join(','), vettore: 'V10', targa: 'FI 123 AB', autista: 'Paolo Bini', porto: 'franco', data: '2027-04-08'}); }],
+    ['RF: carica', function () { window.SP4.SP().colli.forEach(function (x) { if (!x.caricato) window.SP4.carica({sscc: x.sscc, data: '2027-04-08'}); }); }],
+    ['Prova: leggi', null],
+    ['Partenza', function () { window.SP4.parti({trasporto: window.SP4.SP().trasporti[0].numero, data: '2027-04-08'}); }],
+    ['Stampa i due DDT', null],
+    ['Aprile — VF01', function (X) { [apr(X, 'C300'), apr(X, 'C400')].forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-04-09'}); }); }],
+    ['Registra la differenza di prelievo', function () { window.IV4.registra({data: '2027-04-10'}); }]);
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();

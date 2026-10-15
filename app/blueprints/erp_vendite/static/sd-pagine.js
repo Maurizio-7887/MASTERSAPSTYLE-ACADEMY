@@ -33,16 +33,20 @@
       L.collega(radice, 'ia', {ia: SD.incassoAcconto}, rendi);
     },
     consegne: function () {
-      var daConsegnare = ordiniOR().filter(function (o) { return o.consegnato < o.qta; });
+      var inPrelievo = function (o) { return S().consegne.filter(function (c) { return c.ordine === o.numero && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0); };
+      var daConsegnare = ordiniOR().filter(function (o) { return o.consegnato + inPrelievo(o) < o.qta; });
       radice.innerHTML = U.avviso(S()) +
         L.scheda('🚚', 'Consegna con uscita merci', 'VL01N · 601', L.modulo('vl', [['ordine', 'Ordine cliente', 'select', '', U.lista(daConsegnare, function (o) { return o.numero + ' · ' + U.nome(S(), o.cliente) + ' · ' + o.qta + ' ' + o.materiale; }, '— niente da consegnare —')],
-          ['data', 'Data uscita merci', 'date']], [['vl', 'Crea consegna e registra uscita merci']]) + '<p class="lab-nota">L\'uscita merci (601) scarica il magazzino a costo standard: D 41 Costo del venduto / A 13 Prodotti finiti.</p>') +
+          ['data', 'Data uscita merci', 'date']], [['vl', window.WM4 && window.WM4.attivo() ? 'Crea consegna (con prelievo a magazzino)' : 'Crea consegna e registra uscita merci']]) + '<p class="lab-nota">L\'uscita merci (601) scarica il magazzino a costo standard: D 41 Costo del venduto / A 13 Prodotti finiti.</p>') +
+        (window.WM4 && window.WM4.attivo() ? L.scheda('🏬', 'Uscita merci di una consegna prelevata', 'VL02N · 601', L.modulo('pg', [['consegna', 'Consegna con prelievo completato', 'select', '', U.lista(S().consegne.filter(function (c) { return c.pgi === false && window.WM4.statoPrelievo(c).stato === 'C'; }), function (c) { return c.numero + ' · ' + U.nome(S(), c.cliente) + ' · ' + c.qta + ' ' + c.materiale; }, '— nessuna consegna prelevata —')],
+          ['data', 'Data uscita merci', 'date']], [['pg', 'Registra uscita merci']]) + '<p class="lab-nota">Con il WMS attivo la consegna nasce senza uscita merci. Il percorso completo (imballo, trasporto, carico, DDT) è in <b>Spedizione</b>; qui l\'uscita merci diretta, senza trasporto.</p>') : '') +
         L.scheda('📦', 'Consegne', 'VL06O', L.tabella(['Consegna', 'Tipo', 'Data', 'Ordine', 'Cliente', 'Materiale', 'Q.tà›', 'Stato'], S().consegne.map(function (c) {
-          return [c.numero, c.tipo, fd(c.data), c.ordine, nome(c.cliente), c.materiale, n0(c.qta), c.tipo === 'LR' ? 'reso rientrato (651)' : c.fatturata ? 'fatturata' : '<b>da fatturare</b>']; }), 'Nessuna consegna.'));
+          return [c.numero, c.tipo, fd(c.data), c.ordine, nome(c.cliente), c.materiale, n0(c.qta), c.tipo === 'LR' ? 'reso rientrato (651)' : c.pgi === false ? '<b>in prelievo (WMS)</b>' : c.fatturata ? 'fatturata' : '<b>da fatturare</b>']; }), 'Nessuna consegna.'));
       L.collega(radice, 'vl', {vl: SD.consegna}, rendi);
+      L.collega(radice, 'pg', {pg: SD.uscitaMerci}, rendi);
     },
     fatture: function () {
-      var daFatt = S().consegne.filter(function (c) { return c.tipo === 'LF' && !c.fatturata; });
+      var daFatt = S().consegne.filter(function (c) { return c.tipo === 'LF' && !c.fatturata && c.pgi !== false; });
       radice.innerHTML = U.avviso(S()) +
         L.scheda('🧾', 'Crea fattura', 'VF01 · tipo F2', L.modulo('vf', [['consegna', 'Consegna', 'select', '', U.lista(daFatt, function (c) { return c.numero + ' · ' + U.nome(S(), c.cliente) + ' · ' + c.qta + ' ' + c.materiale; }, '— nessuna consegna da fatturare —')],
           ['data', 'Data fattura', 'date']], [['vf', 'Crea e contabilizza']]) +

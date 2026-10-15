@@ -262,12 +262,12 @@ LABORATORI = {
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
-               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("static", "js/lab-copioni.js"),
+               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
                "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
-               "erp_inventario": "Inventari fisici e contabili", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
+               "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -299,6 +299,11 @@ _ERP_PAGINE = {
                        {"endpoint": "differenze", "titolo": "Differenze inventariali", "icona": "⚖️", "tcode": "LI21 · 711/712"},
                        {"endpoint": "abc", "titolo": "Classificazione ABC", "icona": "🔤", "tcode": "MC40 · inventario a rotazione"},
                        {"endpoint": "valorizzazione", "titolo": "Valorizzazione delle rimanenze", "icona": "💶", "tcode": "FIFO · LIFO · CMP · standard"}],
+    "erp_spedizione": [{"endpoint": "monitor", "titolo": "Monitor delle consegne in uscita", "icona": "🚚", "tcode": "VL06O · /SCWM/PRDO"},
+                       {"endpoint": "prelievo", "titolo": "Lista di prelievo", "icona": "📋", "tcode": "LT21 · prelievo FIFO"},
+                       {"endpoint": "imballo", "titolo": "Imballo e etichette SSCC", "icona": "📦", "tcode": "VL02N · /SCWM/PACK"},
+                       {"endpoint": "trasporti", "titolo": "Trasporti e carico", "icona": "🚛", "tcode": "VT01N · VT02N"},
+                       {"endpoint": "ddt", "titolo": "Documento di trasporto (DDT)", "icona": "📄", "tcode": "DDT · D.P.R. 472/96"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
@@ -306,7 +311,7 @@ _ERP_PAGINE = {
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
-           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js"}
+           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js"}
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
@@ -355,4 +360,7 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.inventario_differenze", None, "Lo scaffale non torna col sistema?", "📝", "inventario fisico · 999", None),
             ("formazione.inventario_rotazione", None, "Fermi tutto per l'inventario?", "🔄", "rotazione · ABC", None),
             ("formazione.valorizzazione", None, "Come valorizzi le rimanenze?", "💶", "FIFO · LIFO · CMP", None),
+            ("formazione.processo_spedizione", None, "Spedisci senza sapere cosa sale sul camion?", "🚛", "consegna · carico · uscita merci", None),
+            ("formazione.prelievo_errori", None, "Il prelievo è lento e pieno di errori?", "📋", "FIFO · RF · differenze", None),
+            ("formazione.ddt_sscc", None, "DDT ed etichette scritti a mano?", "📄", "DDT · SSCC · GS1-128", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

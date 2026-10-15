@@ -167,12 +167,20 @@ class Lavoro:
             invs = wm.get("inventari") or []
             ubic = wm.get("ubicazioni") or {}
             base.update({"wm_attivo": "sì" if wm.get("attivo") else "no",
-                         "compiti_confermati": sum(1 for t in wm.get("compiti") or [] if t.get("stato") == "confermato"),
+                         "compiti_confermati": sum(1 for t in wm.get("compiti") or [] if t.get("stato") == "confermato" and (t.get("confermato") or "") <= "2027-03-31"),
                          "udc_ferro": len({q.get("udc") or q.get("id") for q in quanti if q.get("mat") == "FERRO" and (ubic.get(q.get("ubic")) or {}).get("tipo") == "002"}),
                          "inventari_chiusi": sum(1 for d in invs if d.get("stato") == "chiuso"),
                          "riconte": sum(1 for d in invs for r in d.get("righe") or [] if r.get("riconta")),
+                         "differenze_65_marzo": self.saldo("65", fino="2027-03-31"),
                          "differenze_65": self.saldo("65"),
-                         "giacenza_tr_std": giac.get("TR-STD"),
+                         "giacenza_tr_std": round(sum(m.get("qta") or 0 for m in s.get("movimenti") or [] if m.get("mat") == "TR-STD" and (m.get("data") or "") <= "2027-03-31"), 3),
+                         "consegne_wm_uscite": sum(1 for c in s.get("consegne") or [] if c.get("wm") and c.get("pgi")),
+                         "compiti_prelievo": sum(1 for t in wm.get("compiti") or [] if t.get("tipo") == "PICK" and t.get("stato") == "confermato"),
+                         "colli": len((s.get("sped") or {}).get("colli") or []),
+                         "peso_lordo": round(sum(x.get("pesoLordo") or 0 for x in (s.get("sped") or {}).get("colli") or []), 2),
+                         "trasporti_partiti": sum(1 for t in (s.get("sped") or {}).get("trasporti") or [] if t.get("partenza")),
+                         "ddt": sum(1 for c in s.get("consegne") or [] if c.get("ddt")),
+                         "giacenza_tr_ped": giac.get("TR-PED"),
                          "quadratura_im_wm": ("sì" if wm.get("attivo") and all(abs(giac.get(m, 0) - tot_wm.get(m, 0)) < 1e-6 for m in giac) else "no")})
         return base
 

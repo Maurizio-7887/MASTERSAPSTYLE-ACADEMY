@@ -48,6 +48,12 @@ CASI = [
      "🔄", "erp_inventario", "ABC"),
     ("valorizzazione", "Quanto valgono le rimanenze in bilancio?", "Stesse quantità, valori diversi: FIFO, LIFO, costo medio o standard? E che effetto ha sull'utile?",
      "💶", "erp_inventario", "Valorizzazione"),
+    ("processo-spedizione", "Spedisci senza sapere cosa sale sul camion?", "Il camion parte, il cliente chiama: manca un pallet, ce n'è uno di un altro cliente, il DDT non corrisponde.",
+     "🚛", "erp_spedizione", "Aprile — VL01N"),
+    ("prelievo-errori", "Il prelievo è lento e pieno di errori?", "Il magazziniere gira a vuoto, prende il pallet più comodo invece del più vecchio, le mancanze si scoprono dal cliente.",
+     "📋", "erp_spedizione", "RF: preleva la consegna del Comune"),
+    ("ddt-sscc", "DDT ed etichette scritti a mano?", "Numeri di DDT saltati, pesi stimati, colli senza etichetta: al ricevimento del cliente nessuno sa cosa ha in mano.",
+     "📄", "erp_spedizione", "Imballo: 5 pallet"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]

@@ -6,9 +6,9 @@ let errori = 0, controlli = 0;
 const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
-const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js'};
+const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js'};
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js',
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js',
   'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
 let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
 function apri(bp, pagina) {
@@ -252,26 +252,69 @@ p = apri('erp_inventario', 'valorizzazione'); ok(/7\.?710,00/.test(p.testo()), '
 p.lab.querySelector('#lib').checked = true; p.lab.querySelector('#lib').dispatchEvent(new p.w.Event('change'));
 ok(/1\.?660,00/.test(p.testo()) && /1\.?360,00/.test(p.testo()) && /1\.?560,00/.test(p.testo()), 'esempio da manuale FIFO 1.660 · LIFO 1.360 · CMP 1.560');
 p = apri('erp_magazzino', 'monitor'); ok(/quadra/.test(p.testo()), 'monitor');
-{ const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+{ const {st, passi} = guidaStati(p.w, CHIAVE); const APR = passi.findIndex(x => x.titolo.indexOf('Aprile:') === 0); const manc = passi.slice(0, APR).map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
   ok(!manc.length, 'guida S/4 con marzo: passi non riconosciuti → ' + manc.join(' | ')); }
+// ═══ APRILE — spedizione (UF 10) ═══
+p = apri('erp_vendite', 'ordini');
+bene(p.fai('va', {cliente: 'C300', materiale: 'TR-PED', qta: '250', rif: 'GAMMA-APR', data: '2027-04-05'}), 'VA01 Gamma aprile');
+bene(p.fai('va', {cliente: 'C400', materiale: 'TR-STD', qta: '60', rif: 'SIGMA-APR', data: '2027-04-05'}), 'VA01 Sigma aprile');
+for (let i = 0; i < 2; i++) { p = apri('erp_vendite', 'consegne'); bene(p.fai('vl', {ordine: x => x, data: '2027-04-06'}), 'VL01N aprile ' + (i + 1)); }
+const cAp = c => p.S().consegne.filter(k => k.cliente === c && k.wm)[0];
+ok(cAp('C300').pgi === false && p.S().wm.compiti.filter(t => t.tipo === 'PICK').length === 7, 'consegne senza uscita merci, 7 compiti di prelievo');
+p = apri('erp_vendite', 'fatture'); ok(/nessuna consegna da fatturare/.test(p.testo()), 'non si fattura prima dell\'uscita merci');
+p = apri('erp_spedizione', 'prelievo'); ok(/LISTA DI PRELIEVO/.test(p.testo()) && /01-02-2/.test(p.testo()), 'lista di prelievo FIFO');
+p = apri('erp_spedizione', 'imballo'); ok(/nessuna consegna da imballare/.test(p.testo()), 'imballo bloccato prima del prelievo');
+for (let k = 0; k < 8; k++) {
+  p = apri('erp_magazzino', 'rf'); p.lab.querySelector('#rf-data').value = '2027-04-07';
+  const t = p.S().wm.compiti.find(x => x.stato === 'aperto'); if (!t) break;
+  if (t.da === '01-03-2' && !t.origine) p.lab.querySelector('#rf-qta').value = '48';
+  rfInvio(p, '#rf-da', t.da); rfInvio(p, '#rf-udc', t.udc); rfInvio(p, '#rf-a', t.a);
+}
+ok(p.S().wm.compiti.filter(t => t.tipo === 'PICK' && t.stato === 'confermato').length === 8, 'prelievo con la pistola: 8 compiti (uno nato dalla differenza)');
+ok(p.w.WM4.statoPrelievo(cAp('C300')).prelevato === 250 && p.w.WM4.inUbic('DIFF').some(q => q.mat === 'TR-PED' && q.qta === 2), 'Gamma: 250 prelevati, 2 in 999');
+p = apri('erp_spedizione', 'imballo'); bene(p.fai('im', {consegna: cAp('C300').numero, imballo: 'EUR', data: '2027-04-07'}), 'imballo Gamma');
+p = apri('erp_spedizione', 'imballo'); bene(p.fai('im', {consegna: cAp('C400').numero, imballo: 'EUR', data: '2027-04-07'}), 'imballo Sigma');
+ok(p.S().sped.colli.length === 7 && p.lab.querySelectorAll('.s4-et').length >= 2, 'colli ed etichette SSCC');
+ok(p.w.SP4.sscc(1) === '380123450000000013', 'SSCC con cifra di controllo GS1');
+p = apri('erp_spedizione', 'trasporti'); bene(p.fai('vt', {consegne: cAp('C300').numero + ', ' + cAp('C400').numero, vettore: 'V10', targa: 'FI 123 AB', autista: 'Paolo Bini', porto: 'franco', data: '2027-04-08'}), 'VT01N');
+p.fai('pt', {trasporto: x => x, data: '2027-04-08'}); ok(!p.S().sped.trasporti[0].partenza, 'partenza rifiutata senza carico');
+p = apri('erp_magazzino', 'rf'); p.lab.querySelector('.rf-schede [data-s="carico"]').click(); p.lab.querySelector('#rf-data').value = '2027-04-08';
+rfInvio(p, '#rf-sscc', '01-01-1'); ok(/sconosciuto/.test(p.lab.querySelector('#rf-ce').textContent), 'RF carico: codice non SSCC rifiutato');
+for (const x of p.S().sped.colli.slice()) { rfInvio(p, '#rf-sscc', '(00)' + x.sscc); }
+ok(p.S().sped.colli.every(x => x.caricato) && p.S().sped.trasporti[0].stato === 'caricato', 'RF: 7 colli caricati');
+p = apri('erp_spedizione', 'trasporti'); p.fai('pt', {trasporto: x => x, data: '2027-04-08'}); ok(!!p.S().sped.trasporti[0].partenza, 'partenza e uscita merci');
+ok(cAp('C300').ddt === '1' && cAp('C400').ddt === '2' && cAp('C300').pgi === '2027-04-08', 'DDT numerati');
+p = apri('erp_spedizione', 'ddt'); ok(/DOCUMENTO DI TRASPORTO n\. 1\/2027/.test(p.testo()) && /2\.?375/.test(p.testo()) && /Trasporti Toscani/.test(p.testo()), 'DDT 1 stampabile');
+for (let i = 0; i < 2; i++) { p = apri('erp_vendite', 'fatture'); bene(p.fai('vf', {consegna: x => x, data: '2027-04-09'}), 'VF01 aprile ' + (i + 1)); }
+p = apri('erp_inventario', 'differenze'); bene(p.fai('rg', {data: '2027-04-10'}), 'differenza di prelievo registrata');
+p = apri('erp_spedizione', 'monitor'); ok(/Nessuna consegna aperta/.test(p.testo()), 'monitor VL06O tutto completato');
+{
+  const S4s = p.S(); const sal = c => Math.round(S4s.registrazioni.reduce((t, r) => t + r.righe.filter(x => x.conto === c).reduce((u, x) => u + (x.dareAvere === 'DARE' ? x.importo : -x.importo), 0), 0) * 100) / 100;
+  vicino(sal('65'), 133.72, 'conto 65 dopo aprile'); ok(S4s.giacenze['TR-PED'] === 148 && S4s.giacenze['TR-STD'] === 8, 'giacenze dopo aprile ' + JSON.stringify(S4s.giacenze));
+  ok(p.w.WM4.quadratura().every(q => q.ok && q.diff999 === 0), 'quadratura IM–WMS dopo aprile');
+  let d4 = 0, a4 = 0; S4s.registrazioni.forEach(r => r.righe.forEach(x => { if (x.dareAvere === 'DARE') d4 += x.importo; else a4 += x.importo; })); ok(Math.abs(d4 - a4) < 0.005, 'aprile: quadratura Dare = Avere');
+  const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  ok(!manc.length, 'guida S/4 con aprile: passi non riconosciuti → ' + manc.join(' | '));
+  const fl = p.w.SD4.flusso(cAp('C300').ordine).map(x => x.tipo).join('|'); ok(/Compito di magazzino PICK/.test(fl), 'flusso documenti con i compiti di magazzino');
+}
 if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
 const SF = JSON.parse(memoria);
 
 // lezioni «Che situazione hai?»: il copione prepara il sistema fino al passo, la finestra si apre lì
-for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione']) {
+for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet']) {
   const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/s4/?passo=' + encodeURIComponent(passo), runScripts: 'outside-only'}).window;
   LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4, passo);
   const {st, passi} = guidaStati(w, 't');
   const i = passi.findIndex(x => x.titolo.indexOf(passo) === 0);
-  ok(i >= 0 && passi.slice(0, i).every((x, j) => !x.fatto || st[j]) && (!passi[i].fatto || !st[i]), 'lezione «' + passo + '»: sistema pronto fino al passo');
+  ok(i >= 0 && passi.slice(0, i).every((x, j) => !x.fatto || st[j]) && (!passi[i].fatto || !st[i]), 'lezione «' + passo + '»: sistema pronto fino al passo → ' + passi.slice(0, i).map((x, j) => x.fatto && !st[j] ? (j + 1) + ' ' + x.titolo : null).filter(Boolean).join(' | ') + ' / ' + (passi[i] && st[i]));
   if (passo === 'KE30') vicino(w.COPA.report(St, 'cliente').totale.mdc2, 18593.81, 'copione gennaio: MdC II');
 }
 { // copione completo = stesso risultato delle pagine
   const w = new JSDOM('', {url: 'https://sim.local/', runScripts: 'outside-only'}).window; LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4);
-  vicino(w.COPA.report(St, 'cliente', {dal: '2027-02-01'}).totale.mdc1, 9339.87, 'copione completo: MdC I di febbraio');
+  vicino(w.COPA.report(St, 'cliente', {dal: '2027-02-01', al: '2027-02-28'}).totale.mdc1, 9339.87, 'copione completo: MdC I di febbraio');
 }
 fs.writeFileSync(path.join(__dirname, 'lab-erp-finale.json'), JSON.stringify(SF));
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario, aprile spedizione: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

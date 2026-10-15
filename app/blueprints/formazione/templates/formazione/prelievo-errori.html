@@ -1,0 +1,39 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il magazziniere cerca la merce girando, il prelievo dura il doppio.</li>
+  <li>Si prende il pallet più comodo: i più vecchi restano in fondo e invecchiano.</li>
+  <li>Le mancanze si scoprono quando il cliente apre il pallet.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il prelievo si fa con <b>compiti</b> creati dal sistema: ogni compito dice da quale ubicazione, quale unità di carico, quanti pezzi e dove portarli. La <b>strategia FIFO</b> sceglie i quanti più vecchi. La <b>pistola RF</b> controlla ogni lettura. Se nello scaffale ci sono meno pezzi, il magazziniere conferma la quantità vera: la <b>differenza</b> va nella zona 999 e il sistema crea subito un nuovo compito da un'altra ubicazione.</p>
+<p class="lez-chiave">Il cliente riceve la quantità giusta, la mancanza è documentata e finisce in inventario, non nascosta.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Compito di prelievo</dt><dd>Da ubicazione → zona di spedizione, con UdC e quantità.</dd>
+<dt>FIFO</dt><dd>Primo entrato, primo uscito: si preleva il quanto con la data di entrata più vecchia.</dd>
+<dt>Prelievo parziale</dt><dd>Si prende solo una parte del pallet: il resto rimane nell'ubicazione con la stessa UdC.</dd>
+<dt>Differenza di prelievo</dt><dd>Quantità trovata minore del previsto: la differenza va in 999, un nuovo compito completa la consegna.</dd>
+<dt>Lista di prelievo</dt><dd>La versione su carta degli stessi compiti, in ordine di percorso.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Compito</th><th>Da</th><th class="n">Previsti</th><th class="n">Prelevati</th><th>Note</th></tr>
+<tr><td>1</td><td>01-02-2</td><td class="n">50</td><td class="n">50</td><td></td></tr>
+<tr><td>2</td><td>01-03-1</td><td class="n">50</td><td class="n">50</td><td></td></tr>
+<tr><td>3</td><td>01-03-2</td><td class="n">50</td><td class="n">48</td><td>differenza 2 → zona 999</td></tr>
+<tr><td>4</td><td>01-04-1</td><td class="n">50</td><td class="n">50</td><td></td></tr>
+<tr><td>5</td><td>01-04-2</td><td class="n">50</td><td class="n">50</td><td></td></tr>
+<tr><td>6 (nuovo)</td><td>01-05-1</td><td class="n">2</td><td class="n">2</td><td>nato dalla differenza: 48 restano nel pallet</td></tr></table>
+<p>Al Comune di Gamma partono 250 pezzi. I 2 mancanti si registrano in contabilità (711: D 65 / A 13 64,78 €).</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Consegna</b>250 pz</span><span class="f">→</span><span class="b"><b>FIFO</b>5 pallet più vecchi</span><span class="f">→</span><span class="b mag"><b>RF</b>trovati 48</span><span class="f">→</span><span class="b"><b>999</b>2 mancanti</span><span class="f">+</span><span class="b"><b>Nuovo compito</b>2 da 01-05-1</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Compiti di prelievo</td><td>LT03 / LT0S (WM) · /SCWM/TODLV_O (EWM)</td></tr>
+<tr><td>Conferma con differenza</td><td>LT12 con quantità differenza · RF con codice eccezione «DIFF»</td></tr>
+<tr><td>Analisi delle differenze</td><td>LI21 · /SCWM/DIFF_ANALYZER</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché non si spedisce semplicemente 248?</summary><p>Perché a magazzino c'è altra merce: il sistema la trova e completa la consegna; il cliente riceve quanto ordinato.</p></details>
+<details><summary>Che fine fanno i 2 pezzi mancanti?</summary><p>Restano nella 999 finché il responsabile non li registra come differenza inventariale.</p></details>
+{% endblock %}

@@ -81,7 +81,7 @@
       var w = W(), ris = ls('s4-rf-risorsa') || w.risorse[0], dl = ls('s4-rf-data') || w.attivo, scheda = radice.dataset.rf || 'compiti';
       var testa = '<div class="rf-testa"><label>Risorsa<select id="rf-ris">' + w.risorse.map(function (r) { return '<option' + (r === ris ? ' selected' : '') + '>' + e(r) + '</option>'; }).join('') + '</select></label>' +
         '<label>Data di lavoro<input type="date" id="rf-data" value="' + e(dl) + '"></label><button type="button" class="rf-pieno-btn" id="rf-pieno">' + (document.body.classList.contains('rf-pieno') ? '↩ Menu' : '⛶ Schermo pistola') + '</button></div>' +
-        '<div class="rf-schede">' + [['compiti', '📦 Compiti'], ['interroga', '🔎 Interroga'], ['inventario', '📝 Inventario']].map(function (x) { return '<button type="button" data-s="' + x[0] + '" class="' + (x[0] === scheda ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
+        '<div class="rf-schede">' + [['compiti', '📦 Compiti'], ['carico', '🚛 Carico'], ['interroga', '🔎 Interroga'], ['inventario', '📝 Inventario']].map(function (x) { return '<button type="button" data-s="' + x[0] + '" class="' + (x[0] === scheda ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
       var corpo = '';
       if (scheda === 'compiti') {
         var ap = WM.aperti(), sel = radice.dataset.compito && ap.find(function (t) { return t.numero === radice.dataset.compito; }) || ap.find(function (t) { return t.risorsa === ris; }) || ap[0];
@@ -98,6 +98,14 @@
             '<button type="button" class="rf-btn" id="rf-ok">✔ Conferma il compito</button><div class="lab-esito" id="rf-esito"></div>' +
             '<h4>Coda (' + ap.length + ')</h4><ul class="rf-coda">' + ap.map(function (t) { return '<li><span>' + t.numero + ' · ' + t.da + ' → ' + t.a + ' · ' + n0(t.qta) + ' ' + t.mat + (t.risorsa ? ' · ' + e(t.risorsa) : '') + '</span>' + (t === sel ? '<b>in corso</b>' : '<button type="button" class="lab-btn sec" data-prendi="' + t.numero + '">Prendi</button>') + '</li>'; }).join('') + '</ul>';
         }
+      } else if (scheda === 'carico') {
+        var trs = window.SP4 ? window.SP4.SP().trasporti.filter(function (t) { return !t.partenza; }) : [];
+        corpo = trs.length ? trs.map(function (t) {
+          var col = t.consegne.reduce(function (a, k) { return a.concat(window.SP4.colliDi(k)); }, []);
+          return '<div class="rf-compito"><h3>Trasporto ' + t.numero + ' · ' + e(window.SP4.VETTORI[t.vettore]) + (t.targa ? ' · ' + e(t.targa) : '') + '</h3><div class="rf-riga"><span>Colli caricati</span><b>' + col.filter(function (x) { return x.caricato; }).length + ' / ' + col.length + '</b></div>' +
+            col.map(function (x) { return '<div class="rf-riga"><span>' + (x.caricato ? '✅' : '⬜') + ' ' + x.sscc.slice(-6) + ' · ' + x.qta + ' ' + x.materiale + '</span><span>cons. ' + x.consegna + '</span></div>'; }).join('') + '</div>';
+        }).join('') + '<div class="rf-campo"><label>Leggi l\'SSCC del collo da caricare<input id="rf-sscc" autocomplete="off"></label></div><div class="lab-esito" id="rf-ce"></div>'
+          : '<p class="lab-nota">Nessun trasporto da caricare: crealo da Spedizione → Trasporti.</p>';
       } else if (scheda === 'interroga') {
         corpo = '<div class="rf-campo"><label>Leggi un\'ubicazione o un\'unità di carico<input id="rf-q" autocomplete="off"></label></div><div id="rf-ris-q"></div>';
       } else {
@@ -119,6 +127,8 @@
           if (inp.dataset.atteso) { var ok = v === inp.dataset.atteso || (inp.dataset.alt && v === inp.dataset.alt); inp.classList.toggle('ok', ok); inp.classList.toggle('ko', !ok); if (!ok) { if (navigator.vibrate) navigator.vibrate([60, 60, 60]); inp.select(); return; } }
           if (inp.id === 'rf-q') return interroga(v);
           if (inp.id === 'rf-inv') return contaUbic(v);
+          if (inp.id === 'rf-sscc') { try { var msg = window.SP4.carica({sscc: v, data: radice.querySelector('#rf-data').value}); if (navigator.vibrate) navigator.vibrate(120); rendi(); var o3 = radice.querySelector('#rf-ce'); o3.className = 'lab-esito ok'; o3.innerHTML = msg; }
+            catch (x) { var o4 = radice.querySelector('#rf-ce'); o4.className = 'lab-esito ko'; o4.textContent = '⛔ ' + x.message; if (navigator.vibrate) navigator.vibrate([60, 60, 60]); inp.select(); } return; }
           var dopo = campi[k + 1]; if (dopo) dopo.focus(); else { var b = radice.querySelector('#rf-ok'); if (b) b.click(); }
         });
       });

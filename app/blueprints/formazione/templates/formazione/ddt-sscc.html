@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il DDT si compila a mano, i numeri saltano o si ripetono.</li>
+  <li>Il peso è «a occhio», i colli non hanno etichetta.</li>
+  <li>Il cliente al ricevimento non sa quale pallet corrisponde a quale ordine.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Ogni collo deve avere un'identità: l'<b>SSCC</b> (Serial Shipping Container Code, standard GS1), 18 cifre uniche al mondo, stampato in barcode <b>GS1-128</b> con l'identificatore «(00)». Il sistema calcola il <b>peso</b> (netto dei pezzi + tara dell'imballo) e alla partenza numera il <b>DDT</b> con tutti i dati che la legge richiede.</p>
+<p class="lez-chiave">Collo con SSCC → carico verificato → DDT generato dal sistema: carta, camion e gestionale dicono la stessa cosa.</p>
+{% endblock %}
+{% block concetti %}
+<dt>SSCC</dt><dd>Cifra di estensione + prefisso aziendale GS1 + numero progressivo + cifra di controllo (modulo 10).</dd>
+<dt>GS1-128</dt><dd>Codice a barre Code 128 con il carattere FNC1 e gli identificatori di applicazione: (00) SSCC, (02) articolo, (37) quantità…</dd>
+<dt>Peso lordo</dt><dd>Pezzi × peso unitario + tara del pallet (qui EUR 25 kg).</dd>
+<dt>DDT (D.P.R. 472/1996)</dt><dd>Numero progressivo, data, mittente, destinatario, luogo di destinazione, causale, natura e quantità dei beni, colli, aspetto esteriore, peso, porto, vettore, firme.</dd>
+<dt>Fattura differita</dt><dd>Con il DDT la fattura può essere emessa entro il 15 del mese successivo.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Collo</th><th>SSCC</th><th class="n">Pezzi</th><th class="n">Netto kg</th><th class="n">Lordo kg</th></tr>
+<tr><td>1 di 5</td><td>3 8012345 000000001 3</td><td class="n">50</td><td class="n">450</td><td class="n">475</td></tr>
+<tr><td>2 di 5</td><td>3 8012345 000000002 0</td><td class="n">50</td><td class="n">450</td><td class="n">475</td></tr>
+<tr><td>…</td><td></td><td></td><td></td><td></td></tr>
+<tr class="tot"><td>DDT 1</td><td>Comune di Gamma · porto franco · Trasporti Toscani</td><td class="n">250</td><td class="n">2.250</td><td class="n">2.375</td></tr></table>
+<p>Cifra di controllo: si moltiplicano le cifre da destra per 3, 1, 3, 1…, si sommano e si prende quanto manca al multiplo di 10. Il prefisso 8012345 è di fantasia.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Imballo</b>pezzi per collo · tara</span><span class="f">→</span><span class="b"><b>SSCC</b>etichetta GS1-128</span><span class="f">→</span><span class="b mag"><b>Carico</b>lettura alla porta</span><span class="f">→</span><span class="b"><b>Partenza</b>DDT numerato</span><span class="f">→</span><span class="b"><b>Cliente</b>legge gli stessi SSCC</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Unità di movimentazione (HU) con SSCC</td><td>HU02 · VL02N Imballaggio · /SCWM/PACK</td></tr>
+<tr><td>Numerazione SSCC</td><td>customizing «SSCC generation» (prefisso aziendale GS1)</td></tr>
+<tr><td>Stampa etichette e DDT</td><td>messaggi di output (NACE · Output Management in S/4)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché l'SSCC e non il numero d'ordine sull'etichetta?</summary><p>Perché identifica il singolo collo, non l'ordine: un ordine può avere più colli e un collo deve essere riconoscibile anche presso il cliente o il vettore.</p></details>
+<details><summary>Che cosa deve esserci per forza su un DDT?</summary><p>Numero e data, mittente, destinatario, beni con quantità, causale e chi trasporta; poi colli, aspetto, peso e porto completano il documento.</p></details>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>La merce parte sulla base di un foglio, il gestionale lo sa dopo (o mai).</li>
+  <li>Sul camion finisce un pallet di un altro cliente, oppure ne manca uno.</li>
+  <li>Il DDT è scritto a mano e non corrisponde a quanto caricato.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>La spedizione è un <b>processo a tappe</b>, ognuna con il suo documento e il suo stato: <b>consegna</b> (cosa spedire a chi), <b>prelievo</b> (compiti dal magazzino alla zona di spedizione), <b>imballo</b> (colli con SSCC e peso), <b>trasporto</b> (camion, vettore, consegne), <b>carico</b> (ogni collo letto alla porta), <b>uscita merci</b> (la giacenza scende e nasce il DDT), <b>fattura</b>. Il sistema non lascia saltare una tappa.</p>
+<p class="lez-chiave">Nessuna uscita merci senza prelievo completo, imballo e carico verificato: quello che è sul DDT è quello che è sul camion.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Consegna in uscita</dt><dd>Documento che nasce dall'ordine cliente: materiale, quantità, destinatario, data.</dd>
+<dt>Stati (A · B · C)</dt><dd>Per prelievo, imballo, carico, uscita merci, fattura: da fare · in parte · completato.</dd>
+<dt>Zona di spedizione</dt><dd>Area interim (916) dove la merce prelevata aspetta imballo e carico.</dd>
+<dt>Trasporto</dt><dd>Il viaggio del camion: vettore, targa, autista, porto e consegne (anche più destinatari in un giro).</dd>
+<dt>Uscita merci (601)</dt><dd>La giacenza scende, il costo del venduto sale (D 41 / A 13), si numera il DDT.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Tappa</th><th>Comune di Gamma</th><th>Edil Sigma</th></tr>
+<tr><td>Consegna</td><td>250 TR-PED</td><td>60 TR-STD</td></tr>
+<tr><td>Prelievo FIFO</td><td>6 compiti (una differenza di 2 pezzi)</td><td>2 compiti (50 + 10)</td></tr>
+<tr><td>Imballo</td><td>5 pallet EUR · 2.375 kg</td><td>2 pallet EUR · 770 kg</td></tr>
+<tr><td>Trasporto</td><td colspan="2">un camion Trasporti Toscani, targa FI 123 AB, porto franco</td></tr>
+<tr><td>Carico</td><td colspan="2">7 SSCC letti alla porta</td></tr>
+<tr><td>Uscita merci e DDT</td><td>D 41 / A 13 8.097,50 · DDT 1</td><td>D 41 / A 13 2.068,20 · DDT 2</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>VA01</b>ordine</span><span class="f">→</span><span class="b"><b>VL01N</b>consegna</span><span class="f">→</span><span class="b"><b>Prelievo</b>RF · FIFO</span><span class="f">→</span><span class="b"><b>Imballo</b>SSCC</span><span class="f">→</span><span class="b mag"><b>Trasporto</b>carico</span><span class="f">→</span><span class="b"><b>601 + DDT</b>partenza</span><span class="f">→</span><span class="b"><b>VF01</b>fattura</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>SAP ECC (LE-SHP / WM)</th><th>SAP S/4HANA (EWM)</th></tr>
+<tr><td>Consegna</td><td>VL01N · VL06O</td><td>VL01N · /SCWM/PRDO</td></tr>
+<tr><td>Prelievo</td><td>LT03 · LT12 · RF LM05</td><td>/SCWM/RFUI · ondate /SCWM/WAVE</td></tr>
+<tr><td>Imballo</td><td>VL02N → Imballaggio · HU02</td><td>/SCWM/PACK</td></tr>
+<tr><td>Trasporto e carico</td><td>VT01N · VT02N</td><td>/SCWM/TU · /SCWM/LOAD</td></tr>
+<tr><td>Uscita merci</td><td>VL02N «Registra uscita merci»</td><td>/SCWM/PRDO · fine del TU</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché l'uscita merci si registra alla partenza e non al prelievo?</summary><p>Perché finché la merce è in zona di spedizione è ancora dell'azienda e si può correggere: la proprietà e il rischio passano con la consegna al vettore.</p></details>
+<details><summary>Perché due destinatari sullo stesso camion hanno due DDT?</summary><p>Il DDT accompagna i beni verso un destinatario: ognuno firma il suo.</p></details>
+{% endblock %}

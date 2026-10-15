@@ -194,7 +194,8 @@ ok("pannello.js" in a.get("/completo/").get_data(as_text=True), "finestra anche 
 # ── laboratori: lavoro salvato nel proprio slot, consegna e report ──
 for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-finale.json", 8), ("lab-rem", "rem-trattore", "lab-rem-finale.json", 8),
                                 ("erp-ft", "s4-vendite-copa", "lab-erp-finale.json", 8), ("erp-ft", "s4-costi-ml", "lab-erp-finale.json", 8),
-                                ("erp-ft", "s4-magazzino", "lab-erp-finale.json", 8)]:
+                                ("erp-ft", "s4-magazzino", "lab-erp-finale.json", 8),
+                                ("erp-ft", "s4-spedizione", "lab-erp-finale.json", 8)]:
     lab = (Path(__file__).parent / file).read_text(encoding="utf-8")
     pagina = {"lab-hmlv": "/vuoto/alta-varieta/", "lab-rem": "/vuoto/ripetitiva/", "erp-ft": "/vuoto/s4/vendite/"}[slot]
     sl = sync(a.get(pagina).get_data(as_text=True))
