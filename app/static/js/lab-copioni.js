@@ -111,7 +111,24 @@
     ['KGI2', function () { window.PC4.sovraccosti({data: '2027-02-28'}); }],
     ['KO88', function () { window.PC4.liquida({data: '2027-02-28'}); }],
     ['KKS2: leggi', null],
-    ['CKMLCP', function () { window.PC4.chiusuraML({periodo: '2027-02', data: '2027-02-28'}); }]);
+    ['CKMLCP', function () { window.PC4.chiusuraML({periodo: '2027-02', data: '2027-02-28'}); }],
+    ['KE30: margine di febbraio', null], ['Bilancio di verifica di febbraio', null], ['Consegna il lavoro', null],
+    // marzo — magazzino a ubicazioni (WMS) e inventario (UF 9)
+    ['Marzo:', null],
+    ['Attiva il magazzino W100', function () { window.WM4.attiva({data: '2027-03-01'}); }],
+    ['Mappa', null], ['Stampa le etichette', null],
+    ['ME21N: 5.000 kg', function () { window.MM4.ordine({fornitore: 'F100', materiale: 'FERRO', qta: 5000, prezzo: 0.98, data: '2027-03-02'}); }],
+    ['MIGO 101: entrata del ferro in zona', function (X) { window.MM4.entrata({ordine: X.N.S.acquisti[1].numero, data: '2027-03-03'}); }],
+    ['RF: metti a posto', function (X) { window.WM4.aperti().filter(function (t) { return t.tipo === 'PUTAWAY'; }).forEach(function (t) { window.WM4.conferma({compito: t.numero, da: t.da, udc: t.udc, a: t.a, risorsa: 'MAG01 Marco', data: '2027-03-03'}); }); }],
+    ['Prova l', null], ['ABC', null],
+    ['Crea il documento d', function () { window.IV4.crea({tipo: 'rotazione', selezione: 'A', tolleranza: 20, data: '2027-03-10'}); }],
+    ['Attiva il documento', function (X) { window.IV4.attiva({numero: X.N.S.wm.inventari[0].numero, data: '2027-03-10'}); }],
+    ['Prima conta', function (X) { var d = X.N.S.wm.inventari[0], v = {numero: d.numero, contatore: 'MAG02 Sara'};
+      d.righe.forEach(function (r, k) { v['r' + k] = r.ubic === '01-01-2' ? 18 : r.ubic === '01-02-1' ? 31 : r.libro; }); window.IV4.conta(v); }],
+    ['Riconta', function (X) { var d = X.N.S.wm.inventari[0], v = {numero: d.numero, contatore: 'MAG03 Luca'};
+      d.righe.forEach(function (r, k) { if (r.riconta) v['r' + k] = r.ubic === '01-01-2' ? 18 : 30; }); window.IV4.conta(v); }],
+    ['LI20', function (X) { window.IV4.chiudi({numero: X.N.S.wm.inventari[0].numero, data: '2027-03-11'}); }],
+    ['LI21', function () { window.IV4.registra({data: '2027-03-12'}); }]);
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();

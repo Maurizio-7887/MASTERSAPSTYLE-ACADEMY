@@ -152,12 +152,28 @@ class Lavoro:
                          "note_credito": sum(1 for f in s.get("fatture") or [] if f.get("tipo") in ("RE", "G2") and (f.get("data") or "") <= gen),
                          "std_tr_std": (s.get("materiali") or {}).get("TR-STD", {}).get("std"),
                          "rivalutazione": round(-self.saldo("64"), 2),
-                         "pd_acquisti": round(sum(p.get("pd", 0) for p in s.get("mlPD") or [] if p.get("mat") == "FERRO"), 2),
+                         "pd_acquisti": round(sum(p.get("pd", 0) for p in s.get("mlPD") or [] if p.get("mat") == "FERRO" and (p.get("data") or "")[:7] == "2027-02"), 2),
                          "varianza_lotto": lotto,
                          "varianze_ordini": round(sum((o.get("liquidazione") or {}).get("varianza", 0) for o in prod), 2),
                          "ml_venduto": self.saldo("42"),
                          "prezzo_effettivo_ped": ((ml or {}).get("materiali") or {}).get("TR-PED", {}).get("prezzoEffettivo"),
                          "mdc1_febbraio": margini("2027-02-01", "2027-02-28")[1]})
+            wm = s.get("wm") or {}
+            quanti = [q for q in wm.get("quant") or [] if abs(q.get("qta") or 0) > 1e-9]
+            tot_wm = {}
+            for q in quanti:
+                tot_wm[q["mat"]] = round(tot_wm.get(q["mat"], 0) + q["qta"], 3)
+            giac = s.get("giacenze") or {}
+            invs = wm.get("inventari") or []
+            ubic = wm.get("ubicazioni") or {}
+            base.update({"wm_attivo": "sì" if wm.get("attivo") else "no",
+                         "compiti_confermati": sum(1 for t in wm.get("compiti") or [] if t.get("stato") == "confermato"),
+                         "udc_ferro": len({q.get("udc") or q.get("id") for q in quanti if q.get("mat") == "FERRO" and (ubic.get(q.get("ubic")) or {}).get("tipo") == "002"}),
+                         "inventari_chiusi": sum(1 for d in invs if d.get("stato") == "chiuso"),
+                         "riconte": sum(1 for d in invs for r in d.get("righe") or [] if r.get("riconta")),
+                         "differenze_65": self.saldo("65"),
+                         "giacenza_tr_std": giac.get("TR-STD"),
+                         "quadratura_im_wm": ("sì" if wm.get("attivo") and all(abs(giac.get(m, 0) - tot_wm.get(m, 0)) < 1e-6 for m in giac) else "no")})
         return base
 
     def indicatori(self):

@@ -58,3 +58,46 @@
 .lab-flusso li{border-left:3px solid #9CC8F0;padding:5px 10px;margin:4px 0;background:#F5FAFF;border-radius:0 4px 4px 0;font-size:13px}
 .lab-flusso li span{color:var(--f-attenuato)}
 .lab-elenco{margin:4px 0;padding-left:20px;font-size:13.5px;line-height:1.55}
+/* ── WMS: lettore, RF, mappa, etichette, stampa ── */
+.s4-cam-btn{margin-left:6px;font-size:20px;border:1px solid #9CC8F0;background:#F5FAFF;border-radius:6px;padding:4px 10px;cursor:pointer}
+.s4-cam{position:fixed;inset:0;background:rgba(10,20,35,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:12px}
+.s4-cam-in{background:#fff;border-radius:10px;max-width:520px;width:100%;padding:12px}
+.s4-cam-testa{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.s4-cam-testa button{font-size:15px;padding:6px 12px}
+#s4-cam-video{width:100%;min-height:240px;background:#000;border-radius:6px;overflow:hidden}.s4-cam-nota{font-size:13px;color:#556B82}
+.rf{max-width:560px;margin:0 auto;font-size:17px}
+.rf-testa{display:flex;gap:8px;flex-wrap:wrap;background:#0B2B45;color:#fff;padding:10px 12px;border-radius:8px 8px 0 0}
+.rf-testa label{display:flex;flex-direction:column;font-size:12px;gap:3px}.rf-testa select,.rf-testa input{font-size:15px;padding:6px}
+.rf-schede{display:flex;background:#123B5C}.rf-schede button{flex:1;padding:12px 6px;font-size:15px;color:#cfe3f5;background:none;border:0;border-bottom:3px solid transparent}
+.rf-schede button.on{color:#fff;border-bottom-color:#5FD08A;font-weight:600}
+.rf-corpo{background:#fff;border:1px solid #c8d6e3;border-top:0;border-radius:0 0 8px 8px;padding:12px}
+.rf-compito{border:2px solid #0B6EFD;border-radius:8px;padding:10px;margin-bottom:10px}
+.rf-compito h3{margin:0 0 6px;font-size:17px}.rf-riga{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #dde6ee}
+.rf-riga b{font-size:20px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.rf-campo{display:flex;align-items:center;margin:8px 0}.rf-campo label{flex:1;display:flex;flex-direction:column;font-size:13px;color:#335}
+.rf-campo input{font-size:20px;padding:10px;border:2px solid #9CC8F0;border-radius:6px;font-family:ui-monospace,Menlo,Consolas,monospace;text-transform:uppercase}
+.rf-campo input.ok{border-color:#2E9E5B;background:#F0FBF4}.rf-campo input.ko{border-color:#D33;background:#FFF2F2}
+.rf-btn{display:block;width:100%;font-size:19px;padding:14px;margin:8px 0;border-radius:8px;border:0;background:#0B6EFD;color:#fff;font-weight:600}
+.rf-btn.sec{background:#E8F1FB;color:#0B4F9C}.rf-btn.ar{background:#F7A21B;color:#222}
+.rf-coda{list-style:none;padding:0;margin:8px 0}.rf-coda li{padding:8px;border:1px solid #dde6ee;border-radius:6px;margin:4px 0;display:flex;justify-content:space-between;gap:8px}
+.mappa{display:grid;gap:10px}.mappa-corsia{border:1px solid #c8d6e3;border-radius:8px;padding:8px;background:#fafcff}
+.mappa-corsia h4{margin:0 0 6px;font-size:13px;color:#335}.mappa-griglia{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.ubic{border:1px solid #c8d6e3;border-radius:6px;padding:6px;min-height:58px;font-size:12px;cursor:pointer;background:#fff}
+.ubic b{display:block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}.ubic.vuota{background:#F4F6F8;color:#889}
+.ubic.m-TR-STD{background:#E6F0FF}.ubic.m-TR-ALTA{background:#FFF2DD}.ubic.m-TR-PED{background:#E8F7EC}.ubic.m-FERRO{background:#EEE8F7}
+.ubic.bloc{background-image:repeating-linear-gradient(45deg,rgba(211,51,51,.18) 0 6px,transparent 6px 12px)}.ubic.arrivo{outline:2px dashed #0B6EFD}
+.ubic.sel{box-shadow:0 0 0 3px #0B6EFD}
+.kpi4{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.kpi4 div{background:#fff;border:1px solid #c8d6e3;border-radius:8px;padding:10px}.kpi4 b{display:block;font-size:24px}.kpi4 span{font-size:12px;color:#556B82}
+.s4-ets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.s4-et{border:1px dashed #999;border-radius:6px;padding:8px;text-align:center;break-inside:avoid;page-break-inside:avoid}
+.s4-et-t{font-size:11px;color:#556}.s4-et-cod{font:700 22px ui-monospace,Menlo,Consolas,monospace}.s4-et-bc svg{width:100%;height:56px}.s4-et-qr svg{width:64px;height:64px}.s4-et-s{font-size:11px}
+.lista-conta td.vuoto-conta{min-width:90px;border-bottom:1px solid #333}
+@media print{
+  .msa-shell,.msa-attivita,.msa-sottobarra,.msa-lp-intro,.msa-lp-nota,#msa-guida,.msa-g-apri,.no-stampa,.lab-mod,.lab-filtro,.msa-sync,.msa-stato{display:none!important}
+  html,body,body.msa-lab,main,.msa-lp{background:#fff!important}.lab-card{border:0;box-shadow:none}.s4-ets{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:560px){.mappa-griglia{grid-template-columns:repeat(3,minmax(0,1fr))}.s4-ets{grid-template-columns:repeat(2,1fr)}}
+
+body.rf-pieno .msa-shell,body.rf-pieno .msa-attivita,body.rf-pieno .msa-sottobarra,body.rf-pieno .msa-lp-intro,body.rf-pieno .msa-lp-nota{display:none}
+body.rf-pieno .msa-lp{padding-top:6px}
+.rf-testa .rf-pieno-btn{margin-left:auto;align-self:flex-end;background:#123B5C;color:#fff;border:1px solid #5d7d99;border-radius:6px;padding:6px 10px;font-size:14px}

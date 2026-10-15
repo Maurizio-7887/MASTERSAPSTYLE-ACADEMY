@@ -1,0 +1,39 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Si contano gli scaffali e il totale non coincide con il gestionale.</li>
+  <li>Le giacenze vengono «corrette» a mano, senza documento e senza sapere chi ha contato.</li>
+  <li>Nessuno distingue l'errore di conta dalla merce davvero mancante.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>L'<b>inventario fisico</b> è una procedura con un <b>documento</b>: si decide cosa contare, si <b>blocca</b> l'ubicazione, si conta <b>alla cieca</b>, si <b>riconta</b> quando la differenza è oltre la tolleranza, si chiude e solo allora la differenza passa in contabilità. In SAP le differenze aspettano nella <b>zona 999</b>: il magazzino fisico è già corretto, la contabilità no, finché qualcuno non le approva e le registra.</p>
+<p class="lez-chiave">Inventario fisico = quanto c'è davvero. Inventario contabile = quanto dice il sistema. La differenza si documenta, si verifica, si registra.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Documento d'inventario</dt><dd>Elenco delle posizioni da contare (ubicazione, materiale, UdC) con data di riferimento.</dd>
+<dt>Blocco</dt><dd>Durante la conta l'ubicazione non riceve né cede merce: la fotografia non cambia.</dd>
+<dt>Conta cieca</dt><dd>La lista non riporta la quantità a sistema: chi conta non è condizionato.</dd>
+<dt>Tolleranza e riconta</dt><dd>Sopra una soglia in € (qui 20) la posizione si riconta, meglio da un'altra persona.</dd>
+<dt>Zona 999</dt><dd>Area interim delle differenze: tiene la quadratura tra IM e WMS fino alla registrazione.</dd>
+<dt>Registrazione (711/712)</dt><dd>Mancanza o eccedenza in contabilità di magazzino: D 65 Differenze inventariali / A magazzino, al costo standard.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Ubicazione</th><th>Materiale</th><th class="n">Sistema</th><th class="n">1ª conta</th><th class="n">Valore diff.</th><th class="n">Riconta</th><th>Esito</th></tr>
+<tr><td>01-01-1</td><td>TR-STD</td><td class="n">50</td><td class="n">50</td><td class="n">0</td><td class="n">—</td><td>ok</td></tr>
+<tr><td>01-01-2</td><td>TR-STD</td><td class="n">20</td><td class="n">18</td><td class="n">−68,94</td><td class="n">18</td><td>mancano 2 pezzi</td></tr>
+<tr><td>01-02-1</td><td>TR-ALTA</td><td class="n">30</td><td class="n">31</td><td class="n">+39,54</td><td class="n">30</td><td>era un errore di conta</td></tr></table>
+<p>Chiusura (LI20): 01-01-2 passa a 18, i 2 pezzi vanno in 999. Registrazione (LI21): movimento 711, D 65 / A 13 68,94 €. Giacenza TR-STD 68 in IM e nel WMS.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Crea</b>LI01N</span><span class="f">→</span><span class="b"><b>Attiva</b>blocco · lista cieca</span><span class="f">→</span><span class="b"><b>Conta</b>LI11N · RF</span><span class="f">→</span><span class="b"><b>Riconta</b>LI14 se oltre tolleranza</span><span class="f">→</span><span class="b mag"><b>Chiudi</b>LI20 → 999</span><span class="f">→</span><span class="b"><b>Registra</b>LI21 · 711 · D 65</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>SAP WM</th><th>SAP EWM / MM</th></tr>
+<tr><td>Crea e attiva</td><td>LI01N · LI02N</td><td>/SCWM/PI_CREATE · MI01 (solo MM)</td></tr>
+<tr><td>Stampa la lista</td><td>LI04</td><td>/SCWM/PI_PROCESS · MI21</td></tr>
+<tr><td>Conta e riconta</td><td>LI11N · LI14</td><td>/SCWM/PI_COUNT · RF · MI04 · MI11</td></tr>
+<tr><td>Chiudi e registra</td><td>LI20 · LI21</td><td>/SCWM/DIFF_ANALYZER · MI07</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché non si corregge subito la giacenza in contabilità?</summary><p>Perché una differenza è un costo (o un ricavo): qualcuno deve verificarla e approvarla. La 999 tiene la differenza «in sospeso» senza far perdere la quadratura.</p></details>
+<details><summary>Perché la riconta la fa un'altra persona?</summary><p>Per non ripetere lo stesso errore: due conte indipendenti uguali danno una quantità affidabile.</p></details>
+<details><summary>Che cosa succede se si spedisce da un'ubicazione bloccata?</summary><p>Il sistema non crea né conferma il compito: la conta resterebbe falsata.</p></details>
+{% endblock %}

@@ -26,7 +26,7 @@ window.WM4 = (function () {
   var attivo = function (data) { var w = W(); return !!(w && w.attivo && (!data || data >= w.attivo)); };
   var richiesto = function () { if (!attivo()) throw Error('Il WMS non è attivo: Magazzino → Struttura → «Attiva il magazzino W100».'); };
   var tipoMat = function (m) { return N().materiale(m).tipo; };
-  var quanti = function (f) { return W().quant.filter(function (q) { return q.qta > 1e-9 && (!f || f(q)); }); };
+  var quanti = function (f) { return W().quant.filter(function (q) { return Math.abs(q.qta) > 1e-9 && (!f || f(q)); }); };   // nella 999 un quanto può essere negativo (eccedenza)
   var inUbic = function (b) { return quanti(function (q) { return q.ubic === b; }); };
   var aperti = function () { return W().compiti.filter(function (t) { return t.stato === 'aperto'; }); };
   var riservato = function (qid) { return r2(aperti().filter(function (t) { return t.quant === qid; }).reduce(function (s, t) { return s + t.qta; }, 0)); };
@@ -41,7 +41,7 @@ window.WM4 = (function () {
     var u = W().ubicazioni, t = tipoMat(mat) === 'ROH' ? '002' : '001';
     var cand = Object.keys(u).filter(function (b) { return u[b].tipo === t && !u[b].blocco && b !== escludi; }).sort();
     if (t === '002') {   // aggiunta a scorta esistente
-      var stesso = cand.filter(function (b) { return inUbic(b).some(function (q) { return q.mat === mat; }) && occupazione(b) < u[b].cap; })[0];
+      var stesso = cand.filter(function (b) { return (inUbic(b).some(function (q) { return q.mat === mat; }) || aperti().some(function (t) { return t.a === b && t.mat === mat; })) && occupazione(b) < u[b].cap; })[0];
       if (stesso) return stesso;
     }
     var vuota = cand.filter(function (b) { return occupazione(b) === 0; })[0];
@@ -55,7 +55,7 @@ window.WM4 = (function () {
   // FIFO sulle ubicazioni del tipo indicato (quanti non bloccati e non già riservati)
   function fifo(mat, qta, tipi) {
     var u = W().ubicazioni, out = [], resto = qta;
-    quanti(function (q) { return q.mat === mat && tipi.indexOf(u[q.ubic].tipo) >= 0 && !u[q.ubic].blocco; })
+    quanti(function (q) { return q.qta > 0 && q.mat === mat && tipi.indexOf(u[q.ubic].tipo) >= 0 && !u[q.ubic].blocco; })
       .sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : a.ubic < b.ubic ? -1 : a.ubic > b.ubic ? 1 : (+a.id.slice(1)) - (+b.id.slice(1)); })
       .forEach(function (q) { if (resto <= 1e-9) return; var disp = r2(q.qta - riservato(q.id)); if (disp <= 1e-9) return; var x = Math.min(disp, resto); out.push({q: q, qta: r2(x)}); resto = r2(resto - x); });
     return {righe: out, mancante: resto};

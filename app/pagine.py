@@ -261,10 +261,13 @@ LABORATORI = {
 }
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
-               ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("static", "js/lab-copioni.js")]
+               ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
+               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("static", "js/lab-copioni.js"),
+               ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
-               "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
+               "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
+               "erp_inventario": "Inventari fisici e contabili", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -285,13 +288,25 @@ _ERP_PAGINE = {
                   {"endpoint": "calcolo", "titolo": "Calcolo del costo standard", "icona": "🏷️", "tcode": "CK11N · CK24 · CK13N"},
                   {"endpoint": "chiusura", "titolo": "Chiusura degli ordini e varianze", "icona": "⚖️", "tcode": "KGI2 · KKS2 · KO88"},
                   {"endpoint": "ml", "titolo": "Material Ledger", "icona": "📒", "tcode": "CKM3 · CKMLCP"}],
+    "erp_magazzino": [{"endpoint": "struttura", "titolo": "Struttura e attivazione", "icona": "🏬", "tcode": "W100 · tipi · ubicazioni · strategie"},
+                      {"endpoint": "mappa", "titolo": "Mappa delle ubicazioni", "icona": "🗺️", "tcode": "LS26 · LX03 · /SCWM/MON"},
+                      {"endpoint": "rf", "titolo": "Pistola RF", "icona": "🔫", "tcode": "LM00 · /SCWM/RFUI"},
+                      {"endpoint": "compiti", "titolo": "Compiti di magazzino", "icona": "📋", "tcode": "LT10 · LT12 · LT22"},
+                      {"endpoint": "monitor", "titolo": "Monitor del magazzino", "icona": "📈", "tcode": "/SCWM/MON · LX23"},
+                      {"endpoint": "etichette", "titolo": "Etichette barcode e QR", "icona": "🏷️", "tcode": "Code 128 · QR"}],
+    "erp_inventario": [{"endpoint": "documenti", "titolo": "Documenti d'inventario", "icona": "📝", "tcode": "LI01N · LI11N · LI14 · LI20"},
+                       {"endpoint": "lista", "titolo": "Lista di conta da stampare", "icona": "🖨️", "tcode": "LI04"},
+                       {"endpoint": "differenze", "titolo": "Differenze inventariali", "icona": "⚖️", "tcode": "LI21 · 711/712"},
+                       {"endpoint": "abc", "titolo": "Classificazione ABC", "icona": "🔤", "tcode": "MC40 · inventario a rotazione"},
+                       {"endpoint": "valorizzazione", "titolo": "Valorizzazione delle rimanenze", "icona": "💶", "tcode": "FIFO · LIFO · CMP · standard"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"}],
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
-           "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js"}
+           "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
+           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js"}
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
@@ -314,7 +329,7 @@ MODULI += [
      "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
      "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
     {"codice": "s4", "sigla": "S/4", "breve": "Sistema integrato", "titolo": "Sistema integrato S/4", "icona": "🏢", "colore": "laboratorio", "kpi": None,
-     "descrizione": "Un solo libro giornale: vendite e resi, acconti, CO-PA per cliente; acquisti, produzione, costo standard con sovraccosti, varianze di lotto, Material Ledger",
+     "descrizione": "Un solo libro giornale: vendite e resi, CO-PA; acquisti, produzione, costo standard, varianze di lotto, Material Ledger; magazzino a ubicazioni con pistola RF e inventari",
      "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None, p["gruppo"]) for p in _ERP_NAV]},
 ]
 
@@ -336,4 +351,8 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.sovraccosti", None, "Lo standard non copre i costi generali?", "🧮", "CK11N · sovraccosti", None),
             ("formazione.varianza_lotto", None, "I lotti piccoli costano di più?", "📏", "KKS2 · varianza di lotto", None),
             ("formazione.material_ledger", None, "Il costo standard non è quello vero?", "📒", "Material Ledger · CKMLCP", None),
+            ("formazione.dove_merce", None, "Non sai dove è la merce?", "🗺️", "WMS · ubicazioni · RF", None),
+            ("formazione.inventario_differenze", None, "Lo scaffale non torna col sistema?", "📝", "inventario fisico · 999", None),
+            ("formazione.inventario_rotazione", None, "Fermi tutto per l'inventario?", "🔄", "rotazione · ABC", None),
+            ("formazione.valorizzazione", None, "Come valorizzi le rimanenze?", "💶", "FIFO · LIFO · CMP", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

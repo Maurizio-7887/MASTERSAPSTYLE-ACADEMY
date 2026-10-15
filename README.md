@@ -33,6 +33,8 @@ app/
     erp_acquisti/    S/4 · Acquisti: ME21N, MIGO 101 a standard con differenza prezzo (conto 63), MIRO con WE/RE
     erp_produzione/  S/4 · Produzione: CO01 con costi pianificati, 261, CO11N (attrezzaggio + lavorazione), 101, TECO
     erp_costi/       S/4 · CO-PC: scheda di calcolo con sovraccosti, CK11N/CK24 con rivalutazione, KGI2, KKS2 (anche varianza di lotto), KO88, Material Ledger CKM3/CKMLCP a più livelli
+    erp_magazzino/   S/4 · WMS in logica SAP: W100, tipi magazzino 902/001/002/100/916/999, ubicazioni, quanti, UdC, compiti con strategie, pistola RF (pistola vera in modalità tastiera o fotocamera), monitor, etichette Code 128 / QR
+    erp_inventario/  S/4 · Inventari fisici e contabili (UF 9): documenti annuale / a rotazione ABC / ubicazione vuota, lista cieca, conta e riconta, 999, LI21, valorizzazione FIFO-LIFO-CMP-standard
     erp_fi/          S/4 · Contabilità: libro giornale e bilancio di verifica del sistema integrato
                      (un solo stato «erp-ft» e un solo libro giornale per tutti i moduli S/4: static/js/erp/nucleo.js)
     formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
@@ -107,6 +109,8 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 | `COSTO_ORARIO` | costo orario iniziale in € (poi si cambia dal pannello) |
 
 ## Prossimi passi
-- sistema integrato S/4, tappe successive: PS, WM, tesoreria, valute, infragruppo e consolidato, cedolino
+- corso FORMAS (Pistoia): UF 10 spedizione con WMS (prelievo, imballo, DDT, carico) · UF 11 innovazione (slotting, ondate, KPI, RFID)
+- corso FORMAS (Pistoia): UF 10 spedizione con WMS (prelievo, imballo, DDT, carico) · UF 11 innovazione (slotting, ondate, KPI, RFID)
+- sistema integrato S/4, tappe successive: tesoreria, valute, infragruppo e consolidato, cedolino
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite

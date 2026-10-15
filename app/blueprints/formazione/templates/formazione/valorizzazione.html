@@ -1,0 +1,45 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Le quantità a fine anno sono certe, ma non si sa quale prezzo usare.</li>
+  <li>Il prezzo d'acquisto cambia durante l'anno: l'ultimo? il primo? la media?</li>
+  <li>Cambiando metodo cambia l'utile, e nessuno sa spiegare perché.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Le rimanenze di beni fungibili si valorizzano con un <b>metodo</b> (art. 2426 c.c., OIC 13): <b>costo medio ponderato</b>, <b>FIFO</b> (primo entrato, primo uscito) o <b>LIFO</b> (ultimo entrato, primo uscito). Nelle aziende con SAP spesso si usa il <b>costo standard</b> corretto a fine periodo al costo effettivo dal Material Ledger. La <b>scheda di magazzino</b> registra carichi, scarichi e giacenza con i valori di ogni metodo.</p>
+<p class="lez-chiave">Con prezzi in aumento: FIFO → rimanenze più alte e utile più alto; LIFO → rimanenze più basse e utile più basso; il costo medio sta in mezzo.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Scheda di magazzino</dt><dd>Per ogni materiale: data, causale, carico, scarico, giacenza, valore.</dd>
+<dt>FIFO</dt><dd>Gli scarichi prendono i lotti più vecchi; restano in rimanenza gli ultimi acquisti.</dd>
+<dt>LIFO</dt><dd>Gli scarichi prendono i lotti più recenti; restano i più vecchi (a scatti annuali o continuo).</dd>
+<dt>Costo medio ponderato</dt><dd>Dopo ogni carico: (valore giacenza + valore carico) / (quantità giacenza + quantità carico).</dd>
+<dt>Costo standard</dt><dd>Prezzo fisso per il periodo; le differenze (Material Ledger) portano al costo effettivo.</dd>
+<dt>Variazione delle rimanenze</dt><dd>Nel conto economico: rimanenze finali − iniziali; con l'inventario permanente il conto magazzino è già aggiornato.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Esempio da manuale (lo trovi modificabile nella pagina «Valorizzazione delle rimanenze»):</p>
+<table class="lez-tab"><tr><th>Data</th><th>Causale</th><th class="n">Carico</th><th class="n">Scarico</th><th class="n">Prezzo</th></tr>
+<tr><td>1/1</td><td>rimanenza iniziale</td><td class="n">100</td><td></td><td class="n">10</td></tr>
+<tr><td>10/1</td><td>acquisto</td><td class="n">200</td><td></td><td class="n">12</td></tr>
+<tr><td>15/1</td><td>vendita</td><td></td><td class="n">150</td><td></td></tr>
+<tr><td>20/1</td><td>acquisto</td><td class="n">100</td><td></td><td class="n">13</td></tr>
+<tr><td>25/1</td><td>vendita</td><td></td><td class="n">120</td><td></td></tr></table>
+<table class="lez-tab"><tr><th>Metodo</th><th>Rimanenza 130 pezzi</th><th class="n">Valore</th></tr>
+<tr><td>FIFO</td><td>30 a 12 + 100 a 13</td><td class="n">1.660</td></tr>
+<tr><td>LIFO continuo</td><td>30 a 12 + 100 a 10</td><td class="n">1.360</td></tr>
+<tr><td>Costo medio ponderato</td><td>130 a 12,00</td><td class="n">1.560</td></tr>
+<tr><td>Costo standard 11</td><td>130 a 11</td><td class="n">1.430</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Carichi</b>prezzi diversi</span><span class="f">→</span><span class="b"><b>Scarichi</b>quale lotto esce?</span><span class="f">→</span><span class="b mag"><b>Metodo</b>FIFO · LIFO · CMP · standard</span><span class="f">→</span><span class="b"><b>Rimanenze</b>stato patrimoniale</span><span class="f">→</span><span class="b"><b>Costo del venduto</b>conto economico · utile</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Scheda di magazzino / movimenti</td><td>MB51 · MB5B (giacenza a una data)</td></tr>
+<tr><td>Prezzo medio variabile o standard</td><td>MM03 vista Contabilità (controllo prezzo V o S)</td></tr>
+<tr><td>Valorizzazione FIFO / LIFO di bilancio</td><td>MRF1 … MRF4 (FIFO) · MRL1 … (LIFO)</td></tr>
+<tr><td>Costo effettivo</td><td>CKM3 · CKMLCP (Material Ledger)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché nel ferro del sistema FIFO, LIFO e costo medio danno lo stesso valore?</summary><p>Perché tutto il consumo di febbraio è avvenuto prima dell'acquisto di marzo: le uscite hanno preso lo stesso lotto con ogni metodo.</p></details>
+<details><summary>Si può cambiare metodo ogni anno?</summary><p>No: il metodo si cambia solo in casi eccezionali, motivandolo in nota integrativa (principio di costanza).</p></details>
+{% endblock %}

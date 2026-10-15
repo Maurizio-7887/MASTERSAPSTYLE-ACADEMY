@@ -1,0 +1,43 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il gestionale dice «70 transenne a magazzino», ma non dice <b>dove</b>.</li>
+  <li>Per trovare un pallet si gira tra le corsie; chi è nuovo non trova niente.</li>
+  <li>Si spedisce il pallet più comodo, non il più vecchio: la merce invecchia in fondo agli scaffali.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Serve la <b>gestione a ubicazioni</b> (WMS, in SAP «Warehouse Management» ed «Extended Warehouse Management»). La contabilità di magazzino (IM) continua a sapere <b>quanto</b> c'è e quanto vale; il WMS sa <b>dove</b>: in quale ubicazione, su quale unità di carico, da quando. Ogni spostamento fisico diventa un <b>compito di magazzino</b> che il magazziniere conferma con la <b>pistola RF</b>.</p>
+<p class="lez-chiave">IM: quanto e quanto vale. WMS: dove, su cosa, da quando. Devono sempre quadrare.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Numero magazzino</dt><dd>Il magazzino fisico gestito a ubicazioni (qui W100).</dd>
+<dt>Tipo magazzino</dt><dd>Zona con le stesse regole: scaffalatura porta-pallet (001), catasta (002), ricevimento (902), spedizione (916), approvvigionamento produzione (100), differenze (999).</dd>
+<dt>Ubicazione</dt><dd>Il «posto» con un indirizzo: 01-02-1 = corsia 01, campata 02, livello 1.</dd>
+<dt>Quanto</dt><dd>Una giacenza in un'ubicazione: materiale, quantità, unità di carico, data di entrata (per il FIFO).</dd>
+<dt>Unità di carico (UdC / HU)</dt><dd>Pallet o fascio con un numero proprio ed etichetta: si sposta e si legge tutta insieme.</dd>
+<dt>Compito di magazzino</dt><dd>Ordine di spostamento da un'ubicazione a un'altra (ordine di trasferimento in WM, warehouse task in EWM).</dd>
+<dt>Strategie</dt><dd>Messa a posto (prossima ubicazione vuota, aggiunta a scorta esistente) e prelievo (FIFO).</dd>
+{% endblock %}
+{% block esempio %}
+<p>All'attivazione (1/3/2027) il sistema prende le giacenze contabili e le mette nelle ubicazioni:</p>
+<table class="lez-tab"><tr><th>Materiale</th><th class="n">Giacenza IM</th><th>Unità di carico</th><th>Ubicazioni</th></tr>
+<tr><td>TR-STD</td><td class="n">70</td><td>pallet da 50 + pallet da 20</td><td>01-01-1 · 01-01-2</td></tr>
+<tr><td>TR-ALTA</td><td class="n">30</td><td>1 pallet</td><td>01-02-1</td></tr>
+<tr><td>TR-PED</td><td class="n">400</td><td>8 pallet da 50</td><td>01-02-2 … 02-01-1</td></tr>
+<tr><td>Ferro</td><td class="n">2.810 kg</td><td>fasci 1.000 · 1.000 · 810</td><td>F-01 (2) · F-02</td></tr></table>
+<p>Poi arrivano 5.000 kg di ferro: la MIGO li carica in IM e li mette in <b>GR-ZONE</b> con 5 compiti; la strategia «aggiunta a scorta esistente» li porta in F-02, F-03, F-04. Il magazziniere conferma leggendo origine, UdC e destinazione: se legge l'ubicazione sbagliata, la pistola si rifiuta.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>MIGO 101</b>IM + quanto in GR-ZONE</span><span class="f">→</span><span class="b"><b>Compito</b>messa a posto, strategia</span><span class="f">→</span><span class="b mag"><b>Pistola RF</b>leggi · controlla · conferma</span><span class="f">→</span><span class="b"><b>Ubicazione</b>quanto con UdC e data</span><span class="f">→</span><span class="b"><b>Prelievo FIFO</b>il più vecchio esce per primo</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>SAP WM (ECC)</th><th>SAP EWM (S/4HANA)</th></tr>
+<tr><td>Struttura del magazzino</td><td>SPRO · LS01N ubicazioni</td><td>/SCWM/LS01 · tipi magazzino</td></tr>
+<tr><td>Giacenze per ubicazione</td><td>LX02 · LS26 · LX03</td><td>/SCWM/MON</td></tr>
+<tr><td>Compiti</td><td>ordine di trasferimento LT01 · LT10 · LT12</td><td>warehouse task /SCWM/ADHU · /SCWM/TO_CONF</td></tr>
+<tr><td>Pistola RF</td><td>LM00</td><td>/SCWM/RFUI</td></tr>
+<tr><td>Quadratura IM–WM</td><td>LX23</td><td>/SCWM/STOCK_COMP</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché la merce appena ricevuta non va subito sullo scaffale?</summary><p>Perché il magazzino deve sapere dove la mette: la zona di ricevimento è un'area «di passaggio» finché il magazziniere non conferma la messa a posto.</p></details>
+<details><summary>Che cosa succede se il magazziniere mette il pallet in un'altra ubicazione?</summary><p>La pistola non conferma: legge un'ubicazione diversa da quella del compito. Così il sistema non «perde» la merce.</p></details>
+<details><summary>Il WMS cambia il valore del magazzino?</summary><p>No: sposta solo il «dove». Valori e scritture restano in IM e in contabilità.</p></details>
+{% endblock %}

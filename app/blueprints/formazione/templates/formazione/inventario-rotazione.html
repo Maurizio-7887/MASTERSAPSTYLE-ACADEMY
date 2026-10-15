@@ -1,0 +1,40 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>A fine anno si fermano le spedizioni per contare tutto.</li>
+  <li>Le conte si fanno di corsa e nessuno le ricontrolla.</li>
+  <li>Si conta con la stessa attenzione la vite da pochi centesimi e il pallet da mille euro.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Esiste l'<b>inventario a rotazione</b> (ciclico, permanente): si contano poche ubicazioni alla volta durante l'anno, con frequenza diversa secondo l'importanza del materiale. L'importanza la dà la <b>classificazione ABC</b> (Pareto): pochi codici fanno la maggior parte del valore dei consumi e vanno contati più spesso.</p>
+<p class="lez-chiave">A: si contano ogni mese · B: ogni trimestre · C: una volta l'anno. Il magazzino non si ferma mai.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Classificazione ABC</dt><dd>Materiali ordinati per valore dei consumi: A fino all'80% cumulato, B fino al 95%, C il resto.</dd>
+<dt>Inventario annuale</dt><dd>Tutte le ubicazioni a una data, di solito a magazzino fermo.</dd>
+<dt>Inventario a rotazione</dt><dd>Gruppi di ubicazioni durante l'anno: ogni posizione almeno una volta nell'esercizio.</dd>
+<dt>Inventario a ubicazione vuota</dt><dd>Si controllano le ubicazioni che il sistema dice vuote (spesso dopo un prelievo): se c'è merce, è un errore da scoprire subito.</dd>
+<dt>Accuratezza</dt><dd>% di posizioni contate senza differenze: il KPI del magazzino.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Materiale</th><th class="n">Valore consumi</th><th class="n">%</th><th class="n">% cumulata</th><th>Classe</th><th>Conte/anno</th></tr>
+<tr><td>TR-STD</td><td class="n">25.163,10</td><td class="n">52</td><td class="n">52</td><td>A</td><td>12</td></tr>
+<tr><td>TR-ALTA</td><td class="n">10.675,80</td><td class="n">22</td><td class="n">74</td><td>A</td><td>12</td></tr>
+<tr><td>TR-PED</td><td class="n">6.478,00</td><td class="n">13</td><td class="n">88</td><td>B</td><td>4</td></tr>
+<tr><td>Ferro</td><td class="n">5.880,50</td><td class="n">12</td><td class="n">100</td><td>C</td><td>1</td></tr></table>
+<p>Il documento a rotazione della classe A prende solo 3 ubicazioni (TR-STD e TR-ALTA): si contano in pochi minuti senza fermare il resto del magazzino.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-due">
+  <div><h3>📅 Annuale</h3><ul><li>tutte le ubicazioni insieme</li><li>magazzino fermo</li><li>una volta l'anno</li><li>errori scoperti tardi</li></ul></div>
+  <div><h3>🔄 A rotazione</h3><ul><li>poche ubicazioni alla volta</li><li>magazzino aperto</li><li>A ogni mese, C una volta l'anno</li><li>errori scoperti subito</li></ul></div>
+</div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Analisi ABC</td><td>MC40 · indicatore di inventario a rotazione nell'anagrafica (MM02, vista Magazzino)</td></tr>
+<tr><td>Inventario a rotazione</td><td>MICN (MM) · LICC (WM) · /SCWM/PI_CREATE con procedura «cycle counting»</td></tr>
+<tr><td>Ubicazione vuota / al prelievo</td><td>LX26 · conferma dell'ubicazione vuota in RF</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il ferro è in classe C se ne consumiamo tonnellate?</summary><p>Perché l'ABC si fa sul valore: 6.190 kg a 0,95 € valgono meno delle transenne vendute.</p></details>
+<details><summary>L'inventario a rotazione sostituisce quello di fine anno?</summary><p>Sì, se ogni posizione è contata almeno una volta nell'esercizio e la procedura è documentata: è la prassi accettata dai revisori.</p></details>
+{% endblock %}

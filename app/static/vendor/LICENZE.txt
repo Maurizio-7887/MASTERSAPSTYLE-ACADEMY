@@ -1,0 +1,4 @@
+Librerie di terze parti incluse senza modifiche:
+- JsBarcode 3.11.6 — MIT — https://github.com/lindell/JsBarcode
+- qrcode-generator 1.4.4 — MIT — https://github.com/kazuhikoarase/qrcode-generator
+- html5-qrcode 2.3.8 — Apache License 2.0 — https://github.com/mebjas/html5-qrcode (usa ZXing, Apache 2.0)

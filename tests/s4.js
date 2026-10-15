@@ -6,12 +6,15 @@ let errori = 0, controlli = 0;
 const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
-const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js'};
+const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js'};
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/static/js/lab-copioni.js'];
-let memoria = null;   // il localStorage passa da una pagina all'altra come nel browser
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js',
+  'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
+let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
 function apri(bp, pagina) {
+  if (ultima) memoria = ultima.localStorage.getItem(CHIAVE) || memoria;
   const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
+  ultima = w;
   if (memoria) w.localStorage.setItem(CHIAVE, memoria);
   w.confirm = () => true;
   w.LAB_PAGINA = {chiave: CHIAVE, pagina: pagina, slot: 'erp-ft'};
@@ -184,19 +187,78 @@ ok(/Periodo chiuso/.test(apri('erp_costi', 'ml').testo()), 'Material Ledger chiu
   vicino(p.w.COPA.report(S2, 'cliente', {al: '2027-01-31'}).totale.mdc1, 19946, 'KE30 gennaio invariato');
   p = apri('erp_copa', 'ke30'); ok(/Material Ledger/.test(p.testo()), 'KE30 riga differenze ML');
   const {st, passi} = guidaStati(p.w, CHIAVE);
-  const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  const MAR = passi.findIndex(x => x.titolo.indexOf('Marzo:') === 0);
+  const manc = passi.slice(0, MAR).map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
   ok(!manc.length, 'guida S/4 completa: passi non riconosciuti → ' + manc.join(' | '));
   // vecchio stato (prima della tappa CO-PC) si completa senza perdere dati
   const vecchio = JSON.parse(fs.readFileSync(path.join(__dirname, 'lab-erp-gennaio.json'), 'utf8'));
   delete vecchio.costing; delete vecchio.produzione; delete vecchio.materiali.FERRO; vecchio.pianoDeiConti = vecchio.pianoDeiConti.filter(c => c.codice !== '12');
-  memoria = JSON.stringify(vecchio);
+  memoria = JSON.stringify(vecchio); ultima = null;
   const pv = apri('erp_costi', 'scheda'); ok(pv.S().costing && pv.S().materiali.FERRO && pv.S().pianoDeiConti.some(c => c.codice === '12') && pv.S().fatture.length === 6, 'stato salvato prima della tappa: completato');
-  memoria = JSON.stringify(S2);
+  memoria = JSON.stringify(S2); ultima = null;
 }
+// ═══ MARZO — magazzino WMS e inventario (UF 9), dalle pagine e dalla pistola RF ═══
+p = apri('erp_magazzino', 'mappa'); ok(/non è ancora attivo/.test(p.testo()), 'mappa: WMS non attivo');
+p = apri('erp_magazzino', 'struttura');
+p.fai('at', {data: '2027-03-01'}); ok(p.S().wm && p.S().wm.attivo === '2027-03-01' && /WMS attivo/.test(p.testo()), 'attivazione W100');
+ok(p.S().wm.carico.length === 14, 'carico iniziale: 14 unità di carico (' + p.S().wm.carico.length + ')');
+p = apri('erp_magazzino', 'mappa'); ok(/01-01-2/.test(p.testo()) && p.lab.querySelectorAll('.ubic[data-u]').length === 40, 'mappa con 40 ubicazioni');
+p.lab.querySelector('[data-u="01-01-2"]').click(); ok(/Ubicazione 01-01-2/.test(p.testo()) && /1000002/.test(p.testo()), 'dettaglio ubicazione 01-01-2');
+p = apri('erp_magazzino', 'etichette'); ok(p.lab.querySelectorAll('.s4-et').length === 40 && p.lab.querySelector('.s4-et svg'), 'etichette con barcode');
+p = apri('erp_acquisti', 'ordini'); bene(p.fai('me', {fornitore: 'F100', materiale: 'FERRO', qta: '5000', prezzo: '0,98', data: '2027-03-02'}), 'ME21N marzo');
+p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: x => x, data: '2027-03-03'}), 'MIGO 101 marzo');
+ok(p.S().wm.compiti.filter(t => t.tipo === 'PUTAWAY').map(t => t.a).join() === 'F-02,F-03,F-03,F-04,F-04', 'strategia aggiunta a scorta: ' + p.S().wm.compiti.map(t => t.a).join());
+const rfInvio = (pp, id, v) => { const i = pp.lab.querySelector(id); i.value = v; i.dispatchEvent(new pp.w.KeyboardEvent('keydown', {key: 'Enter', bubbles: true})); return i; };
+p = apri('erp_magazzino', 'rf');
+p.lab.querySelector('#rf-data').value = '2027-03-03';
+let t0 = p.S().wm.compiti[0];
+let campo = rfInvio(p, '#rf-da', 'F-01'); ok(campo.classList.contains('ko'), 'RF: origine sbagliata segnalata in rosso');
+p.lab.querySelector('#rf-da').value = 'GR-ZONE'; p.lab.querySelector('#rf-udc').value = t0.udc; p.lab.querySelector('#rf-a').value = 'F-05';
+p.lab.querySelector('#rf-ok').click(); ok(/destinazione sbagliata/.test(p.lab.querySelector('#rf-esito').textContent), 'RF: destinazione sbagliata rifiutata');
+for (let k = 0; k < 5; k++) {
+  p = apri('erp_magazzino', 'rf'); p.lab.querySelector('#rf-data').value = '2027-03-03';
+  const t = p.S().wm.compiti.find(x => x.stato === 'aperto');
+  rfInvio(p, '#rf-da', t.da.toLowerCase()); rfInvio(p, '#rf-udc', t.udc); rfInvio(p, '#rf-a', t.a);   // l'ultimo Invio conferma da solo
+  ok(t.stato === 'confermato' || p.S().wm.compiti.find(x => x.numero === t.numero).stato === 'confermato', 'RF: messa a posto ' + t.numero + ' con tre letture');
+}
+{ const pq = apri('erp_magazzino', 'rf'); ok(/Nessun compito aperto/.test(pq.testo()), 'RF: coda vuota → ' + pq.S().wm.compiti.map(t => t.numero + t.stato).join() + ' ' + pq.testo().slice(0, 200)); }
+p = apri('erp_magazzino', 'rf'); p.lab.querySelector('.rf-schede [data-s="interroga"]').click();
+rfInvio(p, '#rf-q', 'F-03'); ok(/FERRO/.test(p.lab.querySelector('#rf-ris-q').textContent) && /1\.?000/.test(p.lab.querySelector('#rf-ris-q').textContent), 'RF: interroga ubicazione');
+p = apri('erp_inventario', 'abc'); ok(/TR-STD/.test(p.testo()) && /mensile/.test(p.testo()), 'ABC');
+{ const a = p.w.IV4.abc().righe.map(x => x.mat + x.classe).join(); ok(a === 'TR-STDA,TR-ALTAA,TR-PEDB,FERROC', 'classi ABC ' + a); }
+p = apri('erp_inventario', 'documenti');
+bene(p.fai('in', {tipo: 'rotazione', selezione: 'A', tolleranza: '20', data: '2027-03-10'}), 'LI01N rotazione classe A');
+ok(p.S().wm.inventari[0].righe.map(r => r.ubic).join() === '01-01-1,01-01-2,01-02-1', 'posizioni del documento');
+p = apri('erp_inventario', 'documenti'); p.fai('ia', {data: '2027-03-10'}); ok(p.S().wm.inventari[0].stato === 'attivo', 'attivazione documento');
+ok(p.S().wm.ubicazioni['01-01-2'].blocco, 'ubicazione bloccata');
+p = apri('erp_inventario', 'lista'); ok(/LISTA DI CONTA/.test(p.testo()) && !/\b20\b.*pz/.test(p.lab.querySelector('table.lista-conta').textContent), 'lista di conta cieca');
+p = apri('erp_inventario', 'documenti'); ok(/nascosta/.test(p.testo()), 'quantità contabile nascosta durante la conta');
+bene(p.fai('ic', {r0: '50', r1: '18', r2: '31', contatore: 'MAG02 Sara'}), 'prima conta');
+ok(p.S().wm.inventari[0].stato === 'riconta', 'stato riconta');
+p = apri('erp_magazzino', 'rf'); p.lab.querySelector('.rf-schede [data-s="inventario"]').click();
+rfInvio(p, '#rf-inv', '01-02-1'); p.lab.querySelector('#rf-c2').value = '30'; p.lab.querySelector('#rf-conta').click();
+rfInvio(p, '#rf-inv', '01-01-2'); p.lab.querySelector('#rf-c1').value = '18'; p.lab.querySelector('#rf-conta').click();
+ok(p.S().wm.inventari[0].stato === 'contato', 'riconta dalla pistola RF → contato (' + p.S().wm.inventari[0].stato + ')');
+p = apri('erp_inventario', 'documenti'); p.fai('ix', {data: '2027-03-11'}); ok(p.S().wm.inventari[0].stato === 'chiuso', 'LI20 chiusura');
+ok(p.w.WM4.quadratura().every(q => q.ok) && p.w.WM4.quadratura().find(q => q.mat === 'TR-STD').diff999 === 2, 'dopo LI20: 2 TR-STD nella 999, IM = WMS');
+ok(!p.S().wm.ubicazioni['01-01-2'].blocco, 'ubicazioni sbloccate');
+p = apri('erp_inventario', 'differenze'); bene(p.fai('rg', {data: '2027-03-12'}), 'LI21 registrazione');
+{
+  const S3 = p.S(); const sal = c => Math.round(S3.registrazioni.reduce((t, r) => t + r.righe.filter(x => x.conto === c).reduce((u, x) => u + (x.dareAvere === 'DARE' ? x.importo : -x.importo), 0), 0) * 100) / 100;
+  vicino(sal('65'), 68.94, 'conto 65 differenze inventariali'); ok(S3.giacenze['TR-STD'] === 68 && S3.giacenze.FERRO === 7810, 'giacenze dopo inventario');
+  ok(p.w.WM4.quadratura().every(q => q.ok && q.diff999 === 0), 'quadratura IM–WMS finale');
+}
+p = apri('erp_inventario', 'valorizzazione'); ok(/7\.?710,00/.test(p.testo()), 'valorizzazione ferro 7.710');
+p.lab.querySelector('#lib').checked = true; p.lab.querySelector('#lib').dispatchEvent(new p.w.Event('change'));
+ok(/1\.?660,00/.test(p.testo()) && /1\.?360,00/.test(p.testo()) && /1\.?560,00/.test(p.testo()), 'esempio da manuale FIFO 1.660 · LIFO 1.360 · CMP 1.560');
+p = apri('erp_magazzino', 'monitor'); ok(/quadra/.test(p.testo()), 'monitor');
+{ const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  ok(!manc.length, 'guida S/4 con marzo: passi non riconosciuti → ' + manc.join(' | ')); }
+if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
 const SF = JSON.parse(memoria);
 
 // lezioni «Che situazione hai?»: il copione prepara il sistema fino al passo, la finestra si apre lì
-for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP']) {
+for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione']) {
   const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/s4/?passo=' + encodeURIComponent(passo), runScripts: 'outside-only'}).window;
   LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4, passo);
@@ -211,5 +273,5 @@ for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', '
   vicino(w.COPA.report(St, 'cliente', {dal: '2027-02-01'}).totale.mdc1, 9339.87, 'copione completo: MdC I di febbraio');
 }
 fs.writeFileSync(path.join(__dirname, 'lab-erp-finale.json'), JSON.stringify(SF));
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

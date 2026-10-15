@@ -1,7 +1,8 @@
 /* Sistema integrato S/4 — gennaio: vendite e redditività (condizioni, acconto, resi, note di credito, CO-PA);
    febbraio: costi del prodotto (sovraccosti, CK11N/CK24, ordini di produzione, varianza di lotto, Material Ledger). */
 (function () {
-  var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.';
+  var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.', M = 'erp_magazzino.', I = 'erp_inventario.';
+  var inv = function (h) { return ((h.S.wm || {}).inventari || [])[0]; };
   var ord = function (h, c, tipo, feb) { return (h.S.ordini || []).filter(function (o) { return o.cliente === c && o.tipo === (tipo || 'OR') && (feb ? o.data >= '2027-02-01' : o.data < '2027-02-01'); }); };
   var cond = function (h, tipo, c, m) { return (h.S.condizioni || []).some(function (x) { return x.origine === 'VK11' && x.tipo === tipo && x.cliente === c && (!m || x.materiale === m); }); };
   var fatt = function (h, c, tipo) { return (h.S.fatture || []).filter(function (f) { return f.cliente === c && f.tipo === (tipo || 'F2') && f.data < '2027-02-01'; }); };
@@ -40,7 +41,7 @@
       campi: [['Committente', c], ['Materiale', m], ['Quantità', String(q)], ['Riferimento', rif], ['Data', '15/02/2027']], attesa: attesa, fatto: function (h) { return ord(h, c, 'OR', true).length > 0; }};
   };
   window.MSA_ESERCIZIO = {
-    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite e redditività (gennaio), costi del prodotto e Material Ledger (febbraio)', versione: 'erp-ft',
+    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gennaio), costi del prodotto (febbraio), magazzino WMS e inventario (marzo)', versione: 'erp-ft',
     passi: [
       {g: 'Prima di cominciare', data: '', titolo: 'Che cosa è il sistema integrato', dove: {ep: D + 'avvio'}, percorso: 'Launchpad → S/4 Sistema integrato → Avvio del sistema',
        campi: [['Un solo libro giornale', 'ogni documento logistico scrive la sua registrazione'], ['Prezzi', 'non si digitano: li determina la procedura ZFT001 dalle condizioni'],
@@ -158,8 +159,56 @@
        nota: 'Le differenze di prezzo arrivano al cliente: è il costo vero del venduto.'},
       {g: 'Febbraio — analisi', data: '', titolo: 'Bilancio di verifica di febbraio', dove: {ep: F + 'bilancio'}, percorso: 'S/4 → Bilancio di verifica (F.08)',
        campi: [['Magazzino ferro (12)', '2.810 = 2.810 kg × 1,00 effettivo'], ['Prodotti finiti (13)', '17.290'], ['Conti 61 e 63', 'a zero dopo la chiusura del Material Ledger'], ['Rivalutazione (64)', '670,90']], nota: 'Deve quadrare: Dare = Avere.'},
-      {g: 'Fine', data: '', titolo: 'Consegna il lavoro al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+      {g: 'Fine di febbraio', data: '', titolo: 'Consegna il lavoro al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
        campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — costi del prodotto e Material Ledger']]},
+      // ═══ MARZO — magazzino a ubicazioni (WMS) e inventari fisici e contabili (UF 9) ═══
+      {g: 'Marzo — il magazzino a ubicazioni', data: '', titolo: 'Marzo: il magazzino a ubicazioni e l\'inventario', dove: {ep: M + 'struttura'}, percorso: 'S/4 → Magazzino (WMS) → Struttura e attivazione',
+       campi: [['Fino a febbraio', 'la contabilità di magazzino sa QUANTO c\'è, non DOVE'], ['Da marzo', 'magazzino W100: ubicazioni, unità di carico, compiti, pistola RF'], ['Poi', 'inventario a rotazione: conta cieca, riconta, differenze, registrazione']],
+       nota: 'Se non hai fatto gennaio e febbraio: Struttura e attivazione → «Carica la situazione di fine febbraio».'},
+      {g: 'Marzo — il magazzino a ubicazioni', data: '01/03/2027', titolo: 'Attiva il magazzino W100', dove: {ep: M + 'struttura'}, percorso: 'Magazzino → Struttura e attivazione',
+       campi: [['Data di attivazione', '01/03/2027']], attesa: '40 ubicazioni · 14 unità di carico dal carico iniziale: TR-STD 50 + 20 · TR-ALTA 30 · TR-PED 8 pallet da 50 · ferro 1.000 + 1.000 + 810 kg. Nessuna scrittura.',
+       fatto: function (h) { return !!(h.S.wm && h.S.wm.attivo); }},
+      {g: 'Marzo — il magazzino a ubicazioni', data: '', titolo: 'Mappa: guarda dove sono le giacenze', dove: {ep: M + 'mappa'}, percorso: 'Magazzino → Mappa delle ubicazioni',
+       campi: [['Scaffali 001', 'corsia-campata-livello, un pallet per ubicazione'], ['Catasta 002', 'F-01 … F-06, due fasci ciascuna'], ['Tocca 01-01-2', 'quanto: 20 TR-STD, UdC 1000002, data di entrata']], nota: 'Spunta quando hai spiegato quanto, ubicazione e unità di carico.'},
+      {g: 'Marzo — il magazzino a ubicazioni', data: '', titolo: 'Stampa le etichette delle ubicazioni', dove: {ep: M + 'etichette'}, percorso: 'Magazzino → Etichette',
+       campi: [['Code 128', 'per la pistola'], ['QR', 'per la fotocamera dello smartphone']], nota: 'Facoltativo: attaccale agli scaffali (o a scatole) per provare la pistola RF dal vero.'},
+      {g: 'Marzo — entrata a magazzino', data: '02/03/2027', titolo: 'ME21N: 5.000 kg di ferro a 0,98', dove: {ep: A + 'ordini'}, percorso: 'S/4 → Acquisti → Ordini d\'acquisto',
+       campi: [['Fornitore', 'F100'], ['Materiale', 'FERRO'], ['Quantità', '5000'], ['Prezzo', '0,98'], ['Data', '02/03/2027']], fatto: function (h) { return (h.S.acquisti || []).length >= 2; }},
+      {g: 'Marzo — entrata a magazzino', data: '03/03/2027', titolo: 'MIGO 101: entrata del ferro in zona di ricevimento', dove: {ep: A + 'entrate'}, percorso: 'Acquisti → Entrata merci',
+       campi: [['Ordine', 'quello di marzo'], ['Data', '03/03/2027']], attesa: 'D 12 4.750 · D 63 150 / A 22 4.900. Nel WMS: 5 fasci da 1.000 kg in GR-ZONE e 5 compiti di messa a posto (F-02, F-03, F-03, F-04, F-04: aggiunta a scorta esistente).',
+       fatto: function (h) { return (h.S.acquisti || []).length >= 2 && h.S.acquisti[1].entrato >= 5000; }},
+      {g: 'Marzo — entrata a magazzino', data: '03/03/2027', titolo: 'RF: metti a posto i 5 fasci di ferro', dove: {ep: M + 'rf'}, percorso: 'Magazzino → Pistola RF → Compiti',
+       campi: [['1', 'leggi l\'ubicazione di origine GR-ZONE'], ['2', 'leggi l\'unità di carico'], ['3', 'leggi l\'ubicazione di destinazione proposta'], ['Risorsa', 'MAG01 Marco · data 03/03/2027']],
+       attesa: 'Ogni conferma sposta il quanto dalla GR-ZONE alla catasta. Nessuna scrittura contabile.',
+       fatto: function (h) { var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.tipo === 'PUTAWAY'; }); return t.length >= 5 && t.every(function (x) { return x.stato === 'confermato'; }); }},
+      {g: 'Marzo — entrata a magazzino', data: '', titolo: 'Prova l\'errore: leggi l\'ubicazione sbagliata', dove: {ep: M + 'rf'}, percorso: 'Pistola RF', campi: [['Prova', 'su un compito leggi un\'altra ubicazione']],
+       nota: 'La pistola rifiuta la conferma: è il controllo che evita la merce «persa» nel magazzino. Spunta a mano.'},
+      {g: 'Marzo — inventario (UF 9)', data: '', titolo: 'ABC: classifica i materiali', dove: {ep: I + 'abc'}, percorso: 'S/4 → Inventari → Classificazione ABC',
+       campi: [['A', 'TR-STD 52% · TR-ALTA (74% cumulato): conta mensile'], ['B', 'TR-PED (88%): trimestrale'], ['C', 'FERRO: annuale']], nota: 'Spunta quando hai spiegato Pareto e frequenze.'},
+      {g: 'Marzo — inventario (UF 9)', data: '10/03/2027', titolo: 'Crea il documento d\'inventario a rotazione (classe A)', dove: {ep: I + 'documenti'}, percorso: 'Inventari → Documenti d\'inventario (LI01N)',
+       campi: [['Tipo', 'Inventario a rotazione'], ['Selezione', 'A'], ['Tolleranza', '20 €'], ['Data', '10/03/2027']], attesa: '3 posizioni: 01-01-1 TR-STD, 01-01-2 TR-STD, 01-02-1 TR-ALTA',
+       fatto: function (h) { return ((h.S.wm || {}).inventari || []).length > 0; }},
+      {g: 'Marzo — inventario (UF 9)', data: '10/03/2027', titolo: 'Attiva il documento e stampa la lista di conta', dove: {ep: I + 'documenti'}, percorso: 'Inventari → Documenti · Attiva · poi Lista di conta',
+       campi: [['Data di riferimento', '10/03/2027']], attesa: 'Le 3 ubicazioni si bloccano. La lista è «cieca»: niente quantità a sistema.',
+       fatto: function (h) { var d = inv(h); return !!d && d.stato !== 'creato'; }},
+      {g: 'Marzo — inventario (UF 9)', data: '10/03/2027', titolo: 'Prima conta', dove: {ep: I + 'documenti'}, percorso: 'Inventari → Documenti · Conta (o pistola RF → Inventario)',
+       campi: [['01-01-1', '50'], ['01-01-2', '18'], ['01-02-1', '31'], ['Contato da', 'MAG02 Sara']], attesa: '2 posizioni oltre la tolleranza di 20 €: 01-01-2 (−2 × 34,47 = −68,94) e 01-02-1 (+1 × 39,54) → riconta',
+       fatto: function (h) { var d = inv(h); return !!d && ['riconta', 'contato', 'chiuso'].indexOf(d.stato) >= 0; }},
+      {g: 'Marzo — inventario (UF 9)', data: '11/03/2027', titolo: 'Riconta le posizioni oltre tolleranza', dove: {ep: I + 'documenti'}, percorso: 'Inventari → Documenti · Riconta (LI14)',
+       campi: [['01-01-2', '18 (confermato: mancano 2 pezzi)'], ['01-02-1', '30 (la prima conta era sbagliata)'], ['Contato da', 'MAG03 Luca']],
+       nota: 'Un altro magazziniere riconta: l\'errore di conta sulla TR-ALTA sparisce, la mancanza sulla TR-STD resta.', fatto: function (h) { var d = inv(h); return !!d && ['contato', 'chiuso'].indexOf(d.stato) >= 0; }},
+      {g: 'Marzo — inventario (UF 9)', data: '11/03/2027', titolo: 'LI20: chiudi il documento nel WMS', dove: {ep: I + 'documenti'}, percorso: 'Inventari → Documenti · Chiudi',
+       campi: [['Data', '11/03/2027']], attesa: '01-01-2 passa a 18 pezzi; i 2 mancanti vanno nella zona 999. IM e WMS restano uguali (70). Ubicazioni sbloccate.',
+       fatto: function (h) { var d = inv(h); return !!d && d.stato === 'chiuso'; }},
+      {g: 'Marzo — inventario (UF 9)', data: '12/03/2027', titolo: 'LI21: registra le differenze in contabilità', dove: {ep: I + 'differenze'}, percorso: 'Inventari → Differenze inventariali',
+       campi: [['Data', '12/03/2027']], attesa: 'Movimento 711 di 2 TR-STD: D 65 Differenze inventariali / A 13 Magazzino 68,94. Giacenza TR-STD 68.',
+       fatto: function (h) { return (((h.S.wm || {}).registrazioni) || []).length > 0; }},
+      {g: 'Marzo — inventario (UF 9)', data: '', titolo: 'LX23: quadratura IM – WMS', dove: {ep: M + 'monitor'}, percorso: 'Magazzino → Monitor',
+       campi: [['TR-STD', '68 = 68'], ['FERRO', '7.810 = 7.810'], ['999', 'vuota']], nota: 'Spunta quando hai spiegato perché contabilità e magazzino devono sempre quadrare.'},
+      {g: 'Marzo — inventario (UF 9)', data: '', titolo: 'Valorizzazione delle rimanenze: FIFO, LIFO, costo medio', dove: {ep: I + 'valorizzazione'}, percorso: 'Inventari → Valorizzazione delle rimanenze',
+       campi: [['Esempio da manuale', 'FIFO 1.660 · LIFO 1.360 · CMP 1.560 · standard 1.430'], ['Ferro del sistema', '7.810 kg: FIFO = LIFO = CMP 7.710 (tutto il consumo è avvenuto prima del secondo acquisto) · standard 7.419,50']], nota: 'Spunta quando hai confrontato i metodi (art. 2426 c.c., OIC 13).'},
+      {g: 'Fine di marzo', data: '', titolo: 'Consegna il lavoro di marzo al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+       campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — magazzino WMS e inventario']]},
     ]),
   };
 })();
