@@ -66,6 +66,10 @@ CASI = [
      "💱", "erp_valute", "Luglio — F-28"),
     ("costo-personale", "Quanto costa davvero un dipendente?", "Si conosce il netto in busta, non il costo per l'azienda né quanto pesa su ogni reparto.",
      "🧾", "erp_paghe", "Calcola i cedolini"),
+    ("fattura-sbagliata", "Hai sbagliato una fattura?", "La fattura è partita con la data o l'importo sbagliati: c'è chi la cancella, chi la rifà sopra, chi non sa se si può ancora toccare.",
+     "↩️", "erp_fi", "VF11: storna"),
+    ("chi-fa-cosa", "Tutti possono fare tutto?", "Chi vende sblocca da solo i clienti sopra fido, chi compra si approva gli ordini, nessuno sa chi ha fatto cosa.",
+     "🔐", "erp_dati", "VKM1"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]

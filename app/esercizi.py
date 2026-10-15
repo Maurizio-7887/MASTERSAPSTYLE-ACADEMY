@@ -153,6 +153,20 @@ ESERCIZI = {
             ("f24_versato", "F24 versato a luglio", 3603.92, 0.005),
         ],
     },
+    "s4-controlli": {
+        "titolo": "Sistema integrato S/4 — ruoli, crediti, storni e SdI, acquisti approvati, lotti e seriali, tredicesima (agosto – dicembre)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("ordini_rilasciati_vkm1", "Ordini rilasciati dal responsabile crediti (VKM1)", 1, 0),
+            ("fatture_stornate_ago", "Fatture stornate prima dell'invio allo SdI (VF11)", 1, 0),
+            ("documenti_sdi", "Documenti trasmessi allo SdI", 3, 0),
+            ("nota_credito_td04", "Nota di credito TD04 a Delta (IVA compresa)", 244.00, 0.005),
+            ("rda_ordinate", "Richieste d'acquisto approvate e ordinate", 1, 0),
+            ("ferro_colata_0816", "Ferro della colata COL-0816 in giacenza (kg)", 4000, 0.005),
+            ("seriali_presso_clienti", "Transenne alte con numero di serie presso i clienti", 320, 0),
+            ("tredicesima_dicembre", "Tredicesime pagate a dicembre", 6950.00, 0.005),
+        ],
+    },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
 }
 

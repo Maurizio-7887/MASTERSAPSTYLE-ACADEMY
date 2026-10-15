@@ -1,0 +1,36 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Una fattura esce con la data o la quantità sbagliata e qualcuno la «cancella» dal gestionale.</li>
+  <li>Non si sa se una fattura è già arrivata al cliente attraverso lo SdI.</li>
+  <li>Si rifà la fattura sopra quella vecchia e i numeri non tornano più.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>In un sistema contabile <b>un documento registrato non si cancella mai: si storna</b>. Lo storno è un documento nuovo, con le righe a segni invertiti e il riferimento al documento sbagliato. Per la fattura di vendita c'è un limite in più: finché <b>non è stata trasmessa allo SdI</b> si storna con VF11 e si rifà; dopo la trasmissione esiste per l'Agenzia delle Entrate e <b>si corregge solo con una nota di credito</b> (tipo documento TD04), anch'essa da trasmettere.</p>
+<p class="lez-chiave">Prima dello SdI: VF11 e nuova fattura. Dopo lo SdI: nota di credito TD04. Mai cancellare.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Storno (VF11, FB08)</dt><dd>Documento nuovo a segni invertiti, collegato al primo. Il libro giornale conserva entrambi.</dd>
+<dt>Si storna dalla coda</dt><dd>Incasso → fattura → uscita merci: prima si storna l'ultimo documento (FB08, poi VF11, poi VL09).</dd>
+<dt>SdI</dt><dd>Sistema di Interscambio dell'Agenzia delle Entrate: riceve la fattura elettronica (XML FatturaPA) e la consegna al cliente.</dd>
+<dt>TD01 / TD04</dt><dd>Tipo documento della fattura e della nota di credito nel tracciato FatturaPA.</dd>
+<dt>Nota di credito</dt><dd>Per un reso (con merce che rientra) o per un abbuono (richiesta G2, approvata dal responsabile crediti).</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Situazione (agosto)</th><th>Che cosa si fa</th><th>Risultato</th></tr>
+<tr><td>Fattura di Edil Sigma con data 17/08 invece di 07/08, non ancora allo SdI</td><td>VF11 con la stessa data, poi VF01 del 07/08</td><td>Documento S1 a segni invertiti; la consegna torna da fatturare</td></tr>
+<tr><td>Fattura di Delta già trasmessa allo SdI; 2 transenne graffiate</td><td>VF11 rifiutato → richiesta G2 da 200 €, approvazione, nota di credito</td><td>Nota di credito 244 € (TD04) trasmessa allo SdI</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Errore</b>in fattura</span><span class="f">→</span><span class="b mag"><b>Già allo SdI?</b></span><span class="f">→ no →</span><span class="b"><b>VF11</b>storno + nuova fattura</span><span class="f">· sì →</span><span class="b"><b>Nota di credito</b>TD04 allo SdI</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Storno fattura di vendita</td><td>VF11</td></tr>
+<tr><td>Storno uscita merci / entrata merci</td><td>VL09 / MBST</td></tr>
+<tr><td>Storno fattura fornitore</td><td>MR8M</td></tr>
+<tr><td>Storno documento contabile</td><td>FB08</td></tr>
+<tr><td>Fattura elettronica</td><td>eDocument Cockpit (EDOC_COCKPIT)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché non si può semplicemente cancellare la fattura?</summary><p>Perché il numero è progressivo e il libro giornale deve restare completo: lo storno lascia la traccia di che cosa è successo e quando.</p></details>
+<details><summary>Si può stornare una fattura già incassata?</summary><p>Prima si storna l'incasso (FB08), che riapre la partita; poi, se non è allo SdI, la fattura.</p></details>
+{% endblock %}

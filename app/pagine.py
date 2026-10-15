@@ -301,7 +301,7 @@ _ERP_PAGINE = {
                       {"endpoint": "compiti", "titolo": "Compiti di magazzino", "icona": "📋", "tcode": "LT10 · LT12 · LT22"},
                       {"endpoint": "monitor", "titolo": "Monitor del magazzino", "icona": "📈", "tcode": "/SCWM/MON · LX23"},
                       {"endpoint": "etichette", "titolo": "Etichette barcode e QR", "icona": "🏷️", "tcode": "Code 128 · QR"},
-                      {"endpoint": "lotti", "titolo": "Lotti e tracciabilità", "icona": "🧬", "tcode": "MSC3N · MB56"}],
+                      {"endpoint": "lotti", "titolo": "Lotti, numeri di serie e tracciabilità", "icona": "🧬", "tcode": "MSC3N · MB56 · IQ03"}],
     "erp_inventario": [{"endpoint": "documenti", "titolo": "Documenti d'inventario", "icona": "📝", "tcode": "LI01N · LI11N · LI14 · LI20"},
                        {"endpoint": "lista", "titolo": "Lista di conta da stampare", "icona": "🖨️", "tcode": "LI04"},
                        {"endpoint": "differenze", "titolo": "Differenze inventariali", "icona": "⚖️", "tcode": "LI21 · 711/712"},
@@ -396,4 +396,6 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.previsione_cassa", None, "Non sai quanta cassa avrai?", "💧", "tesoreria · F110 · estratto conto", None),
             ("formazione.valute_estere", None, "Vendi e compri in dollari?", "💱", "cambi · FAGL_FCV", None),
             ("formazione.costo_personale", None, "Quanto costa davvero un dipendente?", "🧾", "cedolino · F24 · CdC", None),
+            ("formazione.fattura_sbagliata", None, "Hai sbagliato una fattura?", "↩️", "storno · SdI · nota di credito", None),
+            ("formazione.chi_fa_cosa", None, "Tutti possono fare tutto?", "🔐", "ruoli · fido · approvazioni", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

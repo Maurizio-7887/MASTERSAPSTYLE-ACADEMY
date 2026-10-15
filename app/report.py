@@ -204,6 +204,14 @@ class Lavoro:
                          "iva_reverse_charge": round(sum(x.get("importo") or 0 for r in s.get("registrazioni") or [] if r.get("tipo") == "FATTURA_VALUTA" for x in r.get("righe") or [] if x.get("conto") == "14"), 2),
                          "f24_versato": round(sum(r["righe"][-1]["importo"] for r in s.get("registrazioni") or [] if r.get("tipo") == "F24"), 2),
                          "ricavi_servizi": -self.saldo("44", fino="2027-07-31"),
+                         "fatture_stornate_ago": sum(1 for f in s.get("fatture") or [] if f.get("tipo") == "F2" and f.get("stornata") and (f.get("data") or "") >= "2027-08-01"),
+                         "documenti_sdi": sum(1 for f in s.get("fatture") or [] if f.get("sdi")),
+                         "nota_credito_td04": round(sum(f.get("totale") or 0 for f in s.get("fatture") or [] if f.get("tipo") == "G2" and f.get("sdi") and (f.get("data") or "") >= "2027-08-01"), 2),
+                         "ordini_rilasciati_vkm1": sum(1 for o in s.get("ordini") or [] if (o.get("credito") or {}).get("stato") == "D"),
+                         "rda_ordinate": sum(1 for r in s.get("rda") or [] if r.get("stato") == "ordinata"),
+                         "seriali_presso_clienti": sum(1 for m in (s.get("seriali") or {}).values() for x in m.values() if x.get("stato") == "cliente"),
+                         "ferro_colata_0816": round((((s.get("lotti") or {}).get("FERRO") or {}).get("COL-0816") or {}).get("qta") or 0, 2),
+                         "tredicesima_dicembre": round(sum(c.get("tredicesima") or 0 for c in (s.get("hr") or {}).get("cedolini") or [] if c.get("periodo") == "2027-12"), 2),
                          "credito_usd_aperto": round(sum(d.get("importo") or 0 for d in (s.get("fx") or {}).get("documenti") or [] if d.get("lato") == "cliente" and not d.get("chiuso")), 2),
                          "quadratura_im_wm": ("sì" if wm.get("attivo") and all(abs(giac.get(m, 0) - tot_wm.get(m, 0)) < 1e-6 for m in giac) else "no")})
         return base

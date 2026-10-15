@@ -34,7 +34,7 @@
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
     'TR-STD': {nome: 'Transenna standard', tipo: 'FERT', um: 'pz', std: 31.40, peso: 12, ferro: 8, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.40}, attrezzaggio: 3},
-    'TR-ALTA': {nome: 'Transenna alta (prolunga)', tipo: 'FERT', um: 'pz', std: 36.10, peso: 15, ferro: 10, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.50}, attrezzaggio: 3},
+    'TR-ALTA': {nome: 'Transenna alta (prolunga)', tipo: 'FERT', um: 'pz', std: 36.10, peso: 15, ferro: 10, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.50}, attrezzaggio: 3, seriale: 'Z001'},
     'TR-PED': {nome: 'Transenna pedonale (base)', tipo: 'FERT', um: 'pz', std: 29.55, peso: 9, ferro: 9, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.30}, attrezzaggio: 3},
     'FERRO': {nome: 'Tubo di ferro', tipo: 'ROH', um: 'kg', std: 0.95, peso: 1},
   };
@@ -51,7 +51,7 @@
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
     compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0,
-    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000};
+    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, seriale: 0};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',
@@ -70,10 +70,12 @@
     Object.keys(n.numeri).forEach(function (k) { if (S.numeri[k] == null) S.numeri[k] = n.numeri[k]; });
     Object.keys(MATERIALI).forEach(function (m) {
       if (!S.materiali[m]) S.materiali[m] = JSON.parse(JSON.stringify(MATERIALI[m]));
-      ['tipo', 'um', 'ferro', 'ore', 'attrezzaggio', 'peso'].forEach(function (k) { if (S.materiali[m][k] == null && MATERIALI[m][k] != null) S.materiali[m][k] = JSON.parse(JSON.stringify(MATERIALI[m][k])); });
+      ['tipo', 'um', 'ferro', 'ore', 'attrezzaggio', 'peso', 'seriale'].forEach(function (k) { if (S.materiali[m][k] == null && MATERIALI[m][k] != null) S.materiali[m][k] = JSON.parse(JSON.stringify(MATERIALI[m][k])); });
       if (S.giacenze[m] == null) S.giacenze[m] = 0;
     });
     ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
+    if (!S.seriali) { S.seriali = {}; Object.keys(S.materiali).filter(function (m) { return S.materiali[m].seriale; }).forEach(function (m) {   // numeri di serie attivati su uno stato esistente
+      S.seriali[m] = {}; Object.keys((S.lotti || {})[m] || {}).forEach(function (l) { for (var i = 0; i < Math.round(S.lotti[m][l].qta); i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); S.seriali[m][sn] = {stato: 'magazzino', lotto: l, cliente: '', storia: [{data: S.avviato || '', tipo: '561', rif: 'seriali attivati su uno stato esistente'}]}; } }); }); }
     if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }
     Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; else if (S.clienti[k].fido == null) { S.clienti[k].fido = n.clienti[k].fido; S.clienti[k].rischio = n.clienti[k].rischio; } });
     Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; });
@@ -132,7 +134,32 @@
           if (serve > 1e-9) tocc.push({lotto: 'SENZA LOTTO', qta: r2(serve)});
         }
         var mv = {data: data, mat: mat, qta: qta, tipo: tipo, rif: rif, lotti: tocc};
+        if ((S.materiali[mat] || {}).seriale) mv.seriali = N.seriali(mat, qta, data, tipo, rif, tocc, opz);
         S.movimenti.push(mv); return mv;
+      },
+      // numeri di serie (profilo Z001, IQ03): un numero per pezzo, nasce all'entrata e segue il pezzo fino al cliente.
+      // In uscita si prendono i numeri dei lotti consumati, dal più vecchio; negli storni e nei resi tornano in magazzino gli stessi numeri.
+      seriali: function (mat, qta, data, tipo, rif, tocc, opz) {
+        var sm = (S.seriali = S.seriali || {})[mat] = S.seriali[mat] || {}, presi = [];
+        var ordine = (S.ordini || []).find(function (o) { return o.numero === rif; }) || {};
+        var STATO = {'601': 'cliente', '261': 'consumato', '102': 'annullato', '711': 'perso'};
+        tocc.forEach(function (t) {
+          var n = Math.round(t.qta);
+          if (qta > 0) {
+            var torna = (opz.seriali || []).filter(function (sn) { return sm[sn] && sm[sn].stato !== 'magazzino'; });
+            if (!torna.length && (tipo === '602' || tipo === '651' || tipo === '262' || tipo === '712'))
+              torna = Object.keys(sm).filter(function (sn) { var x = sm[sn], u = x.storia[x.storia.length - 1];
+                return x.stato !== 'magazzino' && (tipo === '602' ? u.rif === rif && x.stato === 'cliente' : tipo === '651' ? x.stato === 'cliente' && x.cliente === ordine.cliente : tipo === '712' ? x.stato === 'perso' : u.rif === rif); }).reverse();
+            torna = torna.filter(function (sn) { return presi.indexOf(sn) < 0; }).slice(0, n);
+            torna.forEach(function (sn) { sm[sn].stato = 'magazzino'; sm[sn].lotto = t.lotto; sm[sn].storia.push({data: data, tipo: tipo, rif: rif || ''}); presi.push(sn); });
+            for (var i = torna.length; i < n; i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); sm[sn] = {stato: 'magazzino', lotto: t.lotto, cliente: '', storia: [{data: data, tipo: tipo, rif: rif || ''}]}; presi.push(sn); }
+          } else {
+            var disp = Object.keys(sm).filter(function (sn) { return sm[sn].stato === 'magazzino' && (sm[sn].lotto === t.lotto || t.lotto === 'SENZA LOTTO') && presi.indexOf(sn) < 0; }).sort();
+            if (tipo === '102') disp.reverse();
+            disp.slice(0, n).forEach(function (sn) { var x = sm[sn]; x.stato = STATO[tipo] || 'uscito'; x.cliente = tipo === '601' ? (ordine.cliente || '') : x.cliente; x.storia.push({data: data, tipo: tipo, rif: rif || ''}); presi.push(sn); });
+          }
+        });
+        return presi;
       },
       saldo: function (conto, partner) {
         return r2(S.registrazioni.reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === conto && (!partner || x.partner === partner); })

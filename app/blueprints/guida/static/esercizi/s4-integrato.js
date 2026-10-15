@@ -4,10 +4,19 @@
   var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.', M = 'erp_magazzino.', I = 'erp_inventario.';
   var inv = function (h) { return ((h.S.wm || {}).inventari || [])[0]; };
   var X = 'erp_spedizione.', Z = 'erp_innovazione.', T = 'erp_tesoreria.', Y = 'erp_paghe.', W = 'erp_valute.';
+  var agoOrd = function (h, cli, mat, d) { return h.S.ordini.filter(function (o) { return o.tipo === 'OR' && o.cliente === cli && o.materiale === mat && o.data === d; })[0]; };
+  var agoSigma = function (h) { return agoOrd(h, 'C400', 'TR-PED', '2027-08-02'); }, agoDelta = function (h) { return agoOrd(h, 'C200', 'TR-ALTA', '2027-08-03'); };
+  var agoOP = function (h) { return (h.S.produzione || []).filter(function (o) { return o.materiale === 'TR-ALTA' && o.data === '2027-08-04'; })[0]; };
+  var agoCons = function (h) { var o = [agoSigma(h), agoDelta(h)].filter(Boolean).map(function (x) { return x.numero; }); return h.S.consegne.filter(function (c) { return c.tipo === 'LF' && o.indexOf(c.ordine) >= 0; }); };
+  var agoFatt = function (h) { var c = agoCons(h).map(function (x) { return x.numero; }); return h.S.fatture.filter(function (f) { return f.tipo === 'F2' && !f.stornata && c.indexOf(f.consegna) >= 0; }); };
+  var agoG2 = function (h) { return h.S.ordini.filter(function (o) { return o.tipo === 'G2' && o.data === '2027-08-09'; })[0]; };
+  var agoRdA = function (h) { return (h.S.rda || []).filter(function (r) { return r.materiale === 'FERRO' && r.qta === 12000 && r.data === '2027-08-10'; })[0]; };
+  var putawayFatti = function (h, docs) { var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.tipo === 'PUTAWAY' && docs.indexOf(x.rif) >= 0; }); return t.length > 0 && t.every(function (x) { return x.stato !== 'aperto'; }); };
+  var agoOA = function (h) { var r = agoRdA(h); return r && r.ordine ? h.S.acquisti.filter(function (o) { return o.numero === r.ordine; })[0] : null; };
   var fxDoc = function (h, lato, imp) { return (((h.S.fx || {}).documenti) || []).filter(function (d) { return d.lato === lato && d.importo === imp; })[0]; };
   var trasf = function (h) { return ((h.S.wm || {}).compiti || []).filter(function (t) { return t.tipo === 'TRASF' && /slotting/.test(t.motivo || ''); }); };
   var magO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-05-01'; }); };
-  var magC = function (h) { return (h.S.consegne || []).filter(function (k) { return k.wm && k.data >= '2027-05-01'; }); };
+  var magC = function (h) { return (h.S.consegne || []).filter(function (k) { return k.wm && k.data >= '2027-05-01' && k.data < '2027-06-01'; }); };
   var aprO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-04-01'; }); };
   var aprC = function (h, c) { return (h.S.consegne || []).filter(function (k) { return k.cliente === c && k.wm; })[0]; };
   var prelevato = function (h, c) { var k = aprC(h, c); if (!k) return false; var t = ((h.S.wm || {}).compiti || []).filter(function (x) { return x.consegna === k.numero; }); return t.length > 0 && t.every(function (x) { return x.stato === 'confermato'; }); };
@@ -50,7 +59,7 @@
       campi: [['Committente', c], ['Materiale', m], ['Quantità', String(q)], ['Riferimento', rif], ['Data', '15/02/2027']], attesa: attesa, fatto: function (h) { return ord(h, c, 'OR', true).length > 0; }};
   };
   window.MSA_ESERCIZIO = {
-    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite, costi, magazzino, spedizione, innovazione, tesoreria e paghe, valute (gennaio – luglio)', versione: 'erp-ft',
+    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite, costi, magazzino, spedizione, innovazione, tesoreria e paghe, valute, controlli e correzioni (gennaio – dicembre)', versione: 'erp-ft',
     passi: [
       {g: 'Prima di cominciare', data: '', titolo: 'Che cosa è il sistema integrato', dove: {ep: D + 'avvio'}, percorso: 'Launchpad → S/4 Sistema integrato → Avvio del sistema',
        campi: [['Un solo libro giornale', 'ogni documento logistico scrive la sua registrazione'], ['Prezzi', 'non si digitano: li determina la procedura ZFT001 dalle condizioni'],
@@ -155,7 +164,7 @@
        fatto: function (h) { return (h.S.produzione || []).some(function (o) { return o.eventi.some(function (e) { return e.tipo === 'KGI2'; }); }); }},
       {g: 'Febbraio — chiusura', data: '28/02/2027', titolo: 'KO88: varianze e liquidazione degli ordini', dove: {ep: C + 'chiusura'}, percorso: 'Chiusura degli ordini · 2 Varianze e liquidazione (KKS2 · KO88)',
        campi: [['Data', '28/02/2027']], attesa: 'D 61 / A 73: TR-STD −0,60 · TR-ALTA 61,90 · TR-PED 550,43 = 611,73',
-       fatto: function (h) { var p = h.S.produzione || []; return p.length >= 3 && p.every(function (o) { return o.liquidazione; }); }},
+       fatto: function (h) { var p = (h.S.produzione || []).filter(function (o) { return !o.data || o.data < '2027-03-01'; }); return p.length >= 3 && p.every(function (o) { return o.liquidazione; }); }},
       {g: 'Febbraio — chiusura', data: '', titolo: 'KKS2: leggi le categorie di varianza', dove: {ep: C + 'chiusura'}, percorso: 'Chiusura degli ordini · schede degli ordini',
        campi: [['TR-STD (300)', 'solo prezzo dell\'output −0,60: lo standard 34,47 arrotonda 34,468'], ['TR-ALTA (100)', 'varianza di LOTTO 61,60: attrezzaggio 84 + 10% su 100 pz invece di 300 · output 0,30'],
                ['TR-PED (300)', 'quantità ferro 85,50 · ore 420 · sovraccosti 46,28 · output −1,35']], nota: 'Stessa efficienza, lotto più piccolo: la TR-ALTA costa 0,62 €/pz in più. Spunta quando hai spiegato le tre schede.'},
@@ -353,6 +362,104 @@
        campi: [['66 Utili su cambi', '370,37 realizzati'], ['67 Perdite su cambi', '45,87 realizzate'], ['68', 'a zero dopo lo storno del 01/08']], nota: 'Spunta a mano.'},
       {g: 'Fine di luglio', data: '', titolo: 'Consegna il lavoro di giugno e luglio al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
        campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizi', 'tesoreria e paghe · valute']]},
+      // ═══ AGOSTO — ruoli, crediti e disponibilità, storni e SdI, richieste d'acquisto, lotti e numeri di serie · DICEMBRE — tredicesima e conguaglio ═══
+      {g: 'Agosto — ruoli', data: '', titolo: 'Agosto: ogni transazione al ruolo giusto', dove: {ep: D + 'ruoli'}, percorso: 'S/4 → Dati di base → Ruoli e autorizzazioni',
+       campi: [['Chi', 'sempre tu, ma con il «cappello» del ruolo indicato in ogni passo'], ['Se sbagli ruolo', 'il sistema blocca con il messaggio SU53 e dice chi può farlo'], ['Cambio ruolo', 'menu «Stai lavorando come» in cima alla pagina']]},
+      {g: 'Agosto — ruoli', data: '02/08/2027', titolo: 'Attiva le autorizzazioni', dove: {ep: D + 'ruoli'}, percorso: 'Ruoli e autorizzazioni · SU01 / PFCG',
+       campi: [['Controllo delle autorizzazioni', 'attivo'], ['Ruolo', '💳 Responsabile crediti']], fatto: function (h) { return !!(h.S.auth && h.S.auth.attivo); }},
+      {g: 'Agosto — crediti', data: '02/08/2027', titolo: 'FD32: abbassa il fido di Edil Sigma', dove: {ep: V + 'crediti'}, percorso: 'Vendite → Gestione crediti e disponibilità · FD32',
+       campi: [['Ruolo', '💳 Responsabile crediti'], ['Cliente', 'C400 Edil Sigma'], ['Fido', '5000'], ['Rischio', 'C — alto']], nota: 'Sigma ha pagato a giugno solo una parte: il responsabile crediti riduce l\'esposizione accettata.',
+       fatto: function (h) { return (h.S.clienti.C400 || {}).fido === 5000; }},
+      {g: 'Agosto — crediti', data: '02/08/2027', titolo: 'VA01: 20 TR-PED a Edil Sigma — blocco crediti', dove: {ep: V + 'ordini'}, percorso: 'Vendite → Ordini cliente',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Cliente', 'C400'], ['Materiale', 'TR-PED'], ['Quantità', '20'], ['Data', '02/08/2027']],
+       attesa: 'Ordine creato ma bloccato: esposizione 6.015,30 € contro un fido di 5.000 (sforamento 1.015,30). La disponibilità c\'è (28 pezzi).',
+       fatto: function (h) { return !!agoSigma(h); }},
+      {g: 'Agosto — crediti', data: '02/08/2027', titolo: 'Prova a consegnare l\'ordine bloccato', dove: {ep: V + 'consegne'}, percorso: 'Vendite → Consegne',
+       campi: [['Ruolo', '🏬 Capo magazzino'], ['Ordine', 'quello di Edil Sigma']], attesa: 'Rifiutato: «serve il rilascio del responsabile crediti (VKM1)». Un ordine bloccato non va in magazzino.', nota: 'Spunta a mano.'},
+      {g: 'Agosto — crediti', data: '03/08/2027', titolo: 'VKM1: il responsabile crediti rilascia l\'ordine', dove: {ep: V + 'crediti'}, percorso: 'Gestione crediti · Ordini bloccati (VKM1)',
+       campi: [['Ruolo', '💳 Responsabile crediti'], ['Ordine', 'quello di Edil Sigma'], ['Decisione', 'autorizza lo sforamento (solo questo ordine)'], ['Nota', 'acconto promesso'], ['Data', '03/08/2027']],
+       attesa: 'Ordine rilasciato; la decisione resta nel registro (chi, quando, perché).', fatto: function (h) { var o = agoSigma(h); return !!o && o.credito && o.credito.stato === 'D'; }},
+      {g: 'Agosto — disponibilità', data: '03/08/2027', titolo: 'VA01: 30 TR-ALTA a Delta — conferma parziale', dove: {ep: V + 'ordini'}, percorso: 'Vendite → Ordini cliente',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Cliente', 'C200'], ['Materiale', 'TR-ALTA'], ['Quantità', '30'], ['Data', '03/08/2027']],
+       attesa: 'ATP: in giacenza ci sono 10 pezzi → confermati 10 su 30. Gli altri 20 aspettano la produzione.', fatto: function (h) { return !!agoDelta(h); }},
+      {g: 'Agosto — produzione', data: '04/08/2027', titolo: 'CO01: 20 TR-ALTA per completare Delta', dove: {ep: P + 'ordini'}, percorso: 'Produzione → Ordini di produzione',
+       campi: [['Ruolo', '🏭 Capo reparto produzione'], ['Materiale', 'TR-ALTA'], ['Quantità', '20'], ['Data', '04/08/2027']], fatto: function (h) { return !!agoOP(h); }},
+      {g: 'Agosto — produzione', data: '04/08/2027', titolo: 'Approvvigiona la linea: 200 kg di ferro', dove: {ep: M + 'compiti'}, percorso: 'Magazzino → Compiti di magazzino · Approvvigionamento',
+       campi: [['Ruolo', '🏭 Capo reparto produzione'], ['Ordine', 'quello delle TR-ALTA'], ['Ferro kg', '200'], ['Data', '04/08/2027']],
+       fatto: function (h) { var o = agoOP(h); return !!o && ((h.S.wm || {}).compiti || []).some(function (t) { return t.tipo === 'STAGING' && t.ordine === o.numero; }); }},
+      {g: 'Agosto — produzione', data: '04/08/2027', titolo: 'RF: porta il ferro alla linea', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti',
+       campi: [['Ruolo', '👷 Magazziniere'], ['Compito', 'approvvigionamento verso PSA-L1']],
+       fatto: function (h) { var o = agoOP(h); return !!o && ((h.S.wm || {}).compiti || []).some(function (t) { return t.tipo === 'STAGING' && t.ordine === o.numero && t.stato === 'confermato'; }); }},
+      {g: 'Agosto — produzione', data: '04/08/2027', titolo: '261, CO11N e 101: le 20 transenne alte', dove: {ep: P + 'avanzamento'}, percorso: 'Produzione → Prelievi, conferme, entrate',
+       campi: [['Ruolo', '🏭 Capo reparto produzione'], ['261', '200 kg il 04/08'], ['CO11N', 'attrezzaggio 3 h, lavorazione 16 h, il 05/08'], ['101', '20 pz il 05/08']],
+       attesa: 'Ogni transenna riceve il suo numero di serie (profilo Z001) e il lotto dell\'ordine di produzione.',
+       fatto: function (h) { var o = agoOP(h); return !!o && (o.eventi || []).some(function (e) { return e.tipo === '101'; }); }},
+      {g: 'Agosto — produzione', data: '05/08/2027', titolo: 'RF: metti a scaffale le transenne', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti', campi: [['Ruolo', '👷 Magazziniere']],
+       fatto: function (h) { var o = agoOP(h), d = o && (o.eventi || []).filter(function (e) { return e.tipo === '101'; }).map(function (e) { return e.doc; }); return putawayFatti(h, d || []); }},
+      {g: 'Agosto — disponibilità', data: '05/08/2027', titolo: 'Conferma automatica: Delta ora ha 30 su 30', dove: {ep: V + 'crediti'}, percorso: 'Gestione crediti e disponibilità · ATP',
+       campi: [['Ordine Delta', 'confermati 30 su 30'], ['Perché', 'all\'entrata di produzione il sistema riassegna la disponibilità (V_V2) a chi ha ordinato prima']],
+       fatto: function (h) { var o = agoDelta(h); return !!o && o.confermata === 30; }},
+      {g: 'Agosto — consegne', data: '06/08/2027', titolo: 'VL01N: consegne di Edil Sigma e di Delta', dove: {ep: V + 'consegne'}, percorso: 'Vendite → Consegne',
+       campi: [['Ruolo', '🏬 Capo magazzino'], ['Ordini', 'Edil Sigma e Delta (uno alla volta)'], ['Data', '06/08/2027']], fatto: function (h) { return agoCons(h).length >= 2; }},
+      {g: 'Agosto — consegne', data: '06/08/2027', titolo: 'Rilascia l\'ondata e preleva con la pistola', dove: {ep: Z + 'ondate'}, percorso: 'Innovazione → Prelievo a ondate, poi Pistola RF',
+       campi: [['Ruolo', '🏬 Capo magazzino (ondata), 👷 Magazziniere (RF)'], ['Data', '06/08/2027']],
+       fatto: function (h) { var c = agoCons(h); return c.length >= 2 && ((h.S.wm || {}).compiti || []).filter(function (t) { return c.some(function (k) { return k.numero === t.consegna; }); }).every(function (t) { return t.stato !== 'aperto'; }) && ((h.S.wm || {}).compiti || []).some(function (t) { return c.some(function (k) { return k.numero === t.consegna; }); }); }},
+      {g: 'Agosto — consegne', data: '06/08/2027', titolo: 'VL02N: uscita merci delle due consegne', dove: {ep: V + 'consegne'}, percorso: 'Vendite → Consegne · Uscita merci',
+       campi: [['Ruolo', '🏬 Capo magazzino'], ['Data', '06/08/2027']], attesa: 'Delta riceve 30 transenne alte: 10 dal lotto di febbraio e 20 da quello di agosto, ognuna col suo numero di serie.',
+       fatto: function (h) { var c = agoCons(h); return c.length >= 2 && c.every(function (k) { return !!k.pgi; }); }},
+      {g: 'Agosto — storno e SdI', data: '17/08/2027', titolo: 'VF01: fattura Edil Sigma con la data sbagliata', dove: {ep: V + 'fatture'}, percorso: 'Vendite → Fatturazione',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Consegna', 'quella di Edil Sigma'], ['Data', '17/08/2027 (errore voluto: doveva essere 07/08)']],
+       fatto: function (h) { return h.S.fatture.some(function (f) { return f.data === '2027-08-17' && f.tipo === 'F2'; }); }},
+      {g: 'Agosto — storno e SdI', data: '17/08/2027', titolo: 'VF11: storna la fattura sbagliata (non è ancora allo SdI)', dove: {ep: F + 'storni'}, percorso: 'Contabilità → Storni e annullamenti · VF11',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Fattura', 'quella del 17/08'], ['Data dello storno', '17/08/2027 (la stessa del documento)']],
+       attesa: 'Documento di storno S1 con scrittura inversa: il credito verso Sigma, i ricavi, l\'IVA e la CO-PA tornano a zero; la consegna è di nuovo da fatturare.',
+       fatto: function (h) { return h.S.fatture.some(function (f) { return f.data === '2027-08-17' && f.tipo === 'F2' && f.stornata; }); }},
+      {g: 'Agosto — storno e SdI', data: '07/08/2027', titolo: 'VF01: rifai le fatture di Edil Sigma e di Delta', dove: {ep: V + 'fatture'}, percorso: 'Vendite → Fatturazione',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Consegne', 'Edil Sigma, poi Delta'], ['Data', '07/08/2027']],
+       fatto: function (h) { var c = agoCons(h); return c.length >= 2 && c.every(function (k) { return k.fatturata; }); }},
+      {g: 'Agosto — storno e SdI', data: '07/08/2027', titolo: 'Trasmetti le due fatture allo SdI', dove: {ep: F + 'sdi'}, percorso: 'Contabilità → Fattura elettronica (SdI)',
+       campi: [['Ruolo', '📒 Contabile'], ['Documenti', 'le due fatture del 07/08, una alla volta'], ['Data', '07/08/2027']], attesa: 'Tipo documento TD01, ricevuta di consegna con l\'identificativo SdI. Guarda l\'anteprima XML FatturaPA.',
+       fatto: function (h) { var f = agoFatt(h); return f.length >= 2 && f.every(function (x) { return !!x.sdi; }); }},
+      {g: 'Agosto — storno e SdI', data: '09/08/2027', titolo: 'Prova a stornare la fattura di Delta', dove: {ep: F + 'storni'}, percorso: 'Storni e annullamenti · VF11',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Fattura', 'quella di Delta']], attesa: 'Rifiutato: è già stata trasmessa allo SdI e per l\'Agenzia delle Entrate esiste. Si corregge con una nota di credito (TD04).', nota: 'Spunta a mano.'},
+      {g: 'Agosto — storno e SdI', data: '09/08/2027', titolo: 'VA01 G2: richiesta di nota di credito per Delta', dove: {ep: V + 'resi'}, percorso: 'Vendite → Resi e note di credito · Richiesta G2',
+       campi: [['Ruolo', '📝 Addetto vendite'], ['Fattura', 'quella di Delta'], ['Importo', '200'], ['Motivo', '2 transenne graffiate'], ['Data', '09/08/2027']],
+       fatto: function (h) { return !!agoG2(h); }},
+      {g: 'Agosto — storno e SdI', data: '09/08/2027', titolo: 'Approva la richiesta e emetti la nota di credito', dove: {ep: V + 'resi'}, percorso: 'Resi e note di credito · Approvazione (VA02) e Nota di credito (VF01 G2)',
+       campi: [['Approvazione', '💳 Responsabile crediti'], ['Nota di credito', '📝 Addetto vendite, data 09/08/2027']], attesa: 'Nota di credito 200 € + IVA 44 = 244 €: D 40 / D 21 / A 11 Delta.',
+       fatto: function (h) { var o = agoG2(h); return !!o && o.accreditato; }},
+      {g: 'Agosto — storno e SdI', data: '09/08/2027', titolo: 'Trasmetti la nota di credito allo SdI (TD04)', dove: {ep: F + 'sdi'}, percorso: 'Contabilità → Fattura elettronica (SdI)',
+       campi: [['Ruolo', '📒 Contabile'], ['Documento', 'la nota di credito G2'], ['Data', '09/08/2027']],
+       fatto: function (h) { return h.S.fatture.some(function (f) { return f.tipo === 'G2' && f.data === '2027-08-09' && f.sdi; }); }},
+      {g: 'Agosto — acquisti', data: '10/08/2027', titolo: 'ME51N: richiesta d\'acquisto di 12.000 kg di ferro', dove: {ep: A + 'richieste'}, percorso: 'Acquisti → Richieste d\'acquisto e approvazione',
+       campi: [['Ruolo', '🏭 Capo reparto produzione'], ['Materiale', 'FERRO'], ['Quantità', '12000'], ['Serve per il', '20/08/2027'], ['Richiedente', 'Produzione'], ['Data', '10/08/2027']],
+       attesa: 'Valore stimato a standard 11.400 €: la richiesta aspetta l\'approvazione.', fatto: function (h) { return !!agoRdA(h); }},
+      {g: 'Agosto — acquisti', data: '10/08/2027', titolo: 'ME54N: il responsabile acquisti approva', dove: {ep: A + 'richieste'}, percorso: 'Richieste d\'acquisto · Approvazione',
+       campi: [['Ruolo', '✅ Responsabile acquisti (prima prova come capo reparto: SU53)'], ['Decisione', 'approva'], ['Data', '10/08/2027']],
+       fatto: function (h) { var r = agoRdA(h); return !!r && r.stato !== 'da approvare'; }},
+      {g: 'Agosto — acquisti', data: '11/08/2027', titolo: 'ME21N: ordine con riferimento alla richiesta', dove: {ep: A + 'ordini'}, percorso: 'Acquisti → Ordini d\'acquisto e rilascio',
+       campi: [['Ruolo', '🛒 Buyer'], ['Richiesta', 'quella approvata'], ['Fornitore', 'F100'], ['Prezzo', '0,97'], ['Data', '11/08/2027']],
+       attesa: 'Ordine di 11.640 € sopra la soglia di 10.000: nasce bloccato.', fatto: function (h) { var r = agoRdA(h); return !!r && !!r.ordine; }},
+      {g: 'Agosto — acquisti', data: '11/08/2027', titolo: 'ME29N: rilascia l\'ordine sopra soglia', dove: {ep: A + 'ordini'}, percorso: 'Ordini d\'acquisto · Rilascio',
+       campi: [['Ruolo', '✅ Responsabile acquisti'], ['Decisione', 'rilascia'], ['Data', '11/08/2027']],
+       fatto: function (h) { var o = agoOA(h); return !!o && o.rilascio && o.rilascio.stato !== 'bloccato'; }},
+      {g: 'Agosto — acquisti', data: '16/08/2027', titolo: 'MIGO: prima consegna di 4.000 kg, colata COL-0816', dove: {ep: A + 'entrate'}, percorso: 'Acquisti → Entrata merci',
+       campi: [['Ruolo', '🏬 Capo magazzino'], ['Ordine', 'quello rilasciato'], ['Quantità', '4000 (consegna parziale)'], ['Lotto / colata', 'COL-0816'], ['Data', '16/08/2027']],
+       fatto: function (h) { return !!((h.S.lotti || {}).FERRO || {})['COL-0816']; }},
+      {g: 'Agosto — acquisti', data: '16/08/2027', titolo: 'RF: metti a catasta il ferro', dove: {ep: M + 'rf'}, percorso: 'Pistola RF → Compiti', campi: [['Ruolo', '👷 Magazziniere']],
+       fatto: function (h) { var o = agoOA(h); return !!o && putawayFatti(h, (o.entrate || []).map(function (e) { return e.doc; })); }},
+      {g: 'Agosto — tracciabilità', data: '', titolo: 'MB56: Delta reclama, risali alle colate', dove: {ep: M + 'lotti'}, percorso: 'Magazzino → Lotti, numeri di serie e tracciabilità',
+       campi: [['Consegna', 'quella di Delta del 06/08'], ['Lotti', 'L1000002 (10 pz, febbraio) e L1000004 (20 pz, agosto)'], ['A monte', 'colate del ferro e fornitore']], nota: 'Spunta a mano.'},
+      {g: 'Agosto — tracciabilità', data: '', titolo: 'IQ03: la storia di un pezzo', dove: {ep: M + 'lotti'}, percorso: 'Lotti, numeri di serie · Numeri di serie',
+       campi: [['Numero di serie', 'SN000291'], ['Stato', 'presso il cliente Delta'], ['Storia', 'entrata 12/02 dall\'ordine 1000002 → uscita 06/08 con la consegna di Delta']], nota: 'Spunta a mano.'},
+      {g: 'Dicembre — paghe', data: '31/12/2027', titolo: 'Calcola le paghe da luglio a dicembre', dove: {ep: Y + 'cedolino'}, percorso: 'Paghe → Presenze e cedolino · Calcolo',
+       campi: [['Ruolo', '🧾 Addetto paghe'], ['Periodi', '2027-07, 2027-08, 2027-09, 2027-10, 2027-11, 2027-12 (uno dopo l\'altro)']],
+       attesa: 'Ogni mese matura ratei di tredicesima, ferie e ROL; a dicembre si paga la tredicesima e si fa il conguaglio IRPEF.',
+       fatto: function (h) { return (((h.S.hr || {}).cedolini) || []).filter(function (c) { return c.periodo === '2027-12'; }).length >= 3; }},
+      {g: 'Dicembre — paghe', data: '', titolo: 'Il cedolino di dicembre di Marco Rossi', dove: {ep: Y + 'cedolino'}, percorso: 'Paghe → Cedolino · 2027-12',
+       campi: [['Tredicesima', '2.100,00 (tassata all\'aliquota marginale)'], ['Conguaglio IRPEF', '4,51 a debito (per gli straordinari di giugno)'], ['Netto', '3.171,26'], ['Ferie residue', 'quelle maturate e non godute passano all\'anno dopo']], nota: 'Spunta a mano.'},
+      {g: 'Fine di agosto', data: '', titolo: 'Consegna il lavoro di agosto e dicembre al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+       campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — controlli, correzioni e fine anno']]},
     ]),
   };
 })();

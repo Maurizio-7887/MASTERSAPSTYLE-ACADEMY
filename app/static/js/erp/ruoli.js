@@ -70,9 +70,9 @@ window.AU4 = (function () {
   // barra del ruolo in cima a ogni pagina (solo con le autorizzazioni attive)
   function barra() {
     var a = X(); if (!a.attivo) return '';
-    return '<div class="lab-filtro au-barra no-stampa"><label>👤 Stai lavorando come <select id="au-ruolo">' + Object.keys(RUOLI).map(function (r) { return '<option value="' + r + '"' + (r === a.ruolo ? ' selected' : '') + '>' + RUOLI[r].icona + ' ' + RUOLI[r].nome + '</option>'; }).join('') + '</select></label></div>';
+    return '<div class="lab-filtro au-barra no-stampa"><label>👤 Stai lavorando come <select id="au-barra-ruolo">' + Object.keys(RUOLI).map(function (r) { return '<option value="' + r + '"' + (r === a.ruolo ? ' selected' : '') + '>' + RUOLI[r].icona + ' ' + RUOLI[r].nome + '</option>'; }).join('') + '</select></label></div>';
   }
-  if (typeof document !== 'undefined') document.addEventListener('change', function (e) { if (e.target && e.target.id === 'au-ruolo') { imposta({ruolo: e.target.value}); if (window.location && window.location.reload) window.location.reload(); } });
+  if (typeof document !== 'undefined') document.addEventListener('change', function (e) { if (e.target && e.target.id === 'au-barra-ruolo') { imposta({ruolo: e.target.value}); if (window.location && window.location.reload) window.location.reload(); } });
   installa();
   if (window.S4UI && !window.S4UI.__au) { var av = window.S4UI.avviso; window.S4UI.avviso = function (s) { return barra() + av(s); }; window.S4UI.__au = true; }
   return {RUOLI: RUOLI, A: A, imposta: imposta, verifica: verifica, puo: puo, barra: barra, stato: X, installa: installa};

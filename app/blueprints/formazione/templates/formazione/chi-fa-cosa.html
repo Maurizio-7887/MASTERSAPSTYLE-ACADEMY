@@ -1,0 +1,38 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il commerciale sblocca da solo un cliente oltre il fido per chiudere il mese.</li>
+  <li>Chi chiede il materiale lo ordina e se lo approva.</li>
+  <li>Dopo un errore nessuno sa chi l'ha fatto e con quale autorizzazione.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Un gestionale come SAP divide il lavoro in <b>ruoli</b> (PFCG): ogni transazione controlla se il ruolo dell'utente è autorizzato e, se non lo è, blocca e registra il tentativo (SU53). È la <b>separazione dei compiti</b>: chi vende non rilascia i crediti, chi chiede non approva, chi compra non rilascia gli ordini sopra soglia. A questo si aggiungono i controlli automatici: <b>fido</b> (blocco crediti e VKM1), <b>disponibilità</b> (ATP) e <b>strategia di rilascio</b> degli acquisti.</p>
+<p class="lez-chiave">Nel laboratorio lavori da solo, ma «indossi» un ruolo alla volta: il sistema ti ferma come fermerebbe un collega.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Ruolo (PFCG)</dt><dd>Insieme di transazioni e autorizzazioni assegnato a un utente (SU01).</dd>
+<dt>SU53</dt><dd>Ultimo controllo di autorizzazione fallito: dice che cosa mancava.</dd>
+<dt>Fido ed esposizione</dt><dd>Esposizione = crediti aperti + ordini non ancora fatturati; oltre il fido l'ordine nasce bloccato.</dd>
+<dt>VKM1</dt><dd>Il responsabile crediti decide: rilascia, aumenta il fido, rifiuta.</dd>
+<dt>ATP</dt><dd>Conferma solo la quantità disponibile; il resto si conferma quando entra la produzione.</dd>
+<dt>ME51N → ME54N → ME21N → ME29N</dt><dd>Richiesta, approvazione, ordine con riferimento, rilascio sopra soglia.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Passo di agosto</th><th>Ruolo</th><th>Controllo</th></tr>
+<tr><td>Ordine di Edil Sigma, 20 TR-PED</td><td>Addetto vendite</td><td>Fido 5.000 superato di 1.015,30: blocco</td></tr>
+<tr><td>Rilascio dell'ordine</td><td>Responsabile crediti</td><td>VKM1, decisione registrata</td></tr>
+<tr><td>Richiesta di 12.000 kg di ferro</td><td>Capo reparto</td><td>Non può approvarla: SU53</td></tr>
+<tr><td>Ordine da 11.640 €</td><td>Buyer → Responsabile acquisti</td><td>Sopra la soglia di 10.000: ME29N</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Ruolo</b>chi sei</span><span class="f">→</span><span class="b"><b>Transazione</b>che cosa fai</span><span class="f">→</span><span class="b mag"><b>Autorizzazione</b>sì / SU53</span><span class="f">→</span><span class="b"><b>Controlli</b>fido · ATP · soglia</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Ruoli e utenti</td><td>PFCG · SU01 · SUIM</td></tr>
+<tr><td>Controllo fallito</td><td>SU53</td></tr>
+<tr><td>Fido e blocchi</td><td>FD32 · VKM1 · UKM_CASE</td></tr>
+<tr><td>Acquisti approvati</td><td>ME51N · ME54N · ME21N · ME29N</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il buyer non deve approvare le richieste?</summary><p>Perché chi spende non deve autorizzare la propria spesa: è la base dei controlli interni (e della revisione).</p></details>
+<details><summary>Che cosa succede alle quantità non confermate dall'ATP?</summary><p>Restano sull'ordine; all'entrata di produzione il sistema le conferma in ordine di data (V_V2).</p></details>
+{% endblock %}

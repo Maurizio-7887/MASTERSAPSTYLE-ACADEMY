@@ -188,6 +188,21 @@ ok(/COL-7781/.test(m) && /Acciaierie Umbre/.test(m), 'a monte: dalla consegna al
 prova(() => ST.vl09({consegna: cL.numero, data: '2027-08-31'}), 'VL09 con i lotti');
 ok(LT.lotto('TR-PED', 'L' + opL.numero).qta === 5, 'VL09 riporta la merce nel suo lotto (' + LT.lotto('TR-PED', 'L' + opL.numero).qta + ')');
 
+// ── numeri di serie (IQ03) sulla transenna alta: nascono all'entrata, seguono il pezzo, tornano con lo storno ──
+{ const SA = () => S().seriali['TR-ALTA'], inMag = () => Object.keys(SA()).filter(k => SA()[k].stato === 'magazzino').length;
+  ok(inMag() === S().giacenze['TR-ALTA'], 'seriali in magazzino = giacenza TR-ALTA (' + inMag() + ' = ' + S().giacenze['TR-ALTA'] + ')');
+  prova(() => PP.ordine({materiale: 'TR-ALTA', qta: '3', data: '2027-09-01'}), 'CO01 TR-ALTA per i seriali');
+  const opS = S().produzione.slice(-1)[0]; const prima = S().numeri.seriale;
+  prova(() => PP.entrata({ordine: opS.numero, qta: '3', data: '2027-09-01'}), '101 crea 3 numeri di serie'); confermaTutti('2027-09-01');
+  ok(S().numeri.seriale === prima + 3 && SA()['SN' + String(prima + 1).padStart(6, '0')].lotto === 'L' + opS.numero, 'nuovi seriali nel lotto di produzione');
+  prova(() => SD.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: '2', data: '2027-09-02'}), 'VA01 2 TR-ALTA');
+  const oS = S().ordini.slice(-1)[0]; prova(() => SD.consegna({ordine: oS.numero, data: '2027-09-02'}), 'VL01N TR-ALTA'); confermaTutti('2027-09-02');
+  const cS = S().consegne.slice(-1)[0]; prova(() => SD.uscitaMerci({consegna: cS.numero, data: '2027-09-02'}), 'VL02N con i seriali');
+  ok(cS.seriali.length === 2 && cS.seriali.every(k => SA()[k].stato === 'cliente' && SA()[k].cliente === 'C200'), 'la consegna porta 2 seriali, presso Delta');
+  const x = LT.seriale(cS.seriali[0]); ok(/Delta/.test(x.cliente) && x.storia.some(h => /consegna/.test(h.testo)), 'IQ03: storia del pezzo fino al cliente');
+  prova(() => ST.vl09({consegna: cS.numero, data: '2027-09-02'}), 'VL09 TR-ALTA');
+  ok(cS.seriali.every(k => SA()[k].stato === 'magazzino') && inMag() === S().giacenze['TR-ALTA'], 'VL09: tornano in magazzino gli stessi numeri di serie'); }
+
 // ── cedolino completo: ferie, ROL, ratei, progressivi, tredicesima e conguaglio di dicembre ──
 prova(() => PY.presenze({matricola: '00001', periodo: '2027-08', ferie: '10', rol: '4'}), 'presenze di agosto con le ferie');
 for (const m of ['07', '08', '09', '10', '11', '12']) prova(() => PY.calcola({periodo: '2027-' + m}), 'calcolo 2027-' + m);
@@ -205,6 +220,7 @@ const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"
   LOGICA.concat([nome === 'cedolino' ? 'app/blueprints/erp_paghe/static/py-pagine.js' : nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
 let pg = pagina('cedolino'); ok(/Tredicesima mensilità/.test(pg.document.body.textContent) && /Conguaglio IRPEF di fine anno/.test(pg.document.body.textContent) && /Ferie e permessi/.test(pg.document.body.textContent), 'cedolino di dicembre a video');
 pg = pagina('lotti'); ok(/Giacenza per lotto/.test(pg.document.body.textContent) && /COL-7781/.test(pg.document.body.textContent), 'pagina lotti');
+pg.document.querySelector('#sn').value = 'sn000001'; pg.document.querySelector('#snv').click(); ok(/SN000001/.test(pg.document.body.textContent) && /TR-ALTA/.test(pg.document.body.textContent) && /Numeri di serie/.test(pg.document.body.textContent), 'pagina IQ03: numero di serie');
 pg.document.querySelector('[data-lotto="FERRO|COL-7781"]').click(); ok(/A valle/.test(pg.document.body.textContent) && /Delta/.test(pg.document.body.textContent), 'pagina lotti: tracciabilità del lotto');
 pg = pagina('ruoli'); ok(/Matrice ruoli/.test(pg.document.body.textContent) && /SU53/.test(pg.document.body.textContent) && /VL01N/.test(pg.document.body.textContent), 'pagina ruoli e autorizzazioni');
 pg = pagina('richieste'); ok(/ME5A/.test(pg.document.body.textContent) && /ordinata/.test(pg.document.body.textContent), 'pagina richieste d\'acquisto');

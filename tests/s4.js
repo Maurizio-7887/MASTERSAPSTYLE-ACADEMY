@@ -375,13 +375,74 @@ p = apri('erp_valute', 'valutazione'); bene(p.fai('vl', {data: '2027-07-31', sto
   vicino(-salS(S7, '66'), 370.37, 'utile su cambi realizzato'); vicino(salS(S7, '67'), 45.87, 'perdita su cambi realizzata'); vicino(salS(S7, '68', '2027-07-31'), 178.57, 'perdita non realizzata al 31/07'); vicino(salS(S7, '68'), 0, 'storno al 01/08');
   vicino(salS(S7, '28'), 0, 'INPS versato'); vicino(salS(S7, '29'), 0, 'Erario versato');
   let d7 = 0, a7 = 0; S7.registrazioni.forEach(r => r.righe.forEach(x => { if (x.dareAvere === 'DARE') d7 += x.importo; else a7 += x.importo; })); ok(Math.abs(d7 - a7) < 0.005, 'luglio: quadratura Dare = Avere');
-  const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  const {st, passi} = guidaStati(p.w, CHIAVE); const AGO = passi.findIndex(x => x.titolo.indexOf('Agosto:') === 0); const manc = passi.slice(0, AGO).map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
   ok(!manc.length, 'guida S/4 completa fino a luglio: passi non riconosciuti → ' + manc.join(' | ')); }
 if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
 const SF = JSON.parse(memoria);
+// ═══ AGOSTO — ruoli, crediti e disponibilità, storni e SdI, acquisti con approvazione, lotti e seriali · DICEMBRE — paghe ═══
+const ora = () => JSON.parse(memoria);
+const ruolo = r => { const q = apri('erp_dati', 'ruoli'); bene(q.fai('au', {attivo: 'si', ruolo: r}), 'ruolo ' + r); };
+const rfTutti = d => { ruolo('MAGAZZINIERE'); for (let k = 0; k < 20; k++) { const q = apri('erp_magazzino', 'rf'); q.lab.querySelector('#rf-data').value = d; const t = q.w.WM4.aperti()[0]; if (!t) break; rfInvio(q, '#rf-da', t.da); rfInvio(q, '#rf-udc', t.udc); rfInvio(q, '#rf-a', t.a); } };
+ruolo('CREDITI');
+p = apri('erp_vendite', 'crediti'); ok(/Stai lavorando come/.test(p.testo()), 'barra del ruolo in cima alla pagina');
+bene(p.fai('fd', {cliente: 'C400', fido: '5000', rischio: 'C'}), 'FD32 fido di Sigma');
+p = apri('erp_vendite', 'ordini'); ok(/ko/.test(p.fai('va', {cliente: 'C400', materiale: 'TR-PED', qta: '20', data: '2027-08-02'})), 'VA01 come responsabile crediti: SU53');
+ruolo('VENDITE'); p = apri('erp_vendite', 'ordini'); bene(p.fai('va', {cliente: 'C400', materiale: 'TR-PED', qta: '20', data: '2027-08-02'}), 'VA01 Sigma');
+const oSig = p.S().ordini.slice(-1)[0]; ok(oSig.credito.stato === 'B' && /1\.?015,30/.test(oSig.credito.motivo), 'blocco crediti: sforamento 1.015,30 → ' + oSig.credito.motivo);
+ruolo('CAPO_MAG'); p = apri('erp_vendite', 'consegne'); ok(/VKM1/.test(p.fai('vl', {ordine: oSig.numero, data: '2027-08-02'})), 'consegna rifiutata: serve VKM1');
+ruolo('CREDITI'); p = apri('erp_vendite', 'crediti'); bene(p.fai('vk', {ordine: oSig.numero, decisione: 'rilascia', nota: 'acconto promesso', data: '2027-08-03'}), 'VKM1 rilascio');
+ruolo('VENDITE'); p = apri('erp_vendite', 'ordini'); bene(p.fai('va', {cliente: 'C200', materiale: 'TR-ALTA', qta: '30', data: '2027-08-03'}), 'VA01 Delta TR-ALTA');
+const oDel = p.S().ordini.slice(-1)[0]; ok(oDel.confermata === 10, 'ATP: confermate 10 su 30');
+ruolo('PRODUZIONE'); p = apri('erp_produzione', 'ordini'); bene(p.fai('co', {materiale: 'TR-ALTA', qta: '20', data: '2027-08-04'}), 'CO01 TR-ALTA');
+const opA = p.S().produzione.slice(-1)[0].numero;
+p = apri('erp_magazzino', 'compiti'); bene(p.fai('sg', {ordine: opA, kg: '200', data: '2027-08-04'}), 'staging 200 kg');
+rfTutti('2027-08-04');
+ruolo('PRODUZIONE'); p = apri('erp_produzione', 'avanzamento');
+bene(p.fai('pr', {ordine: opA, kg: '200', data: '2027-08-04'}), '261 agosto'); bene(p.fai('cf', {ordine: opA, attrezzaggio: '3', ore: '16', data: '2027-08-05'}), 'CO11N agosto'); bene(p.fai('en', {ordine: opA, data: '2027-08-05'}), '101 agosto');
+rfTutti('2027-08-05');
+ok(ora().ordini.find(o => o.numero === oDel.numero).confermata === 30, 'conferma automatica: Delta 30 su 30');
+ruolo('CAPO_MAG'); p = apri('erp_vendite', 'consegne'); bene(p.fai('vl', {ordine: oSig.numero, data: '2027-08-06'}), 'VL01N Sigma'); bene(p.fai('vl', {ordine: oDel.numero, data: '2027-08-06'}), 'VL01N Delta');
+const cAgo = () => ora().consegne.filter(c => c.ordine === oSig.numero || c.ordine === oDel.numero);
+p = apri('erp_innovazione', 'ondate'); bene(p.fai('on', {data: '2027-08-06'}), 'ondata di agosto');
+rfTutti('2027-08-06');
+ruolo('CAPO_MAG'); for (const c of cAgo()) { p = apri('erp_vendite', 'consegne'); bene(p.fai('pg', {consegna: c.numero, data: '2027-08-06'}), 'VL02N ' + c.numero); }
+{ const cD = cAgo().find(c => c.ordine === oDel.numero); ok(cD.seriali.length === 30 && cD.lotti.length === 2, 'Delta: 30 numeri di serie da 2 lotti'); }
+ruolo('VENDITE'); p = apri('erp_vendite', 'fatture'); bene(p.fai('vf', {consegna: cAgo()[0].numero, data: '2027-08-17'}), 'VF01 con la data sbagliata');
+const fSb = p.S().fatture.slice(-1)[0]; 
+p = apri('erp_fi', 'storni'); bene(p.fai('vf', {fattura: fSb.numero, data: '2027-08-17'}), 'VF11 prima dello SdI');
+for (const c of cAgo()) { p = apri('erp_vendite', 'fatture'); bene(p.fai('vf', {consegna: c.numero, data: '2027-08-07'}), 'VF01 ' + c.numero); }
+const fAgo = () => ora().fatture.filter(f => f.tipo === 'F2' && !f.stornata && cAgo().some(c => c.numero === f.consegna));
+ruolo('CONTABILE'); for (const f of fAgo()) { p = apri('erp_fi', 'sdi'); bene(p.fai('sd', {fattura: f.numero, data: '2027-08-07'}), 'SdI ' + f.numero); }
+const fDel = fAgo().find(f => f.cliente === 'C200');
+ruolo('VENDITE'); p = apri('erp_fi', 'storni'); ok(/SdI.*nota di credito/.test(p.fai('vf', {fattura: fDel.numero, data: '2027-08-09'})), 'VF11 dopo lo SdI rifiutato');
+p = apri('erp_vendite', 'resi'); bene(p.fai('ab', {fattura: fDel.numero, importo: '200', motivo: '2 transenne graffiate', data: '2027-08-09'}), 'richiesta G2');
+ruolo('CREDITI'); p = apri('erp_vendite', 'resi'); bene(p.fai('ap', {richiesta: x => x}), 'approvazione G2');
+ruolo('VENDITE'); p = apri('erp_vendite', 'resi'); bene(p.fai('ng', {richiesta: x => x, data: '2027-08-09'}), 'nota di credito G2');
+const ncA = p.S().fatture.slice(-1)[0]; ok(ncA.tipo === 'G2' && ncA.totale === 244, 'nota di credito 244 €');
+ruolo('CONTABILE'); p = apri('erp_fi', 'sdi'); bene(p.fai('sd', {fattura: ncA.numero, data: '2027-08-09'}), 'SdI nota di credito'); ok(/TD04/.test(p.S().fatture.slice(-1)[0].sdi.tipo), 'TD04');
+ruolo('PRODUZIONE'); p = apri('erp_acquisti', 'richieste'); bene(p.fai('rq', {materiale: 'FERRO', qta: '12000', consegna: '2027-08-20', richiedente: 'Produzione', data: '2027-08-10'}), 'ME51N');
+ok(/SU53/.test(p.fai('ap', {rda: x => x, decisione: 'approva', data: '2027-08-10'})), 'ME54N come capo reparto: SU53');
+ruolo('RESP_ACQ'); p = apri('erp_acquisti', 'richieste'); bene(p.fai('ap', {rda: x => x, decisione: 'approva', data: '2027-08-10'}), 'ME54N');
+ruolo('BUYER'); p = apri('erp_acquisti', 'ordini'); bene(p.fai('me', {rda: x => x, fornitore: 'F100', prezzo: '0,97', data: '2027-08-11'}), 'ME21N da richiesta');
+const oaA = p.S().acquisti.slice(-1)[0]; ok(oaA.rilascio.stato === 'bloccato', 'ordine sopra soglia bloccato');
+ruolo('RESP_ACQ'); p = apri('erp_acquisti', 'ordini'); bene(p.fai('rl', {ordine: oaA.numero, decisione: 'rilascia', data: '2027-08-11'}), 'ME29N');
+ruolo('CAPO_MAG'); p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: oaA.numero, qta: '4000', lotto: 'COL-0816', data: '2027-08-16'}), 'MIGO colata COL-0816');
+rfTutti('2027-08-16');
+p = apri('erp_magazzino', 'lotti'); p.lab.querySelector('#lc').value = cAgo().find(c => c.ordine === oDel.numero).numero; p.lab.querySelector('#lc').dispatchEvent(new p.w.Event('change'));
+ok(/L1000004/.test(p.testo()) && /Acciaierie Umbre/.test(p.testo()) && /Numeri di serie consegnati/.test(p.testo()), 'MB56 dal reclamo di Delta');
+p.lab.querySelector('#sn').value = 'SN000291'; p.lab.querySelector('#snv').click(); ok(/presso il cliente/.test(p.testo()) && /Delta/.test(p.testo()), 'IQ03 SN000291');
+ruolo('PAGHE'); for (const m of ['07', '08', '09', '10', '11', '12']) { p = apri('erp_paghe', 'cedolino'); bene(p.fai('ca', {periodo: '2027-' + m}), 'paghe 2027-' + m); }
+{ const d = p.S().hr.cedolini.find(c => c.periodo === '2027-12' && c.matricola === '00001'); vicino(d.tredicesima, 2100, 'tredicesima di Marco'); vicino(d.conguaglio, 4.51, 'conguaglio di Marco'); vicino(d.netto, 3171.26, 'netto di dicembre di Marco'); }
+ruolo('ADMIN');
+{ const S8 = p.S(); let d8 = 0, a8 = 0; S8.registrazioni.forEach(r => r.righe.forEach(x => { if (x.dareAvere === 'DARE') d8 += x.importo; else a8 += x.importo; })); ok(Math.abs(d8 - a8) < 0.005, 'agosto: quadratura Dare = Avere');
+  ok(Object.keys(S8.seriali['TR-ALTA']).filter(k => S8.seriali['TR-ALTA'][k].stato === 'magazzino').length === S8.giacenze['TR-ALTA'], 'seriali in magazzino = giacenza');
+  const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  ok(!manc.length, 'guida S/4 completa fino a dicembre: passi non riconosciuti → ' + manc.join(' | ')); }
+if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
+fs.writeFileSync(path.join(__dirname, 'lab-erp-agosto.json'), memoria);
 
 // lezioni «Che situazione hai?»: il copione prepara il sistema fino al passo, la finestra si apre lì
-for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID', 'F110', 'Calcola i cedolini', 'Luglio — F-28']) {
+for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID', 'F110', 'Calcola i cedolini', 'Luglio — F-28', 'VKM1', 'VF11: storna', 'ME29N', 'Calcola le paghe da luglio']) {
   const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/s4/?passo=' + encodeURIComponent(passo), runScripts: 'outside-only'}).window;
   LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4, passo);
@@ -396,5 +457,5 @@ for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', '
   vicino(w.COPA.report(St, 'cliente', {dal: '2027-02-01', al: '2027-02-28'}).totale.mdc1, 9339.87, 'copione completo: MdC I di febbraio');
 }
 fs.writeFileSync(path.join(__dirname, 'lab-erp-finale.json'), JSON.stringify(SF));
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario, aprile spedizione, maggio innovazione, giugno tesoreria e paghe, luglio valute: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario, aprile spedizione, maggio innovazione, giugno tesoreria e paghe, luglio valute, agosto ruoli, crediti, storni e SdI, acquisti approvati, lotti e seriali, dicembre tredicesima e conguaglio: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

@@ -87,7 +87,7 @@ window.ST4 = (function () {
     var r0 = regDi('USCITA_MERCI', c.numero); if (!r0) throw Error('Uscita merci della consegna non trovata.');
     var o = s.ordini.find(function (x) { return x.numero === c.ordine; });
     var r = inverti(r0, i.data, 'VL09 storno dell\'uscita merci della consegna ' + c.numero + ' (movimento 602)');
-    n.movimento(c.materiale, c.qta, r.data, '602', o.numero, {lotti: c.lotti});
+    n.movimento(c.materiale, c.qta, r.data, '602', o.numero, {lotti: c.lotti, seriali: c.seriali || null});
     if (c.wm && window.WM4 && window.WM4.attivo()) window.WM4.nuovoQuant('GI-ZONE', c.materiale, c.qta, '', r.data, c.numero);
     o.consegnato = r2(o.consegnato - c.qta); c.pgi = false;
     if (c.ddt) { c.ddtAnnullato = c.ddt; c.ddt = ''; }

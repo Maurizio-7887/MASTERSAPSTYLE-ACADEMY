@@ -197,6 +197,10 @@
       radice.querySelector('#stampa').onclick = function () { window.print(); };
     },
     lotti: function () {
+      var serieCons = function (n) { var c = S().consegne.find(function (k) { return k.numero === n; }); var sn = (c && c.seriali) || []; return sn.length ? '<p class="lab-nota">Numeri di serie consegnati: <b>' + sn[0] + (sn.length > 1 ? ' … ' + sn[sn.length - 1] : '') + '</b> (' + sn.length + ' pezzi).</p>' : ''; };
+      var serieDett = function () { if (!radice.dataset.sn) return ''; try { var x = window.LT4.seriale(radice.dataset.sn);
+        return '<p>Numero <b>' + x.sn + '</b> · ' + x.mat + ' · lotto ' + e(x.lotto) + ' · <b>' + x.stato + '</b>' + (x.cliente ? ' · ' + e(x.cliente) : '') + '</p>' + L.tabella(['Data', 'Movimento'], x.storia.map(function (h) { return [fd(h.data), e(h.testo)]; })); }
+        catch (err) { return '<p class="lab-esito ko">' + e(err.message) + '</p>'; } };
       var LT = window.LT4, tutti = LT.elenco(), mat = radice.dataset.mat || '', sel = radice.dataset.lotto || '', cons = radice.dataset.cons || '';
       var vista = tutti.filter(function (x) { return (!mat || x.mat === mat) && (x.qta > 1e-9 || radice.dataset.esauriti === '1'); });
       var albero = function (righe) { return '<ul class="lab-elenco">' + righe.map(function (x) { return '<li style="margin-left:' + (x.livello * 1.4) + 'rem">' + (x.tipo === 'lotto' ? '🧬 ' : x.tipo === '601' || x.tipo === 'consegna' ? '🚚 ' : x.tipo === '261' ? '🏭 ' : x.tipo === 'origine' ? '📥 ' : '• ') + e(x.testo) + '</li>'; }).join('') + '</ul>'; };
@@ -211,11 +215,16 @@
             '<button type="button" class="lab-btn sec" data-lotto="' + e(x.mat + '|' + x.lotto) + '">Traccia</button>']; }), 'Nessun lotto.') +
           '<p class="lab-nota">Il ferro prende il lotto della <b>colata</b> scritta sul certificato del fornitore all\'entrata merci; le transenne prendono il lotto dell\'<b>ordine di produzione</b>. Le uscite consumano i lotti più vecchi (FIFO).</p>') + dett +
         L.scheda('🔎', 'Reclamo di un cliente: risali dalla consegna', 'MB56 a monte', '<div class="lab-filtro"><label>Consegna <select id="lc"><option value="">— scegli —</option>' + S().consegne.filter(function (c) { return c.tipo === 'LF' && c.lotti; }).map(function (c) { return '<option' + (c.numero === cons ? ' selected' : '') + ' value="' + c.numero + '">' + c.numero + ' · ' + e(U.nome(S(), c.cliente)) + ' · ' + c.qta + ' ' + c.materiale + '</option>'; }).join('') + '</select></label></div>' +
-          (cons ? albero(LT.daConsegna(cons)) : '<p class="lab-nota">Se un cliente segnala un difetto, dalla consegna risali ai lotti di transenne e alle colate di ferro; poi dal lotto di ferro scendi a valle per trovare <b>tutti</b> i clienti da avvisare (richiamo).</p>'));
+          (cons ? albero(LT.daConsegna(cons)) + serieCons(cons) : '<p class="lab-nota">Se un cliente segnala un difetto, dalla consegna risali ai lotti di transenne e alle colate di ferro; poi dal lotto di ferro scendi a valle per trovare <b>tutti</b> i clienti da avvisare (richiamo).</p>')) +
+        L.scheda('🔢', 'Numeri di serie', 'IQ03 · profilo Z001 sulla TR-ALTA', L.tabella(['Materiale', 'Totale›', 'In magazzino›', 'Presso i clienti›', 'Altri›'], LT.serieRiepilogo().map(function (t) { return [t.mat, n0(t.totale), n0(t.magazzino || 0), n0(t.cliente || 0), n0(t.totale - (t.magazzino || 0) - (t.cliente || 0))]; }), 'Nessun materiale con numero di serie.') +
+          '<div class="lab-filtro"><label>Numero di serie <input id="sn" value="' + e(radice.dataset.sn || '') + '" placeholder="SN000001" autocomplete="off"></label> <button type="button" class="lab-btn" id="snv">Visualizza (IQ03)</button></div>' + serieDett() +
+          '<p class="lab-nota">La transenna alta ha il <b>profilo di numero di serie</b>: ogni pezzo riceve un numero all\'entrata (produzione o apertura) e lo porta fino al cliente. Il lotto dice «fatte insieme con quel ferro», il numero di serie dice «proprio quel pezzo»: serve per garanzie, collaudi e richiami mirati.</p>');
       radice.querySelectorAll('[data-lotto]').forEach(function (b) { b.onclick = function () { radice.dataset.lotto = this.dataset.lotto; rendi(); }; });
       radice.querySelector('#lm').onchange = function () { radice.dataset.mat = this.value; rendi(); };
       radice.querySelector('#le').onchange = function () { radice.dataset.esauriti = this.checked ? '1' : ''; rendi(); };
       radice.querySelector('#lc').onchange = function () { radice.dataset.cons = this.value; rendi(); };
+      radice.querySelector('#snv').onclick = function () { radice.dataset.sn = radice.querySelector('#sn').value.trim().toUpperCase(); rendi(); };
+      radice.querySelector('#sn').onkeydown = function (ev) { if (ev.key === 'Enter') radice.querySelector('#snv').click(); };
     },
   };
   function rendi() { (PAGINE[C.pagina] || PAGINE.struttura)(); }

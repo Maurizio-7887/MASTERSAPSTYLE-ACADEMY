@@ -186,7 +186,7 @@ window.SD4 = (function () {
     }
     var std = N.materiale(o.materiale).std, val = r2(q * std);
     var mv = N.movimento(o.materiale, -q, data, '601', o.numero);
-    var c2 = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val, lotti: mv.lotti};
+    var c2 = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val, lotti: mv.lotti, seriali: mv.seriali || null};
     S().consegne.push(c2); o.consegnato += q;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c2.numero, descrizione: 'Consegna ' + c2.numero + ' — uscita merci 601 ' + q + ' pz ' + o.materiale + ' (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
@@ -204,7 +204,7 @@ window.SD4 = (function () {
     var std = N.materiale(c.materiale).std, val = r2(q * std);
     if (c.wm) WM.uscitaSpedizione(c, q);
     var mv = N.movimento(c.materiale, -q, data, '601', o.numero);
-    c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q; c.lotti = mv.lotti;
+    c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q; c.lotti = mv.lotti; c.seriali = mv.seriali || null;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + c.materiale + ' dalla zona di spedizione (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
     N.salva(); return r;

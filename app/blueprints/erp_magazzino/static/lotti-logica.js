@@ -51,5 +51,21 @@ window.LT4 = (function () {
     (c.lotti || []).forEach(function (z) { out.push({livello: 1, tipo: 'lotto', testo: 'lotto ' + z.lotto + ' · ' + L.n0(z.qta) + ' pz', mat: c.materiale, lotto: z.lotto}); if (((S().lotti || {})[c.materiale] || {})[z.lotto]) monte(c.materiale, z.lotto, 2, out); });
     return out;
   }
-  return {elenco: elenco, valle: valle, monte: monte, daConsegna: daConsegna, lotto: lotto};
+  // numeri di serie (IQ03): storia del singolo pezzo e riepilogo per stato
+  var DESCR = {magazzino: 'in magazzino', cliente: 'presso il cliente', consumato: 'consumato', annullato: 'entrata annullata', perso: 'mancante all\'inventario', uscito: 'uscito'};
+  function seriale(sn) {
+    sn = String(sn || '').trim().toUpperCase(); var sm = S().seriali || {}, mat = Object.keys(sm).find(function (m) { return sm[m][sn]; });
+    if (!mat) throw Error('Numero di serie ' + sn + ' inesistente.');
+    var x = sm[mat][sn];
+    return {sn: sn, mat: mat, stato: DESCR[x.stato] || x.stato, lotto: x.lotto, cliente: x.cliente ? x.cliente + ' ' + ((S().clienti[x.cliente] || {}).nome || '') : '',
+      storia: x.storia.map(function (h) { var c = h.tipo === '601' || h.tipo === '602' ? S().consegne.find(function (k) { return (k.seriali || []).indexOf(sn) >= 0 && k.ordine === h.rif; }) : null;
+        return {data: h.data, tipo: h.tipo, testo: (nomeTipo[h.tipo] || h.tipo) + (h.rif ? ' · ' + h.rif : '') + (c ? ' · consegna ' + c.numero + ' · ' + cliente(c.ordine) : '')}; })};
+  }
+  function serieRiepilogo() {
+    var sm = S().seriali || {}, out = [];
+    Object.keys(sm).forEach(function (m) { var t = {mat: m, totale: 0}; Object.keys(sm[m]).forEach(function (sn) { var st = sm[m][sn].stato; t[st] = (t[st] || 0) + 1; t.totale++; }); out.push(t); });
+    return out;
+  }
+  function serieDi(mat, filtro) { var sm = (S().seriali || {})[mat] || {}; return Object.keys(sm).filter(function (sn) { return !filtro || sm[sn].stato === filtro; }).sort(); }
+  return {elenco: elenco, valle: valle, monte: monte, daConsegna: daConsegna, lotto: lotto, seriale: seriale, serieRiepilogo: serieRiepilogo, serieDi: serieDi};
 })();

@@ -189,7 +189,46 @@
     ['F24', function () { window.PY4.f24({periodo: '2027-06', data: '2027-07-16'}); }],
     ['Luglio — F-28', function () { window.FX4.regola({documento: window.FX4.V().documenti[0].numero, data: '2027-07-20'}); }],
     ['Luglio — F-53', function () { window.FX4.regola({documento: window.FX4.V().documenti[1].numero, data: '2027-07-25'}); }],
-    ['FAGL_FCV', function () { window.FX4.valuta({data: '2027-07-31', storno: 'si'}); }]);
+    ['FAGL_FCV', function () { window.FX4.valuta({data: '2027-07-31', storno: 'si'}); }],
+    // agosto — ruoli, crediti, disponibilità, storni e SdI, acquisti con approvazione, lotti e seriali · dicembre — paghe
+    ['Agosto: ogni transazione', null],
+    ['Attiva le autorizzazioni', function () { window.AU4.imposta({attivo: 'si', ruolo: 'CREDITI'}); }],
+    ['FD32', function () { ru('CREDITI'); window.SD4.anagraficaCredito({cliente: 'C400', fido: 5000, rischio: 'C', data: '2027-08-02'}); }],
+    ['VA01: 20 TR-PED', function () { ru('VENDITE'); window.SD4.ordine({cliente: 'C400', materiale: 'TR-PED', qta: 20, data: '2027-08-02'}); }],
+    ['Prova a consegnare', null],
+    ['VKM1', function () { ru('CREDITI'); window.SD4.decisioneCredito({ordine: ult('OR', 'C400').numero, decisione: 'rilascia', nota: 'acconto promesso', data: '2027-08-03'}); }],
+    ['VA01: 30 TR-ALTA', function () { ru('VENDITE'); window.SD4.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: 30, data: '2027-08-03'}); }],
+    ['CO01: 20 TR-ALTA', function () { ru('PRODUZIONE'); window.PP4.ordine({materiale: 'TR-ALTA', qta: 20, data: '2027-08-04'}); }],
+    ['Approvvigiona la linea', function () { ru('PRODUZIONE'); window.WM4.approvvigiona({ordine: opA().numero, kg: 200, data: '2027-08-04'}); }],
+    ['RF: porta il ferro', function () { rf('2027-08-04'); }],
+    ['261, CO11N e 101', function () { ru('PRODUZIONE'); var o = opA().numero; window.PP4.prelievo({ordine: o, kg: 200, data: '2027-08-04'}); window.PP4.conferma({ordine: o, attrezzaggio: 3, ore: 16, data: '2027-08-05'}); window.PP4.entrata({ordine: o, qta: 20, data: '2027-08-05'}); }],
+    ['RF: metti a scaffale le transenne', function () { rf('2027-08-05'); }],
+    ['Conferma automatica', null],
+    ['VL01N: consegne di Edil Sigma', function () { ru('CAPO_MAG'); window.SD4.consegna({ordine: ult('OR', 'C400').numero, data: '2027-08-06'}); window.SD4.consegna({ordine: ult('OR', 'C200').numero, data: '2027-08-06'}); }],
+    ['Rilascia l\'ondata e preleva', function () { ru('CAPO_MAG'); if (window.IN4 && (window.SD4.N.S.wm || {}).ondate) window.IN4.rilasciaOndata({data: '2027-08-06'}); rf('2027-08-06'); }],
+    ['VL02N: uscita merci delle due', function () { ru('CAPO_MAG'); consAgo().forEach(function (c) { window.SD4.uscitaMerci({consegna: c.numero, data: '2027-08-06'}); }); }],
+    ['VF01: fattura Edil Sigma con la data sbagliata', function () { ru('VENDITE'); window.SD4.fattura({consegna: consAgo()[0].numero, data: '2027-08-17'}); }],
+    ['VF11: storna', function () { ru('VENDITE'); window.ST4.vf11({fattura: window.SD4.N.S.fatture.filter(function (f) { return f.data === '2027-08-17'; })[0].numero, data: '2027-08-17'}); }],
+    ['VF01: rifai', function () { ru('VENDITE'); consAgo().forEach(function (c) { window.SD4.fattura({consegna: c.numero, data: '2027-08-07'}); }); }],
+    ['Trasmetti le due fatture', function () { ru('CONTABILE'); fattAgo().forEach(function (f) { window.ST4.inviaSdi({fattura: f.numero, data: '2027-08-07'}); }); }],
+    ['Prova a stornare la fattura di Delta', null],
+    ['VA01 G2', function () { ru('VENDITE'); window.SD4.richiestaAbbuono({fattura: fattAgo()[1].numero, importo: 200, motivo: '2 transenne graffiate', data: '2027-08-09'}); }],
+    ['Approva la richiesta', function () { var g = ult('G2'); ru('CREDITI'); window.SD4.approvaAbbuono({richiesta: g.numero, data: '2027-08-09'}); ru('VENDITE'); window.SD4.notaCreditoAbbuono({richiesta: g.numero, data: '2027-08-09'}); }],
+    ['Trasmetti la nota di credito', function () { ru('CONTABILE'); window.ST4.inviaSdi({fattura: window.SD4.N.S.fatture.filter(function (f) { return f.tipo === 'G2'; }).slice(-1)[0].numero, data: '2027-08-09'}); }],
+    ['ME51N', function () { ru('PRODUZIONE'); window.MM4.richiesta({materiale: 'FERRO', qta: 12000, consegna: '2027-08-20', richiedente: 'Produzione', data: '2027-08-10'}); }],
+    ['ME54N', function () { ru('RESP_ACQ'); window.MM4.approva({rda: window.SD4.N.S.rda.slice(-1)[0].numero, decisione: 'approva', data: '2027-08-10'}); }],
+    ['ME21N: ordine con riferimento', function () { ru('BUYER'); window.MM4.ordine({rda: window.SD4.N.S.rda.slice(-1)[0].numero, fornitore: 'F100', prezzo: 0.97, data: '2027-08-11'}); }],
+    ['ME29N', function () { ru('RESP_ACQ'); window.MM4.rilascia({ordine: window.SD4.N.S.acquisti.slice(-1)[0].numero, decisione: 'rilascia', data: '2027-08-11'}); }],
+    ['MIGO: prima consegna', function () { ru('CAPO_MAG'); window.MM4.entrata({ordine: window.SD4.N.S.acquisti.slice(-1)[0].numero, qta: 4000, lotto: 'COL-0816', data: '2027-08-16'}); }],
+    ['RF: metti a catasta', function () { rf('2027-08-16'); }],
+    ['MB56', null], ['IQ03', null],
+    ['Calcola le paghe da luglio', function () { ru('PAGHE'); ['07', '08', '09', '10', '11', '12'].forEach(function (m) { window.PY4.calcola({periodo: '2027-' + m}); }); }]);
+  var ru = function (r) { window.AU4.imposta({ruolo: r}); };
+  var rf = function (d) { ru('MAGAZZINIERE'); window.WM4.aperti().forEach(function (t) { window.WM4.conferma({compito: t.numero, data: d}); }); };
+  var ult = function (tipo, cli) { return window.SD4.N.S.ordini.filter(function (o) { return o.tipo === tipo && (!cli || o.cliente === cli); }).slice(-1)[0]; };
+  var opA = function () { return window.SD4.N.S.produzione.filter(function (o) { return o.materiale === 'TR-ALTA'; }).slice(-1)[0]; };
+  var consAgo = function () { var o = [ult('OR', 'C400').numero, ult('OR', 'C200').numero]; return window.SD4.N.S.consegne.filter(function (c) { return c.tipo === 'LF' && o.indexOf(c.ordine) >= 0; }).sort(function (a, b) { return o.indexOf(a.ordine) - o.indexOf(b.ordine); }); };
+  var fattAgo = function () { var c = consAgo().map(function (x) { return x.numero; }); return window.SD4.N.S.fatture.filter(function (f) { return f.tipo === 'F2' && !f.stornata && c.indexOf(f.consegna) >= 0; }).sort(function (a, b) { return c.indexOf(a.consegna) - c.indexOf(b.consegna); }); };
   var ESTRATTO_GIUGNO = ['2027-06-08;-10980;SEPA SCT ADDEBITO DISTINTA F110-001 ACCIAIERIE UMBRE', '2027-06-09;18651,36;BONIFICO DA BETA COSTRUZIONI SRL RIF FT 90000002',
     '2027-06-10;12383;BONIFICO COMUNE DI GAMMA MANDATO 145 FT 90000004', '2027-06-11;10043,04;BONIFICO DELTA NOLEGGI SRL', '2027-06-12;4800;BONIFICO EDIL SIGMA SRL',
     '2027-06-15;-18,50;COMMISSIONI E SPESE TENUTA CONTO', '2027-06-15;3,11;INTERESSI CREDITORI NETTI'].join('\n');
