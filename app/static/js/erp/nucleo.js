@@ -23,6 +23,13 @@
     ['76', 'Sovraccosti accreditati ai centri di costo', 'RICAVO'],
     // dalla tappa WMS
     ['65', 'Differenze inventariali di magazzino', 'COSTO'],
+    // tesoreria, valute, paghe
+    ['18', 'Banca c/transito pagamenti (F110)', 'ATTIVO'], ['16', 'Rettifiche di valutazione su partite in valuta', 'ATTIVO'],
+    ['24', 'Debiti verso INAIL', 'PASSIVO'], ['27', 'Debiti verso dipendenti (retribuzioni nette)', 'PASSIVO'], ['28', 'Debiti verso INPS', 'PASSIVO'],
+    ['29', 'Erario c/ritenute (IRPEF e addizionali)', 'PASSIVO'], ['31', 'Fondo TFR', 'PASSIVO'],
+    ['44', 'Ricavi per servizi', 'RICAVO'], ['54', 'Consulenze e servizi', 'COSTO'], ['58', 'Commissioni e spese bancarie', 'COSTO'], ['59', 'Interessi attivi bancari', 'RICAVO'],
+    ['66', 'Utili su cambi', 'RICAVO'], ['67', 'Perdite su cambi', 'COSTO'], ['68', 'Differenze cambio da valutazione', 'COSTO'],
+    ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
@@ -31,17 +38,20 @@
     'TR-PED': {nome: 'Transenna pedonale (base)', tipo: 'FERT', um: 'pz', std: 29.55, peso: 9, ferro: 9, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.30}, attrezzaggio: 3},
     'FERRO': {nome: 'Tubo di ferro', tipo: 'ROH', um: 'kg', std: 0.95, peso: 1},
   };
-  var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg'}};
+  var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg', iban: 'IT60X0542811101000000123456'},
+                   'F200': {nome: 'Gamma Steel Engineering LLC', regione: 'USA', pagamento: '30 gg', valuta: 'USD', iban: 'US-ABA 026009593 / 4417 2210'}};
   var CLIENTI = {
     'C100': {nome: 'Beta Costruzioni Srl', regione: 'Umbria', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: '30 gg'},
     'C200': {nome: 'Delta Noleggi Srl', regione: 'Toscana', canale: '20 Noleggio', gruppo: 'Noleggiatori', pagamento: '30 gg'},
     'C300': {nome: 'Comune di Gamma', regione: 'Umbria', canale: '30 Enti pubblici', gruppo: 'Enti pubblici', pagamento: '60 gg'},
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg'},
+    'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: ''},
   };
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
-    compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0};
+    compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0,
+    estratto: 0, pagamento: 0, cedolino: 0};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',
@@ -64,6 +74,8 @@
       if (S.giacenze[m] == null) S.giacenze[m] = 0;
     });
     ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
+    Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; });
+    Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; });
     return S;
   }
 
@@ -87,7 +99,9 @@
           var imp = r2(x.importo), segno = x.dareAvere;
           if (imp < 0) { imp = -imp; segno = segno === 'DARE' ? 'AVERE' : 'DARE'; }
           if (segno === 'DARE') d += imp; else a += imp;
-          return {conto: x.conto, dareAvere: segno, importo: imp, partner: x.partner || '', testo: x.testo || ''};
+          var y = {conto: x.conto, dareAvere: segno, importo: imp, partner: x.partner || '', testo: x.testo || ''};
+          if (x.pareggio) y.pareggio = x.pareggio; if (x.valuta) { y.valuta = x.valuta; y.importoValuta = x.importoValuta; } if (x.scadenza) y.scadenza = x.scadenza; if (x.cdc) y.cdc = x.cdc;
+          return y;
         });
         if (!righe.length) return null;
         if (Math.abs(r2(d) - r2(a)) > 0.001) throw Error('Documento non quadrato: Dare ' + L.eur(d) + ' ≠ Avere ' + L.eur(a));

@@ -125,6 +125,34 @@ ESERCIZI = {
             ("giacenza_tr_ped_maggio", "Giacenza TR-PED a fine maggio", 28, 0),
         ],
     },
+    "s4-tesoreria-paghe": {
+        "titolo": "Sistema integrato S/4 — tesoreria e paghe (giugno)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("f110_totale", "Pagamenti F110 eseguiti", 10980.00, 0.005),
+            ("righe_automatiche", "Righe dell'estratto abbinate in automatico", 6, 0),
+            ("estratto_completo", "Estratto conto registrato per intero", "sì", None),
+            ("banca_15_06", "Saldo della banca al 15/06", 103535.81, 0.005),
+            ("crediti_30_06", "Crediti verso clienti al 30/06", 49752.91, 0.005),
+            ("netti_giugno", "Netti in busta di giugno", 5594.55, 0.005),
+            ("irpef_giugno", "IRPEF trattenuta a giugno", 730.97, 0.005),
+            ("costo_personale_giugno", "Costo del personale di giugno (80 + 81 + 82)", 9792.99, 0.005),
+        ],
+    },
+    "s4-valute": {
+        "titolo": "Sistema integrato S/4 — valute estere e F24 (luglio)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("fatture_valuta", "Fatture in valuta registrate", 3, 0),
+            ("ricavi_servizi", "Ricavi per servizi in euro (conto 44)", 30000.00, 0.005),
+            ("iva_reverse_charge", "IVA in reverse charge sulla fattura estera", 1100.00, 0.005),
+            ("utili_cambi", "Utili su cambi realizzati", 370.37, 0.005),
+            ("perdite_cambi", "Perdite su cambi realizzate", 45.87, 0.005),
+            ("perdita_valutazione", "Perdita su cambi non realizzata al 31/07", 178.57, 0.005),
+            ("credito_usd_aperto", "Credito in USD ancora aperto", 11000.00, 0.005),
+            ("f24_versato", "F24 versato a luglio", 3603.92, 0.005),
+        ],
+    },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
 }
 

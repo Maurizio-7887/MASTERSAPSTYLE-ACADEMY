@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>La fattura al cliente americano è in dollari, l'incasso arriva un mese dopo.</li>
+  <li>In banca entrano più (o meno) euro di quelli registrati.</li>
+  <li>A fine mese i crediti in dollari restano al cambio di quando sono nati.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Ogni documento in valuta si registra in euro al <b>cambio del giorno</b> (tabella OB08). Quando si incassa o si paga, la partita si chiude al <b>cambio storico</b> e la banca si muove al cambio del giorno: la differenza è <b>realizzata</b> (utile o perdita su cambi). A fine periodo le partite ancora aperte si <b>valutano</b> al cambio di chiusura (FAGL_FCV): differenza <b>non realizzata</b>, stornata il giorno dopo.</p>
+<p class="lez-chiave">Credito in dollari: se il dollaro si rafforza (servono meno dollari per un euro) guadagni; se si indebolisce perdi. Per un debito è il contrario.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Quotazione</dt><dd>«Incerto per certo»: 1 EUR = x USD (come i cambi BCE).</dd>
+<dt>Cambio storico</dt><dd>Quello della fattura: resta sulla partita.</dd>
+<dt>Differenza realizzata</dt><dd>All'incasso o al pagamento: conti 66 utili / 67 perdite su cambi.</dd>
+<dt>Differenza non realizzata</dt><dd>Alla valutazione di fine periodo: conto 68 con rettifica 16, stornata il giorno dopo.</dd>
+<dt>Art. 2426 n. 8-bis c.c.</dt><dd>L'utile netto non realizzato su cambi va in una riserva non distribuibile.</dd>
+<dt>IVA con l'estero</dt><dd>Servizi B2B a extra-UE non soggetti (art. 7-ter); servizi da extra-UE: reverse charge con autofattura TD17.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Partita</th><th class="n">USD</th><th class="n">Cambio storico</th><th class="n">EUR storico</th><th class="n">Cambio regolazione</th><th class="n">EUR regolazione</th><th>Esito</th></tr>
+<tr><td>Fattura Zeta 1/7</td><td class="n">22.000</td><td class="n">1,10</td><td class="n">20.000,00</td><td class="n">1,08 (incasso 20/7)</td><td class="n">20.370,37</td><td>utile realizzato 370,37</td></tr>
+<tr><td>Fattura Gamma Steel 2/7</td><td class="n">5.500</td><td class="n">1,10</td><td class="n">5.000,00</td><td class="n">1,09 (pagamento 25/7)</td><td class="n">5.045,87</td><td>perdita realizzata 45,87</td></tr>
+<tr><td>Fattura Zeta 15/7 (aperta)</td><td class="n">11.000</td><td class="n">1,10</td><td class="n">10.000,00</td><td class="n">1,12 (valutazione 31/7)</td><td class="n">9.821,43</td><td>perdita non realizzata 178,57</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>OB08</b>tassi</span><span class="f">→</span><span class="b"><b>FB70 / FB60</b>cambio storico</span><span class="f">→</span><span class="b mag"><b>Incasso / pagamento</b>66 · 67 realizzate</span><span class="f">→</span><span class="b"><b>FAGL_FCV</b>68 non realizzate</span><span class="f">→</span><span class="b"><b>Storno</b>1° giorno dopo</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Tassi di cambio</td><td>OB08 · TCURR</td></tr>
+<tr><td>Fatture in valuta</td><td>FB70 · FB60 · MIRO e VF01 in valuta</td></tr>
+<tr><td>Incassi e pagamenti</td><td>F-28 · F-53 · F110</td></tr>
+<tr><td>Valutazione</td><td>FAGL_FCV (con storno, tipo di valutazione)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché la valutazione si storna il giorno dopo?</summary><p>Perché la partita resta al cambio storico: il mese nuovo riparte da lì e la differenza vera si conosce solo all'incasso.</p></details>
+<details><summary>Che cosa sarebbe successo se il dollaro a fine mese fosse sceso a 1,08?</summary><p>11.000 / 1,08 = 10.185,19: utile non realizzato di 185,19, da tenere in riserva non distribuibile se resta netto a fine esercizio.</p></details>
+{% endblock %}

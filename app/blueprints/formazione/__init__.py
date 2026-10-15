@@ -60,6 +60,12 @@ CASI = [
      "📈", "erp_innovazione", "KPI di maggio"),
     ("rfid-automazione", "Leggere tutto in un colpo?", "Al carico si leggono i colli uno per uno; la merce in arrivo per un ordine urgente va prima a scaffale e poi torna indietro.",
      "📡", "erp_innovazione", "Varco RFID"),
+    ("previsione-cassa", "Non sai quanta cassa avrai il mese prossimo?", "I pagamenti ai fornitori si fanno a mano, l'estratto conto si spunta su carta, i clienti in ritardo li scopre la banca.",
+     "💧", "erp_tesoreria", "F110"),
+    ("valute-estere", "Vendi e compri in dollari?", "La fattura è in dollari, l'incasso arriva dopo: in banca entra un importo diverso e nessuno sa dove registrare la differenza.",
+     "💱", "erp_valute", "Luglio — F-28"),
+    ("costo-personale", "Quanto costa davvero un dipendente?", "Si conosce il netto in busta, non il costo per l'azienda né quanto pesa su ogni reparto.",
+     "🧾", "erp_paghe", "Calcola i cedolini"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]

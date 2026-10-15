@@ -3,7 +3,8 @@
 (function () {
   var V = 'erp_vendite.', D = 'erp_dati.', K = 'erp_copa.', F = 'erp_fi.', A = 'erp_acquisti.', P = 'erp_produzione.', C = 'erp_costi.', M = 'erp_magazzino.', I = 'erp_inventario.';
   var inv = function (h) { return ((h.S.wm || {}).inventari || [])[0]; };
-  var X = 'erp_spedizione.', Z = 'erp_innovazione.';
+  var X = 'erp_spedizione.', Z = 'erp_innovazione.', T = 'erp_tesoreria.', Y = 'erp_paghe.', W = 'erp_valute.';
+  var fxDoc = function (h, lato, imp) { return (((h.S.fx || {}).documenti) || []).filter(function (d) { return d.lato === lato && d.importo === imp; })[0]; };
   var trasf = function (h) { return ((h.S.wm || {}).compiti || []).filter(function (t) { return t.tipo === 'TRASF' && /slotting/.test(t.motivo || ''); }); };
   var magO = function (h, c) { return (h.S.ordini || []).some(function (o) { return o.tipo === 'OR' && o.cliente === c && o.data >= '2027-05-01'; }); };
   var magC = function (h) { return (h.S.consegne || []).filter(function (k) { return k.wm && k.data >= '2027-05-01'; }); };
@@ -49,7 +50,7 @@
       campi: [['Committente', c], ['Materiale', m], ['Quantità', String(q)], ['Riferimento', rif], ['Data', '15/02/2027']], attesa: attesa, fatto: function (h) { return ord(h, c, 'OR', true).length > 0; }};
   };
   window.MSA_ESERCIZIO = {
-    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite (gen), costi (feb), magazzino e inventario (mar), spedizione (apr), innovazione (mag)', versione: 'erp-ft',
+    codice: 's4-integrato', titolo: 'Sistema integrato S/4: vendite, costi, magazzino, spedizione, innovazione, tesoreria e paghe, valute (gennaio – luglio)', versione: 'erp-ft',
     passi: [
       {g: 'Prima di cominciare', data: '', titolo: 'Che cosa è il sistema integrato', dove: {ep: D + 'avvio'}, percorso: 'Launchpad → S/4 Sistema integrato → Avvio del sistema',
        campi: [['Un solo libro giornale', 'ogni documento logistico scrive la sua registrazione'], ['Prezzi', 'non si digitano: li determina la procedura ZFT001 dalle condizioni'],
@@ -299,6 +300,59 @@
       {g: 'Maggio — chiusura', data: '', titolo: 'KPI di fine maggio: confronta', dove: {ep: Z + 'kpi'}, percorso: 'Innovazione → KPI', campi: [['Metri per riga', 'scendono dopo slotting e ondata'], ['Produttività', 'compiti per risorsa']], nota: 'Spunta a mano.'},
       {g: 'Fine di maggio', data: '', titolo: 'Consegna il lavoro di maggio al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
        campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizio', 'Sistema integrato S/4 — innovazione del magazzino']]},
+      // ═══ GIUGNO — tesoreria e paghe · LUGLIO — valute ═══
+      {g: 'Giugno — tesoreria', data: '', titolo: 'Giugno: tesoreria e paghe', dove: {ep: T + 'posizione'}, percorso: 'S/4 → Tesoreria',
+       campi: [['Tesoreria', 'quanta cassa, chi deve pagare, chi pagare, che cosa dice la banca'], ['Paghe', 'tre dipendenti, il cedolino, la contabilità, gli stipendi'], ['Luglio', 'un cliente e un fornitore in dollari']]},
+      {g: 'Giugno — tesoreria', data: '01/06/2027', titolo: 'Posizione di cassa e previsione', dove: {ep: T + 'posizione'}, percorso: 'Tesoreria → Posizione di cassa e previsione',
+       campi: [['Previsione dal', '01/06/2027'], ['Banca', '68.653,80'], ['Crediti scaduti', '70.497,70 da sollecitare'], ['Debiti scaduti', '10.980 (Acciaierie Umbre, scaduta il 6 aprile)']], nota: 'Spunta a mano.'},
+      {g: 'Giugno — tesoreria', data: '01/06/2027', titolo: 'Partite aperte e anzianità dei crediti', dove: {ep: T + 'partite'}, percorso: 'Tesoreria → Partite aperte e scadenze',
+       campi: [['Beta', '18.651,36 (fattura di gennaio meno il reso) + 19.983,60 + 7.488,36'], ['Edil Sigma', '4.934,90 scaduta da febbraio']], nota: 'Spunta a mano.'},
+      {g: 'Giugno — tesoreria', data: '07/06/2027', titolo: 'F110: paga il fornitore scaduto', dove: {ep: T + 'pagamenti'}, percorso: 'Tesoreria → Pagamenti automatici',
+       campi: [['Data di esecuzione', '07/06/2027']], attesa: 'Distinta F110-001: D 20 Acciaierie Umbre / A 18 Banca c/transito 10.980. File SEPA pain.001 con l\'IBAN del fornitore.',
+       fatto: function (h) { return (((h.S.tes || {}).pagamenti) || []).length > 0; }},
+      {g: 'Giugno — tesoreria', data: '15/06/2027', titolo: 'Carica l\'estratto conto di giugno', dove: {ep: T + 'estratti'}, percorso: 'Tesoreria → Estratto conto elettronico',
+       campi: [['Movimenti', 'pulsante «Usa l\'estratto di esempio di giugno»'], ['Data', '15/06/2027']], fatto: function (h) { return (((h.S.tes || {}).estratti) || []).length > 0; }},
+      {g: 'Giugno — tesoreria', data: '15/06/2027', titolo: 'Abbinamento automatico dell\'estratto', dove: {ep: T + 'estratti'}, percorso: 'Estratto conto · Abbina e registra',
+       campi: [['Regole', 'distinta F110 · riferimento fattura · importo univoco · parole chiave']], attesa: '6 righe su 7 registrate da sole; resta il bonifico di Edil Sigma da 4.800.',
+       fatto: function (h) { var e = (((h.S.tes || {}).estratti) || [])[0]; return !!e && e.righe.filter(function (x) { return x.stato === 'abbinata in automatico'; }).length >= 6; }},
+      {g: 'Giugno — tesoreria', data: '15/06/2027', titolo: 'FEBAN: registra a mano il bonifico di Edil Sigma', dove: {ep: T + 'estratti'}, percorso: 'Estratto conto · Abbinamento manuale',
+       campi: [['Riga', '5 · BONIFICO EDIL SIGMA · 4.800'], ['Cliente', 'C400 Edil Sigma'], ['Fattura', 'vuoto (in conto: chiude le più vecchie)']], attesa: 'D 10 / A 11 Sigma 4.800: la fattura di gennaio resta aperta per 134,90.',
+       fatto: function (h) { var e = (((h.S.tes || {}).estratti) || [])[0]; return !!e && e.righe.every(function (x) { return x.contabile; }); }},
+      {g: 'Giugno — tesoreria', data: '', titolo: 'Riconciliazione: estratto e conto banca quadrano', dove: {ep: T + 'estratti'}, percorso: 'Estratto conto · Riconciliazione', campi: [['Saldo', '103.535,81 = 103.535,81'], ['Conto 18', 'a zero: la distinta è stata addebitata']], nota: 'Spunta a mano.'},
+      {g: 'Giugno — paghe', data: '30/06/2027', titolo: 'Presenze di giugno: 8 ore di straordinario a Marco Rossi', dove: {ep: Y + 'cedolino'}, percorso: 'S/4 → Paghe → Presenze e cedolino',
+       campi: [['Dipendente', '00001 Marco Rossi'], ['Periodo', '2027-06'], ['Straordinari', '8']], fatto: function (h) { return !!(((h.S.hr || {}).presenze || {})['2027-06/00001']); }},
+      {g: 'Giugno — paghe', data: '30/06/2027', titolo: 'Calcola i cedolini di giugno', dove: {ep: Y + 'cedolino'}, percorso: 'Paghe → Calcolo della paga',
+       campi: [['Periodo', '2027-06']], attesa: 'Netti 1.786,73 · 1.802,16 · 2.005,66 = 5.594,55 · costo azienda 9.792,99',
+       fatto: function (h) { return (((h.S.hr || {}).cedolini) || []).filter(function (c) { return c.periodo === '2027-06'; }).length >= 3; }},
+      {g: 'Giugno — paghe', data: '', titolo: 'Stampa il cedolino di Marco Rossi', dove: {ep: Y + 'cedolino'}, percorso: 'Paghe → Cedolino · Stampa', campi: [['Lordo', '2.221,39 (con 121,39 di straordinario)'], ['Netto', '1.786,73']], nota: 'Spunta a mano.'},
+      {g: 'Giugno — paghe', data: '30/06/2027', titolo: 'Registra la paga in contabilità', dove: {ep: Y + 'contabilita'}, percorso: 'Paghe → Registrazione, stipendi e F24 · 1',
+       campi: [['Periodo', '2027-06'], ['Data', '30/06/2027']], attesa: 'D 80 7.071,39 · D 81 2.197,79 · D 82 523,81 per centro di costo / A 27 5.594,55 · A 28 2.776,95 · A 24 106,07 · A 29 826,97 · A 31 488,45',
+       fatto: function (h) { return (((h.S.hr || {}).registrati) || []).some(function (x) { return x.periodo === '2027-06'; }); }},
+      {g: 'Giugno — paghe', data: '30/06/2027', titolo: 'Paga gli stipendi di giugno', dove: {ep: Y + 'contabilita'}, percorso: 'Paghe → 2 · Pagamento degli stipendi',
+       campi: [['Periodo', '2027-06'], ['Data', '30/06/2027']], attesa: 'D 27 / A 10 5.594,55', fatto: function (h) { return (((h.S.hr || {}).registrati) || []).some(function (x) { return x.periodo === '2027-06' && x.pagato; }); }},
+      {g: 'Luglio — valute', data: '', titolo: 'Luglio: le valute', dove: {ep: W + 'tassi'}, percorso: 'S/4 → Valute estere',
+       campi: [['Cliente', 'C500 Zeta Barriers Inc. (USA)'], ['Fornitore', 'F200 Gamma Steel Engineering LLC (USA)'], ['Valuta', 'USD']]},
+      {g: 'Luglio — valute', data: '01/07/2027', titolo: 'OB08: inserisci i tassi del dollaro', dove: {ep: W + 'tassi'}, percorso: 'Valute → Tassi di cambio',
+       campi: [['01/07/2027', '1,10'], ['20/07/2027', '1,08'], ['25/07/2027', '1,09'], ['31/07/2027', '1,12']], fatto: function (h) { return (((h.S.fx || {}).tassi) || []).length >= 4; }},
+      {g: 'Luglio — valute', data: '01/07/2027', titolo: 'FB70: fattura 22.000 USD a Zeta Barriers', dove: {ep: W + 'documenti'}, percorso: 'Valute → Fatture in valuta · cliente',
+       campi: [['Cliente', 'C500'], ['Importo', '22000'], ['Descrizione', 'progettazione impianto'], ['Data', '01/07/2027']], attesa: 'D 11 / A 44 20.000,00 (22.000 ÷ 1,10). Non soggetta IVA (art. 7-ter).', fatto: function (h) { return fxDoc(h, 'cliente', 22000); }},
+      {g: 'Luglio — valute', data: '02/07/2027', titolo: 'FB60: fattura 5.500 USD di Gamma Steel', dove: {ep: W + 'documenti'}, percorso: 'Valute → Fatture in valuta · fornitore',
+       campi: [['Fornitore', 'F200'], ['Importo', '5500'], ['Numero fattura', 'INV-7781'], ['Data', '02/07/2027']], attesa: 'D 54 / A 20 5.000,00 · reverse charge D 14 / A 21 1.100', fatto: function (h) { return fxDoc(h, 'fornitore', 5500); }},
+      {g: 'Luglio — valute', data: '15/07/2027', titolo: 'FB70: fattura 11.000 USD a Zeta Barriers', dove: {ep: W + 'documenti'}, percorso: 'Valute → Fatture in valuta · cliente',
+       campi: [['Cliente', 'C500'], ['Importo', '11000'], ['Descrizione', 'assistenza tecnica'], ['Data', '15/07/2027']], attesa: 'D 11 / A 44 10.000,00', fatto: function (h) { return fxDoc(h, 'cliente', 11000); }},
+      {g: 'Luglio — valute', data: '16/07/2027', titolo: 'F24: versa ritenute e contributi di giugno', dove: {ep: Y + 'contabilita'}, percorso: 'Paghe → 3 · Versamento F24',
+       campi: [['Periodo', '2027-06'], ['Data', '16/07/2027']], attesa: 'D 29 826,97 · D 28 2.776,95 / A 10 3.603,92', fatto: function (h) { return (((h.S.hr || {}).registrati) || []).some(function (x) { return x.periodo === '2027-06' && x.f24; }); }},
+      {g: 'Luglio — valute', data: '20/07/2027', titolo: 'Luglio — F-28: incasso 22.000 USD al cambio 1,08', dove: {ep: W + 'regolazioni'}, percorso: 'Valute → Incassi e pagamenti in valuta',
+       campi: [['Partita', 'la fattura da 22.000 USD'], ['Data', '20/07/2027']], attesa: 'D 10 20.370,37 / A 11 20.000 · A 66 utile su cambi 370,37', fatto: function (h) { var d = fxDoc(h, 'cliente', 22000); return !!d && !!d.chiuso; }},
+      {g: 'Luglio — valute', data: '25/07/2027', titolo: 'Luglio — F-53: pagamento 5.500 USD al cambio 1,09', dove: {ep: W + 'regolazioni'}, percorso: 'Valute → Incassi e pagamenti in valuta',
+       campi: [['Partita', 'la fattura di Gamma Steel'], ['Data', '25/07/2027']], attesa: 'D 20 5.000 · D 67 perdita su cambi 45,87 / A 10 5.045,87', fatto: function (h) { var d = fxDoc(h, 'fornitore', 5500); return !!d && !!d.chiuso; }},
+      {g: 'Luglio — valute', data: '31/07/2027', titolo: 'FAGL_FCV: valutazione al 31 luglio', dove: {ep: W + 'valutazione'}, percorso: 'Valute → Valutazione di fine periodo',
+       campi: [['Data', '31/07/2027'], ['Storno', 'sì']], attesa: '11.000 USD a 1,12 = 9.821,43: perdita non realizzata 178,57 (D 68 / A 16), stornata il 01/08',
+       fatto: function (h) { return (((h.S.fx || {}).valutazioni) || []).length > 0; }},
+      {g: 'Luglio — valute', data: '', titolo: 'Utili e perdite su cambi in bilancio', dove: {ep: F + 'bilancio'}, percorso: 'S/4 → Bilancio di verifica',
+       campi: [['66 Utili su cambi', '370,37 realizzati'], ['67 Perdite su cambi', '45,87 realizzate'], ['68', 'a zero dopo lo storno del 01/08']], nota: 'Spunta a mano.'},
+      {g: 'Fine di luglio', data: '', titolo: 'Consegna il lavoro di giugno e luglio al docente', dove: {ep: 'allievo.consegna'}, percorso: '👤 La mia area → Consegna il lavoro',
+       campi: [['Lavoro', 'Sistema integrato S/4'], ['Esercizi', 'tesoreria e paghe · valute']]},
     ]),
   };
 })();

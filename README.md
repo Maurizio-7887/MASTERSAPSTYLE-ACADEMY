@@ -37,6 +37,9 @@ app/
     erp_inventario/  S/4 · Inventari fisici e contabili (UF 9): documenti annuale / a rotazione ABC / ubicazione vuota, lista cieca, conta e riconta, 999, LI21, valorizzazione FIFO-LIFO-CMP-standard
     erp_spedizione/  S/4 · Spedizione (UF 10): monitor VL06O con stati A/B/C, lista di prelievo FIFO, imballo in colli con SSCC GS1 ed etichette GS1-128, trasporto VT01N, carico con lettura degli SSCC (RF), uscita merci del trasporto, DDT (D.P.R. 472/96)
     erp_innovazione/ S/4 · Innovazione logistica (UF 11): KPI di magazzino, slotting ABC per righe di prelievo, prelievo a ondate a serpentina, cross-docking, varco RFID (EPC SSCC-96)
+    erp_tesoreria/   S/4 · Tesoreria: partite aperte con scadenze e anzianità, posizione e previsione di liquidità, F110 con file SEPA pain.001, estratto conto elettronico con abbinamento automatico e FEBAN
+    erp_valute/      S/4 · Valute: tassi OB08, fatture FB70/FB60 in USD (art. 7-ter, reverse charge TD17), differenze cambio realizzate, valutazione FAGL_FCV con storno
+    erp_paghe/       S/4 · Paghe: dipendenti, presenze, cedolino (IRPEF 2026, detrazioni, cuneo, INPS, INAIL, TFR), registrazione per centro di costo, stipendi, F24
     erp_fi/          S/4 · Contabilità: libro giornale e bilancio di verifica del sistema integrato
                      (un solo stato «erp-ft» e un solo libro giornale per tutti i moduli S/4: static/js/erp/nucleo.js)
     formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
@@ -112,6 +115,6 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 
 ## Prossimi passi
 - corso FORMAS (Pistoia): percorso UF 8–11 in /<versione>/formazione/formas
-- sistema integrato S/4, tappe successive: tesoreria, valute, infragruppo e consolidato, cedolino
+- sistema integrato S/4, in attesa: infragruppo e consolidato (versione leggera con una consociata)
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite

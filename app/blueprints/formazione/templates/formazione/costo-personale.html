@@ -1,0 +1,41 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Si sa il netto in busta, non quanto costa il dipendente all'azienda.</li>
+  <li>Il costo del personale è un numero unico, senza sapere quanto pesa su magazzino, produzione, amministrazione.</li>
+  <li>Le scadenze di F24 e stipendi non compaiono nella previsione di cassa.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il <b>cedolino</b> parte dal <b>lordo</b>, toglie i <b>contributi INPS</b> del dipendente, calcola l'<b>IRPEF</b> sull'imponibile (con detrazioni e cuneo fiscale) e arriva al <b>netto</b>. Sopra il lordo l'azienda paga i <b>contributi a suo carico</b>, l'<b>INAIL</b> e accantona il <b>TFR</b>. La registrazione della paga (PC00_M99_CIPE) porta ogni costo sul <b>centro di costo</b> del dipendente e crea i debiti da pagare: netti a fine mese, F24 il 16.</p>
+<p class="lez-chiave">Costo azienda ≈ lordo × 1,4: il netto è poco più di due terzi del lordo e meno della metà del costo.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Lordo</dt><dd>Retribuzione contrattuale + straordinari − assenze non retribuite.</dd>
+<dt>Imponibile fiscale</dt><dd>Lordo − contributi INPS del dipendente (9,19%).</dd>
+<dt>IRPEF 2026</dt><dd>23% fino a 28.000 € · 33% fino a 50.000 € · 43% oltre, meno le detrazioni per lavoro dipendente e il cuneo fiscale.</dd>
+<dt>Costo azienda</dt><dd>Lordo + INPS ditta + INAIL + TFR.</dd>
+<dt>TFR</dt><dd>Retribuzione ÷ 13,5, meno lo 0,50% versato all'INPS.</dd>
+<dt>F24</dt><dd>Entro il 16 del mese dopo: ritenute IRPEF e addizionali, contributi INPS.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Giugno 2027</th><th class="n">Marco (magazzino)</th><th class="n">Sara (produzione)</th><th class="n">Giulia (amministrazione)</th></tr>
+<tr><td>Lordo</td><td class="n">2.221,39</td><td class="n">2.250,00</td><td class="n">2.600,00</td></tr>
+<tr><td>INPS dipendente</td><td class="n">204,15</td><td class="n">206,78</td><td class="n">238,94</td></tr>
+<tr><td>IRPEF netta</td><td class="n">202,51</td><td class="n">211,06</td><td class="n">317,40</td></tr>
+<tr><td>Netto in busta</td><td class="n">1.786,73</td><td class="n">1.802,16</td><td class="n">2.005,66</td></tr>
+<tr class="tot"><td>Costo azienda</td><td class="n">3.076,35</td><td class="n">3.115,97</td><td class="n">3.600,67</td></tr></table>
+<p>Marco ha 8 ore di straordinario al 25%: 2.100 ÷ 173 × 1,25 × 8 = 121,39 €. Calcolo didattico con parametri modificabili: le aliquote ditta e INAIL reali dipendono dal settore.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Presenze</b>straordinari</span><span class="f">→</span><span class="b"><b>Calcolo</b>lordo · INPS · IRPEF · netto</span><span class="f">→</span><span class="b mag"><b>CIPE</b>costi per centro</span><span class="f">→</span><span class="b"><b>Stipendi</b>D 27 / A 10</span><span class="f">→</span><span class="b"><b>F24</b>il 16</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Anagrafica dipendente</td><td>PA30 (infotipi 0001 organizzazione, 0008 retribuzione)</td></tr>
+<tr><td>Presenze</td><td>PA61 · infotipo 2010</td></tr>
+<tr><td>Calcolo e cedolino</td><td>PC00_M15_CALC · PC00_M15_CEDT</td></tr>
+<tr><td>Registrazione in contabilità</td><td>PC00_M99_CIPE · PCP0</td></tr>
+<tr><td>F24</td><td>report di versamento Italia (F24 telematico)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il costo del personale va sul centro di costo?</summary><p>Per sapere quanto costa ogni reparto: è la base delle tariffe orarie (qui 28 €/h) e dei sovraccosti del costo del prodotto.</p></details>
+<details><summary>Perché l'INAIL non è nell'F24 mensile?</summary><p>Si paga con l'autoliquidazione annuale: nel mese si accantona come debito.</p></details>
+{% endblock %}

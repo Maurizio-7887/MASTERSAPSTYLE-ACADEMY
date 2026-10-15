@@ -1,0 +1,41 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>I bonifici ai fornitori si preparano uno per uno sull'home banking.</li>
+  <li>L'estratto conto si «spunta» a mano, riga per riga, contro le fatture.</li>
+  <li>Nessuno sa dire quanta liquidità ci sarà fra un mese.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>La <b>tesoreria</b> lavora sulle <b>partite aperte</b> con la loro <b>scadenza</b>. Da qui nascono tre automatismi SAP: la <b>previsione di liquidità</b> (incassi e pagamenti attesi per settimana), il <b>programma di pagamento</b> F110 (sceglie le partite scadute, crea i bonifici SEPA, registra il pagamento) e l'<b>estratto conto elettronico</b> (la banca manda il file, le regole abbinano i movimenti alle partite).</p>
+<p class="lez-chiave">Partita aperta + scadenza → previsione · F110 · abbinamento automatico. A mano resta solo l'eccezione.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Partita aperta</dt><dd>Fattura (o nota di credito, acconto) non ancora pareggiata, con data di scadenza dai termini di pagamento.</dd>
+<dt>Pareggio</dt><dd>Abbinamento tra fattura e pagamento: con riferimento, oppure le più vecchie per prime.</dd>
+<dt>F110</dt><dd>Parametri → proposta → esecuzione → supporto di pagamento (file SEPA pain.001).</dd>
+<dt>Banca c/transito</dt><dd>Conto ponte tra il pagamento registrato e l'addebito effettivo della banca.</dd>
+<dt>Estratto conto elettronico</dt><dd>File della banca (CBI, camt.053): regole di ricerca per riferimento, importo, parole chiave.</dd>
+<dt>Riconciliazione</dt><dd>Saldo dell'estratto = saldo del conto banca.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Riga dell'estratto (giugno)</th><th class="n">Importo</th><th>Regola</th><th>Scrittura</th></tr>
+<tr><td>Addebito distinta F110-001</td><td class="n">−10.980,00</td><td>uguale alla distinta</td><td>D 18 / A 10</td></tr>
+<tr><td>Bonifico Beta «RIF FT 90000002»</td><td class="n">18.651,36</td><td>riferimento fattura</td><td>D 10 / A 11 Beta</td></tr>
+<tr><td>Bonifico Comune di Gamma «FT 90000004»</td><td class="n">12.383,00</td><td>riferimento fattura</td><td>D 10 / A 11 Gamma</td></tr>
+<tr><td>Bonifico Delta (senza riferimento)</td><td class="n">10.043,04</td><td>importo di una sola partita</td><td>D 10 / A 11 Delta</td></tr>
+<tr><td>Bonifico Edil Sigma</td><td class="n">4.800,00</td><td><b>nessuna: a mano</b></td><td>D 10 / A 11 Sigma (in conto)</td></tr>
+<tr><td>Commissioni e spese</td><td class="n">−18,50</td><td>parola chiave</td><td>D 58 / A 10</td></tr>
+<tr><td>Interessi creditori</td><td class="n">3,11</td><td>parola chiave</td><td>D 10 / A 59</td></tr></table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Fatture</b>partite con scadenza</span><span class="f">→</span><span class="b"><b>Previsione</b>FF7B</span><span class="f">→</span><span class="b mag"><b>F110</b>bonifici SEPA</span><span class="f">→</span><span class="b"><b>Estratto conto</b>abbinamento</span><span class="f">→</span><span class="b"><b>Riconciliazione</b>banca = conto 10</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione / app</th></tr>
+<tr><td>Partite aperte</td><td>FBL5N · FBL1N · Gestisci partite aperte cliente</td></tr>
+<tr><td>Posizione e previsione</td><td>FF7A · FF7B · Cash Flow Analyzer</td></tr>
+<tr><td>Pagamenti automatici</td><td>F110 · Gestisci pagamenti automatici</td></tr>
+<tr><td>Estratto conto</td><td>FF_5 · FEBAN · Riconcilia conti bancari</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il pagamento F110 non va direttamente sul conto banca?</summary><p>Perché il giorno in cui si invia il bonifico non è quello dell'addebito: il conto in transito mostra i soldi «in viaggio» e si chiude con l'estratto conto.</p></details>
+<details><summary>Che cosa si fa con un bonifico che non trova la fattura?</summary><p>Si registra in conto al cliente (partita a credito) e si chiede il dettaglio: qui Sigma paga 4.800 su 9.436,70.</p></details>
+{% endblock %}

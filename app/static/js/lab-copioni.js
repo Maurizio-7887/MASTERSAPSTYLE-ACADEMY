@@ -167,7 +167,32 @@
     ['Maggio — VT01N', function (X) { window.SP4.creaTrasporto({consegne: mag(X).map(function (c) { return c.numero; }).join(','), vettore: 'V20', targa: 'PT 456 CD', autista: 'Anna Neri', porto: 'franco', data: '2027-05-08'}); }],
     ['Varco RFID', function () { window.IN4.varco({trasporto: window.SP4.SP().trasporti.slice(-1)[0].numero, data: '2027-05-08'}); }],
     ['Maggio — partenza', function () { window.SP4.parti({trasporto: window.SP4.SP().trasporti.slice(-1)[0].numero, data: '2027-05-08'}); }],
-    ['Maggio — VF01', function (X) { mag(X).forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-05-10'}); }); }]);
+    ['Maggio — VF01', function (X) { mag(X).forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-05-10'}); }); }],
+    ['Cross-docking: come', null], ['KPI di fine maggio', null], ['Consegna il lavoro di maggio', null],
+    // giugno — tesoreria e paghe · luglio — valute
+    ['Giugno:', null], ['Posizione di cassa', null], ['Partite aperte e anzianità', null],
+    ['F110', function () { window.TS4.eseguiPagamenti({data: '2027-06-07'}); }],
+    ['Carica l', function () { window.TS4.caricaEstratto({data: '2027-06-15', righe: ESTRATTO_GIUGNO}); }],
+    ['Abbinamento automatico', function () { window.TS4.abbina({estratto: window.TS4.T().estratti.slice(-1)[0].numero}); }],
+    ['FEBAN', function () { var e = window.TS4.T().estratti.slice(-1)[0]; window.TS4.manuale({estratto: e.numero, riga: 5, cliente: 'C400', doc: ''}); }],
+    ['Riconciliazione', null],
+    ['Presenze di giugno', function () { window.PY4.presenze({matricola: '00001', periodo: '2027-06', straordinari: 8}); }],
+    ['Calcola i cedolini', function () { window.PY4.calcola({periodo: '2027-06'}); }],
+    ['Stampa il cedolino', null],
+    ['Registra la paga', function () { window.PY4.registra({periodo: '2027-06', data: '2027-06-30'}); }],
+    ['Paga gli stipendi', function () { window.PY4.pagaNetti({periodo: '2027-06', data: '2027-06-30'}); }],
+    ['Luglio:', null],
+    ['OB08', function () { [['2027-07-01', 1.10], ['2027-07-20', 1.08], ['2027-07-25', 1.09], ['2027-07-31', 1.12]].forEach(function (t) { window.FX4.tasso({valuta: 'USD', data: t[0], tasso: t[1]}); }); }],
+    ['FB70: fattura 22.000', function () { window.FX4.fatturaCliente({cliente: 'C500', importo: 22000, testo: 'progettazione impianto', data: '2027-07-01'}); }],
+    ['FB60', function () { window.FX4.fatturaFornitore({fornitore: 'F200', importo: 5500, rif: 'INV-7781', testo: 'consulenza tecnica', data: '2027-07-02'}); }],
+    ['FB70: fattura 11.000', function () { window.FX4.fatturaCliente({cliente: 'C500', importo: 11000, testo: 'assistenza tecnica', data: '2027-07-15'}); }],
+    ['F24', function () { window.PY4.f24({periodo: '2027-06', data: '2027-07-16'}); }],
+    ['Luglio — F-28', function () { window.FX4.regola({documento: window.FX4.V().documenti[0].numero, data: '2027-07-20'}); }],
+    ['Luglio — F-53', function () { window.FX4.regola({documento: window.FX4.V().documenti[1].numero, data: '2027-07-25'}); }],
+    ['FAGL_FCV', function () { window.FX4.valuta({data: '2027-07-31', storno: 'si'}); }]);
+  var ESTRATTO_GIUGNO = ['2027-06-08;-10980;SEPA SCT ADDEBITO DISTINTA F110-001 ACCIAIERIE UMBRE', '2027-06-09;18651,36;BONIFICO DA BETA COSTRUZIONI SRL RIF FT 90000002',
+    '2027-06-10;12383;BONIFICO COMUNE DI GAMMA MANDATO 145 FT 90000004', '2027-06-11;10043,04;BONIFICO DELTA NOLEGGI SRL', '2027-06-12;4800;BONIFICO EDIL SIGMA SRL',
+    '2027-06-15;-18,50;COMMISSIONI E SPESE TENUTA CONTO', '2027-06-15;3,11;INTERESSI CREDITORI NETTI'].join('\n');
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();

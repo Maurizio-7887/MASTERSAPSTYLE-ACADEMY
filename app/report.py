@@ -189,6 +189,22 @@ class Lavoro:
                          "ondata_metri_ordine": sum(o.get("metriOrdine") or 0 for o in wm.get("ondateRilasciate") or []),
                          "rfid_letture": sum(1 for x in (s.get("sped") or {}).get("colli") or [] if x.get("rfid")),
                          "consegne_maggio": sum(1 for c in s.get("consegne") or [] if c.get("wm") and c.get("pgi") and (c.get("data") or "") >= "2027-05-01"),
+                         "f110_totale": round(sum(r.get("totale") or 0 for r in (s.get("tes") or {}).get("pagamenti") or []), 2),
+                         "righe_automatiche": sum(1 for e in (s.get("tes") or {}).get("estratti") or [] for r in e.get("righe") or [] if r.get("stato") == "abbinata in automatico"),
+                         "estratto_completo": "sì" if (s.get("tes") or {}).get("estratti") and all(r.get("contabile") for e in s["tes"]["estratti"] for r in e.get("righe") or []) else "no",
+                         "banca_15_06": self.saldo("10", fino="2027-06-15"),
+                         "crediti_30_06": self.saldo("11", fino="2027-06-30"),
+                         "netti_giugno": round(sum(c.get("netto") or 0 for c in (s.get("hr") or {}).get("cedolini") or [] if c.get("periodo") == "2027-06"), 2),
+                         "costo_personale_giugno": round(self.saldo("80", fino="2027-06-30") + self.saldo("81", fino="2027-06-30") + self.saldo("82", fino="2027-06-30"), 2),
+                         "irpef_giugno": round(sum(c.get("irpef") or 0 for c in (s.get("hr") or {}).get("cedolini") or [] if c.get("periodo") == "2027-06"), 2),
+                         "fatture_valuta": len((s.get("fx") or {}).get("documenti") or []),
+                         "utili_cambi": -self.saldo("66", fino="2027-07-31"),
+                         "perdite_cambi": self.saldo("67", fino="2027-07-31"),
+                         "perdita_valutazione": self.saldo("68", fino="2027-07-31"),
+                         "iva_reverse_charge": round(sum(x.get("importo") or 0 for r in s.get("registrazioni") or [] if r.get("tipo") == "FATTURA_VALUTA" for x in r.get("righe") or [] if x.get("conto") == "14"), 2),
+                         "f24_versato": round(sum(r["righe"][-1]["importo"] for r in s.get("registrazioni") or [] if r.get("tipo") == "F24"), 2),
+                         "ricavi_servizi": -self.saldo("44", fino="2027-07-31"),
+                         "credito_usd_aperto": round(sum(d.get("importo") or 0 for d in (s.get("fx") or {}).get("documenti") or [] if d.get("lato") == "cliente" and not d.get("chiuso")), 2),
                          "quadratura_im_wm": ("sì" if wm.get("attivo") and all(abs(giac.get(m, 0) - tot_wm.get(m, 0)) < 1e-6 for m in giac) else "no")})
         return base
 

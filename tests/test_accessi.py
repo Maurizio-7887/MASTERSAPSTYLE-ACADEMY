@@ -196,7 +196,8 @@ for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-f
                                 ("erp-ft", "s4-vendite-copa", "lab-erp-finale.json", 8), ("erp-ft", "s4-costi-ml", "lab-erp-finale.json", 8),
                                 ("erp-ft", "s4-magazzino", "lab-erp-finale.json", 8),
                                 ("erp-ft", "s4-spedizione", "lab-erp-finale.json", 8),
-                                ("erp-ft", "s4-innovazione", "lab-erp-finale.json", 8)]:
+                                ("erp-ft", "s4-innovazione", "lab-erp-finale.json", 8),
+                                ("erp-ft", "s4-tesoreria-paghe", "lab-erp-finale.json", 8), ("erp-ft", "s4-valute", "lab-erp-finale.json", 8)]:
     lab = (Path(__file__).parent / file).read_text(encoding="utf-8")
     pagina = {"lab-hmlv": "/vuoto/alta-varieta/", "lab-rem": "/vuoto/ripetitiva/", "erp-ft": "/vuoto/s4/vendite/"}[slot]
     sl = sync(a.get(pagina).get_data(as_text=True))

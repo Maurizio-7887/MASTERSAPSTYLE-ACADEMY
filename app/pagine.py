@@ -262,13 +262,16 @@ LABORATORI = {
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
-               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"), ("static", "js/lab-copioni.js"),
+               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
+               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
                "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
                "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)",
-               "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)", "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
+               "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)",
+               "erp_tesoreria": "Tesoreria (cassa, pagamenti, estratti conto)", "erp_valute": "Valute estere", "erp_paghe": "Paghe e costo del personale",
+               "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -309,6 +312,17 @@ _ERP_PAGINE = {
                         {"endpoint": "slotting", "titolo": "Slotting ABC", "icona": "🧭", "tcode": "/SCWM/SLOT · ricollocazione"},
                         {"endpoint": "ondate", "titolo": "Prelievo a ondate e cross-docking", "icona": "🌊", "tcode": "/SCWM/WAVE · VL35"},
                         {"endpoint": "rfid", "titolo": "Varco RFID", "icona": "📡", "tcode": "EPC SSCC-96 · SAP AII"}],
+    "erp_tesoreria": [{"endpoint": "posizione", "titolo": "Posizione di cassa e previsione", "icona": "💧", "tcode": "FF7A · FF7B"},
+                      {"endpoint": "partite", "titolo": "Partite aperte e scadenze", "icona": "📒", "tcode": "FBL5N · FBL1N · anzianità"},
+                      {"endpoint": "pagamenti", "titolo": "Pagamenti automatici", "icona": "💸", "tcode": "F110 · SEPA pain.001"},
+                      {"endpoint": "estratti", "titolo": "Estratto conto elettronico", "icona": "🏦", "tcode": "FF_5 · FEBAN"}],
+    "erp_valute": [{"endpoint": "tassi", "titolo": "Tassi di cambio", "icona": "💱", "tcode": "OB08"},
+                   {"endpoint": "documenti", "titolo": "Fatture in valuta", "icona": "🧾", "tcode": "FB70 · FB60"},
+                   {"endpoint": "regolazioni", "titolo": "Incassi e pagamenti in valuta", "icona": "🏦", "tcode": "F-28 · F-53"},
+                   {"endpoint": "valutazione", "titolo": "Valutazione di fine periodo", "icona": "📆", "tcode": "FAGL_FCV"}],
+    "erp_paghe": [{"endpoint": "dipendenti", "titolo": "Dipendenti e parametri", "icona": "👷", "tcode": "PA30"},
+                  {"endpoint": "cedolino", "titolo": "Presenze e cedolino", "icona": "🧾", "tcode": "PC00_M15_CALC · CEDT"},
+                  {"endpoint": "contabilita", "titolo": "Registrazione, stipendi e F24", "icona": "📒", "tcode": "PC00_M99_CIPE · F24"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
@@ -316,7 +330,8 @@ _ERP_PAGINE = {
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
-           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js"}
+           "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js",
+           "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js"}
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
         _p["ep"] = f"{_bp}.{_p['endpoint']}"
@@ -339,7 +354,7 @@ MODULI += [
      "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
      "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
     {"codice": "s4", "sigla": "S/4", "breve": "Sistema integrato", "titolo": "Sistema integrato S/4", "icona": "🏢", "colore": "laboratorio", "kpi": None,
-     "descrizione": "Un solo libro giornale: vendite e resi, CO-PA; acquisti, produzione, costo standard, varianze di lotto, Material Ledger; magazzino a ubicazioni con pistola RF e inventari",
+     "descrizione": "Un solo libro giornale: vendite e resi, CO-PA; acquisti, produzione, costo standard, varianze di lotto, Material Ledger; magazzino a ubicazioni con pistola RF, inventari e spedizione; tesoreria, valute e paghe",
      "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None, p["gruppo"]) for p in _ERP_NAV]},
 ]
 
@@ -372,4 +387,7 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.magazziniere_cammina", None, "Il magazziniere cammina troppo?", "🧭", "slotting · ondate", None),
             ("formazione.misurare_magazzino", None, "Come misuri il tuo magazzino?", "📈", "KPI di magazzino", None),
             ("formazione.rfid_automazione", None, "Leggere tutto in un colpo?", "📡", "RFID · automazione · cross-docking", None),
+            ("formazione.previsione_cassa", None, "Non sai quanta cassa avrai?", "💧", "tesoreria · F110 · estratto conto", None),
+            ("formazione.valute_estere", None, "Vendi e compri in dollari?", "💱", "cambi · FAGL_FCV", None),
+            ("formazione.costo_personale", None, "Quanto costa davvero un dipendente?", "🧾", "cedolino · F24 · CdC", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

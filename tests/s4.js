@@ -6,9 +6,9 @@ let errori = 0, controlli = 0;
 const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
-const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js', erp_innovazione: 'in-pagine.js'};
+const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js', erp_tesoreria: 'tes-pagine.js', erp_valute: 'val-pagine.js', erp_paghe: 'py-pagine.js', erp_innovazione: 'in-pagine.js'};
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js',
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js',
   'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
 let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
 function apri(bp, pagina) {
@@ -337,14 +337,51 @@ for (let i = 0; i < 2; i++) { p = apri('erp_vendite', 'fatture'); bene(p.fai('vf
   ok(xd && xd.da === 'GR-ZONE' && S2.wm.compiti.some(t => t.stato === 'annullato' && /cross-docking/.test(t.motivo)), 'cross-docking: messa a posto annullata, prelievo dalla GR-ZONE');
 }
 { const S5 = p.S(); ok(S5.giacenze['TR-PED'] === 28, 'giacenza TR-PED fine maggio ' + S5.giacenze['TR-PED']); ok(p.w.WM4.quadratura().every(q => q.ok), 'quadratura IM–WMS a maggio');
-  const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  const {st, passi} = guidaStati(p.w, CHIAVE); const GIU = passi.findIndex(x => x.titolo.indexOf('Giugno:') === 0); const manc = passi.slice(0, GIU).map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
   ok(!manc.length, 'guida S/4 con maggio: passi non riconosciuti → ' + manc.join(' | ')); }
 p = apri('erp_innovazione', 'kpi'); ok(/MAG01 Marco/.test(p.testo()) && /Produttività/.test(p.testo()), 'KPI con produttività per risorsa');
+// ═══ GIUGNO — tesoreria e paghe ═══
+const salS = (S0, c, fino) => Math.round(S0.registrazioni.filter(r => !fino || r.data <= fino).reduce((t, r) => t + r.righe.filter(x => x.conto === c).reduce((u, x) => u + (x.dareAvere === 'DARE' ? x.importo : -x.importo), 0), 0) * 100) / 100;
+p = apri('erp_tesoreria', 'posizione'); p.lab.querySelector('#fd').value = '2027-06-01'; p.lab.querySelector('#fd').dispatchEvent(new p.w.Event('change'));
+ok(/70\.?497,70/.test(p.testo()) && /68\.?653,80/.test(p.testo()), 'posizione di cassa al 01/06: banca 68.653,80, crediti scaduti 70.497,70');
+p = apri('erp_tesoreria', 'partite'); ok(/90000002/.test(p.testo()) && /18\.?651,36/.test(p.testo()), 'partite aperte con il pareggio della nota di credito');
+p = apri('erp_tesoreria', 'pagamenti'); p.lab.querySelector('#fd').value = '2027-06-07'; p.lab.querySelector('#fd').dispatchEvent(new p.w.Event('change'));
+ok(/5105600001/.test(p.testo()), 'proposta F110 con la fattura scaduta');
+bene(p.fai('pg', {data: '2027-06-07'}), 'F110 eseguito'); ok(/pain\.001/.test(p.testo()) && /IT60X0542811101000000123456/.test(p.testo()), 'file SEPA con IBAN');
+p = apri('erp_tesoreria', 'estratti'); p.lab.querySelector('#esempio').click(); bene(p.fai('ec', {data: '2027-06-15'}), 'estratto conto caricato');
+p = apri('erp_tesoreria', 'estratti'); bene(p.fai('ab', {}), 'abbinamento automatico');
+ok(p.S().tes.estratti[0].righe.filter(x => x.stato === 'abbinata in automatico').length === 6, '6 righe su 7 in automatico');
+p = apri('erp_tesoreria', 'estratti'); p.fai('mn', {riga: '5', cliente: 'C400', doc: ''}); ok(p.S().tes.estratti[0].righe[4].contabile, 'FEBAN: bonifico di Sigma a mano');
+ok(/quadrano/.test(apri('erp_tesoreria', 'estratti').testo()), 'riconciliazione estratto = conto 10');
+p = apri('erp_paghe', 'cedolino'); bene(p.fai('pr', {matricola: '00001', periodo: '2027-06', straordinari: '8'}), 'presenze di giugno');
+bene(p.fai('ca', {periodo: '2027-06'}), 'calcolo dei cedolini');
+p = apri('erp_paghe', 'cedolino'); ok(/CEDOLINO PAGA/.test(p.testo()) && /1\.?786,73/.test(p.testo()), 'cedolino di Marco: netto 1.786,73');
+p = apri('erp_paghe', 'contabilita'); bene(p.fai('rg', {periodo: '2027-06', data: '2027-06-30'}), 'registrazione della paga');
+p = apri('erp_paghe', 'contabilita'); bene(p.fai('pn', {periodo: '2027-06', data: '2027-06-30'}), 'pagamento degli stipendi');
+ok(/3\.?076,35/.test(p.testo()) && /Magazzino/.test(p.testo()), 'costo del personale per centro di costo');
+{ const S6 = p.S(); vicino(salS(S6, '10', '2027-06-15'), 103535.81, 'banca al 15/06'); vicino(salS(S6, '18'), 0, 'banca in transito chiusa'); vicino(salS(S6, '27'), 0, 'netti pagati'); }
+// ═══ LUGLIO — valute e F24 ═══
+p = apri('erp_valute', 'tassi');
+for (const [d, t] of [['2027-07-01', '1,10'], ['2027-07-20', '1,08'], ['2027-07-25', '1,09'], ['2027-07-31', '1,12']]) bene(p.fai('tx', {valuta: 'USD', data: d, tasso: t}), 'OB08 ' + d);
+p = apri('erp_valute', 'documenti'); bene(p.fai('fc', {cliente: 'C500', importo: '22000', testo: 'progettazione impianto', data: '2027-07-01'}), 'FB70 22.000 USD');
+bene(p.fai('ff', {fornitore: 'F200', importo: '5500', rif: 'INV-7781', testo: 'consulenza tecnica', data: '2027-07-02'}), 'FB60 5.500 USD');
+bene(p.fai('fc', {cliente: 'C500', importo: '11000', testo: 'assistenza tecnica', data: '2027-07-15'}), 'FB70 11.000 USD');
+p = apri('erp_paghe', 'contabilita'); bene(p.fai('f2', {periodo: '2027-06', data: '2027-07-16'}), 'F24 di luglio');
+const docs = () => p.S().fx.documenti;
+p = apri('erp_valute', 'regolazioni'); bene(p.fai('rg', {documento: docs()[0].numero, data: '2027-07-20'}), 'incasso 22.000 USD');
+p = apri('erp_valute', 'regolazioni'); bene(p.fai('rg', {documento: docs()[1].numero, data: '2027-07-25'}), 'pagamento 5.500 USD');
+p = apri('erp_valute', 'valutazione'); bene(p.fai('vl', {data: '2027-07-31', storno: 'si'}), 'FAGL_FCV');
+{ const S7 = p.S();
+  vicino(-salS(S7, '66'), 370.37, 'utile su cambi realizzato'); vicino(salS(S7, '67'), 45.87, 'perdita su cambi realizzata'); vicino(salS(S7, '68', '2027-07-31'), 178.57, 'perdita non realizzata al 31/07'); vicino(salS(S7, '68'), 0, 'storno al 01/08');
+  vicino(salS(S7, '28'), 0, 'INPS versato'); vicino(salS(S7, '29'), 0, 'Erario versato');
+  let d7 = 0, a7 = 0; S7.registrazioni.forEach(r => r.righe.forEach(x => { if (x.dareAvere === 'DARE') d7 += x.importo; else a7 += x.importo; })); ok(Math.abs(d7 - a7) < 0.005, 'luglio: quadratura Dare = Avere');
+  const {st, passi} = guidaStati(p.w, CHIAVE); const manc = passi.map((x, i) => x.fatto && !st[i] ? (i + 1) + '. ' + x.titolo : null).filter(Boolean);
+  ok(!manc.length, 'guida S/4 completa fino a luglio: passi non riconosciuti → ' + manc.join(' | ')); }
 if (ultima) memoria = ultima.localStorage.getItem(CHIAVE);
 const SF = JSON.parse(memoria);
 
 // lezioni «Che situazione hai?»: il copione prepara il sistema fino al passo, la finestra si apre lì
-for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID']) {
+for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', 'KKS2: leggi', 'CKMLCP', 'Mappa', 'Crea il documento d', 'ABC', 'Valorizzazione', 'Aprile — VL01N', 'RF: preleva la consegna del Comune', 'Imballo: 5 pallet', 'Slotting', 'KPI di maggio', 'Varco RFID', 'F110', 'Calcola i cedolini', 'Luglio — F-28']) {
   const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/s4/?passo=' + encodeURIComponent(passo), runScripts: 'outside-only'}).window;
   LOGICA.forEach(f => w.eval(R(f)));
   w.SD4.avvia('t'); const St = w.LabCopioni.esegui(w.LabCopioni.SD4, w.SD4, passo);
@@ -359,5 +396,5 @@ for (const passo of ['VK11: prezzo speciale', 'F-37', 'Reso:', 'KE30', 'KZZ2', '
   vicino(w.COPA.report(St, 'cliente', {dal: '2027-02-01', al: '2027-02-28'}).totale.mdc1, 9339.87, 'copione completo: MdC I di febbraio');
 }
 fs.writeFileSync(path.join(__dirname, 'lab-erp-finale.json'), JSON.stringify(SF));
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario, aprile spedizione, maggio innovazione: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ sistema integrato S/4 dalle pagine — gennaio vendite e CO-PA, febbraio CO-PC e Material Ledger, marzo WMS e inventario, aprile spedizione, maggio innovazione, giugno tesoreria e paghe, luglio valute: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);
