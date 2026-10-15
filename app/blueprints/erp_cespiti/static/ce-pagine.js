@@ -37,6 +37,11 @@
           L.tabella(['Cespite', 'Descrizione', 'In funzione', 'Costo›', 'Aliquota›', 'Mesi›', 'Quota›'], prev, 'Nessun cespite in uso.') +
           L.modulo('af', [['data', 'Data di registrazione (fine periodo)', 'date', al]], [['af', 'Registra gli ammortamenti (AFAB)']]) +
           '<p class="lab-nota">Quota = costo × aliquota × mesi / 12. D 50 Ammortamenti / A 02 / 04 Fondo ammortamento. Si registra di solito una volta l\'anno al 31/12: le quote già registrate non si ripetono.</p>') +
+        L.scheda('⚖️', 'Ammortamento civilistico e fiscale ' + al.slice(0, 4), 'doppio binario · art. 102 TUIR · DM 31/12/1988', (function () { var f = CE.fiscale(al.slice(0, 4));
+          return L.tabella(['Cespite', 'Civilistico›', 'Coefficiente fiscale', 'Massimo deducibile›', 'Deducibile›', 'Variazione›', 'Eccedenza da recuperare›'], f.righe.map(function (x) {
+            return [x.codice + (x.ceduto ? ' (ceduto)' : ''), eur(x.civile), x.coeff + '%' + (x.primoAnno ? ' a metà (primo anno)' : ''), eur(x.massimo), eur(x.deducibile),
+              x.aumento ? '+ ' + eur(x.aumento) : x.diminuzione ? '− ' + eur(x.diminuzione) : '—', eur(x.eccedenzaFine) + (x.recuperoCessione ? ' (recuperati ' + eur(x.recuperoCessione) + ' alla cessione)' : '')]; }), 'Nessuna quota nell\'anno.') +
+            '<p class="lab-nota">In bilancio l\'ammortamento segue l\'uso del bene (mesi). Il fisco ammette al massimo il coefficiente tabellare, ridotto alla metà nell\'anno di entrata in funzione: l\'eccedenza è una variazione in aumento IRES e IRAP che si recupera negli anni dopo o alla cessione (vedi Imposte).</p>'; })()) +
         L.scheda('🏭', 'Registro', 'AW01N', registro());
       radice.querySelector('#al').onchange = function () { radice.dataset.al = this.value; rendi(); };
       L.collega(radice, 'af', {af: CE.ammortizza}, rendi);

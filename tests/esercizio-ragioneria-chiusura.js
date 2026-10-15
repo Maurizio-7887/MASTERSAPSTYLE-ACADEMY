@@ -133,22 +133,26 @@ p = apri('erp_chiusura', 'iva'); bene(p.fai('lq', {periodo: '2027-T2', data: '20
 p = apri('erp_cespiti', 'cessione'); bene(p.fai('cs', {cespite: 'CE-0002', cliente: 'C600', prezzo: '6500', iva: '22', data: '2027-11-30'}), 'cessione carrello'); checkpoint('Cessione');
 vicino(saldo('46'), 566.67, 'minusvalenza'); vicino(saldo('03'), 0, 'mezzi eliminati'); vicino(saldo('04'), 0, 'fondo mezzi eliminato');
 p = apri('erp_vendite', 'incassi'); bene(p.fai('in', {cliente: 'C600', importo: '7930', rif: 'CESSIONE CARRELLO', data: '2027-12-15'}), 'incasso cessione');
-p = apri('erp_chiusura', 'chiusura'); ok(/Ammortamenti 2027 non registrati/.test(p.testo()) && /IRES 2027 non registrata/.test(p.testo()), 'controlli prima della chiusura');
+p = apri('erp_chiusura', 'chiusura'); ok(/Ammortamenti 2027 non registrati/.test(p.testo()) && /Imposte 2027 \(IRES e IRAP\) non registrate/.test(p.testo()), 'controlli prima della chiusura');
 ok(/ko/.test(p.fai('ch', {anno: '2027', forza: 'no'})), 'chiusura rifiutata con avvertenze');
 p = apri('erp_cespiti', 'ammortamenti'); bene(p.fai('af', {data: '2027-12-31'}), 'AFAB 2027'); vicino(saldo('02'), -800, 'fondo saldatrice 800');
 p = apri('erp_chiusura', 'iva'); bene(p.fai('lq', {periodo: '2027-T4', data: '2027-12-31'}), 'liquidazione T4'); vicino(saldo('14'), 110, 'credito IVA a fine anno');
-p = apri('erp_chiusura', 'imposte'); ok(/26\.?424,67/.test(p.testo()), 'risultato prima delle imposte 26.424,67');
-bene(p.fai('ir', {anno: '2027', aumenti: '', diminuzioni: '', aliquota: '24', data: '2027-12-31'}), 'IRES'); vicino(-saldo('23'), 6341.92, 'IRES 6.341,92'); checkpoint('Fine anno');
+p = apri('erp_cespiti', 'ammortamenti'); ok(/a metà \(primo anno\)/.test(p.testo()) && /600,00/.test(p.testo()), 'doppio binario: massimo fiscale saldatrice 600');
+{ const f = p.w.CE4.fiscale('2027'); vicino(f.totali.aumento, 333.33, 'ammortamenti non deducibili'); vicino(f.totali.recuperoCessione, 133.33, 'recupero alla cessione'); vicino(f.totali.eccedenzaFine, 200, 'differenza temporanea a fine anno'); }
+p = apri('erp_chiusura', 'imposte'); ok(/26\.?424,67/.test(p.testo()) && /26\.?624,67/.test(p.testo()) && /26\.?882,97/.test(p.testo()), 'prospetti IRES e IRAP');
+p.fai('ir', {anno: '2027', aumenti: '', diminuzioni: '', aliquota: '24', aliquotaIrap: '3,9', data: '2027-12-31'}); ok(/Imposte 2027 registrate/.test(p.testo()), 'imposte registrate');
+vicino(-saldo('23'), 6389.92, 'IRES 6.389,92'); vicino(-saldo('35'), 1048.44, 'IRAP 1.048,44'); vicino(saldo('17'), 55.8, 'imposte anticipate 55,80'); vicino(-saldo('51'), 55.8, 'provento da imposte anticipate'); checkpoint('Fine anno');
+p = apri('erp_chiusura', 'imposte'); ok(/Imposte 2027 registrate/.test(p.testo()), 'imposte registrate una volta');
 p = apri('erp_chiusura', 'chiusura'); ok(/Controlli superati/.test(p.testo()), 'controlli verdi');
 const regPrimaCh = p.S().registrazioni.length; p.fai('ch', {anno: '2027', forza: 'no'}); ok(!!p.S().chiusure['2027'] && /Esercizio 2027 chiuso/.test(p.testo()), 'chiusura 2027');
 { const S = p.S(), nuovi = S.registrazioni.slice(regPrimaCh); ok(nuovi.map(r => r.tipo).join() === 'EPILOGO,RISULTATO,CHIUSURA_SP', 'tre documenti di chiusura');
   vicino(-saldo('32', '2027-12-30') , 0, 'utile non ancora sul 32 prima della chiusura');
-  vicino(S.chiusure['2027'].utile, 20082.75, 'utile 2027');
+  vicino(S.chiusure['2027'].utile, 19042.11, 'utile 2027');
   const nz = {}; S.registrazioni.forEach(r => r.righe.forEach(x => nz[x.conto] = Math.round(((nz[x.conto] || 0) + (x.dareAvere === 'DARE' ? x.importo : -x.importo)) * 100) / 100));
   ok(Object.values(nz).every(v => Math.abs(v) < 0.005), 'dopo la chiusura tutti i conti a zero'); }
 p = apri('erp_fi', 'fatture'); ok(/chiuso/.test(p.fai('fs', {cliente: 'C200', testo: 'prova', imponibile: '10', iva: '22', scadenza: '', data: '2027-12-31'})), 'nessuna scrittura nel 2027 chiuso');
 p = apri('erp_chiusura', 'riapertura'); p.fai('ra', {anno: '2028', data: '2028-01-01'}); ok(!!p.S().chiusure['2027'].riapertura && /riaperto/.test(p.testo()), 'riapertura 2028'); checkpoint('Riapertura');
-vicino(saldo('10'), 77807.7, 'banca riaperta'); vicino(saldo('13'), 17842.37, 'prodotti finiti riaperti'); vicino(saldo('01') + saldo('02'), 11200, 'saldatrice netta'); vicino(-saldo('32'), 20082.75, 'utile da destinare');
+vicino(saldo('10'), 77807.7, 'banca riaperta'); vicino(saldo('13'), 17842.37, 'prodotti finiti riaperti'); vicino(saldo('01') + saldo('02'), 11200, 'saldatrice netta'); vicino(-saldo('32'), 19042.11, 'utile da destinare'); vicino(saldo('17'), 55.8, 'imposte anticipate riaperte');
 vicino(saldo('90') + saldo('91') + saldo('92'), 0, 'conti di chiusura a zero');
 { const c = p.w.CH4.calcolaIva('2028-T1'); vicino(c.credito, 0, 'la riapertura non è IVA del 2028'); vicino(c.riporto, 110, 'credito IVA riportato dal 2027'); vicino(c.saldo, -110, 'primo trimestre 2028 parte a credito');
   ok(!p.w.CH4.controlli('2028').some(x => /IVA non ancora liquidata/.test(x)), 'riapertura non risulta come IVA da liquidare'); }
@@ -159,5 +163,5 @@ ok(p.w.WM4.quadratura().every(q => q.ok) && p.S().giacenze.FERRO === 2200, 'maga
 for (const passo of p.w.MSA_ESERCIZIO.passi.filter(x => x.fatto)) ok(passo.fatto({S: p.S()}), 'spunta automatica: ' + passo.titolo);
 fs.writeFileSync(path.join(__dirname, 'ragioneria-chiusura-finale.json'), JSON.stringify(p.S()));
 p.w.close();
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ ragioneria seconda parte — cespiti, servizi e SdI, Ri.Ba., factoring, IVA trimestrale, IRES, chiusura e riapertura: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ ragioneria seconda parte — cespiti con doppio binario fiscale, servizi e SdI, Ri.Ba., factoring, IVA trimestrale, IRES, IRAP e imposte anticipate, chiusura e riapertura: ' + controlli + ' controlli');
 if (errori) process.exit(1);

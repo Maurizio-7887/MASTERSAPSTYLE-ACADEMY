@@ -376,7 +376,7 @@ _ERP_PAGINE = {
                     {"endpoint": "ammortamenti", "titolo": "Ammortamenti", "icona": "🧮", "tcode": "AFAB"},
                     {"endpoint": "cessione", "titolo": "Cessione di un cespite", "icona": "🔁", "tcode": "ABAVN · F-92"}],
     "erp_chiusura": [{"endpoint": "iva", "titolo": "Liquidazione IVA e F24", "icona": "🧮", "tcode": "registro IVA · liquidazione · F24"},
-                     {"endpoint": "imposte", "titolo": "Imposte (IRES)", "icona": "🧾", "tcode": "IRES · variazioni fiscali"},
+                     {"endpoint": "imposte", "titolo": "Imposte (IRES, IRAP, anticipate)", "icona": "🧾", "tcode": "IRES · IRAP · OIC 25"},
                      {"endpoint": "chiusura", "titolo": "Chiusura dell'esercizio", "icona": "🔒", "tcode": "epilogo · FAGLGVTR"},
                      {"endpoint": "riapertura", "titolo": "Riapertura e destinazione dell'utile", "icona": "🔓", "tcode": "1° gennaio · F.16"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},

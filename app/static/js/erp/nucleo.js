@@ -33,10 +33,10 @@
     ['01', 'Impianti e macchinari', 'ATTIVO'], ['02', 'Fondo ammortamento impianti e macchinari', 'ATTIVO'],
     ['03', 'Mezzi di movimentazione interna', 'ATTIVO'], ['04', 'Fondo ammortamento mezzi di movimentazione', 'ATTIVO'],
     ['15', 'Crediti verso factor', 'ATTIVO'], ['23', 'Erario c/IRES', 'PASSIVO'], ['25', 'Erario c/IVA', 'PASSIVO'],
-    ['32', 'Utile (perdita) d\'esercizio', 'PASSIVO'], ['33', 'Riserva legale', 'PASSIVO'],
+    ['32', 'Utile (perdita) d\'esercizio', 'PASSIVO'], ['17', 'Crediti per imposte anticipate', 'ATTIVO'], ['35', 'Erario c/IRAP', 'PASSIVO'], ['52', 'IRAP corrente', 'COSTO'], ['51', 'Imposte anticipate (−) e differite (+)', 'COSTO'], ['33', 'Riserva legale', 'PASSIVO'],
     ['36', 'Banca c/anticipi salvo buon fine (RiBa)', 'PASSIVO'], ['37', 'Debiti verso factor (pro solvendo)', 'PASSIVO'],
     ['45', 'Plusvalenze da cessione cespiti', 'RICAVO'], ['46', 'Minusvalenze da cessione cespiti', 'COSTO'], ['50', 'Ammortamenti', 'COSTO'],
-    ['53', 'Interessi su IVA trimestrale', 'COSTO'], ['55', 'Oneri su cessione crediti (factoring)', 'COSTO'], ['56', 'Imposte sul reddito (IRES)', 'COSTO'],
+    ['53', 'Interessi su IVA trimestrale', 'COSTO'], ['55', 'Oneri su cessione crediti (factoring)', 'COSTO'], ['56', 'IRES corrente', 'COSTO'],
     ['90', 'Conto economico (epilogo)', 'CHIUSURA'], ['91', 'Stato patrimoniale finale', 'CHIUSURA'], ['92', 'Stato patrimoniale iniziale', 'CHIUSURA'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
   ];

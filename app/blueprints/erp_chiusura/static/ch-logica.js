@@ -2,7 +2,7 @@
    IVA: liquidazione periodica (mensile o trimestrale): si confrontano IVA a debito (21) e a credito (14) maturate fino a fine periodo.
      Debito → D 21 / A 14 / A 25 Erario c/IVA, da versare con F24 entro il 16 del mese dopo (trimestrale: + 1% di interessi, e il 16 del secondo mese).
      Credito → D 21 / A 14 per l'IVA a debito; il credito residuo resta sul 14 e si riporta al periodo dopo.
-   IRES 24% sul risultato prima delle imposte ± variazioni fiscali: D 56 / A 23 Erario c/IRES (IRAP non calcolata: semplificazione didattica).
+   Imposte: IRES 24% e IRAP 3,9% con le variazioni fiscali (ammortamenti oltre i coefficienti, primo anno a metà) e le imposte anticipate.
    Chiusura (31/12): epilogo dei costi e dei ricavi nel Conto economico (90), risultato al conto 32, chiusura delle attività e passività
    nello Stato patrimoniale finale (91). Riapertura (1/1): le stesse attività e passività dallo Stato patrimoniale iniziale (92).
    In SAP il riporto dei saldi è FAGLGVTR (e F.16 per clienti e fornitori): le partite aperte restano quelle dei documenti originali. */
@@ -67,25 +67,57 @@ window.CH4 = (function () {
   function contoEconomico(anno, senzaImposte) {
     var al = anno + '-12-31', dal = anno + '-01-01', voci = {};
     S().registrazioni.forEach(function (r) { if (r.data < dal || r.data > al || r.tipo === 'EPILOGO') return;
-      r.righe.forEach(function (x) { var t = tipo(x.conto); if (t !== 'COSTO' && t !== 'RICAVO') return; if (senzaImposte && x.conto === '56') return;
+      r.righe.forEach(function (x) { var t = tipo(x.conto); if (t !== 'COSTO' && t !== 'RICAVO') return; if (senzaImposte && IMPOSTE[x.conto]) return;
         voci[x.conto] = r2((voci[x.conto] || 0) + (x.dareAvere === 'DARE' ? x.importo : -x.importo)); }); });
     var ricavi = 0, costi = 0, righe = [];
     Object.keys(voci).sort(function (a, b) { return a.localeCompare(b, 'it', {numeric: true}); }).forEach(function (c) { if (Math.abs(voci[c]) < 0.005) return; righe.push({conto: c, nome: nome(c), tipo: tipo(c), saldo: voci[c]}); if (voci[c] < 0) ricavi -= voci[c]; else costi += voci[c]; });
     return {righe: righe, ricavi: r2(ricavi), costi: r2(costi), risultato: r2(ricavi - costi)};
   }
-  function calcolaIres(i) {
+  // ── imposte dell'esercizio: IRES e IRAP correnti, imposte anticipate sulle differenze temporanee ──
+  // IRES (art. 83 TUIR): risultato prima delle imposte ± variazioni. Automatiche: ammortamenti oltre i coefficienti fiscali
+  // (in aumento), recuperi e minor valore fiscale alla cessione (in diminuzione). Manuali: le altre variazioni.
+  // IRAP (art. 5 D.Lgs. 446/1997, società di capitali): valore della produzione = differenza tra valore e costi della produzione,
+  // quindi SENZA proventi e oneri finanziari (area C: interessi, oneri di factoring, cambi) e senza le imposte. I costi del
+  // personale dipendente a tempo indeterminato sono deducibili (art. 11 c. 4-octies). Ammortamenti nei limiti fiscali come IRES.
+  // L'IRAP non è deducibile dall'IRES (la deduzione forfetaria del 10% e quella sul costo del personale sono per cassa: nel primo anno
+  // senza versamenti IRAP non spettano). Imposte anticipate (OIC 25): differenze temporanee × (aliquota IRES + IRAP).
+  var FINANZIARI = {'53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
+  var IMPOSTE = {'56': 1, '52': 1, '51': 1};
+  function calcolaImposte(i) {
     var anno = String(i.anno || '').trim(); if (!/^\d{4}$/.test(anno)) throw Error('Anno non valido.');
-    var ce = contoEconomico(anno, true), aum = L.num(i.aumenti || 0, 'Variazioni in aumento', 0), dim = L.num(i.diminuzioni || 0, 'Variazioni in diminuzione', 0), aliq = L.num(i.aliquota || 24, 'Aliquota IRES %', 0);
-    var base = r2(Math.max(0, ce.risultato + aum - dim));
-    return {anno: anno, risultato: ce.risultato, aumenti: aum, diminuzioni: dim, base: base, aliquota: aliq, ires: r2(base * aliq / 100)};
+    var al = anno + '-12-31', dal = anno + '-01-01', voci = {};
+    S().registrazioni.forEach(function (r) { if (r.data < dal || r.data > al || r.chiusura) return;
+      r.righe.forEach(function (x) { var t = tipo(x.conto); if (t !== 'COSTO' && t !== 'RICAVO') return; voci[x.conto] = r2((voci[x.conto] || 0) + (x.dareAvere === 'DARE' ? x.importo : -x.importo)); }); });
+    var ante = 0; Object.keys(voci).forEach(function (c) { if (!IMPOSTE[c]) ante -= voci[c]; }); ante = r2(ante);
+    var fis = window.CE4 ? window.CE4.fiscale(anno) : {righe: [], totali: {aumento: 0, diminuzione: 0, recuperoCessione: 0, eccedenzaFine: 0, eccedenzaInizio: 0}}, ft = fis.totali;
+    var aum = L.num(i.aumenti || 0, 'Altre variazioni in aumento', 0), dim = L.num(i.diminuzioni || 0, 'Altre variazioni in diminuzione', 0);
+    var aIres = L.num(i.aliquota || i.aliquotaIres || 24, 'Aliquota IRES %', 0), aIrap = L.num(i.aliquotaIrap == null || i.aliquotaIrap === '' ? 3.9 : i.aliquotaIrap, 'Aliquota IRAP %', 0);
+    var varIres = [['Ammortamenti oltre il limite fiscale (art. 102 TUIR, primo anno a metà)', ft.aumento], ['Recupero di ammortamenti non dedotti negli anni prima', -ft.diminuzione],
+      ['Cessioni: maggior valore fiscale residuo (minusvalenza fiscale più alta)', -ft.recuperoCessione], ['Altre variazioni in aumento', aum], ['Altre variazioni in diminuzione', -dim]];
+    var baseIres = r2(Math.max(0, ante + varIres.reduce(function (t, v) { return t + v[1]; }, 0))), ires = r2(baseIres * aIres / 100);
+    var fin = Object.keys(FINANZIARI).filter(function (c) { return Math.abs(voci[c] || 0) > 0.004; }).map(function (c) { return [c + ' ' + FINANZIARI[c], voci[c]]; });
+    var vp = r2(ante + fin.reduce(function (t, v) { return t + v[1]; }, 0));   // si tolgono gli oneri (si aggiungono) e i proventi (si sottraggono) finanziari
+    var varIrap = [['Ammortamenti oltre il limite fiscale', ft.aumento], ['Recupero di ammortamenti non dedotti', -ft.diminuzione], ['Cessioni: maggior valore fiscale residuo', -ft.recuperoCessione]];
+    var baseIrap = r2(Math.max(0, vp + varIrap.reduce(function (t, v) { return t + v[1]; }, 0))), irap = r2(baseIrap * aIrap / 100);
+    var tempFine = ft.eccedenzaFine, tempInizio = ft.eccedenzaInizio, anticipate = r2((tempFine - tempInizio) * (aIres + aIrap) / 100);
+    return {anno: anno, risultato: ante, voci: voci, fiscale: fis, variazioniIres: varIres, aumenti: aum, diminuzioni: dim, base: baseIres, aliquota: aIres, ires: ires,
+      finanziari: fin, valoreProduzione: vp, variazioniIrap: varIrap, baseIrap: baseIrap, aliquotaIrap: aIrap, irap: irap,
+      differenzeTemporanee: {inizio: tempInizio, fine: tempFine}, anticipate: anticipate, totaleImposte: r2(ires + irap - anticipate), utile: r2(ante - ires - irap + anticipate)};
   }
+  var calcolaIres = calcolaImposte;
   function registraIres(i) {
-    var n = N(), c = calcolaIres(i), data = n.data(i.data || c.anno + '-12-31');
-    if (X().imposte.some(function (x) { return x.anno === c.anno; })) throw Error('IRES ' + c.anno + ' già registrata.');
-    if (!c.ires) throw Error('Base imponibile zero: niente IRES da registrare.');
-    var r = n.post({data: data, tipo: 'IMPOSTE', rif: 'IRES ' + c.anno, descrizione: 'IRES ' + c.anno + ': risultato prima delle imposte ' + L.eur(c.risultato) + (c.aumenti ? ' + variazioni ' + L.eur(c.aumenti) : '') + (c.diminuzioni ? ' − variazioni ' + L.eur(c.diminuzioni) : '') + ' = base ' + L.eur(c.base) + ' × ' + c.aliquota + '%',
-      righe: [{conto: '56', dareAvere: 'DARE', importo: c.ires, testo: 'IRES di competenza ' + c.anno}, {conto: '23', dareAvere: 'AVERE', importo: c.ires, testo: 'saldo IRES entro il 30/06 dell\'anno dopo'}]});
-    c.contabile = r.numero; X().imposte.push(c); n.salva(); return r;
+    var n = N(), c = calcolaImposte(i), data = n.data(i.data || c.anno + '-12-31');
+    if (X().imposte.some(function (x) { return x.anno === c.anno; })) throw Error('Imposte ' + c.anno + ' già registrate.');
+    var righe = [];
+    if (c.ires) righe.push({conto: '56', dareAvere: 'DARE', importo: c.ires, testo: 'IRES corrente ' + c.aliquota + '%'}, {conto: '23', dareAvere: 'AVERE', importo: c.ires, testo: 'debito IRES (saldo entro il 30/06)'});
+    if (c.irap) righe.push({conto: '52', dareAvere: 'DARE', importo: c.irap, testo: 'IRAP corrente ' + c.aliquotaIrap + '%'}, {conto: '35', dareAvere: 'AVERE', importo: c.irap, testo: 'debito IRAP (saldo entro il 30/06)'});
+    if (c.anticipate > 0.004) righe.push({conto: '17', dareAvere: 'DARE', importo: c.anticipate, testo: 'imposte anticipate su differenze temporanee'}, {conto: '51', dareAvere: 'AVERE', importo: c.anticipate, testo: 'imposte anticipate'});
+    if (c.anticipate < -0.004) righe.push({conto: '51', dareAvere: 'DARE', importo: -c.anticipate, testo: 'riassorbimento imposte anticipate'}, {conto: '17', dareAvere: 'AVERE', importo: -c.anticipate, testo: 'utilizzo crediti per imposte anticipate'});
+    if (!righe.length) throw Error('Base imponibile zero: niente imposte da registrare.');
+    var r = n.post({data: data, tipo: 'IMPOSTE', rif: 'IMPOSTE ' + c.anno, descrizione: 'Imposte ' + c.anno + ': IRES ' + c.aliquota + '% su ' + L.eur(c.base) + ' = ' + L.eur(c.ires) + ' · IRAP ' + c.aliquotaIrap + '% su ' + L.eur(c.baseIrap) + ' = ' + L.eur(c.irap) +
+      (Math.abs(c.anticipate) > 0.004 ? ' · imposte anticipate ' + L.eur(c.anticipate) + ' su differenze temporanee ' + L.eur(c.differenzeTemporanee.fine) : ''), righe: righe});
+    var x = {anno: c.anno, risultato: c.risultato, base: c.base, ires: c.ires, baseIrap: c.baseIrap, irap: c.irap, anticipate: c.anticipate, differenze: c.differenzeTemporanee, aumenti: c.aumenti, diminuzioni: c.diminuzioni, contabile: r.numero};
+    X().imposte.push(x); n.salva(); return r;
   }
   // controlli prima di chiudere
   function controlli(anno) {
@@ -96,7 +128,7 @@ window.CH4 = (function () {
     var coperto = function (d) { return X().iva.some(function (x) { return x.dal <= d && x.al >= d; }); };
     var ivaNonLiq = s.registrazioni.filter(function (r) { return r.data.slice(0, 4) === anno && r.tipo !== 'LIQUIDAZIONE_IVA' && !r.chiusura && r.righe.some(function (x) { return x.conto === '21' || x.conto === '14'; }) && !coperto(r.data); });
     if (ivaNonLiq.length) out.push('IVA non ancora liquidata per ' + ivaNonLiq.length + ' documenti (il primo del ' + L.fd(ivaNonLiq[0].data) + '): fai le liquidazioni del periodo.');
-    if (!X().imposte.some(function (x) { return x.anno === anno; })) out.push('IRES ' + anno + ' non registrata.');
+    if (!X().imposte.some(function (x) { return x.anno === anno; })) out.push('Imposte ' + anno + ' (IRES e IRAP) non registrate.');
     if (window.WM4 && s.wm && s.wm.attivo && window.WM4.aperti().length) out.push('Ci sono ' + window.WM4.aperti().length + ' compiti di magazzino aperti.');
     return out;
   }
@@ -158,6 +190,6 @@ window.CH4 = (function () {
       if (tipo(c) === 'ATTIVO') { att.push({conto: c, nome: nome(c), saldo: v}); ta += v; } else { pas.push({conto: c, nome: nome(c), saldo: -v}); tp -= v; } });
     return {attivo: att, passivo: pas, totaleAttivo: r2(ta), totalePassivo: r2(tp)};
   }
-  return {periodo: periodo, calcolaIva: calcolaIva, liquidaIva: liquidaIva, versaIva: versaIva, contoEconomico: contoEconomico, calcolaIres: calcolaIres, registraIres: registraIres,
+  return {periodo: periodo, calcolaIva: calcolaIva, liquidaIva: liquidaIva, versaIva: versaIva, contoEconomico: contoEconomico, calcolaIres: calcolaIres, calcolaImposte: calcolaImposte, registraIres: registraIres, registraImposte: registraIres,
     controlli: controlli, chiudi: chiudi, riapri: riapri, destinaUtile: destinaUtile, statoPatrimoniale: statoPatrimoniale, saldo: saldo, X: X};
 })();

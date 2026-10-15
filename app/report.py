@@ -253,7 +253,7 @@ class Lavoro:
                 "rc_oneri_factoring": sc("55"),
                 "rc_iva_t1_versata": round((iva.get("2027-T1") or {}).get("saldo") or 0, 2) if (iva.get("2027-T1") or {}).get("versato") else 0,
                 "rc_credito_iva": sc("14"),
-                "rc_ires": -sc("23"),
+                "rc_ires": -sc("23"), "rc_irap": -sc("35"), "rc_anticipate": sc("17"),
                 "rc_utile": round(chiuso.get("utile") or 0, 2),
                 "rc_chiuso": "sì" if chiuso.get("risultato") and chiuso.get("chiusuraSP") else "no",
                 "rc_riaperto": "sì" if chiuso.get("riapertura") else "no",

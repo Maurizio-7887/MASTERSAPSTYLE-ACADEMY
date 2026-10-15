@@ -27,10 +27,11 @@ Dopo la consegna della prima parte la guida prosegue sugli stessi dati:
 - **Ri.Ba. salvo buon fine** (TES → Ri.Ba.): distinta con anticipo 80%, esito a buon fine a scadenza; insoluto disponibile.
 - **Factoring** (TES → Factoring): cessione pro soluto con anticipo 90% e commissione 2%; pro solvendo disponibile.
 - **IVA trimestrale** (FI → IVA, imposte, chiusura): liquidazioni T1 (a debito, F24 con interessi 1%), T2 (a credito, riporto), T4 (credito 110 riportato al 2028).
-- **IRES** 24% sul risultato prima delle imposte (26.424,67 → 6.341,92), variazioni fiscali manuali; IRAP non calcolata.
-- **Chiusura dell'esercizio 2027**: controlli, epilogo nel conto economico (90), utile 20.082,75 al conto 32, chiusura dei conti patrimoniali (91); dopo la chiusura non si registra più con data 2027.
+- **Ammortamento con doppio binario**: in bilancio pro rata per mesi; fiscalmente al massimo il coefficiente tabellare, ridotto alla metà nell'anno di entrata in funzione (art. 102 TUIR). L'eccedenza è una variazione in aumento che si recupera negli anni dopo o alla cessione.
+- **IRES** 24%: 26.424,67 + 333,33 − 133,33 = 26.624,67 → 6.389,92. **IRAP** 3,9% sul valore della produzione (senza area finanziaria) 26.882,97 → 1.048,44. **Imposte anticipate** sulla differenza temporanea di 200: 55,80 (OIC 25). Utile netto 19.042,11.
+- **Chiusura dell'esercizio 2027**: controlli, epilogo nel conto economico (90), utile 19.042,11 al conto 32, chiusura dei conti patrimoniali (91); dopo la chiusura non si registra più con data 2027.
 - **Riapertura al 1° gennaio 2028** dallo Stato patrimoniale iniziale (92); destinazione dell'utile facoltativa.
-Il pannello chiede di ricostruire tutte le scritture tranne epilogo, chiusura e riapertura (riporti meccanici). La consegna «Ragioneria con WMS — seconda parte» ha 12 numeri di controllo; quelli della prima parte restano giusti anche dopo la chiusura. La guida PDF copre ancora solo la prima parte.
+Il pannello chiede di ricostruire tutte le scritture tranne epilogo, chiusura e riapertura (riporti meccanici). La consegna «Ragioneria con WMS — seconda parte» ha 14 numeri di controllo; quelli della prima parte restano giusti anche dopo la chiusura. La guida PDF copre ancora solo la prima parte.
 
 Il ciclo produttivo è aggregato, non tre ordini separati per semilavorati. Il programma è didattico e non è SAP.
 

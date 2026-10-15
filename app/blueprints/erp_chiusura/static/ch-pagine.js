@@ -30,14 +30,26 @@
       L.collega(radice, 'lq', {lq: CH.liquidaIva}, rendi); L.collega(radice, 'vs', {vs: CH.versaIva}, rendi);
     },
     imposte: function () {
-      var a = anno(), c = CH.calcolaIres({anno: a, aumenti: radice.dataset.au || 0, diminuzioni: radice.dataset.di || 0}), ce = CH.contoEconomico(a, true);
-      radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
-        L.scheda('🧾', 'IRES di competenza', 'imposte dell\'esercizio', L.tabella(['Voce', 'Importo›'], [['Risultato prima delle imposte ' + a, eur(c.risultato)], ['+ variazioni in aumento', eur(c.aumenti)], ['− variazioni in diminuzione', eur(c.diminuzioni)],
-            {cls: 'tot', celle: ['Base imponibile', eur(c.base)]}, ['IRES ' + c.aliquota + '%', '<b>' + eur(c.ires) + '</b>']]) +
-          L.modulo('ir', [['anno', 'Esercizio', 'text', a], ['aumenti', 'Variazioni in aumento €', 'num', c.aumenti || ''], ['diminuzioni', 'Variazioni in diminuzione €', 'num', c.diminuzioni || ''], ['aliquota', 'Aliquota %', 'num', 24], ['data', 'Data', 'date', a + '-12-31']], [['ir', 'Registra l\'IRES'], ['pv', 'Ricalcola', 'sec']]) +
-          '<p class="lab-nota">D 56 Imposte sul reddito / A 23 Erario c/IRES. Le variazioni fiscali (costi non deducibili, quote non tassate…) si scrivono a mano. IRAP non calcolata: semplificazione didattica. Saldo e acconti si versano con F24 l\'anno dopo.</p>') +
-        L.scheda('📊', 'Conto economico ' + a + ' (prima delle imposte)', 'F.01 · CE', tabCE(ce)) + '</div>';
-      L.collega(radice, 'ir', {ir: CH.registraIres, pv: function (v) { radice.dataset.au = v.aumenti || 0; radice.dataset.di = v.diminuzioni || 0; return '<!--info-->'; }}, rendi);
+      var a = anno(), d = radice.dataset, c = CH.calcolaImposte({anno: a, aumenti: d.au || 0, diminuzioni: d.di || 0, aliquota: d.ai || 24, aliquotaIrap: d.ap || 3.9}), ce = CH.contoEconomico(a, true);
+      var fatte = CH.X().imposte.find(function (x) { return x.anno === a; });
+      var rigaV = function (v) { return [e(v[0]), v[1] ? (v[1] > 0 ? '+ ' : '− ') + eur(Math.abs(v[1])) : '—']; };
+      radice.innerHTML = U.avviso(S()) + (fatte ? '<p class="lab-esito ok">✓ Imposte ' + a + ' registrate (documento ' + fatte.contabile + '): IRES ' + eur(fatte.ires) + ' · IRAP ' + eur(fatte.irap) + ' · imposte anticipate ' + eur(fatte.anticipate) + '.</p>' : '') + '<div class="lab-griglia">' +
+        L.scheda('🧾', 'IRES — dal risultato al reddito imponibile', 'art. 83 TUIR · modello Redditi SC', L.tabella(['Voce', 'Importo›'], [['Risultato prima delle imposte ' + a, eur(c.risultato)]].concat(c.variazioniIres.map(rigaV))
+            .concat([{cls: 'tot', celle: ['Reddito imponibile', eur(c.base)]}, ['IRES ' + c.aliquota + '%', '<b>' + eur(c.ires) + '</b>']]))) +
+        L.scheda('🏭', 'IRAP — valore della produzione', 'art. 5 D.Lgs. 446/1997', L.tabella(['Voce', 'Importo›'], [['Risultato prima delle imposte', eur(c.risultato)]].concat(c.finanziari.map(function (v) { return [e('Si toglie l\'area finanziaria: ' + v[0]), (v[1] > 0 ? '+ ' : '− ') + eur(Math.abs(v[1]))]; }))
+            .concat([{cls: 'tot', celle: ['Differenza tra valore e costi della produzione', eur(c.valoreProduzione)]}]).concat(c.variazioniIrap.map(rigaV))
+            .concat([{cls: 'tot', celle: ['Base imponibile IRAP', eur(c.baseIrap)]}, ['IRAP ' + c.aliquotaIrap + '%', '<b>' + eur(c.irap) + '</b>']])) +
+          '<p class="lab-nota">IRAP: niente proventi e oneri finanziari, niente imposte; i costi del personale a tempo indeterminato sono deducibili. L\'IRAP non si deduce dall\'IRES (le deduzioni previste sono per cassa e nel primo anno non spettano).</p>') + '</div>' +
+        '<div class="lab-griglia">' + L.scheda('🔁', 'Differenze temporanee e imposte anticipate', 'OIC 25', L.tabella(['Cespite', 'Civilistico›', 'Massimo fiscale›', 'Deducibile›', 'Eccedenza a fine anno›'], c.fiscale.righe.map(function (x) {
+            return [x.codice + (x.primoAnno ? ' (primo anno: coefficiente ' + x.coeff + '% a metà)' : '') + (x.ceduto ? ' — ceduto' : ''), eur(x.civile), eur(x.massimo), eur(x.deducibile), eur(x.eccedenzaFine)]; }), 'Nessun cespite.') +
+          L.tabella(['Voce', 'Importo›'], [['Differenze temporanee a inizio anno', eur(c.differenzeTemporanee.inizio)], ['Differenze temporanee a fine anno', eur(c.differenzeTemporanee.fine)],
+            ['Imposte anticipate (IRES ' + c.aliquota + '% + IRAP ' + c.aliquotaIrap + '%)', '<b>' + eur(c.anticipate) + '</b>'], {cls: 'tot', celle: ['Imposte a conto economico (correnti − anticipate)', eur(c.totaleImposte)]}, ['Utile netto', '<b>' + eur(c.utile) + '</b>']]) +
+          '<p class="lab-nota">L\'ammortamento in bilancio oltre il limite fiscale si paga oggi ma si recupera domani: per questo si iscrive un credito (17) per le imposte che si pagheranno in meno negli anni successivi.</p>') +
+        L.scheda('✍️', 'Registra le imposte', 'scrittura di fine anno', fatte ? '<p class="lab-vuoto">Già registrate.</p>' : L.modulo('ir', [['anno', 'Esercizio', 'text', a], ['aumenti', 'Altre variazioni in aumento €', 'num', d.au || ''], ['diminuzioni', 'Altre variazioni in diminuzione €', 'num', d.di || ''],
+            ['aliquota', 'Aliquota IRES %', 'num', d.ai || 24], ['aliquotaIrap', 'Aliquota IRAP % (ordinaria 3,9; le regioni la variano)', 'num', d.ap || 3.9], ['data', 'Data', 'date', a + '-12-31']], [['ir', 'Registra IRES, IRAP e imposte anticipate'], ['pv', 'Ricalcola', 'sec']]) +
+          '<p class="lab-nota">D 56 IRES / A 23 · D 52 IRAP / A 35 · D 17 Crediti per imposte anticipate / A 51. Saldo e acconti si versano con F24 entro il 30 giugno dell\'anno dopo.</p>') + '</div>' +
+        L.scheda('📊', 'Conto economico ' + a + ' (prima delle imposte)', 'F.01 · CE', tabCE(ce));
+      L.collega(radice, 'ir', {ir: CH.registraIres, pv: function (v) { d.au = v.aumenti || 0; d.di = v.diminuzioni || 0; d.ai = v.aliquota || 24; d.ap = v.aliquotaIrap || 3.9; return '<p class="lab-nota">Ricalcolato con le variazioni e le aliquote indicate.</p>'; }}, rendi);
     },
     chiusura: function () {
       var a = anno(), ch = (S().chiusure || {})[String(+a - 1)], ultima = Object.keys(S().chiusure || {}).sort().slice(-1)[0], vista = radice.dataset.v || (ultima && !(S().chiusure[ultima].riapertura) ? ultima : a);

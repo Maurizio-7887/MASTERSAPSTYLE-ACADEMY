@@ -70,4 +70,4 @@ if p2.exists():
     for k, label, att, tol in ESERCIZI['ragioneria-wms']['attesi'] + ESERCIZI['ragioneria-wms-chiusura']['attesi']:
         assert k in ind2, k
         assert (ind2[k] == att if tol is None else abs(ind2[k]-att) <= tol), ('seconda parte', k, ind2[k], att)
-print(f'OK: selezione persistente, {len(endpoints)} collegamenti guida, 18 indicatori finali e consegna allievo' + (', 12 indicatori della seconda parte e i 18 della prima ancora giusti dopo la chiusura' if p2.exists() else ''))
+print(f'OK: selezione persistente, {len(endpoints)} collegamenti guida, 18 indicatori finali e consegna allievo' + (', 14 indicatori della seconda parte e i 18 della prima ancora giusti dopo la chiusura' if p2.exists() else ''))

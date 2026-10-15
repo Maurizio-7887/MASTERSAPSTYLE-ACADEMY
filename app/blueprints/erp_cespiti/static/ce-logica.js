@@ -32,7 +32,7 @@ window.CE4 = (function () {
     var r = n.post({data: data, tipo: 'FATTURA_CESPITE', rif: rif, descrizione: 'F-90 acquisto cespite ' + cod + ' «' + desc + '» da ' + f.nome + ' — fattura ' + rif,
       righe: [{conto: cl.conto, dareAvere: 'DARE', importo: costo, testo: cod + ' ' + desc}, {conto: '14', dareAvere: 'DARE', importo: iva, testo: 'IVA ' + ivaP + '%'},
               {conto: '20', dareAvere: 'AVERE', importo: r2(costo + iva), partner: i.fornitore, testo: 'fattura ' + rif}]});
-    C().push({codice: cod, descrizione: desc, classe: i.classe, costo: costo, aliquota: aliq, acquisto: data, inFunzione: funz, fornitore: i.fornitore, fattura: rif, contabile: r.numero, ammortamenti: [], cessione: null});
+    C().push({codice: cod, descrizione: desc, classe: i.classe, costo: costo, aliquota: aliq, coeffFiscale: cl.aliquota, acquisto: data, inFunzione: funz, fornitore: i.fornitore, fattura: rif, contabile: r.numero, ammortamenti: [], cessione: null});
     n.salva(); return r;
   }
   // AFAB: ammortamento di tutti i cespiti attivi fino alla data (di solito il 31/12)
@@ -82,5 +82,31 @@ window.CE4 = (function () {
         quote: c.ammortamenti, stato: ceduto ? 'ceduto il ' + L.fd(c.cessione.data) : 'in uso', cessione: c.cessione};
     });
   }
-  return {CLASSI: CLASSI, acquista: acquista, ammortizza: ammortizza, cedi: cedi, registro: registro, quota: quota, trova: trova, elenco: C};
+  // ── doppio binario civilistico / fiscale (art. 102 TUIR, DM 31/12/1988) ──
+  // quota fiscale massima dell'anno: costo × coefficiente tabellare, ridotto alla METÀ nell'esercizio di entrata in funzione.
+  // Se l'ammortamento civilistico supera il massimo, l'eccedenza non è deducibile (variazione in aumento) e si recupera negli
+  // anni in cui il civilistico è minore del massimo fiscale (variazione in diminuzione) oppure alla cessione, perché il valore
+  // fiscale residuo del bene è più alto (la minusvalenza fiscale è maggiore, la plusvalenza minore).
+  var coeff = function (c) { return c.coeffFiscale != null ? c.coeffFiscale : CLASSI[c.classe].aliquota; };
+  function fiscale(anno) {
+    anno = +anno; var righe = [], tot = {civile: 0, deducibile: 0, aumento: 0, diminuzione: 0, recuperoCessione: 0, eccedenzaFine: 0, eccedenzaInizio: 0};
+    C().forEach(function (c) {
+      var primo = +c.inFunzione.slice(0, 4); if (primo > anno) return;
+      var ecc = 0, riga = null;
+      for (var y = primo; y <= anno; y++) {
+        var civ = r2(c.ammortamenti.filter(function (a) { return a.anno === y; }).reduce(function (t, a) { return t + a.importo; }, 0));
+        var max = r2(c.costo * coeff(c) / 100 * (y === primo ? 0.5 : 1)), ceduto = c.cessione && +c.cessione.data.slice(0, 4) === y;
+        var ded = ceduto ? Math.min(civ, max) : Math.min(r2(civ + ecc), max), inizio = ecc;
+        ecc = r2(ecc + civ - ded);
+        var rec = 0; if (ceduto) { rec = ecc; ecc = 0; }
+        if (y === anno) riga = {codice: c.codice, descrizione: c.descrizione, coeff: coeff(c), primoAnno: y === primo, civile: civ, massimo: max, deducibile: r2(ded),
+          aumento: r2(Math.max(0, civ - ded)), diminuzione: r2(Math.max(0, ded - civ)), recuperoCessione: r2(rec), eccedenzaInizio: inizio, eccedenzaFine: ecc, ceduto: !!ceduto};
+        if (c.cessione && +c.cessione.data.slice(0, 4) <= y) break;
+      }
+      if (!riga) { if (c.cessione && +c.cessione.data.slice(0, 4) < anno) return; }
+      if (riga) { righe.push(riga); ['civile', 'deducibile', 'aumento', 'diminuzione', 'recuperoCessione', 'eccedenzaFine', 'eccedenzaInizio'].forEach(function (k) { tot[k] = r2(tot[k] + riga[k]); }); }
+    });
+    return {anno: anno, righe: righe, totali: tot};
+  }
+  return {CLASSI: CLASSI, acquista: acquista, ammortizza: ammortizza, cedi: cedi, registro: registro, quota: quota, trova: trova, elenco: C, fiscale: fiscale, coeff: coeff};
 })();
