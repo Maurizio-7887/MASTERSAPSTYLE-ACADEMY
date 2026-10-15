@@ -64,4 +64,10 @@ with app.app_context():
     assert prove['esiti'] and not prove['coda']
     assert len(prove['esiti']) == len(json.loads(x.dati)['registrazioni'])
     assert all(e['corretto'] and not e['conAiuto'] for e in prove['esiti'])
-print(f'OK: selezione persistente, {len(endpoints)} collegamenti guida, 18 indicatori finali e consegna allievo')
+p2 = Path(__file__).parent / 'ragioneria-chiusura-finale.json'
+if p2.exists():
+    ind2 = Lavoro(json.loads(p2.read_text())).indicatori()
+    for k, label, att, tol in ESERCIZI['ragioneria-wms']['attesi'] + ESERCIZI['ragioneria-wms-chiusura']['attesi']:
+        assert k in ind2, k
+        assert (ind2[k] == att if tol is None else abs(ind2[k]-att) <= tol), ('seconda parte', k, ind2[k], att)
+print(f'OK: selezione persistente, {len(endpoints)} collegamenti guida, 18 indicatori finali e consegna allievo' + (', 12 indicatori della seconda parte e i 18 della prima ancora giusti dopo la chiusura' if p2.exists() else ''))

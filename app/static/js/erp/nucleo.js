@@ -29,6 +29,15 @@
     ['29', 'Erario c/ritenute (IRPEF e addizionali)', 'PASSIVO'], ['31', 'Fondo TFR', 'PASSIVO'],
     ['44', 'Ricavi per servizi', 'RICAVO'], ['54', 'Consulenze e servizi', 'COSTO'], ['58', 'Commissioni e spese bancarie', 'COSTO'], ['59', 'Interessi attivi bancari', 'RICAVO'],
     ['66', 'Utili su cambi', 'RICAVO'], ['67', 'Perdite su cambi', 'COSTO'], ['68', 'Differenze cambio da valutazione', 'COSTO'],
+    // cespiti, RiBa, factoring, IVA, imposte, chiusura e riapertura
+    ['01', 'Impianti e macchinari', 'ATTIVO'], ['02', 'Fondo ammortamento impianti e macchinari', 'ATTIVO'],
+    ['03', 'Mezzi di movimentazione interna', 'ATTIVO'], ['04', 'Fondo ammortamento mezzi di movimentazione', 'ATTIVO'],
+    ['15', 'Crediti verso factor', 'ATTIVO'], ['23', 'Erario c/IRES', 'PASSIVO'], ['25', 'Erario c/IVA', 'PASSIVO'],
+    ['32', 'Utile (perdita) d\'esercizio', 'PASSIVO'], ['33', 'Riserva legale', 'PASSIVO'],
+    ['36', 'Banca c/anticipi salvo buon fine (RiBa)', 'PASSIVO'], ['37', 'Debiti verso factor (pro solvendo)', 'PASSIVO'],
+    ['45', 'Plusvalenze da cessione cespiti', 'RICAVO'], ['46', 'Minusvalenze da cessione cespiti', 'COSTO'], ['50', 'Ammortamenti', 'COSTO'],
+    ['53', 'Interessi su IVA trimestrale', 'COSTO'], ['55', 'Oneri su cessione crediti (factoring)', 'COSTO'], ['56', 'Imposte sul reddito (IRES)', 'COSTO'],
+    ['90', 'Conto economico (epilogo)', 'CHIUSURA'], ['91', 'Stato patrimoniale finale', 'CHIUSURA'], ['92', 'Stato patrimoniale iniziale', 'CHIUSURA'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
@@ -39,19 +48,21 @@
     'FERRO': {nome: 'Tubo di ferro', tipo: 'ROH', um: 'kg', std: 0.95, peso: 1},
   };
   var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg', iban: 'IT60X0542811101000000123456'},
-                   'F200': {nome: 'Gamma Steel Engineering LLC', regione: 'USA', pagamento: '30 gg', valuta: 'USD', iban: 'US-ABA 026009593 / 4417 2210'}};
+                   'F200': {nome: 'Gamma Steel Engineering LLC', regione: 'USA', pagamento: '30 gg', valuta: 'USD', iban: 'US-ABA 026009593 / 4417 2210'},
+                   'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'}};
   var CLIENTI = {
     'C100': {nome: 'Beta Costruzioni Srl', regione: 'Umbria', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: '30 gg', fido: 60000, rischio: 'B'},
     'C200': {nome: 'Delta Noleggi Srl', regione: 'Toscana', canale: '20 Noleggio', gruppo: 'Noleggiatori', pagamento: '30 gg', fido: 30000, rischio: 'B'},
     'C300': {nome: 'Comune di Gamma', regione: 'Umbria', canale: '30 Enti pubblici', gruppo: 'Enti pubblici', pagamento: '60 gg', fido: 50000, rischio: 'A'},
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg', fido: 15000, rischio: 'C'},
+    'C600': {nome: 'Usato Epsilon Srl', regione: 'Toscana', canale: '50 Cessioni di beni strumentali', gruppo: 'Diversi', pagamento: '15 gg', fido: 20000, rischio: 'B'},
     'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: '', fido: 50000, rischio: 'B'},
   };
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
     compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0,
-    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, seriale: 0};
+    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, seriale: 0, cespite: 0, riba: 0, factoring: 0, fatturaServizi: 0};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',
@@ -108,6 +119,7 @@
           var k = chiaveRagioneria(r);
           if (!visti.has(k)) {
             visti.add(k); q.visti.push(k);
+            if (r.quiz === false) return;   // epilogo, chiusura e riapertura dei conti: scritture meccaniche, niente domanda
             q.coda.push({chiave: k, documento: JSON.parse(JSON.stringify(r)), risposte: [], tentativi: 0});
             aggiunti++;
           }
@@ -135,7 +147,10 @@
         });
         if (!righe.length) return null;
         if (Math.abs(r2(d) - r2(a)) > 0.001) throw Error('Documento non quadrato: Dare ' + L.eur(d) + ' ≠ Avere ' + L.eur(a));
+        var anno = String(reg.data || '').slice(0, 4);   // esercizio chiuso: niente più scritture con data in quell'anno
+        if (S.chiusure && S.chiusure[anno] && !reg.chiusura) throw Error('L\'esercizio ' + anno + ' è chiuso (chiusura del ' + L.fd(S.chiusure[anno].data) + '): non si registra più con data ' + L.fd(reg.data) + '.');
         var r = {id: S.prossimoIdRegistrazione++, numero: N.numero('contabile'), data: reg.data, tipo: reg.tipo, descrizione: reg.descrizione, righe: righe, rif: reg.rif || ''};
+        if (reg.quiz === false) r.quiz = false; if (reg.chiusura) r.chiusura = reg.chiusura;
         S.registrazioni.push(r);
         return r;
       },

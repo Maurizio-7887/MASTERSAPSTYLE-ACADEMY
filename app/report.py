@@ -223,13 +223,41 @@ class Lavoro:
                 "rw_compiti_confermati": sum(t.get("stato") == "confermato" for t in compiti),
                 "rw_ferro": g.get("FERRO", 0), "rw_std": g.get("TR-STD", 0),
                 "rw_alta": g.get("TR-ALTA", 0), "rw_ped": g.get("TR-PED", 0),
-                "rw_ferro_valore": self.saldo("12"), "rw_pf_valore": self.saldo("13"),
-                "rw_cogs": round(self.saldo("41") + self.saldo("42"), 2),
-                "rw_banca": self.saldo("10"), "rw_clienti": self.saldo("11"),
-                "rw_fornitori": self.saldo("20"), "rw_were": self.saldo("22"),
-                "rw_transito": self.saldo("18"),
+                # prima parte: valori al 30/04/2027, così restano giusti anche dopo la seconda parte e la chiusura
+                "rw_ferro_valore": self.saldo("12", fino="2027-04-30"), "rw_pf_valore": self.saldo("13", fino="2027-04-30"),
+                "rw_cogs": round(self.saldo("41", fino="2027-04-30") + self.saldo("42", fino="2027-04-30"), 2),
+                "rw_banca": self.saldo("10", fino="2027-04-30"), "rw_clienti": self.saldo("11", fino="2027-04-30"),
+                "rw_fornitori": self.saldo("20", fino="2027-04-30"), "rw_were": self.saldo("22", fino="2027-04-30"),
+                "rw_transito": self.saldo("18", fino="2027-04-30"),
                 "rw_colli": len((s.get("sped") or {}).get("colli") or []),
                 "rw_ddt": sum(bool(c.get("ddt")) for c in s.get("consegne") or []),
+            })
+            # seconda parte: saldi del 2027 senza i documenti di chiusura (che azzerano tutto al 31/12)
+            def sc(conto, fino="2027-12-31"):
+                t = 0
+                for r in s.get("registrazioni") or []:
+                    if (r.get("data") or "") > fino or r.get("chiusura") in ("epilogo", "stato patrimoniale", "riapertura"):
+                        continue
+                    for x in r.get("righe") or []:
+                        if str(x.get("conto")) == conto:
+                            t += (1 if x.get("dareAvere") == "DARE" else -1) * (x.get("importo") or 0)
+                return round(t, 2)
+            ch = s.get("chiusura") or {}
+            iva = {x.get("periodo"): x for x in ch.get("iva") or []}
+            chiuso = (s.get("chiusure") or {}).get("2027") or {}
+            base.update({
+                "rc_cespiti_netto": round(sc("01") + sc("02") + sc("03") + sc("04"), 2),
+                "rc_ammortamenti": sc("50"),
+                "rc_minusvalenza": sc("46"),
+                "rc_ricavi_servizi": -sc("44"),
+                "rc_oneri_factoring": sc("55"),
+                "rc_iva_t1_versata": round((iva.get("2027-T1") or {}).get("saldo") or 0, 2) if (iva.get("2027-T1") or {}).get("versato") else 0,
+                "rc_credito_iva": sc("14"),
+                "rc_ires": -sc("23"),
+                "rc_utile": round(chiuso.get("utile") or 0, 2),
+                "rc_chiuso": "sì" if chiuso.get("risultato") and chiuso.get("chiusuraSP") else "no",
+                "rc_riaperto": "sì" if chiuso.get("riapertura") else "no",
+                "rc_banca_2028": round(sum((1 if x.get("dareAvere") == "DARE" else -1) * (x.get("importo") or 0) for r in s.get("registrazioni") or [] for x in r.get("righe") or [] if str(x.get("conto")) == "10"), 2),
             })
         return base
 

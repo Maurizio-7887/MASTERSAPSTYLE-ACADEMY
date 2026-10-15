@@ -188,7 +188,7 @@
   function bilancio(S) {
     var conti = {};
     S.registrazioni.forEach(function (r) { r.righe.forEach(function (x) { conti[x.conto] = (conti[x.conto] || 0) + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }); });
-    var righe = S.pianoDeiConti.filter(function (c) { return Math.abs(conti[c.codice] || 0) > 0.004; }).map(function (c) {
+    var righe = S.pianoDeiConti.slice().sort(function (x, y) { return String(x.codice).localeCompare(String(y.codice), 'it', {numeric: true}); }).filter(function (c) { return Math.abs(conti[c.codice] || 0) > 0.004; }).map(function (c) {
       var v = r2(conti[c.codice]); return [c.codice, esc(c.nome), v > 0 ? eur(v) : '', v < 0 ? eur(-v) : ''];
     });
     var d = 0, a = 0; Object.keys(conti).forEach(function (k) { if (conti[k] > 0) d += conti[k]; else a -= conti[k]; });

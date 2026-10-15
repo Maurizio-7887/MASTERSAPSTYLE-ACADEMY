@@ -37,6 +37,10 @@ window.AU4 = (function () {
     'TS4.eseguiPagamenti': ['F110', ['TESORIERE']], 'TS4.caricaEstratto': ['FF_5', ['TESORIERE']], 'TS4.abbina': ['FEBAN abbinamento', ['TESORIERE']], 'TS4.manuale': ['FEBAN manuale', ['TESORIERE', 'CONTABILE']],
     'FX4.tasso': ['OB08', ['TESORIERE', 'CONTROLLER']], 'FX4.fatturaCliente': ['FB70', ['CONTABILE']], 'FX4.fatturaFornitore': ['FB60', ['CONTABILE']], 'FX4.regola': ['F-28 / F-53 in valuta', ['TESORIERE']], 'FX4.valuta': ['FAGL_FCV', ['CONTROLLER', 'CONTABILE']],
     'PY4.presenze': ['PA61', ['PAGHE']], 'PY4.calcola': ['PC00_M15_CALC', ['PAGHE']], 'PY4.registra': ['PC00_M99_CIPE', ['PAGHE']], 'PY4.pagaNetti': ['bonifici stipendi', ['TESORIERE']], 'PY4.f24': ['F24', ['TESORIERE']], 'PY4.parametri': ['tabelle paghe', ['PAGHE']],
+    'FS4.fattura': ['FB70', ['CONTABILE', 'VENDITE']], 'CE4.acquista': ['AS01 · F-90', ['CONTABILE']], 'CE4.ammortizza': ['AFAB', ['CONTABILE', 'CONTROLLER']], 'CE4.cedi': ['ABAVN', ['CONTABILE']],
+    'RB4.presentaRiba': ['distinta Ri.Ba.', ['TESORIERE']], 'RB4.esitoRiba': ['esito Ri.Ba.', ['TESORIERE']], 'RB4.cedi': ['factoring cessione', ['TESORIERE']], 'RB4.chiudiFactoring': ['factoring saldo', ['TESORIERE']],
+    'CH4.liquidaIva': ['liquidazione IVA', ['CONTABILE']], 'CH4.versaIva': ['F24 IVA', ['TESORIERE', 'CONTABILE']], 'CH4.registraIres': ['IRES', ['CONTABILE', 'CONTROLLER']],
+    'CH4.chiudi': ['chiusura esercizio', ['CONTABILE', 'CONTROLLER']], 'CH4.riapri': ['riapertura', ['CONTABILE', 'CONTROLLER']], 'CH4.destinaUtile': ['destinazione utile', ['CONTABILE']],
     'ST4.inviaSdi': ['SdI invio', ['CONTABILE', 'VENDITE']], 'ST4.vf11': ['VF11', ['VENDITE', 'CONTABILE']], 'ST4.vl09': ['VL09', ['CAPO_MAG']], 'ST4.eliminaConsegna': ['VL02N elimina', ['CAPO_MAG']],
     'ST4.mbst': ['MBST', ['CAPO_MAG']], 'ST4.mr8m': ['MR8M', ['CONTABILE']], 'ST4.produzione': ['CO13 / 262 / 102', ['PRODUZIONE', 'CONTROLLER']], 'ST4.lt15': ['LT15', ['CAPO_MAG']], 'ST4.fb08': ['FB08', ['CONTABILE', 'TESORIERE']],
   };

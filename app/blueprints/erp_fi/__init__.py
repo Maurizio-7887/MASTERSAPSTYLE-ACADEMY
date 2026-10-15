@@ -26,3 +26,8 @@ def sdi():
 @bp.route("/storni")
 def storni():
     return render_lab("erp_fi", "storni")
+
+
+@bp.route("/fatture")
+def fatture():
+    return render_lab("erp_fi", "fatture")

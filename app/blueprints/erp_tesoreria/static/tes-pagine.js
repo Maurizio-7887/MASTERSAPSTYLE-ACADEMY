@@ -67,6 +67,35 @@
       if (sel) { L.collega(radice, 'ab', {ab: function () { return TS.abbina({estratto: sel.numero}); }}, rendi); L.collega(radice, 'mn', {mn: function (v) { v.estratto = sel.numero; return TS.manuale(v); }}, rendi); }
     },
   };
+  var etPart = function (p) { return p.doc + ' · ' + p.nome + ' · ' + eur(p.aperto) + ' · scade ' + fd(p.scadenza); };
+  PAGINE.riba = function () {
+    var RB = window.RB4, lib = RB.partiteLibere(), rb = RB.T().riba;
+    radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+      L.scheda('🧾', 'Presenta le Ri.Ba. in banca', 'F110 Ri.Ba. · distinta SBF', L.modulo('rp', [['fattura', 'Fattura del cliente', 'select', '', lib.length ? lib.map(function (p) { return [p.doc, etPart(p)]; }) : [['', '— nessuna partita aperta —']]],
+        ['scadenza', 'Scadenza della Ri.Ba. (vuoto = quella della fattura)', 'date'], ['anticipo', 'Anticipo salvo buon fine %', 'num', 80], ['commissione', 'Commissione di presentazione €', 'num', 4], ['data', 'Data di presentazione', 'date']], [['rp', 'Presenta la distinta']]) +
+        '<p class="lab-nota">Con l\'anticipo <b>salvo buon fine</b> la banca accredita subito una parte (D 10 / A 36), ma il credito resta sul cliente: se il cliente non paga, l\'anticipo si restituisce.</p>') +
+      L.scheda('📬', 'Esito alla scadenza', 'buon fine · insoluto', L.modulo('re', [['riba', 'Ri.Ba. presentata', 'select', '', U.lista(rb.filter(function (x) { return x.stato === 'presentata'; }), function (x) { return x.numero + ' · ' + x.nome + ' · ' + eur(x.importo) + ' · scade ' + fd(x.scadenza); }, '— nessuna Ri.Ba. in attesa —')],
+        ['esito', 'Esito', 'select', 'pagata', [['pagata', 'pagata (buon fine)'], ['insoluta', 'insoluta']]], ['spese', 'Spese di insoluto €', 'num'], ['data', 'Data dell\'esito', 'date']], [['re', 'Registra l\'esito']]) +
+        '<p class="lab-nota">Buon fine: D 36 anticipo + D 10 differenza / A 11 cliente (la fattura si chiude). Insoluto: D 36 / A 10 restituzione dell\'anticipo, D 58 spese; il credito resta aperto e si sollecita il cliente.</p>') + '</div>' +
+      L.scheda('📋', 'Portafoglio Ri.Ba.', 'distinte', L.tabella(['Ri.Ba.', 'Fattura', 'Cliente', 'Importo›', 'Scadenza', 'Presentata', 'Anticipo›', 'Stato'], rb.map(function (x) {
+        return [x.numero, x.fattura, e(x.nome), eur(x.importo), fd(x.scadenza), fd(x.presentata), eur(x.anticipo), x.stato + (x.esito ? ' il ' + fd(x.esito) : '')]; }), 'Nessuna Ri.Ba.') +
+        '<p class="lab-nota">Banca c/anticipi SBF (36): ' + eur(-N.saldo('36')) + ' €.</p>');
+    L.collega(radice, 'rp', {rp: RB.presentaRiba}, rendi); L.collega(radice, 're', {re: RB.esitoRiba}, rendi);
+  };
+  PAGINE.factoring = function () {
+    var RB = window.RB4, lib = RB.partiteLibere(), fc = RB.T().factoring;
+    radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+      L.scheda('🤝', 'Cedi una fattura al factor', 'factoring · cessione del credito', L.modulo('fc', [['fattura', 'Fattura del cliente', 'select', '', lib.length ? lib.map(function (p) { return [p.doc, etPart(p)]; }) : [['', '— nessuna partita aperta —']]],
+        ['modo', 'Tipo di cessione', 'select', 'soluto', [['soluto', 'pro soluto (il rischio passa al factor)'], ['solvendo', 'pro solvendo (il rischio resta a noi)']]], ['factor', 'Società di factoring', 'text', 'Factor Italia SpA'],
+        ['anticipo', 'Anticipo %', 'num', 90], ['commissione', 'Commissione %', 'num', 2], ['data', 'Data della cessione', 'date']], [['fc', 'Cedi il credito']]) +
+        '<p class="lab-nota">Pro soluto: il credito esce dal cliente (D 15 Crediti verso factor / A 11), la commissione è un onere (55), l\'anticipo arriva in banca. Pro solvendo: il credito resta sul cliente e l\'anticipo è un debito verso il factor (37).</p>') +
+      L.scheda('🏁', 'Il cliente paga il factor', 'chiusura del contratto', L.modulo('fx', [['factoring', 'Contratto', 'select', '', U.lista(fc.filter(function (x) { return x.stato === 'ceduta'; }), function (x) { return x.numero + ' · pro ' + x.modo + ' · ' + x.nome + ' · ' + eur(x.importo); }, '— nessun contratto aperto —')],
+        ['data', 'Data', 'date']], [['fx', 'Registra il saldo dal factor']]) + '<p class="lab-nota">Il factor incassa dal cliente e ci accredita la differenza: importo − anticipo − commissione.</p>') + '</div>' +
+      L.scheda('📋', 'Contratti di factoring', '', L.tabella(['Contratto', 'Fattura', 'Cliente', 'Tipo', 'Importo›', 'Anticipo›', 'Commissione›', 'Stato'], fc.map(function (x) {
+        return [x.numero, x.fattura, e(x.nome), 'pro ' + x.modo, eur(x.importo), eur(x.anticipo), eur(x.commissione), x.stato + (x.chiusa ? ' il ' + fd(x.chiusa) : '')]; }), 'Nessun contratto.') +
+        '<p class="lab-nota">Crediti verso factor (15): ' + eur(N.saldo('15')) + ' € · Debiti verso factor (37): ' + eur(-N.saldo('37')) + ' €.</p>');
+    L.collega(radice, 'fc', {fc: RB.cedi}, rendi); L.collega(radice, 'fx', {fx: RB.chiudiFactoring}, rendi);
+  };
   function rendi() { (PAGINE[C.pagina] || PAGINE.posizione)(); }
   rendi();
 })();

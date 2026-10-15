@@ -5,6 +5,24 @@ gli indicatori disponibili sono quelli di report.indicatori().
 """
 
 ESERCIZI = {
+    "ragioneria-wms-chiusura": {
+        "titolo": "Ragioneria con WMS — seconda parte: cespiti, Ri.Ba., factoring, IVA, IRES, chiusura e riapertura",
+        "versione": "erp-ft",
+        "attesi": [
+            ("rc_cespiti_netto", "Cespiti netti al 31/12 (saldatrice 12.000 − fondo 800)", 11200.00, 0.005),
+            ("rc_ammortamenti", "Ammortamenti 2027", 1733.33, 0.005),
+            ("rc_minusvalenza", "Minusvalenza sulla cessione del carrello", 566.67, 0.005),
+            ("rc_ricavi_servizi", "Ricavi per servizi (noleggi)", 13000.00, 0.005),
+            ("rc_oneri_factoring", "Commissione di factoring", 195.20, 0.005),
+            ("rc_iva_t1_versata", "IVA del 1° trimestre versata (senza interessi)", 6309.60, 0.005),
+            ("rc_credito_iva", "Credito IVA riportato al 2028", 110.00, 0.005),
+            ("rc_ires", "IRES 2027", 6341.92, 0.005),
+            ("rc_utile", "Utile d'esercizio 2027", 20082.75, 0.005),
+            ("rc_chiuso", "Esercizio 2027 chiuso", "sì", None),
+            ("rc_riaperto", "Conti riaperti al 1° gennaio 2028", "sì", None),
+            ("rc_banca_2028", "Banca all'apertura del 2028", 77807.70, 0.005),
+        ],
+    },
     "ragioneria-wms": {
         "titolo": "Ragioneria con WMS — acquisto, produzione, vendita e banca",
         "versione": "erp-ft",

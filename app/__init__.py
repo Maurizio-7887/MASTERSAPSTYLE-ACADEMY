@@ -20,6 +20,8 @@ from .blueprints.erp_fi import bp as erp_fi
 from .blueprints.erp_innovazione import bp as erp_innovazione
 from .blueprints.erp_inventario import bp as erp_inventario
 from .blueprints.erp_magazzino import bp as erp_magazzino
+from .blueprints.erp_cespiti import bp as erp_cespiti
+from .blueprints.erp_chiusura import bp as erp_chiusura
 from .blueprints.erp_paghe import bp as erp_paghe
 from .blueprints.erp_produzione import bp as erp_produzione
 from .blueprints.erp_spedizione import bp as erp_spedizione
@@ -42,7 +44,7 @@ from .db import inizializza, ora_italiana
 BLUEPRINT = [portale, accessi, sincronia, guida, allievo, docente,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
-             erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_costi, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_valute, erp_paghe, erp_copa, erp_fi]
+             erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_costi, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_valute, erp_paghe, erp_copa, erp_fi, erp_cespiti, erp_chiusura]
 
 
 def create_app():

@@ -59,6 +59,15 @@
       L.collega(radice, 'lt', {lt: ST.lt15}, rendi); L.collega(radice, 'fb', {fb: function (v) { return ST.fb08({documento: v.documento, data: v.data, motivo: v.motivo === '02' ? '02 storno in un periodo successivo' : '01 storno nello stesso periodo'}); }}, rendi);
     },
   };
+  PAGINE.fatture = function () {
+    var FS = window.FS4, el = FS.elenco();
+    radice.innerHTML = avviso() + L.scheda('🧾', 'Fattura di servizi a cliente italiano', 'FB70 · FI-AR', L.modulo('fs', [['cliente', 'Cliente', 'select', 'C200', U.clienti(S()).filter(function (c) { return !(S().clienti[c[0]] || {}).valuta || S().clienti[c[0]].valuta === 'EUR'; })],
+        ['testo', 'Descrizione del servizio', 'text', 'noleggio transenne per evento'], ['imponibile', 'Imponibile €', 'num'], ['iva', 'IVA %', 'num', 22], ['scadenza', 'Scadenza del pagamento', 'date'], ['data', 'Data della fattura', 'date']], [['fs', 'Registra la fattura']]) +
+        '<p class="lab-nota">D 11 Cliente (totale) / A 44 Ricavi per servizi / A 21 IVA a debito. La scadenza serve a Ri.Ba., factoring e scadenziario. Poi la fattura va trasmessa allo SdI (Contabilità → Fattura elettronica).</p>') +
+      L.scheda('📋', 'Fatture di servizi emesse', 'FBL5N', L.tabella(['Fattura', 'Data', 'Cliente', 'Descrizione', 'Imponibile›', 'IVA›', 'Totale›', 'Scadenza', 'SdI'], el.map(function (f) {
+        return [f.numero, fd(f.data), e(nomeCli(f.cliente)), e(f.testo), eur(f.imponibile), eur(f.iva), eur(f.totale), f.scadenza ? fd(f.scadenza) : '', f.sdi ? 'consegnata ' + fd(f.sdi.data) : 'da trasmettere']; }), 'Nessuna fattura di servizi.'));
+    L.collega(radice, 'fs', {fs: FS.fattura}, rendi);
+  };
   function rendi() { (PAGINE[C.pagina] || PAGINE.giornale)(); }
   rendi();
 })();

@@ -4,7 +4,7 @@
   "description": "Test di regressione: esegue l'esercizio guidato dentro il simulatore e verifica i numeri della guida",
   "scripts": {
     "test": "npm run test:solo-integrato && npm run test:launchpad-wms && npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte && npm run test:laboratori && npm run test:s4 && npm run test:accessi && npm run test:sincronia && npm run test:guida && npm run test:ragioneria-wms",
-    "test:ragioneria-wms": "node tests/pannello-wms.js && node tests/quiz-contabile.js && node tests/esercizio-ragioneria-wms.js && python3 tests/test_ragioneria_wms.py",
+    "test:ragioneria-wms": "node tests/pannello-wms.js && node tests/quiz-contabile.js && node tests/esercizio-ragioneria-wms.js && node tests/esercizio-ragioneria-chiusura.js && python3 tests/test_ragioneria_wms.py",
     "test:launchpad-wms": "python3 tests/test_launchpad_wms.py",
     "test:rotte": "python3 tests/test_rotte.py",
     "test:file-unico": "node tests/esercizio.js sorgenti/simulatore-vuoto.html",

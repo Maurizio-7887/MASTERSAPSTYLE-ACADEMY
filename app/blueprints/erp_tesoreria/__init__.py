@@ -26,3 +26,13 @@ def pagamenti():
 @bp.route("/estratti")
 def estratti():
     return render_lab("erp_tesoreria", "estratti")
+
+
+@bp.route("/riba")
+def riba():
+    return render_lab("erp_tesoreria", "riba")
+
+
+@bp.route("/factoring")
+def factoring():
+    return render_lab("erp_tesoreria", "factoring")

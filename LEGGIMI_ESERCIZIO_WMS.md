@@ -20,7 +20,19 @@ Spostamenti WMS senza scritture, operazioni non riuscite e compiti RF parziali n
 
 La nuova guida è predefinita; dal launchpad resta selezionabile il precedente percorso integrato gennaio–dicembre. **Cambiare guida non cambia i dati**: tutti i moduli condividono un solo salvataggio. La preferenza della guida è ricordata nella sessione; un nuovo accesso può richiedere di riselezionarla.
 
-Il vecchio esercizio classico è conservato, non convertito integralmente: questo scenario NON comprende cespiti, Ri.Ba., factoring, liquidazioni fiscali o chiusura annuale. Il ciclo produttivo è aggregato, non tre ordini separati per semilavorati. Il programma è didattico e non è SAP.
+## Seconda parte (capitoli 10–16, maggio 2027 – gennaio 2028)
+Dopo la consegna della prima parte la guida prosegue sugli stessi dati:
+- **Cespiti** (FI → Cespiti): acquisto con fattura di una saldatrice (12.000, 10%) e di un carrello elevatore (8.000, 20%) da Macchine Alfa; registro AW01N; ammortamento AFAB pro rata per mesi; cessione del carrello a novembre con minusvalenza 566,67.
+- **Fatture di servizi** (FI → Fatture di servizi, FB70) a Delta e Beta, trasmesse allo SdI.
+- **Ri.Ba. salvo buon fine** (TES → Ri.Ba.): distinta con anticipo 80%, esito a buon fine a scadenza; insoluto disponibile.
+- **Factoring** (TES → Factoring): cessione pro soluto con anticipo 90% e commissione 2%; pro solvendo disponibile.
+- **IVA trimestrale** (FI → IVA, imposte, chiusura): liquidazioni T1 (a debito, F24 con interessi 1%), T2 (a credito, riporto), T4 (credito 110 riportato al 2028).
+- **IRES** 24% sul risultato prima delle imposte (26.424,67 → 6.341,92), variazioni fiscali manuali; IRAP non calcolata.
+- **Chiusura dell'esercizio 2027**: controlli, epilogo nel conto economico (90), utile 20.082,75 al conto 32, chiusura dei conti patrimoniali (91); dopo la chiusura non si registra più con data 2027.
+- **Riapertura al 1° gennaio 2028** dallo Stato patrimoniale iniziale (92); destinazione dell'utile facoltativa.
+Il pannello chiede di ricostruire tutte le scritture tranne epilogo, chiusura e riapertura (riporti meccanici). La consegna «Ragioneria con WMS — seconda parte» ha 12 numeri di controllo; quelli della prima parte restano giusti anche dopo la chiusura. La guida PDF copre ancora solo la prima parte.
+
+Il ciclo produttivo è aggregato, non tre ordini separati per semilavorati. Il programma è didattico e non è SAP.
 
 ## Verifiche
 Superata la suite completa `npm test`, incluse 48 verifiche specifiche del quiz, 298 controlli del ciclo attraverso pagine e pulsanti (ora comprendenti le domande sui documenti effettivi), 33 spunte automatiche della guida, 37 collegamenti e 18 indicatori di consegna. Verificati anche risposta errata in pareggio, importi italiani, più documenti, rientro pagina, bozza, aiuto, salvataggio fallito e assenza di doppie registrazioni. Prove automatiche in ambiente isolato, non sul sito pubblicato né su Windows; nessun collaudo visuale manuale in browser dichiarato. Nessun deploy effettuato.

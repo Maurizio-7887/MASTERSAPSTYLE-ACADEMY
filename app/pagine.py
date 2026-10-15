@@ -300,7 +300,8 @@ LABORATORI = {
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
-               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
+               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"),
+               ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
@@ -308,7 +309,8 @@ _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_a
                "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)",
                "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)",
                "erp_tesoreria": "Tesoreria (cassa, pagamenti, estratti conto)", "erp_valute": "Valute estere", "erp_paghe": "Paghe e costo del personale",
-               "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)"}
+               "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)", "erp_cespiti": "Cespiti (FI-AA)",
+               "erp_chiusura": "IVA, imposte, chiusura e riapertura"}
 _ERP_PAGINE = {
     "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
@@ -357,7 +359,9 @@ _ERP_PAGINE = {
     "erp_tesoreria": [{"endpoint": "posizione", "titolo": "Posizione di cassa e previsione", "icona": "💧", "tcode": "FF7A · FF7B"},
                       {"endpoint": "partite", "titolo": "Partite aperte e scadenze", "icona": "📒", "tcode": "FBL5N · FBL1N · anzianità"},
                       {"endpoint": "pagamenti", "titolo": "Pagamenti automatici", "icona": "💸", "tcode": "F110 · SEPA pain.001"},
-                      {"endpoint": "estratti", "titolo": "Estratto conto elettronico", "icona": "🏦", "tcode": "FF_5 · FEBAN"}],
+                      {"endpoint": "estratti", "titolo": "Estratto conto elettronico", "icona": "🏦", "tcode": "FF_5 · FEBAN"},
+                      {"endpoint": "riba", "titolo": "Ri.Ba. salvo buon fine", "icona": "🧾", "tcode": "distinta Ri.Ba. · SBF · insoluti"},
+                      {"endpoint": "factoring", "titolo": "Factoring", "icona": "🤝", "tcode": "pro soluto · pro solvendo"}],
     "erp_valute": [{"endpoint": "tassi", "titolo": "Tassi di cambio", "icona": "💱", "tcode": "OB08"},
                    {"endpoint": "documenti", "titolo": "Fatture in valuta", "icona": "🧾", "tcode": "FB70 · FB60"},
                    {"endpoint": "regolazioni", "titolo": "Incassi e pagamenti in valuta", "icona": "🏦", "tcode": "F-28 · F-53"},
@@ -367,15 +371,25 @@ _ERP_PAGINE = {
                   {"endpoint": "contabilita", "titolo": "Registrazione, stipendi e F24", "icona": "📒", "tcode": "PC00_M99_CIPE · F24"}],
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
+    "erp_cespiti": [{"endpoint": "registro", "titolo": "Registro dei cespiti", "icona": "🏭", "tcode": "AW01N · AR01"},
+                    {"endpoint": "acquisto", "titolo": "Acquisto di un cespite", "icona": "🆕", "tcode": "AS01 · F-90"},
+                    {"endpoint": "ammortamenti", "titolo": "Ammortamenti", "icona": "🧮", "tcode": "AFAB"},
+                    {"endpoint": "cessione", "titolo": "Cessione di un cespite", "icona": "🔁", "tcode": "ABAVN · F-92"}],
+    "erp_chiusura": [{"endpoint": "iva", "titolo": "Liquidazione IVA e F24", "icona": "🧮", "tcode": "registro IVA · liquidazione · F24"},
+                     {"endpoint": "imposte", "titolo": "Imposte (IRES)", "icona": "🧾", "tcode": "IRES · variazioni fiscali"},
+                     {"endpoint": "chiusura", "titolo": "Chiusura dell'esercizio", "icona": "🔒", "tcode": "epilogo · FAGLGVTR"},
+                     {"endpoint": "riapertura", "titolo": "Riapertura e destinazione dell'utile", "icona": "🔓", "tcode": "1° gennaio · F.16"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"},
+               {"endpoint": "fatture", "titolo": "Fatture di servizi", "icona": "🧾", "tcode": "FB70"},
                {"endpoint": "sdi", "titolo": "Fattura elettronica (SdI)", "icona": "📤", "tcode": "FatturaPA · TD01 · TD04"},
                {"endpoint": "storni", "titolo": "Storni e annullamenti", "icona": "↩️", "tcode": "VF11 · VL09 · MBST · MR8M · FB08"}],
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
            "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js",
-           "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js"}
+           "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js",
+           "erp_cespiti": "ce-pagine.js", "erp_chiusura": "ch-pagine.js"}
 _WMS = {"erp_magazzino", "erp_inventario", "erp_spedizione", "erp_innovazione"}   # pagine che stanno «di casa» nel modulo WMS
 for _bp, _pp in _ERP_PAGINE.items():
     for _p in _pp:
@@ -460,7 +474,7 @@ MODULI = [
     _integrato("pp", "PP", "Produzione", "🏭", "produzione", ["erp_produzione"]),
     next(m for m in MODULI_ARCHIVIO if m["codice"] == "wms"),
     _integrato("img", "DATI", "Avvio e dati di base", "⚙️", "impostazioni", ["erp_dati"]),
-    _integrato("fi", "FI", "Contabilità", "🏛️", "contabilita", ["erp_fi"]),
+    _integrato("fi", "FI", "Contabilità", "🏛️", "contabilita", ["erp_fi", "erp_cespiti", "erp_chiusura"]),
     _integrato("co", "CO", "Costi e redditività", "📊", "controllo", ["erp_costi", "erp_copa"]),
     _integrato("tes", "TES", "Tesoreria", "🏦", "contabilita", ["erp_tesoreria"]),
     _integrato("val", "FX", "Valute estere", "💱", "contabilita", ["erp_valute"]),
@@ -472,4 +486,4 @@ for _bp, _lab in LABORATORI.items():
         _lab["codice"] = ({"erp_dati": "img", "erp_vendite": "sd", "erp_acquisti": "mm",
                            "erp_produzione": "pp", "erp_costi": "co", "erp_copa": "co",
                            "erp_fi": "fi", "erp_tesoreria": "tes", "erp_valute": "val",
-                           "erp_paghe": "hr"}).get(_bp, "wms")
+                           "erp_paghe": "hr", "erp_cespiti": "fi", "erp_chiusura": "fi"}).get(_bp, "wms")

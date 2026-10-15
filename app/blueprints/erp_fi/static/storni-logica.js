@@ -29,7 +29,8 @@ window.ST4 = (function () {
   function documentiVendita() {
     var a = (S().fatture || []).filter(function (f) { return ['F2', 'RE', 'G2'].indexOf(f.tipo) >= 0; }).map(function (f) { return {numero: f.numero, tipo: f.tipo, cliente: f.cliente, data: f.data, totale: f.totale, rif: f, fonte: 'SD'}; });
     var b = ((S().fx || {}).documenti || []).filter(function (d) { return d.lato === 'cliente'; }).map(function (d) { return {numero: d.numero, tipo: 'F2', cliente: d.partner, data: d.data, totale: d.eur, rif: d, fonte: 'FI'}; });
-    return a.concat(b);
+    var c = (S().fattureServizi || []).map(function (f) { return {numero: f.numero, tipo: 'F2', cliente: f.cliente, data: f.data, totale: f.totale, rif: f, fonte: 'FS'}; });
+    return a.concat(b).concat(c);
   }
   var tipoDoc = function (t) { return t === 'F2' ? 'TD01 fattura' : 'TD04 nota di credito'; };
   function inviaSdi(i) {
