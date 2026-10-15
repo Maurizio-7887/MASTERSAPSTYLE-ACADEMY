@@ -173,8 +173,9 @@
         var out = radice.querySelector('#' + prefisso + '-esito');
         try {
           var res = azioni[b.dataset.azione](valori(radice, prefisso));
-          var html = '✓ Registrato.' + (typeof res === 'string' ? res : righeScrittura(res));
-          if (dopo) { dopo(); out = radice.querySelector('#' + prefisso + '-esito') || out; }   // la pagina si ridisegna: il messaggio resta
+          var info = typeof res === 'string' && res.indexOf('<!--info-->') === 0;   // solo informazione: la pagina non si ridisegna, i campi restano
+          var html = info ? res : '✓ Registrato.' + (typeof res === 'string' ? res : righeScrittura(res));
+          if (dopo && !info) { dopo(); out = radice.querySelector('#' + prefisso + '-esito') || out; }   // la pagina si ridisegna: il messaggio resta
           esito(out, true, html);
         } catch (e) { esito(out, false, '⛔ ' + esc(e.message)); }
       });

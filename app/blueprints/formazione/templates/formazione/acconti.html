@@ -1,0 +1,37 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>L'acconto incassato finisce in avere sul conto del cliente e la partita resta «strana» fino alla fattura.</li>
+  <li>L'IVA dell'acconto si dimentica, oppure si paga di nuovo sulla fattura finale.</li>
+  <li>In fattura nessuno detrae l'acconto: il cliente riceve una fattura per l'intero importo.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>L'acconto non è un credito: è un <b>debito verso il cliente</b> (gli devi la merce). SAP lo tiene su un <b>conto di contabilità generale speciale</b> (CoGe speciale A, qui il conto 19) e lo chiude in fattura con la condizione <b>AZWB</b>, che lo detrae dal totale.</p>
+<p class="lez-chiave">Richiesta (F-37): solo una partita statistica. Incasso (F-29): banca, acconto, IVA. Fattura: detrazione dell'acconto e IVA solo sul residuo.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Richiesta di acconto (F-37)</dt><dd>Partita statistica sul cliente: si vede in FBL5N ma non tocca il bilancio.</dd>
+<dt>Incasso dell'acconto (F-29)</dt><dd>D Banca / A Acconti da clienti (CoGe speciale A) + A IVA a debito: in Italia l'IVA è dovuta all'incasso (fattura d'acconto).</dd>
+<dt>AZWB</dt><dd>Condizione della fattura che detrae l'acconto già incassato.</dd>
+<dt>Riconciliazione</dt><dd>A fine processo il conto 19 deve tornare a zero per quel cliente.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Edil Sigma ordina 150 TR-STD: netto 9.045 € (con 225 € di trasporto nel Lazio). Chiediamo 5.000 € di acconto.</p>
+<table class="lez-tab"><tr><th>Momento</th><th>Dare</th><th>Avere</th></tr>
+<tr><td>05/01 F-37 richiesta</td><td colspan="2">nessuna scrittura (partita statistica)</td></tr>
+<tr><td>08/01 F-29 incasso</td><td>10 Banca 6.100</td><td>19 Acconti 5.000 · 21 IVA 1.100</td></tr>
+<tr><td>20/01 fattura</td><td>11 Sigma 4.934,90 · 19 Acconti 5.000 · 47 Sconti 180</td><td>40 Ricavi 9.000 · 48 Trasporti 225 · 21 IVA 889,90</td></tr></table>
+<p>IVA totale: 1.100 + 889,90 = 1.989,90 = 22% di 9.045. Il conto 19 torna a zero.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>VA01</b>ordine</span><span class="f">→</span><span class="b"><b>F-37</b>richiesta (statistica)</span><span class="f">→</span><span class="b mag"><b>F-29</b>incasso · conto 19 · IVA</span><span class="f">→</span><span class="b"><b>VL01N</b>consegna</span><span class="f">→</span><span class="b"><b>VF01</b>AZWB detrae · 19 a zero</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Richiesta di acconto</td><td>F-37 (o piano di fatturazione con data acconto)</td></tr>
+<tr><td>Incasso dell'acconto</td><td>F-29</td></tr>
+<tr><td>Partite con CoGe speciale</td><td>FBL5N con «Operazioni di CoGe speciale»</td></tr>
+<tr><td>Detrazione in fattura</td><td>VF01 — condizione AZWB</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché l'acconto non va sul conto 11 Crediti verso clienti?</summary><p>Perché è un debito verso il cliente: tenerlo separato evita di compensare crediti e debiti e mostra in bilancio gli acconti ricevuti.</p></details>
+<details><summary>Perché l'IVA in fattura è 889,90 e non 1.989,90?</summary><p>Perché 1.100 sono già stati versati con la fattura d'acconto: in fattura si calcola solo sul residuo 4.045.</p></details>
+{% endblock %}

@@ -192,9 +192,10 @@ ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizi
 ok("pannello.js" in a.get("/completo/").get_data(as_text=True), "finestra anche nella versione completa")
 
 # ── laboratori: lavoro salvato nel proprio slot, consegna e report ──
-for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-finale.json", 8), ("lab-rem", "rem-trattore", "lab-rem-finale.json", 8)]:
+for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-finale.json", 8), ("lab-rem", "rem-trattore", "lab-rem-finale.json", 8),
+                                ("erp-ft", "s4-vendite-copa", "lab-erp-finale.json", 8)]:
     lab = (Path(__file__).parent / file).read_text(encoding="utf-8")
-    pagina = "/vuoto/alta-varieta/" if slot == "lab-hmlv" else "/vuoto/ripetitiva/"
+    pagina = {"lab-hmlv": "/vuoto/alta-varieta/", "lab-rem": "/vuoto/ripetitiva/", "erp-ft": "/vuoto/s4/vendite/"}[slot]
     sl = sync(a.get(pagina).get_data(as_text=True))
     ok(sl and sl["chiave"].endswith(slot + "-civilistico"), f"{slot}: pagina con sincronia del laboratorio")
     r = a.post(f"/api/stato/{slot}", data=json.dumps({"csrf": sl["csrf"], "stato": lab}))

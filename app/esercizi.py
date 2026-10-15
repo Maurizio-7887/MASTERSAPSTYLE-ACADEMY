@@ -55,6 +55,20 @@ ESERCIZI = {
             ("ferro_finale", "Ferro rimasto (kg)", 733, 0.005),
         ],
     },
+    "s4-vendite-copa": {
+        "titolo": "Sistema integrato S/4 — vendite, resi, acconti e redditività (CO-PA)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("ordini_or", "Ordini cliente (VA01)", 4, 0),
+            ("acconti_chiusi", "Conto 19 Acconti da clienti dopo la fattura", 0.00, 0.005),
+            ("note_credito", "Note di credito emesse (reso RE + abbuono G2)", 2, 0),
+            ("ricavi_netti_copa", "Ricavi netti dopo rettifiche (KE30)", 44773.00, 0.005),
+            ("mdc1", "Margine di contribuzione I (KE30)", 19946.00, 0.005),
+            ("mdc2", "Margine di contribuzione II (KE30)", 18593.81, 0.005),
+            ("crediti_clienti", "Crediti verso clienti aperti (conto 11)", 35969.26, 0.005),
+            ("banca_finale", "Banca a fine gennaio", 68653.80, 0.005),
+        ],
+    },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
 }
 

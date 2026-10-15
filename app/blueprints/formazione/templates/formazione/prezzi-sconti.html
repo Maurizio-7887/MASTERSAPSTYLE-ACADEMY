@@ -1,0 +1,42 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il listino è un foglio Excel; ogni venditore applica lo sconto che ricorda.</li>
+  <li>Due clienti uguali pagano prezzi diversi e nessuno sa spiegare perché.</li>
+  <li>Il trasporto a volte si addebita, a volte no; le provvigioni si calcolano a fine anno.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>In SAP il prezzo <b>non si digita</b> nell'ordine: si registrano le <b>condizioni</b> (VK11) e il sistema le legge con la <b>procedura di calcolo</b> (V/08). Per ogni tipo di condizione una <b>sequenza di accesso</b> dice in che ordine cercare: prima il record più specifico (cliente/materiale), poi quello generale (materiale).</p>
+<p class="lez-chiave">Le decisioni commerciali diventano dati: si possono controllare, cambiare con una data di validità e analizzare.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Tipo condizione</dt><dd>PR00 prezzo, K007 sconto cliente, ZSCA sconto quantità a scaglioni, KF00 trasporto, MWST IVA, ERB1 provvigione, VPRS costo standard (statistica).</dd>
+<dt>Sequenza di accesso</dt><dd>L'elenco delle chiavi da provare in ordine; si ferma al primo record trovato.</dd>
+<dt>Procedura di calcolo (ZFT001)</dt><dd>Lo schema della videata prezzi: in che ordine si applicano le condizioni, su quale base, con quali subtotali.</dd>
+<dt>Scaglioni</dt><dd>Lo stesso record contiene più percentuali per fasce di quantità.</dd>
+<dt>Condizioni statistiche</dt><dd>VPRS non cambia il prezzo: porta il costo nella posizione e così il margine nell'ordine e nel CO-PA.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Sistema integrato S/4 — Beta Costruzioni ordina 300 TR-STD (listino 60 €, sconto cliente 5%).</p>
+<table class="lez-tab"><tr><th>Cond.</th><th>Descrizione</th><th class="n">Base</th><th class="n">Importo</th></tr>
+<tr><td>PR00</td><td>Prezzo (record materiale: per Beta non c'è un prezzo speciale)</td><td class="n">60,00 × 300</td><td class="n">18.000,00</td></tr>
+<tr><td>ZSCA</td><td>Sconto quantità — scaglione da 300 pz</td><td class="n">4 %</td><td class="n">−720,00</td></tr>
+<tr><td>K007</td><td>Sconto cliente</td><td class="n">5 %</td><td class="n">−900,00</td></tr>
+<tr class="tot"><td></td><td>Netto</td><td></td><td class="n">16.380,00</td></tr>
+<tr><td>MWST</td><td>IVA</td><td class="n">22 %</td><td class="n">3.603,60</td></tr>
+<tr><td>VPRS</td><td>Costo standard 300 × 31,40</td><td></td><td class="n">9.420,00</td></tr>
+<tr><td>ERB1</td><td>Provvigione agente</td><td class="n">3 %</td><td class="n">491,40</td></tr></table>
+<p>Delta Noleggi ha invece un record PR00 <b>cliente/materiale</b> a 70 € per la TR-ALTA: la sequenza lo trova per primo e non legge il listino a 72 €.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>VK11</b>condizioni</span><span class="f">→</span><span class="b"><b>Sequenza di accesso</b>cliente/materiale → materiale</span><span class="f">→</span><span class="b"><b>Procedura ZFT001</b>prezzo · sconti · trasporto · IVA</span><span class="f">→</span><span class="b mag"><b>Ordine VA01</b>videata condizioni</span><span class="f">→</span><span class="b"><b>Fattura · CO-PA</b>stessi valori</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Creare / modificare / vedere condizioni</td><td>VK11 · VK12 · VK13</td></tr>
+<tr><td>Procedura di calcolo, tipi condizione, sequenze</td><td>V/08 · V/06 · V/07 (customizing)</td></tr>
+<tr><td>Videata prezzi della posizione</td><td>VA01 → Posizione → Condizioni (con «Analisi» della determinazione)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il prezzo speciale di Delta vince sul listino?</summary><p>La sequenza di accesso prova prima la chiave cliente/materiale, più specifica, e si ferma al primo record trovato.</p></details>
+<details><summary>Lo sconto quantità si calcola sul lordo o sul netto dopo lo sconto cliente?</summary><p>Dipende dalla procedura: qui entrambi sul lordo (passo 10). In SAP lo decide la colonna «Da passo» della procedura.</p></details>
+<details><summary>A cosa serve VPRS se non cambia il prezzo?</summary><p>Porta il costo standard nella posizione: margine nell'ordine e costo del venduto nel CO-PA.</p></details>
+{% endblock %}

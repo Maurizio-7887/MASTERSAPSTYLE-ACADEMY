@@ -259,6 +259,36 @@ LABORATORI = {
         {"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03 · F.08"},
     ]},
 }
+# ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
+_ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js")]
+_ERP_PAGINE = {
+    "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
+                 {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
+                 {"endpoint": "condizioni", "titolo": "Condizioni di prezzo", "icona": "🏷️", "tcode": "VK11 · VK13 · V/08"}],
+    "erp_vendite": [{"endpoint": "ordini", "titolo": "Ordini cliente", "icona": "📝", "tcode": "VA01 · VA05"},
+                    {"endpoint": "acconti", "titolo": "Acconti clienti", "icona": "💰", "tcode": "F-37 · F-29"},
+                    {"endpoint": "consegne", "titolo": "Consegne", "icona": "🚚", "tcode": "VL01N · 601"},
+                    {"endpoint": "fatture", "titolo": "Fatturazione", "icona": "🧾", "tcode": "VF01 · VF05"},
+                    {"endpoint": "resi", "titolo": "Resi e note di credito", "icona": "↩️", "tcode": "RE · 651 · G2"},
+                    {"endpoint": "incassi", "titolo": "Incassi e partite", "icona": "🏦", "tcode": "F-28 · FBL5N"},
+                    {"endpoint": "flusso", "titolo": "Flusso documenti", "icona": "🔗", "tcode": "VA03"}],
+    "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
+                 {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
+    "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
+               {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"}],
+}
+_ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js"}
+for _bp, _pp in _ERP_PAGINE.items():
+    for _p in _pp:
+        _p["ep"] = f"{_bp}.{_p['endpoint']}"
+_ERP_NAV = [p for pp in _ERP_PAGINE.values() for p in pp]
+for _bp, _pp in _ERP_PAGINE.items():
+    LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "s4", "esercizio": "s4-vendite-copa",
+                       "js": _ERP_COMUNI + [(f"{_bp}.static", _ERP_JS[_bp])], "pagine": _pp, "nav": _ERP_NAV, "copione": "SD4"}
+for _k, _lab in LABORATORI.items():
+    for _p in _lab["pagine"]:
+        _p.setdefault("ep", f"{_k}.{_p['endpoint']}")
+    _lab.setdefault("nav", _lab["pagine"])
 LAB_SLOTS = {v["slot"]: v["titolo"] for v in LABORATORI.values()}
 
 MODULI += [
@@ -268,6 +298,9 @@ MODULI += [
     {"codice": "rem", "sigla": "REM", "breve": "Ripetitiva", "titolo": "Produzione ripetitiva (modello trattore)", "icona": "🚜", "colore": "laboratorio", "kpi": None,
      "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
      "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
+    {"codice": "s4", "sigla": "S/4", "breve": "Sistema integrato", "titolo": "Sistema integrato S/4 — vendite e redditività", "icona": "🏢", "colore": "laboratorio", "kpi": None,
+     "descrizione": "Un solo libro giornale: condizioni di prezzo, acconti, consegne, fatture, resi e note di credito, CO-PA per cliente",
+     "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None) for p in _ERP_NAV]},
 ]
 
 # ── «Che situazione hai?»: lezioni che portano ai laboratori (prima la spiegazione, poi la prova) ──
@@ -281,4 +314,8 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.scorte_semilavorati", None, "Quanti semilavorati a scorta?", "🛟", "DDMRP · buffer", None),
             ("formazione.linea_ripetitiva", None, "Pochi modelli su una linea?", "🚜", "REM · collettore", None),
             ("formazione.backflush", None, "Il backflush falsa il magazzino?", "⚖️", "MFBF · WIP al target", None),
+            ("formazione.prezzi_sconti", None, "Prezzi e sconti a mano?", "🏷️", "VK11 · condizioni", None),
+            ("formazione.acconti", None, "Acconti dai clienti?", "💰", "F-37 · F-29 · AZWB", None),
+            ("formazione.resi_abbuoni", None, "Resi e abbuoni?", "↩️", "RE · 651 · G2", None),
+            ("formazione.redditivita_clienti", None, "Quanto guadagni per cliente?", "📊", "CO-PA · KE30", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

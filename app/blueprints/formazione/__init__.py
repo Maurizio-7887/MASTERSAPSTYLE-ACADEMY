@@ -26,6 +26,14 @@ CASI = [
      "🚜", "ripetitiva", "Budget 2027"),
     ("backflush", "Lo scarico automatico (backflush) ti falsa il magazzino?", "Scarti, sfridi e pezzi fermi in linea che lo scarico a standard non vede.",
      "⚖️", "ripetitiva", "20 TR-STD fermi"),
+    ("prezzi-sconti", "Prezzi e sconti decisi a mano, ordine per ordine?", "Ogni venditore applica il suo sconto, il listino è un foglio Excel e nessuno sa perché un cliente paga meno.",
+     "🏷️", "erp_dati", "VK11: prezzo speciale"),
+    ("acconti", "Chiedi acconti ai clienti prima di consegnare?", "L'acconto finisce tra i crediti, l'IVA si paga due volte o mai, e in fattura nessuno lo detrae.",
+     "💰", "erp_vendite", "F-37"),
+    ("resi-abbuoni", "Clienti che rendono merce o chiedono abbuoni?", "Note di credito fatte a mano, merce resa che non rientra a magazzino, abbuoni senza approvazione.",
+     "↩️", "erp_vendite", "Reso:"),
+    ("redditivita-clienti", "Non sai quanto guadagni su ogni cliente?", "Il fatturato per cliente c'è, il margine no: sconti, resi, trasporti e provvigioni si perdono nel conto economico.",
+     "📊", "erp_copa", "KE30"),
     ("ciclo-completo", "Devi insegnare il ciclo completo, dalla costituzione al bilancio?", "Contabilità, controllo di gestione, vendite, acquisti e produzione in un unico esercizio.",
      "🏛️", None, "Prepara l'azienda nuova"),
 ]
@@ -59,7 +67,18 @@ def lezione(slug):
                            modulo_attivo=modulo("casi"), endpoint_corrente=f"formazione.{slug.replace('-', '_')}",
                            url_lab=_url_lab(v, caso), blueprint_lab=caso[4],
                            chiave_lab=f"ferro-transenne-fi-2026-{lab['slot']}-civilistico" if lab else None,
-                           js_lab=url_for(f"{caso[4]}.static", filename=lab["js"][0]) if lab else None, casi=CASI)
+                           js_lab=_js_logica(caso[4], lab) if lab else [], copione=lab.get("copione", "HMLV" if caso[4] == "alta_varieta" else "REM") if lab else None,
+                           casi=CASI)
+
+
+def _js_logica(blueprint, lab):
+    """Gli script di logica del laboratorio (non quelli che disegnano le pagine), per preparare la situazione dalla lezione."""
+    out = []
+    for f in lab["js"]:
+        ep, nome = f if isinstance(f, tuple) else (f"{blueprint}.static", f)
+        if "-pagine" not in nome:
+            out.append(url_for(ep, filename=nome))
+    return out
 
 
 for _c in CASI:

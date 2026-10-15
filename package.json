@@ -3,7 +3,7 @@
   "private": true,
   "description": "Test di regressione: esegue l'esercizio guidato dentro il simulatore e verifica i numeri della guida",
   "scripts": {
-    "test": "npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte && npm run test:laboratori && npm run test:accessi && npm run test:sincronia && npm run test:guida",
+    "test": "npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte && npm run test:laboratori && npm run test:s4 && npm run test:accessi && npm run test:sincronia && npm run test:guida",
     "test:rotte": "python3 tests/test_rotte.py",
     "test:file-unico": "node tests/esercizio.js sorgenti/simulatore-vuoto.html",
     "test:blueprint": "python3 tests/componi_pagina.py /vuoto/tutto tests/_pagina-tutto.html && node tests/esercizio.js tests/_pagina-tutto.html",
@@ -12,7 +12,8 @@
     "test:accessi": "python3 tests/test_accessi.py",
     "test:sincronia": "node tests/sincronia.js",
     "test:guida": "node tests/guida.js",
-    "test:laboratori": "node tests/laboratori.js"
+    "test:laboratori": "node tests/laboratori.js",
+    "test:s4": "node tests/s4.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"

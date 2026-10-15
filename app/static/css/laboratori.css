@@ -54,3 +54,7 @@
 .lab-buffer .nfp{position:absolute;top:30px;transform:translateX(-50%);font:600 12px "Segoe UI",Arial,sans-serif;white-space:nowrap;color:var(--f-testo)}
 .msa-modulo.g-laboratorio,.msa-tile.g-laboratorio,.msa-intro-modulo.g-laboratorio{--c:#8D4FD8}
 @media (max-width:700px){.lab-griglia{grid-template-columns:1fr}}
+.lab-flusso{list-style:none;padding:0;margin:6px 0}
+.lab-flusso li{border-left:3px solid #9CC8F0;padding:5px 10px;margin:4px 0;background:#F5FAFF;border-radius:0 4px 4px 0;font-size:13px}
+.lab-flusso li span{color:var(--f-attenuato)}
+.lab-elenco{margin:4px 0;padding-left:20px;font-size:13.5px;line-height:1.55}

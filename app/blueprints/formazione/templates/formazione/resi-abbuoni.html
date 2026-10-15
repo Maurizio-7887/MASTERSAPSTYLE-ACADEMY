@@ -1,0 +1,38 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Le note di credito si fanno a mano in contabilità, senza legame con la fattura d'origine.</li>
+  <li>La merce resa torna in magazzino ma il gestionale non lo sa (o non ne riprende il costo).</li>
+  <li>Gli abbuoni si concedono al telefono, senza approvazione.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Sono <b>due processi diversi</b>. Il <b>reso</b> fa rientrare merce: ordine di reso (RE) con riferimento alla fattura → consegna di reso con entrata merci <b>651</b> → nota di credito. L'<b>abbuono</b> non muove merce: richiesta di nota di credito (G2) che nasce con un <b>blocco fatturazione</b> → approvazione → nota di credito.</p>
+<p class="lez-chiave">Riferimento alla fattura: prezzi, sconti, cliente e materiale si copiano, e il flusso documenti resta collegato.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Ordine di reso (RE)</dt><dd>Creato con riferimento alla fattura; non si può rendere più di quanto fatturato.</dd>
+<dt>Entrata merci di reso (651)</dt><dd>Riporta la merce a magazzino al costo standard e riduce il costo del venduto.</dd>
+<dt>Richiesta di nota di credito (G2)</dt><dd>Documento di vendita con blocco fatturazione 08: serve l'approvazione (VA02).</dd>
+<dt>Nota di credito</dt><dd>Storna ricavo, IVA e provvigione; nel CO-PA riduce i ricavi del cliente.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Caso</th><th>Logistica</th><th>Contabilità</th></tr>
+<tr><td>Beta rende 20 TR-STD danneggiate</td><td>651: +20 pz a 31,40</td><td>D 13 / A 41 628 · nota di credito D 49 1.092 · D 21 240,24 / A 11 1.332,24 · storno provvigione 32,76</td></tr>
+<tr><td>Abbuono al Comune di Gamma per verniciatura</td><td>nessun movimento</td><td>D 49 300 · D 21 66 / A 11 366</td></tr></table>
+<p>Il reso abbassa ricavi <b>e</b> costo del venduto (la merce torna); l'abbuono abbassa solo i ricavi: tutto il margine perso.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-due">
+  <div><h3>↩️ Reso</h3><ul><li>RE con riferimento alla fattura</li><li>consegna di reso 651</li><li>nota di credito RE</li><li>ricavi − e costo del venduto −</li></ul></div>
+  <div><h3>📝 Abbuono</h3><ul><li>richiesta G2 con blocco 08</li><li>approvazione (quattro occhi)</li><li>nota di credito G2</li><li>solo ricavi −</li></ul></div>
+</div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Ordine di reso / richiesta nota di credito</td><td>VA01 tipo RE / G2, con riferimento a VF03</td></tr>
+<tr><td>Consegna di reso</td><td>VL01N (tipo LR) con movimento 651</td></tr>
+<tr><td>Approvazione</td><td>VA02 — togliere il blocco fatturazione</td></tr>
+<tr><td>Nota di credito</td><td>VF01 · flusso documenti in VA03</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché la nota di credito del reso non si può emettere prima dell'entrata merci?</summary><p>Si accredita la merce effettivamente rientrata: la fatturazione è legata alla consegna di reso.</p></details>
+<details><summary>Quale dei due casi pesa di più sul margine?</summary><p>L'abbuono: si perde ricavo senza recuperare costo. Il reso recupera la merce al costo standard.</p></details>
+{% endblock %}

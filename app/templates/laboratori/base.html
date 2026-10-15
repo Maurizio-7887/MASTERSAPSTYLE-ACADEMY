@@ -15,7 +15,7 @@
     › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
     › <b>{{ pagina.titolo }}</b></span>
   <nav class="msa-pagine" aria-label="Pagine del laboratorio">
-    {% for p in lab.pagine %}<a href="{{ url_for(blueprint ~ '.' ~ p.endpoint) }}" class="{{ 'attivo' if p.endpoint == pagina.endpoint }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
+    {% for p in lab.nav %}<a href="{{ url_for(p.ep) }}" class="{{ 'attivo' if p.ep == pagina.ep }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
   </nav>
 </div></div>
 <main class="msa-lp">
@@ -24,7 +24,7 @@
     <p>{% block intro %}{% endblock %}</p>
   </div>
   <div id="lab" class="lab"></div>
-  <p class="msa-lp-nota">Laboratorio della Ferro &amp; Transenne con un proprio libro giornale: non modifica il simulatore principale. Il lavoro si salva sul portale e si consegna dalla tua area.</p>
+  <p class="msa-lp-nota">{% block nota %}Laboratorio della Ferro &amp; Transenne con un proprio libro giornale: non modifica il simulatore principale. Il lavoro si salva sul portale e si consegna dalla tua area.{% endblock %}</p>
 </main>
 {% set sync = config_sincronia(config.slot) %}
 {% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}

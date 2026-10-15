@@ -32,6 +32,6 @@ def config_guida(versione, esercizio=None, chiave=None):
 def config_guida_modulo(versione, codice):
     """Sulle mattonelle di un laboratorio la finestra mostra l'esercizio di quel laboratorio."""
     for lab in LABORATORI.values():
-        if lab["sigla"].lower() == codice:
+        if lab.get("codice", lab["sigla"].lower()) == codice:
             return config_guida(versione, esercizio=lab["esercizio"], chiave=f"ferro-transenne-fi-2026-{lab['slot']}-civilistico")
     return config_guida(versione)

@@ -1,0 +1,41 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Sai quanto fatturi a ogni cliente, ma non quanto ci guadagni.</li>
+  <li>Sconti, resi, trasporti e provvigioni finiscono in conti generali del conto economico.</li>
+  <li>Il cliente più grande sembra il migliore, finché qualcuno non fa i conti a mano.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Serve il <b>conto economico per segmento</b>: il <b>CO-PA</b> (Profitability Analysis). Ogni fattura e nota di credito scrive una riga con le <b>caratteristiche</b> (cliente, materiale, regione, canale, gruppo clienti) e i <b>campi valore</b> (ricavi, sconti, trasporti, abbuoni, costo del venduto a standard, provvigioni).</p>
+<p class="lez-chiave">Stesse fatture della contabilità, viste per segmento: margine di contribuzione I e II per cliente, materiale, regione.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Caratteristica</dt><dd>Il «per chi / per cosa»: cliente, materiale, regione, canale, gruppo clienti.</dd>
+<dt>Campo valore</dt><dd>Il «quanto»: ricavi lordi, sconti, trasporti, abbuoni, costo del venduto (VPRS), provvigioni.</dd>
+<dt>Margine di contribuzione I</dt><dd>Ricavi netti dopo resi e abbuoni − costo del venduto a standard.</dd>
+<dt>Margine di contribuzione II</dt><dd>MdC I − costi diretti di vendita (qui le provvigioni).</dd>
+<dt>KE30 / KE24</dt><dd>Report per segmento / righe singole.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Sistema integrato S/4 — gennaio 2027, dopo reso di Beta e abbuono al Comune di Gamma.</p>
+<table class="lez-tab"><tr><th>Cliente</th><th class="n">Ricavi netti</th><th class="n">Costo venduto</th><th class="n">MdC I</th><th class="n">Provvigioni</th><th class="n">MdC II</th><th class="n">MdC II %</th></tr>
+<tr><td>Beta Costruzioni</td><td class="n">15.288,00</td><td class="n">8.792,00</td><td class="n">6.496,00</td><td class="n">458,64</td><td class="n">6.037,36</td><td class="n">39 %</td></tr>
+<tr><td>Delta Noleggi</td><td class="n">10.290,00</td><td class="n">5.415,00</td><td class="n">4.875,00</td><td class="n">308,70</td><td class="n">4.566,30</td><td class="n">44 %</td></tr>
+<tr><td>Comune di Gamma</td><td class="n">10.150,00</td><td class="n">5.910,00</td><td class="n">4.240,00</td><td class="n">313,50</td><td class="n">3.926,50</td><td class="n">39 %</td></tr>
+<tr><td>Edil Sigma</td><td class="n">9.045,00</td><td class="n">4.710,00</td><td class="n">4.335,00</td><td class="n">271,35</td><td class="n">4.063,65</td><td class="n">45 %</td></tr>
+<tr class="tot"><td>Totale</td><td class="n">44.773,00</td><td class="n">24.827,00</td><td class="n">19.946,00</td><td class="n">1.352,19</td><td class="n">18.593,81</td><td class="n">42 %</td></tr></table>
+<p>Beta è il cliente più grande ma, tra sconto del 5% e reso, rende in percentuale meno di Sigma, che paga anche il trasporto.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>VF01</b>fattura · nota di credito</span><span class="f">→</span><span class="b"><b>FI</b>conti 40 · 47 · 48 · 49 · 41 · 57</span><span class="f">→</span><span class="b mag"><b>CO-PA</b>riga con caratteristiche e campi valore</span><span class="f">→</span><span class="b"><b>KE30</b>MdC I e II per segmento</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Report di redditività</td><td>KE30 (o app Fiori «Product Profitability», «Market Segment»)</td></tr>
+<tr><td>Righe singole</td><td>KE24</td></tr>
+<tr><td>Caratteristiche e campi valore</td><td>KEA0 · KEA6 (customizing)</td></tr>
+<tr><td>Flusso valori dalla fattura</td><td>KE4I (assegnazione condizioni → campi valore)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il costo del venduto nel CO-PA è a standard?</summary><p>Perché la fattura legge VPRS: le varianze di produzione si possono attribuire ai segmenti con un ciclo a parte (sarà la tappa CO-PC).</p></details>
+<details><summary>Il CO-PA cambia l'utile di bilancio?</summary><p>No: è calcolatorio. Riorganizza gli stessi valori per segmento; la somma dei MdC si riconcilia con la contabilità.</p></details>
+<details><summary>Che cosa cambia vedendolo per regione?</summary><p>Il Lazio porta 225 € di trasporti addebitati: sono ricavi, ma solo se il trasporto vero costa meno.</p></details>
+{% endblock %}

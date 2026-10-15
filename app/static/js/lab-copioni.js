@@ -59,6 +59,31 @@
     ['MFBF del 20/02', function (X) { [['TR-STD', 150], ['TR-ALTA', 90], ['TR-PED', 60]].forEach(function (x) { X.mfbf({mat: x[0], qta: x[1], data: '2027-02-20'}); }); }],
     ['Chiusura di febbraio', function (X) { X.chiusura({periodo: '2027-02'}); }],
   ];
+  // Sistema integrato S/4 — vendite e redditività (stessi titoli dei passi di s4-vendite-copa.js)
+  var o = function (X, c, t) { return X.N.S.ordini.filter(function (x) { return x.cliente === c && x.tipo === (t || 'OR'); }).slice(-1)[0].numero; };
+  var f = function (X, c) { return X.N.S.fatture.filter(function (x) { return x.cliente === c && x.tipo === 'F2'; })[0].numero; };
+  var SD4 = [
+    ['Che cosa è il sistema integrato', null],
+    ['Avvia il sistema', function (X) { X.avviaSistema({data: '2027-01-02'}); }],
+    ['VK11: prezzo speciale', function (X) { X.creaCondizione({tipo: 'PR00', cliente: 'C200', materiale: 'TR-ALTA', valore: 70}); }],
+    ['VK11: sconto cliente 5%', function (X) { X.creaCondizione({tipo: 'K007', cliente: 'C100', valore: 5}); }],
+    ['VK11: sconto cliente 3%', function (X) { X.creaCondizione({tipo: 'K007', cliente: 'C300', valore: 3}); }],
+    ['VA01: Edil Sigma', function (X) { X.ordine({cliente: 'C400', materiale: 'TR-STD', qta: 150, rif: 'SIGMA-150', data: '2027-01-05'}); }],
+    ['F-37', function (X) { X.richiestaAcconto({ordine: o(X, 'C400'), importo: 5000, data: '2027-01-05'}); }],
+    ['F-29', function (X) { X.incassoAcconto({richiesta: X.N.S.acconti[0].numero, data: '2027-01-08'}); }],
+    ['VA01: Beta', function (X) { X.ordine({cliente: 'C100', materiale: 'TR-STD', qta: 300, rif: 'BETA-300', data: '2027-01-10'}); }],
+    ['VA01: Delta', function (X) { X.ordine({cliente: 'C200', materiale: 'TR-ALTA', qta: 150, rif: 'DELTA-150', data: '2027-01-10'}); }],
+    ['VA01: Comune', function (X) { X.ordine({cliente: 'C300', materiale: 'TR-PED', qta: 200, rif: 'GAMMA-200', data: '2027-01-10'}); }],
+    ['VL01N', function (X) { X.N.S.ordini.filter(function (x) { return x.tipo === 'OR'; }).forEach(function (x) { X.consegna({ordine: x.numero, data: '2027-01-15'}); }); }],
+    ['VF01', function (X) { X.N.S.consegne.slice().forEach(function (c) { X.fattura({consegna: c.numero, data: '2027-01-20'}); }); }],
+    ['Reso:', function (X) { X.reso({fattura: f(X, 'C100'), qta: 20, motivo: 'merce danneggiata nel trasporto', data: '2027-01-25'}); }],
+    ['Entrata merci di reso', function (X) { X.entrataReso({reso: o(X, 'C100', 'RE'), data: '2027-01-26'}); }],
+    ['Nota di credito per il reso', function (X) { X.notaCreditoReso({reso: o(X, 'C100', 'RE'), data: '2027-01-27'}); }],
+    ['Abbuono senza reso', function (X) { X.richiestaAbbuono({fattura: f(X, 'C300'), importo: 300, motivo: 'difetto di verniciatura', data: '2027-01-28'}); }],
+    ['Approva l', function (X) { X.approvaAbbuono({richiesta: o(X, 'C300', 'G2')}); }],
+    ['Nota di credito G2', function (X) { X.notaCreditoAbbuono({richiesta: o(X, 'C300', 'G2'), data: '2027-01-29'}); }],
+    ['F-28', function (X) { X.incasso({cliente: 'C200', importo: 12553.8, rif: 'BONIFICO DELTA', data: '2027-01-31'}); }],
+  ];
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();
@@ -70,5 +95,5 @@
     modulo.M.salva();
     return modulo.M.S;
   }
-  window.LabCopioni = {HMLV: HMLV, REM: REM, esegui: esegui};
+  window.LabCopioni = {HMLV: HMLV, REM: REM, SD4: SD4, esegui: esegui};
 })();

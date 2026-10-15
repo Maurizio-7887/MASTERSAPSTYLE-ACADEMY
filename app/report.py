@@ -131,6 +131,16 @@ class Lavoro:
             base.update({"budget_totale": b.get("totale", 0), "piano": "/".join(str(piano.get(m, "")) for m in ("TR-STD", "TR-ALTA", "TR-PED")),
                          "collettori": len(s.get("collettori") or {}), "wip_gennaio": somma("2027-01", "wip"), "varianze_gennaio": somma("2027-01", "varianza"),
                          "output_gennaio": somma("2027-01", "output"), "varianze_febbraio": somma("2027-02", "varianza"), "wip_finale": self.saldo("15")})
+        elif lab == "erp":
+            cp = s.get("copa") or []
+            tot = lambda k: sum((r.get(k) or 0) for r in cp)
+            netti = tot("ricaviLordi") - tot("scontiQuantita") - tot("scontiCliente") + tot("trasporti") + tot("abbuoni")
+            mdc1 = round(netti - tot("costoVenduto"), 2)
+            ordini = s.get("ordini") or []
+            base.update({"ordini_or": sum(1 for o in ordini if o.get("tipo") == "OR"), "acconti_chiusi": self.saldo("19"),
+                         "ricavi_netti_copa": round(netti, 2), "mdc1": mdc1, "mdc2": round(mdc1 - tot("provvigioni"), 2),
+                         "crediti_clienti": self.saldo("11"), "banca_finale": self.saldo("10"),
+                         "note_credito": sum(1 for f in s.get("fatture") or [] if f.get("tipo") in ("RE", "G2"))})
         return base
 
     def indicatori(self):

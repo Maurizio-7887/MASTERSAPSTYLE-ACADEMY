@@ -37,7 +37,7 @@
     {% block prova %}
     <p>Il laboratorio <b>{{ lab.titolo }}</b> si prepara da solo fino al punto da spiegare: trovi la finestra «📘 Esercizio passo passo» aperta sul passo giusto.</p>
     <div class="lab-azioni">
-      <button type="button" class="lab-btn" id="prepara" data-copione="{{ 'HMLV' if blueprint_lab == 'alta_varieta' else 'REM' }}" data-passo="{{ caso[5] }}" data-url="{{ url_lab }}">▶ Prepara la situazione nel laboratorio e aprilo</button>
+      <button type="button" class="lab-btn" id="prepara" data-copione="{{ copione }}" data-passo="{{ caso[5] }}" data-url="{{ url_lab }}">▶ Prepara la situazione nel laboratorio e aprilo</button>
       <a class="lab-btn sec" href="{{ url_lab }}">Apri il laboratorio con il mio lavoro (senza preparare)</a>
     </div>
     <p class="lez-nota">«Prepara» sostituisce il tuo lavoro in questo laboratorio con la situazione pronta. Il simulatore principale non cambia.</p>
@@ -54,7 +54,7 @@
 {% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}
 <script>window.LAB_CHIAVE = {{ chiave_lab | tojson }};</script>
 <script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
-<script src="{{ js_lab }}"></script>
+{% for s in js_lab %}<script src="{{ s }}"></script>{% endfor %}
 <script src="{{ url_for('static', filename='js/lab-copioni.js') }}"></script>
 <script src="{{ url_for('formazione.static', filename='prepara.js') }}"></script>
 {% else %}{% include "sincronia/_battito.html" %}{% endif %}
