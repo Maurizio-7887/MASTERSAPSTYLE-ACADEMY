@@ -87,7 +87,7 @@ window.ST4 = (function () {
     var r0 = regDi('USCITA_MERCI', c.numero); if (!r0) throw Error('Uscita merci della consegna non trovata.');
     var o = s.ordini.find(function (x) { return x.numero === c.ordine; });
     var r = inverti(r0, i.data, 'VL09 storno dell\'uscita merci della consegna ' + c.numero + ' (movimento 602)');
-    n.movimento(c.materiale, c.qta, r.data, '602', o.numero);
+    n.movimento(c.materiale, c.qta, r.data, '602', o.numero, {lotti: c.lotti});
     if (c.wm && window.WM4 && window.WM4.attivo()) window.WM4.nuovoQuant('GI-ZONE', c.materiale, c.qta, '', r.data, c.numero);
     o.consegnato = r2(o.consegnato - c.qta); c.pgi = false;
     if (c.ddt) { c.ddtAnnullato = c.ddt; c.ddt = ''; }
@@ -127,7 +127,7 @@ window.ST4 = (function () {
       qs.forEach(function (q) { s.wm.compiti.filter(function (t) { return t.quant === q.id && t.stato === 'aperto'; }).forEach(function (t) { t.stato = 'annullato'; t.motivo = 'storno entrata ' + e.doc; }); q.qta = 0; });
     }
     var r = inverti(reg(regDi('ENTRATA_ACQUISTO', e.doc).numero), i.data, 'MBST storno dell\'entrata ' + e.doc + ' (movimento 102) — ordine ' + o.numero);
-    n.movimento(o.materiale, -e.qta, r.data, '102', o.numero);
+    n.movimento(o.materiale, -e.qta, r.data, '102', o.numero, {lotti: e.lotto ? [{lotto: e.lotto, qta: e.qta}] : null});
     o.entrato = r2(o.entrato - e.qta); o.valoreEntrato = r2(o.valoreEntrato - e.valoreOrdine); e.stornato = r.data;
     if (Math.abs(e.pd) > 0.004) s.mlPD.push({data: r.data, mat: o.materiale, pd: -e.pd, tipo: 'acquisto', rif: 'storno ' + e.doc, qta: -e.qta});
     n.salva(); return r;
@@ -160,8 +160,8 @@ window.ST4 = (function () {
       }
     }
     var r = inverti(r0, i.data, {'261': 'Storno del prelievo (262) ', CO11N: 'CO13 annullamento della conferma ', '101': 'Storno dell\'entrata di produzione (102) '}[ev.tipo] + 'ordine ' + o.numero);
-    if (ev.tipo === '261') { n.movimento('FERRO', ev.kg, r.data, '262', o.numero); if (s.wm && window.WM4.attivo(ev.data)) window.WM4.nuovoQuant('PSA-L1', 'FERRO', ev.kg, '', r.data, 'storno 262 ' + o.numero); }
-    if (ev.tipo === '101') n.movimento(o.materiale, -ev.qta, r.data, '102', o.numero);
+    if (ev.tipo === '261') { n.movimento('FERRO', ev.kg, r.data, '262', o.numero, {lotti: ev.lotti}); if (s.wm && window.WM4.attivo(ev.data)) window.WM4.nuovoQuant('PSA-L1', 'FERRO', ev.kg, '', r.data, 'storno 262 ' + o.numero); }
+    if (ev.tipo === '101') n.movimento(o.materiale, -ev.qta, r.data, '102', o.numero, {lotti: ev.lotto ? [{lotto: ev.lotto, qta: ev.qta}] : null});
     ev.stornato = r.data; n.salva(); return r;
   }
   // ── LT15: annulla un compito di magazzino aperto e lo ricrea con una nuova proposta ──

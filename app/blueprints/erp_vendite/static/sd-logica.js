@@ -179,14 +179,14 @@ window.SD4 = (function () {
       if ((S().giacenze[o.materiale] || 0) < q) throw Error('Giacenza insufficiente di ' + o.materiale + ': disponibili ' + L.n0(S().giacenze[o.materiale]) + ' pz.');
       var c = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, pgi: false, wm: true};
       S().consegne.push(c);
-      var t = WM.creaPrelievo(c, data);
+      var t; try { t = WM.creaPrelievo(c, data); } catch (err) { S().consegne.pop(); throw err; }
       N.salva();
       if (c.ondata === 'in attesa') return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino lavora <b>a ondate</b>, quindi i compiti di prelievo nascono quando rilasci l\'ondata (Innovazione → Prelievo a ondate).</p>';
       return '<p class="lab-nota">Consegna <b>' + c.numero + '</b> creata per ' + q + ' pz ' + o.materiale + ': il magazzino è gestito a ubicazioni (WMS), quindi nessuna uscita merci per ora. Creati ' + t.length + ' compiti di prelievo (' + (t.some(function (x) { return x.crossDock; }) ? 'anche in cross-docking dalla zona di ricevimento' : 'FIFO') + ') verso la zona di spedizione: confermali dalla pistola RF, poi registra l\'uscita merci.</p>';
     }
     var std = N.materiale(o.materiale).std, val = r2(q * std);
-    N.movimento(o.materiale, -q, data, '601', o.numero);
-    var c2 = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val};
+    var mv = N.movimento(o.materiale, -q, data, '601', o.numero);
+    var c2 = {numero: N.numero('consegna'), tipo: 'LF', ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: q, data: data, fatturata: false, valore: val, lotti: mv.lotti};
     S().consegne.push(c2); o.consegnato += q;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c2.numero, descrizione: 'Consegna ' + c2.numero + ' — uscita merci 601 ' + q + ' pz ' + o.materiale + ' (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
@@ -203,8 +203,8 @@ window.SD4 = (function () {
     if (q <= 0) throw Error('Niente di prelevato.');
     var std = N.materiale(c.materiale).std, val = r2(q * std);
     if (c.wm) WM.uscitaSpedizione(c, q);
-    N.movimento(c.materiale, -q, data, '601', o.numero);
-    c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q;
+    var mv = N.movimento(c.materiale, -q, data, '601', o.numero);
+    c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q; c.lotti = mv.lotti;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + c.materiale + ' dalla zona di spedizione (ordine ' + o.numero + ')',
       righe: [{conto: '41', dareAvere: 'DARE', importo: val}, {conto: '13', dareAvere: 'AVERE', importo: val}]});
     N.salva(); return r;

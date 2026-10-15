@@ -74,6 +74,7 @@
       if (S.giacenze[m] == null) S.giacenze[m] = 0;
     });
     ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
+    if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }
     Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; else if (S.clienti[k].fido == null) { S.clienti[k].fido = n.clienti[k].fido; S.clienti[k].rischio = n.clienti[k].rischio; } });
     Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; });
     return S;
@@ -109,10 +110,29 @@
         S.registrazioni.push(r);
         return r;
       },
-      movimento: function (mat, qta, data, tipo, rif) {
+      // movimento di magazzino, con la gestione dei lotti: in entrata nasce (o si ricarica) un lotto, in uscita si consumano i lotti FIFO
+      // (o quelli indicati in opz.lotti, per esempio negli storni). Restituisce il movimento, con i lotti toccati.
+      movimento: function (mat, qta, data, tipo, rif, opz) {
+        opz = opz || {};
         if ((S.giacenze[mat] || 0) + qta < -1e-9) throw Error('Giacenza insufficiente di ' + mat + ': disponibili ' + L.n0(S.giacenze[mat]) + ' pz.');
         S.giacenze[mat] = r2((S.giacenze[mat] || 0) + qta);
-        S.movimenti.push({data: data, mat: mat, qta: qta, tipo: tipo, rif: rif});
+        var lm = (S.lotti = S.lotti || {})[mat] = S.lotti[mat] || {}, tocc = [];
+        var carica = function (l, q) { if (!lm[l]) lm[l] = {qta: 0, data: data, tipo: tipo, rif: rif || '', fornitore: opz.fornitore || '', colata: opz.colata || ''}; lm[l].qta = r2(lm[l].qta + q); tocc.push({lotto: l, qta: r2(q)}); };
+        if (qta > 0) {
+          if (opz.lotti && opz.lotti.length) { var resto = qta; opz.lotti.forEach(function (x) { var q = Math.min(x.qta, resto); if (q > 1e-9) { carica(x.lotto, q); resto = r2(resto - q); } }); if (resto > 1e-9) carica(opz.lotti[0].lotto, resto); }
+          else {
+            var tipoMat = (S.materiali[mat] || {}).tipo, l = opz.lotto;
+            if (!l) l = tipo === '561' ? 'APERTURA' : tipo === '101' && tipoMat === 'ROH' ? 'C' + String(data).replace(/-/g, '').slice(2) + '-' + (Object.keys(lm).length + 1) : tipo === '101' ? 'L' + rif : tipo === '651' ? 'RESO-' + rif : tipo === '712' ? 'INV-' + String(data).replace(/-/g, '') : 'RIENTRO-' + (rif || data);
+            carica(String(l).trim().toUpperCase(), qta);
+          }
+        } else if (qta < 0) {
+          var serve = -qta, prendi = function (l, q) { var d = Math.min(q, lm[l] ? lm[l].qta : 0); if (d > 1e-9) { lm[l].qta = r2(lm[l].qta - d); tocc.push({lotto: l, qta: r2(d)}); serve = r2(serve - d); } };
+          (opz.lotti || []).forEach(function (x) { prendi(x.lotto, Math.min(x.qta, serve)); });
+          Object.keys(lm).filter(function (l) { return lm[l].qta > 1e-9; }).sort(function (a, b) { return lm[a].data < lm[b].data ? -1 : lm[a].data > lm[b].data ? 1 : a < b ? -1 : 1; }).forEach(function (l) { if (serve > 1e-9) prendi(l, serve); });
+          if (serve > 1e-9) tocc.push({lotto: 'SENZA LOTTO', qta: r2(serve)});
+        }
+        var mv = {data: data, mat: mat, qta: qta, tipo: tipo, rif: rif, lotti: tocc};
+        S.movimenti.push(mv); return mv;
       },
       saldo: function (conto, partner) {
         return r2(S.registrazioni.reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === conto && (!partner || x.partner === partner); })

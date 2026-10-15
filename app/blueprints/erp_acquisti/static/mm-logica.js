@@ -56,11 +56,11 @@ window.MM4 = (function () {
     if (q > o.qta - o.entrato + 1e-9) throw Error('Restano da ricevere ' + L.n0(o.qta - o.entrato) + ' ' + n.materiale(o.materiale).um + '.');
     var m = n.materiale(o.materiale), std = r2(q * m.std), ord = r2(q * o.prezzo), pd = r2(ord - std);
     var doc = n.numero('materiale');
-    n.movimento(o.materiale, q, data, '101', o.numero);
+    var mv = n.movimento(o.materiale, q, data, '101', o.numero, {lotto: i.lotto ? String(i.lotto).trim().toUpperCase() : '', fornitore: o.fornitore, colata: String(i.lotto || '').trim()});
     if (window.WM4 && window.WM4.attivo(data)) window.WM4.entrata(o.materiale, q, data, doc, '101 acquisto');
     o.entrato = r2(o.entrato + q); o.valoreEntrato = r2(o.valoreEntrato + ord);
-    (o.entrate = o.entrate || []).push({doc: doc, qta: q, data: data, valoreStd: std, valoreOrdine: ord, pd: pd});
-    var r = n.post({data: data, tipo: 'ENTRATA_ACQUISTO', rif: doc, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + L.n0(q) + ' ' + m.um + ' ' + o.materiale + ' da ordine ' + o.numero,
+    (o.entrate = o.entrate || []).push({doc: doc, qta: q, data: data, valoreStd: std, valoreOrdine: ord, pd: pd, lotto: mv.lotti[0].lotto});
+    var r = n.post({data: data, tipo: 'ENTRATA_ACQUISTO', rif: doc, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + L.n0(q) + ' ' + m.um + ' ' + o.materiale + ' lotto ' + mv.lotti[0].lotto + ' da ordine ' + o.numero,
       righe: [{conto: '12', dareAvere: 'DARE', importo: std, testo: 'a standard ' + L.eur(m.std)}, {conto: '63', dareAvere: 'DARE', importo: pd, testo: 'differenza prezzo ' + o.materiale},
               {conto: '22', dareAvere: 'AVERE', importo: ord, partner: o.fornitore, testo: 'WE/RE al prezzo d\'ordine'}]});
     if (Math.abs(pd) > 0.004) S().mlPD.push({data: data, mat: o.materiale, pd: pd, tipo: 'acquisto', rif: doc, qta: q});

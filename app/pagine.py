@@ -262,7 +262,7 @@ LABORATORI = {
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
-               ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
+               ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
                ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
@@ -300,7 +300,8 @@ _ERP_PAGINE = {
                       {"endpoint": "rf", "titolo": "Pistola RF", "icona": "🔫", "tcode": "LM00 · /SCWM/RFUI"},
                       {"endpoint": "compiti", "titolo": "Compiti di magazzino", "icona": "📋", "tcode": "LT10 · LT12 · LT22"},
                       {"endpoint": "monitor", "titolo": "Monitor del magazzino", "icona": "📈", "tcode": "/SCWM/MON · LX23"},
-                      {"endpoint": "etichette", "titolo": "Etichette barcode e QR", "icona": "🏷️", "tcode": "Code 128 · QR"}],
+                      {"endpoint": "etichette", "titolo": "Etichette barcode e QR", "icona": "🏷️", "tcode": "Code 128 · QR"},
+                      {"endpoint": "lotti", "titolo": "Lotti e tracciabilità", "icona": "🧬", "tcode": "MSC3N · MB56"}],
     "erp_inventario": [{"endpoint": "documenti", "titolo": "Documenti d'inventario", "icona": "📝", "tcode": "LI01N · LI11N · LI14 · LI20"},
                        {"endpoint": "lista", "titolo": "Lista di conta da stampare", "icona": "🖨️", "tcode": "LI04"},
                        {"endpoint": "differenze", "titolo": "Differenze inventariali", "icona": "⚖️", "tcode": "LI21 · 711/712"},

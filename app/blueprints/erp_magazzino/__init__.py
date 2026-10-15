@@ -36,3 +36,8 @@ def monitor():
 @bp.route("/etichette")
 def etichette():
     return render_lab("erp_magazzino", "etichette")
+
+
+@bp.route("/lotti")
+def lotti():
+    return render_lab("erp_magazzino", "lotti")

@@ -196,6 +196,27 @@
       radice.querySelector('#cosa').onchange = function () { radice.dataset.cosa = this.value; rendi(); };
       radice.querySelector('#stampa').onclick = function () { window.print(); };
     },
+    lotti: function () {
+      var LT = window.LT4, tutti = LT.elenco(), mat = radice.dataset.mat || '', sel = radice.dataset.lotto || '', cons = radice.dataset.cons || '';
+      var vista = tutti.filter(function (x) { return (!mat || x.mat === mat) && (x.qta > 1e-9 || radice.dataset.esauriti === '1'); });
+      var albero = function (righe) { return '<ul class="lab-elenco">' + righe.map(function (x) { return '<li style="margin-left:' + (x.livello * 1.4) + 'rem">' + (x.tipo === 'lotto' ? '🧬 ' : x.tipo === '601' || x.tipo === 'consegna' ? '🚚 ' : x.tipo === '261' ? '🏭 ' : x.tipo === 'origine' ? '📥 ' : '• ') + e(x.testo) + '</li>'; }).join('') + '</ul>'; };
+      var dett = '';
+      if (sel) { var p = sel.split('|'); try { var x = LT.lotto(p[0], p[1]);
+        dett = L.scheda('🧬', 'Lotto ' + e(p[1]) + ' · ' + p[0], 'MSC3N', '<p>Giacenza del lotto <b>' + n0(x.qta) + ' ' + um(p[0]) + '</b> · nato il ' + fd(x.data) + (x.colata ? ' · colata del fornitore ' + e(x.colata) : '') + '</p>' +
+          '<div class="lab-griglia"><div><h3>⬅️ A monte: da dove viene</h3>' + albero(LT.monte(p[0], p[1])) + '</div><div><h3>➡️ A valle: dove è finito</h3>' + albero(LT.valle(p[0], p[1])) + '</div></div>'); } catch (err) { dett = '<p class="lab-esito ko">' + e(err.message) + '</p>'; } }
+      radice.innerHTML = U.avviso(S()) + '<div class="lab-filtro"><label>Materiale <select id="lm"><option value="">tutti</option>' + Object.keys(S().materiali).map(function (m) { return '<option' + (m === mat ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></label>' +
+          ' <label class="chk"><input type="checkbox" id="le"' + (radice.dataset.esauriti === '1' ? ' checked' : '') + '> mostra anche i lotti esauriti</label></div>' +
+        L.scheda('📦', 'Giacenza per lotto', 'MMBE · MSC3N', L.tabella(['Materiale', 'Lotto', 'Nato il', 'Origine', 'Colata / fornitore', 'Giacenza›', ''], vista.map(function (x) {
+          return [x.mat, '<b>' + e(x.lotto) + '</b>', fd(x.data), ({'561': 'apertura', '101': 'entrata 101', '651': 'reso', '712': 'inventario', '602': 'rientro', '262': 'rientro'}[x.tipo] || x.tipo) + (x.rif ? ' · ' + e(x.rif) : ''), e(x.colata || '') + (x.fornitore ? ' · ' + x.fornitore : ''), n0(x.qta) + ' ' + um(x.mat),
+            '<button type="button" class="lab-btn sec" data-lotto="' + e(x.mat + '|' + x.lotto) + '">Traccia</button>']; }), 'Nessun lotto.') +
+          '<p class="lab-nota">Il ferro prende il lotto della <b>colata</b> scritta sul certificato del fornitore all\'entrata merci; le transenne prendono il lotto dell\'<b>ordine di produzione</b>. Le uscite consumano i lotti più vecchi (FIFO).</p>') + dett +
+        L.scheda('🔎', 'Reclamo di un cliente: risali dalla consegna', 'MB56 a monte', '<div class="lab-filtro"><label>Consegna <select id="lc"><option value="">— scegli —</option>' + S().consegne.filter(function (c) { return c.tipo === 'LF' && c.lotti; }).map(function (c) { return '<option' + (c.numero === cons ? ' selected' : '') + ' value="' + c.numero + '">' + c.numero + ' · ' + e(U.nome(S(), c.cliente)) + ' · ' + c.qta + ' ' + c.materiale + '</option>'; }).join('') + '</select></label></div>' +
+          (cons ? albero(LT.daConsegna(cons)) : '<p class="lab-nota">Se un cliente segnala un difetto, dalla consegna risali ai lotti di transenne e alle colate di ferro; poi dal lotto di ferro scendi a valle per trovare <b>tutti</b> i clienti da avvisare (richiamo).</p>'));
+      radice.querySelectorAll('[data-lotto]').forEach(function (b) { b.onclick = function () { radice.dataset.lotto = this.dataset.lotto; rendi(); }; });
+      radice.querySelector('#lm').onchange = function () { radice.dataset.mat = this.value; rendi(); };
+      radice.querySelector('#le').onchange = function () { radice.dataset.esauriti = this.checked ? '1' : ''; rendi(); };
+      radice.querySelector('#lc').onchange = function () { radice.dataset.cons = this.value; rendi(); };
+    },
   };
   function rendi() { (PAGINE[C.pagina] || PAGINE.struttura)(); }
   rendi();

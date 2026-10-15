@@ -6,13 +6,13 @@ const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m);
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/static/js/erp/ruoli.js'];
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/static/js/erp/ruoli.js'];
 const finale = path.join(__dirname, 'lab-erp-finale.json');
 if (!fs.existsSync(finale)) { console.log('✗ manca tests/lab-erp-finale.json: esegui prima tests/s4.js'); process.exit(1); }
 const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
 w.localStorage.setItem(CHIAVE, fs.readFileSync(finale, 'utf8'));
 LOGICA.forEach(f => w.eval(R(f)));
-const SD = w.SD4, ST = w.ST4, WM = w.WM4, MM = w.MM4, PP = w.PP4, AU = w.AU4;
+const SD = w.SD4, ST = w.ST4, WM = w.WM4, MM = w.MM4, PP = w.PP4, AU = w.AU4, LT = w.LT4;
 SD.avvia(CHIAVE); const S = () => w.MSA_STATO_CORRENTE();
 S().wm.ondate = false;
 const prova = (f, m) => { try { return f(); } catch (e) { ok(false, m + ' → ' + e.message); return null; } };
@@ -163,11 +163,38 @@ prova(() => PP.entrata({ordine: S().produzione.slice(-1)[0].numero, qta: '2', da
 ok(AU.stato().su53.length === 3 && AU.stato().su53[0].tcode === 'VL01N', 'SU53 registra i controlli falliti');
 prova(() => AU.imposta({ruolo: 'ADMIN', attivo: 'no'}), 'autorizzazioni spente');
 
+// ── lotti e tracciabilità: colata → ordine di produzione → lotto di transenne → consegna → cliente ──
+prova(() => MM.ordine({fornitore: 'F100', materiale: 'FERRO', qta: '500', prezzo: '0,95', data: '2027-08-29'}), 'ME21N ferro per la colata');
+prova(() => MM.entrata({ordine: S().acquisti.slice(-1)[0].numero, lotto: 'col-7781', data: '2027-08-29'}), 'MIGO con la colata');
+ok(LT.lotto('FERRO', 'COL-7781').qta === 500 && LT.lotto('FERRO', 'COL-7781').fornitore === 'F100', 'lotto della colata COL-7781 con il fornitore');
+confermaTutti('2027-08-29');
+// consumo FIFO dei lotti più vecchi: per isolare la colata consumo prima tutto il ferro più vecchio con un ordine grande
+const ferroVecchio = LT.elenco('FERRO').filter(x => x.lotto !== 'COL-7781' && x.qta > 0).reduce((t, x) => t + x.qta, 0);
+prova(() => PP.ordine({materiale: 'TR-PED', qta: '5', data: '2027-08-30'}), 'CO01 TR-PED');
+const opL = S().produzione.slice(-1)[0];
+prova(() => WM.approvvigiona({ordine: opL.numero, kg: String(ferroVecchio + 45), data: '2027-08-30'}), 'staging di tutto il ferro'); confermaTutti('2027-08-30');
+prova(() => PP.prelievo({ordine: opL.numero, kg: String(ferroVecchio + 45), data: '2027-08-30'}), '261 ferro vecchio + 45 kg della colata');
+ok(opL.eventi[0].lotti.some(x => x.lotto === 'COL-7781' && x.qta === 45), 'il 261 consuma per ultima la colata nuova (FIFO): 45 kg');
+prova(() => PP.entrata({ordine: opL.numero, qta: '5', data: '2027-08-30'}), '101 lotto di produzione'); confermaTutti('2027-08-30');
+ok(LT.lotto('TR-PED', 'L' + opL.numero).qta === 5, 'lotto di produzione L' + opL.numero);
+prova(() => SD.ordine({cliente: 'C200', materiale: 'TR-PED', qta: String(SD.atp('TR-PED').disponibile), data: '2027-08-31'}), 'VA01 tutte le TR-PED');
+const oL = S().ordini.slice(-1)[0]; prova(() => SD.consegna({ordine: oL.numero, data: '2027-08-31'}), 'VL01N'); confermaTutti('2027-08-31');
+const cL = S().consegne.slice(-1)[0]; prova(() => SD.uscitaMerci({consegna: cL.numero, data: '2027-08-31'}), 'VL02N con i lotti');
+ok(cL.lotti.some(x => x.lotto === 'L' + opL.numero), 'la consegna porta il lotto di produzione');
+const v = LT.valle('FERRO', 'COL-7781').map(x => x.testo).join(' | ');
+ok(/ordine di produzione/.test(v) && new RegExp('consegna ' + cL.numero).test(v) && /Delta/.test(v), 'a valle: dalla colata al cliente → ' + v);
+const m = LT.daConsegna(cL.numero).map(x => x.testo).join(' | ');
+ok(/COL-7781/.test(m) && /Acciaierie Umbre/.test(m), 'a monte: dalla consegna alla colata e al fornitore → ' + m.slice(0, 300));
+prova(() => ST.vl09({consegna: cL.numero, data: '2027-08-31'}), 'VL09 con i lotti');
+ok(LT.lotto('TR-PED', 'L' + opL.numero).qta === 5, 'VL09 riporta la merce nel suo lotto (' + LT.lotto('TR-PED', 'L' + opL.numero).qta + ')');
+
 // ── pagine ──
 const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
   x.localStorage.setItem(CHIAVE, w.localStorage.getItem(CHIAVE)); x.LAB_PAGINA = {chiave: CHIAVE, pagina: nome, slot: 'erp-ft'};
-  LOGICA.concat([nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
-let pg = pagina('ruoli'); ok(/Matrice ruoli/.test(pg.document.body.textContent) && /SU53/.test(pg.document.body.textContent) && /VL01N/.test(pg.document.body.textContent), 'pagina ruoli e autorizzazioni');
+  LOGICA.concat([nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
+let pg = pagina('lotti'); ok(/Giacenza per lotto/.test(pg.document.body.textContent) && /COL-7781/.test(pg.document.body.textContent), 'pagina lotti');
+pg.document.querySelector('[data-lotto="FERRO|COL-7781"]').click(); ok(/A valle/.test(pg.document.body.textContent) && /Delta/.test(pg.document.body.textContent), 'pagina lotti: tracciabilità del lotto');
+pg = pagina('ruoli'); ok(/Matrice ruoli/.test(pg.document.body.textContent) && /SU53/.test(pg.document.body.textContent) && /VL01N/.test(pg.document.body.textContent), 'pagina ruoli e autorizzazioni');
 pg = pagina('richieste'); ok(/ME5A/.test(pg.document.body.textContent) && /ordinata/.test(pg.document.body.textContent), 'pagina richieste d\'acquisto');
 pg = pagina('crediti'); ok(/VKM1/.test(pg.document.body.textContent) && /Edil Sigma/.test(pg.document.body.textContent) && /bloccato/.test(pg.document.body.textContent), 'pagina gestione crediti');
 pg = pagina('sdi'); ok(/Trasmissione allo SdI/.test(pg.document.body.textContent) && /consegnata/.test(pg.document.body.textContent) && /FatturaElettronica/.test(pg.document.body.textContent), 'pagina SdI');
@@ -177,5 +204,5 @@ pg.document.getElementById('vf-fattura').value = f2.numero; pg.document.querySel
 ok(/SdI/.test(pg.document.getElementById('vf-esito').textContent), 'pagina storni: VF11 rifiutato dopo lo SdI');
 pg = pagina('giornale'); ok(/stornato dal/.test(pg.document.body.textContent), 'giornale con i documenti stornati');
 quadra('agosto con gli storni');
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio, ruoli e autorizzazioni: ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio, ruoli e autorizzazioni, lotti e tracciabilità: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);
