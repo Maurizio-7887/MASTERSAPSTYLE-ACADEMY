@@ -133,11 +133,26 @@ prova(() => PP.ordine({materiale: 'TR-ALTA', qta: '30', data: '2027-08-22'}), 'C
 prova(() => PP.entrata({ordine: S().produzione.slice(-1)[0].numero, qta: '30', data: '2027-08-23'}), '101 di 30 pezzi');
 ok(oD.confermata === oD.qta && oB.confermata === 5, 'conferma automatica all\'entrata di produzione (Delta prima, poi Beta)');
 
+// ── richiesta d'acquisto, approvazione, ordine con riferimento, rilascio sopra soglia ──
+ok(/ME54N/.test(prova(() => MM.richiesta({materiale: 'FERRO', qta: '12000', consegna: '2027-09-01', richiedente: 'Produzione', data: '2027-08-24'}), 'ME51N') || ''), 'ME51N richiesta creata');
+const rq = S().rda.slice(-1)[0]; ok(rq.stato === 'da approvare' && rq.valore === 11400, 'richiesta da approvare, valore a standard 11.400');
+rifiuta(() => MM.ordine({rda: rq.numero, fornitore: 'F100', prezzo: '0,97', data: '2027-08-24'}), /approvata/, 'ordine da richiesta non approvata');
+prova(() => MM.approva({rda: rq.numero, decisione: 'approva', data: '2027-08-25'}), 'ME54N');
+prova(() => MM.ordine({rda: rq.numero, fornitore: 'F100', prezzo: '0,97', data: '2027-08-25'}), 'ME21N da richiesta');
+const oR = S().acquisti.slice(-1)[0]; ok(oR.rda === rq.numero && oR.qta === 12000 && rq.stato === 'ordinata' && rq.ordine === oR.numero, 'ordine con riferimento alla richiesta');
+ok(oR.rilascio && oR.rilascio.stato === 'bloccato', 'ordine di 11.640 € oltre la soglia: bloccato');
+rifiuta(() => MM.entrata({ordine: oR.numero, data: '2027-08-26'}), /ME29N/, 'entrata su ordine non rilasciato');
+rifiuta(() => MM.ordine({rda: rq.numero, fornitore: 'F100', prezzo: '0,97', data: '2027-08-25'}), /ordinata/, 'richiesta già ordinata');
+prova(() => MM.rilascia({ordine: oR.numero, data: '2027-08-26'}), 'ME29N'); prova(() => MM.entrata({ordine: oR.numero, qta: '100', data: '2027-08-27'}), 'entrata dopo il rilascio');
+prova(() => MM.richiesta({materiale: 'FERRO', qta: '50', data: '2027-08-27'}), 'ME51N piccola'); const rq2 = S().rda.slice(-1)[0];
+prova(() => MM.approva({rda: rq2.numero, decisione: 'rifiuta', data: '2027-08-27'}), 'ME54N rifiuto'); ok(rq2.stato === 'rifiutata', 'richiesta rifiutata');
+
 // ── pagine ──
 const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
   x.localStorage.setItem(CHIAVE, w.localStorage.getItem(CHIAVE)); x.LAB_PAGINA = {chiave: CHIAVE, pagina: nome, slot: 'erp-ft'};
-  LOGICA.concat([nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
-let pg = pagina('crediti'); ok(/VKM1/.test(pg.document.body.textContent) && /Edil Sigma/.test(pg.document.body.textContent) && /bloccato/.test(pg.document.body.textContent), 'pagina gestione crediti');
+  LOGICA.concat([nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
+let pg = pagina('richieste'); ok(/ME5A/.test(pg.document.body.textContent) && /ordinata/.test(pg.document.body.textContent), 'pagina richieste d\'acquisto');
+pg = pagina('crediti'); ok(/VKM1/.test(pg.document.body.textContent) && /Edil Sigma/.test(pg.document.body.textContent) && /bloccato/.test(pg.document.body.textContent), 'pagina gestione crediti');
 pg = pagina('sdi'); ok(/Trasmissione allo SdI/.test(pg.document.body.textContent) && /consegnata/.test(pg.document.body.textContent) && /FatturaElettronica/.test(pg.document.body.textContent), 'pagina SdI');
 pg = pagina('storni'); const tx = pg.document.body.textContent;
 ok(/VF11/.test(tx) && /MBST/.test(tx) && /LT15/.test(tx) && /Documenti stornati/.test(tx) && new RegExp(f1.contabile).test(tx), 'pagina storni');
@@ -145,5 +160,5 @@ pg.document.getElementById('vf-fattura').value = f2.numero; pg.document.querySel
 ok(/SdI/.test(pg.document.getElementById('vf-esito').textContent), 'pagina storni: VF11 rifiutato dopo lo SdI');
 pg = pagina('giornale'); ok(/stornato dal/.test(pg.document.body.textContent), 'giornale con i documenti stornati');
 quadra('agosto con gli storni');
-console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP): ' + controlli + ' controlli');
+console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

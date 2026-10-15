@@ -21,3 +21,8 @@ def entrate():
 @bp.route("/fatture")
 def fatture():
     return render_lab("erp_acquisti", "fatture")
+
+
+@bp.route("/richieste")
+def richieste():
+    return render_lab("erp_acquisti", "richieste")
