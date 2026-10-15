@@ -263,7 +263,7 @@ LABORATORI = {
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
-               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("static", "js/lab-copioni.js"),
+               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
@@ -326,7 +326,9 @@ _ERP_PAGINE = {
     "erp_copa": [{"endpoint": "ke30", "titolo": "Redditività per segmento", "icona": "📊", "tcode": "KE30"},
                  {"endpoint": "ke24", "titolo": "Righe singole CO-PA", "icona": "🧮", "tcode": "KE24"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
-               {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"}],
+               {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"},
+               {"endpoint": "sdi", "titolo": "Fattura elettronica (SdI)", "icona": "📤", "tcode": "FatturaPA · TD01 · TD04"},
+               {"endpoint": "storni", "titolo": "Storni e annullamenti", "icona": "↩️", "tcode": "VF11 · VL09 · MBST · MR8M · FB08"}],
 }
 _ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",

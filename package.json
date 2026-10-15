@@ -13,7 +13,7 @@
     "test:sincronia": "node tests/sincronia.js",
     "test:guida": "node tests/guida.js",
     "test:laboratori": "node tests/laboratori.js",
-    "test:s4": "node tests/s4.js"
+    "test:s4": "node tests/s4.js && node tests/s4-storni.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"

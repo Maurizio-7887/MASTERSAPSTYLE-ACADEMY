@@ -124,12 +124,12 @@ window.SD4 = (function () {
     var c = S().consegne.find(function (x) { return x.numero === String(i.consegna); }); if (!c) throw Error('Consegna inesistente.');
     if (c.pgi !== false) throw Error('Uscita merci già registrata.');
     var data = N.data(i.data); if (data < c.data) throw Error('Uscita merci anteriore alla consegna.');
-    var WM = window.WM4, prel = WM.statoPrelievo(c);
+    var WM = window.WM4, prel = c.wm ? WM.statoPrelievo(c) : {stato: 'C', prelevato: c.qta, aperti: 0};
     if (prel.stato !== 'C') throw Error('Prelievo non completato (stato ' + prel.stato + '): ' + prel.aperti + ' compiti ancora aperti.');
     var o = ord(c.ordine), q = prel.prelevato;
     if (q <= 0) throw Error('Niente di prelevato.');
     var std = N.materiale(c.materiale).std, val = r2(q * std);
-    WM.uscitaSpedizione(c, q);
+    if (c.wm) WM.uscitaSpedizione(c, q);
     N.movimento(c.materiale, -q, data, '601', o.numero);
     c.qta = q; c.valore = val; c.pgi = data; o.consegnato += q;
     var r = N.post({data: data, tipo: 'USCITA_MERCI', rif: c.numero, descrizione: 'Consegna ' + c.numero + ' — uscita merci 601 ' + q + ' pz ' + c.materiale + ' dalla zona di spedizione (ordine ' + o.numero + ')',

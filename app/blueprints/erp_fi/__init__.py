@@ -16,3 +16,13 @@ def giornale():
 @bp.route("/bilancio")
 def bilancio():
     return render_lab("erp_fi", "bilancio")
+
+
+@bp.route("/sdi")
+def sdi():
+    return render_lab("erp_fi", "sdi")
+
+
+@bp.route("/storni")
+def storni():
+    return render_lab("erp_fi", "storni")

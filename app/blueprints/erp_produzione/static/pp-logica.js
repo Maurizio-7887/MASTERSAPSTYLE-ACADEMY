@@ -6,9 +6,9 @@ window.PP4 = (function () {
   var L = window.LabMotore, r2 = L.r2;
   var N = function () { return window.SD4.N; }, S = function () { return N().S; };
   var ord = function (n) { var o = S().produzione.find(function (x) { return x.numero === String(n); }); if (!o) throw Error('Ordine di produzione ' + n + ' inesistente.'); return o; };
-  var somma = function (o, tipo, k) { return r2(o.eventi.filter(function (e) { return e.tipo === tipo; }).reduce(function (t, e) { return t + (e[k] || 0); }, 0)); };
+  var somma = function (o, tipo, k) { return r2(o.eventi.filter(function (e) { return e.tipo === tipo && !e.stornato; }).reduce(function (t, e) { return t + (e[k] || 0); }, 0)); };
   var aperto = function (o) { if (o.liquidazione) throw Error('Ordine ' + o.numero + ' già liquidato e chiuso (CLSD).'); if (o.teco) throw Error('Ordine ' + o.numero + ' chiuso tecnicamente (TECO).'); };
-  function stato(o) { return o.liquidazione ? 'CLSD' : o.teco ? 'TECO' : somma(o, '101', 'qta') >= o.qta ? 'DLV' : o.eventi.some(function (e) { return e.tipo === 'CO11N'; }) ? 'PCNF' : 'REL'; }
+  function stato(o) { return o.liquidazione ? 'CLSD' : o.teco ? 'TECO' : somma(o, '101', 'qta') >= o.qta ? 'DLV' : o.eventi.some(function (e) { return e.tipo === 'CO11N' && !e.stornato; }) ? 'PCNF' : 'REL'; }
 
   function ordine(i) {
     var n = N(), data = n.data(i.data), mat = i.materiale, m = n.materiale(mat), q = L.num(i.qta, 'Quantità', 1);

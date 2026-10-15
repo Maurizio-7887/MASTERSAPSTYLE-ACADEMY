@@ -20,6 +20,7 @@ window.TS4 = (function () {
       var a = anag(lato, p) || {}, voci = [], crediti = [];
       S().registrazioni.forEach(function (r) {
         if (alla && r.data > alla) return;
+        if (r.stornato || r.stornoDi) return;   // documento stornato e il suo storno si annullano: non fanno partite
         r.righe.forEach(function (x, k) {
           if (x.conto !== conto || x.partner !== p) return;
           var base = {doc: r.rif || r.numero, contabile: r.numero, data: r.data, descrizione: r.descrizione, valuta: x.valuta || 'EUR', importoValuta: x.importoValuta || null, pareggio: x.pareggio || ''};
