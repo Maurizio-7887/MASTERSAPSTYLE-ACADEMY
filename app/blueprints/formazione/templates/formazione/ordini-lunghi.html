@@ -1,0 +1,50 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>In azienda si dice «apriamo la <b>commessa</b>» anche per prodotti di catalogo, e la commessa parte dal ferro e arriva al prodotto finito.</li>
+  <li>I semilavorati si avviano <b>mesi prima</b> di diventare prodotto finito e nel frattempo restano a magazzino… ma sull'ordine.</li>
+  <li>Ci sono ordini di produzione aperti da 3, 4, 6 mesi; il controllo di gestione dice che «il gestionale non regge».</li>
+  <li>Molti codici finiti (centinaia o migliaia) in piccoli lotti, con pochi semilavorati comuni: è un'azienda <b>High-Mix Low-Volume</b>.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Non è un limite del software: è un <b>errore di modello</b>. Un unico oggetto (ordine o commessa) copre tutto il percorso dal semilavorato al finito, compresi i mesi di stazionamento a magazzino. Così l'ordine accumula costi per mesi, il WIP cresce, e la varianza arriva una volta sola, alla fine, mescolata.</p>
+<p class="lez-chiave">Regola pratica: dove c'è un magazzino nel mezzo, ci deve essere un ordine che si chiude.</p>
+<p>La soluzione è il <b>disaccoppiamento</b>: un ordine breve per ogni livello di distinta. Il semilavorato chiude il suo ordine entrando a magazzino a costo standard; il prodotto finito, quando arriva l'ordine cliente, apre un suo ordine e preleva il semilavorato come un qualsiasi componente. Il semilavorato si produce <b>a scorta</b> (strategia 70), il finito <b>su ordine</b> (strategia 50).</p>
+{% endblock %}
+{% block concetti %}
+<dt>Controllo costi per ordine</dt><dd>L'ordine di produzione raccoglie costi standard e costi effettivi; a fine vita calcola la varianza. È il modello giusto per lotti discreti (Product Cost by Order).</dd>
+<dt>Commessa</dt><dd>In italiano si usa per tutto; in SAP la commessa vera è l'ordine cliente o l'elemento WBS di progetto. L'ordine di produzione è un'altra cosa: confonderli porta a progetti sbagliati.</dd>
+<dt>Punto di disaccoppiamento</dt><dd>Un magazzino posto in un punto scelto della distinta: interrompe la catena delle dipendenze. A monte si produce a scorta, a valle su ordine.</dd>
+<dt>Strategia 70</dt><dd>Pianificazione a livello di assieme: il semilavorato si pianifica e si produce da solo, i fabbisogni dei padri lo consumano.</dd>
+<dt>Strategia 50</dt><dd>Pianificazione senza assemblaggio finale: l'assemblaggio parte solo con l'ordine cliente.</dd>
+<dt>Ordine collettivo</dt><dd>Padre e figli legati in un unico albero senza passaggio a magazzino: va bene solo se si producono di seguito in pochi giorni. Con mesi di magazzino in mezzo è proprio la «commessa da 6 mesi».</dd>
+{% endblock %}
+{% block esempio %}
+<p>Laboratorio Alta varietà: 600 telai SL-PIEGA prodotti a novembre per tre transenne diverse, che saranno ordinate a dicembre.</p>
+<table class="lez-tab">
+  <tr><th></th><th class="n">Ordini per livello (disaccoppiamento)</th><th class="n">Un solo ordine dal ferro al finito</th></tr>
+  <tr><td>Ordini aperti a fine novembre</td><td class="n">1 (telaio a metà)</td><td class="n">1 (tutta la catena)</td></tr>
+  <tr><td>WIP a bilancio al 30/11</td><td class="n">3.900 €</td><td class="n">12.260 €</td></tr>
+  <tr><td>Telai finiti a fine novembre</td><td class="n">400 a scaffale, 8.080 € a standard</td><td class="n">nessuno: sono «dentro» l'ordine</td></tr>
+  <tr><td>Se i clienti ordinano dopo 6 mesi</td><td class="n">telai a scaffale, nessun ordine aperto</td><td class="n">ordine aperto per 6 mesi</td></tr>
+  <tr><td>Varianze</td><td class="n">una per ordine, per categoria: +280 taglio, −140 piegatura…</td><td class="n">un solo numero alla fine</td></tr>
+  <tr><td>Lead time verso il cliente</td><td class="n">5 giorni (solo saldatura)</td><td class="n">tutta la catena</td></tr>
+</table>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b">🛒 <b>Ferro</b>acquisto</span><span class="f">→</span><span class="b"><b>Ordine 1</b>SL-TAGLIO</span><span class="f">→</span><span class="b mag">📦 <b>Magazzino</b>tagliati (16)</span><span class="f">→</span><span class="b"><b>Ordine 2</b>SL-PIEGA</span><span class="f">→</span><span class="b mag">📦 <b>Disaccoppiamento</b>telai (161) · strat. 70</span><span class="f">→</span><span class="b"><b>Ordine 3</b>assemblaggio · strat. 50</span><span class="f">→</span><span class="b cli">👤 <b>Cliente</b>ordine VA01</span></div>
+<div class="lez-flusso"><span class="b ko"><b>Errore</b>un solo ordine dal ferro alla transenna, aperto finché il cliente non ordina</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Dove in SAP</th><th>Nel laboratorio</th></tr>
+<tr><td>Strategia del materiale</td><td>MM02, vista MRP 3, gruppo di strategia (70 / 50)</td><td>Anagrafica e strategie</td></tr>
+<tr><td>Niente produzione diretta (ordine collettivo)</td><td>MRP 2, approvvigionamento speciale vuoto (non 52)</td><td>un ordine per ogni livello</td></tr>
+<tr><td>Ordine di produzione</td><td>CO01, poi 261 · CO11N · 101</td><td>Ordini di produzione</td></tr>
+<tr><td>Prezzo standard</td><td>Contabilità 1, controllo prezzo S; CK11N</td><td>costo standard in cascata 14,60 → 20,20 → 31,40</td></tr>
+</table>{% endblock %}
+{% block domande %}
+<details><summary>SAP obbliga a chiudere gli ordini di produzione entro il mese?</summary><p>No: obbliga a chiudere il periodo. Un ordine aperto a fine mese diventa WIP; le varianze si calcolano quando l'ordine è finito.</p></details>
+<details><summary>Perché la «commessa da 6 mesi» è un errore di modello?</summary><p>Perché tiene sull'ordine anche il tempo in cui il semilavorato è fermo a magazzino: WIP enorme, varianze illeggibili, semilavorato non utilizzabile per altri prodotti.</p></details>
+<details><summary>Dove si mette il punto di disaccoppiamento?</summary><p>Sui semilavorati comuni a molti padri e con lead time lungo a monte: nel laboratorio il telaio SL-PIEGA, che entra in tutte e tre le transenne.</p></details>
+<details><summary>Che differenza c'è tra strategia 50 e strategia 70?</summary><p>La 50 riguarda il prodotto finito (componenti sulla previsione, assemblaggio solo su ordine cliente); la 70 riguarda il semilavorato stesso, pianificato e prodotto a scorta, consumato dai padri.</p></details>
+<details><summary>Quando un ordine collettivo è la scelta giusta?</summary><p>Quando padre e figlio sono prodotti di seguito, nello stesso flusso, in pochi giorni. Se c'è un magazzino in mezzo, no.</p></details>
+{% endblock %}

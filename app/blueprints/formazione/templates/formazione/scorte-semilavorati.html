@@ -1,0 +1,41 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>I semilavorati a volte <b>mancano</b> (la produzione si ferma) e a volte ce ne sono <b>troppi</b> fermi.</li>
+  <li>L'MRP cambia date e quantità ogni giorno: centinaia di messaggi di eccezione (<b>nervosismo</b>).</li>
+  <li>Una variazione sull'ordine del finito si propaga a cascata su tutti i livelli (<b>effetto frusta</b>).</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il <b>DDMRP</b> (Demand Driven MRP, Ptak e Smith, 2011) dice <b>dove</b> mettere i magazzini di disaccoppiamento, <b>quanto</b> dimensionarli e <b>quando</b> riordinare. Ogni codice disaccoppiato ha un <b>buffer a tre zone</b> (rossa, gialla, verde) e si riordina guardando il <b>flusso netto</b>, non la previsione.</p>
+<p class="lez-chiave">Se il flusso netto scende sotto la cima della gialla, si ordina quanto serve per tornare alla cima della verde.</p>
+<p>Il DDMRP non sostituisce l'MRP: lo spezza in catene corte, sopra e sotto ogni buffer.</p>
+{% endblock %}
+{% block concetti %}
+<dt>ADU</dt><dd>Consumo medio giornaliero (Average Daily Usage).</dd>
+<dt>DLT</dt><dd>Lead time disaccoppiato, in giorni.</dd>
+<dt>LTF</dt><dd>Fattore di lead time: 0,2–0,4 lungo, 0,41–0,6 medio, 0,61–1 corto.</dd>
+<dt>VF</dt><dd>Fattore di variabilità: 0–0,4 bassa, 0,41–0,6 media, oltre 0,61 alta.</dd>
+<dt>Zone</dt><dd>Rosso = ADU × DLT × LTF × (1 + VF) · Giallo = ADU × DLT · Verde = max(ADU × DLT × LTF; MOQ; ADU × ciclo d'ordine).</dd>
+<dt>NFP — flusso netto</dt><dd>Giacenza + ordinato in arrivo − domanda qualificata (ordini scaduti, di oggi e picchi oltre soglia).</dd>
+{% endblock %}
+{% block esempio %}
+<p>Telaio SL-PIEGA (stessi dati dell'esempio SL-100 della relazione): ADU 20 pz/giorno, DLT 15, LTF 0,5, VF 0,5, MOQ 200, ciclo d'ordine 10 giorni.</p>
+<table class="lez-tab"><tr><th>Zona</th><th>Calcolo</th><th class="n">Pezzi</th><th class="n">Cima</th></tr>
+<tr><td>Rosso base</td><td>20 × 15 × 0,5</td><td class="n">150</td><td class="n">—</td></tr>
+<tr><td>Rosso sicurezza</td><td>150 × 0,5</td><td class="n">75</td><td class="n">—</td></tr>
+<tr><td>Rosso totale</td><td>150 + 75</td><td class="n">225</td><td class="n">225</td></tr>
+<tr><td>Giallo</td><td>20 × 15</td><td class="n">300</td><td class="n">525</td></tr>
+<tr><td>Verde</td><td>max(150; 200; 200)</td><td class="n">200</td><td class="n">725</td></tr></table>
+<p><b>Nel laboratorio</b>, a fine dicembre: giacenza 50 + in arrivo 0 − domanda 0 = NFP <b>50</b> → zona rossa → si ordinano 725 − 50 = <b>675</b> telai.</p>
+<p><b>Nella relazione</b>: giacenza 260 + in arrivo 150 − domanda 40 = NFP 370, sotto la cima gialla (525) → si ordinano 725 − 370 = <b>355</b>; priorità 370 / 725 = 51%. Giacenza media attesa ≈ rosso + verde/2 = 325 pezzi, non 725.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso" style="gap:0"><span class="b ko" style="flex:225"><b>ROSSO</b>0–225</span><span class="b mag" style="flex:300"><b>GIALLO</b>225–525 · riordina</span><span class="b" style="flex:200;background:#E9F7EF;border-color:#7CC79A"><b>VERDE</b>525–725</span></div>
+<p class="lez-nota">Si riordina quando il flusso netto entra nel giallo o nel rosso; la priorità di esecuzione è la percentuale del buffer, non la data di scadenza.</p>
+{% endblock %}
+{% block sap %}
+<p>S/4HANA include il DDMRP con app Fiori dedicate: classificazione dei prodotti, posizionamento dei buffer, proposte di livello, pianificazione ed esecuzione per priorità di buffer. I codici disaccoppiati usano tipi MRP dedicati (famiglia D). Va verificato quali funzioni sono coperte dalla licenza e dalla release installata.</p>{% endblock %}
+{% block domande %}
+<details><summary>Esercizio: ADU 8, DLT 20, LTF 0,4, VF 0,6, MOQ 100, ciclo 7; giacenza 150, in arrivo 60, domanda 30. Quanto ordinare?</summary><p>Rosso 64 + 38,4 = 102,4; giallo 160 (cima 262,4); verde max(64; 100; 56) = 100 (cima 362,4). NFP 180, sotto la gialla: ordina 362,4 − 180 = 183 pezzi.</p></details>
+<details><summary>Perché la domanda qualificata non comprende tutti gli ordini futuri?</summary><p>Perché i normali ordini futuri li copre già il buffer: contano solo scaduti, di oggi e picchi oltre soglia.</p></details>
+<details><summary>Che cosa dice un codice sempre oltre la verde?</summary><p>Eccesso di scorta: buffer sovradimensionato o consumo calato, da ricalcolare.</p></details>
+{% endblock %}

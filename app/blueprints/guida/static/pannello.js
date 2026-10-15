@@ -87,6 +87,12 @@
   };
   var pos = parseInt(ss(POS), 10);
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
+  // arrivo da una lezione «Che situazione hai?»: ?passo=<inizio del titolo> apre la finestra su quel passo
+  var richiesto = null;
+  try { richiesto = new URLSearchParams(location.search).get('passo'); } catch (e) { richiesto = null; }
+  if (richiesto) {
+    for (var q = 0; q < N; q++) if (PASSI[q].titolo.indexOf(richiesto) === 0) { pos = q; ss(POS, String(q)); ls(APERTA, '1'); break; }
+  }
 
   function urlPasso(p) {
     var base = (C.url || {})[p.dove && p.dove.ep];

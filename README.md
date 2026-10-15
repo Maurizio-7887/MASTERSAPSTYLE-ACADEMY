@@ -27,6 +27,7 @@ app/
     allievo/         /area/: tempo, lavoro salvato, consegna, risposte del docente
     alta_varieta/    LABORATORIO Alta varietà: tre transenne sullo stesso telaio, strategia 70/50, WIP, varianze KKS2, cruscotto, buffer DDMRP, confronto con la commessa lunga
     ripetitiva/      LABORATORIO Produzione ripetitiva (modello trattore): budget 4.000, versioni di produzione, collettori KKF6N, MFBF con backflush, WIP al target, KKS6/KK87
+    formazione/      «Che situazione hai?»: una lezione per ogni situazione aziendale (sintomi, diagnosi, concetti, esempio, schema, SAP, domande), poi il laboratorio preparato al passo giusto (static/js/lab-copioni.js)
     guida/           finestra «Esercizio passo passo» sopra il simulatore: static/esercizi/<esercizio>.js (passi + spunta automatica), pannello.js/.css
     docente/         /docente/: allievi, tempi e costi (CSV), correzione, report stampabile, risposta (anche via email)
     portale/         pagina iniziale e launchpad a due livelli: moduli FI CO SD MM PP HR… (/<versione>/) → app del modulo (/<versione>/m/<modulo>), materiali, /<versione>/tutto, motore comune (stato, avvio)

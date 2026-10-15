@@ -1,0 +1,50 @@
+/* Lezioni «Che situazione hai?» — leggibili sul proiettore e stampabili */
+.lez{max-width:1080px}
+.lez-testa{display:flex;gap:16px;align-items:center;background:#fff;border:1px solid var(--f-bordo);border-left:5px solid #0F7B6C;border-radius:8px;padding:16px 20px;margin-top:6px}
+.lez-ic{font-size:44px;line-height:1}
+.lez-testa h1{font-size:23px;margin:0 0 4px;font-weight:600}
+.lez-testa p{margin:0;color:var(--f-attenuato);font-size:14.5px}
+.lez-indice{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.lez-indice a{font-size:12.5px;text-decoration:none;color:#0F7B6C;border:1px solid #8CCFC4;background:#fff;border-radius:14px;padding:4px 11px}
+.lez-sez{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:14px 20px;margin:12px 0;font-size:15px;line-height:1.55}
+.lez-sez h2{font-size:17px;margin:0 0 10px;color:#0B5C51}
+.lez-sez ul{margin:6px 0;padding-left:22px}.lez-sez li{margin:3px 0}
+.lez-sez p{margin:6px 0}
+.lez-gloss{display:grid;grid-template-columns:minmax(160px,230px) 1fr;gap:8px 16px;margin:0}
+.lez-gloss dt{font-weight:600}.lez-gloss dd{margin:0;color:#3a3d40}
+.lez-tab{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+.lez-tab th{background:#F0F7F6;text-align:left;padding:6px 9px;border-bottom:1px solid #CFE6E2}
+.lez-tab td{padding:6px 9px;border-bottom:1px solid #EDEFF2;vertical-align:top}
+.lez-tab td.n,.lez-tab th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lez-tab tr.tot td{font-weight:700;border-top:2px solid #CFE6E2}
+.lez-scr{font:13px Consolas,monospace;background:#F7F9FA;border:1px solid #E1E6EA;border-radius:5px;padding:8px 12px;white-space:pre;overflow-x:auto;margin:8px 0}
+.lez-flusso{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:10px 0}
+.lez-flusso .b{background:#F0F7F6;border:1.5px solid #8CCFC4;border-radius:8px;padding:8px 12px;min-width:110px;text-align:center;font-size:13.5px}
+.lez-flusso .b b{display:block;font-size:14px}
+.lez-flusso .b.mag{background:#FFF8E1;border-color:#E6C35C}
+.lez-flusso .b.cli{background:#E8F4FD;border-color:#9CC8F0}
+.lez-flusso .b.ko{background:#FFF1F1;border-color:#E9A3A3}
+.lez-flusso .f{align-self:center;padding:0 6px;color:#6A6D70;font-size:18px}
+.lez-due{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lez-due>div{border:1px solid #E1E6EA;border-radius:8px;padding:10px 14px}
+.lez-due h3{font-size:14.5px;margin:0 0 6px}
+.lez-domande details{border:1px solid #E1E6EA;border-radius:6px;padding:8px 12px;margin:6px 0;background:#FCFDFD}
+.lez-domande summary{cursor:pointer;font-weight:600}
+.lez-domande details p{margin:8px 0 2px;color:#2b4a46}
+.lez-nota{font-size:12.5px;color:var(--f-attenuato)}
+.lez-chiave{border-left:4px solid #0F7B6C;background:#F0F7F6;padding:8px 12px;border-radius:4px;margin:10px 0;font-weight:600}
+.lez-prova{border-color:#0F7B6C;border-width:2px}
+.lez-casi{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.lez-casi a{display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--f-testo);border:1px solid var(--f-bordo);border-radius:6px;padding:8px 10px;font-size:13px;background:#FAFBFC}
+.lez-casi a span{font-size:20px}
+.casi-griglia{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:12px}
+.caso{display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid var(--f-bordo);border-top:5px solid #0F7B6C;border-radius:10px;padding:14px 16px;text-decoration:none;color:var(--f-testo);box-shadow:0 1px 3px rgba(0,0,0,.08);transition:box-shadow .15s,transform .15s}
+.caso:hover{box-shadow:0 4px 14px rgba(0,0,0,.18);transform:translateY(-2px)}
+.caso .ic{font-size:30px}
+.caso b{font-size:16px;line-height:1.3}
+.caso p{margin:0;font-size:13px;color:var(--f-attenuato)}
+.caso .va{margin-top:auto;font-size:12.5px;color:#0F7B6C;font-weight:600}
+
+@media (max-width:760px){.lez-due{grid-template-columns:1fr}.lez-gloss{grid-template-columns:1fr}}
+@media print{.msa-shell,.msa-attivita,.msa-sottobarra,.lez-indice,.lez-prova,.lez-altri,.msa-lp-piede,#msa-guida{display:none!important}
+  body{background:#fff}.lez-sez,.lez-testa{border:0;padding:6px 0;break-inside:avoid-page}.lez{max-width:none}}

@@ -1,0 +1,46 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>L'inventario fisico non torna con il magazzino del gestionale.</li>
+  <li>Sfridi, scarti e sostituzioni di materiale non compaiono da nessuna parte.</li>
+  <li>A fine mese ci sono pezzi a metà in linea e non si sa come valorizzarli.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Il <b>backflush</b> scarica sempre <b>a standard</b>: esattamente la distinta e il ciclo. Tutto ciò che è diverso dallo standard va dichiarato a parte, altrimenti il magazzino si falsa:</p>
+<ul><li><b>Scarti</b>: pezzi che hanno consumato materiale e ore ma non sono diventati prodotto buono → conferma di scarto.</li>
+<li><b>Sfridi e consumi extra</b>: materiale in più rispetto alla distinta → prelievo aggiuntivo al collettore.</li>
+<li><b>Pezzi fermi in linea</b>: confermati fino a un <b>punto di conteggio</b> → a fine mese diventano <b>WIP al target</b>, valorizzati a standard fino a quel punto.</li></ul>
+<p class="lez-chiave">Il backflush va bene dove la distinta è affidabile; dove ci sono sostituzioni e sfridi variabili servono conferme reali per fase.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Backflush</dt><dd>Scarico automatico di componenti e attività a standard alla conferma del prodotto.</dd>
+<dt>Punto di conteggio</dt><dd>Operazione del ciclo a cui si conferma l'avanzamento: scarica tutto ciò che sta prima.</dd>
+<dt>WIP al target</dt><dd>In produzione ripetitiva il WIP si valuta a costo standard sulle quantità ferme ai punti di conteggio.</dd>
+<dt>Conferma di scarto</dt><dd>Consumi e lavorazioni senza prodotto: restano sul collettore e diventano varianza.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>A gennaio, sui collettori</th><th>Movimento</th><th class="n">Effetto</th></tr>
+<tr><td>20 TR-STD fermi dopo la piegatura</td><td>MFBF fino al punto di conteggio</td><td class="n">WIP al target 20 × 20,20 = <b>404</b> (D 15 / A 74)</td></tr>
+<tr><td>3 TR-STD rovinati in saldatura</td><td>MFBF di scarto</td><td class="n">varianza <b>94,20</b> (3 × 31,40)</td></tr>
+<tr><td>40 kg di sfrido sulle prolunghe</td><td>prelievo extra al collettore TR-ALTA</td><td class="n">varianza <b>38,00</b> (40 × 0,95)</td></tr>
+<tr><td>TR-PED tutto regolare</td><td>solo conferme complete</td><td class="n">varianza 0</td></tr></table>
+<p>A febbraio i 20 telai si completano «dal punto di conteggio»: si scarica solo la saldatura (8 h = 224 €), entra il finito a 628 €, il WIP di 404 si storna e la varianza è zero.</p>
+<div class="lez-scr">Collettore TR-STD, gennaio:
+costi (backflush + scarto + punto di conteggio)   5.679,20
+− output a standard (165 × 31,40)                 5.181,00
+− WIP al target                                     404,00
+= varianza di periodo                                94,20</div>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Taglio</b></span><span class="f">→</span><span class="b"><b>Piegatura</b></span><span class="f">→</span><span class="b mag"><b>Punto di conteggio</b>WIP al target</span><span class="f">→</span><span class="b"><b>Saldatura</b></span><span class="f">→</span><span class="b cli"><b>Prodotto finito</b>MFBF</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Conferma a consuntivo, scarto, punto di conteggio</td><td>MFBF</td></tr>
+<tr><td>Prelievo aggiuntivo al collettore</td><td>MB1A / MIGO 261 sul collettore</td></tr>
+<tr><td>Differenze d'inventario</td><td>MI07</td></tr>
+<tr><td>WIP al target e varianze</td><td>KKAS · KKS6 · KK87</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché il backflush «falsa il magazzino» nelle aziende ad alta varietà?</summary><p>Perché scarica sempre la distinta standard: con sostituzioni frequenti e sfridi variabili il consumo vero è diverso, e la differenza resta nascosta.</p></details>
+<details><summary>Come si valorizzano i pezzi fermi in linea a fine mese?</summary><p>Si confermano fino al punto di conteggio: a fine mese diventano WIP al target, a costo standard fino a quel punto.</p></details>
+<details><summary>Dove finiscono gli scarti?</summary><p>Restano come costi sul collettore senza output: a fine mese sono varianza di periodo.</p></details>
+{% endblock %}

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Che situazione hai? · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<link rel="stylesheet" href="{{ url_for('formazione.static', filename='formazione.css') }}">
+</head>
+<body class="msa-launchpad">
+{% include "simulatore/_shell.html" %}
+<main class="msa-lp">
+  <div class="msa-lp-intro" style="border-left-color:#0F7B6C">
+    <h1>🎓 Che situazione hai?</h1>
+    <p>Scegli la situazione che riconosci in azienda. Si apre prima la <b>lezione</b> da spiegare (sintomi, diagnosi, concetti, esempio con i numeri, schema, SAP, domande per la classe); in fondo il pulsante prepara il <b>laboratorio</b> al punto giusto, con la finestra passo passo già aperta.</p>
+  </div>
+  <div class="casi-griglia">
+  {% for c in casi %}
+    <a class="caso" href="{{ url_for('formazione.' ~ c[0] | replace('-', '_')) }}">
+      <span class="ic" aria-hidden="true">{{ c[3] }}</span>
+      <b>{{ c[1] }}</b>
+      <p>{{ c[2] }}</p>
+      <span class="va">{{ ('Laboratorio ' ~ laboratori[c[4]].titolo) if c[4] else 'Esercizio guidato del simulatore' }} ›</span>
+    </a>
+  {% endfor %}
+  </div>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% include "sincronia/_battito.html" %}
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>A fine mese il conto economico mostra <b>costi di produzione senza ricavi</b>: materiali consumati e ore lavorate su ordini non ancora finiti.</li>
+  <li>Il controller chiede di <b>chiudere tutti gli ordini entro il mese</b>, anche se non sono finiti.</li>
+  <li>Si chiudono a forza ordini incompleti: poi i pezzi prodotti dopo non hanno più un ordine, e le varianze sono false.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>In SAP si chiude il <b>periodo contabile</b>, non l'ordine. Un ordine può durare più mesi: a ogni fine mese il suo saldo — costi caricati meno quanto è già entrato a magazzino — diventa <b>WIP</b>, una rimanenza di prodotti in corso di lavorazione. Il WIP neutralizza i costi sul conto economico; quando l'ordine è finito il WIP si annulla e si calcola la varianza.</p>
+<p>Se a fine mese «i costi restano sospesi», di solito manca la <b>configurazione del WIP</b> (chiave di analisi dei risultati nel tipo d'ordine), non serve chiudere gli ordini.</p>
+<p class="lez-chiave">Ordine aperto a fine mese → WIP. Ordine finito → storno del WIP, varianza, liquidazione.</p>
+{% endblock %}
+{% block concetti %}
+<dt>WIP (Work in Process)</dt><dd>Costi sostenuti su ordini non ancora completati, iscritti fra le rimanenze: stato patrimoniale voce C.I.2, contropartita voce A.2 del conto economico.</dd>
+<dt>Chiusura di periodo</dt><dd>Sequenza di fine mese: sovraccosti → calcolo WIP (KKAX/KKAO) → varianze (KKS2/KKS1) → liquidazione (KO88/CO88).</dd>
+<dt>Stati dell'ordine</dt><dd>REL rilasciato (si accumulano costi) · PDLV consegnato in parte · DLV consegnato · TECO chiuso tecnicamente · CLSD liquidato. WIP su REL/PDLV, varianze su DLV/TECO.</dd>
+<dt>Liquidazione</dt><dd>Il WIP passa in contabilità generale; le varianze vanno a conto economico (e al CO-PA se attivo).</dd>
+{% endblock %}
+{% block esempio %}
+<p>Ordine dei 600 telai SL-PIEGA, standard 20,20 €/pz (12.120 € il lotto).</p>
+<table class="lez-tab">
+  <tr><th>Momento</th><th>Evento</th><th class="n">Costi cumulati</th><th class="n">Entrato a std</th><th class="n">WIP a fine mese</th><th class="n">Varianza</th></tr>
+  <tr><td>Fine novembre</td><td>261 tagliati 8.760 + CO11N 115 h 3.220; 101 di 400 pz</td><td class="n">11.980</td><td class="n">8.080</td><td class="n"><b>3.900</b></td><td class="n">non calcolata (ordine aperto)</td></tr>
+  <tr><td>Fine dicembre</td><td>101 degli ultimi 200 pz: ordine DLV</td><td class="n">11.980</td><td class="n">12.120</td><td class="n">0 (stornato)</td><td class="n"><b>−140</b> favorevole</td></tr>
+</table>
+<div class="lez-scr">30/11  Dare 15 WIP                              3.900
+       Avere 74 Variazione rimanenze in corso       3.900
+31/12  Dare 74 Variazione rimanenze in corso       3.900   (storno: ordine finito)
+       Avere 15 WIP                                 3.900
+31/12  Dare 73 Output di produzione                  140   (varianza favorevole: 5 h × 28 €)
+       Avere 61 Varianze di produzione               140</div>
+<p class="lez-nota">Esercizio della relazione: ordine di 300 pz a 12 €; a fine marzo costi 2.100 → WIP 2.100; ad aprile altri 1.700 e consegna completa → WIP annullato, varianza 3.800 − 3.600 = +200 sfavorevole.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Novembre</b>costi 11.980 · entrati 8.080</span><span class="f">→</span><span class="b mag"><b>30/11 CO88</b>WIP 3.900 (D15/A74)</span><span class="f">→</span><span class="b"><b>Dicembre</b>entrano gli ultimi 200</span><span class="f">→</span><span class="b mag"><b>31/12 CO88</b>storno WIP · varianza −140 · CLSD</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Passo di fine mese</th><th>Singolo</th><th>Collettivo</th></tr>
+<tr><td>Sovraccosti</td><td>KGI2</td><td>CO43</td></tr><tr><td>Calcolo WIP</td><td>KKAX</td><td>KKAO</td></tr>
+<tr><td>Varianze</td><td>KKS2</td><td>KKS1</td></tr><tr><td>Liquidazione</td><td>KO88</td><td>CO88</td></tr></table>
+<p class="lez-nota">In S/4HANA esiste anche la contabilizzazione per evento di WIP e varianze: più tempestiva, stessa logica.</p>{% endblock %}
+{% block domande %}
+<details><summary>In quali stati dell'ordine si calcola il WIP e in quali le varianze?</summary><p>WIP sugli ordini rilasciati non ancora consegnati del tutto (REL, PDLV); varianze sugli ordini consegnati o chiusi tecnicamente (DLV, TECO).</p></details>
+<details><summary>Perché il WIP «neutralizza» i costi a fine mese?</summary><p>Perché la variazione positiva delle rimanenze (A.2) compensa a conto economico i costi sostenuti per pezzi non ancora finiti.</p></details>
+<details><summary>Che cosa succede se si chiude a forza un ordine incompleto?</summary><p>Si calcola una varianza falsa sui pezzi non ancora prodotti, e i pezzi fatti dopo non hanno più un ordine su cui caricarsi.</p></details>
+<details><summary>In quale voce di bilancio stanno WIP e semilavorati? Si applica l'OIC 23?</summary><p>C.I.2 «prodotti in corso di lavorazione e semilavorati». L'OIC 23 riguarda i lavori su ordinazione (commesse vere), non i semilavorati di catalogo.</p></details>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Devi far vedere come <b>ogni documento logistico</b> (DDT, fattura, entrata merci, conferma di produzione) genera la sua scrittura in partita doppia.</li>
+  <li>Vuoi un percorso unico dalla <b>costituzione</b> della società al <b>bilancio</b> e alla riapertura.</li>
+  <li>Servono anche RiBa, anticipo su fattura, factoring, cespiti, paghe, IVA e IRES.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>È l'esercizio guidato della Ferro &amp; Transenne: l'azienda nasce il 1° dicembre 2026, compra ferro, produce 200 transenne con tre ordini di produzione, vende a due clienti, finanzia i crediti, rinnova due impianti, chiude il 2026 e lo riapre nel 2027.</p>
+<p class="lez-chiave">Regola d'oro: compila → leggi l'anteprima → controlla Dare = Avere → conferma una sola volta → verifica nel Libro Giornale.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Costo standard in cascata</dt><dd>SL-TAGLIO 14,60 → SL-PIEGA 20,20 → TRANSENNA 31,40.</dd>
+<dt>Varianze CO88</dt><dd>476 di efficienza sul conto 61 (Taglio 140, Piegatura 112, Saldatura 224).</dd>
+<dt>RiBa salvo buon fine</dt><dd>L'anticipo è un debito verso la banca (3602): il credito verso il cliente resta aperto fino alla scadenza.</dd>
+<dt>Factoring pro soluto</dt><dd>Il credito esce subito dal conto 11: il rischio passa al factor (1601).</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th>Numero di controllo</th><th class="n">Valore</th></tr>
+<tr><td>Risultato prima delle imposte 2026</td><td class="n">2.120,30</td></tr><tr><td>IRES</td><td class="n">508,87</td></tr>
+<tr><td>Utile d'esercizio</td><td class="n">1.611,43</td></tr><tr><td>Banca al 31/12/2026</td><td class="n">57.988,40</td></tr>
+<tr><td>Banca al 30/06/2027</td><td class="n">74.095,13</td></tr></table>{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Costituzione</b>capitale, cespiti</span><span class="f">→</span><span class="b"><b>Acquisti</b>MIGO · MIRO</span><span class="f">→</span><span class="b"><b>Produzione</b>3 ordini</span><span class="f">→</span><span class="b"><b>Vendite</b>DDT · fattura</span><span class="f">→</span><span class="b"><b>Finanza</b>RiBa · factoring</span><span class="f">→</span><span class="b mag"><b>Chiusura</b>IVA · IRES · bilancio</span></div>{% endblock %}
+{% block sap %}<p>FI-GL, FI-AA, FI-AR, FI-AP, FI-BL, CO-CCA, SD (VA01, VL02N, VF01), MM (ME21N, MIGO, MIRO), PP (CO01, CO11N, CO88). La guida completa è il PDF «Esercizio guidato passo passo» tra i materiali.</p>{% endblock %}
+{% block domande %}
+<details><summary>Perché il costo del venduto nasce con il DDT e non con la fattura?</summary><p>Perché è l'uscita merci (601) a far uscire le transenne dal magazzino: la fattura rileva il ricavo e il credito.</p></details>
+<details><summary>L'anticipo della banca è l'incasso del cliente?</summary><p>No: è un debito verso la banca; il credito verso il cliente resta aperto fino all'incasso.</p></details>
+{% endblock %}
+{% block prova %}
+<p>L'esercizio si svolge nel simulatore principale, versione vuota, con la finestra «📘 Esercizio passo passo».</p>
+<div class="lab-azioni"><a class="lab-btn" href="{{ url_lab }}">▶ Apri l'esercizio guidato al passo 1</a>
+<a class="lab-btn sec" href="{{ url_for('portale.materiale', file='Guida-esercizio-integrato.pdf') }}">📕 Guida PDF</a></div>
+{% endblock %}

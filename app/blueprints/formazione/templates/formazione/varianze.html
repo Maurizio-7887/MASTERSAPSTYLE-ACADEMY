@@ -1,0 +1,51 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>A fine commessa c'è <b>un solo numero</b> di scostamento e nessuno sa dire se è colpa del materiale, dei tempi o del lotto.</li>
+  <li>Le varianze compaiono <b>sempre sullo stesso codice</b>, mese dopo mese.</li>
+  <li>Il magazzino dei prodotti fabbricati è valorizzato a media mobile e «assorbe» gli scostamenti.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>La varianza si capisce solo se è <b>scomposta per categoria</b> e calcolata su un ordine <b>corto</b>, di un solo livello. Il magazzino si carica sempre al <b>costo standard</b> (controllo prezzo S): ogni differenza fra costo effettivo e standard resta sull'ordine come varianza, e dice dove intervenire.</p>
+<p class="lez-chiave">Varianza = costi effettivi dell'ordine − quantità entrata × costo standard. Poi si divide: prezzo, quantità, efficienza, lotto, scarto.</p>
+<p>Una varianza cronica sullo stesso codice di solito indica una <b>distinta o un ciclo da correggere</b>, non un problema della produzione.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Costo standard</dt><dd>Costo unitario predeterminato da distinta (quantità × prezzo) e ciclo (tempi × tariffe), più i sovraccosti. In SAP CK11N, rilascio come nuovo prezzo standard una volta l'anno.</dd>
+<dt>Controllo prezzo S / V</dt><dd>S: carico e scarico sempre a standard, le differenze diventano varianza dell'ordine. V (media mobile): adatto agli acquisti, sconsigliato per i fabbricati.</dd>
+<dt>Varianze di input</dt><dd>Prezzo (stessa quantità, prezzo diverso), quantità (sfridi, tempi diversi), utilizzo risorse (materiale sostituito), input residuo.</dd>
+<dt>Varianze di output</dt><dd>Prezzo di output (entrata non a standard), dimensione del lotto (attrezzaggio su un lotto diverso da quello del calcolo: tipico dell'alta varietà), scarto.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Varianze dei sei ordini del laboratorio Alta varietà, calcolate a ordine finito:</p>
+<table class="lez-tab">
+  <tr><th>Ordine</th><th>Standard</th><th>Reale</th><th class="n">Varianza €</th><th>Categoria</th></tr>
+  <tr><td>SL-TAGLIO 600</td><td>150 h di taglio</td><td>160 h</td><td class="n">+280</td><td>efficienza Taglio (10 h × 28)</td></tr>
+  <tr><td>SL-PIEGA 600</td><td>120 h di piegatura</td><td>115 h</td><td class="n">−140</td><td>efficienza Piegatura</td></tr>
+  <tr><td>TR-STD 300</td><td>120 h di saldatura</td><td>126 h</td><td class="n">+168</td><td>efficienza Saldatura</td></tr>
+  <tr><td>TR-ALTA 150</td><td>75 h</td><td>75 h</td><td class="n">0</td><td>—</td></tr>
+  <tr><td>TR-PED 100</td><td>30 h</td><td>28 h</td><td class="n">−56</td><td>efficienza Saldatura</td></tr>
+  <tr class="tot"><td>Totale conto 61</td><td></td><td></td><td class="n">+252</td><td></td></tr>
+</table>
+<p>Esempio della relazione (ordine di 500 pz SL-100, standard 10 €/pz = 5.000 €; effettivo 640 m di tubo a 5,20 €/m e 44 h a 50 €/h = 5.528 €):</p>
+<table class="lez-tab"><tr><th>Componente</th><th>Calcolo</th><th class="n">Varianza</th></tr>
+<tr><td>Prezzo materiale</td><td>640 m × (5,20 − 5,00)</td><td class="n">+128 €</td></tr>
+<tr><td>Quantità materiale</td><td>(640 − 600) m × 5,00</td><td class="n">+200 €</td></tr>
+<tr><td>Quantità lavorazione</td><td>(44 − 40) h × 50</td><td class="n">+200 €</td></tr>
+<tr class="tot"><td>Totale sfavorevole</td><td>5.528 − 5.000</td><td class="n">+528 €</td></tr></table>
+<p class="lez-nota">Il magazzino si carica comunque a 5.000 €; i 528 € dicono dove intervenire: acquisti (128), sfridi di taglio (200), tempi ciclo (200).</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Costi effettivi</b>261 + CO11N</span><span class="f">−</span><span class="b"><b>Output a standard</b>101 × costo std</span><span class="f">=</span><span class="b mag"><b>Varianza</b>conto 61</span><span class="f">→</span><span class="b"><b>Per categoria</b>prezzo · quantità · efficienza · lotto · scarto</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Costo standard del materiale</td><td>CK11N (singolo), CK40N (massivo), CK24 rilascio</td></tr>
+<tr><td>Calcolo varianze</td><td>KKS2 (singolo ordine), KKS1 (collettivo)</td></tr>
+<tr><td>Analisi dell'ordine</td><td>KKBC_ORD, report varianze per categoria</td></tr>
+<tr><td>Liquidazione</td><td>KO88 / CO88</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché per un semilavorato di produzione propria si preferisce il controllo prezzo S?</summary><p>Perché con la media mobile le varianze sparirebbero dentro il valore di magazzino: il magazzino diventerebbe il deposito degli scostamenti.</p></details>
+<details><summary>Che cosa indica una varianza di dimensione del lotto ricorrente?</summary><p>Un lotto di calcolo del costo standard irrealistico rispetto ai lotti veri, tipico dell'alta varietà: l'attrezzaggio viene spalmato su una quantità diversa.</p></details>
+<details><summary>Esercizio: standard 2 kg a 3 €/kg e 0,1 h a 40 €/h per pezzo, 200 pz; consuntivo 430 kg a 3,10 €/kg e 19 h. Scomponi.</summary><p>Standard 2.000 €, effettivo 1.333 + 760 = 2.093 €. Prezzo materiale +43, quantità materiale +90, lavorazione −40 (favorevole): totale +93 sfavorevole.</p></details>
+<details><summary>Perché con la commessa lunga la varianza è illeggibile?</summary><p>Perché arriva una volta sola, a fine percorso, e somma taglio, piegatura e saldatura: +280 −140 +168 diventano un unico numero senza nome.</p></details>
+{% endblock %}

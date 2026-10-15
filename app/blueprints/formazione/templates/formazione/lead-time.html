@@ -1,0 +1,42 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Il cliente aspetta settimane anche per prodotti di catalogo.</li>
+  <li>A ogni ordine cliente si riparte dalla materia prima.</li>
+  <li>Il lead time promesso è il lead time di <b>tutta la distinta</b>: acquisto, taglio, piegatura, saldatura.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>Nell'MRP classico ogni livello aspetta quello sopra: il lead time verso il cliente è il <b>lead time cumulato</b>, il percorso più lungo dalla materia prima al finito. Con un magazzino di disaccoppiamento sul semilavorato comune il cliente aspetta solo il tratto <b>a valle</b> del magazzino: il <b>lead time disaccoppiato</b>.</p>
+<p class="lez-chiave">Si produce a scorta ciò che è comune e lungo da fare; si assembla su ordine ciò che è specifico e veloce.</p>
+<p>Le aziende ad alta varietà raramente sono «pure»: ATO per la maggior parte dei codici, MTS per gli alto-rotanti, MTO per gli speciali. Serve una strategia <b>per materiale</b>.</p>
+{% endblock %}
+{% block concetti %}
+<dt>MTS — produzione a scorta</dt><dd>Tutto prodotto prima dell'ordine; lead time minimo, scorte alte, rischio obsolescenza su migliaia di codici.</dd>
+<dt>ATO — assemblaggio su ordine</dt><dd>Semilavorati a scorta, assemblaggio finale solo su ordine cliente: il caso del laboratorio.</dd>
+<dt>MTO — produzione su ordine</dt><dd>Solo le materie prime a scorta: lead time lungo, saturazione irregolare.</dd>
+<dt>ETO</dt><dd>Progettazione su ordine: commesse lunghe, controllo per progetto.</dd>
+<dt>Lead time disaccoppiato (DLT)</dt><dd>Il percorso più lungo non protetto fra due punti di disaccoppiamento, o fra l'ultimo e il cliente.</dd>
+{% endblock %}
+{% block esempio %}
+<table class="lez-tab"><tr><th></th><th>Senza disaccoppiamento</th><th>Con i telai a scaffale</th></tr>
+<tr><td>Inizio produzione</td><td>quando arriva l'ordine</td><td>04/11, a scorta (strategia 70)</td></tr>
+<tr><td>Ordine cliente</td><td>05/12</td><td>05/12</td></tr>
+<tr><td>Cosa resta da fare</td><td>taglio, piegatura, saldatura</td><td>solo la saldatura (strategia 50)</td></tr>
+<tr><td>Consegna</td><td>dopo tutta la catena (dal 04/11 al 10/12: 36 giorni)</td><td><b>10/12: 5 giorni</b></td></tr></table>
+<p>Tre clienti, tre transenne diverse, un solo telaio: Beta 300 TR-STD, Delta 150 TR-ALTA, Comune di Gamma 100 TR-PED. L'ATP vede prodotti finiti 0 ma 600 telai a scaffale: basta aprire tre ordini di assemblaggio.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-flusso"><span class="b"><b>Ferro → Taglio → Piegatura</b>a scorta, su previsione</span><span class="f">→</span><span class="b mag">📦 <b>Telai SL-PIEGA</b>punto di disaccoppiamento</span><span class="f">→</span><span class="b"><b>Saldatura</b>su ordine</span><span class="f">→</span><span class="b cli">👤 <b>5 giorni</b></span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Codice</th><th>Strategia</th><th>Uso</th></tr>
+<tr><td>10</td><td>Produzione a scorta, fabbisogni netti</td><td>finiti alto-rotanti</td></tr>
+<tr><td>20</td><td>Produzione su ordine</td><td>prodotti speciali</td></tr>
+<tr><td>40</td><td>Pianificazione con assemblaggio finale</td><td>finiti con domanda prevedibile</td></tr>
+<tr><td>50 / 52</td><td>Senza assemblaggio finale (52 con materiale di pianificazione)</td><td>ATO con previsione sul finito</td></tr>
+<tr><td>70 / 74</td><td>Pianificazione a livello di assieme (74 fantasma)</td><td>semilavorati comuni a molti padri</td></tr>
+<tr><td>81 / 82</td><td>Assemblaggio su ordine</td><td>assemblaggio finale rapido</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Che cos'è il lead time disaccoppiato e perché riduce il lead time verso il cliente?</summary><p>È il tratto non protetto dopo l'ultimo magazzino di disaccoppiamento: il cliente aspetta solo quello, non tutta la distinta.</p></details>
+<details><summary>Perché non mettere tutto a scorta (MTS)?</summary><p>Con migliaia di codici finiti le scorte esplodono e invecchiano; conviene tenere a scorta pochi semilavorati comuni.</p></details>
+<details><summary>Esercizio: 400 finiti da 35 semilavorati, 6 dei quali entrano in più di 50 finiti; lead time cumulato 70 giorni, il cliente ne accetta 10. Dove disaccoppiare?</summary><p>Sui 6 semilavorati comuni (buffer DDMRP o strategia 70); finiti su ordine (50/52 o 81/82) se l'assemblaggio sta nei 10 giorni, altrimenti un secondo disaccoppiamento o i finiti alto-rotanti a scorta.</p></details>
+{% endblock %}

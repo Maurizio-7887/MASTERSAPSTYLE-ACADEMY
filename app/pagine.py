@@ -269,3 +269,16 @@ MODULI += [
      "descrizione": "Laboratorio: budget 4.000 transenne, linea unica, collettori costi per periodo, backflush, WIP al target",
      "app": [(f"ripetitiva.{p['endpoint']}", None, p["titolo"], p["icona"], p["tcode"], None) for p in LABORATORI["ripetitiva"]["pagine"]]},
 ]
+
+# ── «Che situazione hai?»: lezioni che portano ai laboratori (prima la spiegazione, poi la prova) ──
+MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione hai?", "titolo": "Che situazione hai? — lezioni e casi aziendali", "icona": "🎓",
+    "colore": "formazione", "kpi": None,
+    "descrizione": "Riconosci la situazione dell'azienda: prima la lezione da spiegare, poi il laboratorio pronto al punto giusto",
+    "app": [("formazione.ordini_lunghi", None, "Ordini aperti per mesi?", "⏳", "commessa lunga · disaccoppiamento", None),
+            ("formazione.wip_fine_mese", None, "Costi senza ricavi a fine mese?", "📆", "WIP · CO88 · KKAX", None),
+            ("formazione.varianze", None, "Varianze che nessuno spiega?", "🔬", "KKS2 · categorie", None),
+            ("formazione.lead_time", None, "Il cliente aspetta troppo?", "🚚", "ATO · strategia 50/70", None),
+            ("formazione.scorte_semilavorati", None, "Quanti semilavorati a scorta?", "🛟", "DDMRP · buffer", None),
+            ("formazione.linea_ripetitiva", None, "Pochi modelli su una linea?", "🚜", "REM · collettore", None),
+            ("formazione.backflush", None, "Il backflush falsa il magazzino?", "⚖️", "MFBF · WIP al target", None),
+            ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})

@@ -1,0 +1,46 @@
+{% extends "formazione/_lezione.html" %}
+{% block sintomi %}<ul>
+  <li>Pochi modelli, prodotti <b>ogni giorno</b>, sempre sulla stessa linea.</li>
+  <li>Volumi stabili e prevedibili: si ragiona in pezzi al giorno, cadenza, saturazione della linea.</li>
+  <li>Aprire, confermare e chiudere un ordine per ogni lotto è solo burocrazia.</li>
+</ul>{% endblock %}
+{% block diagnosi %}
+<p>È il modello del <b>costruttore di trattori</b>: la <b>produzione ripetitiva</b> (Repetitive Manufacturing). Niente ordini di produzione: si pianificano quantità per linea e per periodo, si dichiara il prodotto finito con una <b>conferma a consuntivo</b> che scarica in automatico materiali e ore a standard (<b>backflush</b>), e i costi si raccolgono su un <b>collettore costi di prodotto</b> sempre aperto.</p>
+<p class="lez-chiave">Oggetto di costo: il collettore del prodotto, non l'ordine. Controllo: per periodo, non per lotto.</p>
+<p>A fine mese, per ogni collettore: costi del mese − output a standard − variazione del WIP = <b>varianza di periodo</b>. Il collettore non si chiude mai.</p>
+{% endblock %}
+{% block concetti %}
+<dt>Versione di produzione</dt><dd>Distinta + ciclo + linea abilitati alla produzione ripetitiva, con il profilo REM.</dd>
+<dt>Piano di produzione per linea</dt><dd>Quantità per linea e giorno/mese (run schedule), non ordini.</dd>
+<dt>Collettore costi di prodotto</dt><dd>Oggetto di costo permanente, uno per materiale e versione (KKF6N).</dd>
+<dt>Conferma a consuntivo (MFBF)</dt><dd>Un gesto: carica il prodotto finito e scarica a standard componenti e attività (backflush).</dd>
+<dt>Varianza di periodo</dt><dd>Calcolata ogni mese sul collettore (KKS6) e liquidata (KK87): con volumi alti è stabile e confrontabile.</dd>
+{% endblock %}
+{% block esempio %}
+<p>Laboratorio Produzione ripetitiva: budget 2027 di 4.000 transenne.</p>
+<table class="lez-tab"><tr><th>Transenna</th><th class="n">Budget anno</th><th class="n">Piano mensile</th><th class="n">Prodotti a gennaio</th><th class="n">Costo std</th><th class="n">Varianza gennaio</th><th class="n">Febbraio</th></tr>
+<tr><td>TR-STD</td><td class="n">2.000</td><td class="n">167</td><td class="n">165</td><td class="n">31,40</td><td class="n">94,20</td><td class="n">0</td></tr>
+<tr><td>TR-ALTA</td><td class="n">1.200</td><td class="n">100</td><td class="n">98</td><td class="n">36,10</td><td class="n">38,00</td><td class="n">0</td></tr>
+<tr><td>TR-PED</td><td class="n">800</td><td class="n">67</td><td class="n">67</td><td class="n">29,55</td><td class="n">0</td><td class="n">0</td></tr>
+<tr class="tot"><td>Totale</td><td class="n">4.000</td><td class="n">334</td><td class="n">330</td><td></td><td class="n">132,20</td><td class="n">0</td></tr></table>
+<p>Tre collettori, sempre aperti. A gennaio la varianza dice subito dove guardare: 3 pezzi scartati in saldatura sulla standard (3 × 31,40) e 40 kg di sfrido sulle prolunghe dell'alta (40 × 0,95). A febbraio, senza anomalie, zero.</p>
+{% endblock %}
+{% block schema %}
+<div class="lez-due">
+  <div><h3>🚜 Modello trattore (produzione ripetitiva)</h3><ul><li>3 prodotti, migliaia di pezzi</li><li>un collettore per prodotto, sempre aperto</li><li>MFBF: backflush a standard</li><li>varianza per periodo, stabile</li></ul></div>
+  <div><h3>🧩 Alta varietà (controllo per ordine)</h3><ul><li>2.000 codici, piccoli lotti</li><li>un ordine per lotto e per livello</li><li>prelievi e ore reali per fase</li><li>varianza per ordine, per categoria</li></ul></div>
+</div>
+<div class="lez-flusso"><span class="b"><b>Budget</b>4.000 pz</span><span class="f">→</span><span class="b"><b>Piano linea</b>167 · 100 · 67 / mese</span><span class="f">→</span><span class="b"><b>MFBF</b>backflush</span><span class="f">→</span><span class="b mag"><b>Collettore</b>costi del mese</span><span class="f">→</span><span class="b"><b>Fine mese</b>WIP al target · KKS6 · KK87</span></div>
+{% endblock %}
+{% block sap %}
+<table class="lez-tab"><tr><th>Cosa</th><th>Transazione</th></tr>
+<tr><td>Versione di produzione</td><td>C223 (profilo REM in MM02, vista MRP 4)</td></tr>
+<tr><td>Piano della linea</td><td>MF50 · MD61 per la previsione</td></tr>
+<tr><td>Collettore costi di prodotto</td><td>KKF6N</td></tr>
+<tr><td>Conferma a consuntivo</td><td>MFBF (o app Fiori)</td></tr>
+<tr><td>Fine mese</td><td>WIP al target (KKAS), varianze (KKS6), liquidazione (KK87 / CO88)</td></tr></table>{% endblock %}
+{% block domande %}
+<details><summary>Perché la produzione ripetitiva funziona per un costruttore di trattori?</summary><p>Poche famiglie ripetute ogni giorno: distinta affidabile, linea come oggetto da governare, il mese è un'unità di analisi sensata.</p></details>
+<details><summary>Perché è inadatta a un'azienda con 2.000 referenze in piccoli lotti?</summary><p>2.000 collettori quasi vuoti, varianze su 1–2 lotti al mese (rumore), backflush a standard che falsa il magazzino, nessuna tracciabilità del lotto.</p></details>
+<details><summary>Il collettore costi si chiude a fine mese?</summary><p>No: si chiude il periodo (WIP, varianze, liquidazione); il collettore resta aperto e a febbraio continua a raccogliere costi.</p></details>
+{% endblock %}

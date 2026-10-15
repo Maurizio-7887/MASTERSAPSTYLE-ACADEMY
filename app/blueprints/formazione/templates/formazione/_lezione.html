@@ -1,0 +1,63 @@
+{# Impaginazione comune delle lezioni «Che situazione hai?». Ogni lezione riempie i blocchi; in fondo: prepara il laboratorio. #}
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>{{ caso[1] }} · MASTERSAPSTYLE Academy</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/laboratori.css') }}">
+<link rel="stylesheet" href="{{ url_for('formazione.static', filename='formazione.css') }}">
+</head>
+<body class="msa-launchpad msa-lezione">
+{% include "simulatore/_shell.html" %}
+<div class="msa-sottobarra"><div class="msa-riga">
+  <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a> › <a href="{{ url_for('formazione.indice') }}"><b class="msa-sigla">CASI</b> Che situazione hai?</a> › <b>{{ caso[1] }}</b></span>
+  <button type="button" class="msa-torna" onclick="window.print()">🖨️ Stampa la lezione</button>
+</div></div>
+<main class="msa-lp lez">
+  <header class="lez-testa">
+    <span class="lez-ic">{{ caso[3] }}</span>
+    <div><h1>{{ caso[1] }}</h1><p>{{ caso[2] }}</p></div>
+  </header>
+  <nav class="lez-indice">
+    <a href="#sintomi">1 · Lo riconosci se…</a><a href="#diagnosi">2 · Cosa sta succedendo</a><a href="#concetti">3 · I concetti</a>
+    <a href="#esempio">4 · L'esempio con i numeri</a><a href="#schema">5 · Lo schema</a><a href="#sap">6 · In SAP</a><a href="#domande">7 · Domande per la classe</a><a href="#prova">8 · Ora provalo</a>
+  </nav>
+  <section id="sintomi" class="lez-sez"><h2>1 · Lo riconosci se…</h2>{% block sintomi %}{% endblock %}</section>
+  <section id="diagnosi" class="lez-sez"><h2>2 · Cosa sta succedendo</h2>{% block diagnosi %}{% endblock %}</section>
+  <section id="concetti" class="lez-sez"><h2>3 · I concetti da spiegare</h2><dl class="lez-gloss">{% block concetti %}{% endblock %}</dl></section>
+  <section id="esempio" class="lez-sez"><h2>4 · L'esempio con i numeri (gli stessi del laboratorio)</h2>{% block esempio %}{% endblock %}</section>
+  <section id="schema" class="lez-sez"><h2>5 · Lo schema da disegnare alla lavagna</h2>{% block schema %}{% endblock %}</section>
+  <section id="sap" class="lez-sez"><h2>6 · Come si fa in SAP</h2>{% block sap %}{% endblock %}</section>
+  <section id="domande" class="lez-sez"><h2>7 · Domande per la classe</h2><div class="lez-domande">{% block domande %}{% endblock %}</div>
+    <p class="lez-nota">Clic su una domanda per vedere la risposta. In stampa le risposte compaiono tutte.</p></section>
+  <section id="prova" class="lez-sez lez-prova"><h2>8 · Ora provalo</h2>
+    {% block prova %}
+    <p>Il laboratorio <b>{{ lab.titolo }}</b> si prepara da solo fino al punto da spiegare: trovi la finestra «📘 Esercizio passo passo» aperta sul passo giusto.</p>
+    <div class="lab-azioni">
+      <button type="button" class="lab-btn" id="prepara" data-copione="{{ 'HMLV' if blueprint_lab == 'alta_varieta' else 'REM' }}" data-passo="{{ caso[5] }}" data-url="{{ url_lab }}">▶ Prepara la situazione nel laboratorio e aprilo</button>
+      <a class="lab-btn sec" href="{{ url_lab }}">Apri il laboratorio con il mio lavoro (senza preparare)</a>
+    </div>
+    <p class="lez-nota">«Prepara» sostituisce il tuo lavoro in questo laboratorio con la situazione pronta. Il simulatore principale non cambia.</p>
+    <div class="lab-esito" id="prepara-esito"></div>
+    {% endblock %}
+  </section>
+  <section class="lez-sez lez-altri"><h2>Altre situazioni</h2><div class="lez-casi">
+    {% for c in casi if c[0] != caso[0] %}<a href="{{ url_for('formazione.' ~ c[0] | replace('-', '_')) }}"><span>{{ c[3] }}</span>{{ c[1] }}</a>{% endfor %}
+  </div></section>
+</main>
+<div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · lezione stampabile</div>
+{% if lab %}
+{% set sync = config_sincronia(lab.slot) %}
+{% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}
+<script>window.LAB_CHIAVE = {{ chiave_lab | tojson }};</script>
+<script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
+<script src="{{ js_lab }}"></script>
+<script src="{{ url_for('static', filename='js/lab-copioni.js') }}"></script>
+<script src="{{ url_for('formazione.static', filename='prepara.js') }}"></script>
+{% else %}{% include "sincronia/_battito.html" %}{% endif %}
+<script src="{{ url_for('formazione.static', filename='domande.js') }}"></script>
+</body>
+</html>

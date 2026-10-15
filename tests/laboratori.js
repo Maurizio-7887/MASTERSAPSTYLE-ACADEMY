@@ -5,8 +5,8 @@ const R = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
 let errori = 0;
 const ok = (c, m) => { if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
-function finestra() {
-  const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/alta-varieta/', runScripts: 'outside-only'}).window;
+function finestra(qs) {
+  const w = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/alta-varieta/' + (qs || ''), runScripts: 'outside-only'}).window;
   w.eval(R('app/static/js/lab-motore.js')); return w;
 }
 const saldo = (S, c) => Math.round(S.registrazioni.reduce((t, r) => t + r.righe.filter(x => x.conto === c).reduce((u, x) => u + (x.dareAvere === 'DARE' ? x.importo : -x.importo), 0), 0) * 100) / 100;
@@ -113,5 +113,30 @@ function guida(w, file, S) {
   ok(!manc.length, 'guida REM: passi non riconosciuti alla fine:\n  ' + manc.join('\n  '));
   fs.writeFileSync(path.join(__dirname, 'lab-rem-finale.json'), JSON.stringify(S()));
   console.log(`✅ laboratorio Produzione ripetitiva: piano 167/100/67 · WIP gen 404 · varianze gen 132,20 · feb 0 · guida ${passi.length} passi`);
+}
+
+// ═══ 3) Lezioni «Che situazione hai?»: il copione prepara il laboratorio e la finestra si apre sul passo giusto ═══
+{
+  const lezioni = [['HMLV', 'alta_varieta/static/hmlv-logica.js', 'hmlv-disaccoppiamento.js', ['Strategie:', 'CO88: chiusura di novembre', 'CO88: chiusura di dicembre', 'VA01: tre ordini cliente', 'Buffer DDMRP']],
+                   ['REM', 'ripetitiva/static/rem-logica.js', 'rem-trattore.js', ['Budget 2027', '20 TR-STD fermi']]];
+  let n = 0;
+  for (const [nome, logica, guidaFile, passi] of lezioni) {
+    for (const passo of passi) {
+      const w = finestra('?passo=' + encodeURIComponent(passo)); w.eval(R('app/blueprints/' + logica)); w.eval(R('app/static/js/lab-copioni.js'));
+      const mod = w[nome]; mod.avvia('k-' + nome);
+      w.LabCopioni.esegui(w.LabCopioni[nome], mod, passo);
+      w.eval(R('app/blueprints/guida/static/esercizi/' + guidaFile));
+      w.MSA_GUIDA = {esercizio: w.MSA_ESERCIZIO.codice, chiave: 'x', url: {}};
+      w.eval(R('app/blueprints/guida/static/pannello.js'));
+      const P = w.MSA_ESERCIZIO.passi, i = w.MSA_GUIDA_API.passo();
+      ok(P[i].titolo.indexOf(passo) === 0, `lezione ${nome} «${passo}»: la finestra si apre su «${P[i].titolo}»`);
+      ok(quadra(mod.M.S), `lezione ${nome} «${passo}»: Dare = Avere`);
+      n++;
+    }
+    const w = finestra(); w.eval(R('app/blueprints/' + logica)); w.eval(R('app/static/js/lab-copioni.js'));
+    const mod = w[nome]; mod.avvia('t-' + nome); const S = w.LabCopioni.esegui(w.LabCopioni[nome], mod);
+    vicino(saldo(S, '61'), nome === 'HMLV' ? 252 : 132.2, `copione ${nome} completo: varianze`);
+  }
+  console.log(`✅ lezioni «Che situazione hai?»: ${n} situazioni preparate, finestra sul passo giusto`);
 }
 process.exit(errori ? 1 : 0);
