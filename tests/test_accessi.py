@@ -75,8 +75,8 @@ r = a.post("/api/stato/vuoto", data=json.dumps({"csrf": s["csrf"], "stato": dati
 ok(r.status_code == 200 and r.get_json()["rev"] == 1, "lavoro salvato (rev 1)")
 r = a.post("/api/stato/vuoto", data=json.dumps({"csrf": s["csrf"], "stato": dati}), headers={"X-CSRF": s["csrf"]})
 ok(r.get_json()["rev"] == 1, "stesso lavoro → nessuna nuova revisione")
-s2 = sync(a.get("/vuoto/").get_data(as_text=True))
-ok(s2 and s2["stato"] == dati and s2["rev"] == 1, "il launchpad riporta il lavoro salvato nel browser")
+s2 = sync(a.get("/vuoto/contabilita/moduli").get_data(as_text=True))
+ok(s2 and s2["stato"] == dati and s2["rev"] == 1, "la pagina storica riporta il lavoro classico salvato nel browser")
 ok(a.get("/api/stato/vuoto").get_json()["stato"] == dati, "GET dello stato")
 
 # ── tempo di collegamento ──
@@ -149,7 +149,7 @@ r = d.post("/docente/allievi/nuovo", data={"csrf": tok(d, "/docente/allievi/nuov
 l = entra("luca", "lucaluca1")
 l.post("/password", data={"csrf": tok(l, "/password"), "attuale": "lucaluca1", "nuova": "lucaluca2", "conferma": "lucaluca2"})
 ok(l.get(f"/area/consegna/{cid}").status_code == 404, "un altro allievo non vede la consegna")
-ok(sync(l.get("/vuoto/").get_data(as_text=True))["stato"] is None, "un altro allievo non riceve il lavoro di Anna")
+ok(sync(l.get("/vuoto/contabilita/moduli").get_data(as_text=True))["stato"] is None, "un altro allievo non riceve il lavoro di Anna")
 
 # ── blocco dopo 5 tentativi ──
 x = app.test_client()
@@ -170,22 +170,22 @@ y = app.test_client()
 ok(y.post("/accesso", data={"csrf": tok(y, "/accesso"), "username": "luca", "password": nuova}).status_code == 401, "allievo disattivato non entra")
 
 # ── passa il lavoro: docente → allievo e ritorno ──
-sd = sync(d.get("/vuoto/").get_data(as_text=True))
+sd = sync(d.get("/vuoto/contabilita/moduli").get_data(as_text=True))
 lavoro_docente = json.dumps({**FINALE, "notaDocente": "lavagna"}, ensure_ascii=False)
 d.post("/api/stato/vuoto", data=json.dumps({"csrf": sd["csrf"], "stato": lavoro_docente}))
 with app.app_context():
     aid = Utente.query.filter_by(username="anna.verdi").first().id
 r = d.post("/docente/passa", data={"csrf": tok(d, "/docente/passa"), "verso": "a_allievi", "versione": "vuoto", "allievi": [str(aid)]})
 ok(r.status_code == 302, "lavoro del docente passato all'allievo")
-s3 = sync(a.get("/vuoto/").get_data(as_text=True))
+s3 = sync(a.get("/vuoto/contabilita/moduli").get_data(as_text=True))
 ok(s3["stato"] == lavoro_docente and s3["rev"] == 2, "l'allievo riparte dal lavoro del docente (rev 2)")
 html = d.get("/docente/passa").get_data(as_text=True)
 ok("sostituito dal lavoro del docente" in html, "il lavoro precedente dell'allievo è in archivio")
 arch = re.search(r'/docente/archivio/(\d+)/ripristina', html).group(1)
 d.post(f"/docente/archivio/{arch}/ripristina", data={"csrf": tok(d, "/docente/passa")})
-ok(sync(a.get("/vuoto/").get_data(as_text=True))["stato"] == dati, "ripristino dall'archivio")
+ok(sync(a.get("/vuoto/contabilita/moduli").get_data(as_text=True))["stato"] == dati, "ripristino dall'archivio")
 r = d.post("/docente/passa", data={"csrf": tok(d, "/docente/passa"), "verso": "da_allievo", "versione": "vuoto", "allievo": str(aid)})
-ok(r.status_code == 302 and sync(d.get("/vuoto/").get_data(as_text=True))["stato"] == dati, "il docente carica il lavoro dell'allievo")
+ok(r.status_code == 302 and sync(d.get("/vuoto/contabilita/moduli").get_data(as_text=True))["stato"] == dati, "il docente carica il lavoro dell'allievo")
 ok(a.get("/docente/passa").status_code == 403, "l'allievo non può passare lavori")
 html = a.get("/vuoto/contabilita/fi-gl").get_data(as_text=True)
 ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizio passo passo» nelle pagine del simulatore")

@@ -4,7 +4,7 @@
 - static/pannello.js / .css       la finestra, uguale su tutte le pagine
 - templates/guida/_pannello.html  da includere in fondo alle pagine del simulatore e del launchpad
 """
-from flask import Blueprint, url_for
+from flask import Blueprint, url_for, request, session
 
 from ...accesso import utente_corrente
 from ...pagine import LABORATORI, tutte_le_pagine
@@ -18,6 +18,14 @@ ESERCIZIO_PER_VERSIONE = {"vuoto": "guidato-dic-2026", "completo": "guidato-dic-
 @bp.app_template_global()
 def config_guida(versione, esercizio=None, chiave=None):
     esercizio = esercizio or ESERCIZIO_PER_VERSIONE.get(versione)
+    if esercizio == "s4-integrato":
+        scelte = {"ragioneria-wms", "s4-integrato"}
+        scelta = request.args.get("esercizio_guida")
+        if scelta in scelte:
+            session["guida_integrata"] = scelta
+        esercizio = session.get("guida_integrata", "ragioneria-wms")
+        if esercizio not in scelte:
+            esercizio = "ragioneria-wms"
     if not esercizio or utente_corrente() is None:
         return None
     url = {f"{a['blueprint']}.{p['endpoint']}": url_for(f"{a['blueprint']}.{p['endpoint']}", versione=versione) for a, p in tutte_le_pagine()}
@@ -31,6 +39,9 @@ def config_guida(versione, esercizio=None, chiave=None):
 @bp.app_template_global()
 def config_guida_modulo(versione, codice):
     """Sulle mattonelle di un laboratorio la finestra mostra l'esercizio di quel laboratorio."""
+    from ...pagine import MODULI
+    if codice in {m["codice"] for m in MODULI}:
+        return config_guida(versione, esercizio="s4-integrato", chiave="ferro-transenne-fi-2026-erp-ft-civilistico")
     for lab in LABORATORI.values():
         if lab.get("codice", lab["sigla"].lower()) == codice:
             return config_guida(versione, esercizio=lab["esercizio"], chiave=f"ferro-transenne-fi-2026-{lab['slot']}-civilistico")

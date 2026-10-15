@@ -82,14 +82,41 @@
     return S;
   }
 
+  // Il quiz fotografa solo documenti realmente salvati. Le vecchie scritture
+  // diventano la base iniziale, non una raffica di domande retroattive.
+  function chiaveRagioneria(r) {
+    return JSON.stringify([r.id, r.numero, r.data, r.tipo, r.descrizione,
+      (r.righe || []).map(function (x) { return [x.conto, x.dareAvere, x.importo, x.partner || '']; })]);
+  }
+  function baseRagioneria(S) {
+    if (!S.msaRagioneria || S.msaRagioneria.versione !== 1)
+      S.msaRagioneria = {versione: 1, visti: (S.registrazioni || []).map(chiaveRagioneria), coda: [], esiti: []};
+    return S.msaRagioneria;
+  }
+
   function crea(chiave) {
     var S = null;
     try { S = JSON.parse(localStorage.getItem(chiave) || 'null'); } catch (e) { S = null; }
     if (!S || S.lab !== 'erp') S = statoNuovo(); else completa(S);
+    baseRagioneria(S);
     var N = {
       get S() { return S; },
-      salva: function () { try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { throw Error('Memoria del browser piena.'); } },
-      azzera: function () { S = statoNuovo(); N.salva(); return S; },
+      salva: function () {
+        var prima = JSON.parse(JSON.stringify(baseRagioneria(S))), q = S.msaRagioneria;
+        var visti = new Set(q.visti), aggiunti = 0;
+        (S.registrazioni || []).forEach(function (r) {
+          var k = chiaveRagioneria(r);
+          if (!visti.has(k)) {
+            visti.add(k); q.visti.push(k);
+            q.coda.push({chiave: k, documento: JSON.parse(JSON.stringify(r)), risposte: [], tentativi: 0});
+            aggiunti++;
+          }
+        });
+        try { localStorage.setItem(chiave, JSON.stringify(S)); }
+        catch (e) { S.msaRagioneria = prima; throw Error('Memoria del browser piena.'); }
+        if (aggiunti) window.dispatchEvent(new CustomEvent('msa:registrazioni-salvate'));
+      },
+      azzera: function () { S = statoNuovo(); baseRagioneria(S); N.salva(); return S; },
       fornitore: function (f) { var x = S.fornitori[f]; if (!x) throw Error('Fornitore ' + f + ' inesistente.'); return x; },
       numero: function (tipo) { return String(++S.numeri[tipo]); },
       data: function (d) { L.dataOk(d); if (!S.avviato) throw Error('Prima avvia il sistema (Dati di base → Avvia).'); if (d < S.avviato) throw Error('Data anteriore all\'avvio del sistema (' + L.fd(S.avviato) + ').'); return d; },

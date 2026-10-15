@@ -133,7 +133,7 @@ def wms_verifica():
 
 @bp.route("/")
 def indice():
-    return render_template("formazione/indice.html", casi=CASI, versione=versione_corrente(), versioni=VERSIONI,
+    return render_template("formazione/indice.html", casi=[c for c in CASI if c[4] and LABORATORI[c[4]]["slot"] == "erp-ft"], versione=versione_corrente(), versioni=VERSIONI,
                            moduli=MODULI, modulo_attivo=modulo("casi"), endpoint_corrente="formazione.indice", laboratori=LABORATORI)
 
 

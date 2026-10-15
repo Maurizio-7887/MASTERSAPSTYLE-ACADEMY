@@ -1,7 +1,43 @@
+# Aggiornamento Pistoia — solo sistema integrato
+
+La home e il launchpad mostrano soltanto il sistema integrato. Le tile SD, MM,
+PP, WMS, FI, CO, tesoreria, valute, personale e dati di base lavorano nello
+stesso slot `erp-ft`, con un solo libro giornale. Le guide avviate dalle tile
+usano `s4-integrato`, non l'esercizio del vecchio sistema.
+
+Avvio: aprire la home, scegliere **Entra nel sistema integrato**, poi **Avvio e
+dati di base**. Se esiste già lavoro integrato, riprenderlo senza reinizializzare
+l'azienda. Per il WMS attivare W100 da **Struttura e attivazione**, quando previsto
+dall'esercizio. Restano valide le istruzioni di installazione riportate sotto.
+
+Non sono stati cancellati né convertiti i dati classici. Codice, URL storici,
+guide e materiali offline sono conservati per compatibilità, ma rimossi dal
+percorso ordinario; chi possiede un vecchio URL può ancora aprirlo dopo il login.
+Le consegne pregresse restano leggibili; nella nuova consegna compare prima
+l'integrato e, solo se già salvati, gli archivi precedenti. Il docente conserva
+gli strumenti di gestione degli archivi. Nessuna migrazione del database.
+
+Gli URL tecnici `/vuoto/` e `/completo/` restano compatibili: per le funzioni ERP
+sono due indirizzi dello stesso stato integrato, non due aziende. Nei menu non
+si sceglie più una versione. Non tutte le funzioni del classico hanno un
+equivalente nell'integrato: non sono state inventate o trasferite in questa
+modifica. Il programma rimane un simulatore didattico, non SAP certificato.
+
+---
+
 # MASTERSAPSTYLE ACADEMY
 
 Portale dei simulatori didattici in stile SAP di Maurizio Gustinicchi Consulting.
 Primo simulatore: **Ferro & Transenne** — contabilità generale, controllo di gestione, vendite, acquisti e produzione a tre fasi.
+
+## Aggiornamento navigazione WMS — 15 ottobre 2026
+
+- I quattro moduli **SD, MM, PP e WMS** sono in evidenza nella prima sezione del launchpad, allo stesso livello. Tutti gli altri moduli restano accessibili nella sezione successiva.
+- WMS ha titolo breve e colore dedicato; conserva tutte le app esistenti, raggruppate per fase operativa.
+- La pagina WMS include accessi rapidi all'avvio e agli ordini SD/MM/PP del **sistema integrato**. I dati di quel sistema non sono i dati del percorso classico: non viene effettuata alcuna fusione o migrazione.
+- Questo aggiornamento modifica la navigazione, non le regole contabili o di movimentazione. Nessuna migrazione del database richiesta; nessun intervento sui salvataggi.
+- Il WMS era già registrato come modulo: non è stato creato un secondo WMS.
+- Test mirato: `python tests/test_launchpad_wms.py`. Si aggiunge ai test esistenti.
 
 ## Struttura: una cartella per attività, una pagina HTML per ogni pezzo
 

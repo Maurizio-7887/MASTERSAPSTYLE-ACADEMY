@@ -214,6 +214,23 @@ class Lavoro:
                          "tredicesima_dicembre": round(sum(c.get("tredicesima") or 0 for c in (s.get("hr") or {}).get("cedolini") or [] if c.get("periodo") == "2027-12"), 2),
                          "credito_usd_aperto": round(sum(d.get("importo") or 0 for d in (s.get("fx") or {}).get("documenti") or [] if d.get("lato") == "cliente" and not d.get("chiuso")), 2),
                          "quadratura_im_wm": ("sì" if wm.get("attivo") and all(abs(giac.get(m, 0) - tot_wm.get(m, 0)) < 1e-6 for m in giac) else "no")})
+        if lab == "erp":
+            wm = s.get("wm") or {}
+            compiti = wm.get("compiti") or []
+            g = s.get("giacenze") or {}
+            base.update({
+                "rw_compiti_aperti": sum(t.get("stato") == "aperto" for t in compiti),
+                "rw_compiti_confermati": sum(t.get("stato") == "confermato" for t in compiti),
+                "rw_ferro": g.get("FERRO", 0), "rw_std": g.get("TR-STD", 0),
+                "rw_alta": g.get("TR-ALTA", 0), "rw_ped": g.get("TR-PED", 0),
+                "rw_ferro_valore": self.saldo("12"), "rw_pf_valore": self.saldo("13"),
+                "rw_cogs": round(self.saldo("41") + self.saldo("42"), 2),
+                "rw_banca": self.saldo("10"), "rw_clienti": self.saldo("11"),
+                "rw_fornitori": self.saldo("20"), "rw_were": self.saldo("22"),
+                "rw_transito": self.saldo("18"),
+                "rw_colli": len((s.get("sped") or {}).get("colli") or []),
+                "rw_ddt": sum(bool(c.get("ddt")) for c in s.get("consegne") or []),
+            })
         return base
 
     def indicatori(self):

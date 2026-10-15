@@ -52,3 +52,15 @@
 .msa-g-shell{background:#0070F2;color:#fff;border:0;border-radius:4px;padding:4px 11px;font:600 12.5px "Segoe UI",Arial,sans-serif;cursor:pointer}
 .msa-g-shell:hover{background:#0854A0}
 #msa-guida .msa-g-esito a{color:#0854A0}
+#msa-guida .msa-q-riga{border:1px solid #b6c8d9;border-radius:5px;margin:12px 0;padding:7px;display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+#msa-guida .msa-q-riga legend{font-weight:600;font-size:12px;padding:0 4px;max-width:100%;overflow-wrap:anywhere}
+#msa-guida .msa-q-riga label{display:block;font-size:12px;min-width:0}
+#msa-guida .msa-q-importo{box-sizing:border-box;width:100%;border:1px solid #89919a;border-radius:4px;padding:6px;font:inherit}
+#msa-guida .msa-q-errore{color:#a32121;grid-column:1/-1}
+#msa-guida .msa-q-info{font-size:11px;color:#52616f;overflow-wrap:anywhere}
+#msa-guida .msa-q-verifica,#msa-guida .msa-q-continua{background:#0070f2;color:#fff;border:0;border-radius:4px;padding:9px;cursor:pointer;font:600 13px 'Segoe UI',sans-serif;width:100%}
+#msa-guida .msa-q-aiuto{margin-top:9px;background:#fff;border:1px solid #89919a;border-radius:4px;padding:7px;width:100%;cursor:pointer;color:#3b5369}
+#msa-guida .msa-q-messaggio{font-weight:600}
+#msa-guida .msa-q-soluzione{border-collapse:collapse;width:100%;font-size:11px;margin-top:12px}
+#msa-guida .msa-q-soluzione td,#msa-guida .msa-q-soluzione th{border-bottom:1px solid #d1d5db;padding:5px 3px;text-align:right}
+#msa-guida .msa-q-soluzione td:first-child,#msa-guida .msa-q-soluzione th:first-child{text-align:left;overflow-wrap:anywhere}

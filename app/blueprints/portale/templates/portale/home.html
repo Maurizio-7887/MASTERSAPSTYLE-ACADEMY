@@ -35,34 +35,21 @@
     </a>
   </div>
   {% endif %}
-  <div class="msa-gruppo">🏭 Ferro &amp; Transenne S.r.l. — scegli la versione</div>
+  <div class="msa-gruppo">🏭 Un solo sistema integrato</div>
   <div class="msa-tiles">
-  {% for v, testo in versioni.items() %}
-    <a class="msa-tile grande g-{{ 'contabilita' if v == 'vuoto' else 'vendite_acquisti' }}" href="{{ url_for('portale.ingresso', versione=v) }}">
-      <span class="ic" aria-hidden="true">{{ '🧱' if v == 'vuoto' else '🏢' }}</span>
-      <b>Versione {{ v }}</b><p>{{ testo }}.</p>
-      <span class="tc">Launchpad · {{ attivita | length }} attività</span>
+    <a class="msa-tile grande g-magazzino" href="{{ url_for('portale.ingresso', versione='vuoto') }}">
+      <span class="ic" aria-hidden="true">🏢</span><b>Entra nel sistema integrato</b>
+      <p>SD · MM · PP · WMS · FI · CO: una sola azienda e un solo libro giornale.</p>
     </a>
-  {% endfor %}
-  </div>
-  <div class="msa-gruppo">📎 Materiali</div>
-  <div class="msa-tiles">
-  {% for m in materiali %}
-    <a class="msa-tile g-materiali" href="{{ url_for('portale.materiale', file=m.file) }}">
-      <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span>
-      <b>{{ m.titolo }}</b><p>{{ m.testo }}</p>
+    <a class="msa-tile g-impostazioni" href="{{ url_for('erp_dati.avvio', versione='vuoto') }}">
+      <span class="ic" aria-hidden="true">🚀</span><b>Avvio e ripresa del lavoro</b>
+      <p>Apri l'ambiente integrato. Se hai già lavorato, prosegui senza reinizializzare i dati.</p>
     </a>
-  {% endfor %}
-  </div>
-  <div class="msa-gruppo">🧩 Le attività del simulatore</div>
-  <div class="msa-tiles">
-  {% for a in attivita %}
-    <a class="msa-tile g-{{ a.blueprint }}" href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint, versione='vuoto') }}">
-      <b>{{ a.titolo }}</b><p>{{ a.pagine | map(attribute='titolo') | join(' · ') }}</p>
+    <a class="msa-tile g-formazione" href="{{ url_for('formazione.formas', versione='vuoto') }}">
+      <span class="ic" aria-hidden="true">🎓</span><b>Corso FORMAS Pistoia</b><p>Lezioni e attività di magazzino.</p>
     </a>
-  {% endfor %}
   </div>
-  <p class="msa-lp-nota">Ogni allievo ha il suo accesso: il lavoro si salva sul portale, separato per versione, e il docente riceve le consegne da correggere. Le pagine della stessa versione condividono gli stessi dati. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
+  <p class="msa-lp-nota">Ogni allievo ha il suo accesso: il lavoro del sistema integrato si salva sul portale, e il docente riceve le consegne da correggere. Tutti i moduli visibili condividono gli stessi dati integrati. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza professionale.</p>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting · materiali didattici</div>
 </body>

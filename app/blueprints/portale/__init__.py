@@ -9,6 +9,8 @@ from ...simulatore import STATIC, mappa_url, meta
 bp = Blueprint("portale", __name__, template_folder="templates", static_folder="static", static_url_path="/static/portale")
 
 MATERIALI = [
+    {"file": "Esercitazione_Ragioneria_con_WMS.pdf", "titolo": "Ragioneria con WMS — guida passo passo (PDF)",
+     "testo": "Acquisto, produzione, vendita, chiusura costi e banca: percorso integrato con magazzino attivo dall'apertura."},
     {"file": "Guida-esercizio-integrato.pdf", "titolo": "Esercizio guidato passo passo (PDF)",
      "testo": "Dalla costituzione al saldo IRES: tre ordini di produzione, RiBa, anticipo su fattura, factoring, chiusura e riapertura."},
     {"file": "ferro-transenne-vuoto-file-unico.html", "titolo": "Simulatore offline — versione vuota (file unico)",
@@ -24,12 +26,12 @@ SCHEDE_TUTTO = [("impostazioni", "impostazioni"), ("pianificazione", "budget"), 
 
 @bp.route("/")
 def home():
-    return render_template("portale/home.html", versioni=VERSIONI, attivita=ATTIVITA, materiali=MATERIALI)
+    return render_template("portale/home.html", versioni=VERSIONI, attivita=ATTIVITA, materiali=[])
 
 
 def _lp(versione, **extra):
     return render_template(extra.pop("template"), versione=versione, versioni=VERSIONI, attivita_tutte=ATTIVITA, attivita=None,
-                           moduli=MODULI, materiali=MATERIALI, chiave_storage=f"ferro-transenne-fi-2026-{versione}-civilistico", **extra)
+                           moduli=MODULI, materiali=[], chiave_storage="ferro-transenne-fi-2026-erp-ft-civilistico", **extra)
 
 
 @bp.route("/<versione>/")

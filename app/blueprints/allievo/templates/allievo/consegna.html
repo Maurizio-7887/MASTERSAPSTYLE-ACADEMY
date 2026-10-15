@@ -9,13 +9,13 @@
   <select id="versione" name="versione" required>
     {% for v in versioni %}
       {% set l = (lavori | selectattr('versione', 'equalto', v) | list | first) %}
-      <option value="{{ v }}">{{ versioni[v] if v.startswith('lab-') else 'Simulatore, versione ' ~ v }} — {% if l %}{{ l.scritture }} scritture, salvato {{ ora_italiana(l.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</option>
+      <option value="{{ v }}">{{ versioni[v] }} — {% if l %}{{ l.scritture }} scritture, salvato {{ ora_italiana(l.aggiornato) }}{% else %}nessun lavoro salvato{% endif %}</option>
     {% endfor %}
   </select>
   <label for="esercizio">Esercizio</label>
   <select id="esercizio" name="esercizio">
     {% for v, lista in scelte.items() %}
-      <optgroup label="{{ versioni[v] if v.startswith('lab-') else 'Versione ' ~ v }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
+      <optgroup label="{{ versioni[v] }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
     {% endfor %}
   </select>
   <label for="nota">Messaggio per il docente (facoltativo)</label>

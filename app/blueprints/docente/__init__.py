@@ -12,7 +12,7 @@ from ...accesso import solo_docente, utente_corrente
 from ...db import ROMA, ArchivioLavoro, Consegna, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
 from ...pagine import LAB_SLOTS, VERSIONI
 
-LAVORI = {**{v: v for v in VERSIONI}, **{k: 'lab ' + v for k, v in LAB_SLOTS.items()}}
+LAVORI = {'erp-ft': 'Sistema integrato', **{v: 'Archivio storico · ' + v for v in VERSIONI}, **{k: 'Archivio laboratorio · ' + v for k, v in LAB_SLOTS.items() if k != 'erp-ft'}}
 from ...report import report as report_lavoro
 from ...esercizi import ESERCIZI
 from ...report import report
@@ -282,7 +282,7 @@ def passa():
     """Passa il comando: il lavoro del docente va a uno o più allievi (o quello di un allievo al docente)."""
     io = utente_corrente()
     allievi = Utente.query.filter_by(ruolo="allievo", attivo=True).order_by(Utente.nome).all()
-    versione = request.values.get("versione") if request.values.get("versione") in LAVORI else "vuoto"
+    versione = request.values.get("versione") if request.values.get("versione") in LAVORI else "erp-ft"
     if request.method == "POST":
         verso = request.form.get("verso")
         if verso == "a_allievi":

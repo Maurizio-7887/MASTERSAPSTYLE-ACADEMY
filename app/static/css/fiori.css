@@ -152,6 +152,15 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 .msa-modulo .piede .n{color:var(--f-blu-scuro);white-space:nowrap}
 .g-contabilita{--c:var(--f-blu)}.g-controllo,.g-reportistica{--c:var(--f-verde)}.g-vendite_acquisti{--c:var(--f-arancio)}.g-produzione{--c:#C35500}.g-personale{--c:#C0399F}.g-pianificazione{--c:var(--f-viola)}.g-impostazioni{--c:#5B738B}
 .g-acquisti{--c:#8D6E00}
+.g-magazzino{--c:#087F8C}
+.msa-moduli-operativi{grid-template-columns:repeat(4,minmax(0,1fr))}
+.msa-moduli-operativi .msa-modulo{min-width:0}
+.msa-wms-collegamenti{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.msa-wms-collegamenti a{color:var(--f-blu-scuro);background:#fff;border:1px solid var(--f-bordo);border-radius:4px;padding:6px 10px;text-decoration:none}
+.msa-wms-collegamenti a:hover{background:#E8F4FD}
+.msa-wms-collegamenti a:focus-visible{outline:2px solid var(--f-blu);outline-offset:2px}
+@media (max-width:1100px){.msa-moduli-operativi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.msa-moduli-operativi{grid-template-columns:1fr}}
 .msa-tiles.compatte .msa-tile{border-top-color:var(--c,var(--f-blu))}
 .msa-intro-modulo{display:flex;align-items:center;gap:14px;border-left-color:var(--c)}
 .msa-intro-modulo h1{margin:0}

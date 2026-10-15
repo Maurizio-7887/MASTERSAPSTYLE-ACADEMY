@@ -7,8 +7,7 @@
     {% if versione %}<a class="msa-home" href="{{ url_for('portale.ingresso', versione=versione) }}">🏠 Launchpad</a>{% endif %}
     <span class="msa-dx">
       {% if versione %}
-        <span class="msa-versione-badge">Versione {{ versione }}</span>
-        {% for v in versioni %}{% if v != versione %}<a href="{{ url_for(endpoint_corrente, versione=v, **(parametri_correnti or {})) }}">passa a {{ v }}</a>{% endif %}{% endfor %}
+        <span class="msa-versione-badge">Sistema integrato</span>
       {% endif %}
       {% set u = utente_corrente() %}
       {% if u %}

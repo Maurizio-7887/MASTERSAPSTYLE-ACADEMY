@@ -80,8 +80,11 @@ def consegna():
         db.session.commit()
         flash("Consegna inviata al docente. Riceverai qui la sua risposta.", "ok")
         return redirect(url_for("allievo.vedi", cid=c.id))
-    return render_template("allievo/consegna.html", lavori=riepilogo_lavori(u), versioni=LAVORI,
-                           scelte={v: scelte(v) for v in LAVORI})
+    # Nuove consegne sull'integrato; disponibili gli slot storici solo se già salvati.
+    visibili = {"erp-ft": "Sistema integrato"}
+    visibili.update({v: "Archivio storico · " + LAVORI[v] for v in lavori if v != "erp-ft" and v in LAVORI})
+    return render_template("allievo/consegna.html", lavori=riepilogo_lavori(u), versioni=visibili,
+                           scelte={v: scelte(v) for v in visibili})
 
 
 @bp.route("/consegna/<int:cid>")

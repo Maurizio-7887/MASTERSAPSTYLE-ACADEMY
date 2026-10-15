@@ -1,0 +1,50 @@
+// Pannello reale e passi reali: apertura, avanzamento e ripresa senza click su Avanti.
+const fs=require('fs'),path=require('path'),{JSDOM}=require('jsdom');
+const R=f=>fs.readFileSync(path.join(__dirname,'../app/blueprints/guida/static',f),'utf8');
+let n=0;
+function ok(c,m){n++;if(!c)throw Error(m);}
+function pagina(S,opts={}){
+ const w=new JSDOM('<body><main><button id="conferma">Conferma operazione</button></main></body>',{url:'https://sim.local/vuoto/s4/dati/',runScripts:'outside-only',pretendToBeVisual:true}).window;
+ const tick=[];
+ w.setInterval=f=>{tick.push(f);return tick.length;};
+ w.setTimeout=f=>{f();return 1;};
+ if(opts.pos!==undefined)w.sessionStorage.setItem('msa-guida-pos-ragioneria-wms',String(opts.pos));
+ if(opts.chiusa)w.localStorage.setItem('msa-guida-aperta-ragioneria-wms','0');
+ w.MSA_STATO_CORRENTE=()=>S;
+ w.MSA_SALVA_STATO_CORRENTE=()=>w.localStorage.setItem('dati',JSON.stringify(S));
+ w.MSA_GUIDA={esercizio:'ragioneria-wms',versione:'vuoto',chiave:'dati',url:{'erp_dati.avvio':'/vuoto/s4/dati/','erp_magazzino.struttura':'/vuoto/s4/magazzino/'}};
+ w.eval(R('esercizi/ragioneria-wms.js'));w.eval(R('pannello.js'));
+ return {w,S,tick:()=>tick.forEach(f=>f()),pos:()=>w.MSA_GUIDA_API.passo(),click:()=>w.document.getElementById('conferma').click()};
+}
+const x=pagina({});
+ok(!x.w.document.querySelector('.msa-g-pannello').hidden,'pannello destro aperto al primo accesso');
+ok(x.pos()===0,'introduzione visibile senza salti');
+x.w.document.querySelector('.msa-g-mano').click();
+ok(x.pos()===1,'conferma lettura mostra subito apertura azienda');
+ok(!x.w.document.querySelector('.msa-g-mano'),'operazione contabile non aggirabile con spunta manuale');
+x.click();ok(x.pos()===1,'click senza operazione riuscita non avanza');
+x.S.avviato='2027-01-02';x.click();
+ok(x.pos()===2,'operazione completata mostra attivazione WMS automaticamente');
+x.S.wm={attivo:'2027-01-02'};x.tick();
+ok(x.pos()===3,'attivazione WMS mostra lettura mappa');
+x.tick();ok(x.pos()===3,'lettura didattica non saltata');
+x.w.document.querySelector('.msa-g-mano').click();
+ok(x.pos()===4,'lettura mappa confermata mostra il costo standard');
+ok(x.w.sessionStorage.getItem('msa-guida-pos-ragioneria-wms')==='4','passo salvato per cambio pagina');
+x.w.MSA_GUIDA_API.vaiA(9,true);
+x.S.wm.compiti=[{tipo:'PUTAWAY',mat:'FERRO',stato:'confermato',qta:1000,qtaEff:1000},{tipo:'PUTAWAY',mat:'FERRO',stato:'aperto',qta:1000},{tipo:'PUTAWAY',mat:'FERRO',stato:'aperto',qta:1000}];
+x.tick();ok(x.pos()===9,'un compito su tre non completa il passo RF');
+x.S.wm.compiti.forEach(t=>{t.stato='confermato';t.qtaEff=1000;});x.click();
+ok(x.pos()===10,'solo tre compiti confermati mostrano la fattura fornitore');
+x.w.MSA_GUIDA_API.vaiA(2,true);x.tick();
+ok(x.pos()===2,'ripasso di passo completato resta consultabile');
+x.w.document.querySelector('.msa-g-chiudi').click();
+ok(x.w.localStorage.getItem('msa-guida-aperta-ragioneria-wms')==='0','riduzione ricordata');
+const y=pagina({avviato:'2027-01-02'},{pos:1});
+ok(y.pos()===2,'ricaricamento dopo operazione riprende dal successivo');
+ok(!y.w.document.querySelector('.msa-g-pannello').hidden,'pannello aperto anche sulla nuova pagina');
+const z=pagina({},{chiusa:true});
+ok(z.w.document.querySelector('.msa-g-pannello').hidden,'riduzione volontaria rispettata');
+z.w.MSA_GUIDA_API.apri(true);ok(!z.w.document.querySelector('.msa-g-pannello').hidden,'riapertura disponibile');
+[x,y,z].forEach(t=>t.w.close());
+console.log('OK: '+n+' verifiche pannello destro e avanzamento automatico WMS');

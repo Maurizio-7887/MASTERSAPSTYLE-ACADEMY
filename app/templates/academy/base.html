@@ -9,8 +9,9 @@
 {% block testa %}{% endblock %}
 </head>
 <body class="msa-ac">
-{% set versione = None %}
+{% with versione = None %}
 {% include "simulatore/_shell.html" %}
+{% endwith %}
 <main>
   {% with messaggi = get_flashed_messages(with_categories=true) %}
     {% for cat, m in messaggi %}<div class="msa-msg {{ cat }}">{{ m }}</div>{% endfor %}

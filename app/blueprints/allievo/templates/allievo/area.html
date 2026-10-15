@@ -12,15 +12,13 @@
 
 <h2>Il mio lavoro</h2>
 <div class="msa-tiles">
-{% for v, testo in versioni.items() %}
-  {% set l = (lavori | selectattr('versione', 'equalto', v) | list | first) %}
-  <a class="msa-tile g-{{ 'contabilita' if v == 'vuoto' else 'vendite_acquisti' }}" href="{{ url_for('portale.ingresso', versione=v) }}">
-    <span class="ic" aria-hidden="true">{{ '🧱' if v == 'vuoto' else '🏢' }}</span>
-    <b>Versione {{ v }}</b>
-    <p>{% if l %}Salvato {{ ora_italiana(l.aggiornato) }}{% else %}Non ancora iniziata{% endif %}</p>
-    <span class="kpi"><strong>{{ l.scritture if l else 0 }}</strong><span>scritture{% if l and l.ultima_data %} · fino al {{ l.ultima_data }}{% endif %}</span></span>
+{% set l = (lavori | selectattr('versione', 'equalto', 'erp-ft') | list | first) %}
+  <a class="msa-tile g-magazzino" href="{{ url_for('portale.ingresso', versione='vuoto') }}">
+    <span class="ic" aria-hidden="true">🏢</span><b>Il mio sistema integrato</b>
+    <p>{% if l %}Salvato {{ ora_italiana(l.aggiornato) }}{% else %}Non ancora iniziato{% endif %}</p>
+    <span class="kpi"><strong>{{ l.scritture if l else 0 }}</strong><span>scritture del sistema integrato</span></span>
   </a>
-{% endfor %}
+
   <a class="msa-tile g-personale" href="{{ url_for('allievo.consegna') }}">
     <span class="ic" aria-hidden="true">📤</span><b>Consegna il lavoro</b>
     <p>Invia al docente una fotografia del tuo lavoro: la correggerà e ti risponderà qui.</p>

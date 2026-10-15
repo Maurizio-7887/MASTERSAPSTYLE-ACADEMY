@@ -8,7 +8,14 @@
   var E = window.MSA_ESERCIZIO, C = window.MSA_GUIDA;
   if (!E || !C) return;
   var PASSI = E.passi, N = PASSI.length;
+  var guidata = E.pannelloAutomatico === true;
   var chiave = C.chiave;
+  var quiz = window.MSA_RAGIONERIA;
+  function inQuiz() { return quiz && quiz.pendente(stato()); }
+  function salvaQuiz() {
+    if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') window.MSA_SALVA_STATO_CORRENTE();
+    else localStorage.setItem(chiave, JSON.stringify(stato()));
+  }
   var POS = 'msa-guida-pos-' + E.codice, APERTA = 'msa-guida-aperta';
   var ss = function (k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } };
   var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
@@ -36,7 +43,7 @@
   function esiti() {
     var S = stato(), h = aiutanti(S), m = manuali(S);
     return PASSI.map(function (p) {
-      if (m[p.titolo]) return 'mano';
+      if (m[p.titolo] && !(guidata && p.fatto)) return 'mano';
       if (!p.fatto) return '';
       try { return p.fatto(h) ? 'auto' : ''; } catch (e) { return ''; }
     });
@@ -80,6 +87,7 @@
   var stati = esiti();
   // il primo passo da fare DOPO l'ultimo già fatto (i passi introduttivi a mano non bloccano chi riprende a metà)
   var primoDaFare = function () {
+    if (guidata) { for (var f = 0; f < N; f++) if (!stati[f]) return f; return N - 1; }
     var ult = -1; for (var j = 0; j < N; j++) if (stati[j]) ult = j;
     for (var i = ult + 1; i < N; i++) if (!stati[i]) return i;
     for (i = 0; i < N; i++) if (!stati[i]) return i;
@@ -87,6 +95,8 @@
   };
   var pos = parseInt(ss(POS), 10);
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
+  // Ripresa dopo un salvataggio seguito subito da un cambio di pagina.
+  if (guidata && stati[pos]) { while (pos < N - 1 && stati[pos]) pos++; ss(POS, String(pos)); }
   // arrivo da una lezione «Che situazione hai?»: ?passo=<inizio del titolo> apre la finestra su quel passo
   var richiesto = null;
   try { richiesto = new URLSearchParams(location.search).get('passo'); } catch (e) { richiesto = null; }
@@ -132,6 +142,16 @@
     barra.style.width = Math.round(fatti / N * 100) + '%';
     progB.textContent = fatti + '/' + N;
     num.textContent = (pos + 1) + ' / ' + N;
+    var pendente = inQuiz();
+    sel.disabled = !!pendente;
+    radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
+    radice.querySelector('.msa-g-av').disabled = !!pendente;
+    if (pendente) {
+      corpo.innerHTML = quiz.html(stato(), esc);
+      num.textContent = 'Laboratorio di ragioneria';
+      disegnaElenco();
+      return;
+    }
     var qui = suQuestaPagina(p);
     var avvisoCompleto = (C.versione === 'completo' && pos === 0) ? '<div class="msa-g-esito">⚠️ Sei nella versione <b>completa</b>: il preset «Azienda nuova» cancella i dati di esempio. Per l\'esercizio è più comodo la <a href="' + location.pathname.replace('/completo/', '/vuoto/') + '">versione vuota</a>.</div>' : '';
     var h = '<div class="msa-g-gruppo">' + esc(p.g) + '</div>' +
@@ -144,11 +164,11 @@
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';
       }).join('') + '</table>';
     }
-    if (p.attesa) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+    if (p.attesa && !(E.verificaRagioneria && p.contabile && !st)) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
     if (p.nota) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
     if (st === 'auto') h += '<div class="msa-g-esito ok">✓ Fatto: il programma lo ha già registrato.</div>';
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';
-    else if (p.fatto) h += '<div class="msa-g-esito">○ Non ancora registrato: quando confermi, il passo si spunta da solo. <button type="button" class="msa-g-mano">segna fatto a mano</button></div>';
+    else if (p.fatto) h += '<div class="msa-g-esito">○ Non ancora registrato: quando confermi, il passo si spunta da solo.' + (guidata ? ' Il pannello mostrerà automaticamente il passaggio successivo.' : ' <button type="button" class="msa-g-mano">segna fatto a mano</button>') + '</div>';
     else h += '<div class="msa-g-esito">○ Questo passo si spunta a mano. <button type="button" class="msa-g-mano">✓ Fatto</button></div>';
     corpo.innerHTML = h;
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
@@ -163,7 +183,7 @@
     bottone.hidden = si;
     bottone.setAttribute('aria-expanded', si ? 'true' : 'false');
     document.documentElement.classList.toggle('msa-guida-aperta', si);
-    ls(APERTA, si ? '1' : '0');
+    ls(guidata ? APERTA + '-' + E.codice : APERTA, si ? '1' : '0');
     if (si) disegna();
   }
 
@@ -174,8 +194,12 @@
   sel.addEventListener('change', function () { vaiA(parseInt(sel.value, 10), true); });
   corpo.addEventListener('click', function (e) {
     var t = e.target;
+    if (inQuiz()) {
+      if (quiz.click(t, corpo, stato(), salvaQuiz)) { disegna(); if (!inQuiz()) riprendi(); }
+      return;
+    }
     if (t.classList.contains('msa-g-vai')) vai(PASSI[pos]);
-    else if (t.classList.contains('msa-g-mano')) { segnaAMano(PASSI[pos], true); stati = esiti(); disegna(); }
+    else if (t.classList.contains('msa-g-mano')) { segnaAMano(PASSI[pos], true); if (guidata) aggiorna(); else { stati = esiti(); disegna(); } }
     else if (t.classList.contains('msa-g-togli')) { segnaAMano(PASSI[pos], false); stati = esiti(); disegna(); }
     else if (t.classList.contains('msa-g-val')) {
       var testo = t.textContent;
@@ -184,21 +208,55 @@
     }
   });
 
-  // controlla ogni 1,5 s se il passo mostrato è stato registrato: allora passa al successivo
+  corpo.addEventListener('change', function () {
+    if (inQuiz()) quiz.bozza(corpo, stato(), salvaQuiz);
+  });
+  function riprendi() {
+    stati = esiti();
+    if (guidata && stati[pos]) {
+      while (pos < N - 1 && stati[pos]) pos++;
+      ss(POS, String(pos));
+    }
+    disegna();
+  }
+  window.addEventListener('msa:registrazioni-salvate', function () {
+    if (!inQuiz()) return;
+    apri(true);
+    disegna();
+    corpo.scrollTop = 0;
+  });
+  // Conferme, spunte di lettura e ripresa pagina usano la stessa verifica.
+  // Non cambia pagina da solo: mostra il passo seguente e il relativo pulsante Apri.
   var avanzando = null;
-  setInterval(function () {
-    if (pannello.hidden || document.visibilityState === 'hidden') return;
+  function aggiorna() {
+    if (document.visibilityState === 'hidden') return;
+    if (inQuiz()) { if (pannello.hidden) apri(true); return; }
+    if (pannello.hidden) return;
     var prima = stati[pos], nuovi = esiti();
     var cambiato = nuovi.some(function (x, i) { return x !== stati[i]; });
     stati = nuovi;
     if (!cambiato) return;
     disegna();
+    if (guidata && !prima && stati[pos] && pos < N - 1) {
+      var prossimo = pos + 1;
+      while (prossimo < N - 1 && stati[prossimo]) prossimo++;
+      vaiA(prossimo, true);
+      return;
+    }
     if (!prima && stati[pos] && pos < N - 1 && !avanzando) {
       avanzando = setTimeout(function () { avanzando = null; var i = pos + 1; while (i < N - 1 && stati[i]) i++; vaiA(i, true); }, 1400);
     }
-  }, 1500);
+  }
+  setInterval(aggiorna, guidata ? 700 : 1500);
+  if (guidata) {
+    document.addEventListener('click', function (e) {
+      if (!radice.contains(e.target)) setTimeout(aggiorna, 0);
+    });
+    document.addEventListener('submit', function () { setTimeout(aggiorna, 0); });
+    window.addEventListener('storage', aggiorna);
+  }
 
-  apri(ls(APERTA) === '1');
+  apri(inQuiz() ? true : guidata ? ls(APERTA + '-' + E.codice) !== '0' : ls(APERTA) === '1');
   progB.textContent = stati.filter(Boolean).length + '/' + N;
   window.MSA_GUIDA_API = {stati: function () { return esiti(); }, vaiA: vaiA, apri: apri, passo: function () { return pos; }};
 })();

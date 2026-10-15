@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>{{ modulo_attivo.sigla }} {{ modulo_attivo.titolo }} · versione {{ versione }} · MASTERSAPSTYLE Academy</title>
+<title>{{ modulo_attivo.sigla }} {{ modulo_attivo.titolo }} · Sistema integrato · MASTERSAPSTYLE Academy</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
 </head>
 <body class="msa-launchpad">
@@ -15,6 +15,19 @@
     <div><h1>{{ modulo_attivo.titolo }}</h1><p>{{ modulo_attivo.descrizione }}</p></div>
     <a class="msa-indietro" href="{{ url_for('portale.ingresso', versione=versione) }}">‹ Tutti i moduli</a>
   </div>
+  {% if modulo_attivo.codice == 'wms' %}
+  <aside class="msa-card" aria-label="Dati e collegamenti del WMS">
+    <b>WMS · Sistema integrato</b>
+    <p>Le funzioni di questa pagina condividono i dati del <b>Sistema integrato S/4</b>. Al primo utilizzo avvia quel sistema e poi attiva il magazzino W100 da «Struttura e attivazione».</p>
+    <p>Le tile SD, MM e PP del launchpad sono collegate allo stesso ambiente del WMS: gli acquisti, le vendite e la produzione utilizzano i dati integrati.</p>
+    <nav class="msa-wms-collegamenti" aria-label="Operazioni collegate al WMS">
+      <a href="{{ url_for('erp_dati.avvio', versione=versione) }}">Avvio del sistema integrato</a>
+      <a href="{{ url_for('erp_vendite.ordini', versione=versione) }}">SD integrato · Ordini cliente</a>
+      <a href="{{ url_for('erp_acquisti.ordini', versione=versione) }}">MM integrato · Ordini d'acquisto</a>
+      <a href="{{ url_for('erp_produzione.ordini', versione=versione) }}">PP integrato · Ordini di produzione</a>
+    </nav>
+  </aside>
+  {% endif %}
   {% set ns = namespace(gruppo=None) %}
   {% if not (app and app[0].gruppo) %}<div class="msa-tiles compatte">{% endif %}
   {% for t in app %}
@@ -29,6 +42,7 @@
   </div>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% set slot_sincronia = "erp-ft" %}
 {% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>

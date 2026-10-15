@@ -4,43 +4,54 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Launchpad · versione {{ versione }} · MASTERSAPSTYLE Academy</title>
+<title>Launchpad · Sistema integrato · MASTERSAPSTYLE Academy</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
 </head>
 <body class="msa-launchpad">
 {% include "simulatore/_shell.html" %}
 <main class="msa-lp">
   <div class="msa-lp-intro">
-    <h1>Launchpad — Ferro &amp; Transenne, versione {{ versione }}</h1>
-    <p>Scegli il modulo: dentro trovi le sue transazioni. {{ versioni[versione] }}.</p>
+    <h1>Sistema integrato — Ferro &amp; Transenne</h1>
+    <p>Un solo ambiente per SD, MM, PP, WMS e contabilità. Scegli il modulo: dentro trovi le sue funzioni.</p>
   </div>
-  <div class="msa-gruppo">Moduli</div>
-  <div class="msa-moduli">
-  {% for m in moduli %}
-    <a class="msa-modulo g-{{ m.colore }}" href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}">
+  {% macro tile_modulo(m) %}
+    <a class="msa-modulo g-{{ m.colore }}" data-modulo="{{ m.codice }}" href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}">
       <span class="sigla">{{ m.sigla }}</span>
       <span class="testo"><b>{{ m.titolo }}</b><small>{{ m.descrizione }}</small></span>
-      <span class="piede"><span class="kpi" data-kpi="{{ m.kpi }}"><strong>—</strong><span></span></span><span class="n">{{ m.app | length }} app ›</span></span>
+      <span class="piede">{% if m.kpi %}<span class="kpi" data-kpi="{{ m.kpi }}"><strong>—</strong><span></span></span>{% endif %}<span class="n">{{ m.app | length }} app ›</span></span>
     </a>
+  {% endmacro %}
+  {% set operativi = ['sd', 'mm', 'pp', 'wms'] %}
+  <section aria-labelledby="moduli-operativi">
+  <h2 class="msa-gruppo" id="moduli-operativi">Moduli operativi · SD · MM · PP · WMS</h2>
+  <div class="msa-moduli msa-moduli-operativi">
+  {% for m in moduli | selectattr('codice', 'in', operativi) %}
+    {{ tile_modulo(m) }}
   {% endfor %}
   </div>
-  <div class="msa-gruppo">📎 Materiali</div>
-  <div class="msa-tiles compatte">
-    {% for m in materiali %}
-      <a class="msa-tile g-materiali" href="{{ url_for('portale.materiale', file=m.file) }}">
-        <span class="ic" aria-hidden="true">{{ '📕' if m.file.endswith('.pdf') else '💾' }}</span><b>{{ m.titolo }}</b>
-      </a>
-    {% endfor %}
-    <a class="msa-tile g-materiali" href="{{ url_for('portale.tutto', versione=versione) }}">
-      <span class="ic" aria-hidden="true">🗂️</span><b>Tutte le schede in una pagina</b>
-    </a>
+  </section>
+  <section aria-labelledby="altri-moduli">
+  <h2 class="msa-gruppo" id="altri-moduli">Contabilità, controllo, formazione e altri moduli</h2>
+  <div class="msa-moduli">
+  {% for m in moduli | rejectattr('codice', 'in', operativi) %}
+    {{ tile_modulo(m) }}
+  {% endfor %}
   </div>
-  <p class="msa-lp-nota">Il lavoro si salva da solo sul portale, separato per versione: lo ritrovi accedendo da qualsiasi computer. Quando hai finito un esercizio consegnalo dalla tua area (👤 in alto) per ricevere la correzione. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
+  </section>
+  <div class="msa-tiles compatte">
+    <a class="msa-tile g-impostazioni" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='ragioneria-wms') }}"><b>📘 Esercitazione ragioneria con WMS</b><p>Guida passo passo: acquisto, messa a dimora, produzione, prelievo, spedizione, fattura e banca. Seleziona la guida senza cancellare dati; inizia con un account di prova pulito.</p></a>
+    <a class="msa-tile g-impostazioni" href="{{ url_for('portale.materiale', file='Esercitazione_Ragioneria_con_WMS.pdf') }}"><b>📄 Guida stampabile — Ragioneria con WMS</b><p>Gli stessi passi della finestra Esercizio, con dati da inserire, controlli e risultati contabili attesi.</p></a>
+    <a class="msa-tile g-impostazioni" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='s4-integrato') }}"><b>📚 Percorso integrato gennaio–dicembre</b><p>Seleziona la precedente guida integrata. Stesso salvataggio: cambiare guida non crea una nuova azienda e non azzera il lavoro.</p></a>
+    <a class="msa-tile g-impostazioni" href="{{ url_for('erp_dati.avvio', versione=versione) }}"><b>🚀 Avvio e ripresa del sistema</b><p>Al primo utilizzo imposta l'azienda; se hai già lavorato non reinizializzarla.</p></a>
+  </div>
+  <p class="msa-lp-nota">Il lavoro si salva da solo sul portale, unico per tutti i moduli integrati: lo ritrovi accedendo da qualsiasi computer. Quando hai finito un esercizio consegnalo dalla tua area (👤 in alto) per ricevere la correzione. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
+{% set slot_sincronia = "erp-ft" %}
 {% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
+{% set guida = config_guida_modulo(versione, "sd") %}
 {% include "guida/_pannello.html" %}
 </body>
 </html>

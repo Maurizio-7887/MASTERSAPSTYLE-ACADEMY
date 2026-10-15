@@ -5,6 +5,30 @@ gli indicatori disponibili sono quelli di report.indicatori().
 """
 
 ESERCIZI = {
+    "ragioneria-wms": {
+        "titolo": "Ragioneria con WMS — acquisto, produzione, vendita e banca",
+        "versione": "erp-ft",
+        "attesi": [
+            ("wm_attivo", "Magazzino W100 attivo", "sì", None),
+            ("quadratura_im_wm", "Quantità IM e WMS riconciliate", "sì", None),
+            ("rw_compiti_aperti", "Compiti WMS ancora aperti", 0, 0),
+            ("rw_compiti_confermati", "Compiti WMS confermati", 17, 0),
+            ("rw_ferro", "Ferro finale kg", 2200, 0.001),
+            ("rw_std", "TR-STD finale pz", 50, 0),
+            ("rw_alta", "TR-ALTA finale pz", 200, 0),
+            ("rw_ped", "TR-PED finale pz", 300, 0),
+            ("rw_ferro_valore", "Valore contabile ferro dopo ML", 2200, 0.005),
+            ("rw_pf_valore", "Valore contabile PF dopo ML", 17842.37, 0.005),
+            ("rw_cogs", "Costo del venduto dopo ML", 19331.03, 0.005),
+            ("rw_banca", "Banca dopo riconciliazione", 84989.60, 0.005),
+            ("rw_clienti", "Residuo clienti", 0, 0.005),
+            ("rw_fornitori", "Residuo fornitori", 0, 0.005),
+            ("rw_were", "Transitorio WE/RE", 0, 0.005),
+            ("rw_transito", "Banca in transito", 0, 0.005),
+            ("rw_colli", "Colli con SSCC", 11, 0),
+            ("rw_ddt", "DDT emessi", 1, 0),
+        ],
+    },
     "guidato-dic-2026": {
         "titolo": "Esercizio guidato — costituzione 01/12/2026 (guida PDF)",
         "versione": "vuoto",

@@ -176,8 +176,8 @@ MODULI = [
         (PP_, "co88", "Chiusura di periodo", "📆", "CO88", None),
         ("pianificazione.fabbisogno", None, "Fabbisogno PP / MM", "🧭", "MD04 · ME51N", None),
      ]},
-    {"codice": "wms", "breve": "Magazzino", "sigla": "WMS", "titolo": "Magazzino WMS (logica SAP EWM)", "icona": "🏬", "colore": "laboratorio", "kpi": None,
-     "descrizione": "Il magazzino a ubicazioni come in SAP EWM: entrate, messa a posto, pistola RF, merce bloccata, lotti, inventari, prelievo, imballo, spedizione, innovazione", "app": [
+    {"codice": "wms", "breve": "Magazzino", "sigla": "WMS", "titolo": "Magazzino WMS", "icona": "🏬", "colore": "magazzino", "kpi": None,
+     "descrizione": "Magazzino a ubicazioni in logica SAP: entrate, pistola RF, compiti, lotti, inventari e spedizioni. Accesso diretto alle funzioni del sistema integrato.", "app": [
         ("erp_magazzino.struttura", None, "Struttura e attivazione", "🏬", "W100 · tipi · ubicazioni", None, "1 · Struttura del magazzino"),
         ("erp_magazzino.mappa", None, "Mappa delle ubicazioni", "🗺️", "LS26 · LX03", None, "1 · Struttura del magazzino"),
         ("erp_magazzino.etichette", None, "Etichette barcode e QR", "🏷️", "Code 128 · QR", None, "1 · Struttura del magazzino"),
@@ -239,7 +239,7 @@ MODULI = [
 
 
 def modulo(codice):
-    return next((m for m in MODULI if m["codice"] == codice), None)
+    return next((m for m in MODULI if m["codice"] == codice), None) or next((m for m in MODULI_ARCHIVIO if m["codice"] == codice), None)
 
 
 def app_modulo(m):
@@ -439,3 +439,37 @@ MODULI.insert(0, {"codice": "casi", "sigla": "CASI", "breve": "Che situazione ha
             ("formazione.fattura_sbagliata", None, "Hai sbagliato una fattura?", "↩️", "storno · SdI · nota di credito", None),
             ("formazione.chi_fa_cosa", None, "Tutti possono fare tutto?", "🔐", "ruoli · fido · approvazioni", None),
             ("formazione.ciclo_completo", None, "Il ciclo completo?", "🏛️", "esercizio guidato", None)]})
+
+
+# Percorso ordinario unico. I blueprint e gli slot storici restano intatti.
+MODULI_ARCHIVIO = MODULI
+def _integrato(codice, sigla, titolo, icona, colore, gruppi):
+    return {"codice": codice, "sigla": sigla, "breve": titolo, "titolo": titolo,
+            "icona": icona, "colore": colore, "kpi": None,
+            "descrizione": "Sistema integrato: stessa azienda, stessi dati e un solo libro giornale.",
+            "app": [(p["ep"], None, p["titolo"], p["icona"], p["tcode"], None,
+                     _ERP_GRUPPI[bp]) for bp in gruppi for p in _ERP_PAGINE[bp]]}
+
+_casi_esclusi = {
+    "ordini_lunghi", "wip_fine_mese", "varianze", "lead_time", "scorte_semilavorati",
+    "linea_ripetitiva", "backflush", "ciclo_completo"}
+_casi = next(m for m in MODULI_ARCHIVIO if m["codice"] == "casi")
+MODULI = [
+    _integrato("sd", "SD", "Vendite", "🛍️", "vendite_acquisti", ["erp_vendite"]),
+    _integrato("mm", "MM", "Acquisti", "🛒", "acquisti", ["erp_acquisti"]),
+    _integrato("pp", "PP", "Produzione", "🏭", "produzione", ["erp_produzione"]),
+    next(m for m in MODULI_ARCHIVIO if m["codice"] == "wms"),
+    _integrato("img", "DATI", "Avvio e dati di base", "⚙️", "impostazioni", ["erp_dati"]),
+    _integrato("fi", "FI", "Contabilità", "🏛️", "contabilita", ["erp_fi"]),
+    _integrato("co", "CO", "Costi e redditività", "📊", "controllo", ["erp_costi", "erp_copa"]),
+    _integrato("tes", "TES", "Tesoreria", "🏦", "contabilita", ["erp_tesoreria"]),
+    _integrato("val", "FX", "Valute estere", "💱", "contabilita", ["erp_valute"]),
+    _integrato("hr", "HR", "Paghe e personale", "👤", "personale", ["erp_paghe"]),
+    {**_casi, "app": [a for a in _casi["app"] if a[0].split(".")[-1] not in _casi_esclusi]},
+]
+for _bp, _lab in LABORATORI.items():
+    if _lab["slot"] == "erp-ft":
+        _lab["codice"] = ({"erp_dati": "img", "erp_vendite": "sd", "erp_acquisti": "mm",
+                           "erp_produzione": "pp", "erp_costi": "co", "erp_copa": "co",
+                           "erp_fi": "fi", "erp_tesoreria": "tes", "erp_valute": "val",
+                           "erp_paghe": "hr"}).get(_bp, "wms")
