@@ -31,3 +31,13 @@ def storni():
 @bp.route("/fatture")
 def fatture():
     return render_lab("erp_fi", "fatture")
+
+
+@bp.route("/passive")
+def passive():
+    return render_lab("erp_fi", "passive")
+
+
+@bp.route("/sopravvenienze")
+def sopravvenienze():
+    return render_lab("erp_fi", "sopravvenienze")

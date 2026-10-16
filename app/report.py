@@ -259,6 +259,25 @@ class Lavoro:
                 "rc_riaperto": "sì" if chiuso.get("riapertura") else "no",
                 "rc_banca_2028": round(sum((1 if x.get("dareAvere") == "DARE" else -1) * (x.get("importo") or 0) for r in s.get("registrazioni") or [] for x in r.get("righe") or [] if str(x.get("conto")) == "10"), 2),
             })
+            # «Dicembre: dalla costituzione alla riapertura»: saldi del 2026 senza epilogo, chiusura e riapertura
+            def s26(conto):
+                return sc(conto, fino="2026-12-31")
+            ch26 = (s.get("chiusure") or {}).get("2026") or {}
+            base.update({
+                "dc_costituzione": (s.get("costituzione") or {}).get("data") or "",
+                "dc_capitale_versato": round(-s26("30") - s26("08"), 2),
+                "dc_ordini_pp": sum(1 for o in s.get("produzione") or [] if (o.get("data") or "").startswith("2026-12")),
+                "dc_scorte": "/".join(str(round(g.get(m, 0))) for m in ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD")),
+                "dc_rimanenze": round(s26("12") + s26("07") + s26("13"), 2),
+                "dc_colli": len((s.get("sped") or {}).get("colli") or []),
+                "dc_plusvalenza": -s26("45"), "dc_minusvalenza": s26("46"), "dc_sopravvenienza": -s26("84"),
+                "dc_risconto": s26("06"), "dc_rateo": -s26("39"), "dc_ammortamenti": s26("50"),
+                "dc_credito_iva": s26("14"), "dc_ires": -s26("23"), "dc_irap": -s26("35"),
+                "dc_utile": round(ch26.get("utile") or 0, 2),
+                "dc_chiuso": "sì" if ch26.get("risultato") and ch26.get("chiusuraSP") else "no",
+                "dc_riaperto": "sì" if ch26.get("riapertura") else "no",
+                "dc_banca_31_12": s26("10"),
+            })
         return base
 
     def indicatori(self):

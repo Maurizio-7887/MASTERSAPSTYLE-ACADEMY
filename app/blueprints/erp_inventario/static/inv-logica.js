@@ -11,7 +11,7 @@ window.IV4 = (function () {
   var FREQ = {A: 12, B: 4, C: 1};
   var doc = function (n) { var d = W().inventari.find(function (x) { return x.numero === String(n); }); if (!d) throw Error('Documento d\'inventario ' + n + ' inesistente.'); return d; };
   var std = function (m) { return N().materiale(m).std; };
-  var conto = function (m) { return N().materiale(m).tipo === 'ROH' ? '12' : '13'; };
+  var conto = function (m) { return N().contoMag(m); };
 
   // classificazione ABC sul valore dei consumi (uscite 601 e 261, al netto dei resi 651), al costo standard attuale
   function abc() {

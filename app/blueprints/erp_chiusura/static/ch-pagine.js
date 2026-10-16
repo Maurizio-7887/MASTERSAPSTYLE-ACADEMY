@@ -76,6 +76,22 @@
       L.collega(radice, 'ra', {ra: CH.riapri}, rendi); L.collega(radice, 'du', {du: CH.destinaUtile}, rendi);
     },
   };
+  PAGINE.assestamenti = function () {
+    var a = anno(), el = (CH.X().assestamenti || []), economici = S().pianoDeiConti.filter(function (c) { return c.tipo === 'COSTO' || c.tipo === 'RICAVO'; })
+      .sort(function (x, y) { return x.codice.localeCompare(y.codice, 'it', {numeric: true}); }).map(function (c) { return [c.codice, c.codice + ' ' + c.nome + ' (' + (c.tipo === 'COSTO' ? 'costo' : 'ricavo') + ')']; });
+    var tipi = Object.keys(CH.TIPI_ASS).map(function (k) { return [k, CH.TIPI_ASS[k].nome]; });
+    radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+      L.scheda('📐', 'Rateo o risconto al 31 dicembre', 'assestamento per competenza', L.modulo('as', [['tipo', 'Tipo', 'select', 'risconto-attivo', tipi], ['conto', 'Conto economico collegato', 'select', '83', economici], ['testo', 'Descrizione', 'text', 'premio assicurativo pagato in anticipo'],
+        ['importo', 'Importo dell\'intera operazione €', 'num'], ['dal', 'Periodo di competenza dal', 'date'], ['al', 'Periodo di competenza al', 'date'], ['data', 'Data dell\'assestamento', 'date', a + '-12-31']], [['prova', 'Calcola la quota', 'sec'], ['as', 'Registra']]) +
+        '<p class="lab-nota"><b>Risconto</b> = già pagato/fatturato, in parte dell\'anno dopo: si toglie la quota futura (attivo: D 06 / A costo · passivo: D ricavo / A 34).<br><b>Rateo</b> = maturato quest\'anno, si pagherà/incasserà dopo: si aggiunge la quota maturata (attivo: D 05 / A ricavo · passivo: D costo / A 39).<br>Quota a giorni, primo e ultimo giorno compresi.</p>') +
+      L.scheda('↩️', 'Storno al 1° gennaio', 'dopo la riapertura', L.modulo('st', [['data', 'Data dello storno', 'date', (+a) + '-01-01']], [['st', 'Storna ratei e risconti dell\'anno prima']]) +
+        '<p class="lab-nota">Dopo la riapertura dei conti, ratei e risconti si «girano» di nuovo sui costi e ricavi del nuovo anno con la scrittura inversa: così, quando arriverà la fattura o il pagamento, il conto economico del nuovo anno avrà solo la sua quota.</p>') + '</div>' +
+      L.scheda('📋', 'Ratei e risconti registrati', '', L.tabella(['Tipo', 'Conto', 'Descrizione', 'Periodo', 'Importo›', 'Giorni', 'Quota›', 'Data', 'Stornato'], el.map(function (x) {
+        return [x.nome, x.conto, e(x.testo), fd(x.dal) + ' – ' + fd(x.al), eur(x.importo), (CH.TIPI_ASS[x.tipo].futuro ? x.futuri : x.maturati) + ' / ' + x.giorni, eur(x.quota), fd(x.data), x.stornato ? fd(x.stornato) : 'no']; }), 'Nessun rateo o risconto.'));
+    L.collega(radice, 'as', {as: CH.assestamento, prova: function (v) { var c = CH.calcolaAssestamento(v);
+      return '<!--info--><p class="lab-nota">' + c.nome + ': ' + c.formula + ' — conto ' + c.contoSP + ' ' + e(S().pianoDeiConti.find(function (x) { return x.codice === c.contoSP; }).nome) + '.</p>'; }}, rendi);
+    L.collega(radice, 'st', {st: CH.stornaAssestamenti}, rendi);
+  };
   function rendi() { (PAGINE[C.pagina] || PAGINE.iva)(); }
   rendi();
 })();

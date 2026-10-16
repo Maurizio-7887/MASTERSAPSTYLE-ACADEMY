@@ -18,6 +18,13 @@ window.PY4 = (function () {
   var H = function () { var s = S(); if (!s.hr) s.hr = {parametri: JSON.parse(JSON.stringify(PARAMETRI)), dipendenti: JSON.parse(JSON.stringify(DIPENDENTI)), presenze: {}, cedolini: [], registrati: []}; return s.hr; };
   (function () { var vecchio = H; H = function () { var h = vecchio(); if (h.parametri.ferieAnno == null) { h.parametri.ferieAnno = 26; h.parametri.rolAnno = 72; }
     h.dipendenti.forEach(function (d) { var x = DIPENDENTI.find(function (y) { return y.matricola === d.matricola; }) || {}; if (d.ferieAP == null) { d.ferieAP = x.ferieAP || 0; d.rolAP = x.rolAP || 0; } }); return h; }; })();
+  // azienda nuova: i tre dipendenti sono assunti il giorno della costituzione (niente mesi precedenti, niente ferie arretrate)
+  window.S4.dopoAvvio.push(function (n, i) {
+    if (!i || i.modo !== 'costituzione') return;
+    H().dipendenti.forEach(function (d) { d.assunzione = n.S.avviato; d.ferieAP = 0; d.rolAP = 0; });
+  });
+  // primo mese di lavoro nell'anno (1 = gennaio): per chi è assunto durante l'anno, il mese di assunzione
+  var primoMese = function (d, anno) { var a = d.assunzione; if (!a || +a.slice(0, 4) < +anno) return 1; if (+a.slice(0, 4) > +anno) return 13; return +a.slice(5, 7); };
   var dip = function (m) { var d = H().dipendenti.find(function (x) { return x.matricola === String(m); }); if (!d) throw Error('Matricola ' + m + ' inesistente.'); return d; };
   function irpefAnnua(r) { var t = 0, prima = 0; H().parametri.scaglioni.forEach(function (s) { if (r > prima) { t += (Math.min(r, s[0]) - prima) * s[1] / 100; } prima = s[0]; }); return t; }
   function detrazione(r) {   // art. 13 c. 1 TUIR
@@ -43,14 +50,16 @@ window.PY4 = (function () {
   // i mesi precedenti dello stesso anno: cedolini già calcolati o, prima dell'avvio delle paghe nel sistema, «storico» a paga base
   function precedenti(d, per) {
     var anno = per.slice(0, 4), m = +per.slice(5, 7), out = [];
-    for (var k = 1; k < m; k++) { var p = anno + '-' + String(k).padStart(2, '0'), c = H().cedolini.find(function (x) { return x.periodo === p && x.matricola === d.matricola; });
+    for (var k = primoMese(d, anno); k < m; k++) { var p = anno + '-' + String(k).padStart(2, '0'), c = H().cedolini.find(function (x) { return x.periodo === p && x.matricola === d.matricola; });
       out.push(c || Object.assign(calcolaUno(d, p, true), {storico: true})); }
     return out;
   }
   function calcolaUno(d, per, semplice) {
     var p = H().parametri, pr = H().presenze[per + '/' + d.matricola] || {straordinari: 0, assenze: 0, ferie: 0, rol: 0}, mese = +per.slice(5, 7);
     var oraria = d.lordo / p.oreMese, straord = r2(pr.straordinari * oraria * (1 + p.maggStraord / 100)), assenze = r2(pr.assenze * oraria);
-    var ordinario = r2(d.lordo + straord - assenze), tredicesima = !semplice && mese === 12 ? r2(d.lordo * 12 / 12) : 0;
+    var mesiAnno = Math.max(0, mese - primoMese(d, per.slice(0, 4)) + 1);   // mesi lavorati nell'anno fino a questo (13ª, ferie e permessi maturano solo da lì)
+    if (mesiAnno <= 0) throw Error(d.nome + ' è assunto il ' + L.fd(d.assunzione) + ': nessun cedolino per ' + per + '.');
+    var ordinario = r2(d.lordo + straord - assenze), tredicesima = !semplice && mese === 12 ? r2(d.lordo * mesiAnno / 12) : 0;
     var lordo = r2(ordinario + tredicesima), inpsDip = r2(lordo * p.inpsDip / 100), inpsOrd = r2(ordinario * p.inpsDip / 100), imponibile = r2(ordinario - inpsOrd);
     var annuo = imponibile * p.mensilita, cu = cuneo(annuo), imponibileFisc = r2(imponibile - cu.esente / p.mensilita);
     var irpefLorda = r2(irpefAnnua(imponibileFisc * 12) / 12);
@@ -64,18 +73,19 @@ window.PY4 = (function () {
       var prec = precedenti(d, per), somma = function (k) { return r2(prec.reduce(function (t, x) { return t + (x[k] || 0); }, 0)); };
       // conguaglio di fine anno: imposta vera sull'imponibile dell'anno, meno quanto già trattenuto
       if (mese === 12) {
-        var R = r2(somma('imponibile') + c.imponibile), cuA = cuneo(R), impA = r2(R - cuA.esente), lorda = r2(irpefAnnua(impA)), dt = r2(detrazione(impA)), ud = r2(cuA.detrazione);
+        // detrazioni per lavoro dipendente rapportate al periodo di lavoro nell'anno (art. 13 TUIR: in giorni; qui in mesi)
+        var R = r2(somma('imponibile') + c.imponibile), cuA = cuneo(R), impA = r2(R - cuA.esente), lorda = r2(irpefAnnua(impA)), dt = r2(detrazione(impA) * mesiAnno / 12), ud = r2(cuA.detrazione);
         var dovuta = r2(Math.max(0, lorda - dt - ud)), trattenuta = r2(somma('irpef') + c.irpef);
         c.conguaglio = r2(dovuta - trattenuta); c.irpef = r2(c.irpef + c.conguaglio);
-        c.conguaglioDettaglio = {reddito: R, sommaEsente: r2(cuA.esente), imponibile: impA, lorda: lorda, detrazioni: dt, ulteriore: ud, dovuta: dovuta, trattenuta: trattenuta};
+        c.conguaglioDettaglio = {reddito: R, sommaEsente: r2(cuA.esente), imponibile: impA, lorda: lorda, detrazioni: dt, ulteriore: ud, dovuta: dovuta, trattenuta: trattenuta, mesi: mesiAnno};
       }
       c.progressivi = {mesi: prec.length + 1, storico: prec.filter(function (x) { return x.storico; }).length, imponibileInps: r2(somma('lordo') + c.lordo), imponibileFiscale: r2(somma('imponibileFiscale') + c.imponibileFiscale), irpef: r2(somma('irpef') + c.irpef),
         inpsDip: r2(somma('inpsDip') + c.inpsDip), tfr: r2(somma('tfrLordo') + r2(lordo / p.tfrDivisore))};
       // ratei e ferie maturati nell'anno fino a questo mese
       var godF = r2(prec.reduce(function (t, x) { return t + ((H().presenze[x.periodo + '/' + d.matricola] || {}).ferie || 0); }, 0) + (pr.ferie || 0));
       var godR = r2(prec.reduce(function (t, x) { return t + ((H().presenze[x.periodo + '/' + d.matricola] || {}).rol || 0); }, 0) + (pr.rol || 0));
-      c.ratei = {mesi: mese, tredicesima: r2(d.lordo * mese / 12), tredicesimaPagata: tredicesima, ferieMaturate: r2(p.ferieAnno * mese / 12), ferieGodute: godF, ferieMese: pr.ferie || 0, ferieAP: d.ferieAP || 0,
-        ferieResidue: r2((d.ferieAP || 0) + p.ferieAnno * mese / 12 - godF), rolMaturati: r2(p.rolAnno * mese / 12), rolGoduti: godR, rolMese: pr.rol || 0, rolAP: d.rolAP || 0, rolResidui: r2((d.rolAP || 0) + p.rolAnno * mese / 12 - godR)};
+      c.ratei = {mesi: mesiAnno, tredicesima: r2(d.lordo * mesiAnno / 12), tredicesimaPagata: tredicesima, ferieMaturate: r2(p.ferieAnno * mesiAnno / 12), ferieGodute: godF, ferieMese: pr.ferie || 0, ferieAP: d.ferieAP || 0,
+        ferieResidue: r2((d.ferieAP || 0) + p.ferieAnno * mesiAnno / 12 - godF), rolMaturati: r2(p.rolAnno * mesiAnno / 12), rolGoduti: godR, rolMese: pr.rol || 0, rolAP: d.rolAP || 0, rolResidui: r2((d.rolAP || 0) + p.rolAnno * mesiAnno / 12 - godR)};
     }
     c.netto = r2(lordo - inpsDip - c.irpef - addiz);
     var inpsDitta = r2(lordo * p.inpsDitta / 100), inail = r2(lordo * p.inail / 100);

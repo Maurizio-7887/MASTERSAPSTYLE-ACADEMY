@@ -139,6 +139,7 @@
   function modulo(prefisso, campi, pulsanti) {
     return '<div class="lab-mod" data-prefisso="' + prefisso + '"><div class="lab-form">' + campi.map(function (c) {
       var id = prefisso + '-' + c[0], v = c[3] == null ? '' : c[3];
+      if (c[2] === 'num' && typeof v === 'number') v = String(v).replace('.', ',');   // 3.9 → «3,9»: il punto si legge come separatore delle migliaia
       var input = c[2] === 'select'
         ? '<select id="' + id + '">' + c[4].map(function (o) { o = Array.isArray(o) ? o : [o, o]; return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'
         : c[2] === 'check' ? '<input type="checkbox" id="' + id + '"' + (v ? ' checked' : '') + '>'

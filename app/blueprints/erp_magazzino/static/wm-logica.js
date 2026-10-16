@@ -13,7 +13,7 @@ window.WM4 = (function () {
     '002': {nome: 'Catasta ferro (a blocchi)', interim: false}, '100': {nome: 'Approvvigionamento produzione (PSA linea 1)', interim: true},
     '916': {nome: 'Zona di spedizione (interim)', interim: true}, '999': {nome: 'Differenze (interim)', interim: true},
     '980': {nome: 'Merce bloccata (quarantena)', interim: true}};
-  var UDC = {FERT: 50, ROH: 1000};   // pezzi per pallet · kg per fascio
+  var UDC = {FERT: 50, ROH: 1000, HALB: 100};   // pezzi per pallet · kg per fascio · kit di semilavorati per cassone metallico
   var RISORSE = ['MAG01 Marco', 'MAG02 Sara', 'MAG03 Luca', 'MAG04 Giulia'];
   var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni', BLOCCO: 'Porta in quarantena'};
 
@@ -121,17 +121,17 @@ window.WM4 = (function () {
   }
   // ── approvvigionamento della produzione (staging) e consumo dal PSA ──
   function approvvigiona(i) {
-    richiesto(); var n = N(), data = n.data(i.data), o = window.PP4.ord(i.ordine);
-    var kg = L.num(i.kg == null || i.kg === '' ? r2(n.materiale(o.materiale).ferro * o.qta) : i.kg, 'Ferro (kg)', 1);
-    var f = fifo('FERRO', kg, ['002']);
-    if (f.mancante > 1e-9) throw Error('In catasta mancano ' + L.n0(f.mancante) + ' kg di ferro disponibili.');
-    var t = f.righe.map(function (x) { return compito({tipo: 'STAGING', mat: 'FERRO', qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'PSA-L1', creato: data, rif: o.numero, ordine: o.numero}); });
+    richiesto(); var n = N(), data = n.data(i.data), o = window.PP4.ord(i.ordine), cp = window.PP4.comp(o), cm = cp.mat, ferro = cm === 'FERRO', um = ferro ? 'kg' : 'pz';
+    var kg = L.num(i.kg == null || i.kg === '' ? r2(cp.q * o.qta) : i.kg, ferro ? 'Ferro (kg)' : cm + ' (pz)', 1);
+    var f = fifo(cm, kg, ferro ? ['002'] : ['001']);
+    if (f.mancante > 1e-9) throw Error((ferro ? 'In catasta mancano ' + L.n0(f.mancante) + ' kg di ferro disponibili.' : 'A scaffale mancano ' + L.n0(f.mancante) + ' pz di ' + cm + ' disponibili: controlla che lo stadio prima sia entrato e messo a posto.'));
+    var t = f.righe.map(function (x) { return compito({tipo: 'STAGING', mat: cm, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'PSA-L1', creato: data, rif: o.numero, ordine: o.numero}); });
     n.salva();
-    return '<p class="lab-nota">Creati ' + t.length + ' compiti di approvvigionamento (FIFO) per ' + L.n0(kg) + ' kg di ferro verso l\'area PSA-L1 dell\'ordine ' + o.numero + ': ' + t.map(function (x) { return x.numero + ' ' + x.da + ' ' + L.n0(x.qta) + ' kg'; }).join(' · ') + '.</p>';
+    return '<p class="lab-nota">Creati ' + t.length + ' compiti di approvvigionamento (FIFO) per ' + L.n0(kg) + ' ' + um + ' di ' + (ferro ? 'ferro' : cm) + ' verso l\'area PSA-L1 dell\'ordine ' + o.numero + ': ' + t.map(function (x) { return x.numero + ' ' + x.da + ' ' + L.n0(x.qta) + ' ' + um; }).join(' · ') + '.</p>';
   }
   function consumaPSA(mat, qta, ordine) {
     var disp = r2(inUbic('PSA-L1').filter(function (q) { return q.mat === mat; }).reduce(function (s, q) { return s + q.qta; }, 0));
-    if (disp + 1e-9 < qta) throw Error('WMS attivo: il ferro si preleva dall\'area di approvvigionamento PSA-L1, dove ce ne sono ' + L.n0(disp) + ' kg. Prima l\'approvvigionamento (Magazzino → Compiti) e la conferma con la pistola RF.');
+    if (disp + 1e-9 < qta) throw Error('WMS attivo: ' + (mat === 'FERRO' ? 'il ferro' : 'il semilavorato ' + mat) + ' si preleva dall\'area di approvvigionamento PSA-L1, dove ce ne sono ' + L.n0(disp) + (mat === 'FERRO' ? ' kg' : ' pz') + '. Prima l\'approvvigionamento (Magazzino → Compiti) e la conferma con la pistola RF.');
     var resto = qta;
     inUbic('PSA-L1').filter(function (q) { return q.mat === mat; }).sort(function (a, b) { return a.data < b.data ? -1 : 1; }).forEach(function (q) { var d = Math.min(q.qta, resto); q.qta = r2(q.qta - d); resto = r2(resto - d); });
   }
@@ -235,7 +235,7 @@ window.WM4 = (function () {
     n.movimento(q.mat, -qta, data, '555', 'rottamazione ' + q.udc, {lotti: q.lotto ? [{lotto: q.lotto, qta: qta}] : null});
     q.qta = 0; B()[q.mat] = r2(Math.max(0, bloccato(q.mat) - qta));
     var r = n.post({data: data, tipo: 'ROTTAMAZIONE', rif: q.udc, descrizione: 'Movimento 555 — rottamazione dal bloccato: ' + L.n0(qta) + ' ' + m.um + ' ' + q.mat + ' × ' + L.eur(m.std) + ' (UdC ' + q.udc + ', ' + motivo + ')',
-      righe: [{conto: '69', dareAvere: 'DARE', importo: val, testo: q.mat + ' ' + motivo}, {conto: m.tipo === 'ROH' ? '12' : '13', dareAvere: 'AVERE', importo: val, testo: q.mat}]});
+      righe: [{conto: '69', dareAvere: 'DARE', importo: val, testo: q.mat + ' ' + motivo}, {conto: N().contoMag(q.mat), dareAvere: 'AVERE', importo: val, testo: q.mat}]});
     logBlocco({data: data, tipo: '555 rottamazione', mat: q.mat, qta: qta, udc: q.udc, motivo: motivo, rif: r.numero});
     n.salva(); return r;
   }

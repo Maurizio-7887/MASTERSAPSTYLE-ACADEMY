@@ -162,7 +162,7 @@ window.ST4 = (function () {
       }
     }
     var r = inverti(r0, i.data, {'261': 'Storno del prelievo (262) ', CO11N: 'CO13 annullamento della conferma ', '101': 'Storno dell\'entrata di produzione (102) '}[ev.tipo] + 'ordine ' + o.numero);
-    if (ev.tipo === '261') { n.movimento('FERRO', ev.kg, r.data, '262', o.numero, {lotti: ev.lotti}); if (s.wm && window.WM4.attivo(ev.data)) window.WM4.nuovoQuant('PSA-L1', 'FERRO', ev.kg, '', r.data, 'storno 262 ' + o.numero); }
+    if (ev.tipo === '261') { var cm = ev.mat || 'FERRO'; n.movimento(cm, ev.kg, r.data, '262', o.numero, {lotti: ev.lotti}); if (s.wm && window.WM4.attivo(ev.data)) window.WM4.nuovoQuant('PSA-L1', cm, ev.kg, '', r.data, 'storno 262 ' + o.numero); }
     if (ev.tipo === '101') n.movimento(o.materiale, -ev.qta, r.data, '102', o.numero, {lotti: ev.lotto ? [{lotto: ev.lotto, qta: ev.qta}] : null});
     ev.stornato = r.data; n.salva(); return r;
   }
@@ -174,7 +174,7 @@ window.ST4 = (function () {
     var nuovo = null, data = i.data || t.creato;
     if (t.tipo === 'PUTAWAY') { var q = w.quant.find(function (x) { return x.id === t.quant; }); nuovo = [window.WM4.compito({tipo: 'PUTAWAY', mat: t.mat, qta: t.qta, quant: t.quant, udc: t.udc, da: t.da, a: window.WM4.libera(t.mat, t.a), creato: data, rif: t.rif, motivo: 'ricreato da ' + t.numero})]; }
     else if (t.tipo === 'PICK' || t.tipo === 'STAGING') {
-      var f = window.WM4.fifo(t.mat, t.qta, t.tipo === 'STAGING' ? ['002'] : ['001', '002']);
+      var f = window.WM4.fifo(t.mat, t.qta, t.tipo === 'STAGING' ? (t.mat === 'FERRO' ? ['002'] : ['001']) : ['001', '002']);
       if (f.mancante > 1e-9) throw Error('Non c\'è altra giacenza disponibile per ricreare il compito.');
       nuovo = f.righe.map(function (x) { return window.WM4.compito({tipo: t.tipo, mat: t.mat, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: t.a, creato: data, rif: t.rif, consegna: t.consegna, ordine: t.ordine, ondata: t.ondata, origine: t.numero}); });
     }

@@ -1,3 +1,13 @@
+# Esercitazione «Dicembre: dalla costituzione alla riapertura» — 16/10/2026
+
+L'azienda nasce il **01/12/2026** da zero e la guida laterale accompagna l'allievo in 79 passi (74 spuntati in automatico, 5 letture da confermare con «Fatto»).
+
+1. Launchpad → **Dicembre: dalla costituzione alla riapertura**. Se nel sistema integrato c'è lavoro vecchio: Avvio → «Azzera il sistema integrato». L'esercizio si rifà da capo quante volte si vuole.
+2. Avvio → riquadro **Oppure: azienda nuova (costituzione)**: capitale 80.000 (D 08 / A 30), poi versamento dei soci (D 10 / A 08). Niente scorte, banca a zero; la TR-STD si produce in tre stadi con semilavorati veri (SL-TAGLIO → SL-PIEGA → TR-STD, standard 14,60 · 20,20 · 31,40); tre dipendenti assunti il 01/12.
+3. Percorso: WMS attivo e vuoto · 5 macchinari (F-90) · polizza (FB60, esente) e pagamento (F-53) · ordini Beta 180 e Delta 120 · ferro 3.000 kg (ME21N, MIGO, RF, MIRO) · tre stadi, ognuno con CO01, staging WMS, RF, 261, CO11N, 101 e messa a scaffale · scorte intermedie (440 kg, 10 + 10 semilavorati) · consegne con picking, imballo SSCC, trasporto, carico, 601 e DDT · fatture e SdI · anticipo su fattura Beta 80% (conto 38) · pagamenti fornitori · sopravvenienza attiva (indennizzo 500) · cessioni del carrello (minusvalenza 1.300) e della sega (plusvalenza 816,67) · stipendi di dicembre con 13ª di un mese · risconto attivo assicurazione 1.098,08 e rateo passivo fitto 1.033,33 · AFAB · KO88 · IVA di dicembre (credito 3.313,20) · IRES 682,30 e IRAP 110,87 · chiusura con **utile 2.049,75** · riapertura 01/01/2027 · storno di ratei e risconti · incasso Beta ed estinzione dell'anticipo · F24 del 18/01/2027 · destinazione dell'utile.
+4. Pagine nuove: FI → Fatture passive di servizi e pagamenti (FB60 · F-53), FI → Sopravvenienze attive, Tesoreria → Anticipo su fatture, FI → Ratei e risconti (con storno al 1° gennaio).
+5. Consegna: area allievo → Sistema integrato → «Dicembre: dalla costituzione alla riapertura» (21 numeri di controllo). Test: `npm run test:dicembre-wms`.
+
 # Esercitazione Ragioneria con WMS — revisione 15/10/2026
 
 ## Per iniziare la lezione

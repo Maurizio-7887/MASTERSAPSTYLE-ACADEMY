@@ -81,7 +81,7 @@ window.CH4 = (function () {
   // personale dipendente a tempo indeterminato sono deducibili (art. 11 c. 4-octies). Ammortamenti nei limiti fiscali come IRES.
   // L'IRAP non è deducibile dall'IRES (la deduzione forfetaria del 10% e quella sul costo del personale sono per cassa: nel primo anno
   // senza versamenti IRAP non spettano). Imposte anticipate (OIC 25): differenze temporanee × (aliquota IRES + IRAP).
-  var FINANZIARI = {'53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
+  var FINANZIARI = {'60': 'interessi passivi bancari', '53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
   var IMPOSTE = {'56': 1, '52': 1, '51': 1};
   function calcolaImposte(i) {
     var anno = String(i.anno || '').trim(); if (!/^\d{4}$/.test(anno)) throw Error('Anno non valido.');
@@ -181,6 +181,52 @@ window.CH4 = (function () {
       righe: [{conto: '32', dareAvere: 'DARE', importo: utile, testo: 'destinazione utile'}, {conto: '33', dareAvere: 'AVERE', importo: leg, testo: 'riserva legale'}, {conto: '30', dareAvere: 'AVERE', importo: r2(utile - leg), testo: 'utili portati a riserva'}]});
     n.salva(); return r;
   }
+  // ── ratei e risconti (art. 2424-bis c. 6 c.c., OIC 18): la parte di un costo o di un ricavo che appartiene a un altro esercizio ──
+  // RISCONTO: pagato o fatturato ORA ma di competenza in parte FUTURA → si rinvia la quota futura (attivo: D 06 / A costo; passivo: D ricavo / A 34).
+  // RATEO: di competenza in parte di QUEST'ANNO ma si pagherà o incasserà DOPO → si anticipa la quota maturata (attivo: D 05 / A ricavo; passivo: D costo / A 39).
+  // Quota a giorni: periodo dal–al compresi; il 1° gennaio si stornano (si riportano sul conto economico del nuovo anno).
+  var TIPI_ASS = {
+    'risconto-attivo': {nome: 'Risconto attivo', conto: '06', natura: 'COSTO', futuro: true},
+    'risconto-passivo': {nome: 'Risconto passivo', conto: '34', natura: 'RICAVO', futuro: true},
+    'rateo-attivo': {nome: 'Rateo attivo', conto: '05', natura: 'RICAVO', futuro: false},
+    'rateo-passivo': {nome: 'Rateo passivo', conto: '39', natura: 'COSTO', futuro: false}};
+  var giorni = function (a, b) { return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5) + 1; };
+  function calcolaAssestamento(i) {
+    var t = TIPI_ASS[i.tipo]; if (!t) throw Error('Scegli il tipo: rateo o risconto, attivo o passivo.');
+    var conto = String(i.conto || '').trim(); if (tipo(conto) !== t.natura) throw Error(t.nome + ': il conto economico deve essere un ' + (t.natura === 'COSTO' ? 'costo' : 'ricavo') + ' (scelto ' + (conto || 'nessuno') + ').');
+    var imp = L.num(i.importo, 'Importo dell\'operazione', 0.01), dal = L.dataOk(i.dal), al = L.dataOk(i.al), data = L.dataOk(i.data);
+    if (al < dal) throw Error('Il periodo finisce prima di cominciare.');
+    if (data < dal || data >= al) throw Error('La data dell\'assestamento (' + L.fd(data) + ') deve cadere dentro il periodo ' + L.fd(dal) + ' – ' + L.fd(al) + ', prima della fine.');
+    var tot = giorni(dal, al), maturati = giorni(dal, data), futuri = tot - maturati;
+    var quota = r2(imp * (t.futuro ? futuri : maturati) / tot);
+    return {tipo: i.tipo, nome: t.nome, contoSP: t.conto, conto: conto, importo: imp, dal: dal, al: al, data: data, giorni: tot, maturati: maturati, futuri: futuri, quota: quota,
+      formula: L.eur(imp) + ' × ' + (t.futuro ? futuri : maturati) + ' / ' + tot + ' giorni = ' + L.eur(quota)};
+  }
+  function assestamento(i) {
+    var n = N(), c = calcolaAssestamento(i); n.data(c.data);
+    var testo = String(i.testo || '').trim() || nome(c.conto);
+    if (X().assestamenti && X().assestamenti.some(function (x) { return x.conto === c.conto && x.dal === c.dal && x.al === c.al && x.data === c.data && !x.stornato; })) throw Error('Questo ' + c.nome.toLowerCase() + ' è già registrato.');
+    var t = TIPI_ASS[c.tipo], righe = c.tipo === 'risconto-attivo' ? [{conto: '06', dareAvere: 'DARE', importo: c.quota}, {conto: c.conto, dareAvere: 'AVERE', importo: c.quota, testo: 'quota di competenza futura'}]
+      : c.tipo === 'risconto-passivo' ? [{conto: c.conto, dareAvere: 'DARE', importo: c.quota, testo: 'quota di competenza futura'}, {conto: '34', dareAvere: 'AVERE', importo: c.quota}]
+      : c.tipo === 'rateo-attivo' ? [{conto: '05', dareAvere: 'DARE', importo: c.quota}, {conto: c.conto, dareAvere: 'AVERE', importo: c.quota, testo: 'quota maturata'}]
+      : [{conto: c.conto, dareAvere: 'DARE', importo: c.quota, testo: 'quota maturata'}, {conto: '39', dareAvere: 'AVERE', importo: c.quota}];
+    var r = n.post({data: c.data, tipo: 'ASSESTAMENTO', rif: t.nome.toUpperCase() + ' ' + c.conto, descrizione: t.nome + ' al ' + L.fd(c.data) + ' — ' + testo + ': ' + c.formula + ' (periodo ' + L.fd(c.dal) + ' – ' + L.fd(c.al) + ')', righe: righe});
+    X().assestamenti = X().assestamenti || []; X().assestamenti.push(Object.assign(c, {testo: testo, contabile: r.numero, stornato: null}));
+    n.salva(); return r;
+  }
+  // 1° gennaio: dopo la riapertura, ratei e risconti tornano sul conto economico del nuovo anno (scritture inverse)
+  function stornaAssestamenti(i) {
+    var n = N(), data = n.data(i.data), prec = String(+data.slice(0, 4) - 1), s = S(); X();
+    if (!s.chiusure[prec] || !s.chiusure[prec].riapertura) throw Error('Prima chiudi il ' + prec + ' e riapri i conti al 1° gennaio: lo storno viene dopo la riapertura.');
+    var da = (X().assestamenti || []).filter(function (x) { return !x.stornato && x.data.slice(0, 4) === prec; });
+    if (!da.length) throw Error('Nessun rateo o risconto del ' + prec + ' da stornare.');
+    var righe = [];
+    da.forEach(function (x) { var y = s.registrazioni.find(function (r) { return r.numero === x.contabile; });
+      y.righe.forEach(function (z) { righe.push({conto: z.conto, dareAvere: z.dareAvere === 'DARE' ? 'AVERE' : 'DARE', importo: z.importo, testo: 'storno ' + x.nome.toLowerCase() + ' ' + x.testo}); }); });
+    var r = n.post({data: data, tipo: 'STORNO_ASSESTAMENTI', rif: 'STORNO RATEI E RISCONTI ' + prec, descrizione: 'Storno al ' + L.fd(data) + ' dei ratei e risconti del ' + prec + ': ' + da.map(function (x) { return x.nome.toLowerCase() + ' ' + x.conto + ' ' + L.eur(x.quota); }).join(' · '), righe: righe});
+    da.forEach(function (x) { x.stornato = data; x.storno = r.numero; });
+    n.salva(); return r;
+  }
   // stato patrimoniale alla data (prima della chiusura): attività e passività per conto
   function statoPatrimoniale(alla) {
     var sal = saldi(alla, function (r) { return !(r.chiusura === 'stato patrimoniale' && r.data === alla); }), voci = {};
@@ -191,5 +237,6 @@ window.CH4 = (function () {
     return {attivo: att, passivo: pas, totaleAttivo: r2(ta), totalePassivo: r2(tp)};
   }
   return {periodo: periodo, calcolaIva: calcolaIva, liquidaIva: liquidaIva, versaIva: versaIva, contoEconomico: contoEconomico, calcolaIres: calcolaIres, calcolaImposte: calcolaImposte, registraIres: registraIres, registraImposte: registraIres,
+    TIPI_ASS: TIPI_ASS, calcolaAssestamento: calcolaAssestamento, assestamento: assestamento, stornaAssestamenti: stornaAssestamenti,
     controlli: controlli, chiudi: chiudi, riapri: riapri, destinaUtile: destinaUtile, statoPatrimoniale: statoPatrimoniale, saldo: saldo, X: X};
 })();

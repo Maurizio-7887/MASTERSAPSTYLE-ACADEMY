@@ -11,7 +11,7 @@
     ordini: function () {
       radice.innerHTML = U.avviso(S()) +
         '<div class="lab-griglia">' +
-        L.scheda('🆕', 'Crea ordine cliente', 'VA01 · tipo OR', L.modulo('va', [['cliente', 'Committente', 'select', 'C100', U.clienti(S())], ['materiale', 'Materiale', 'select', 'TR-STD', U.materiali(S())],
+        L.scheda('🆕', 'Crea ordine cliente', 'VA01 · tipo OR', L.modulo('va', [['cliente', 'Committente', 'select', 'C100', U.clienti(S())], ['materiale', 'Materiale', 'select', 'TR-STD', U.vendibili(S())],
           ['qta', 'Quantità (pz)', 'num'], ['rif', 'Riferimento cliente', 'text'], ['data', 'Data documento', 'date']], [['prezzi', 'Mostra condizioni', 'sec'], ['va', 'Salva ordine']])) +
         L.scheda('💡', 'Come legge i prezzi', '', '<p class="lab-nota">Il prezzo non si scrive: il sistema lo <b>determina</b> leggendo le tabelle condizioni con la procedura ZFT001 (Dati di base → Condizioni). Premi «Mostra condizioni» per vedere la videata prezzi prima di salvare.</p>') +
         '</div>' +

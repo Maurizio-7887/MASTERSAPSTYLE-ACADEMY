@@ -96,6 +96,20 @@
         '<p class="lab-nota">Crediti verso factor (15): ' + eur(N.saldo('15')) + ' € · Debiti verso factor (37): ' + eur(-N.saldo('37')) + ' €.</p>');
     L.collega(radice, 'fc', {fc: RB.cedi}, rendi); L.collega(radice, 'fx', {fx: RB.chiudiFactoring}, rendi);
   };
+  PAGINE.anticipi = function () {
+    var RB = window.RB4, lib = RB.partiteLibere(), an = RB.T().anticipi;
+    radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+      L.scheda('⏩', 'Chiedi l\'anticipo di una fattura', 'anticipo su fatture · conto 38', L.modulo('an', [['fattura', 'Fattura del cliente', 'select', '', lib.length ? lib.map(function (p) { return [p.doc, etPart(p)]; }) : [['', '— nessuna partita aperta —']]],
+        ['percentuale', 'Percentuale anticipata dalla banca %', 'num', 80], ['commissione', 'Commissione €', 'num', 30], ['data', 'Data dell\'accredito', 'date']], [['an', 'Registra l\'anticipo']]) +
+        '<p class="lab-nota">La banca presta subito una parte della fattura emessa: D 10 Banca (al netto della commissione) + D 58 Commissione / A 38 Banca c/anticipi su fatture. Il credito <b>resta sul cliente</b> (11): la fattura è solo una garanzia. È un debito verso la banca a breve termine.</p>') +
+      L.scheda('🏁', 'Il cliente paga: estingui l\'anticipo', 'rientro', L.modulo('ae', [['anticipo', 'Anticipo', 'select', '', U.lista(an.filter(function (x) { return !x.estinto; }), function (x) { return x.numero + ' · ' + x.nome + ' · fattura ' + x.fattura + ' · ' + eur(x.importo); }, '— nessun anticipo aperto —')],
+        ['interessi', 'Interessi addebitati €', 'num'], ['data', 'Data', 'date']], [['ae', 'Registra l\'estinzione']]) +
+        '<p class="lab-nota">Prima si registra l\'incasso del cliente (Vendite → Incassi, D 10 / A 11); poi la banca trattiene l\'anticipo con gli interessi: D 38 + D 60 Interessi passivi / A 10.</p>') + '</div>' +
+      L.scheda('📋', 'Anticipi su fatture', '', L.tabella(['Anticipo', 'Fattura', 'Cliente', 'Fattura €›', '%', 'Anticipo €›', 'Commissione›', 'Data', 'Estinto'], an.map(function (x) {
+        return [x.numero, x.fattura, e(x.nome), eur(x.fatturaImporto), L.n0(x.perc), eur(x.importo), eur(x.commissione), fd(x.data), x.estinto ? fd(x.estinto) : 'no']; }), 'Nessun anticipo.') +
+        '<p class="lab-nota">Banca c/anticipi su fatture (38): ' + eur(-N.saldo('38')) + ' €.</p>');
+    L.collega(radice, 'an', {an: RB.anticipoFattura}, rendi); L.collega(radice, 'ae', {ae: RB.estinguiAnticipo}, rendi);
+  };
   function rendi() { (PAGINE[C.pagina] || PAGINE.posizione)(); }
   rendi();
 })();

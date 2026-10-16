@@ -36,3 +36,8 @@ def riba():
 @bp.route("/factoring")
 def factoring():
     return render_lab("erp_tesoreria", "factoring")
+
+
+@bp.route("/anticipi")
+def anticipi():
+    return render_lab("erp_tesoreria", "anticipi")

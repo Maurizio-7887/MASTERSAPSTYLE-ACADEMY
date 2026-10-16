@@ -19,7 +19,7 @@ ESERCIZIO_PER_VERSIONE = {"vuoto": "guidato-dic-2026", "completo": "guidato-dic-
 def config_guida(versione, esercizio=None, chiave=None):
     esercizio = esercizio or ESERCIZIO_PER_VERSIONE.get(versione)
     if esercizio == "s4-integrato":
-        scelte = {"ragioneria-wms", "s4-integrato"}
+        scelte = {"ragioneria-wms", "dicembre-wms", "s4-integrato"}
         scelta = request.args.get("esercizio_guida")
         if scelta in scelte:
             session["guida_integrata"] = scelta

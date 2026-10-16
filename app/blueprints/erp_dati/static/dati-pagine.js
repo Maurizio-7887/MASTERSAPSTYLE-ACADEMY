@@ -8,16 +8,26 @@
   var PAGINE = {
     avvio: function () {
       radice.innerHTML =
-        L.scheda('🚀', 'Avvio del sistema integrato', 'società 1000 · area vendite 1000/10/00', (S().avviato
+        (S().costituzione
+          ? L.scheda('🏛️', 'Azienda nuova: costituita il ' + L.fd(S().costituzione.data), 'capitale sociale ' + eur(S().costituzione.capitale) + ' €',
+              '<div class="lab-esito ok">✓ Costituzione registrata: D 08 Crediti verso soci / A 30 Capitale sociale ' + eur(S().costituzione.capitale) + ' €. Magazzino vuoto, nessun cliente con debiti, banca a zero. La TR-STD si produce in tre stadi (SL-TAGLIO → SL-PIEGA → TR-STD); costi standard 14,60 · 20,20 · 31,40 €/pz già rilasciati; tre dipendenti assunti oggi.</div>' +
+              (N.saldo('08') > 0.004 ? L.modulo('vs', [['importo', 'Importo versato (vuoto = tutto il sottoscritto)', 'num'], ['data', 'Data del versamento', 'date', S().costituzione.data]], [['vs', 'Registra il versamento dei soci']]) +
+                '<p class="lab-nota">I soci versano il capitale sul conto corrente della società: D 10 Banca / A 08 Crediti verso soci. Ancora da versare: <b>' + eur(N.saldo('08')) + ' €</b>.</p>'
+                : '<p class="lab-nota">Capitale interamente versato: crediti verso soci (08) a zero.</p>'))
+          : L.scheda('🚀', 'Avvio del sistema integrato', 'società 1000 · area vendite 1000/10/00', (S().avviato
           ? '<div class="lab-esito ok">✓ Sistema avviato il ' + L.fd(S().avviato) + ': banca 50.000 €, magazzino 500 TR-STD · 200 TR-ALTA · 300 TR-PED a costo standard, listino e condizioni predefinite caricate.</div>'
           : L.modulo('av', [['data', 'Data di avvio', 'date']], [['av', 'Avvia il sistema']]) +
-            '<p class="lab-nota">Crea i saldi di apertura (banca 50.000 €; magazzino prodotti finiti a costo standard, movimento 561) e le condizioni di listino: PR00 60 / 72 / 55 €, scaglioni ZSCA 2% da 100 pz e 4% da 300 pz, trasporto KF00 1,50 €/pz per il Lazio, provvigione ERB1 3%.</p>')) +
+            '<p class="lab-nota">Crea i saldi di apertura (banca 50.000 €; magazzino prodotti finiti a costo standard, movimento 561) e le condizioni di listino: PR00 60 / 72 / 55 €, scaglioni ZSCA 2% da 100 pz e 4% da 300 pz, trasporto KF00 1,50 €/pz per il Lazio, provvigione ERB1 3%.</p>'))) +
+        (S().avviato ? '' : L.scheda('🏛️', 'Oppure: azienda nuova (costituzione)', 'esercizio «Dicembre: dalla costituzione alla riapertura»', L.modulo('cs', [['data', 'Data di costituzione', 'date'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Costituisci la società']]) +
+            '<p class="lab-nota">L\'azienda nasce da zero: <b>nessuna scorta, banca a zero</b>, i soci sottoscrivono il capitale (D 08 / A 30) e poi lo versano. La transenna standard si fa in <b>tre stadi con i semilavorati a magazzino</b> (taglio, piega, saldatura). Stesso listino e stesse condizioni di vendita.</p>')) +
         L.scheda('🧭', 'Cosa c\'è in questo sistema', 'S/4 didattico', '<ul class="lab-elenco"><li><b>Un solo libro giornale</b> per tutti i moduli: ogni documento logistico genera la sua scrittura.</li>' +
           '<li><b>Numerazione dei documenti</b> come in SAP: ordini 1000xxxx, consegne 8000xxxx, fatture 9000xxxx, resi 6000xxxx, contabili 1000xxxxx.</li>' +
           '<li><b>Flusso documenti</b> (VA03): ordine → consegna → fattura → nota di credito.</li><li><b>CO-PA</b>: ogni fattura scrive i campi valore per cliente, materiale, regione, canale.</li></ul>') +
         L.scheda('⏩', 'Parti da febbraio', 'situazione pronta', '<button type="button" class="lab-btn sec" id="gennaio">Carica la situazione di fine gennaio (vendite completate)</button><p class="lab-nota">Esegue in automatico tutto gennaio dell\'esercizio (avvio, condizioni, quattro ordini, acconto, resi, abbuono, incasso): serve per cominciare dai costi del prodotto. Sostituisce il lavoro attuale del sistema integrato.</p>') +
         L.scheda('♻️', 'Ricomincia', '', '<button type="button" class="lab-btn rosso" id="azzera">Azzera il sistema integrato</button><p class="lab-nota">Cancella documenti e scritture di questo sistema; il simulatore principale e i laboratori non cambiano.</p>');
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
+      L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v); }}, rendi);
+      L.collega(radice, 'vs', {vs: N.versaCapitale}, rendi);
       radice.querySelector('#gennaio').onclick = function () { if (confirm('Sostituire il lavoro del sistema integrato con la situazione di fine gennaio?')) { window.LabCopioni.esegui(window.LabCopioni.SD4, SD, 'Febbraio:'); if (window.MSA_SALVA) window.MSA_SALVA(); rendi(); } };
       radice.querySelector('#azzera').onclick = function () { if (confirm('Azzerare il sistema integrato?')) { N.azzera(); rendi(); } };
     },
@@ -41,9 +51,9 @@
       radice.innerHTML = U.avviso(S()) +
         '<div class="lab-griglia">' +
         L.scheda('✍️', 'Crea condizione', 'VK11', L.modulo('vk', [['tipo', 'Tipo condizione', 'select', 'PR00', tipi.map(function (t) { return [t, t + ' — ' + SD.TIPI[t]]; })],
-          ['cliente', 'Cliente (vuoto = tutti, solo PR00)', 'select', '', [['', '—']].concat(U.clienti(S()))], ['materiale', 'Materiale (PR00)', 'select', 'TR-ALTA', U.materiali(S())],
+          ['cliente', 'Cliente (vuoto = tutti, solo PR00)', 'select', '', [['', '—']].concat(U.clienti(S()))], ['materiale', 'Materiale (PR00)', 'select', 'TR-ALTA', U.vendibili(S())],
           ['regione', 'Regione (KF00)', 'text'], ['valore', 'Valore (€ o %)', 'num']], [['vk', 'Salva condizione']])) +
-        L.scheda('🧮', 'Simula la determinazione prezzi', 'VA01 → Condizioni', L.modulo('si', [['cliente', 'Cliente', 'select', 'C100', U.clienti(S())], ['materiale', 'Materiale', 'select', 'TR-STD', U.materiali(S())], ['qta', 'Quantità', 'num', 300]], [['si', 'Calcola']])) +
+        L.scheda('🧮', 'Simula la determinazione prezzi', 'VA01 → Condizioni', L.modulo('si', [['cliente', 'Cliente', 'select', 'C100', U.clienti(S())], ['materiale', 'Materiale', 'select', 'TR-STD', U.vendibili(S())], ['qta', 'Quantità', 'num', 300]], [['si', 'Calcola']])) +
         '</div>' +
         L.scheda('📋', 'Condizioni registrate', 'VK13', L.tabella(['Tipo', 'Descrizione', 'Chiave', 'Valori chiave', 'Valore', 'Origine'], righe, 'Avvia il sistema per caricare il listino.')) +
         L.scheda('🔧', 'Procedura di calcolo ZFT001', 'V/08', L.tabella(['Passo', 'Cond.', 'Descrizione', 'Da passo', 'Sequenza di accesso / note'], [

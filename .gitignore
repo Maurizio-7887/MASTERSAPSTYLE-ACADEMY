@@ -14,3 +14,5 @@ tests/lab-erp-gennaio.json
 tests/ragioneria-wms-controlli.json
 tests/ragioneria-wms-finale.json
 tests/ragioneria-chiusura-finale.json
+tests/dicembre-wms-finale.json
+tests/dicembre-wms-31-12.json

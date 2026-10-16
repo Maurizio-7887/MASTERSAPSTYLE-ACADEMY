@@ -10,12 +10,27 @@ window.PC4 = (function () {
   var C = function () { return S().costing; };
   var mese = function (d) { return String(d).slice(0, 7); };
 
+  // azienda nuova: scheda di calcolo senza sovraccosti, tariffa 28 €/h, lotto 100; costi standard già rilasciati per i tre livelli
+  window.S4.dopoAvvio.push(function (n, i) {
+    if (!i || i.modo !== 'costituzione') return;
+    var s = n.S; s.costing.scheda = {sovrMat: 0, sovrProd: 0, tariffa: 28, lotto: 100, confermata: true};
+    var ordine = ['SL-TAGLIO', 'SL-PIEGA'].concat(Object.keys(s.materiali).filter(function (m) { return s.materiali[m].tipo === 'FERT'; }));
+    ordine.forEach(function (m) {
+      var el = elementi(m, 100), st = {materiale: m, data: s.avviato, lotto: 100, elementi: el, unitario: r2(el.totale / 100), stato: 'FR', variante: 'PPC1', rilascio: s.avviato};
+      s.costing.stime[m] = st; s.materiali[m].std = st.unitario;
+      s.costing.rilasci.push({materiale: m, data: s.avviato, vecchio: st.unitario, nuovo: st.unitario, giacenza: 0, rivalutazione: 0, contabile: '', costituzione: true});
+    });
+  });
   // elementi di costo per un lotto di q pezzi (CK11N mostra gli stessi elementi, come KKBC)
+  // componente diretto: il ferro (semilavorati «fantasma») oppure, nell'azienda nuova a tre stadi, il semilavorato del livello sotto
+  var componente = function (m) { return m.comp || {mat: 'FERRO', q: m.ferro}; };
+  // prezzo del componente: la stima non ancora rilasciata (calcolo a più livelli, CK11N «roll-up»), altrimenti lo standard
+  var prezzoComp = function (mat) { var st = C().stime[mat]; return st && st.stato !== 'FR' ? st.unitario : N().materiale(mat).std; };
   function elementi(mat, q, par) {
-    var m = N().materiale(mat), sc = par || C().scheda, ferro = N().materiale('FERRO').std;
+    var m = N().materiale(mat), sc = par || C().scheda, cp = componente(m), prezzo = prezzoComp(cp.mat);
     var oreVar = Object.keys(m.ore).reduce(function (t, k) { return t + m.ore[k]; }, 0);
-    var kg = r2(m.ferro * q), x = {kg: kg, ore: r2(oreVar * q), oreSet: m.attrezzaggio, q: q};
-    x.mat = r2(kg * ferro); x.sovrMat = r2(x.mat * sc.sovrMat / 100);
+    var kg = r2(cp.q * q), x = {kg: kg, comp: cp.mat, um: N().materiale(cp.mat).um || 'kg', ore: r2(oreVar * q), oreSet: m.attrezzaggio, q: q};
+    x.mat = r2(kg * prezzo); x.sovrMat = r2(x.mat * sc.sovrMat / 100);
     x.lav = r2(x.ore * sc.tariffa); x.set = r2(m.attrezzaggio * sc.tariffa); x.sovrProd = r2((x.lav + x.set) * sc.sovrProd / 100);
     x.totale = r2(x.mat + x.sovrMat + x.lav + x.set + x.sovrProd);
     x.centri = Object.keys(m.ore).map(function (k) { return {centro: k, ore: r2(m.ore[k] * q), valore: r2(m.ore[k] * q * sc.tariffa)}; });
@@ -32,7 +47,7 @@ window.PC4 = (function () {
   // CK11N: stima del costo standard
   function calcola(i) {
     var data = N().data(i.data), mat = i.materiale, m = N().materiale(mat);
-    if (m.tipo !== 'FERT') throw Error('Il calcolo del costo si fa sui prodotti finiti; il ferro ha un prezzo d\'acquisto.');
+    if (m.tipo !== 'FERT' && m.tipo !== 'HALB') throw Error('Il calcolo del costo si fa sui prodotti finiti e sui semilavorati; il ferro ha un prezzo d\'acquisto.');
     var lotto = C().scheda.lotto, el = elementi(mat, lotto);
     var st = {materiale: mat, data: data, lotto: lotto, elementi: el, unitario: r2(el.totale / lotto), stato: 'KA', variante: 'PPC1'};
     C().stime[mat] = st; N().salva();
@@ -41,9 +56,9 @@ window.PC4 = (function () {
   function tabellaStima(st) {
     var el = st.elementi;
     return L.tabella(['Riga', 'Elemento di costo', 'Base›', 'Lotto ' + L.n0(st.lotto) + ' pz €›', 'Per pezzo €›'], [
-      ['10', 'Materiale diretto (ferro)', L.n0(el.kg) + ' kg', L.eur(el.mat), L.eur(el.mat / st.lotto)],
+      ['10', 'Materiale diretto (' + (el.comp && el.comp !== 'FERRO' ? el.comp : 'ferro') + ')', L.n0(el.kg) + ' ' + (el.um || 'kg'), L.eur(el.mat), L.eur(el.mat / st.lotto)],
       ['20', 'Sovraccosto materiale', L.n0(el.par.sovrMat) + ' % di 10', L.eur(el.sovrMat), L.eur(el.sovrMat / st.lotto)],
-      ['30', 'Lavorazione (Taglio, Piegatura, Saldatura)', L.n0(el.ore) + ' h', L.eur(el.lav), L.eur(el.lav / st.lotto)],
+      ['30', 'Lavorazione (' + (el.centri || []).map(function (c) { return c.centro; }).join(', ') + ')', L.n0(el.ore) + ' h', L.eur(el.lav), L.eur(el.lav / st.lotto)],
       ['40', 'Attrezzaggio (fisso per lotto)', L.n0(el.oreSet) + ' h', L.eur(el.set), L.eur(el.set / st.lotto)],
       ['50', 'Sovraccosto di produzione', L.n0(el.par.sovrProd) + ' % di 30+40', L.eur(el.sovrProd), L.eur(el.sovrProd / st.lotto)],
       {cls: 'tot', celle: ['', 'Costo di produzione', '', L.eur(el.totale), L.eur(st.unitario)]}]);
@@ -102,7 +117,7 @@ window.PC4 = (function () {
     var plan = elementi(o.materiale, q || o.qta, o.piano.par);
     var target = q ? r2(st.totale * q / st.lotto) : 0;
     var cat = [
-      {cat: 'Quantità materiale (ferro)', piano: L.n0(plan.kg) + ' kg', eff: L.n0(e.kg) + ' kg', v: r2(e.mat - plan.mat)},
+      {cat: 'Quantità materiale (' + (plan.comp && plan.comp !== 'FERRO' ? plan.comp : 'ferro') + ')', piano: L.n0(plan.kg) + ' ' + plan.um, eff: L.n0(e.kg) + ' ' + plan.um, v: r2(e.mat - plan.mat)},
       {cat: 'Quantità attività — lavorazione', piano: L.n0(plan.ore) + ' h', eff: L.n0(e.ore) + ' h', v: r2(e.lav - plan.lav)},
       {cat: 'Quantità attività — attrezzaggio', piano: L.n0(plan.oreSet) + ' h', eff: L.n0(e.oreSet) + ' h', v: r2(e.set - plan.set)},
       {cat: 'Sovraccosti (seguono gli input)', piano: L.eur(plan.sovrMat + plan.sovrProd), eff: L.eur(e.sovrMat + e.sovrProd), v: r2(e.sovrMat + e.sovrProd - plan.sovrMat - plan.sovrProd)},
@@ -146,6 +161,8 @@ window.PC4 = (function () {
     var aperti = s.produzione.filter(function (o) { return !o.liquidazione && o.eventi.some(function (e) { return mese(e.data) === periodo; }); });
     if (aperti.length) avvisi.push('Ordini di produzione non ancora liquidati: ' + aperti.map(function (o) { return o.numero; }).join(', ') + ' (KGI2 + KO88).');
     var inPer = function (d) { return d >= inizio && d <= fine; };
+    if (s.movimenti.some(function (x) { return inPer(x.data) && (s.materiali[x.mat] || {}).tipo === 'HALB'; }))
+      avvisi.push('Nel periodo ci sono semilavorati (produzione a tre stadi): in questo sistema didattico il Material Ledger lavora solo con i semilavorati «fantasma». Le differenze prezzo restano sul conto 63 e le varianze sul 61, il magazzino resta a costo standard.');
     var mov = s.movimenti.filter(function (x) { return inPer(x.data); });
     var res = {periodo: periodo, materiali: {}, ferroOrdini: []};
     var base = function (m) {

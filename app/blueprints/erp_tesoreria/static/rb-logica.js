@@ -8,9 +8,9 @@ window.RB4 = (function () {
   'use strict';
   var L = window.LabMotore, r2 = L.r2;
   var N = function () { return window.SD4.N; }, S = function () { return N().S; };
-  var T = function () { var s = S(); s.tes = s.tes || {}; s.tes.riba = s.tes.riba || []; s.tes.factoring = s.tes.factoring || []; return s.tes; };
+  var T = function () { var s = S(); s.tes = s.tes || {}; s.tes.riba = s.tes.riba || []; s.tes.factoring = s.tes.factoring || []; s.tes.anticipi = s.tes.anticipi || []; return s.tes; };
   // partita aperta del cliente (dalla tesoreria), non già impegnata in una Ri.Ba. o in un factoring attivi
-  function impegnata(doc) { return T().riba.some(function (x) { return x.fattura === doc && x.stato !== 'insoluta'; }) || T().factoring.some(function (x) { return x.fattura === doc; }); }
+  function impegnata(doc) { return T().riba.some(function (x) { return x.fattura === doc && x.stato !== 'insoluta'; }) || T().factoring.some(function (x) { return x.fattura === doc; }) || T().anticipi.some(function (x) { return x.fattura === doc && !x.estinto; }); }
   function partiteLibere(alla) { return window.TS4.partite('cliente', null, alla).filter(function (p) { return p.doc !== 'acconto' && p.aperto > 0.004 && !impegnata(p.doc); }); }
   function partita(doc, alla) {
     var p = window.TS4.partite('cliente', null, alla).find(function (x) { return x.doc === String(doc); });
@@ -78,5 +78,29 @@ window.RB4 = (function () {
               {conto: '11', dareAvere: 'AVERE', importo: x.importo, partner: x.cliente, pareggio: x.fattura, testo: 'incasso tramite factor'}]});
     x.stato = 'chiusa'; x.chiusa = data; n.salva(); return r;
   }
-  return {partiteLibere: partiteLibere, presentaRiba: presentaRiba, esitoRiba: esitoRiba, cedi: cedi, chiudiFactoring: chiudiFactoring, T: T};
+  // ── anticipo su fatture: la banca accredita una percentuale della fattura (D 10 / A 38 Banca c/anticipi su fatture), il credito resta
+  //    sul cliente. Quando il cliente paga (F-28) la banca trattiene l'anticipo con gli interessi: D 38 + D 60 / A 10. ──
+  function anticipoFattura(i) {
+    var n = N(), data = n.data(i.data), p = partita(i.fattura, data);
+    var perc = L.num(i.percentuale == null || i.percentuale === '' ? 80 : i.percentuale, 'Percentuale anticipata', 1), comm = i.commissione == null || i.commissione === '' ? 0 : L.num(i.commissione, 'Commissione €', 0);
+    if (perc > 100) throw Error('La banca non anticipa più del 100% della fattura.');
+    var ant = r2(p.aperto * perc / 100), numero = 'ANT-' + String(n.numero('riba')).padStart(3, '0');
+    var righe = [{conto: '10', dareAvere: 'DARE', importo: r2(ant - comm), testo: 'accredito netto anticipo ' + numero}, {conto: '38', dareAvere: 'AVERE', importo: ant, testo: 'anticipo ' + perc + '% fattura ' + p.doc}];
+    if (comm > 0) righe.push({conto: '58', dareAvere: 'DARE', importo: comm, testo: 'commissione anticipo fatture'});
+    var r = n.post({data: data, tipo: 'ANTICIPO_FATTURE', rif: numero, descrizione: 'Anticipo su fatture ' + numero + ': fattura ' + p.doc + ' di ' + p.nome + ' ' + L.eur(p.aperto) + ' × ' + perc + '% = ' + L.eur(ant) + (comm ? ', commissione ' + L.eur(comm) : '') + ' — il credito resta sul cliente', righe: righe});
+    T().anticipi.push({numero: numero, fattura: p.doc, cliente: p.partner, nome: p.nome, fatturaImporto: p.aperto, scadenza: p.scadenza, perc: perc, importo: ant, commissione: comm, data: data, contabile: r.numero, estinto: null});
+    n.salva(); return r;
+  }
+  function estinguiAnticipo(i) {
+    var n = N(), data = n.data(i.data), x = T().anticipi.find(function (y) { return y.numero === String(i.anticipo); });
+    if (!x) throw Error('Anticipo ' + i.anticipo + ' inesistente.'); if (x.estinto) throw Error('Anticipo ' + x.numero + ' già estinto il ' + L.fd(x.estinto) + '.');
+    if (data < x.data) throw Error('L\'estinzione non può precedere l\'anticipo.');
+    var int = i.interessi == null || i.interessi === '' ? 0 : L.num(i.interessi, 'Interessi €', 0);
+    var righe = [{conto: '38', dareAvere: 'DARE', importo: x.importo, testo: 'rimborso anticipo ' + x.numero}];
+    if (int > 0) righe.push({conto: '60', dareAvere: 'DARE', importo: int, testo: 'interessi sull\'anticipo'});
+    righe.push({conto: '10', dareAvere: 'AVERE', importo: r2(x.importo + int), testo: 'addebito per estinzione ' + x.numero});
+    var r = n.post({data: data, tipo: 'ESTINZIONE_ANTICIPO', rif: x.numero, descrizione: 'Estinzione dell\'anticipo ' + x.numero + ' (fattura ' + x.fattura + '): la banca trattiene ' + L.eur(x.importo) + (int ? ' + interessi ' + L.eur(int) : ''), righe: righe});
+    x.estinto = data; x.interessi = int; x.estinzione = r.numero; n.salva(); return r;
+  }
+  return {anticipoFattura: anticipoFattura, estinguiAnticipo: estinguiAnticipo, partiteLibere: partiteLibere, presentaRiba: presentaRiba, esitoRiba: esitoRiba, cedi: cedi, chiudiFactoring: chiudiFactoring, T: T};
 })();

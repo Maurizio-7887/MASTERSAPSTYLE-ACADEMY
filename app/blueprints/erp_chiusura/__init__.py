@@ -26,3 +26,8 @@ def chiusura():
 @bp.route("/riapertura")
 def riapertura():
     return render_lab("erp_chiusura", "riapertura")
+
+
+@bp.route("/assestamenti")
+def assestamenti():
+    return render_lab("erp_chiusura", "assestamenti")

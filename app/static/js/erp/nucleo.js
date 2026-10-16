@@ -38,6 +38,11 @@
     ['45', 'Plusvalenze da cessione cespiti', 'RICAVO'], ['46', 'Minusvalenze da cessione cespiti', 'COSTO'], ['50', 'Ammortamenti', 'COSTO'],
     ['53', 'Interessi su IVA trimestrale', 'COSTO'], ['55', 'Oneri su cessione crediti (factoring)', 'COSTO'], ['56', 'IRES corrente', 'COSTO'],
     ['90', 'Conto economico (epilogo)', 'CHIUSURA'], ['91', 'Stato patrimoniale finale', 'CHIUSURA'], ['92', 'Stato patrimoniale iniziale', 'CHIUSURA'],
+    // azienda nuova (costituzione), produzione a tre stadi, anticipo fatture, assestamenti di fine anno
+    ['08', 'Crediti verso soci per versamenti ancora dovuti', 'ATTIVO'], ['07', 'Magazzino semilavorati', 'ATTIVO'], ['71', 'Consumi di semilavorati', 'COSTO'],
+    ['38', 'Banca c/anticipi su fatture', 'PASSIVO'], ['60', 'Interessi passivi bancari', 'COSTO'],
+    ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
+    ['05', 'Ratei attivi', 'ATTIVO'], ['06', 'Risconti attivi', 'ATTIVO'], ['39', 'Ratei passivi', 'PASSIVO'], ['34', 'Risconti passivi', 'PASSIVO'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
@@ -49,7 +54,12 @@
   };
   var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg', iban: 'IT60X0542811101000000123456'},
                    'F200': {nome: 'Gamma Steel Engineering LLC', regione: 'USA', pagamento: '30 gg', valuta: 'USD', iban: 'US-ABA 026009593 / 4417 2210'},
-                   'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'}};
+                   'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'},
+                   'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'}};
+  // azienda nuova: i tre stadi della transenna standard diventano materiali veri, con scorta e ordine propri (taglio → piega → saldatura)
+  var SEMILAVORATI = {
+    'SL-TAGLIO': {nome: 'Tubi tagliati (kit per una TR-STD)', tipo: 'HALB', um: 'pz', std: 14.60, peso: 8, comp: {mat: 'FERRO', q: 8}, ore: {Taglio: 0.25}, attrezzaggio: 0},
+    'SL-PIEGA': {nome: 'Telaio piegato (per una TR-STD)', tipo: 'HALB', um: 'pz', std: 20.20, peso: 8, comp: {mat: 'SL-TAGLIO', q: 1}, ore: {Piegatura: 0.20}, attrezzaggio: 0}};
   var CLIENTI = {
     'C100': {nome: 'Beta Costruzioni Srl', regione: 'Umbria', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: '30 gg', fido: 60000, rischio: 'B'},
     'C200': {nome: 'Delta Noleggi Srl', regione: 'Toscana', canale: '20 Noleggio', gruppo: 'Noleggiatori', pagamento: '30 gg', fido: 30000, rischio: 'B'},
@@ -207,17 +217,40 @@
         return r2(S.registrazioni.reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === conto && (!partner || x.partner === partner); })
           .reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0));
       },
+      // conto di magazzino del materiale: materie prime 12, semilavorati 07, prodotti finiti 13
+      contoMag: function (mat) { var t = (S.materiali[mat] || {}).tipo; return t === 'ROH' ? '12' : t === 'HALB' ? '07' : '13'; },
+      // versamento del capitale sottoscritto alla costituzione: D 10 Banca / A 08 Crediti verso soci
+      versaCapitale: function (i) {
+        if (!S.costituzione) throw Error('Il versamento dei soci vale per l\'azienda nuova (avvio «Costituzione»).');
+        var data = N.data(i.data), dovuto = N.saldo('08'), imp = i.importo == null || i.importo === '' ? dovuto : L.num(i.importo, 'Importo versato', 0.01);
+        if (dovuto <= 0.004) throw Error('Il capitale sottoscritto è già tutto versato.');
+        if (imp > dovuto + 0.005) throw Error('I soci devono ancora versare ' + L.eur(dovuto) + ' €: non si versa di più.');
+        var r = N.post({data: data, tipo: 'VERSAMENTO_SOCI', rif: String(i.rif || 'VERSAMENTO CAPITALE').trim(), descrizione: 'Versamento dei soci sul conto corrente della società: ' + L.eur(imp) + ' € del capitale sottoscritto',
+          righe: [{conto: '10', dareAvere: 'DARE', importo: imp}, {conto: '08', dareAvere: 'AVERE', importo: imp}]});
+        N.salva(); return r;
+      },
       // avvio: saldi di apertura (banca e magazzino prodotti finiti a costo standard)
+      // oppure «costituzione»: azienda nuova senza scorte, capitale sottoscritto dai soci, produzione a tre stadi con semilavorati
       avvia: function (i) {
         if (S.avviato) throw Error('Sistema già avviato il ' + L.fd(S.avviato) + '. Per ripartire usa «Azzera».');
         var data = L.dataOk(i.data);
+        if (i.modo === 'costituzione') {
+          var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
+          S.avviato = data; S.costituzione = {data: data, capitale: cap};
+          Object.keys(SEMILAVORATI).forEach(function (m) { S.materiali[m] = JSON.parse(JSON.stringify(SEMILAVORATI[m])); S.giacenze[m] = 0; });
+          var tr = S.materiali['TR-STD']; tr.comp = {mat: 'SL-PIEGA', q: 1}; tr.ore = {Saldatura: 0.40}; tr.attrezzaggio = 0;
+          var rc = N.post({data: data, tipo: 'COSTITUZIONE', rif: 'COSTITUZIONE', descrizione: 'Costituzione di ' + S.societa + ': i soci sottoscrivono il capitale sociale di ' + L.eur(cap) + ' €',
+            righe: [{conto: '08', dareAvere: 'DARE', importo: cap, testo: 'capitale sottoscritto e non ancora versato'}, {conto: '30', dareAvere: 'AVERE', importo: cap, testo: 'capitale sociale'}]});
+          if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
+          N.salva(); return rc;
+        }
         var stock = {'TR-STD': 500, 'TR-ALTA': 200, 'TR-PED': 300};
         S.avviato = data;
         var val = 0;
         Object.keys(stock).forEach(function (m) { N.movimento(m, stock[m], data, '561', 'APERTURA'); val += stock[m] * S.materiali[m].std; });
         var r = N.post({data: data, tipo: 'APERTURA', descrizione: 'Saldi di apertura: banca e magazzino prodotti finiti (561)',
           righe: [{conto: '10', dareAvere: 'DARE', importo: 50000}, {conto: '13', dareAvere: 'DARE', importo: val}, {conto: '30', dareAvere: 'AVERE', importo: 50000 + val}]});
-        if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N); });
+        if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
         N.salva(); return r;
       },
     };

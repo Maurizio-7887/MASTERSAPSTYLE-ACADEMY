@@ -68,6 +68,31 @@
         return [f.numero, fd(f.data), e(nomeCli(f.cliente)), e(f.testo), eur(f.imponibile), eur(f.iva), eur(f.totale), f.scadenza ? fd(f.scadenza) : '', f.sdi ? 'consegnata ' + fd(f.sdi.data) : 'da trasmettere']; }), 'Nessuna fattura di servizi.'));
     L.collega(radice, 'fs', {fs: FS.fattura}, rendi);
   };
+  var nomeFor = function (f) { return ((S().fornitori || {})[f] || {}).nome || f; };
+  PAGINE.passive = function () {
+    var FS = window.FS4, el = FS.passive(), aperti = Object.keys(S().fornitori || {}).filter(function (f) { return N.saldo('20', f) < -0.004; });
+    radice.innerHTML = avviso() + '<div class="lab-griglia">' +
+      L.scheda('📥', 'Fattura passiva di servizi', 'FB60 · FI-AP', L.modulo('fp', [['fornitore', 'Fornitore', 'select', 'F400', U.fornitori(S())], ['rif', 'Numero della fattura del fornitore', 'text'],
+        ['conto', 'Conto di costo', 'select', '83', FS.COSTI], ['testo', 'Descrizione', 'text', 'premio annuo polizza incendio e furto'], ['imponibile', 'Imponibile €', 'num'], ['iva', 'IVA % (assicurazioni: 0, esenti)', 'num', 0],
+        ['dal', 'Competenza dal (facoltativo)', 'date'], ['al', 'Competenza al (facoltativo)', 'date'], ['scadenza', 'Scadenza del pagamento', 'date'], ['data', 'Data di registrazione', 'date']], [['fp', 'Registra la fattura']]) +
+        '<p class="lab-nota">D conto di costo + D 14 IVA a credito / A 20 Fornitore. Il periodo di competenza non cambia la scrittura: serve a fine anno per il <b>risconto</b> (Chiusura → Ratei e risconti).</p>') +
+      L.scheda('💸', 'Pagamento a un fornitore', 'F-53', L.modulo('pg', [['fornitore', 'Fornitore', 'select', aperti[0] || 'F100', U.fornitori(S())], ['documento', 'Fattura da pagare (facoltativo)', 'text'], ['importo', 'Importo (vuoto = tutto il debito aperto)', 'num'], ['data', 'Data del bonifico', 'date']], [['pg', 'Registra il pagamento']]) +
+        '<p class="lab-nota">D 20 Fornitore / A 10 Banca. Per pagare più fornitori alla scadenza c\'è anche il pagamento automatico (Tesoreria → F110).</p>') + '</div>' +
+      L.scheda('🏭', 'Debiti verso fornitori', 'FBL1N', L.tabella(['Fornitore', 'Nome', 'Debito aperto €›'], Object.keys(S().fornitori || {}).map(function (f) { return [f, e(nomeFor(f)), eur(-N.saldo('20', f))]; }))) +
+      L.scheda('📋', 'Fatture passive di servizi', 'FBL1N', L.tabella(['Fattura', 'Data', 'Fornitore', 'Conto', 'Descrizione', 'Competenza', 'Imponibile›', 'IVA›', 'Totale›'], el.map(function (f) {
+        return [e(f.rif), fd(f.data), e(nomeFor(f.fornitore)), f.conto, e(f.testo), f.dal && f.al ? fd(f.dal) + ' – ' + fd(f.al) : '', eur(f.imponibile), eur(f.iva), eur(f.totale)]; }), 'Nessuna fattura passiva di servizi.'));
+    L.collega(radice, 'fp', {fp: FS.fatturaPassiva}, rendi); L.collega(radice, 'pg', {pg: FS.paga}, rendi);
+  };
+  PAGINE.sopravvenienze = function () {
+    var FS = window.FS4, el = FS.sopravvenienze(), da = el.filter(function (x) { return !x.incassato; });
+    radice.innerHTML = avviso() + '<div class="lab-griglia">' +
+      L.scheda('🌩️', 'Sopravvenienza attiva: indennizzo riconosciuto', 'FB50 · A 84', L.modulo('sv', [['compagnia', 'Compagnia di assicurazione', 'select', 'F400', U.fornitori(S())], ['rif', 'Riferimento (lettera di liquidazione)', 'text'], ['testo', 'Evento', 'text', 'indennizzo per il sinistro del furgone'], ['importo', 'Importo €', 'num'], ['data', 'Data', 'date']], [['sv', 'Registra la sopravvenienza']]) +
+        '<p class="lab-nota">Un provento <b>non previsto</b>: la compagnia riconosce un indennizzo. D 09 Crediti verso compagnie di assicurazione / A 84 Sopravvenienze attive. È fuori campo IVA (art. 15 DPR 633/72): nessuna fattura. Nel bilancio va tra gli «altri ricavi e proventi» (A5).</p>') +
+      L.scheda('🏦', 'Incasso dell\'indennizzo', 'F-28', L.modulo('ii', [['sopravvenienza', 'Indennizzo', 'select', '', U.lista(da, function (x) { return x.rif + ' · ' + nomeFor(x.compagnia) + ' · ' + eur(x.importo); }, '— nessun indennizzo da incassare —', function (x) { return x.rif; })], ['data', 'Data dell\'accredito', 'date']], [['ii', 'Registra l\'incasso']]) +
+        '<p class="lab-nota">D 10 Banca / A 09 Crediti verso compagnie di assicurazione. Il ricavo è già stato registrato al riconoscimento.</p>') + '</div>' +
+      L.scheda('📋', 'Sopravvenienze attive', '', L.tabella(['Rif.', 'Data', 'Compagnia', 'Evento', 'Importo›', 'Incassato'], el.map(function (x) { return [e(x.rif), fd(x.data), e(nomeFor(x.compagnia)), e(x.testo), eur(x.importo), x.incassato ? fd(x.incassato) : 'no']; }), 'Nessuna sopravvenienza.'));
+    L.collega(radice, 'sv', {sv: FS.sopravvenienza}, rendi); L.collega(radice, 'ii', {ii: FS.incassaIndennizzo}, rendi);
+  };
   function rendi() { (PAGINE[C.pagina] || PAGINE.giornale)(); }
   rendi();
 })();
