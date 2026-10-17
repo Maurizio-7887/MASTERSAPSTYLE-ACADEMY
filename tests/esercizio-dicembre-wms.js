@@ -127,9 +127,17 @@ vicino(p.S().ordini[0].prezzi.totale,12912.48,'totale Beta'); vicino(p.S().ordin
 // 5 · ferro
 p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'3000',prezzo:'1',data:'2026-12-03'}),'ME21N'); fino('ordina 3.000');
 const oa = p.S().acquisti[0].numero;
-p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa,data:'2026-12-04'}),'MIGO'); fino('ricevi il ferro');
-rfTutti('2026-12-04','PUTAWAY',3); fino('3 fasci');
-p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa,rif:'FR-2026-871',data:'2026-12-05'}),'MIRO'); fino('fattura del ferro'); controlla('Ferro');
+p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa,ddt:'DDT-AU-5512',lotto:'COL-1204',danneggiati:'200',danno:'tubi schiacciati nel trasporto',data:'2026-12-04'}),'MIGO con danneggiati'); fino('200 kg sono schiacciati');
+ok(p.w.WM4.bloccato('FERRO')===200,'200 kg in stock bloccato');
+rfTutti('2026-12-04','PUTAWAY',3); fino('3 fasci buoni');
+p = apri('erp_magazzino','bloccato'); const qz = p.w.WM4.bloccati()[0];
+bene(p.fai('dq',{udc:qz.udc,motivo:'tubi schiacciati, non riparabili',data:'2026-12-05'},'ro'),'rottamazione'); fino('decidi sui 200 kg'); vicinoS('69',190,'rottamazione');
+p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa,rif:'FR-2026-871',data:'2026-12-05'}),'MIRO'); fino('fattura del ferro');
+p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'500',prezzo:'1,08',data:'2026-12-05'}),'riordino'); fino('riordino urgente');
+const oa2 = p.S().acquisti[1].numero;
+p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa2,ddt:'DDT-AU-5530',lotto:'COL-1206',data:'2026-12-06'}),'MIGO riordino'); fino('500 kg urgenti');
+rfTutti('2026-12-06','PUTAWAY',1); fino('fascio urgente'); ok(p.w.WM4.inUbic('F-02').length===2,'due colate in F-02');
+p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa2,rif:'FR-2026-902',data:'2026-12-06'}),'MIRO riordino'); fino('fattura del riordino'); controlla('Ferro');
 // 6 · 7 · 8 · i tre stadi
 const stadio = (mat, q, d1, d2, ore, nStaging, nPutaway, titoli) => {
   p = apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:mat,qta:String(q),data:d1}),'CO01 '+mat); fino(titoli[0]);
@@ -143,13 +151,18 @@ const stadio = (mat, q, d1, d2, ore, nStaging, nPutaway, titoli) => {
   bene(p.fai('cf',{ordine:o,attrezzaggio:'0',ore:String(ore),data:d1}),'CO11N '+mat); fino(titoli[4]);
   bene(p.fai('en',{ordine:o,data:d2}),'101 '+mat); fino(titoli[5]);
   rfTutti(d2,'PUTAWAY',nPutaway); fino(titoli[6]); controlla('Stadio '+mat);
+  if (mat === 'SL-TAGLIO') {
+    const c20 = p.w.WM4.inUbic('01-02-2')[0]; ok(!!c20 && c20.qta===20,'cassone da 20 in 01-02-2');
+    p = apri('erp_magazzino','compiti'); bene(p.fai('tr',{udc:c20.udc,a:'03-05-2',motivo:'resti in fondo al magazzino',data:'2026-12-08'}),'trasferimento'); fino('sposta il cassone');
+    rfTutti('2026-12-08','TRASF',1); fino('conferma lo spostamento'); ok(p.w.WM4.inUbic('03-05-2')[0].qta===20,'cassone in 03-05-2');
+  }
 };
 stadio('SL-TAGLIO',320,'2026-12-07','2026-12-08',80,3,4,['ordine di taglio','porta il ferro','approvvigionamento del ferro','consuma il ferro','80 ore','versa a magazzino i 320','cassoni di SL-TAGLIO']);
 vicinoS('07',4672,'semilavorati dopo il taglio');
 stadio('SL-PIEGA',310,'2026-12-09','2026-12-10',62,4,4,['ordine di piega','kit tagliati alla linea','approvvigionamento dei kit','310 kit tagliati','62 ore','310 telai piegati','cassoni di SL-PIEGA']);
 stadio('TR-STD',300,'2026-12-11','2026-12-12',120,3,6,['ordine di saldatura','telai alla linea','approvvigionamento dei telai','300 telai','120 ore','carica a magazzino le 300','6 pallet']);
-const g = p.S().giacenze; ok(g.FERRO===440 && g['SL-TAGLIO']===10 && g['SL-PIEGA']===10 && g['TR-STD']===300,'scorte nei tre stadi: '+JSON.stringify(g));
-vicinoS('12',418,'ferro a scorta'); vicinoS('07',348,'semilavorati a scorta'); vicinoS('13',9420,'prodotti finiti');
+const g = p.S().giacenze; ok(g.FERRO===740 && g['SL-TAGLIO']===10 && g['SL-PIEGA']===10 && g['TR-STD']===300,'scorte nei tre stadi: '+JSON.stringify(g));
+vicinoS('12',703,'ferro a scorta'); vicinoS('07',348,'semilavorati a scorta'); vicinoS('13',9420,'prodotti finiti');
 ok(p.S().ordini.every(o => o.confermata === o.qta),'ordini cliente confermati dalla produzione');
 // 9 · consegna con picking
 p = apri('erp_vendite','consegne'); const ob = p.S().ordini[0].numero, od = p.S().ordini[1].numero;
@@ -175,7 +188,7 @@ p = apri('erp_tesoreria','anticipi'); bene(p.fai('an',{fattura:fb,percentuale:'8
 vicinoS('38',-10329.98,'debito per anticipo'); vicinoS('11',21520.80,'crediti verso clienti restano aperti');
 p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F100',data:'2026-12-17'}),'paga ferro'); fino('paga il ferro');
 p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F300',data:'2026-12-18'}),'paga macchine'); fino('paga i macchinari');
-vicinoS('20',0,'fornitori pagati'); vicinoS('10',32979.98,'banca dopo i pagamenti');
+vicinoS('20',0,'fornitori pagati'); vicinoS('10',32321.18,'banca dopo i pagamenti');
 // 11 · sopravvenienza
 p = apri('erp_fi','sopravvenienze'); bene(p.fai('sv',{compagnia:'F400',rif:'LIQ-4471',testo:'indennizzo per il sinistro del furgone del 10/12',importo:'500',data:'2026-12-21'}),'sopravvenienza'); fino('riconosce un indennizzo');
 p = apri('erp_fi','sopravvenienze'); bene(p.fai('ii',{sopravvenienza:'LIQ-4471',data:'2026-12-28'}),'incasso indennizzo'); fino('Incassa l’indennizzo');
@@ -198,23 +211,32 @@ bene(p.fai('as',{tipo:'risconto-attivo',conto:'83',testo:'polizza POL-2026-118',
 p = apri('erp_chiusura','assestamenti'); bene(p.fai('as',{tipo:'rateo-passivo',conto:'86',testo:'fitto capannone, trimestre posticipato',importo:'3000',dal:'2026-12-01',al:'2027-02-28',data:'2026-12-31'}),'rateo'); fino('Rateo passivo');
 vicinoS('06',1098.08,'risconto'); vicinoS('39',-1033.33,'rateo');
 p = apri('erp_cespiti','ammortamenti'); bene(p.fai('af',{data:'2026-12-31'}),'AFAB'); fino('AFAB'); vicinoS('50',458.34,'ammortamenti');
+// inventario di fine anno
+p = apri('erp_magazzino','mappa'); const occ = ['F-02','01-02-2','03-05-2'].map(b => p.w.WM4.inUbic(b).map(q => q.mat + ' ' + q.qta).join('+')); ok(occ.join('|')==='FERRO 240+FERRO 500|SL-PIEGA 10|SL-TAGLIO 10','ubicazioni occupate: '+occ.join('|'));
+p = apri('erp_inventario','documenti'); bene(p.fai('in',{tipo:'ubicazioni',selezione:'F-02, 01-02-2, 03-05-2',tolleranza:'20',data:'2026-12-31'}),'LI01N'); fino('ubicazioni occupate');
+p = apri('erp_inventario','documenti'); p.fai('ia',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='attivo','attiva inventario'); fino('Attiva l’inventario');
+p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {contatore:'Allievo'}; d.righe.forEach((r,k) => v['r'+k] = r.mat === 'SL-TAGLIO' ? '9' : String(r.libro)); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='contato','conta'); } fino('registra la conta');
+p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='chiuso','chiudi inventario'); fino('LI20');
+p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2026-12-31'}),'LI21'); fino('LI21'); vicinoS('65',14.60,'differenza inventariale'); ok(p.S().giacenze['SL-TAGLIO']===9,'9 kit dopo l’inventario');
+{ const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); console.log('VALORIZZAZIONE FERRO', JSON.stringify({g:v.giacenza,fifo:v.fifo,lifo:v.lifo,cmp:v.cmp,std:v.standard})); vicino(v.fifo,780,'FIFO ferro'); vicino(v.lifo,740,'LIFO ferro'); }
+controlla('Inventario');
 p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length; p.fai('ko',{data:'2026-12-31'}); fino('KO88'); ok(p.S().registrazioni.length===nk,'varianza zero: nessuna scrittura'); vicinoS('61',0,'varianze');
 // 15 · IVA, imposte, chiusura
-p = apri('erp_chiusura','iva'); bene(p.fai('lq',{periodo:'2026-12',data:'2026-12-31'}),'liquidazione IVA'); fino('Liquida l’IVA'); vicinoS('14',3313.20,'credito IVA');
+p = apri('erp_chiusura','iva'); bene(p.fai('lq',{periodo:'2026-12',data:'2026-12-31'}),'liquidazione IVA'); fino('Liquida l’IVA'); vicinoS('14',3432,'credito IVA');
 p = apri('erp_chiusura','imposte'); p.fai('ir',{anno:'2026',aumenti:'',diminuzioni:'',data:'2026-12-31'}); ok(/Imposte 2026 registrate/.test(p.testo()),'imposte'); fino('IRES e IRAP');
-vicinoS('23',-682.30,'IRES'); vicinoS('35',-110.87,'IRAP');
-p = apri('erp_chiusura','chiusura'); { const t=p.testo(), i=t.search(/2.?049/); ok(i>=0,'utile nel prospetto di chiusura: '+t.slice(t.indexOf('Conto economico'),t.indexOf('Conto economico')+1500)); }
-p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,2049.75,'utile');
+vicinoS('23',-617.60,'IRES'); vicinoS('35',-100.36,'IRAP');
+p = apri('erp_chiusura','chiusura'); { const t=p.testo(), i=t.search(/1.?855,36/); ok(i>=0,'utile nel prospetto di chiusura: '+t.slice(t.indexOf('Conto economico'),t.indexOf('Conto economico')+1500)); }
+p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,1855.36,'utile'); vicinoS('10',51886.42,'banca al 31/12');
 fs.writeFileSync(path.join(__dirname,'dicembre-wms-31-12.json'),JSON.stringify(p.S(),null,2));
 // 16 · riapertura e gennaio
-p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); fino('Riapri i conti');
+p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,99365.38,'totale riapertura'); } fino('Riapri i conti');
 p = apri('erp_chiusura','assestamenti'); bene(p.fai('st',{data:'2027-01-01'}),'storno ratei e risconti'); fino('Storna il risconto');
 vicinoS('06',0,'risconto stornato'); vicinoS('39',0,'rateo stornato'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='83').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1098.08,'assicurazione di competenza 2027 (334 giorni)');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C100',importo:'12912,48',rif:'SALDO FATTURA BETA',data:'2027-01-14'}),'incasso Beta'); fino('Beta paga');
 p = apri('erp_tesoreria','anticipi'); bene(p.fai('ae',{anticipo:'ANT-001',interessi:'25',data:'2027-01-14'}),'estinzione anticipo'); fino('ripaga l’anticipo');
 p = apri('erp_paghe','contabilita'); bene(p.fai('f2',{periodo:'2026-12',data:'2027-01-18'}),'F24'); fino('F24');
 p = apri('erp_chiusura','riapertura'); bene(p.fai('du',{legale:'5',data:'2027-04-30'}),'destinazione utile'); fino('destina l’utile');
-vicinoS('33',-102.49,'riserva legale'); vicinoS('10',51077.85,'banca finale'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
+vicinoS('33',-92.77,'riserva legale'); vicinoS('10',50419.05,'banca finale'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
 controlla('Fine');
 ok(p.w.WM4.aperti().length===0,'nessun compito aperto');
 const S = p.S();

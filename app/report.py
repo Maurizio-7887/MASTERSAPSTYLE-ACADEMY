@@ -270,6 +270,7 @@ class Lavoro:
                 "dc_scorte": "/".join(str(round(g.get(m, 0))) for m in ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD")),
                 "dc_rimanenze": round(s26("12") + s26("07") + s26("13"), 2),
                 "dc_colli": len((s.get("sped") or {}).get("colli") or []),
+                "dc_rottamazione": s26("69"), "dc_differenza_inventario": s26("65"),
                 "dc_plusvalenza": -s26("45"), "dc_minusvalenza": s26("46"), "dc_sopravvenienza": -s26("84"),
                 "dc_risconto": s26("06"), "dc_rateo": -s26("39"), "dc_ammortamenti": s26("50"),
                 "dc_credito_iva": s26("14"), "dc_ires": -s26("23"), "dc_irap": -s26("35"),

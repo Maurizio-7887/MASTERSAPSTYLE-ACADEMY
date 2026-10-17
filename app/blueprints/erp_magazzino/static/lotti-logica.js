@@ -38,9 +38,12 @@ window.LT4 = (function () {
       out.push({livello: liv, tipo: 'origine', testo: 'colata ' + (x.colata || l) + ' · entrata del ' + L.fd(x.data) + ' · ordine d\'acquisto ' + x.rif + ' · fornitore ' + (o.fornitore || x.fornitore || '') + ' ' + ((S().fornitori[o.fornitore || x.fornitore] || {}).nome || '')});
     } else if (x.tipo === '101') {
       out.push({livello: liv, tipo: 'origine', testo: 'prodotto dall\'ordine di produzione ' + x.rif + ' il ' + L.fd(x.data)});
-      var usati = {};
-      S().movimenti.filter(function (m) { return m.rif === x.rif && (m.tipo === '261' || m.tipo === '262'); }).forEach(function (m) { (m.lotti || []).forEach(function (z) { usati[z.lotto] = r2((usati[z.lotto] || 0) + (m.tipo === '261' ? z.qta : -z.qta)); }); });
-      Object.keys(usati).filter(function (k) { return usati[k] > 1e-9; }).forEach(function (k) { out.push({livello: liv + 1, tipo: 'lotto', testo: 'ferro lotto ' + k + ' · ' + L.n0(usati[k]) + ' kg', mat: 'FERRO', lotto: k}); if (k !== 'SENZA LOTTO' && ((S().lotti || {}).FERRO || {})[k]) monte('FERRO', k, liv + 2, out); });
+      var usati = {};   // componenti consumati dall'ordine: il ferro o, nella produzione a tre stadi, il semilavorato del livello sotto
+      S().movimenti.filter(function (m) { return m.rif === x.rif && (m.tipo === '261' || m.tipo === '262'); }).forEach(function (m) { (m.lotti || []).forEach(function (z) { var k = m.mat + '|' + z.lotto; usati[k] = r2((usati[k] || 0) + (m.tipo === '261' ? z.qta : -z.qta)); }); });
+      Object.keys(usati).filter(function (k) { return usati[k] > 1e-9; }).forEach(function (k) {
+        var cm = k.split('|')[0], cl = k.slice(cm.length + 1), fe = cm === 'FERRO';
+        out.push({livello: liv + 1, tipo: 'lotto', testo: (fe ? 'ferro lotto ' + cl + ' · ' + L.n0(usati[k]) + ' kg' : cm + ' lotto ' + cl + ' · ' + L.n0(usati[k]) + ' pz'), mat: cm, lotto: cl});
+        if (cl !== 'SENZA LOTTO' && ((S().lotti || {})[cm] || {})[cl]) monte(cm, cl, liv + 2, out); });
     } else out.push({livello: liv, tipo: 'origine', testo: (nomeTipo[x.tipo] || x.tipo) + ' del ' + L.fd(x.data) + (x.rif ? ' · ' + x.rif : '')});
     return out;
   }
