@@ -9,6 +9,10 @@ from ...simulatore import STATIC, mappa_url, meta
 bp = Blueprint("portale", __name__, template_folder="templates", static_folder="static", static_url_path="/static/portale")
 
 MATERIALI = [
+    {"file": "Esercitazione_Completa_FORMAS.pdf", "titolo": "Esercitazione completa — Firenze e FORMAS Pistoia (PDF)",
+     "testo": "Caso principale, UF 8–11 e laboratori dei comandi: dati simulati, verifiche e mappa di copertura."},
+    {"file": "Esercitazione_Completa_FORMAS.md", "titolo": "Esercitazione completa — sorgente modificabile",
+     "testo": "Testo modificabile della stessa esercitazione, generato dalle guide del programma."},
     {"file": "Esercitazione_Ragioneria_con_WMS.pdf", "titolo": "Ragioneria con WMS — guida passo passo (PDF)",
      "testo": "Acquisto, produzione, vendita, chiusura costi e banca: percorso integrato con magazzino attivo dall'apertura."},
     {"file": "Guida-esercizio-integrato.pdf", "titolo": "Esercizio guidato passo passo (PDF)",

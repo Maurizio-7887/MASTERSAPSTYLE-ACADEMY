@@ -3,8 +3,14 @@
 {% if guida %}
 <link rel="stylesheet" href="{{ url_for('guida.static', filename='pannello.css') }}">
 <script>window.MSA_GUIDA = {{ guida | tojson }};</script>
-{% if guida.esercizio == 'dicembre-wms' %}
+{% if guida.esercizio in ['dicembre-wms', 'completo-formas'] %}
 <script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-legacy.js') }}"></script>
+{% endif %}
+{% if guida.esercizio == 'completo-formas' %}
+<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/magazzino-formas.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/laboratori-completi.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/uso-programma.js') }}"></script>
 {% endif %}
 <script src="{{ url_for('guida.static', filename='esercizi/' ~ guida.esercizio ~ '.js') }}"></script>
 <script src="{{ url_for('guida.static', filename='ragioneria.js') }}"></script>
