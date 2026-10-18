@@ -14,7 +14,7 @@ window.PC4 = (function () {
   window.S4.dopoAvvio.push(function (n, i) {
     if (!i || i.modo !== 'costituzione') return;
     var s = n.S; s.costing.scheda = {sovrMat: 0, sovrProd: 0, tariffa: 28, lotto: 100, confermata: true};
-    var ordine = ['SL-TAGLIO', 'SL-PIEGA'].concat(Object.keys(s.materiali).filter(function (m) { return s.materiali[m].tipo === 'FERT'; }));
+    var ordine = ['SL-TAGLIO', 'SL-PIEGA'].filter(function (m) { return !!s.materiali[m]; }).concat(Object.keys(s.materiali).filter(function (m) { return s.materiali[m].tipo === 'FERT'; }));
     ordine.forEach(function (m) {
       var el = elementi(m, 100), st = {materiale: m, data: s.avviato, lotto: 100, elementi: el, unitario: r2(el.totale / 100), stato: 'FR', variante: 'PPC1', rilascio: s.avviato};
       s.costing.stime[m] = st; s.materiali[m].std = st.unitario;

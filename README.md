@@ -1,5 +1,39 @@
 # Aggiornamento Pistoia — solo sistema integrato
 
+## Produzione: ordine unico a operazioni e semilavorato autonomo
+
+Nelle **nuove costituzioni** (`produzioneModello: wip-fasi-v1`) l'esercizio
+**Dicembre: dalla costituzione alla riapertura** distingue due percorsi:
+
+- **TR-STD, 300 pezzi:** un ordine con le operazioni 0010 Taglio, 0020 Piegatura
+  e 0030 Saldatura. Tre dichiarazioni CO11N distinte, con quantità e ore, sullo
+  stesso ordine. Le fasi non generano carichi/scarichi di semilavorati.
+  Dopo il prelievo di 2.400 kg, il saldo analitico cresce da 2.280 a 4.380,
+  6.060 e 9.420 euro. Il 101 carica soltanto i pezzi che hanno terminato il ciclo;
+  sono ammessi versamenti parziali di pezzi finiti. Il totale dell'esercizio è 300.
+- **SL-TAGLIO, 20 kit:** ordine autonomo, prelievo 160 kg, 5 ore di taglio,
+  versamento 101 al magazzino semilavorati per 292 euro e messa a scaffale WMS.
+  Questi kit restano a scorta: non sono le fasi della transenna e non vengono
+  prelevati per l'ordine TR-STD. La successiva conta dell'esercizio trova 19 kit.
+
+Il **WIP analitico** esposto è il saldo dei costi imputati meno gli accrediti
+dei versamenti per ordini ancora in lavorazione. È una rappresentazione
+didattica: **non** è un calcolo SAP completo delle rimanenze di fine periodo e
+non genera una capitalizzazione FI automatica. A DLV/TECO il saldo residuo è
+trattato dal percorso di varianze/liquidazione, non come WIP aperto.
+
+Gli esercizi già iniziati e le consegne storiche conservano distinta, ordini,
+guida e numeri attesi precedenti. Non ci sono migrazioni o azzeramenti automatici.
+Per svolgere il nuovo percorso occorre iniziare una nuova costituzione nello
+spazio didattico appropriato, dopo aver conservato il lavoro precedente; non
+usare «Azzera» per aggiornare un lavoro in corso. I percorsi storici/offline e
+gli altri esercizi integrati non vengono convertiti in questo intervento.
+
+Test mirati: `npm run test:dicembre-wms` (con dipendenze Python installate),
+più le regressioni integrate esistenti. La fixture
+`tests/fixtures/dicembre-wms-legacy.json` contiene esclusivamente dati sintetici
+prodotti dal test della versione precedente, per verificare la compatibilità.
+
 La home e il launchpad mostrano soltanto il sistema integrato. Le tile SD, MM,
 PP, WMS, FI, CO, tesoreria, valute, personale e dati di base lavorano nello
 stesso slot `erp-ft`, con un solo libro giornale. Le guide avviate dalle tile

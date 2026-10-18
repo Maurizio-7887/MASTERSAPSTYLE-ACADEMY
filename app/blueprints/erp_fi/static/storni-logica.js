@@ -150,7 +150,16 @@ window.ST4 = (function () {
     if (o.liquidazione) throw Error('Ordine già liquidato (CLSD): non si storna più.');
     var k = +i.evento, ev = o.eventi[k]; if (!ev) throw Error('Evento inesistente.'); if (ev.stornato) throw Error('Già stornato.');
     if (ev.tipo === 'KGI2') throw Error('I sovraccosti si ricalcolano da soli al prossimo KGI2.');
-    var r0 = s.registrazioni.filter(function (r) { return r.rif === o.numero && !r.stornato && !r.stornoDi && r.tipo === {'261': 'PRELIEVO_261', CO11N: 'CONFERMA', '101': 'ENTRATA_PRODUZIONE'}[ev.tipo] && r.data === ev.data &&
+    if (o.fasi && ev.tipo !== '101') {
+      var successivi = o.eventi.some(function (e) {
+        if (e.stornato) return false;
+        if (e.tipo === '101') return true;
+        if (ev.tipo === '261') return e.tipo === 'CO11N';
+        return e.tipo === 'CO11N' && o.fasi.indexOf(e.fase) > o.fasi.indexOf(ev.fase);
+      });
+      if (successivi) throw Error('Storna prima il versamento e le fasi successive: il ciclo va annullato a ritroso.');
+    }
+    var r0 = s.registrazioni.filter(function (r) { return (!ev.contabile || r.numero === ev.contabile) && r.rif === o.numero && !r.stornato && !r.stornoDi && r.tipo === {'261': 'PRELIEVO_261', CO11N: 'CONFERMA', '101': 'ENTRATA_PRODUZIONE'}[ev.tipo] && r.data === ev.data &&
       (ev.doc ? r.descrizione.indexOf(ev.doc) >= 0 : Math.abs(r.righe[0].importo - ev.valore) < 0.005); })[0];
     if (!r0) throw Error('Documento contabile dell\'evento non trovato.');
     if (ev.tipo === '101') {

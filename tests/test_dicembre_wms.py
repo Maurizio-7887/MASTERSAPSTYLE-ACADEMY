@@ -6,7 +6,7 @@ import re
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from tests._client import app, docente, entra, csrf
 from app.report import Lavoro
-from app.esercizi import ESERCIZI
+from app.esercizi import ESERCIZI, attesi_esercizio
 from app.db import db, Utente, Consegna
 
 
@@ -36,9 +36,20 @@ assert config(c.get('/vuoto/?esercizio_guida=ragioneria-wms').get_data(as_text=T
 
 stato = (Path(__file__).parent / 'dicembre-wms-finale.json').read_text()
 ind = Lavoro(json.loads(stato)).indicatori()
-for k, label, att, tol in ESERCIZI['dicembre-wms']['attesi']:
+for k, label, att, tol in attesi_esercizio('dicembre-wms', json.loads(stato)):
     assert k in ind, k
     assert (ind[k] == att if tol is None else abs(ind[k] - att) <= tol), (k, ind[k], att)
+
+assert json.loads(stato)['produzioneModello'] == 'wip-fasi-v1'
+assert all(r['ok'] for r in Lavoro(json.loads(stato)).confronto('dicembre-wms'))
+# Fotografie precedenti: stesso codice di consegna, attesi storici e guida storica.
+legacy_path = Path(__file__).parent / 'fixtures' / 'dicembre-wms-legacy.json'
+legacy = json.loads(legacy_path.read_text())
+assert 'produzioneModello' not in legacy
+assert attesi_esercizio('dicembre-wms', legacy) is ESERCIZI['dicembre-wms']['attesi']
+legacy_righe = Lavoro(legacy).confronto('dicembre-wms')
+assert len(legacy_righe) == 23 and all(r['ok'] for r in legacy_righe), legacy_righe
+assert Lavoro(legacy).indicatori()['dc_scorte'] == '740/9/10/0'
 
 with app.app_context():
     u = Utente(username='prova.dicembre', nome='Prova Dicembre WMS', deve_cambiare_password=False)
