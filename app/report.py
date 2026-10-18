@@ -7,7 +7,7 @@ import json
 from datetime import date
 from collections import defaultdict
 
-from .esercizi import ESERCIZI
+from .esercizi import ESERCIZI, attesi_esercizio
 
 TECNICHE = {"CHIUSURA_CE", "CHIUSURA_SP", "APERTURA_SP"}
 
@@ -267,7 +267,7 @@ class Lavoro:
                 "dc_costituzione": (s.get("costituzione") or {}).get("data") or "",
                 "dc_capitale_versato": round(-s26("30") - s26("08"), 2),
                 "dc_ordini_pp": sum(1 for o in s.get("produzione") or [] if (o.get("data") or "").startswith("2026-12")),
-                "dc_scorte": "/".join(str(round(g.get(m, 0))) for m in ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD")),
+                "dc_scorte": "/".join(str(round(g.get(m, 0))) for m in (("FERRO", "SL-TAGLIO", "TR-STD") if s.get("produzioneModello") == "wip-fasi-v1" else ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD"))),
                 "dc_rimanenze": round(s26("12") + s26("07") + s26("13"), 2),
                 "dc_colli": len((s.get("sped") or {}).get("colli") or []),
                 "dc_rottamazione": s26("69"), "dc_differenza_inventario": s26("65"),
@@ -317,7 +317,7 @@ class Lavoro:
         es = ESERCIZI.get(esercizio) or ESERCIZI["libero"]
         ind = self.indicatori()
         righe = []
-        for chiave, etichetta, atteso, tol in es["attesi"]:
+        for chiave, etichetta, atteso, tol in attesi_esercizio(esercizio, self.s):
             reale = ind.get(chiave)
             if tol is None:
                 ok = str(reale) == str(atteso)

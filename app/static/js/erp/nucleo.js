@@ -238,7 +238,13 @@
           var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
           S.avviato = data; S.costituzione = {data: data, capitale: cap};
           Object.keys(SEMILAVORATI).forEach(function (m) { S.materiali[m] = JSON.parse(JSON.stringify(SEMILAVORATI[m])); S.giacenze[m] = 0; });
-          var tr = S.materiali['TR-STD']; tr.comp = {mat: 'SL-PIEGA', q: 1}; tr.ore = {Saldatura: 0.40}; tr.attrezzaggio = 0;
+          // Nuovi esercizi: un solo ordine della transenna, tre operazioni senza scorte intermedie.
+          // Non si modifica alcuna azienda salvata: questo ramo vale solo alla costituzione.
+          delete S.materiali['SL-PIEGA']; delete S.giacenze['SL-PIEGA'];
+          S.produzioneModello = 'wip-fasi-v1';
+          var tr = S.materiali['TR-STD']; tr.comp = {mat: 'FERRO', q: 8};
+          tr.ore = {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.40}; tr.attrezzaggio = 0;
+          tr.fasi = ['Taglio', 'Piegatura', 'Saldatura'];
           var rc = N.post({data: data, tipo: 'COSTITUZIONE', rif: 'COSTITUZIONE', descrizione: 'Costituzione di ' + S.societa + ': i soci sottoscrivono il capitale sociale di ' + L.eur(cap) + ' €',
             righe: [{conto: '08', dareAvere: 'DARE', importo: cap, testo: 'capitale sottoscritto e non ancora versato'}, {conto: '30', dareAvere: 'AVERE', importo: cap, testo: 'capitale sociale'}]});
           if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });

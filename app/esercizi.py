@@ -6,7 +6,7 @@ gli indicatori disponibili sono quelli di report.indicatori().
 
 ESERCIZI = {
     "dicembre-wms": {
-        "titolo": "Dicembre: dalla costituzione alla riapertura — azienda nuova con WMS e produzione a tre stadi",
+        "titolo": "Dicembre: dalla costituzione alla riapertura — azienda nuova con WMS e produzione",
         "versione": "erp-ft",
         "attesi": [
             ("dc_costituzione", "Data di costituzione", "2026-12-01", None),
@@ -246,3 +246,29 @@ ESERCIZI = {
 
 def scelte(versione=None):
     return [(k, e["titolo"]) for k, e in ESERCIZI.items() if not versione or e["versione"] in (None, versione)]
+
+
+# Dicembre: il vecchio schema resta valido per fotografie e aziende già salvate.
+# Il modello nuovo elimina 56 euro di attività (7.336 -> 7.280) e conserva lo
+# stesso ferro consumato e COGS; ante imposte 2.573,32 - 56 = 2.517,32.
+_DICEMBRE_WIP_ATTESI = {
+    "dc_ordini_pp": ("Ordini indipendenti: TR-STD a fasi + HALB a scorta", 2),
+    "dc_scorte": ("Scorte finali: ferro kg / SL-TAGLIO / TR-STD", "740/19/0"),
+    "dc_rimanenze": ("Rimanenze al 31/12 (ferro 703 + HALB 277,40)", 980.40),
+    "dc_ires": ("IRES 2026", 604.16),
+    "dc_irap": ("IRAP 2026", 98.18),
+    "dc_utile": ("Utile d'esercizio 2026", 1814.98),
+}
+ESERCIZI["dicembre-wms"]["attesi_per_modello"] = {
+    "wip-fasi-v1": [
+        (k, *_DICEMBRE_WIP_ATTESI[k], tol) if k in _DICEMBRE_WIP_ATTESI else (k, label, valore, tol)
+        for k, label, valore, tol in ESERCIZI["dicembre-wms"]["attesi"]
+    ],
+}
+
+
+def attesi_esercizio(codice, stato=None):
+    """Numeri di controllo secondo il modello salvato, senza migrare l'archivio."""
+    esercizio = ESERCIZI.get(codice) or ESERCIZI["libero"]
+    modello = (stato or {}).get("produzioneModello")
+    return esercizio.get("attesi_per_modello", {}).get(modello, esercizio["attesi"])
