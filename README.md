@@ -190,3 +190,22 @@ Railway: Nixpacks + gunicorn `--preload` (`railway.json`), controllo su `/health
 - sistema integrato S/4, in attesa: infragruppo e consolidato (versione leggera con una consociata)
 - altri esercizi con i loro numeri di controllo (`app/esercizi.py`)
 - altri simulatori della suite
+
+
+## Esercitazione completa Firenze / FORMAS Pistoia
+
+Dal Launchpad scegliere **Esercitazione completa — azienda, magazzino e innovazione**. La guida laterale affianca il caso Dicembre con WIP a fasi e semilavorato autonomo a supplementi UF 8–11 e laboratori alternativi. I materiali PDF e Markdown sono disponibili nel portale e nella pagina FORMAS.
+
+- **238 passi**: caso aziendale, contabilità di magazzino, inventari, ERP/WMS, RF, tracciabilità, spedizione e innovazione.
+- [Mappa di copertura](docs/copertura-esercizio-completo.md): 129/129 azioni normalizzate, inclusi alias, e 76/76 schermate attive raggiunte. È copertura delle consegne, non certificazione di esecuzione di ogni clic.
+- Il calendario fornito identifica UF e date: non è un syllabus analitico. Lo sviluppo dei contenuti è una proposta didattica verificata sul programma.
+- Cambiare guida non separa i dati: conservare il caso principale e usare account dedicati per laboratori alternativi. Nessun reset, importazione o conversione automatica dei lavori esistenti.
+- I comandi di navigazione ripetuti sono raggruppati; archivi storici/offline e funzioni riservate al docente sono distinti dall'operatività allievo.
+
+### Collaudi della guida completa
+
+`npm run test:completo-formas` esegue struttura/compatibilità (1.867 controlli), rotte/materiali (181), laboratori contabili/commerciali (171), magazzino (97) e regressione inventario RF (59). La suite `npm test` comprende anche questi test. Controlli eseguiti con JSDOM e database SQLite temporanei, dati sintetici e nessun invio esterno. Le spunte manuali richiedono evidenze e verifica del docente.
+
+Corretto un difetto UI nella conta RF: la conta veniva invocata due volte e l'ultima mostrava un errore dopo il salvataggio riuscito. Una sola chiamata ora salva e aggiorna la pagina. Non cambia il motore inventariale.
+
+Non collaudati nell'app online: permessi e concorrenza server, stampa fisica, fotocamere, terminali o varchi reali. RFID, robot e altre tecnologie sono simulazioni o attività di valutazione, non integrazioni hardware. La prova cross-dock arriva al PICK confermato; la sua partenza specifica e il preset di fine febbraio richiedono riscontro manuale separato. Nessun account allievo online è stato modificato e nessun deploy è stato eseguito.

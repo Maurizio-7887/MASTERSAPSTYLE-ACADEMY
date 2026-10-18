@@ -164,7 +164,7 @@
           var val = {numero: d.numero, parziale: true, contatore: radice.querySelector('#rf-ris').value};
           d.righe.forEach(function (r, k) { var c = radice.querySelector('#rf-c' + k); if (c && c.value !== '') { val['r' + k] = c.value; var m = radice.querySelector('#rf-m' + k); if (m) val['m' + k] = m.value; } });
           var o = radice.querySelector('#rf-ce');
-          try { var t = IV.conta(val); var manca = d.righe.some(function (r) { return sec ? r.riconta && r.conta2 === null : r.conta1 === null; }); if (!manca) t = IV.conta({numero: d.numero, contatore: val.contatore}); o.className = 'lab-esito ok'; o.innerHTML = t; var ii = radice.querySelector('#rf-inv'); ii.value = ''; ii.focus(); }
+          try { var t = IV.conta(val); o.className = 'lab-esito ok'; o.innerHTML = t; var ii = radice.querySelector('#rf-inv'); ii.value = ''; ii.focus(); }
           catch (x) { o.className = 'lab-esito ko'; o.textContent = '⛔ ' + x.message; }
         };
       }

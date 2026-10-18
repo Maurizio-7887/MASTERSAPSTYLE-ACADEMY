@@ -16,3 +16,7 @@ tests/ragioneria-wms-finale.json
 tests/ragioneria-chiusura-finale.json
 tests/dicembre-wms-finale.json
 tests/dicembre-wms-31-12.json
+
+tests/_completo/
+tests/magazzino-smoke-results.json
+tests/magazzino-rf-regression-results.json

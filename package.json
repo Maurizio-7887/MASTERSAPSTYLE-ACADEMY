@@ -3,7 +3,7 @@
   "private": true,
   "description": "Test di regressione: esegue l'esercizio guidato dentro il simulatore e verifica i numeri della guida",
   "scripts": {
-    "test": "npm run test:solo-integrato && npm run test:launchpad-wms && npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte && npm run test:laboratori && npm run test:s4 && npm run test:accessi && npm run test:sincronia && npm run test:guida && npm run test:ragioneria-wms && npm run test:dicembre-wms",
+    "test": "npm run test:solo-integrato && npm run test:launchpad-wms && npm run test:rotte && npm run test:file-unico && npm run test:blueprint && npm run test:multipagina && npm run test:ponte && npm run test:laboratori && npm run test:s4 && npm run test:accessi && npm run test:sincronia && npm run test:guida && npm run test:ragioneria-wms && npm run test:dicembre-wms && npm run test:completo-formas",
     "test:dicembre-wms": "node tests/wip-fasi.js && node tests/esercizio-dicembre-wms.js && python3 tests/test_dicembre_wms.py",
     "test:wip-fasi": "node tests/wip-fasi.js",
     "test:ragioneria-wms": "node tests/pannello-wms.js && node tests/quiz-contabile.js && node tests/esercizio-ragioneria-wms.js && node tests/esercizio-ragioneria-chiusura.js && python3 tests/test_ragioneria_wms.py",
@@ -18,7 +18,8 @@
     "test:guida": "node tests/guida.js",
     "test:laboratori": "node tests/laboratori.js",
     "test:s4": "node tests/s4.js && node tests/s4-storni.js",
-    "test:solo-integrato": "python3 tests/test_solo_integrato.py"
+    "test:solo-integrato": "python3 tests/test_solo_integrato.py",
+    "test:completo-formas": "node tests/guida-completa.js && python3 tests/test_guida_completa.py && node tests/laboratori-completi-smoke.js && node tests/magazzino-completo-smoke.js && node tests/magazzino-rf-regression.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"

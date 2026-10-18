@@ -46,7 +46,7 @@ for v in ['vuoto', 'completo']:
                 'alta_varieta', 'ripetitiva'}, (u, href)
             assert ep != 'portale.tutto', (u, href)
             if ep == 'portale.materiale':
-                assert args.get('file') == 'Esercitazione_Ragioneria_con_WMS.pdf', (u, href)
+                assert args.get('file') in {'Esercitazione_Ragioneria_con_WMS.pdf', 'Esercitazione_Completa_FORMAS.pdf'}, (u, href)
             assert args.get('codice') not in {'s4', 'hmlv', 'rem', 'pian', 'rep'}, (u, href)
         if '/m/' in u or u == f'/{v}/':
             assert config(html, 'MSA_SYNC')['versione'] == 'erp-ft'

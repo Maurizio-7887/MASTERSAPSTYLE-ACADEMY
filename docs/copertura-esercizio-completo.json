@@ -1,0 +1,3514 @@
+{
+  "versione": "completo-formas-v1",
+  "base": {
+    "path": "/tmp/academy-wip",
+    "mode": "read-only",
+    "commit_or_revision": "unresolved local WIP snapshot (no git status/revision captured)",
+    "app_started": false,
+    "real_data_used": false
+  },
+  "passi": 238,
+  "comandi_mappati": 129,
+  "comandi_censiti": 129,
+  "comandi": [
+    {
+      "id": "erp_acquisti:rq:rq",
+      "module": "erp_acquisti",
+      "form": "rq",
+      "form_page": "richieste",
+      "action": "rq",
+      "label": "Crea la richiesta",
+      "route": "/<versione>/s4/acquisti/richieste",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 18,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.richiesta",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        173,
+        225
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:ap:ap",
+      "module": "erp_acquisti",
+      "form": "ap",
+      "form_page": "richieste",
+      "action": "ap",
+      "label": "Registra la decisione",
+      "route": "/<versione>/s4/acquisti/richieste",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 21,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.approva",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        173
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:me:me",
+      "module": "erp_acquisti",
+      "form": "me",
+      "form_page": "ordini",
+      "action": "me",
+      "label": "Salva ordine",
+      "route": "/<versione>/s4/acquisti/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 30,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.ordine",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “ME21N: ordina 3.000 kg di ferro” | “ME21N: riordino urgente di 500 kg” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        16,
+        21,
+        99,
+        139,
+        174,
+        175,
+        184,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:rl:rl",
+      "module": "erp_acquisti",
+      "form": "rl",
+      "form_page": "ordini",
+      "action": "rl",
+      "label": "Registra",
+      "route": "/<versione>/s4/acquisti/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 34,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.rilascia",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        174,
+        175
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:so:so",
+      "module": "erp_acquisti",
+      "form": "so",
+      "form_page": "ordini",
+      "action": "so",
+      "label": "Salva la soglia",
+      "route": "/<versione>/s4/acquisti/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 35,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.parametri",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        174
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:mi:mi",
+      "module": "erp_acquisti",
+      "form": "mi",
+      "form_page": "entrate",
+      "action": "mi",
+      "label": "Registra entrata",
+      "route": "/<versione>/s4/acquisti/entrate",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 40,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.entrata",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “MIGO 101: ricevi il ferro, 200 kg sono schiacciati” | “MIGO 101: ricevi i 500 kg urgenti” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        17,
+        22,
+        100,
+        139,
+        176,
+        184,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_acquisti:mr:mr",
+      "module": "erp_acquisti",
+      "form": "mr",
+      "form_page": "fatture",
+      "action": "mr",
+      "label": "Registra fattura",
+      "route": "/<versione>/s4/acquisti/fatture",
+      "source": {
+        "declaration": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "declaration_line": 50,
+        "collega": "app/blueprints/erp_acquisti/static/mm-pagine.js",
+        "logic": "app/blueprints/erp_acquisti/static/mm-logica.js"
+      },
+      "linked_handler": "MM.fattura",
+      "prerequisites": "Supplier/material/request/order state required by the selected purchasing action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “MIRO: registra la fattura del ferro” | “MIRO: fattura del riordino” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        20,
+        24,
+        176,
+        184
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_cespiti:ac:ac",
+      "module": "erp_cespiti",
+      "form": "ac",
+      "form_page": "acquisto",
+      "action": "ac",
+      "label": "Registra il cespite e la fattura",
+      "route": "/<versione>/s4/cespiti/acquisto",
+      "source": {
+        "declaration": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "declaration_line": 24,
+        "collega": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "logic": "app/blueprints/erp_cespiti/static/ce-logica.js"
+      },
+      "linked_handler": "CE.acquista",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “F-90: compra la taglierina a nastro” | “F-90: compra la piegatubi idraulica” | “F-90: compra la saldatrice a filo” | “F-90: compra il carrello elevatore del magazzino” | “F-90: compra una sega circolare d’occasione” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        215
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_cespiti:af:af",
+      "module": "erp_cespiti",
+      "form": "af",
+      "form_page": "ammortamenti",
+      "action": "af",
+      "label": "Registra gli ammortamenti (AFAB)",
+      "route": "/<versione>/s4/cespiti/ammortamenti",
+      "source": {
+        "declaration": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "declaration_line": 38,
+        "collega": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "logic": "app/blueprints/erp_cespiti/static/ce-logica.js"
+      },
+      "linked_handler": "CE.ammortizza",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “AFAB: ammortamenti di dicembre” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        73,
+        217
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_cespiti:cs:cs",
+      "module": "erp_cespiti",
+      "form": "cs",
+      "form_page": "cessione",
+      "action": "cs",
+      "label": "Registra la cessione",
+      "route": "/<versione>/s4/cespiti/cessione",
+      "source": {
+        "declaration": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "declaration_line": 50,
+        "collega": "app/blueprints/erp_cespiti/static/ce-pagine.js",
+        "logic": "app/blueprints/erp_cespiti/static/ce-logica.js"
+      },
+      "linked_handler": "CE.cedi",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Vendi il carrello elevatore: minusvalenza” | “Vendi la sega circolare: plusvalenza” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        64,
+        65,
+        216
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:lq:lq",
+      "module": "erp_chiusura",
+      "form": "lq",
+      "form_page": "iva",
+      "action": "lq",
+      "label": "Registra la liquidazione",
+      "route": "/<versione>/s4/chiusura/iva",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 22,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.liquidaIva",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Liquida l’IVA di dicembre” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        83,
+        220
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:vs:vs",
+      "module": "erp_chiusura",
+      "form": "vs",
+      "form_page": "iva",
+      "action": "vs",
+      "label": "Registra l'F24",
+      "route": "/<versione>/s4/chiusura/iva",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 24,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.versaIva",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        220
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:ir:ir",
+      "module": "erp_chiusura",
+      "form": "ir",
+      "form_page": "imposte",
+      "action": "ir",
+      "label": "Registra IRES, IRAP e imposte anticipate",
+      "route": "/<versione>/s4/chiusura/imposte",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 48,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.registraIres",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Calcola e registra IRES e IRAP” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        84,
+        221
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:ir:pv",
+      "module": "erp_chiusura",
+      "form": "ir",
+      "form_page": "imposte",
+      "action": "pv",
+      "label": "Ricalcola",
+      "route": "/<versione>/s4/chiusura/imposte",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 48,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "function (v) { d.au = v.aumenti || 0; d.di = v.diminuzioni || 0; d.ai = v.aliquota || 24; d.ap = v.aliquotaIrap || 3.9; return '<p class=\"lab-nota\">Ricalcolato con le variazioni e le aliquote indicate.</p>';",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Calcola e registra IRES e IRAP” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        84,
+        221
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:ch:ch",
+      "module": "erp_chiusura",
+      "form": "ch",
+      "form_page": "chiusura",
+      "action": "ch",
+      "label": "Chiudi l'esercizio",
+      "route": "/<versione>/s4/chiusura/chiusura",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 60,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.chiudi",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Chiudi l’esercizio 2026” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        86,
+        222
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:ra:ra",
+      "module": "erp_chiusura",
+      "form": "ra",
+      "form_page": "riapertura",
+      "action": "ra",
+      "label": "Riapri i conti",
+      "route": "/<versione>/s4/chiusura/riapertura",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 71,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.riapri",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Riapri i conti al 1° gennaio 2027” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        87,
+        222
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:du:du",
+      "module": "erp_chiusura",
+      "form": "du",
+      "form_page": "riapertura",
+      "action": "du",
+      "label": "Registra la destinazione",
+      "route": "/<versione>/s4/chiusura/riapertura",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 73,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.destinaUtile",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “L’assemblea approva il bilancio e destina l’utile” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        92,
+        223
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:as:prova",
+      "module": "erp_chiusura",
+      "form": "as",
+      "form_page": "assestamenti",
+      "action": "prova",
+      "label": "Calcola la quota",
+      "route": "/<versione>/s4/chiusura/assestamenti",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 84,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "function (v) { var c = CH.calcolaAssestamento(v);\n      return '<!--info--><p class=\"lab-nota\">' + c.nome + ': ' + c.formula + ' — conto ' + c.contoSP + ' ' + e(S().pianoDeiConti.find(function (x) { return x.codice === c.contoSP;",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Rateo passivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        71,
+        72,
+        219
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:as:as",
+      "module": "erp_chiusura",
+      "form": "as",
+      "form_page": "assestamenti",
+      "action": "as",
+      "label": "Registra",
+      "route": "/<versione>/s4/chiusura/assestamenti",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 84,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.assestamento",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Rateo passivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        71,
+        72,
+        219
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_chiusura:st:st",
+      "module": "erp_chiusura",
+      "form": "st",
+      "form_page": "assestamenti",
+      "action": "st",
+      "label": "Storna ratei e risconti dell'anno prima",
+      "route": "/<versione>/s4/chiusura/assestamenti",
+      "source": {
+        "declaration": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "declaration_line": 87,
+        "collega": "app/blueprints/erp_chiusura/static/ch-pagine.js",
+        "logic": "app/blueprints/erp_chiusura/static/ch-logica.js"
+      },
+      "linked_handler": "CH.stornaAssestamenti",
+      "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Storna il risconto e il rateo” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        88,
+        223
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:sk:sk",
+      "module": "erp_costi",
+      "form": "sk",
+      "form_page": "scheda",
+      "action": "sk",
+      "label": "Salva la scheda",
+      "route": "/<versione>/s4/costi/scheda",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 14,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.scheda",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        177,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:ck:ck",
+      "module": "erp_costi",
+      "form": "ck",
+      "form_page": "calcolo",
+      "action": "ck",
+      "label": "Calcola",
+      "route": "/<versione>/s4/costi/calcolo",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 30,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.calcola",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        177,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:cr:marca",
+      "module": "erp_costi",
+      "form": "cr",
+      "form_page": "calcolo",
+      "action": "marca",
+      "label": "Marca tutte le stime calcolate",
+      "route": "/<versione>/s4/costi/calcolo",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 31,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.marca",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        177,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:cr:cr",
+      "module": "erp_costi",
+      "form": "cr",
+      "form_page": "calcolo",
+      "action": "cr",
+      "label": "Rilascia",
+      "route": "/<versione>/s4/costi/calcolo",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 31,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.rilascia",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        177,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:kg:kg",
+      "module": "erp_costi",
+      "form": "kg",
+      "form_page": "chiusura",
+      "action": "kg",
+      "label": "Calcola e addebita",
+      "route": "/<versione>/s4/costi/chiusura",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 43,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.sovraccosti",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        180
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:ko:ko",
+      "module": "erp_costi",
+      "form": "ko",
+      "form_page": "chiusura",
+      "action": "ko",
+      "label": "Calcola varianze e liquida",
+      "route": "/<versione>/s4/costi/chiusura",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 44,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.liquida",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “KO88: chiudi i due ordini indipendenti” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        82,
+        180
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_costi:cm:cm",
+      "module": "erp_costi",
+      "form": "cm",
+      "form_page": "ml",
+      "action": "cm",
+      "label": "Esegui la chiusura (a più livelli) e registra",
+      "route": "/<versione>/s4/costi/ml",
+      "source": {
+        "declaration": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "declaration_line": 69,
+        "collega": "app/blueprints/erp_costi/static/copc-pagine.js",
+        "logic": "app/blueprints/erp_costi/static/copc-logica.js"
+      },
+      "linked_handler": "PC.chiusuraML",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        182
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:vs:vs",
+      "module": "erp_dati",
+      "form": "vs",
+      "form_page": "avvio",
+      "action": "vs",
+      "label": "Registra il versamento dei soci",
+      "route": "/<versione>/s4/dati/avvio",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 14,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "N.versaCapitale",
+      "prerequisites": "Use only with the intended initial/corporate state; initialization actions affect the integrated company.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “I soci versano il capitale in banca” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        4
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:av:av",
+      "module": "erp_dati",
+      "form": "av",
+      "form_page": "avvio",
+      "action": "av",
+      "label": "Avvia il sistema",
+      "route": "/<versione>/s4/dati/avvio",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 19,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "SD.avviaSistema",
+      "prerequisites": "Use only with the intended initial/corporate state; initialization actions affect the integrated company.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Alternative start-up or authorization adjustment; not part of December company creation and may affect shared company state.",
+      "passi_completi": [
+        97,
+        159,
+        172,
+        183,
+        191,
+        200,
+        207,
+        213,
+        224
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:cs:cs",
+      "module": "erp_dati",
+      "form": "cs",
+      "form_page": "avvio",
+      "action": "cs",
+      "label": "Costituisci la società",
+      "route": "/<versione>/s4/dati/avvio",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 21,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v);",
+      "prerequisites": "Use only with the intended initial/corporate state; initialization actions affect the integrated company.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Costituisci la società con 80.000 € di capitale” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        3
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:vk:vk",
+      "module": "erp_dati",
+      "form": "vk",
+      "form_page": "condizioni",
+      "action": "vk",
+      "label": "Salva condizione",
+      "route": "/<versione>/s4/dati/condizioni",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 53,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "SD.creaCondizione",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        161
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:si:si",
+      "module": "erp_dati",
+      "form": "si",
+      "form_page": "condizioni",
+      "action": "si",
+      "label": "Calcola",
+      "route": "/<versione>/s4/dati/condizioni",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 56,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "function (v) { var p = SD.prezzi(v.cliente",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        161
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:au:au",
+      "module": "erp_dati",
+      "form": "au",
+      "form_page": "ruoli",
+      "action": "au",
+      "label": "Applica",
+      "route": "/<versione>/s4/dati/ruoli",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "declaration_line": 72,
+        "collega": "app/blueprints/erp_dati/static/dati-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "AU.imposta",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "admin exclusion",
+      "suggested_reason": "Role/authorization administration is operator-only, not an ordinary learner business command.",
+      "passi_completi": [
+        225
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:sd:sd",
+      "module": "erp_fi",
+      "form": "sd",
+      "form_page": "sdi",
+      "action": "sd",
+      "label": "Invia allo SdI",
+      "route": "/<versione>/s4/contabilita-s4/sdi",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 22,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": null
+      },
+      "linked_handler": "ST.inviaSdi",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Trasmetti le due fatture allo SdI” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        58,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:vf:vf",
+      "module": "erp_fi",
+      "form": "vf",
+      "form_page": "storni",
+      "action": "vf",
+      "label": "Storna",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 45,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.vf11",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        187,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:vl:vl",
+      "module": "erp_fi",
+      "form": "vl",
+      "form_page": "storni",
+      "action": "vl",
+      "label": "Storna l'uscita merci",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 46,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.vl09",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        187
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:ec:ec",
+      "module": "erp_fi",
+      "form": "ec",
+      "form_page": "storni",
+      "action": "ec",
+      "label": "Elimina la consegna",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 47,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.eliminaConsegna",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        187
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:mb:mb",
+      "module": "erp_fi",
+      "form": "mb",
+      "form_page": "storni",
+      "action": "mb",
+      "label": "Storna l'entrata",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 48,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.mbst",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        184
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:mr:mr",
+      "module": "erp_fi",
+      "form": "mr",
+      "form_page": "storni",
+      "action": "mr",
+      "label": "Storna la fattura",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 49,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.mr8m",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        184
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:pp:pp",
+      "module": "erp_fi",
+      "form": "pp",
+      "form_page": "storni",
+      "action": "pp",
+      "label": "Storna l'evento",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 50,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "function (v) { var p = String(v.evento).split('|'); return ST.produzione({ordine: p[0]",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        186
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:lt:lt",
+      "module": "erp_fi",
+      "form": "lt",
+      "form_page": "storni",
+      "action": "lt",
+      "label": "Annulla e ricrea",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 51,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "ST.lt15",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        139
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:fb:fb",
+      "module": "erp_fi",
+      "form": "fb",
+      "form_page": "storni",
+      "action": "fb",
+      "label": "Storna il documento",
+      "route": "/<versione>/s4/contabilita-s4/storni",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 52,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/storni-logica.js"
+      },
+      "linked_handler": "function (v) { return ST.fb08({documento: v.documento",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Reversal/correction is an exception branch; not used in a clean December run and should be taught against a deliberately created source document.",
+      "passi_completi": [
+        188
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:fs:fs",
+      "module": "erp_fi",
+      "form": "fs",
+      "form_page": "fatture",
+      "action": "fs",
+      "label": "Registra la fattura",
+      "route": "/<versione>/s4/contabilita-s4/fatture",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 64,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/fs-logica.js"
+      },
+      "linked_handler": "FS.fattura",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        188,
+        193,
+        196,
+        197,
+        198,
+        214,
+        219,
+        235
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:fp:fp",
+      "module": "erp_fi",
+      "form": "fp",
+      "form_page": "passive",
+      "action": "fp",
+      "label": "Registra la fattura",
+      "route": "/<versione>/s4/contabilita-s4/passive",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 75,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/fs-logica.js"
+      },
+      "linked_handler": "FS.fatturaPassiva",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “FB60: registra la polizza annuale” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        12,
+        192,
+        214
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:pg:pg",
+      "module": "erp_fi",
+      "form": "pg",
+      "form_page": "passive",
+      "action": "pg",
+      "label": "Registra il pagamento",
+      "route": "/<versione>/s4/contabilita-s4/passive",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 79,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/fs-logica.js"
+      },
+      "linked_handler": "FS.paga",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “F-53: paga la polizza” | “F-53: paga il ferro” | “F-53: paga i macchinari” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        13,
+        60,
+        61,
+        214
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:sv:sv",
+      "module": "erp_fi",
+      "form": "sv",
+      "form_page": "sopravvenienze",
+      "action": "sv",
+      "label": "Registra la sopravvenienza",
+      "route": "/<versione>/s4/contabilita-s4/sopravvenienze",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 89,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/fs-logica.js"
+      },
+      "linked_handler": "FS.sopravvenienza",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “L’assicurazione riconosce un indennizzo” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        62,
+        218
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_fi:ii:ii",
+      "module": "erp_fi",
+      "form": "ii",
+      "form_page": "sopravvenienze",
+      "action": "ii",
+      "label": "Registra l'incasso",
+      "route": "/<versione>/s4/contabilita-s4/sopravvenienze",
+      "source": {
+        "declaration": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "declaration_line": 91,
+        "collega": "app/blueprints/erp_fi/static/fi-pagine.js",
+        "logic": "app/blueprints/erp_fi/static/fs-logica.js"
+      },
+      "linked_handler": "FS.incassaIndennizzo",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Incassa l’indennizzo” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        63,
+        218
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_innovazione:sl:sl",
+      "module": "erp_innovazione",
+      "form": "sl",
+      "form_page": "slotting",
+      "action": "sl",
+      "label": "Crea i compiti di trasferimento proposti",
+      "route": "/<versione>/s4/innovazione/slotting",
+      "source": {
+        "declaration": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "declaration_line": 33,
+        "collega": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "logic": "app/blueprints/erp_innovazione/static/in-logica.js"
+      },
+      "linked_handler": "IN.applicaSlotting",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        142
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_innovazione:mo:mo",
+      "module": "erp_innovazione",
+      "form": "mo",
+      "form_page": "ondate",
+      "action": "mo",
+      "label": "Salva",
+      "route": "/<versione>/s4/innovazione/ondate",
+      "source": {
+        "declaration": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "declaration_line": 46,
+        "collega": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "logic": "app/blueprints/erp_innovazione/static/in-logica.js"
+      },
+      "linked_handler": "IN.impostazioni",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        143,
+        145,
+        146,
+        150
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_innovazione:on:on",
+      "module": "erp_innovazione",
+      "form": "on",
+      "form_page": "ondate",
+      "action": "on",
+      "label": "Rilascia l'ondata (compiti in ordine di percorso)",
+      "route": "/<versione>/s4/innovazione/ondate",
+      "source": {
+        "declaration": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "declaration_line": 50,
+        "collega": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "logic": "app/blueprints/erp_innovazione/static/in-logica.js"
+      },
+      "linked_handler": "IN.rilasciaOndata",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        144
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_innovazione:rf:rf",
+      "module": "erp_innovazione",
+      "form": "rf",
+      "form_page": "rfid",
+      "action": "rf",
+      "label": "Fai passare il carrello dal varco",
+      "route": "/<versione>/s4/innovazione/rfid",
+      "source": {
+        "declaration": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "declaration_line": 61,
+        "collega": "app/blueprints/erp_innovazione/static/in-pagine.js",
+        "logic": "app/blueprints/erp_innovazione/static/in-logica.js"
+      },
+      "linked_handler": "IN.varco",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        133
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:ia:ia",
+      "module": "erp_inventario",
+      "form": "ia",
+      "form_page": "documenti",
+      "action": "ia",
+      "label": "Attiva (blocca le ubicazioni)",
+      "route": "/<versione>/s4/inventario/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "declaration_line": 26,
+        "collega": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js"
+      },
+      "linked_handler": "function (v) { return IV.attiva({numero: d.numero",
+      "prerequisites": "Relevant inventory document/count/differences must exist; document status controls available action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Attiva l’inventario e stampa la lista di conta” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        76,
+        116,
+        121,
+        122,
+        123,
+        137
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:ic:ic",
+      "module": "erp_inventario",
+      "form": "ic",
+      "form_page": "documenti",
+      "action": "ic",
+      "label": "Registra la conta (LI11N; LI14 riconta quando oltre tolleranza)",
+      "route": "/<versione>/s4/inventario/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "declaration_line": 27,
+        "collega": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js"
+      },
+      "linked_handler": "function (v) { v.numero = d.numero; return IV.conta(v);",
+      "prerequisites": "Relevant inventory document/count/differences must exist; document status controls available action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “LI11N: registra la conta (manca un kit tagliato)” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "coverage_variants": [
+        {
+          "label": "Conta iniziale LI11N",
+          "coverage_current_exercise": "yes",
+          "evidence": "December WMS guide: “LI11N: registra la conta (manca un kit tagliato)”."
+        },
+        {
+          "label": "Riconta LI14",
+          "coverage_current_exercise": "no",
+          "evidence": "Guide says difference is below the €20 tolerance and explicitly expects no recount; source condition selects this label only when the inventory status is riconta."
+        }
+      ],
+      "passi_completi": [
+        77,
+        118,
+        121,
+        123,
+        137
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:ix:ix",
+      "module": "erp_inventario",
+      "form": "ix",
+      "form_page": "documenti",
+      "action": "ix",
+      "label": "Chiudi nel WMS: differenze nella 999 (LI20)",
+      "route": "/<versione>/s4/inventario/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "declaration_line": 28,
+        "collega": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js"
+      },
+      "linked_handler": "function (v) { return IV.chiudi({numero: d.numero",
+      "prerequisites": "Relevant inventory document/count/differences must exist; document status controls available action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “LI20: chiudi l’inventario nel WMS” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        78,
+        119,
+        121,
+        122,
+        123,
+        137
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:in:in",
+      "module": "erp_inventario",
+      "form": "in",
+      "form_page": "documenti",
+      "action": "in",
+      "label": "Crea documento",
+      "route": "/<versione>/s4/inventario/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "declaration_line": 31,
+        "collega": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js"
+      },
+      "linked_handler": "function (v) { var r = IV.crea(v); radice.dataset.doc = W().inventari.slice(-1)[0].numero; return r;",
+      "prerequisites": "Relevant inventory document/count/differences must exist; document status controls available action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “LI01N: documento d’inventario delle ubicazioni occupate” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        75,
+        115,
+        121,
+        122,
+        123,
+        137
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:rg:rg",
+      "module": "erp_inventario",
+      "form": "rg",
+      "form_page": "differenze",
+      "action": "rg",
+      "label": "Registra le differenze",
+      "route": "/<versione>/s4/inventario/differenze",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "declaration_line": 69,
+        "collega": "app/blueprints/erp_inventario/static/inv-pagine.js",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js"
+      },
+      "linked_handler": "IV.registra",
+      "prerequisites": "Relevant inventory document/count/differences must exist; document status controls available action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “LI21: registra la differenza in contabilità” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        79,
+        120,
+        121,
+        122,
+        138
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:at:at",
+      "module": "erp_magazzino",
+      "form": "at",
+      "form_page": "struttura",
+      "action": "at",
+      "label": "Attiva il magazzino W100 e carica le giacenze nelle ubicazioni",
+      "route": "/<versione>/s4/magazzino/",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 21,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.attiva",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Attiva il magazzino W100 (vuoto)” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        5,
+        98
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:sg:sg",
+      "module": "erp_magazzino",
+      "form": "sg",
+      "form_page": "compiti",
+      "action": "sg",
+      "label": "Crea compiti (FIFO)",
+      "route": "/<versione>/s4/magazzino/compiti",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 68,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.approvvigiona",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “WMS: porta il ferro delle transenne alla linea” | “WMS: approvvigiona il ferro dei 20 kit” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        26,
+        35,
+        147
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:tr:tr",
+      "module": "erp_magazzino",
+      "form": "tr",
+      "form_page": "compiti",
+      "action": "tr",
+      "label": "Crea compito",
+      "route": "/<versione>/s4/magazzino/compiti",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 70,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.trasferisci",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “LT10: sposta il cassone da 20 in fondo al magazzino” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        42,
+        110,
+        111,
+        141
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:cf:cf",
+      "module": "erp_magazzino",
+      "form": "cf",
+      "form_page": "compiti",
+      "action": "cf",
+      "label": "Conferma",
+      "route": "/<versione>/s4/magazzino/compiti",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 71,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "function (v) { return WM.conferma({compito: v.compito",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Alternative desk confirmation UI calls the same WM.conferma state transition as RF; December uses RF only, so do not add it as a separate business operation.",
+      "same_business_operation_as": "erp_magazzino:rf:conferma_compito_rf",
+      "passi_completi": [
+        110
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:bl:bl",
+      "module": "erp_magazzino",
+      "form": "bl",
+      "form_page": "bloccato",
+      "action": "bl",
+      "label": "Blocca e crea il compito verso la quarantena",
+      "route": "/<versione>/s4/magazzino/bloccato",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 205,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.blocca",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        112,
+        114
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:dq:sb",
+      "module": "erp_magazzino",
+      "form": "dq",
+      "form_page": "bloccato",
+      "action": "sb",
+      "label": "Sblocca: è buona (343)",
+      "route": "/<versione>/s4/magazzino/bloccato",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 208,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.sblocca",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        113
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:dq:ro",
+      "module": "erp_magazzino",
+      "form": "dq",
+      "form_page": "bloccato",
+      "action": "ro",
+      "label": "Rottama: da buttare (555)",
+      "route": "/<versione>/s4/magazzino/bloccato",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "declaration_line": 208,
+        "collega": "app/blueprints/erp_magazzino/static/wm-pagine.js",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js"
+      },
+      "linked_handler": "WM.rottama",
+      "prerequisites": "WMS must be activated and the relevant open task/handling unit/location must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Quarantena: decidi sui 200 kg schiacciati” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        19,
+        114
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:pa:pa",
+      "module": "erp_paghe",
+      "form": "pa",
+      "form_page": "dipendenti",
+      "action": "pa",
+      "label": "Salva parametri",
+      "route": "/<versione>/s4/paghe/dipendenti",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 14,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "PY.parametri",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        208
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:pr:pr",
+      "module": "erp_paghe",
+      "form": "pr",
+      "form_page": "cedolino",
+      "action": "pr",
+      "label": "Salva presenze",
+      "route": "/<versione>/s4/paghe/cedolino",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 23,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "PY.presenze",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        209,
+        210,
+        212
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:ca:ca",
+      "module": "erp_paghe",
+      "form": "ca",
+      "form_page": "cedolino",
+      "action": "ca",
+      "label": "Calcola i cedolini",
+      "route": "/<versione>/s4/paghe/cedolino",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 24,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "function (v) { var r = PY.calcola(v); radice.dataset.per = v.periodo; return r;",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Calcola le paghe di dicembre” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        68,
+        209,
+        210,
+        212
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:rg:rg",
+      "module": "erp_paghe",
+      "form": "rg",
+      "form_page": "contabilita",
+      "action": "rg",
+      "label": "Registra la paga",
+      "route": "/<versione>/s4/paghe/contabilita",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 55,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "PY.registra",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Registra le paghe in contabilità” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        69,
+        211,
+        212
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:pn:pn",
+      "module": "erp_paghe",
+      "form": "pn",
+      "form_page": "contabilita",
+      "action": "pn",
+      "label": "Paga i netti",
+      "route": "/<versione>/s4/paghe/contabilita",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 56,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "PY.pagaNetti",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Paga gli stipendi” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        70,
+        211,
+        212
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:f2:f2",
+      "module": "erp_paghe",
+      "form": "f2",
+      "form_page": "contabilita",
+      "action": "f2",
+      "label": "Registra l'F24",
+      "route": "/<versione>/s4/paghe/contabilita",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "declaration_line": 57,
+        "collega": "app/blueprints/erp_paghe/static/py-pagine.js",
+        "logic": "app/blueprints/erp_paghe/static/py-logica.js"
+      },
+      "linked_handler": "PY.f24",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “F24: versa ritenute e contributi di dicembre” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        91,
+        211,
+        212
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:co:piano",
+      "module": "erp_produzione",
+      "form": "co",
+      "form_page": "ordini",
+      "action": "piano",
+      "label": "Mostra costi pianificati",
+      "route": "/<versione>/s4/produzione/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 24,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "function (v) { var el = PC.pianifica(v.materiale",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "read-only",
+      "suggested_reason": "Preview/calculation or read-only aid; optional in the December workflow and not a persistent operational command.",
+      "passi_completi": [
+        178
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:co:co",
+      "module": "erp_produzione",
+      "form": "co",
+      "form_page": "ordini",
+      "action": "co",
+      "label": "Rilascia ordine",
+      "route": "/<versione>/s4/produzione/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 24,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "PP.ordine",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “CO01: un ordine per 300 transenne” | “CO01: ordine autonomo per 20 kit SL-TAGLIO” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        25,
+        34,
+        147,
+        178,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:pr:pr",
+      "module": "erp_produzione",
+      "form": "pr",
+      "form_page": "avanzamento",
+      "action": "pr",
+      "label": "Registra prelievo",
+      "route": "/<versione>/s4/produzione/avanzamento",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 36,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "PP.prelievo",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “261: consuma 2.400 kg sullo stesso ordine” | “261: consuma 160 kg per il HALB” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        28,
+        37,
+        148,
+        179,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:cf:cf",
+      "module": "erp_produzione",
+      "form": "cf",
+      "form_page": "avanzamento",
+      "action": "cf",
+      "label": "Conferma",
+      "route": "/<versione>/s4/produzione/avanzamento",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 37,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "PP.conferma",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “CO11N: Taglio 75 ore, WIP 4.380” | “CO11N: Piegatura 60 ore, WIP 6.060” | “CO11N: Saldatura 120 ore, WIP 9.420” | “CO11N: conferma 5 ore del HALB” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        29,
+        30,
+        31,
+        38,
+        148,
+        179,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:en:en",
+      "module": "erp_produzione",
+      "form": "en",
+      "form_page": "avanzamento",
+      "action": "en",
+      "label": "Registra entrata",
+      "route": "/<versione>/s4/produzione/avanzamento",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 38,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "PP.entrata",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “101: carica a magazzino le 300 transenne” | “101: versa a magazzino i 20 kit autonomi” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        32,
+        39,
+        148,
+        179,
+        185
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_produzione:tc:tc",
+      "module": "erp_produzione",
+      "form": "tc",
+      "form_page": "avanzamento",
+      "action": "tc",
+      "label": "Chiudi tecnicamente",
+      "route": "/<versione>/s4/produzione/avanzamento",
+      "source": {
+        "declaration": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "declaration_line": 39,
+        "collega": "app/blueprints/erp_produzione/static/pp-pagine.js",
+        "logic": "app/blueprints/erp_produzione/static/pp-logica.js"
+      },
+      "linked_handler": "PP.teco",
+      "prerequisites": "Relevant released production order and required materials/phase status must exist.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        180
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:im:im",
+      "module": "erp_spedizione",
+      "form": "im",
+      "form_page": "imballo",
+      "action": "im",
+      "label": "Crea i colli (SSCC)",
+      "route": "/<versione>/s4/spedizione/imballo",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "declaration_line": 44,
+        "collega": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "logic": "app/blueprints/erp_spedizione/static/sp-logica.js"
+      },
+      "linked_handler": "function (v) { var r = SP.imballa(v); radice.dataset.ci = v.consegna; return r;",
+      "prerequisites": "Open delivery/SSCC/transport state required by the selected shipping action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Imballa Beta in 4 colli SSCC” | “Imballa Delta in 3 colli SSCC” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        50,
+        51,
+        129,
+        144,
+        150
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:vt:vt",
+      "module": "erp_spedizione",
+      "form": "vt",
+      "form_page": "trasporti",
+      "action": "vt",
+      "label": "Crea trasporto",
+      "route": "/<versione>/s4/spedizione/trasporti",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "declaration_line": 60,
+        "collega": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "logic": "app/blueprints/erp_spedizione/static/sp-logica.js"
+      },
+      "linked_handler": "SP.creaTrasporto",
+      "prerequisites": "Open delivery/SSCC/transport state required by the selected shipping action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Crea un trasporto per le due consegne” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        52,
+        130,
+        144,
+        150
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:ca:ca",
+      "module": "erp_spedizione",
+      "form": "ca",
+      "form_page": "trasporti",
+      "action": "ca",
+      "label": "Carica il collo",
+      "route": "/<versione>/s4/spedizione/trasporti",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "declaration_line": 64,
+        "collega": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "logic": "app/blueprints/erp_spedizione/static/sp-logica.js"
+      },
+      "linked_handler": "SP.carica",
+      "prerequisites": "Open delivery/SSCC/transport state required by the selected shipping action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Carica i 7 colli leggendo gli SSCC” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "same_business_operation_as": "erp_spedizione:trasporti:lettura_sscc_rf",
+      "passi_completi": [
+        53,
+        131
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:pt:pt",
+      "module": "erp_spedizione",
+      "form": "pt",
+      "form_page": "trasporti",
+      "action": "pt",
+      "label": "Registra la partenza e l'uscita merci",
+      "route": "/<versione>/s4/spedizione/trasporti",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "declaration_line": 65,
+        "collega": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "logic": "app/blueprints/erp_spedizione/static/sp-logica.js"
+      },
+      "linked_handler": "SP.parti",
+      "prerequisites": "Open delivery/SSCC/transport state required by the selected shipping action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Partenza: uscita merci 601 e DDT” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        54,
+        134,
+        144,
+        150
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:pg:pg",
+      "module": "erp_tesoreria",
+      "form": "pg",
+      "form_page": "pagamenti",
+      "action": "pg",
+      "label": "Esegui il pagamento (bonifici SEPA)",
+      "route": "/<versione>/s4/tesoreria/pagamenti",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 43,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/tes-logica.js"
+      },
+      "linked_handler": "TS.eseguiPagamenti",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        192
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:ec:ec",
+      "module": "erp_tesoreria",
+      "form": "ec",
+      "form_page": "estratti",
+      "action": "ec",
+      "label": "Carica estratto",
+      "route": "/<versione>/s4/tesoreria/estratti",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 55,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/tes-logica.js"
+      },
+      "linked_handler": "function (v) { var r = TS.caricaEstratto(v); radice.dataset.es = TS.T().estratti.slice(-1)[0].numero; return r;",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        194
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:ab:ab",
+      "module": "erp_tesoreria",
+      "form": "ab",
+      "form_page": "estratti",
+      "action": "ab",
+      "label": "Abbina e registra l'estratto n. {numero}",
+      "route": "/<versione>/s4/tesoreria/estratti",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 57,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/tes-logica.js"
+      },
+      "linked_handler": "function () { return TS.abbina({estratto: sel.numero",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        194
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:mn:mn",
+      "module": "erp_tesoreria",
+      "form": "mn",
+      "form_page": "estratti",
+      "action": "mn",
+      "label": "Registra la riga",
+      "route": "/<versione>/s4/tesoreria/estratti",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 61,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/tes-logica.js"
+      },
+      "linked_handler": "function (v) { v.estratto = sel.numero; return TS.manuale(v);",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        194
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:rp:rp",
+      "module": "erp_tesoreria",
+      "form": "rp",
+      "form_page": "riba",
+      "action": "rp",
+      "label": "Presenta la distinta",
+      "route": "/<versione>/s4/tesoreria/riba",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 74,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.presentaRiba",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        196
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:re:re",
+      "module": "erp_tesoreria",
+      "form": "re",
+      "form_page": "riba",
+      "action": "re",
+      "label": "Registra l'esito",
+      "route": "/<versione>/s4/tesoreria/riba",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 77,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.esitoRiba",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        196
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:fc:fc",
+      "module": "erp_tesoreria",
+      "form": "fc",
+      "form_page": "factoring",
+      "action": "fc",
+      "label": "Cedi il credito",
+      "route": "/<versione>/s4/tesoreria/factoring",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 88,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.cedi",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        197
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:fx:fx",
+      "module": "erp_tesoreria",
+      "form": "fx",
+      "form_page": "factoring",
+      "action": "fx",
+      "label": "Registra il saldo dal factor",
+      "route": "/<versione>/s4/tesoreria/factoring",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 92,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.chiudiFactoring",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        197
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:an:an",
+      "module": "erp_tesoreria",
+      "form": "an",
+      "form_page": "anticipi",
+      "action": "an",
+      "label": "Registra l'anticipo",
+      "route": "/<versione>/s4/tesoreria/anticipi",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 102,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.anticipoFattura",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “Anticipo su fattura: la banca anticipa l’80% di Beta” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        59,
+        198
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:ae:ae",
+      "module": "erp_tesoreria",
+      "form": "ae",
+      "form_page": "anticipi",
+      "action": "ae",
+      "label": "Registra l'estinzione",
+      "route": "/<versione>/s4/tesoreria/anticipi",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "declaration_line": 105,
+        "collega": "app/blueprints/erp_tesoreria/static/tes-pagine.js",
+        "logic": "app/blueprints/erp_tesoreria/static/rb-logica.js"
+      },
+      "linked_handler": "RB.estinguiAnticipo",
+      "prerequisites": "Open customer/vendor item or bank statement/treasury instrument required by selected action.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “La banca si ripaga l’anticipo con gli interessi” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        90,
+        198
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_valute:tx:tx",
+      "module": "erp_valute",
+      "form": "tx",
+      "form_page": "tassi",
+      "action": "tx",
+      "label": "Salva tasso",
+      "route": "/<versione>/s4/valute/tassi",
+      "source": {
+        "declaration": "app/blueprints/erp_valute/static/val-pagine.js",
+        "declaration_line": 13,
+        "collega": "app/blueprints/erp_valute/static/val-pagine.js",
+        "logic": "app/blueprints/erp_valute/static/val-logica.js"
+      },
+      "linked_handler": "FX.tasso",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        202
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_valute:fc:fc",
+      "module": "erp_valute",
+      "form": "fc",
+      "form_page": "documenti",
+      "action": "fc",
+      "label": "Registra fattura",
+      "route": "/<versione>/s4/valute/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_valute/static/val-pagine.js",
+        "declaration_line": 20,
+        "collega": "app/blueprints/erp_valute/static/val-pagine.js",
+        "logic": "app/blueprints/erp_valute/static/val-logica.js"
+      },
+      "linked_handler": "FX.fatturaCliente",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        201,
+        203
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_valute:ff:ff",
+      "module": "erp_valute",
+      "form": "ff",
+      "form_page": "documenti",
+      "action": "ff",
+      "label": "Registra fattura",
+      "route": "/<versione>/s4/valute/documenti",
+      "source": {
+        "declaration": "app/blueprints/erp_valute/static/val-pagine.js",
+        "declaration_line": 22,
+        "collega": "app/blueprints/erp_valute/static/val-pagine.js",
+        "logic": "app/blueprints/erp_valute/static/val-logica.js"
+      },
+      "linked_handler": "FX.fatturaFornitore",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        203
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_valute:rg:rg",
+      "module": "erp_valute",
+      "form": "rg",
+      "form_page": "regolazioni",
+      "action": "rg",
+      "label": "Registra",
+      "route": "/<versione>/s4/valute/regolazioni",
+      "source": {
+        "declaration": "app/blueprints/erp_valute/static/val-pagine.js",
+        "declaration_line": 31,
+        "collega": "app/blueprints/erp_valute/static/val-pagine.js",
+        "logic": "app/blueprints/erp_valute/static/val-logica.js"
+      },
+      "linked_handler": "FX.regola",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        204,
+        206
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_valute:vl:vl",
+      "module": "erp_valute",
+      "form": "vl",
+      "form_page": "valutazione",
+      "action": "vl",
+      "label": "Esegui la valutazione",
+      "route": "/<versione>/s4/valute/valutazione",
+      "source": {
+        "declaration": "app/blueprints/erp_valute/static/val-pagine.js",
+        "declaration_line": 38,
+        "collega": "app/blueprints/erp_valute/static/val-pagine.js",
+        "logic": "app/blueprints/erp_valute/static/val-logica.js"
+      },
+      "linked_handler": "FX.valuta",
+      "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "lab",
+      "suggested_reason": "Distinct innovation/finance/analytics scenario is outside the December baseline; teach separately as an optional lab.",
+      "passi_completi": [
+        205
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:va:prezzi",
+      "module": "erp_vendite",
+      "form": "va",
+      "form_page": "ordini",
+      "action": "prezzi",
+      "label": "Mostra condizioni",
+      "route": "/<versione>/s4/vendite/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 14,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "function (v) { return '<!--info-->' + U.righePrezzi(SD.prezzi(v.cliente",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "read-only",
+      "suggested_reason": "Preview/calculation or read-only aid; optional in the December workflow and not a persistent operational command.",
+      "passi_completi": [
+        124,
+        162
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:va:va",
+      "module": "erp_vendite",
+      "form": "va",
+      "form_page": "ordini",
+      "action": "va",
+      "label": "Salva ordine",
+      "route": "/<versione>/s4/vendite/ordini",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 14,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.ordine",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “VA01: Beta ordina 180 TR-STD” | “VA01: Delta ordina 120 TR-STD” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        14,
+        15,
+        124,
+        140,
+        143,
+        149,
+        162,
+        164,
+        165,
+        181,
+        187,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:vk:vk",
+      "module": "erp_vendite",
+      "form": "vk",
+      "form_page": "crediti",
+      "action": "vk",
+      "label": "Registra la decisione",
+      "route": "/<versione>/s4/vendite/crediti",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 27,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.decisioneCredito",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        163,
+        164,
+        165
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:fd:fd",
+      "module": "erp_vendite",
+      "form": "fd",
+      "form_page": "crediti",
+      "action": "fd",
+      "label": "Salva",
+      "route": "/<versione>/s4/vendite/crediti",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 31,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.anagraficaCredito",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        162,
+        165
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:vv:vv",
+      "module": "erp_vendite",
+      "form": "vv",
+      "form_page": "crediti",
+      "action": "vv",
+      "label": "Riprogramma gli ordini (V_V2)",
+      "route": "/<versione>/s4/vendite/crediti",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 40,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "function () { var r = SD.riconferma(); return '<p class=\"lab-nota\">' + (r.length ? 'Riprogrammati: ' + r.join(' · ') : 'Nessuna variazione: le conferme erano già aggiornate.') + '</p>';",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        163
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:ra:ra",
+      "module": "erp_vendite",
+      "form": "ra",
+      "form_page": "acconti",
+      "action": "ra",
+      "label": "Crea richiesta",
+      "route": "/<versione>/s4/vendite/acconti",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 49,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.richiestaAcconto",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        166
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:ia:ia",
+      "module": "erp_vendite",
+      "form": "ia",
+      "form_page": "acconti",
+      "action": "ia",
+      "label": "Registra incasso",
+      "route": "/<versione>/s4/vendite/acconti",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 51,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.incassoAcconto",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        166
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:vl:vl",
+      "module": "erp_vendite",
+      "form": "vl",
+      "form_page": "consegne",
+      "action": "vl",
+      "label": "Crea consegna (con prelievo WMS se attivo) [label condizionale]",
+      "route": "/<versione>/s4/vendite/consegne",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 63,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.consegna",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “VL01N: consegna per Beta” | “VL01N: consegna per Delta” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        46,
+        47,
+        125,
+        140,
+        143,
+        149,
+        167,
+        181,
+        187,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:pg:pg",
+      "module": "erp_vendite",
+      "form": "pg",
+      "form_page": "consegne",
+      "action": "pg",
+      "label": "Registra uscita merci",
+      "route": "/<versione>/s4/vendite/consegne",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 65,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.uscitaMerci",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        140
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:vf:vf",
+      "module": "erp_vendite",
+      "form": "vf",
+      "form_page": "fatture",
+      "action": "vf",
+      "label": "Crea e contabilizza",
+      "route": "/<versione>/s4/vendite/fatture",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 75,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.fattura",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “VF01: fattura Beta” | “VF01: fattura Delta” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        56,
+        57,
+        167,
+        181,
+        187,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:re:re",
+      "module": "erp_vendite",
+      "form": "re",
+      "form_page": "resi",
+      "action": "re",
+      "label": "Crea ordine di reso",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 87,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.reso",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        168
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:er:er",
+      "module": "erp_vendite",
+      "form": "er",
+      "form_page": "resi",
+      "action": "er",
+      "label": "Registra entrata merci di reso",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 89,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.entrataReso",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        168
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:nr:nr",
+      "module": "erp_vendite",
+      "form": "nr",
+      "form_page": "resi",
+      "action": "nr",
+      "label": "Crea nota di credito",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 91,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.notaCreditoReso",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        168
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:ab:ab",
+      "module": "erp_vendite",
+      "form": "ab",
+      "form_page": "resi",
+      "action": "ab",
+      "label": "Crea richiesta",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 94,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.richiestaAbbuono",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        169,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:ap:ap",
+      "module": "erp_vendite",
+      "form": "ap",
+      "form_page": "resi",
+      "action": "ap",
+      "label": "Togli il blocco fatturazione",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 96,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.approvaAbbuono",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        169,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:ng:ng",
+      "module": "erp_vendite",
+      "form": "ng",
+      "form_page": "resi",
+      "action": "ng",
+      "label": "Crea nota di credito",
+      "route": "/<versione>/s4/vendite/resi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 97,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.notaCreditoAbbuono",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate operational process not explicitly performed in the December baseline; add only as a named branch with prerequisites.",
+      "passi_completi": [
+        169,
+        189
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_vendite:in:in",
+      "module": "erp_vendite",
+      "form": "in",
+      "form_page": "incassi",
+      "action": "in",
+      "label": "Registra incasso",
+      "route": "/<versione>/s4/vendite/incassi",
+      "source": {
+        "declaration": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "declaration_line": 109,
+        "collega": "app/blueprints/erp_vendite/static/sd-pagine.js",
+        "logic": "app/blueprints/erp_vendite/static/sd-logica.js"
+      },
+      "linked_handler": "SD.incasso",
+      "prerequisites": "Relevant sales order/customer/material and credit/stock status; document sequence applies.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide: “F-28: incassa le due cessioni” | “F-28: Delta paga in anticipo” | “F-28: Beta paga la fattura alla scadenza” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "main",
+      "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
+      "passi_completi": [
+        66,
+        67,
+        89,
+        170,
+        188,
+        198,
+        214
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:rf:conferma_compito_rf",
+      "module": "erp_magazzino",
+      "form": "rf",
+      "action": "conferma_compito_rf",
+      "label": "Conferma il compito RF (task/partial quantity/location validation)",
+      "route": "/<versione>/s4/magazzino/rf",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:138-145",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js:151-188"
+      },
+      "prerequisites": "Open WMS task selected; work date/resource/origin/handling unit/quantity/destination valid; task state not already confirmed.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December guide repeatedly instructs RF task confirmation, including PUTAWAY, STAGING, PICK and TRASF tasks (dicembre-wms.js steps 5–9).",
+      "suggested_class": "main",
+      "suggested_reason": "Central WMS operation explicitly exercised.",
+      "same_business_operation_as": "erp_magazzino:cf:cf",
+      "passi_completi": [
+        101,
+        111,
+        112,
+        113,
+        128,
+        138,
+        139,
+        140,
+        142,
+        144,
+        147,
+        149
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:rf:conta_ubicazione_rf",
+      "module": "erp_magazzino",
+      "form": "rf",
+      "action": "conta_ubicazione_rf",
+      "label": "Conta ubicazione / registrazione inventario RF (incl. partial count)",
+      "route": "/<versione>/s4/magazzino/rf",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:146-179",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js:69-90"
+      },
+      "prerequisites": "Inventory document activated and location count task available; correct location and counted quantity.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December uses LI11N document form, not RF count action; RF page count is a separate pathway.",
+      "suggested_class": "branch",
+      "suggested_reason": "Separate RF inventory-count workflow; optional branch only.",
+      "same_business_operation_as": "erp_inventario:ic:ic (alternative RF count path)",
+      "passi_completi": [
+        122
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:rf:interroga",
+      "module": "erp_magazzino",
+      "form": "rf",
+      "action": "interroga",
+      "label": "Interroga ubicazione o unità di carico da pistola RF",
+      "route": "/<versione>/s4/magazzino/rf",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:146-153",
+        "logic": "app/blueprints/erp_magazzino/static/wm-logica.js:255"
+      },
+      "prerequisites": "RF page open; valid bin ID or handling-unit barcode entered.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December uses map and lot-trace screens for inspection; it does not instruct RF interrogation mode.",
+      "suggested_class": "read-only",
+      "suggested_reason": "On-demand stock/location lookup, no ERP mutation.",
+      "passi_completi": [
+        108
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:trasporti:lettura_sscc_rf",
+      "module": "erp_spedizione",
+      "form": "trasporti",
+      "action": "lettura_sscc_rf",
+      "label": "Scansione SSCC per carico tramite pistola RF",
+      "route": "/<versione>/s4/spedizione/trasporti",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js",
+        "logic": "app/blueprints/erp_spedizione/static/sp-logica.js:57-75"
+      },
+      "prerequisites": "Transport created and SSCC package exists, not already loaded.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "Guide says load each of seven SSCCs; it explicitly allows transport page or RF load route (dicembre-wms.js step 9).",
+      "suggested_class": "main",
+      "suggested_reason": "Alternative UI for an explicitly covered loading operation.",
+      "same_business_operation_as": "erp_spedizione:ca:ca",
+      "passi_completi": [
+        132,
+        144,
+        150
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:avvio:azzera_sistema_integrato",
+      "module": "erp_dati",
+      "form": "avvio",
+      "action": "azzera_sistema_integrato",
+      "label": "Azzera il sistema integrato (confirm)",
+      "route": "/<versione>/s4/dati/avvio",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js:32",
+        "logic": "app/static/js/erp/nucleo.js"
+      },
+      "prerequisites": "Learner must understand this deletes integrated ERP records; backup if any work needs preserving; confirmation dialog.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December guide preparatory step says to azzera if stale work exists, warns to download backup first.",
+      "suggested_class": "main",
+      "suggested_reason": "Setup/reset prerequisite is explicitly documented, but not a repeatable business transaction.",
+      "passi_completi": [
+        238
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_dati:avvio:carica_copione_gennaio",
+      "module": "erp_dati",
+      "form": "avvio",
+      "action": "carica_copione_gennaio",
+      "label": "Load end-of-January demonstration state (confirm; replaces current integrated work)",
+      "route": "/<versione>/s4/dati/avvio",
+      "source": {
+        "declaration": "app/blueprints/erp_dati/static/dati-pagine.js:31",
+        "logic": "app/static/js/lab-copioni.js"
+      },
+      "prerequisites": "Admin/teacher or deliberate reset workflow; confirmation required; destroys/replaces integrated work with scripted preset.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December baseline explicitly starts from clean company, not a January preset.",
+      "suggested_class": "admin exclusion",
+      "suggested_reason": "Destructive seeded-state/preset control; teacher-only operator procedure, not a learner business transaction.",
+      "passi_completi": [
+        238
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:rf:toggle_schermo_intero",
+      "module": "erp_magazzino",
+      "form": "rf",
+      "action": "toggle_schermo_intero",
+      "label": "Toggle full-screen RF display",
+      "route": "/<versione>/s4/magazzino/rf",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:118",
+        "logic": null
+      },
+      "prerequisites": "RF page open.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "Usability preference only; not an operational transaction.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Presentation/UI helper; do not count toward exercise commands.",
+      "passi_completi": [
+        108
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:prelievo:stampa",
+      "module": "erp_spedizione",
+      "form": "prelievo",
+      "action": "stampa",
+      "label": "Stampa la lista di prelievo",
+      "route": "/<versione>/s4/spedizione/prelievo",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js:17-18",
+        "logic": null
+      },
+      "prerequisites": "WMS-managed delivery exists and list is displayed; browser print/PDF.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December WMS guide step “Stampa la lista di prelievo” explicitly says print.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Output-only action; the list is part of the covered pick workflow.",
+      "passi_completi": [
+        48,
+        126
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:imballo:stampa",
+      "module": "erp_spedizione",
+      "form": "imballo",
+      "action": "stampa",
+      "label": "Stampa etichette SSCC della consegna",
+      "route": "/<versione>/s4/spedizione/imballo",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js:54",
+        "logic": null
+      },
+      "prerequisites": "SSCC packages created and the selected delivery labels are displayed.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December creates SSCC packages and scans codes from the table; it does not instruct printing this label set.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Optional output route; add only if printed SSCC labels are required.",
+      "passi_completi": [
+        129
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_spedizione:ddt:stampa",
+      "module": "erp_spedizione",
+      "form": "ddt",
+      "action": "stampa",
+      "label": "Stampa o salva il DDT",
+      "route": "/<versione>/s4/spedizione/ddt",
+      "source": {
+        "declaration": "app/blueprints/erp_spedizione/static/sp-pagine.js:17-18",
+        "logic": null
+      },
+      "prerequisites": "Transport departed and DDT exists.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December says the DDT is created at shipment but does not explicitly instruct printing it.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Output-only action; optional deliverable not explicit in baseline.",
+      "passi_completi": [
+        135
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:etichette:stampa",
+      "module": "erp_magazzino",
+      "form": "etichette",
+      "action": "stampa",
+      "label": "Print/save barcode/QR labels",
+      "route": "/<versione>/s4/magazzino/etichette",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/templates/erp_magazzino/etichette.html",
+        "logic": null
+      },
+      "prerequisites": "Label list generated/displayed and browser print/PDF.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "Guide step 8 expressly instructs print or PDF of handling-unit and bin labels.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Output action; no ERP state change.",
+      "passi_completi": [
+        109
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:lista:stampa",
+      "module": "erp_inventario",
+      "form": "lista",
+      "action": "stampa",
+      "label": "Stampa la lista di conta (cieca)",
+      "route": "/<versione>/s4/inventario/lista",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js:62",
+        "logic": null
+      },
+      "prerequisites": "Inventory document activated; count list available.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "December guide says “Attiva l’inventario e stampa la lista di conta” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "suggested_class": "read-only",
+      "suggested_reason": "Read/print output action; not a state mutation.",
+      "passi_completi": [
+        76,
+        117,
+        123
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_paghe:cedolino:stampa",
+      "module": "erp_paghe",
+      "form": "cedolino",
+      "action": "stampa",
+      "label": "Stampa il cedolino",
+      "route": "/<versione>/s4/paghe/cedolino",
+      "source": {
+        "declaration": "app/blueprints/erp_paghe/static/py-pagine.js:50",
+        "logic": null
+      },
+      "prerequisites": "Payroll slip calculated and selected for display.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December says to read a payslip but not to print it.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Optional output; read the payslip in the baseline but printing is not required.",
+      "passi_completi": [
+        210
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_inventario:valorizzazione:ricalcola_esempio",
+      "module": "erp_inventario",
+      "form": "valorizzazione",
+      "action": "ricalcola_esempio",
+      "label": "Ricalcola una simulazione manuale FIFO/LIFO/CMP",
+      "route": "/<versione>/s4/inventario/valorizzazione",
+      "source": {
+        "declaration": "app/blueprints/erp_inventario/static/inv-pagine.js:109-112",
+        "logic": "app/blueprints/erp_inventario/static/inv-logica.js:125-144"
+      },
+      "prerequisites": "Enable “esempio da manuale (modificabile)” and enter valid semicolon-separated movement lines.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December compares valuation methods on actual FERRO records and does not use the editable manual example.",
+      "suggested_class": "lab",
+      "suggested_reason": "Standalone educational calculator; does not change ERP stock or ledger.",
+      "passi_completi": [
+        105
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_tesoreria:estratti:esempio_estratto",
+      "module": "erp_tesoreria",
+      "form": "estratti",
+      "action": "esempio_estratto",
+      "label": "Insert sample bank statement text",
+      "route": "/<versione>/s4/tesoreria/estratti",
+      "source": {
+        "declaration": "app/blueprints/erp_tesoreria/static/tes-pagine.js:65",
+        "logic": null
+      },
+      "prerequisites": "Bank statement text box available.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December uses invoice advance and direct payment, not bank-statement matching.",
+      "suggested_class": "lab",
+      "suggested_reason": "Sample-data convenience for separate bank reconciliation lesson; not a learner business operation.",
+      "passi_completi": [
+        195
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:mappa:seleziona_ubicazione",
+      "module": "erp_magazzino",
+      "form": "mappa",
+      "action": "seleziona_ubicazione",
+      "label": "Select bin in map / filter shown location",
+      "route": "/<versione>/s4/magazzino/mappa",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:61",
+        "logic": null
+      },
+      "prerequisites": "Map page open.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "Guide requires checking the map to identify current bin/handling unit (steps 8 and 14).",
+      "suggested_class": "read-only",
+      "suggested_reason": "Navigation/filter control; no business-state mutation.",
+      "passi_completi": [
+        107
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:lotti:seleziona_lotto_seriale",
+      "module": "erp_magazzino",
+      "form": "lotti",
+      "action": "seleziona_lotto_seriale",
+      "label": "Select lot/serial and trace genealogy",
+      "route": "/<versione>/s4/magazzino/lotti",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:241,245",
+        "logic": "app/blueprints/erp_magazzino/static/lotti-logica.js:51-72"
+      },
+      "prerequisites": "Lots/serials exist; target shipment/handling unit/material selected.",
+      "coverage_current_exercise": "yes",
+      "coverage_evidence": "Guide asks trace customer complaint to input steel lot COL-1204 and downstream Beta/Delta customers (step 9).",
+      "suggested_class": "read-only",
+      "suggested_reason": "Traceability query/selection; no mutation.",
+      "passi_completi": [
+        136
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    },
+    {
+      "id": "erp_magazzino:lotti:cerca_seriale",
+      "module": "erp_magazzino",
+      "form": "lotti",
+      "action": "cerca_seriale",
+      "label": "Cerca numero di serie",
+      "route": "/<versione>/s4/magazzino/lotti",
+      "source": {
+        "declaration": "app/blueprints/erp_magazzino/static/wm-pagine.js:245",
+        "logic": "app/blueprints/erp_magazzino/static/lotti-logica.js:59-65"
+      },
+      "prerequisites": "Serial number exists and search value is entered.",
+      "coverage_current_exercise": "no",
+      "coverage_evidence": "December traces a material lot/customer flow, not a serial-number lookup.",
+      "suggested_class": "read-only",
+      "suggested_reason": "Read-only traceability lookup.",
+      "passi_completi": [
+        136
+      ],
+      "copertura_testo": "presente",
+      "verifica_esecuzione": "Mappa del testo: non equivale a esecuzione di ogni comando. Collaudi in test e nota dedicata."
+    }
+  ],
+  "pagine_da_integrare": [],
+  "nota": "Copertura testuale distinta da collaudo esecutivo, autorizzazioni e rispetto dei requisiti formativi ufficiali."
+}
