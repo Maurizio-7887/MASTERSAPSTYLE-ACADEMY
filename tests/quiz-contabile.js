@@ -19,7 +19,8 @@ function compila(p,modo='corretto'){
  const q=p.S().msaRagioneria.coda[0];
  const rs=q.documento.righe.map((r,i)=>({r,i})).sort((a,b)=>String(a.r.conto).localeCompare(String(b.r.conto),'it',{numeric:true})||a.i-b.i).map(x=>x.r);
  [...p.body().querySelectorAll('.msa-q-riga')].forEach((el,i)=>{
-  const r=rs[i];el.querySelector('select').value=modo==='inverti'?(r.dareAvere==='DARE'?'AVERE':'DARE'):r.dareAvere;
+  const r=rs[i];el.querySelector('.msa-q-conto').value=r.conto;
+  el.querySelector('.msa-q-sezione').value=modo==='inverti'?(r.dareAvere==='DARE'?'AVERE':'DARE'):r.dareAvere;
   el.querySelector('input').value=(modo==='importo'?r.importo*2:r.importo).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
  });
 }
@@ -52,7 +53,7 @@ ok(p.S().msaRagioneria.coda[0].corretto,'risposta reale riconosciuta al centesim
 ok(JSON.stringify(p.S().registrazioni)===libro,'tentativi non alterano giornale');
 p.click('.msa-q-continua');
 ok(p.S().msaRagioneria.esiti.length===1,'esito conservato');
-ok(p.S().msaRagioneria.esiti[0].tentativi===4,'tentativi conservati');
+ok(p.S().msaRagioneria.esiti[0].tentativi===3,'solo i tre tentativi completi conservati; clic vuoto non valutabile');
 ok(p.w.MSA_GUIDA_API.passo()===2,'dopo conferma riprende attivazione WMS');
 ok(!p.w.document.querySelector('.msa-g-av').disabled,'guida riabilitata');
 p.N.salva();p.N.salva();ok(!p.S().msaRagioneria.coda.length,'salvataggi ripetuti non duplicano domande');
@@ -63,7 +64,9 @@ post(p.N,'fattura e provvigione: documento uno');post(p.N,'fattura e provvigione
 ok(p.S().msaRagioneria.coda.length===2,'due documenti della stessa operazione in coda');
 compila(p);p.click('.msa-q-verifica');p.click('.msa-q-continua');
 ok(p.S().msaRagioneria.coda.length===1,'prima risposta non salta seconda scrittura');
-p.click('.msa-q-verifica');p.click('.msa-q-aiuto');
+p.click('.msa-q-verifica');
+ok(!p.body().querySelector('.msa-q-aiuto'),'clic vuoto non autorizza soluzione');
+compila(p,'inverti');p.click('.msa-q-verifica');p.click('.msa-q-aiuto');
 ok(!!p.body().querySelector('.msa-q-soluzione'),'soluzione disponibile dopo tentativo');
 ok(!p.S().msaRagioneria.coda[0].corretto,'aiuto non equivale a risposta corretta');
 p.click('.msa-q-continua');

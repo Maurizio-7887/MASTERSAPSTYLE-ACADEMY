@@ -5,6 +5,7 @@
 <script>window.MSA_GUIDA = {{ guida | tojson }};</script>
 {% if guida.esercizio in ['dicembre-wms', 'completo-formas'] %}
 <script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-legacy.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/cpm-formas.js') }}"></script>
 {% endif %}
 {% if guida.esercizio == 'completo-formas' %}
 <script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms.js') }}"></script>

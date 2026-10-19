@@ -35,10 +35,11 @@ function apri(bp, pagina) {
       });
       const b = lab.querySelector('[data-prefisso="' + pref + '"] [data-azione="' + (azione || pref) + '"]'); if (!b) throw Error('pulsante ' + pref + ' assente');
       b.click();
-      verificaQuiz(w,regPrima);
       const es = lab.querySelector('#' + pref + '-esito');
+      const esito = es ? es.className + ' ' + es.textContent : '';
+      verificaQuiz(w,regPrima);
       memoria = w.localStorage.getItem(CHIAVE);
-      return es ? es.className + ' ' + es.textContent : '';
+      return esito;
     },
     testo: () => lab.textContent};
   return P;
@@ -51,7 +52,8 @@ function verificaQuiz(w,regPrima) {
     const q=S.msaRagioneria.coda[0], rs=q.documento.righe.map((r,i)=>({r,i})).sort((a,b)=>String(a.r.conto).localeCompare(String(b.r.conto),'it',{numeric:true})||a.i-b.i).map(x=>x.r);
     ok(!!w.document.querySelector('.msa-q-verifica'),'domanda immediata per '+q.documento.tipo);
     [...w.document.querySelectorAll('.msa-q-riga')].forEach((el,i)=>{
-      el.querySelector('select').value=rs[i].dareAvere;
+      el.querySelector('.msa-q-conto').value=rs[i].conto;
+      el.querySelector('.msa-q-sezione').value=rs[i].dareAvere;
       el.querySelector('input').value=rs[i].importo.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
     });
     w.document.querySelector('.msa-q-verifica').click();

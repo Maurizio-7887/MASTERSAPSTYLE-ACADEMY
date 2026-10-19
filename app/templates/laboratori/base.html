@@ -29,6 +29,7 @@
 {% set sync = config_sincronia(config.slot) %}
 {% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}
 <script>window.LAB_PAGINA = {{ config | tojson }};</script>
+<script src="{{ url_for('static', filename='js/erp/presidio-didattico.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
 {% for s in js %}<script src="{{ s }}"></script>{% endfor %}
 {% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}

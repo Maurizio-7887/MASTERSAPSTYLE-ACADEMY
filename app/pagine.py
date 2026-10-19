@@ -312,7 +312,7 @@ _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_a
                "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)", "erp_cespiti": "Cespiti (FI-AA)",
                "erp_chiusura": "IVA, imposte, chiusura e riapertura"}
 _ERP_PAGINE = {
-    "erp_dati": [{"endpoint": "avvio", "titolo": "Avvio del sistema", "icona": "🚀", "tcode": "saldi di apertura · 561"},
+    "erp_dati": [{"endpoint": "avvio", "titolo": "Nuova azienda / Avvio", "icona": "🚀", "tcode": "costituzione · saldi pronti"},
                  {"endpoint": "anagrafiche", "titolo": "Clienti e materiali", "icona": "👥", "tcode": "XD03 · MM03 · MMBE"},
                  {"endpoint": "condizioni", "titolo": "Condizioni di prezzo", "icona": "🏷️", "tcode": "VK11 · VK13 · V/08"},
                  {"endpoint": "ruoli", "titolo": "Ruoli e autorizzazioni", "icona": "🔐", "tcode": "PFCG · SU01 · SU53"}],
@@ -330,7 +330,7 @@ _ERP_PAGINE = {
                      {"endpoint": "fatture", "titolo": "Fatture fornitore", "icona": "🧾", "tcode": "MIRO"}],
     "erp_produzione": [{"endpoint": "ordini", "titolo": "Ordini di produzione", "icona": "🏭", "tcode": "CO01 · COOIS"},
                        {"endpoint": "avanzamento", "titolo": "Prelievi, conferme, entrate", "icona": "⏱️", "tcode": "261 · CO11N · 101 · TECO"}],
-    "erp_costi": [{"endpoint": "scheda", "titolo": "Scheda di calcolo e sovraccosti", "icona": "🧮", "tcode": "KZS2 · KZZ2 · KP26"},
+    "erp_costi": [{"endpoint": "scheda", "titolo": "Budget centri e costi standard", "icona": "🧮", "tcode": "CO-CCA · KP26 · CO-PC"},
                   {"endpoint": "calcolo", "titolo": "Calcolo del costo standard", "icona": "🏷️", "tcode": "CK11N · CK24 · CK13N"},
                   {"endpoint": "chiusura", "titolo": "Chiusura degli ordini e varianze", "icona": "⚖️", "tcode": "KGI2 · KKS2 · KO88"},
                   {"endpoint": "ml", "titolo": "Material Ledger", "icona": "📒", "tcode": "CKM3 · CKMLCP"}],
@@ -382,6 +382,7 @@ _ERP_PAGINE = {
                      {"endpoint": "chiusura", "titolo": "Chiusura dell'esercizio", "icona": "🔒", "tcode": "epilogo · FAGLGVTR"},
                      {"endpoint": "riapertura", "titolo": "Riapertura e destinazione dell'utile", "icona": "🔓", "tcode": "1° gennaio · F.16"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
+               {"endpoint": "mastro", "titolo": "Mastrini", "icona": "📖", "tcode": "FBL3N"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"},
                {"endpoint": "fatture", "titolo": "Fatture di servizi", "icona": "🧾", "tcode": "FB70"},
                {"endpoint": "passive", "titolo": "Fatture passive di servizi e pagamenti", "icona": "📥", "tcode": "FB60 · F-53"},

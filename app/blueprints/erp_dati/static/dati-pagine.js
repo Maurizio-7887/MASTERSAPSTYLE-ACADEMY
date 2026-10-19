@@ -8,28 +8,47 @@
   var PAGINE = {
     avvio: function () {
       radice.innerHTML =
+        L.scheda('🧭', 'Da dove si comincia?', 'scegli il percorso giusto', '<ol class="lab-elenco"><li><b>Esercizio libero o FORMAS da zero:</b> scegli <b>Nuova azienda</b>, costituisci la società e versa il capitale. Nessuna scorta viene regalata.</li><li><b>Prepara l’azienda:</b> acquista i beni strumentali, configura WMS, centri, budget annuo, distinta e ciclo standard.</li><li><b>Avvia il ciclo operativo su commessa:</b> ordini clienti → fabbisogni → acquisti materiali → ricevimento → produzione → consegna e fattura. La produzione per scorta è un caso alternativo.</li></ol><p class="lab-nota"><b>Stesso account = stessa azienda integrata.</b> Cambiare guida non crea archivi separati. Gli accessi personali non vengono cancellati dalla ripartenza dell’esercizio.</p>') +
+        (!S().avviato ? L.scheda('🏛️', 'Nuova azienda · parti da zero', 'percorso consigliato FORMAS / esercizio libero', L.modulo('cs', [['data', 'Data di costituzione', 'date', '2026-12-01'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Crea nuova azienda vuota (costituzione)']]) + '<p class="lab-nota">Registra soltanto la sottoscrizione del capitale. Poi versa i soci, acquista i beni e i materiali con documenti espliciti. I materiali e i costi standard predefiniti sono dati di base, <b>non acquisti né giacenze</b>.</p>') : '') +
         (S().costituzione
           ? L.scheda('🏛️', 'Azienda nuova: costituita il ' + L.fd(S().costituzione.data), 'capitale sociale ' + eur(S().costituzione.capitale) + ' €',
               '<div class="lab-esito ok">✓ Costituzione registrata: D 08 Crediti verso soci / A 30 Capitale sociale ' + eur(S().costituzione.capitale) + ' €. Magazzino vuoto, nessun cliente con debiti, banca a zero. ' + (S().produzioneModello === 'wip-fasi-v1' ? 'TR-STD: un ordine con Taglio, Piegatura e Saldatura, tre dichiarazioni separate, costi in WIP analitico fino al versamento finale. SL-TAGLIO: semilavorato autonomo da stoccare. Standard 31,40 e 14,60 €/pz già rilasciati.' : 'Azienda storica: tre ordini SL-TAGLIO → SL-PIEGA → TR-STD; costi standard 14,60 · 20,20 · 31,40 €/pz già rilasciati.') + ' Tre dipendenti assunti oggi.</div>' +
               (N.saldo('08') > 0.004 ? L.modulo('vs', [['importo', 'Importo versato (vuoto = tutto il sottoscritto)', 'num'], ['data', 'Data del versamento', 'date', S().costituzione.data]], [['vs', 'Registra il versamento dei soci']]) +
                 '<p class="lab-nota">I soci versano il capitale sul conto corrente della società: D 10 Banca / A 08 Crediti verso soci. Ancora da versare: <b>' + eur(N.saldo('08')) + ' €</b>.</p>'
                 : '<p class="lab-nota">Capitale interamente versato: crediti verso soci (08) a zero.</p>'))
-          : L.scheda('🚀', 'Avvio del sistema integrato', 'società 1000 · area vendite 1000/10/00', (S().avviato
+          : L.scheda('🚀', 'Alternativa: saldi già pronti', 'NON usare per FORMAS da zero', (S().avviato
           ? '<div class="lab-esito ok">✓ Sistema avviato il ' + L.fd(S().avviato) + ': banca 50.000 €, magazzino 500 TR-STD · 200 TR-ALTA · 300 TR-PED a costo standard, listino e condizioni predefinite caricate.</div>'
-          : L.modulo('av', [['data', 'Data di avvio', 'date']], [['av', 'Avvia il sistema']]) +
+          : L.modulo('av', [['data', 'Data di avvio', 'date']], [['av', 'Carica saldi pronti (NON caso da zero)']]) +
             '<p class="lab-nota">Crea i saldi di apertura (banca 50.000 €; magazzino prodotti finiti a costo standard, movimento 561) e le condizioni di listino: PR00 60 / 72 / 55 €, scaglioni ZSCA 2% da 100 pz e 4% da 300 pz, trasporto KF00 1,50 €/pz per il Lazio, provvigione ERB1 3%.</p>'))) +
-        (S().avviato ? '' : L.scheda('🏛️', 'Oppure: azienda nuova (costituzione)', 'esercizio «Dicembre: dalla costituzione alla riapertura»', L.modulo('cs', [['data', 'Data di costituzione', 'date'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Costituisci la società']]) +
-            '<p class="lab-nota">L\'azienda nasce da zero: <b>nessuna scorta, banca a zero</b>, i soci sottoscrivono il capitale (D 08 / A 30) e poi lo versano. La transenna standard ha <b>un ordine e tre operazioni</b>: Taglio, Piegatura, Saldatura. Ogni fase ha una dichiarazione distinta; nessun carico intermedio, costi accumulati in WIP analitico. Un lotto autonomo di <b>SL-TAGLIO</b> entra invece a magazzino. I lavori già salvati restano invariati. Stesso listino e condizioni di vendita.</p>')) +
-        L.scheda('🧭', 'Cosa c\'è in questo sistema', 'S/4 didattico', '<ul class="lab-elenco"><li><b>Un solo libro giornale</b> per tutti i moduli: ogni documento logistico genera la sua scrittura.</li>' +
+        L.scheda('🧭', 'Cosa c\'è in questo sistema', 'S/4 didattico', '<ul class="lab-elenco"><li><b>Un solo libro giornale con mastrini collegati</b> per tutti i moduli: solo le operazioni con effetti contabili generano scritture; ordini e trasferimenti fisici interni non le generano automaticamente.</li>' +
           '<li><b>Numerazione dei documenti</b> come in SAP: ordini 1000xxxx, consegne 8000xxxx, fatture 9000xxxx, resi 6000xxxx, contabili 1000xxxxx.</li>' +
           '<li><b>Flusso documenti</b> (VA03): ordine → consegna → fattura → nota di credito.</li><li><b>CO-PA</b>: ogni fattura scrive i campi valore per cliente, materiale, regione, canale.</li></ul>') +
         L.scheda('⏩', 'Parti da febbraio', 'situazione pronta', '<button type="button" class="lab-btn sec" id="gennaio">Carica la situazione di fine gennaio (vendite completate)</button><p class="lab-nota">Esegue in automatico tutto gennaio dell\'esercizio (avvio, condizioni, quattro ordini, acconto, resi, abbuono, incasso): serve per cominciare dai costi del prodotto. Sostituisce il lavoro attuale del sistema integrato.</p>') +
-        L.scheda('♻️', 'Ricomincia', '', '<button type="button" class="lab-btn rosso" id="azzera">Azzera il sistema integrato</button><p class="lab-nota">Cancella documenti e scritture di questo sistema; il simulatore principale e i laboratori non cambiano.</p>');
+        L.scheda('♻️', 'Nuova azienda: ricomincia nello stesso account', 'azione distruttiva solo su conferma', '<p class="lab-nota">Sostituisce l’azienda integrata corrente con un archivio vuoto. <b>Non crea uno spazio aggiuntivo.</b> Account e password restano; documenti, contabilità, magazzino, budget e progresso integrato vengono azzerati. Non modifica gli altri laboratori.</p><button type="button" class="lab-btn sec" id="backup-azienda">1 · Scarica il backup JSON dell’azienda attuale</button><button type="button" class="lab-btn rosso" id="azzera" disabled>2 · Riparti da azienda vuota</button><p id="backup-azienda-esito" role="status">Prima scarica il backup; conservarlo è responsabilità del docente. Nessuna cancellazione automatica.</p>');
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
       L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v); }}, rendi);
       L.collega(radice, 'vs', {vs: N.versaCapitale}, rendi);
       radice.querySelector('#gennaio').onclick = function () { if (confirm('Sostituire il lavoro del sistema integrato con la situazione di fine gennaio?')) { window.LabCopioni.esegui(window.LabCopioni.SD4, SD, 'Febbraio:'); if (window.MSA_SALVA) window.MSA_SALVA(); rendi(); } };
-      radice.querySelector('#azzera').onclick = function () { if (confirm('Azzerare il sistema integrato?')) { N.azzera(); rendi(); } };
+      radice.querySelector('#backup-azienda').onclick = function () {
+        try {
+          var file = new Blob([JSON.stringify({formato:'msa-erp-ft-backup-v1',creatoIl:new Date().toISOString(),stato:S()}, null, 2)], {type:'application/json'});
+          var url = URL.createObjectURL(file), a = document.createElement('a');
+          a.href = url; a.download = 'Academy-azienda-backup-' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
+          document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},1000);
+          radice.querySelector('#azzera').disabled = false;
+          radice.querySelector('#backup-azienda-esito').textContent = 'Download richiesto: verifica che il file sia stato salvato prima di proseguire.';
+        } catch(err) { radice.querySelector('#backup-azienda-esito').textContent = 'Backup non riuscito: nessuna cancellazione eseguita. ' + err.message; }
+      };
+      radice.querySelector('#azzera').onclick = function () {
+        if (this.disabled) return;
+        if (prompt('Hai verificato il backup? Scrivi NUOVA AZIENDA per cancellare soltanto l’azienda integrata corrente. Account e password restano.') !== 'NUOVA AZIENDA') return;
+        N.azzera();
+        if (window.MSA_SALVA) window.MSA_SALVA();
+        rendi();
+        // La guida sceglie la versione all'apertura: ricaricarla evita che
+        // un precedente percorso storico resti attivo sulla nuova azienda.
+        if (window.MSA_GUIDA) window.location.reload();
+      };
     },
     anagrafiche: function () {
       radice.innerHTML = U.avviso(S()) +

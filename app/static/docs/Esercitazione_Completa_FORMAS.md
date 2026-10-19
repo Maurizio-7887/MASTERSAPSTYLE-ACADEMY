@@ -1,7 +1,7 @@
 # Esercitazione completa — azienda, magazzino e innovazione
 
 **MASTERSAPSTYLE ACADEMY · Firenze / FORMAS Pistoia**  
-Revisione didattica del 18 ottobre 2026 · Dati esclusivamente sintetici.
+Revisione didattica del 19 ottobre 2026 · versione didattica 2 · Dati esclusivamente sintetici.
 
 **AMBIENTE FORMATIVO — DATI SIMULATI**  
 **SIMULAZIONE DIDATTICA — NON VALIDO AI FINI FISCALI O COMMERCIALI**
@@ -15,6 +15,18 @@ Non basta ottenere una giacenza finale corretta: occorre saper ricostruire chi h
 - **C — Laboratori dei comandi:** operazioni alternative, rifiuti, blocchi, annullamenti e parametri. Un percorso completo non impone di rottamare, sbloccare e rendere contemporaneamente la stessa merce: prova le alternative su casi separati e documenta gli esiti.
 
 La durata va distribuita su più lezioni. Non è corretto presentare l'intero percorso come un'esercitazione da svolgere in 5–6 ore. Le date aziendali simulate non coincidono con le date delle lezioni.
+
+## Ordine obbligatorio del nuovo caso
+
+**Preparazione dell’azienda:** Nuova azienda vuota → costituzione e versamento soci → attivazione WMS → acquisto e registrazione dei cinque beni strumentali → budget annuale dei centri → distinta e ciclo standard → stima e rilascio del costo standard. Non esistono macchinari acquistati automaticamente: i dati anagrafici non sostituiscono le fatture.
+
+**Ciclo operativo su commessa:** inserisci prima gli ordini dei clienti → leggi i fabbisogni → ordina i materiali → ricevi e metti a dimora → registra le fatture → preleva per produzione → dichiara le tre fasi sullo stesso ordine → versa il finito → consegna e fattura. Il lotto autonomo di semilavorati a scorta è esplicitamente distinto.
+
+**Controllo di gestione:** tre centri produttivi Taglio, Piegatura e Saldatura più il centro Generale. Budget personale 36.000 € per centro; Generale produttivo 18.000 € ripartito per capacità (1.500 ore ciascuno): 6.000 € per centro, quindi tariffa (36.000 + 6.000) / 1.500 = 28 €/h. I costi amministrativi non produttivi sono esclusi. Volume annuo 1.200 transenne, distinto dall’ordine di 300. Distinta 8 kg a 0,95 €/kg, ciclo 0,25 + 0,20 + 0,40 ore: standard unitario 31,40 €. Budget e ribaltamenti analitici non creano una seconda scrittura del costo già registrato in contabilità.
+
+**Prima prova, poi confronta:** quando un’operazione genera una scrittura, compila conto, Dare/Avere e importo e invia un tentativo valido. Giornale, mastrini, altre schermate integrate e stampe restano oscurati prima del tentativo. Un tentativo completo anche errato consente il confronto; clic vuoti no. Risposta corretta e soluzione consultata restano distinte. Il PDF contiene risultati attesi: il docente può distribuirli progressivamente per non anticipare le soluzioni.
+
+**Quarantena:** merce bloccata è lo stato; mettervi una UdC è l’azione. Dopo il compito RF e l’arrivo in Q-ZONE si decide sblocco o rottamazione. Non confondere questo processo con il blocco inventariale delle ubicazioni. Le differenze prezzo, con materiale a standard, possono nascere sia al ricevimento sia in fattura: non sono sempre tutte in MIGO.
 
 ## Fonte FORMAS e limiti documentali
 
@@ -31,7 +43,7 @@ Nel calendario risultano incongruenze formali: l'intestazione temporale non comp
 
 ## Regole operative e protezione dei lavori
 
-1. Il docente assegna un account vuoto per il caso principale e account di prova distinti per i laboratori. Se trovi documenti precedenti, fermati: non cancellarli.
+1. Per questa nuova edizione il docente ha deciso di ripartire da zero. Apri «Nuova azienda / Avvio»: se ci sono vecchi documenti, scarica e verifica il backup JSON, poi conferma «NUOVA AZIENDA». La ripartenza sostituisce solo l’azienda integrata nello stesso account, non crea archivi paralleli e non elimina account o password. Non avviene automaticamente. Costituisci poi la società vuota; NON caricare i saldi pronti. I laboratori alternativi restano su account di prova distinti.
 2. Cambiare guida, modulo, versione grafica, computer o scheda del browser **non crea un nuovo archivio**. Lo stesso account usa un unico sistema integrato, sincronizzato.
 3. Consegna il caso principale prima delle prove alternative. Non applicare preset, «Carica situazione» o «Azzera» al lavoro da conservare. Backup e importazioni vanno usati soltanto quando presenti nel percorso attivo e secondo le istruzioni specifiche; una schermata non è un backup completo.
 4. Ogni laboratorio indica i prerequisiti. Se il tuo stato non coincide, non compensare con rettifiche inventate: usa il relativo account di prova o chiedi la predisposizione al docente.
@@ -70,13 +82,15 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Percorso:** Launchpad → Esercitazione completa  
 **Schermata:** `erp_dati.avvio`
 
-- **A · Caso principale:** Costituzione → transenna con tre dichiarazioni e WIP → HALB autonomo → spedizioni → contabilità → chiusura e riapertura. Conserva questi risultati.
+- **A · Preparazione azienda:** Azienda vuota → costituzione e capitale → configurazione WMS → acquisto/entrata in funzione beni strumentali → budget annuo, quattro centri, distinta/ciclo e costo standard. Non è ancora il ciclo operativo commerciale.
+
+- **A · Ciclo operativo:** Ordini cliente → fabbisogni → ordini di acquisto → ricevimento e fattura → 300 transenne sullo stesso ordine con tre dichiarazioni e WIP → 20 kit HALB autonomi a scorta → consegna e fattura cliente → contabilità, chiusura e riapertura. Conserva questi risultati.
 
 - **B · Magazzino FORMAS:** UF 8, 9, 10 e 11: approfondimenti e prove dedicate. Esegui le operazioni alternative solo nello spazio di prova indicato.
 
-- **C · Laboratori dei comandi:** Account didattici separati dal caso principale. Il docente prepara gli accessi; cambiare guida o computer NON separa i dati.
+- **C · Laboratori dei comandi:** Account didattici separati dal caso principale. Il docente prepara gli accessi; cambiare guida o computer NON separa i dati. Nuova azienda nello stesso account sostituisce lo slot: non è un laboratorio separato.
 
-- **Regola di sicurezza:** Non usare Azzera, Carica situazione, Ripristina o un preset sul caso da consegnare. Prima consegna il caso principale e conserva le evidenze; le prove distruttive sono solo per account vuoti sacrificabili.
+- **Regola di sicurezza:** Non usare Azzera, Carica situazione, Ripristina o un preset sul caso da consegnare. La ripartenza Nuova azienda, solo prima di iniziare e autorizzata dal docente, richiede backup JSON se ci sono dati. Prima dei laboratori consegna il caso principale e conserva le evidenze; prove distruttive solo in account sacrificabili.
 
 - **Evidenze:** Per ogni fase conserva numero documento, data, quantità, valore e risposta motivata. Una spunta manuale attesta la tua dichiarazione, non un collaudo automatico.
 
@@ -91,7 +105,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-## 0 · Preparazione
+## 0 · Preparazione azienda
 
 
 ### 2. Prima di cominciare: un sistema vuoto
@@ -99,9 +113,13 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
 
-- **Ambiente:** Sistema integrato, account dedicato al caso principale e privo di documenti precedenti.
+- **Ambiente:** Sistema integrato, azienda dedicata al caso principale e priva di documenti precedenti.
 
-- **Se trovi lavoro esistente:** Fermati e chiedi al docente un account separato. Non usare Azzera per liberare il tuo lavoro.
+- **Se trovi lavoro esistente:** Solo se il docente autorizza la ripartenza: scarica e conserva il backup JSON, poi conferma NUOVA AZIENDA nella scheda di avvio. Sostituisce lo stesso slot, non separa i casi. Per conservarli entrambi operativi richiedi un account separato.
+
+- **Prima fase:** Costituisci la società e versa il capitale; attiva WMS vuoto; acquista i cinque cespiti prima di usarli; prepara budget annuo, quattro centri e standard.
+
+- **Inizio del ciclo operativo:** Sono gli ordini cliente Beta e Delta a dare avvio a fabbisogni, acquisti di ferro, produzione e consegne.
 
 - **Durata:** Percorso esteso su più lezioni. Il caso principale e i laboratori non sono una singola prova da 5–6 ore.
 
@@ -118,7 +136,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 ### 3. Costituisci la società con 80.000 € di capitale
 
-**Percorso:** Avvio e dati di base → Avvio del sistema → riquadro «Oppure: azienda nuova (costituzione)»  
+**Percorso:** Avvio e dati di base → Avvio del sistema → scheda «Nuova azienda · parti da zero»  
 **Schermata:** `erp_dati.avvio`
 
 **Data aziendale simulata:** 01/12/2026
@@ -127,7 +145,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **Capitale sociale sottoscritto:** 80000
 
-- **Pulsante:** Costituisci la società (NON «Avvia il sistema», che caricherebbe scorte e banca già pronte)
+- **Pulsante:** Crea nuova azienda vuota (costituzione); NON usare l’avvio con saldi pronti, che caricherebbe scorte e banca già valorizzate
 
 
 **Risultato / controllo atteso:** D 08 Crediti verso soci per versamenti ancora dovuti / A 30 Capitale sociale 80.000. Banca a zero, magazzino vuoto. Il sistema prepara la TR-STD con tre fasi sullo stesso ordine, un solo HALB autonomo SL-TAGLIO, i costi standard e i tre dipendenti assunti oggi.
@@ -159,6 +177,9 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+## 1 · Preparazione: WMS
+
+
 ### 5. Attiva il magazzino W100 (vuoto)
 
 **Percorso:** WMS → Struttura e attivazione  
@@ -166,34 +187,15 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 **Data aziendale simulata:** 01/12/2026
 
+- **Prerequisito:** Società costituita e capitale versato, ma nessuna scorta; questa è configurazione logistica, non acquisto né produzione
+
 - **Data di attivazione:** 01/12/2026
 
 
 **Risultato / controllo atteso:** 41 ubicazioni create, nessuna unità di carico: il magazzino è vuoto come la contabilità. Nessuna scrittura.
 
 
-**Attenzione e ragionamento:** Da qui in poi ogni merce che entra, si sposta o esce passa da un compito di magazzino confermato con la pistola RF.
-
-
-**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
-**Verifica:** riscontro manuale con evidenze e docente.
-
-
-### 6. Leggi il ciclo a fasi e il semilavorato autonomo
-
-**Percorso:** PP → Ordini di produzione → Distinta e ciclo; poi CO → Calcolo del costo standard  
-**Schermata:** `erp_produzione.ordini`
-
-- **TR-STD:** 8 kg ferro × 0,95 = 7,60; Taglio 0,25 h + Piegatura 0,20 h + Saldatura 0,40 h, a 28 €/h: standard 31,40 €/pz
-
-- **Un solo ordine:** Il ferro e le ore delle tre fasi si accumulano nello stesso WIP analitico. Nessuna entrata merci tra le fasi; un solo 101 del finito alla fine
-
-- **HALB autonomo:** SL-TAGLIO: 8 kg ferro 7,60 + Taglio 0,25 h × 28 = 7,00 → 14,60 €/pz. Un ordine separato produce 20 kit a scorta, non alimenta l’ordine TR-STD
-
-- **Scheda di calcolo:** sovraccosti 0%, tariffa 28 €/h, lotto 100
-
-
-**Attenzione e ragionamento:** WIP analitico = costi addebitati all’ordine meno output accreditato: non è una scorta IM/WMS e non genera da solo una capitalizzazione FI. I vecchi salvataggi mantengono il percorso precedente.
+**Attenzione e ragionamento:** Attiva W100 dopo la costituzione e prima del primo ricevimento di materiali, ancora senza merci: il passo non registra capitale e non carica scorte. In seguito entrate, spostamenti e uscite sono governati dai relativi compiti RF.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -203,7 +205,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 2 · Macchinari
 
 
-### 7. F-90: compra la taglierina a nastro
+### 6. F-90: compra la taglierina a nastro
 
 **Percorso:** FI → Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -234,7 +236,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 8. F-90: compra la piegatubi idraulica
+### 7. F-90: compra la piegatubi idraulica
 
 **Percorso:** FI → Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -265,7 +267,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 9. F-90: compra la saldatrice a filo
+### 8. F-90: compra la saldatrice a filo
 
 **Percorso:** FI → Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -289,14 +291,14 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data:** 01/12/2026
 
 
-**Risultato / controllo atteso:** CE-0003. D 01 6.000 + D 14 1.320 / A 20 7.320. Ora ogni stadio ha la sua macchina.
+**Risultato / controllo atteso:** CE-0003. D 01 6.000 + D 14 1.320 / A 20 7.320. Le tre fasi hanno le proprie macchine: gli acquisti precedono il loro uso produttivo.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 10. F-90: compra il carrello elevatore del magazzino
+### 9. F-90: compra il carrello elevatore del magazzino
 
 **Percorso:** FI → Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -327,7 +329,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 11. F-90: compra una sega circolare d’occasione
+### 10. F-90: compra una sega circolare d’occasione
 
 **Percorso:** FI → Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -354,7 +356,242 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** CE-0005. D 01 2.000 + D 14 440 / A 20 2.440. Debito verso Macchine Alfa: 52.460.
 
 
-**Attenzione e ragionamento:** È un acquisto a buon prezzo: a fine mese la rivenderemo con una plusvalenza.
+**Attenzione e ragionamento:** Tutti e cinque gli acquisti F-90 registrano direttamente fattura e cespite: non creare anche un ordine MM per gli stessi beni. La data di entrata in funzione è 01/12/2026; uso, ammortamento e cessione sono successivi. La sega sarà rivenduta con plusvalenza; il carrello con minusvalenza.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+## 2 · Preparazione: budget e standard
+
+
+### 11. Attiva il nuovo percorso CPM senza scritture FI
+
+**Percorso:** CO → Scheda di calcolo → CPM · Budget dei centri e capacità  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Prerequisiti:** Società costituita, capitale versato, WMS vuoto e cinque cespiti acquistati; nessun ordine PP o movimento materiali
+
+- **Riquadro:** Nuovo laboratorio CPM · centri, budget e standard
+
+- **Scrivi ATTIVA:** ATTIVA
+
+- **Pulsante:** Attiva laboratorio CPM
+
+
+**Risultato / controllo atteso:** Nuova versione cpm-centri-v1: tre centri produttivi e centro Generale. Nessuna scrittura FI, nessun ordine cliente o PP creato. Non modifica retroattivamente ordini esistenti.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 12. Salva il budget annuale: 1.200 transenne, non 300
+
+**Percorso:** CO → Scheda di calcolo → CPM · Budget dei centri e capacità  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Anno del laboratorio:** 2026
+
+- **Generale: indiretti produttivi da ripartire €:** 18000
+
+- **Generale: amministrativi ESCLUSI dal prodotto €:** 0
+
+- **Driver ribaltamento:** Ore pianificate tariffa
+
+- **Taglio · Personale / Indiretti propri / Capacità / Ore pianificate tariffa:** 36000 / 0 / 1500 / 1500
+
+- **Piegatura · Personale / Indiretti propri / Capacità / Ore pianificate tariffa:** 36000 / 0 / 1500 / 1500
+
+- **Saldatura · Personale / Indiretti propri / Capacità / Ore pianificate tariffa:** 36000 / 0 / 1500 / 1500
+
+- **Quote %:** Lascia i valori proposti: non sono utilizzati con driver ore
+
+- **TR-STD · budget quantità annua pz:** 1200
+
+- **Altri prodotti · budget quantità annua pz:** 0; i 20 kit sono una successiva decisione autonoma di scorta, non un input della transenna
+
+- **Pulsante:** Salva budget versionato
+
+
+**Risultato / controllo atteso:** Budget produttivo 126.000 = 108.000 personale + 18.000 Generale, senza duplicare 6.000 di indiretti propri per centro. Piano annuale, non costo del solo dicembre e non ordine di produzione.
+
+
+**Attenzione e ragionamento:** Le 1.500 ore sono la base annua di assorbimento scelta e la capacità disponibile dichiarata: non dividere i costi per le sole ore richieste dai 1.200 pezzi. Il budget non genera debiti, paghe o scritture FI.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 13. Riconcilia quattro centri, tariffe e capacità annuale
+
+**Percorso:** CO → Scheda di calcolo → CPM · Budget dei centri e capacità  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Centro Generale:** 18.000 produttivi × 1.500 / 4.500 = 6.000 a ciascuno dei tre centri; residuo produttivo dopo riparto zero
+
+- **Ciascun centro produttivo:** 36.000 personale + 0 indiretti propri + 6.000 allocati = 42.000; 42.000 / 1.500 h = 28 €/h
+
+- **Taglio · ore del volume e saturazione:** 1.200 × 0,25 = 300 h; 300 / 1.500 = 20%
+
+- **Piegatura · ore del volume e saturazione:** 1.200 × 0,20 = 240 h; 16%
+
+- **Saldatura · ore del volume e saturazione:** 1.200 × 0,40 = 480 h; 32%
+
+- **Amministrativi:** Esclusi dal costo prodotto; qui zero. Non confonderli con il Generale produttivo ripartito
+
+
+**Risultato / controllo atteso:** Il volume richiede 1.020 ore variabili annue; la capacità è 4.500 ore. Non trasformare capacità inutilizzata in pezzi prodotti o movimenti di magazzino.
+
+
+**Attenzione e ragionamento:** Setup zero in questo caso. Per altri cicli il fabbisogno annuo di setup richiede anche il numero dei lotti. Il budget annuo/12 è solo un confronto indicativo se si assume esplicitamente assenza di stagionalità. Spunta dopo il confronto con la tabella.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 14. Salva distinta e ciclo della transenna sui tre centri
+
+**Percorso:** CO → Scheda di calcolo → CPM · Budget dei centri e capacità  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Riquadro:** Distinta e ciclo standard CPM
+
+- **Prodotto da modificare:** TR-STD
+
+- **Componente:** FERRO
+
+- **Quantità componente per pezzo:** 8
+
+- **Taglio h/pz:** 0,25
+
+- **Piegatura h/pz:** 0,20
+
+- **Saldatura h/pz:** 0,40
+
+- **Setup h/lotto:** 0
+
+- **Centro del setup:** Taglio (nessun costo perché setup zero)
+
+- **Pulsante:** Salva distinta/ciclo versionati
+
+
+**Risultato / controllo atteso:** Standard unitario: 8 × 0,95 + 0,25 × 28 + 0,20 × 28 + 0,40 × 28 = 31,40. Le tre fasi appartengono a un solo ordine; nessun HALB intermedio.
+
+
+**Attenzione e ragionamento:** I tempi per pezzo e le tariffe sono dati standard; le conferme successive sono ore effettive. Ogni modifica crea una revisione; non modificare budget o ciclo fra calcolo/rilascio e i due ordini del caso.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 15. Salva il solo HALB autonomo: 20 kit non sono fasi
+
+**Percorso:** CO → Scheda di calcolo → CPM · Budget dei centri e capacità  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Prodotto da modificare:** SL-TAGLIO
+
+- **Componente / Quantità per pezzo:** FERRO / 8
+
+- **Taglio h/pz:** 0,25
+
+- **Piegatura h/pz / Saldatura h/pz:** 0 / 0
+
+- **Setup h/lotto / Centro del setup:** 0 / Taglio
+
+- **Pulsante:** Salva distinta/ciclo versionati
+
+
+**Risultato / controllo atteso:** 7,60 materiale + 7,00 Taglio = 14,60 €/kit. Ordine autonomo futuro: 20 kit, 160 kg, 5 h, valore 292. Non creare SL-PIEGA né consumare questi kit nella transenna.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 16. CK11N: calcola entrambi gli standard dopo il budget
+
+**Percorso:** CO → Calcola il costo standard → Calcola il costo standard  
+**Schermata:** `erp_costi.calcolo`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Pagina:** CO → Calcola il costo standard
+
+- **Materiale / Data di calcolo:** TR-STD / 01/12/2026 → Calcola
+
+- **Ripeti il calcolo:** SL-TAGLIO / 01/12/2026 → Calcola
+
+- **Controlli:** TR-STD 31,40 e SL-TAGLIO 14,60; snapshot della revisione CPM corrente; setup e sovraccosti aggiuntivi zero
+
+
+**Risultato / controllo atteso:** Le tariffe per centro incorporano già il Generale produttivo: non aggiungere un altro sovraccosto del 6.000 per centro. La scheda storica con tariffa comune non sostituisce il modello CPM.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 17. CK24: marca e rilascia gli standard prima dei materiali
+
+**Percorso:** CO → Calcola il costo standard → Marca e rilascia  
+**Schermata:** `erp_costi.calcolo`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Data di rilascio:** 01/12/2026
+
+- **Prima:** Marca tutte le stime calcolate
+
+- **Solo primo CPM su azienda vuota:** Scrivi SOSTITUISCI nel campo dedicato per sostituire il bootstrap di costituzione; è un consenso al primo standard CPM, NON un reset azienda
+
+- **Poi:** Rilascia
+
+- **Verifica:** Stato FR per TR-STD e SL-TAGLIO, standard 31,40 e 14,60; magazzino ancora vuoto
+
+
+**Risultato / controllo atteso:** Nessuna rivalutazione FI: non ci sono giacenze. Il primo standard CPM sostituisce solo l’inizializzazione della nuova costituzione; non modifica saldi o ordini storici.
+
+
+**Attenzione e ragionamento:** Prima salva budget e i due cicli, poi calcola e rilascia entrambi. Una revisione successiva richiede un nuovo calcolo/rilascio; non cambiare i parametri durante questo caso.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 18. Leggi il ciclo a fasi e il semilavorato autonomo
+
+**Percorso:** PP → Ordini di produzione → Distinta e ciclo; poi CO → Calcolo del costo standard  
+**Schermata:** `erp_produzione.ordini`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **TR-STD:** 8 kg ferro × 0,95 = 7,60; Taglio 0,25 h + Piegatura 0,20 h + Saldatura 0,40 h, a 28 €/h: standard 31,40 €/pz
+
+- **Un solo ordine:** Il ferro e le ore delle tre fasi si accumulano nello stesso WIP analitico. Nessuna entrata merci tra le fasi; un solo 101 del finito alla fine
+
+- **HALB autonomo:** SL-TAGLIO: 8 kg ferro 7,60 + Taglio 0,25 h × 28 = 7,00 → 14,60 €/pz. Un ordine separato produce 20 kit a scorta, non alimenta l’ordine TR-STD
+
+- **Scheda di calcolo:** sovraccosti 0%, tariffa 28 €/h, lotto 100
+
+
+**Attenzione e ragionamento:** Prima della produzione acquista e metti in funzione i beni strumentali; verifica poi budget, distinta e tempi. WIP analitico = costi addebitati all’ordine meno output accreditato: non è una scorta IM/WMS e non genera da solo una capitalizzazione FI. I vecchi salvataggi mantengono il percorso precedente.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -364,7 +601,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 3 · Assicurazione
 
 
-### 12. FB60: registra la polizza annuale
+### 19. FB60: registra la polizza annuale
 
 **Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
 **Schermata:** `erp_fi.passive`
@@ -397,7 +634,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 13. F-53: paga la polizza
+### 20. F-53: paga la polizza
 
 **Percorso:** FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore  
 **Schermata:** `erp_fi.passive`
@@ -420,10 +657,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-## 4 · Ordini dei clienti
+## 4 · CICLO OPERATIVO: ordini dei clienti
 
 
-### 14. VA01: Beta ordina 180 TR-STD
+### 21. VA01: Beta ordina 180 TR-STD
 
 **Percorso:** SD → Ordini cliente  
 **Schermata:** `erp_vendite.ordini`
@@ -444,11 +681,14 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** Lordo 10.800 − sconto quantità 2% 216 = netto 10.584; IVA 2.328,48; totale 12.912,48. ATP: giacenza 0 → confermati 0 su 180, l’ordine aspetta la produzione. Nessuna scrittura.
 
 
+**Attenzione e ragionamento:** Qui inizia il ciclo operativo su domanda cliente: ordini → fabbisogni → acquisto materie → ricevimento e fattura → produzione → consegna → fattura cliente. La precedente costituzione e gli acquisti dei macchinari erano preparazione dell’azienda, non ordini dei clienti. Produrre per scorta è un’alternativa: la userai solo per i 20 kit autonomi.
+
+
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 15. VA01: Delta ordina 120 TR-STD
+### 22. VA01: Delta ordina 120 TR-STD
 
 **Percorso:** SD → Ordini cliente  
 **Schermata:** `erp_vendite.ordini`
@@ -473,10 +713,41 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+## 4 · CICLO OPERATIVO: fabbisogni
+
+
+### 23. Dalla domanda ai fabbisogni: 300 transenne e 20 kit a scorta
+
+**Percorso:** SD → Ordini cliente; PP → Ordini di produzione → Distinta e ciclo  
+**Schermata:** `erp_produzione.ordini`
+
+**Data aziendale simulata:** 02/12/2026
+
+- **Domanda acquisita:** Beta 180 + Delta 120 = 300 TR-STD, giacenza finito zero
+
+- **Fabbisogno TR-STD:** 300 × 8 = 2.400 kg FERRO; Taglio 75 h, Piegatura 60 h, Saldatura 120 h
+
+- **Scorta HALB separata:** 20 SL-TAGLIO: 160 kg FERRO + 5 h Taglio; non è un componente delle 300 transenne
+
+- **Acquisti da pianificare:** 2.560 kg netti per i due ordini; primo acquisto 3.000 kg, poi reintegro urgente di 500 kg dopo i 200 kg danneggiati
+
+- **Non creare ancora:** Nessun ordine PP aggiuntivo, nessuna entrata merci e nessuna scrittura per questo calcolo
+
+
+**Risultato / controllo atteso:** Riconcilia domanda cliente, distinta e fabbisogni prima dell’ordine MM del 03/12. Il budget annuo da 1.200 TR-STD è un piano annuale, non sostituisce questi 300 pezzi né genera automaticamente un ordine.
+
+
+**Attenzione e ragionamento:** È un controllo ragionato della distinta consultabile: non viene promesso un lancio MRP automatico. Spunta dopo aver documentato il calcolo.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
 ## 5 · Acquisto del ferro
 
 
-### 16. ME21N: ordina 3.000 kg di ferro
+### 24. ME21N: ordina 3.000 kg di ferro
 
 **Percorso:** MM → Ordini d’acquisto e rilascio  
 **Schermata:** `erp_acquisti.ordini`
@@ -501,7 +772,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 17. MIGO 101: ricevi il ferro, 200 kg sono schiacciati
+### 25. MIGO 101: ricevi il ferro, 200 kg sono schiacciati
 
 **Percorso:** MM → Entrata merci (anche da WMS)  
 **Schermata:** `erp_acquisti.entrate`
@@ -533,7 +804,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 18. RF: metti a dimora i 3 fasci buoni in catasta
+### 26. RF: metti a dimora i 3 fasci buoni in catasta
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -557,9 +828,9 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 19. Quarantena: decidi sui 200 kg schiacciati
+### 27. Quarantena: decidi sui 200 kg schiacciati
 
-**Percorso:** WMS → Merce bloccata e danneggiata → Decisione sulla merce in quarantena  
+**Percorso:** WMS → Merce bloccata e danneggiata → 3 · Decidi sulla merce arrivata in quarantena  
 **Schermata:** `erp_magazzino.bloccato`
 
 **Data aziendale simulata:** 05/12/2026
@@ -576,14 +847,14 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** D 69 Rottamazioni e merce danneggiata / A 12 Ferro 190 (200 × 0,95). Il ferro esce dal magazzino e diventa un costo. Se il controllo avesse detto «buona», si sbloccava (343) e tornava a scaffale.
 
 
-**Attenzione e ragionamento:** Il trasporto era a nostro rischio (franco partenza): il fornitore fattura tutti i 3.000 kg.
+**Attenzione e ragionamento:** Questi 200 kg sono già entrati bloccati in Q-ZONE al ricevimento: non premere «Metti in quarantena e crea il compito RF» su altri fasci. Quel comando serve quando una UdC prima libera deve diventare bloccata e richiede poi conferma RF. Qui devi solo decidere sulla merce già in quarantena. Non confondere con il blocco delle ubicazioni durante l’inventario. Il trasporto era a nostro rischio (franco partenza): il fornitore fattura tutti i 3.000 kg.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 20. MIRO: registra la fattura del ferro
+### 28. MIRO: registra la fattura del ferro
 
 **Percorso:** MM → Fatture fornitore  
 **Schermata:** `erp_acquisti.fatture`
@@ -606,7 +877,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 21. ME21N: riordino urgente di 500 kg
+### 29. ME21N: riordino urgente di 500 kg
 
 **Percorso:** MM → Ordini d’acquisto e rilascio  
 **Schermata:** `erp_acquisti.ordini`
@@ -631,7 +902,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 22. MIGO 101: ricevi i 500 kg urgenti
+### 30. MIGO 101: ricevi i 500 kg urgenti
 
 **Percorso:** MM → Entrata merci  
 **Schermata:** `erp_acquisti.entrate`
@@ -656,7 +927,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 23. RF: metti a dimora il fascio urgente
+### 31. RF: metti a dimora il fascio urgente
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -678,7 +949,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 24. MIRO: fattura del riordino
+### 32. MIRO: fattura del riordino
 
 **Percorso:** MM → Fatture fornitore  
 **Schermata:** `erp_acquisti.fatture`
@@ -702,7 +973,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 6 · Ordine transenne
 
 
-### 25. CO01: un ordine per 300 transenne
+### 33. CO01: un ordine per 300 transenne
 
 **Percorso:** PP → Ordini di produzione  
 **Schermata:** `erp_produzione.ordini`
@@ -723,7 +994,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 26. WMS: porta il ferro delle transenne alla linea
+### 34. WMS: porta il ferro delle transenne alla linea
 
 **Percorso:** WMS → Compiti → Approvvigionamento della produzione  
 **Schermata:** `erp_magazzino.compiti`
@@ -744,7 +1015,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 27. RF: conferma l’approvvigionamento del ferro delle transenne
+### 35. RF: conferma l’approvvigionamento del ferro delle transenne
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -766,7 +1037,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 28. 261: consuma 2.400 kg sullo stesso ordine
+### 36. 261: consuma 2.400 kg sullo stesso ordine
 
 **Percorso:** PP → Prelievi, conferme, entrate → Prelievo  
 **Schermata:** `erp_produzione.avanzamento`
@@ -787,7 +1058,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 29. CO11N: Taglio 75 ore, WIP 4.380
+### 37. CO11N: Taglio 75 ore, WIP 4.380
 
 **Percorso:** PP → Conferma delle ore  
 **Schermata:** `erp_produzione.avanzamento`
@@ -817,7 +1088,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 7 · Fasi sullo stesso ordine
 
 
-### 30. CO11N: Piegatura 60 ore, WIP 6.060
+### 38. CO11N: Piegatura 60 ore, WIP 6.060
 
 **Percorso:** PP → Conferma delle ore  
 **Schermata:** `erp_produzione.avanzamento`
@@ -844,7 +1115,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 31. CO11N: Saldatura 120 ore, WIP 9.420
+### 39. CO11N: Saldatura 120 ore, WIP 9.420
 
 **Percorso:** PP → Conferma delle ore  
 **Schermata:** `erp_produzione.avanzamento`
@@ -871,7 +1142,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 32. 101: carica a magazzino le 300 transenne
+### 40. 101: carica a magazzino le 300 transenne
 
 **Percorso:** PP → Entrata del prodotto  
 **Schermata:** `erp_produzione.avanzamento`
@@ -892,7 +1163,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 33. RF: metti a scaffale i 6 pallet di transenne
+### 41. RF: metti a scaffale i 6 pallet di transenne
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -917,7 +1188,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 8 · HALB autonomo a scorta
 
 
-### 34. CO01: ordine autonomo per 20 kit SL-TAGLIO
+### 42. CO01: ordine autonomo per 20 kit SL-TAGLIO
 
 **Percorso:** PP → Ordini di produzione  
 **Schermata:** `erp_produzione.ordini`
@@ -938,7 +1209,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 35. WMS: approvvigiona il ferro dei 20 kit
+### 43. WMS: approvvigiona il ferro dei 20 kit
 
 **Percorso:** WMS → Compiti → Approvvigionamento  
 **Schermata:** `erp_magazzino.compiti`
@@ -959,7 +1230,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 36. RF: porta alla linea il ferro dei kit
+### 44. RF: porta alla linea il ferro dei kit
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -981,7 +1252,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 37. 261: consuma 160 kg per il HALB
+### 45. 261: consuma 160 kg per il HALB
 
 **Percorso:** PP → Prelievo  
 **Schermata:** `erp_produzione.avanzamento`
@@ -1002,7 +1273,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 38. CO11N: conferma 5 ore del HALB
+### 46. CO11N: conferma 5 ore del HALB
 
 **Percorso:** PP → Conferma  
 **Schermata:** `erp_produzione.avanzamento`
@@ -1011,7 +1282,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **Ordine:** 1000002
 
-- **Fase:** lascia vuoto: ordine autonomo a ciclo singolo
+- **Fase:** Taglio nel percorso CPM: anche l’ordine autonomo conserva la propria operazione nello snapshot. Il campo resta vuoto solo nel precedente ciclo aggregato senza CPM
 
 - **Attrezzaggio:** 0
 
@@ -1027,7 +1298,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 39. 101: versa a magazzino i 20 kit autonomi
+### 47. 101: versa a magazzino i 20 kit autonomi
 
 **Percorso:** PP → Entrata del prodotto  
 **Schermata:** `erp_produzione.avanzamento`
@@ -1048,7 +1319,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 40. RF: metti a scaffale il cassone SL-TAGLIO
+### 48. RF: metti a scaffale il cassone SL-TAGLIO
 
 **Percorso:** WMS → Pistola RF  
 **Schermata:** `erp_magazzino.rf`
@@ -1070,7 +1341,37 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 41. Leggi la mappa delle ubicazioni
+### 49. Confronta budget, attività assorbite e WIP senza duplicazioni
+
+**Percorso:** CO → Scheda di calcolo → Costi primari, attività assorbite e residui  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 12/12/2026
+
+- **Taglio:** 75 h transenne + 5 h kit = 80 h × 28 = 2.240
+
+- **Piegatura:** 60 h × 28 = 1.680
+
+- **Saldatura:** 120 h × 28 = 3.360
+
+- **Totale attività:** 260 h e 7.280, coincidenti con le conferme D72/A75 dei due ordini
+
+- **Piano annuale / consuntivo ordini:** Ore annuali 300/240/480 contro ore effettivamente dichiarate 80/60/120; il budget non rappresenta produzione già avvenuta
+
+- **Costi primari:** Se non hai riportato fonti effettive, le colonne consuntivo sono incomplete: zero inserito NON significa personale gratuito
+
+
+**Risultato / controllo atteso:** Le attività valorizzate sono costi attribuiti agli ordini, non un secondo costo del personale. Le ore coincidono con lo standard dei pezzi confermati: varianza di efficienza zero in questo caso.
+
+
+**Attenzione e ragionamento:** Residuo centro = costi primari effettivi più Generale effettivo allocato meno attività assorbite: non equivale automaticamente a inefficienza. Gli output dei due ordini sono 9.420 + 292 = 9.712; WIP analitico residuo zero dopo i 101, senza capitalizzazione FI automatica.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 50. Leggi la mappa delle ubicazioni
 
 **Percorso:** WMS → Mappa  
 **Schermata:** `erp_magazzino.mappa`
@@ -1087,7 +1388,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 42. LT10: sposta il cassone da 20 in fondo al magazzino
+### 51. LT10: sposta il cassone da 20 in fondo al magazzino
 
 **Percorso:** WMS → Compiti → Trasferimento  
 **Schermata:** `erp_magazzino.compiti`
@@ -1110,7 +1411,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 43. RF: conferma lo spostamento del cassone
+### 52. RF: conferma lo spostamento del cassone
 
 **Percorso:** WMS → Pistola RF  
 **Schermata:** `erp_magazzino.rf`
@@ -1132,7 +1433,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 44. Stampa le etichette del cassone e dell’ubicazione
+### 53. Stampa le etichette del cassone e dell’ubicazione
 
 **Percorso:** WMS → Etichette barcode e QR  
 **Schermata:** `erp_magazzino.etichette`
@@ -1149,7 +1450,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 45. Controlla WIP e stock: due concetti distinti
+### 54. Controlla WIP e stock: due concetti distinti
 
 **Percorso:** WMS → Monitor; PP → Ordini; FI → Bilancio  
 **Schermata:** `erp_magazzino.monitor`
@@ -1175,7 +1476,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 9 · Consegna con picking
 
 
-### 46. VL01N: consegna per Beta
+### 55. VL01N: consegna per Beta
 
 **Percorso:** SD → Consegne  
 **Schermata:** `erp_vendite.consegne`
@@ -1194,7 +1495,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 47. VL01N: consegna per Delta
+### 56. VL01N: consegna per Delta
 
 **Percorso:** SD → Consegne  
 **Schermata:** `erp_vendite.consegne`
@@ -1213,7 +1514,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 48. Stampa la lista di prelievo
+### 57. Stampa la lista di prelievo
 
 **Percorso:** WMS → Spedizione → Lista di prelievo  
 **Schermata:** `erp_spedizione.prelievo`
@@ -1232,7 +1533,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 49. RF: preleva i 7 pallet (FIFO)
+### 58. RF: preleva i 7 pallet (FIFO)
 
 **Percorso:** WMS → Pistola RF → Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -1254,7 +1555,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 50. Imballa Beta in 4 colli SSCC
+### 59. Imballa Beta in 4 colli SSCC
 
 **Percorso:** WMS → Imballo e etichette SSCC  
 **Schermata:** `erp_spedizione.imballo`
@@ -1277,7 +1578,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 51. Imballa Delta in 3 colli SSCC
+### 60. Imballa Delta in 3 colli SSCC
 
 **Percorso:** WMS → Imballo e etichette SSCC  
 **Schermata:** `erp_spedizione.imballo`
@@ -1300,7 +1601,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 52. Crea un trasporto per le due consegne
+### 61. Crea un trasporto per le due consegne
 
 **Percorso:** WMS → Trasporti e carico → Crea il trasporto  
 **Schermata:** `erp_spedizione.trasporti`
@@ -1325,7 +1626,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 53. Carica i 7 colli leggendo gli SSCC
+### 62. Carica i 7 colli leggendo gli SSCC
 
 **Percorso:** WMS → Trasporti e carico → Carico (oppure Pistola RF → Carico)  
 **Schermata:** `erp_spedizione.trasporti`
@@ -1346,7 +1647,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 54. Partenza: uscita merci 601 e DDT
+### 63. Partenza: uscita merci 601 e DDT
 
 **Percorso:** WMS → Trasporti e carico → Fine carico e uscita merci  
 **Schermata:** `erp_spedizione.trasporti`
@@ -1365,7 +1666,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 55. Reclamo simulato: da quale ferro vengono le transenne di Beta?
+### 64. Reclamo simulato: da quale ferro vengono le transenne di Beta?
 
 **Percorso:** WMS → Lotti, numeri di serie e tracciabilità → Reclamo di un cliente  
 **Schermata:** `erp_magazzino.lotti`
@@ -1387,7 +1688,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 10 · Fatture e anticipo
 
 
-### 56. VF01: fattura Beta
+### 65. VF01: fattura Beta
 
 **Percorso:** SD → Fatturazione  
 **Schermata:** `erp_vendite.fatture`
@@ -1406,7 +1707,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 57. VF01: fattura Delta
+### 66. VF01: fattura Delta
 
 **Percorso:** SD → Fatturazione  
 **Schermata:** `erp_vendite.fatture`
@@ -1425,7 +1726,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 58. Trasmetti le due fatture allo SdI
+### 67. Trasmetti le due fatture allo SdI
 
 **Percorso:** FI → Fattura elettronica (SdI)  
 **Schermata:** `erp_fi.sdi`
@@ -1444,7 +1745,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 59. Anticipo su fattura: la banca anticipa l’80% di Beta
+### 68. Anticipo su fattura: la banca anticipa l’80% di Beta
 
 **Percorso:** Tesoreria → Anticipo su fatture  
 **Schermata:** `erp_tesoreria.anticipi`
@@ -1467,7 +1768,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 60. F-53: paga il ferro
+### 69. F-53: paga il ferro
 
 **Percorso:** FI → Fatture passive e pagamenti → Pagamento a un fornitore  
 **Schermata:** `erp_fi.passive`
@@ -1488,7 +1789,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 61. F-53: paga i macchinari
+### 70. F-53: paga i macchinari
 
 **Percorso:** FI → Fatture passive e pagamenti → Pagamento a un fornitore  
 **Schermata:** `erp_fi.passive`
@@ -1512,7 +1813,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 11 · Sopravvenienza
 
 
-### 62. L’assicurazione riconosce un indennizzo
+### 71. L’assicurazione riconosce un indennizzo
 
 **Percorso:** FI → Sopravvenienze attive  
 **Schermata:** `erp_fi.sopravvenienze`
@@ -1523,7 +1824,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **Riferimento:** LIQ-4471
 
-- **Evento:** indennizzo per il sinistro del furgone del 10/12
+- **Evento:** indennizzo per il sinistro del 10/12
 
 - **Importo:** 500
 
@@ -1540,29 +1841,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 63. Incassa l’indennizzo
-
-**Percorso:** FI → Sopravvenienze attive → Incasso dell’indennizzo  
-**Schermata:** `erp_fi.sopravvenienze`
-
-**Data aziendale simulata:** 28/12/2026
-
-- **Indennizzo:** LIQ-4471
-
-- **Data:** 28/12/2026
-
-
-**Risultato / controllo atteso:** D 10 / A 09 500. Il ricavo era già nel conto 84: l’incasso non lo raddoppia.
-
-
-**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
-**Verifica:** riscontro manuale con evidenze e docente.
-
-
 ## 12 · Rivendita dei macchinari
 
 
-### 64. Vendi il carrello elevatore: minusvalenza
+### 72. Vendi il carrello elevatore: minusvalenza
 
 **Percorso:** FI → Cespiti → Cessione di un cespite  
 **Schermata:** `erp_cespiti.cessione`
@@ -1587,7 +1869,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 65. Vendi la sega circolare: plusvalenza
+### 73. Vendi la sega circolare: plusvalenza
 
 **Percorso:** FI → Cespiti → Cessione di un cespite  
 **Schermata:** `erp_cespiti.cessione`
@@ -1612,7 +1894,32 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 66. F-28: incassa le due cessioni
+## 11 · Sopravvenienza
+
+
+### 74. Incassa l’indennizzo
+
+**Percorso:** FI → Sopravvenienze attive → Incasso dell’indennizzo  
+**Schermata:** `erp_fi.sopravvenienze`
+
+**Data aziendale simulata:** 28/12/2026
+
+- **Indennizzo:** LIQ-4471
+
+- **Data:** 28/12/2026
+
+
+**Risultato / controllo atteso:** D 10 / A 09 500. Il ricavo era già nel conto 84: l’incasso non lo raddoppia.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+## 12 · Rivendita dei macchinari
+
+
+### 75. F-28: incassa le due cessioni
 
 **Percorso:** SD → Incassi e partite  
 **Schermata:** `erp_vendite.incassi`
@@ -1635,7 +1942,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 67. F-28: Delta paga in anticipo
+### 76. F-28: Delta paga in anticipo
 
 **Percorso:** SD → Incassi e partite  
 **Schermata:** `erp_vendite.incassi`
@@ -1664,7 +1971,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 13 · Stipendi
 
 
-### 68. Calcola le paghe di dicembre
+### 77. Calcola le paghe di dicembre
 
 **Percorso:** Paghe → Presenze e cedolino → Calcolo  
 **Schermata:** `erp_paghe.cedolino`
@@ -1684,7 +1991,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 69. Registra le paghe in contabilità
+### 78. Registra le paghe in contabilità
 
 **Percorso:** Paghe → Registrazione, stipendi e F24  
 **Schermata:** `erp_paghe.contabilita`
@@ -1703,7 +2010,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 70. Paga gli stipendi
+### 79. Paga gli stipendi
 
 **Percorso:** Paghe → Registrazione, stipendi e F24 → Pagamento dei netti  
 **Schermata:** `erp_paghe.contabilita`
@@ -1725,7 +2032,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 14 · Ratei, risconti, ammortamenti
 
 
-### 71. Risconto attivo sull’assicurazione
+### 80. Risconto attivo sull’assicurazione
 
 **Percorso:** FI → IVA, imposte, chiusura → Ratei e risconti  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -1754,7 +2061,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 72. Rateo passivo sul fitto del capannone
+### 81. Rateo passivo sul fitto del capannone
 
 **Percorso:** FI → IVA, imposte, chiusura → Ratei e risconti  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -1781,7 +2088,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 73. AFAB: ammortamenti di dicembre
+### 82. AFAB: ammortamenti di dicembre
 
 **Percorso:** FI → Cespiti → Ammortamenti  
 **Schermata:** `erp_cespiti.ammortamenti`
@@ -1804,7 +2111,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 14 · Inventario di fine anno
 
 
-### 74. Classificazione ABC dei materiali
+### 83. Classificazione ABC dei materiali
 
 **Percorso:** WMS → Inventari → Classificazione ABC  
 **Schermata:** `erp_inventario.abc`
@@ -1821,7 +2128,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 75. LI01N: documento d’inventario delle ubicazioni occupate
+### 84. LI01N: documento d’inventario delle ubicazioni occupate
 
 **Percorso:** WMS → Inventari → Documenti d’inventario → Crea  
 **Schermata:** `erp_inventario.documenti`
@@ -1844,7 +2151,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 76. Attiva l’inventario e stampa la lista di conta
+### 85. Attiva l’inventario e stampa la lista di conta
 
 **Percorso:** WMS → Inventari → Documenti → Attiva; poi Lista di conta da stampare  
 **Schermata:** `erp_inventario.documenti`
@@ -1863,7 +2170,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 77. LI11N: registra la conta (manca un kit tagliato)
+### 86. LI11N: registra la conta (manca un kit tagliato)
 
 **Percorso:** WMS → Inventari → Documenti → Registra la conta  
 **Schermata:** `erp_inventario.documenti`
@@ -1886,7 +2193,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 78. LI20: chiudi l’inventario nel WMS
+### 87. LI20: chiudi l’inventario nel WMS
 
 **Percorso:** WMS → Inventari → Documenti → Chiudi nel WMS  
 **Schermata:** `erp_inventario.documenti`
@@ -1903,7 +2210,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 79. LI21: registra la differenza in contabilità
+### 88. LI21: registra la differenza in contabilità
 
 **Percorso:** WMS → Inventari → Differenze inventariali → Registra  
 **Schermata:** `erp_inventario.differenze`
@@ -1920,7 +2227,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 80. Valorizza la rimanenza di ferro con i quattro metodi
+### 89. Valorizza la rimanenza di ferro con i quattro metodi
 
 **Percorso:** WMS → Inventari → Valorizzazione delle rimanenze  
 **Schermata:** `erp_inventario.valorizzazione`
@@ -1943,7 +2250,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 81. KPI di magazzino di dicembre
+### 90. KPI di magazzino di dicembre
 
 **Percorso:** WMS → Innovazione → KPI di magazzino  
 **Schermata:** `erp_innovazione.kpi`
@@ -1958,10 +2265,41 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+## 14 · Controllo costi di fine mese
+
+
+### 91. Riconcilia le fonti dei centri prima di interpretare i residui
+
+**Percorso:** Paghe → Costi per centro (KSB1); FI → Giornale e mastrini; CO → Scheda di calcolo → Costi primari, attività assorbite e residui  
+**Schermata:** `erp_costi.scheda`
+
+**Data aziendale simulata:** 31/12/2026
+
+- **Fonti disponibili:** Confronta le paghe contabilizzate e il report KSB1 con giornale/mastrini: retribuzioni, oneri e TFR sono costi primari; non aggiungere le attività D72/A75 una seconda volta
+
+- **Centri non coincidenti:** Il centro payroll Produzione non identifica automaticamente Taglio/Piegatura/Saldatura. Documenta prima un criterio di attribuzione delle fonti; non ripartire importi a caso né trattare Magazzino/Amministrazione come reparti produttivi
+
+- **Modulo analitico, solo con fonte attribuibile:** Data fonte 31/12/2026, riferimento univoco del documento, centro, natura e importo verificato → Riporta costo primario (solo analitico). Non reinserire la stessa fonte
+
+- **Generale:** Per i tre centri produttivi usa personale/indiretti; per Generale produttivi/amministrativi. Non riportare il budget come se fosse un costo effettivamente sostenuto
+
+- **Lettura del report:** Residuo = consuntivo − assorbito = varianza spesa + varianza assorbimento. Efficienza confronta invece ore effettive e ore standard dei pezzi confermati
+
+
+**Risultato / controllo atteso:** Nessun importo consuntivo aggiuntivo è imposto da questa guida. La riconciliazione evidenzia fonti disponibili, eventuali dati mancanti e criterio di attribuzione, senza alterare il risultato FI del caso.
+
+
+**Attenzione e ragionamento:** Il prospetto CPM non importa automaticamente la contabilità. Confrontare budget annuo e costi del solo dicembre richiede un perimetro/periodo dichiarato; budget/12 è solo indicativo se si assume assenza di stagionalità. Non concludere «inefficienza» dal solo residuo e non generare scritture FI di WIP.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
 ## 14 · Ratei, risconti, ammortamenti
 
 
-### 82. KO88: chiudi i due ordini indipendenti
+### 92. KO88: chiudi i due ordini indipendenti
 
 **Percorso:** CO → Chiusura degli ordini e varianze → Varianze e liquidazione  
 **Schermata:** `erp_costi.chiusura`
@@ -1981,10 +2319,63 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+## 14 · Controllo contabile
+
+
+### 93. Rileggi il giornale dopo il tentativo di ragioneria
+
+**Percorso:** Laboratorio di ragioneria → invia un tentativo completo; FI → Libro giornale  
+**Schermata:** `erp_fi.giornale`
+
+**Data aziendale simulata:** 31/12/2026
+
+- **Prima della soluzione:** Per ogni domanda compila conti, sezioni Dare/Avere e importi e invia un tentativo valutabile; un clic senza dati non vale
+
+- **Dopo il tentativo:** Confronta il documento nel giornale: data, numero, descrizione, righe Dare e righe Avere, totale del documento e quadratura
+
+- **Evidenza:** Conserva il numero di una fattura cespite, di un consumo 261 e di una conferma CO11N; distingui i rispettivi conti e gli importi
+
+
+**Risultato / controllo atteso:** Un solo libro giornale integrato. Gli errori del tentativo rimangono evidenze didattiche: consultare la soluzione non trasforma il tentativo in risposta corretta.
+
+
+**Attenzione e ragionamento:** Se ci sono documenti ancora bloccati dal quiz, viste e totali consultabili possono essere parziali. Completa il tentativo prima di cercare le scritture nelle viste derivate.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 94. Apri i mastrini e riconciliali con il giornale
+
+**Percorso:** FI → Mastrini per conto; oppure dal conto del documento nel giornale  
+**Schermata:** `erp_fi.mastro`
+
+**Data aziendale simulata:** 31/12/2026
+
+- **Conto:** Scegli un conto nel selettore e premi Mostra mastrino: prova 10 Banca, 12 Ferro, 07 Semilavorati, 72 e 75 Attività
+
+- **Lettura:** Data, documento, descrizione, Dare, Avere e saldo progressivo con sezione Dare/Avere esplicita
+
+- **Collegamenti:** Apri dal mastrino il documento del giornale; dal conto del giornale torna al relativo mastrino
+
+- **Quadratura:** Somma i movimenti dello stesso conto nel giornale e confronta Dare, Avere e saldo finale; non registrare altre scritture per ottenere il mastrino
+
+
+**Risultato / controllo atteso:** Il mastrino è una vista delle medesime registrazioni, non una seconda contabilità. Sul conto 75 gli accrediti delle attività dei due ordini sommano 7.280.
+
+
+**Attenzione e ragionamento:** La protezione del quiz vale anche qui. Un saldo residuo di centro non dimostra da solo inefficienza e non genera automaticamente WIP patrimoniale FI.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
 ## 15 · IVA, imposte e chiusura
 
 
-### 83. Liquida l’IVA di dicembre
+### 95. Liquida l’IVA di dicembre
 
 **Percorso:** FI → IVA, imposte, chiusura → Liquidazione IVA  
 **Schermata:** `erp_chiusura.iva`
@@ -2003,7 +2394,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 84. Calcola e registra IRES e IRAP
+### 96. Calcola e registra IRES e IRAP
 
 **Percorso:** FI → IVA, imposte, chiusura → Imposte  
 **Schermata:** `erp_chiusura.imposte`
@@ -2026,7 +2417,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 85. Leggi il conto economico di dicembre
+### 97. Leggi il conto economico di dicembre
 
 **Percorso:** FI → IVA, imposte, chiusura → Chiusura dell’esercizio (prospetti)  
 **Schermata:** `erp_chiusura.chiusura`
@@ -2049,7 +2440,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 86. Chiudi l’esercizio 2026
+### 98. Chiudi l’esercizio 2026
 
 **Percorso:** FI → IVA, imposte, chiusura → Chiusura dell’esercizio  
 **Schermata:** `erp_chiusura.chiusura`
@@ -2074,7 +2465,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 16 · Riapertura e gennaio
 
 
-### 87. Riapri i conti al 1° gennaio 2027
+### 99. Riapri i conti al 1° gennaio 2027
 
 **Percorso:** FI → IVA, imposte, chiusura → Riapertura  
 **Schermata:** `erp_chiusura.riapertura`
@@ -2093,7 +2484,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 88. Storna il risconto e il rateo
+### 100. Storna il risconto e il rateo
 
 **Percorso:** FI → IVA, imposte, chiusura → Ratei e risconti → Storno al 1° gennaio  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -2110,7 +2501,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 89. F-28: Beta paga la fattura alla scadenza
+### 101. F-28: Beta paga la fattura alla scadenza
 
 **Percorso:** SD → Incassi e partite  
 **Schermata:** `erp_vendite.incassi`
@@ -2133,7 +2524,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 90. La banca si ripaga l’anticipo con gli interessi
+### 102. La banca si ripaga l’anticipo con gli interessi
 
 **Percorso:** Tesoreria → Anticipo su fatture → Estingui l’anticipo  
 **Schermata:** `erp_tesoreria.anticipi`
@@ -2154,7 +2545,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 91. F24: versa ritenute e contributi di dicembre
+### 103. F24: versa ritenute e contributi di dicembre
 
 **Percorso:** Paghe → Registrazione, stipendi e F24 → F24  
 **Schermata:** `erp_paghe.contabilita`
@@ -2176,7 +2567,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 92. L’assemblea approva il bilancio e destina l’utile
+### 104. L’assemblea approva il bilancio e destina l’utile
 
 **Percorso:** FI → IVA, imposte, chiusura → Riapertura → Destinazione dell’utile  
 **Schermata:** `erp_chiusura.riapertura`
@@ -2195,7 +2586,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 93. Verifica finale
+### 105. Verifica finale
 
 **Percorso:** FI → Contabilità → Bilancio di verifica; WMS → Monitor  
 **Schermata:** `erp_fi.bilancio`
@@ -2216,7 +2607,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 94. Consegna il lavoro al docente
+### 106. Consegna il lavoro al docente
 
 **Percorso:** La mia area → Consegna il lavoro  
 **Schermata:** `allievo.consegna`
@@ -2235,7 +2626,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · lettura
 
 
-### 95. Calendario fornito e programma operativo proposto: non sono la stessa cosa
+### 107. Calendario fornito e programma operativo proposto: non sono la stessa cosa
 
 **Percorso:** FORMAS → Prima del laboratorio  
 **Schermata:** `erp_inventario.valorizzazione`
@@ -2260,7 +2651,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · preparazione
 
 
-### 96. Prima barriera: un account TEST non è una guida diversa
+### 108. Prima barriera: un account TEST non è una guida diversa
 
 **Percorso:** Docente → Nuovo allievo; poi accesso TEST → Sistema integrato S/4  
 **Schermata:** `erp_dati.avvio`
@@ -2285,7 +2676,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · preparazione
 
 
-### 97. B0: inizializza scorte sintetiche già disponibili
+### 109. B0: inizializza scorte sintetiche già disponibili
 
 **Percorso:** Avvio e dati di base → Avvio del sistema → Avvio del sistema integrato  
 **Schermata:** `erp_dati.avvio`
@@ -2310,7 +2701,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · preparazione
 
 
-### 98. Attiva W100 e separa quantità, valore e posizione
+### 110. Attiva W100 e separa quantità, valore e posizione
 
 **Percorso:** Magazzino → Struttura e attivazione  
 **Schermata:** `erp_magazzino.struttura`
@@ -2335,7 +2726,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · preparazione
 
 
-### 99. Prepara ferro a prezzo diverso dallo standard
+### 111. Prepara ferro a prezzo diverso dallo standard
 
 **Percorso:** Acquisti → Ordini d’acquisto → Crea ordine d’acquisto  
 **Schermata:** `erp_acquisti.ordini`
@@ -2365,7 +2756,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 100. Ricevi la colata e rileva la differenza prezzo
+### 112. Ricevi la colata e rileva la differenza prezzo
 
 **Percorso:** Acquisti → Entrate merci da ordine d’acquisto  
 **Schermata:** `erp_acquisti.entrate`
@@ -2400,7 +2791,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · preparazione
 
 
-### 101. Conferma la messa a posto con la pistola RF
+### 113. Conferma la messa a posto con la pistola RF
 
 **Percorso:** Magazzino → Pistola RF → 📦 Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -2427,7 +2818,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · controllo
 
 
-### 102. Verbale B1: la base ripetibile di ogni ramo
+### 114. Verbale B1: la base ripetibile di ogni ramo
 
 **Percorso:** Magazzino → Monitor; Avvio e dati di base → Anagrafiche; Contabilità → Libro giornale  
 **Schermata:** `erp_magazzino.monitor`
@@ -2452,7 +2843,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · preparazione
 
 
-### 103. Backup reale disponibile: fotografia consegnata, non importazione inventata
+### 115. Backup reale disponibile: fotografia consegnata, non importazione inventata
 
 **Percorso:** Area allievo → Consegna il lavoro; docente → consegna del TEST  
 **Schermata:** `erp_dati.avvio`
@@ -2477,7 +2868,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · lettura
 
 
-### 104. Dalla scheda quantità al valore contabile
+### 116. Dalla scheda quantità al valore contabile
 
 **Percorso:** Inventari → Valorizzazione delle rimanenze  
 **Schermata:** `erp_inventario.valorizzazione`
@@ -2499,7 +2890,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 105. Calcola FIFO, LIFO e CMP continuo su un esempio non scrivente
+### 117. Calcola FIFO, LIFO e CMP continuo su un esempio non scrivente
 
 **Percorso:** Inventari → Valorizzazione → esempio da manuale (modificabile)  
 **Schermata:** `erp_inventario.valorizzazione`
@@ -2527,7 +2918,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 106. Criteri di bilancio, WIP analitico e HALB non si sommano due volte
+### 118. Criteri di bilancio, WIP analitico e HALB non si sommano due volte
 
 **Percorso:** Produzione → Ordini (osservazione del caso principale, senza rilasciare ordini)  
 **Schermata:** `erp_produzione.ordini`
@@ -2552,7 +2943,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · lettura
 
 
-### 107. Localizza la merce e interroga senza muoverla
+### 119. Localizza la merce e interroga senza muoverla
 
 **Percorso:** Magazzino → Mappa delle ubicazioni  
 **Schermata:** `erp_magazzino.mappa`
@@ -2572,7 +2963,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 108. RF: interrogazione, schermo pistola e lettura codici
+### 120. RF: interrogazione, schermo pistola e lettura codici
 
 **Percorso:** Magazzino → Pistola RF → 🔎 Interroga  
 **Schermata:** `erp_magazzino.rf`
@@ -2596,7 +2987,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 109. Stampa simulata di ubicazioni e unità di carico
+### 121. Stampa simulata di ubicazioni e unità di carico
 
 **Percorso:** Magazzino → Etichette  
 **Schermata:** `erp_magazzino.etichette`
@@ -2621,7 +3012,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · T
 
 
-### 110. Ramo T: trasferisci un pallet e conferma da scrivania
+### 122. Ramo T: trasferisci un pallet e conferma da scrivania
 
 **Percorso:** Magazzino → Compiti → Trasferimento tra ubicazioni; Conferma da scrivania  
 **Schermata:** `erp_magazzino.compiti`
@@ -2651,7 +3042,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 111. Ramo T: ritorno controllato, non cancellazione della storia
+### 123. Ramo T: ritorno controllato, non cancellazione della storia
 
 **Percorso:** Magazzino → Compiti → Trasferimento tra ubicazioni; Pistola RF  
 **Schermata:** `erp_magazzino.compiti`
@@ -2682,7 +3073,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · Q
 
 
-### 112. Ramo Q: merce presente ma non disponibile
+### 124. Ramo Q: merce presente ma non disponibile
 
 **Percorso:** Magazzino → Merce bloccata e danneggiata → Blocca un’unità di carico  
 **Schermata:** `erp_magazzino.bloccato`
@@ -2712,7 +3103,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 113. Ramo Q: decisione buona e messa a posto
+### 125. Ramo Q: decisione buona e messa a posto
 
 **Percorso:** Magazzino → Merce bloccata → Decisione sulla merce in quarantena  
 **Schermata:** `erp_magazzino.bloccato`
@@ -2741,7 +3132,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · R
 
 
-### 114. Ramo R alternativo: rottama soltanto merce in quarantena
+### 126. Ramo R alternativo: rottama soltanto merce in quarantena
 
 **Percorso:** Magazzino → Merce bloccata e danneggiata → Decisione  
 **Schermata:** `erp_magazzino.bloccato`
@@ -2770,7 +3161,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · I−
 
 
-### 115. Ramo I−: prepara cut-off, contatori e documento selettivo
+### 127. Ramo I−: prepara cut-off, contatori e documento selettivo
 
 **Percorso:** Inventari → Documenti d’inventario → Crea documento d’inventario  
 **Schermata:** `erp_inventario.documenti`
@@ -2800,7 +3191,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 116. Attiva e verifica il blocco operativo
+### 128. Attiva e verifica il blocco operativo
 
 **Percorso:** Inventari → Documenti d’inventario → Documento scelto  
 **Schermata:** `erp_inventario.documenti`
@@ -2824,7 +3215,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 117. Lista cieca: contare senza suggerire il dato libro
+### 129. Lista cieca: contare senza suggerire il dato libro
 
 **Percorso:** Inventari → Lista di conta (oppure Lista di conta da stampare dal documento)  
 **Schermata:** `erp_inventario.lista`
@@ -2846,7 +3237,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 118. Registra prima conta e riconta oltre 20 euro
+### 130. Registra prima conta e riconta oltre 20 euro
 
 **Percorso:** Inventari → Documenti d’inventario  
 **Schermata:** `erp_inventario.documenti`
@@ -2872,7 +3263,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 119. Chiudi nel WMS: comprendere il conto ponte fisico DIFF
+### 131. Chiudi nel WMS: comprendere il conto ponte fisico DIFF
 
 **Percorso:** Inventari → Documenti → Documento contato  
 **Schermata:** `erp_inventario.documenti`
@@ -2897,7 +3288,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · I−
 
 
-### 120. Registra 711 e riconcilia quantità e valore
+### 132. Registra 711 e riconcilia quantità e valore
 
 **Percorso:** Inventari → Differenze inventariali  
 **Schermata:** `erp_inventario.differenze`
@@ -2924,7 +3315,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · I+
 
 
-### 121. Ramo I+: eccedenza con 712, non storno del ramo precedente
+### 133. Ramo I+: eccedenza con 712, non storno del ramo precedente
 
 **Percorso:** Inventari → Documenti → Differenze inventariali  
 **Schermata:** `erp_inventario.documenti`
@@ -2953,7 +3344,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · IV
 
 
-### 122. Ramo IV: inventario a ubicazione vuota e merce ritrovata via RF
+### 134. Ramo IV: inventario a ubicazione vuota e merce ritrovata via RF
 
 **Percorso:** Inventari → Documenti; Magazzino → Pistola RF → 📝 Inventario  
 **Schermata:** `erp_inventario.documenti`
@@ -2990,7 +3381,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · IA
 
 
-### 123. Ramo IA: inventario annuale senza rettifiche
+### 135. Ramo IA: inventario annuale senza rettifiche
 
 **Percorso:** Inventari → Documenti d’inventario → Lista di conta  
 **Schermata:** `erp_inventario.documenti`
@@ -3019,7 +3410,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · S
 
 
-### 124. Ramo S: ordine cliente da 60 pezzi per un flusso completo
+### 136. Ramo S: ordine cliente da 60 pezzi per un flusso completo
 
 **Percorso:** Vendite → Ordini cliente  
 **Schermata:** `erp_vendite.ordini`
@@ -3049,7 +3440,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 125. Crea la consegna WMS senza scaricare ancora l’IM
+### 137. Crea la consegna WMS senza scaricare ancora l’IM
 
 **Percorso:** Vendite → Consegne → Consegna con uscita merci  
 **Schermata:** `erp_vendite.consegne`
@@ -3071,7 +3462,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 126. Lista di prelievo e monitor stati A/B/C
+### 138. Lista di prelievo e monitor stati A/B/C
 
 **Percorso:** Spedizione → Lista di prelievo; Spedizione → Monitor delle consegne  
 **Schermata:** `erp_spedizione.prelievo`
@@ -3096,7 +3487,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · lettura
 
 
-### 127. Leggi direttamente il monitor delle consegne senza registrare operazioni
+### 139. Leggi direttamente il monitor delle consegne senza registrare operazioni
 
 **Percorso:** Spedizione → Monitor delle consegne in uscita  
 **Schermata:** `erp_spedizione.monitor`
@@ -3121,7 +3512,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · S
 
 
-### 128. Conferma un compito, osserva B, completa a C
+### 140. Conferma un compito, osserva B, completa a C
 
 **Percorso:** Magazzino → Pistola RF → 📦 Compiti  
 **Schermata:** `erp_magazzino.rf`
@@ -3143,7 +3534,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 129. Crea tre colli SSCC e verifica pesi
+### 141. Crea tre colli SSCC e verifica pesi
 
 **Percorso:** Spedizione → Imballo e SSCC  
 **Schermata:** `erp_spedizione.imballo`
@@ -3171,7 +3562,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 130. Pianifica trasporto senza partire
+### 142. Pianifica trasporto senza partire
 
 **Percorso:** Spedizione → Trasporti e carico → Crea il trasporto  
 **Schermata:** `erp_spedizione.trasporti`
@@ -3201,7 +3592,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 131. Carica il primo collo da scrivania
+### 143. Carica il primo collo da scrivania
 
 **Percorso:** Spedizione → Trasporti e carico → Carico (da scrivania)  
 **Schermata:** `erp_spedizione.trasporti`
@@ -3223,7 +3614,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 132. Carica il secondo collo con RF e Invio
+### 144. Carica il secondo collo con RF e Invio
 
 **Percorso:** Magazzino → Pistola RF → 🚛 Carico  
 **Schermata:** `erp_magazzino.rf`
@@ -3248,7 +3639,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · S
 
 
-### 133. Carica il collo residuo con il varco RFID simulato
+### 145. Carica il collo residuo con il varco RFID simulato
 
 **Percorso:** Innovazione → Varco RFID → Passaggio dal varco RFID della porta  
 **Schermata:** `erp_innovazione.rfid`
@@ -3275,7 +3666,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · S
 
 
-### 134. Partenza: il solo punto del ramo S che scarica stock
+### 146. Partenza: il solo punto del ramo S che scarica stock
 
 **Percorso:** Spedizione → Trasporti e carico → Fine carico e uscita merci  
 **Schermata:** `erp_spedizione.trasporti`
@@ -3299,7 +3690,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 135. Controlla il DDT e il monitor finale
+### 147. Controlla il DDT e il monitor finale
 
 **Percorso:** Spedizione → DDT; poi Monitor delle consegne  
 **Schermata:** `erp_spedizione.ddt`
@@ -3323,7 +3714,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 136. Traccia lotti a monte/a valle e un numero di serie
+### 148. Traccia lotti a monte/a valle e un numero di serie
 
 **Percorso:** Magazzino → Lotti e tracciabilità  
 **Schermata:** `erp_magazzino.lotti`
@@ -3348,7 +3739,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · S
 
 
-### 137. ABC per valore dei consumi e inventario a rotazione
+### 149. ABC per valore dei consumi e inventario a rotazione
 
 **Percorso:** Inventari → Classificazione ABC; poi Documenti d’inventario  
 **Schermata:** `erp_inventario.abc`
@@ -3375,7 +3766,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF9 · FORMAS · P
 
 
-### 138. Ramo P: differenza di picking con reintegro da altra scorta
+### 150. Ramo P: differenza di picking con reintegro da altra scorta
 
 **Percorso:** Pistola RF → Compiti; Inventari → Differenze inventariali  
 **Schermata:** `erp_magazzino.rf`
@@ -3404,7 +3795,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · LT
 
 
-### 139. Ramo LT: annulla e ricrea una proposta di messa a posto
+### 151. Ramo LT: annulla e ricrea una proposta di messa a posto
 
 **Percorso:** Contabilità → Storni → Annullamento di un compito di magazzino (LT15)  
 **Schermata:** `erp_fi.storni`
@@ -3437,7 +3828,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · PG
 
 
-### 140. Ramo PG alternativo: uscita merci diretta senza il flusso trasporto
+### 152. Ramo PG alternativo: uscita merci diretta senza il flusso trasporto
 
 **Percorso:** Vendite → Consegne → Uscita merci di una consegna prelevata  
 **Schermata:** `erp_vendite.consegne`
@@ -3470,7 +3861,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · L
 
 
-### 141. Ramo L: costruisci un caso con proposta slotting utile
+### 153. Ramo L: costruisci un caso con proposta slotting utile
 
 **Percorso:** Magazzino → Compiti → Trasferimento; Innovazione → Slotting  
 **Schermata:** `erp_magazzino.compiti`
@@ -3494,7 +3885,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 142. Applica proposta e controlla risparmio senza chiamarlo IA
+### 154. Applica proposta e controlla risparmio senza chiamarlo IA
 
 **Percorso:** Innovazione → Slotting → Applica lo slotting  
 **Schermata:** `erp_innovazione.slotting`
@@ -3521,7 +3912,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · O
 
 
-### 143. Ramo O: abilita le ondate prima di creare consegne
+### 155. Ramo O: abilita le ondate prima di creare consegne
 
 **Percorso:** Innovazione → Ondate e cross-docking → Modo di lavoro del magazzino  
 **Schermata:** `erp_innovazione.ondate`
@@ -3549,7 +3940,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 144. Rilascia un giro a serpentina e completa le due spedizioni
+### 156. Rilascia un giro a serpentina e completa le due spedizioni
 
 **Percorso:** Innovazione → Ondate e cross-docking → Rilascia l’ondata  
 **Schermata:** `erp_innovazione.ondate`
@@ -3577,7 +3968,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 145. Spegni le modalità: ciò non annulla le consegne
+### 157. Spegni le modalità: ciò non annulla le consegne
 
 **Percorso:** Innovazione → Ondate e cross-docking → Modo di lavoro del magazzino  
 **Schermata:** `erp_innovazione.ondate`
@@ -3604,7 +3995,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · C
 
 
-### 146. Ramo C: cross-docking con merce realmente in ricevimento
+### 158. Ramo C: cross-docking con merce realmente in ricevimento
 
 **Percorso:** Innovazione → Ondate e cross-docking  
 **Schermata:** `erp_innovazione.ondate`
@@ -3631,7 +4022,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · C
 
 
-### 147. Crea un ordine produttivo e approvvigiona il PSA FIFO
+### 159. Crea un ordine produttivo e approvvigiona il PSA FIFO
 
 **Percorso:** Produzione → Ordini; Magazzino → Compiti → Approvvigionamento della produzione  
 **Schermata:** `erp_produzione.ordini`
@@ -3660,7 +4051,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF8 · FORMAS · C
 
 
-### 148. Consuma, conferma ore e versa dieci finiti in GR-ZONE
+### 160. Consuma, conferma ore e versa dieci finiti in GR-ZONE
 
 **Percorso:** Produzione → Avanzamento  
 **Schermata:** `erp_produzione.avanzamento`
@@ -3687,7 +4078,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · C
 
 
-### 149. Consegna diretta GR→GI senza doppia movimentazione
+### 161. Consegna diretta GR→GI senza doppia movimentazione
 
 **Percorso:** Vendite → Ordini e Consegne; Magazzino → Pistola RF  
 **Schermata:** `erp_vendite.ordini`
@@ -3711,7 +4102,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 150. Completa e riconcilia il ramo cross-dock
+### 162. Completa e riconcilia il ramo cross-dock
 
 **Percorso:** Spedizione → Imballo → Trasporti e carico; Innovazione → Ondate  
 **Schermata:** `erp_spedizione.imballo`
@@ -3740,7 +4131,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · lettura
 
 
-### 151. Misura KPI con perimetro, unità e denominatore dichiarati
+### 163. Misura KPI con perimetro, unità e denominatore dichiarati
 
 **Percorso:** Innovazione → KPI di magazzino; Magazzino → Monitor  
 **Schermata:** `erp_innovazione.kpi`
@@ -3762,7 +4153,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 152. Scegli tecnologia e automazione senza inventare funzioni
+### 164. Scegli tecnologia e automazione senza inventare funzioni
 
 **Percorso:** Innovazione → Varco RFID / Slotting / Ondate (lettura)  
 **Schermata:** `erp_innovazione.rfid`
@@ -3784,7 +4175,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 153. Business case sintetico: beneficio, ROI e payback non sono un preventivo
+### 165. Business case sintetico: beneficio, ROI e payback non sono un preventivo
 
 **Percorso:** Aula → Foglio di calcolo locale, NON un pulsante del gestionale  
 **Schermata:** `erp_innovazione.kpi`
@@ -3808,7 +4199,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 154. Piano pilota: dati, sicurezza, criteri di accettazione e stop
+### 166. Piano pilota: dati, sicurezza, criteri di accettazione e stop
 
 **Percorso:** Aula → Progetto e checklist, nessuna funzione nuova del motore  
 **Schermata:** `erp_innovazione.kpi`
@@ -3835,7 +4226,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · F
 
 
-### 155. Ramo F opzionale: il preset di febbraio sostituisce il lavoro
+### 167. Ramo F opzionale: il preset di febbraio sostituisce il lavoro
 
 **Percorso:** Magazzino → Struttura e attivazione (solo WMS non ancora attivo)  
 **Schermata:** `erp_magazzino.struttura`
@@ -3862,7 +4253,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF10 · FORMAS · ripristino
 
 
-### 156. Ritorno sicuro B1 e verifica del caso principale invariato
+### 168. Ritorno sicuro B1 e verifica del caso principale invariato
 
 **Percorso:** TEST → Avvio del sistema; poi Monitor/Anagrafiche/Giornale  
 **Schermata:** `erp_dati.avvio`
@@ -3887,7 +4278,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## UF11 · FORMAS · lettura
 
 
-### 157. Verifica finale FORMAS: prove e ragionamento, non spunte automatiche
+### 169. Verifica finale FORMAS: prove e ragionamento, non spunte automatiche
 
 **Percorso:** FORMAS → Dossier finale  
 **Schermata:** `erp_innovazione.kpi`
@@ -3914,7 +4305,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 0 · Come usare il supplemento
 
 
-### 158. Prima regola: proteggi il lavoro principale
+### 170. Prima regola: proteggi il lavoro principale
 
 **Percorso:** Sistema integrato → lettura preliminare  
 **Schermata:** `erp_dati.avvio`
@@ -3941,7 +4332,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 1 · Prezzi, credito e vendite alternative
 
 
-### 159. Account usa e getta LAB-SD: avvia una nuova prova
+### 171. Account usa e getta LAB-SD: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -3965,7 +4356,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 160. Leggi i dati che determinano prezzi e disponibilità
+### 172. Leggi i dati che determinano prezzi e disponibilità
 
 **Percorso:** Dati di base → Anagrafiche  
 **Schermata:** `erp_dati.anagrafiche`
@@ -3987,7 +4378,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 161. Crea tre condizioni e verifica la precedenza del prezzo
+### 173. Crea tre condizioni e verifica la precedenza del prezzo
 
 **Percorso:** Dati di base → Condizioni → Crea condizione / Simula la determinazione prezzi  
 **Schermata:** `erp_dati.condizioni`
@@ -4011,7 +4402,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 162. Imposta un limite e genera un ordine davvero bloccato
+### 174. Imposta un limite e genera un ordine davvero bloccato
 
 **Percorso:** Vendite → Gestione crediti; poi Ordini cliente  
 **Schermata:** `erp_vendite.crediti`
@@ -4031,7 +4422,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 163. Decisioni temporanea e definitiva: non sono la stessa cosa
+### 175. Decisioni temporanea e definitiva: non sono la stessa cosa
 
 **Percorso:** Vendite → Gestione crediti → Ordini bloccati  
 **Schermata:** `erp_vendite.crediti`
@@ -4055,7 +4446,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 164. Autorizza un solo ordine, senza cambiare il fido
+### 176. Autorizza un solo ordine, senza cambiare il fido
 
 **Percorso:** Vendite → Ordini cliente; poi Gestione crediti  
 **Schermata:** `erp_vendite.ordini`
@@ -4075,7 +4466,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 165. Aumento fido e blocco anagrafico
+### 177. Aumento fido e blocco anagrafico
 
 **Percorso:** Vendite → Gestione crediti / Ordini cliente  
 **Schermata:** `erp_vendite.crediti`
@@ -4099,7 +4490,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 166. Richiedi e incassa un acconto sul solo LAB-CRED-2
+### 178. Richiedi e incassa un acconto sul solo LAB-CRED-2
 
 **Percorso:** Vendite → Acconti  
 **Schermata:** `erp_vendite.acconti`
@@ -4119,7 +4510,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 167. Vendita diretta senza WMS e deduzione dell’acconto
+### 179. Vendita diretta senza WMS e deduzione dell’acconto
 
 **Percorso:** Vendite → Consegne → Fatture  
 **Schermata:** `erp_vendite.consegne`
@@ -4141,7 +4532,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 168. Reso fisico: RE, rientro 651 e nota di credito
+### 180. Reso fisico: RE, rientro 651 e nota di credito
 
 **Percorso:** Vendite → Resi e note di credito → Reso di merce  
 **Schermata:** `erp_vendite.resi`
@@ -4163,7 +4554,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 169. Abbuono senza merce e rilascio del blocco 08
+### 181. Abbuono senza merce e rilascio del blocco 08
 
 **Percorso:** Vendite → Resi e note di credito → Abbuono senza reso  
 **Schermata:** `erp_vendite.resi`
@@ -4187,7 +4578,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 170. Flusso, CO-PA e incasso residuo
+### 182. Flusso, CO-PA e incasso residuo
 
 **Percorso:** Vendite → Flusso documenti → Incassi  
 **Schermata:** `erp_vendite.flusso`
@@ -4209,7 +4600,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 171. Leggi tutte le dimensioni del margine
+### 183. Leggi tutte le dimensioni del margine
 
 **Percorso:** CO-PA → KE30; poi Righe singole KE24  
 **Schermata:** `erp_copa.ke30`
@@ -4234,7 +4625,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 2 · Acquisti, produzione e costo effettivo
 
 
-### 172. Account usa e getta LAB-CO: avvia una nuova prova
+### 184. Account usa e getta LAB-CO: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -4258,7 +4649,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 173. Due fabbisogni, uno approvato e uno rifiutato
+### 185. Due fabbisogni, uno approvato e uno rifiutato
 
 **Percorso:** Acquisti → Richieste e approvazione  
 **Schermata:** `erp_acquisti.richieste`
@@ -4280,7 +4671,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 174. Strategia sopra soglia e rilascio del buyer
+### 186. Strategia sopra soglia e rilascio del buyer
 
 **Percorso:** Acquisti → Ordini d’acquisto e rilascio  
 **Schermata:** `erp_acquisti.ordini`
@@ -4304,7 +4695,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 175. Rifiuta un ordine e verifica il confine della soglia
+### 187. Rifiuta un ordine e verifica il confine della soglia
 
 **Percorso:** Acquisti → Ordini d’acquisto e rilascio  
 **Schermata:** `erp_acquisti.ordini`
@@ -4326,7 +4717,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 176. Ricezioni parziali e fattura a prezzo diverso
+### 188. Ricezioni parziali e fattura a prezzo diverso
 
 **Percorso:** Acquisti → Entrata merci; poi Fatture fornitore  
 **Schermata:** `erp_acquisti.entrate`
@@ -4348,7 +4739,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 177. Scheda, stima, marcatura e rilascio prima dei movimenti PP
+### 189. Scheda, stima, marcatura e rilascio prima dei movimenti PP
 
 **Percorso:** Costi del prodotto → Scheda; poi Calcolo costo standard  
 **Schermata:** `erp_costi.scheda`
@@ -4372,7 +4763,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 178. Pianifica due lotti e rilascia l’ordine da interrompere
+### 190. Pianifica due lotti e rilascia l’ordine da interrompere
 
 **Percorso:** Produzione → Ordini di produzione  
 **Schermata:** `erp_produzione.ordini`
@@ -4394,7 +4785,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 179. Consumi e ore effettive, poi un versamento parziale
+### 191. Consumi e ore effettive, poi un versamento parziale
 
 **Percorso:** Produzione → Prelievi, conferme, entrate  
 **Schermata:** `erp_produzione.avanzamento`
@@ -4416,7 +4807,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 180. Interrompi davvero il lotto e liquida nella sequenza corretta
+### 192. Interrompi davvero il lotto e liquida nella sequenza corretta
 
 **Percorso:** Produzione → Chiusura tecnica; Costi del prodotto → Chiusura ordini  
 **Schermata:** `erp_produzione.avanzamento`
@@ -4440,7 +4831,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 181. Crea un venduto per confrontare costo standard ed effettivo
+### 193. Crea un venduto per confrontare costo standard ed effettivo
 
 **Percorso:** Vendite → Ordini → Consegne → Fatture  
 **Schermata:** `erp_vendite.ordini`
@@ -4464,7 +4855,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 182. Material Ledger a più livelli e rettifica CO-PA
+### 194. Material Ledger a più livelli e rettifica CO-PA
 
 **Percorso:** Costi del prodotto → Material Ledger  
 **Schermata:** `erp_costi.ml`
@@ -4489,7 +4880,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 3 · Storni tracciabili e rettifiche
 
 
-### 183. Account usa e getta LAB-STORNI: avvia una nuova prova
+### 195. Account usa e getta LAB-STORNI: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -4513,7 +4904,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 184. Prima MR8M, poi MBST: disfa una catena d’acquisto
+### 196. Prima MR8M, poi MBST: disfa una catena d’acquisto
 
 **Percorso:** Acquisti → Ordine / Entrata / Fattura; Contabilità → Storni  
 **Schermata:** `erp_acquisti.ordini`
@@ -4537,7 +4928,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 185. Prepara un ordine PP reversibile
+### 197. Prepara un ordine PP reversibile
 
 **Percorso:** Costi del prodotto → Scheda e Calcolo; Acquisti → Ordini/Entrate; Produzione  
 **Schermata:** `erp_costi.scheda`
@@ -4559,7 +4950,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 186. Storna gli eventi PP dalla coda
+### 198. Storna gli eventi PP dalla coda
 
 **Percorso:** Contabilità → Storni → Storni di produzione  
 **Schermata:** `erp_fi.storni`
@@ -4583,7 +4974,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 187. VF11 → VL09 → elimina consegna, senza cancellare le tracce
+### 199. VF11 → VL09 → elimina consegna, senza cancellare le tracce
 
 **Percorso:** Vendite → Ordine / Consegna / Fattura; Contabilità → Storni  
 **Schermata:** `erp_vendite.ordini`
@@ -4607,7 +4998,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 188. Incasso parziale e FB08 con motivo esplicito
+### 200. Incasso parziale e FB08 con motivo esplicito
 
 **Percorso:** Contabilità → Fatture di servizi; Vendite → Incassi; Contabilità → Storni  
 **Schermata:** `erp_fi.fatture`
@@ -4629,7 +5020,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 189. SdI simulato: dopo la trasmissione serve una nota di credito
+### 201. SdI simulato: dopo la trasmissione serve una nota di credito
 
 **Percorso:** Vendite → Ordini / Consegne / Fatture; Contabilità → Fattura elettronica  
 **Schermata:** `erp_vendite.ordini`
@@ -4655,7 +5046,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 190. Evidenza contabile: originali, inversi e saldi
+### 202. Evidenza contabile: originali, inversi e saldi
 
 **Percorso:** Contabilità → Libro giornale; Bilancio di verifica  
 **Schermata:** `erp_fi.giornale`
@@ -4680,7 +5071,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 4 · Tesoreria e riconciliazione bancaria
 
 
-### 191. Account usa e getta LAB-BANCA: avvia una nuova prova
+### 203. Account usa e getta LAB-BANCA: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -4704,7 +5095,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 192. Da una passiva scaduta alla distinta F110
+### 204. Da una passiva scaduta alla distinta F110
 
 **Percorso:** Contabilità → Fatture passive; Tesoreria → Pagamenti automatici  
 **Schermata:** `erp_fi.passive`
@@ -4728,7 +5119,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 193. Crea la partita che l’estratto chiuderà per riferimento
+### 205. Crea la partita che l’estratto chiuderà per riferimento
 
 **Percorso:** Contabilità → Fatture di servizi  
 **Schermata:** `erp_fi.fatture`
@@ -4754,7 +5145,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 194. Importa cinque movimenti sintetici e riconcilia
+### 206. Importa cinque movimenti sintetici e riconcilia
 
 **Percorso:** Tesoreria → Estratto conto  
 **Schermata:** `erp_tesoreria.estratti`
@@ -4784,7 +5175,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 195. Esamina l’esempio senza importarlo fuori contesto
+### 207. Esamina l’esempio senza importarlo fuori contesto
 
 **Percorso:** Tesoreria → Estratto conto → Usa l’estratto di esempio di giugno  
 **Schermata:** `erp_tesoreria.estratti`
@@ -4806,7 +5197,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 196. Due Ri.Ba.: buon fine e insoluto con ritorno del credito
+### 208. Due Ri.Ba.: buon fine e insoluto con ritorno del credito
 
 **Percorso:** Contabilità → Fatture servizi; Tesoreria → Ri.Ba.  
 **Schermata:** `erp_tesoreria.riba`
@@ -4830,7 +5221,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 197. Confronta pro soluto e pro solvendo fino al saldo
+### 209. Confronta pro soluto e pro solvendo fino al saldo
 
 **Percorso:** Contabilità → Fatture servizi; Tesoreria → Factoring  
 **Schermata:** `erp_tesoreria.factoring`
@@ -4854,7 +5245,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 198. Anticipo su fattura: il prestito non chiude il cliente
+### 210. Anticipo su fattura: il prestito non chiude il cliente
 
 **Percorso:** Contabilità → Fatture servizi; Tesoreria → Anticipi; Vendite → Incassi  
 **Schermata:** `erp_tesoreria.anticipi`
@@ -4878,7 +5269,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 199. Scadenze, anzianità e previsione: controlla l’insoluto
+### 211. Scadenze, anzianità e previsione: controlla l’insoluto
 
 **Percorso:** Tesoreria → Partite aperte; Posizione di cassa  
 **Schermata:** `erp_tesoreria.partite`
@@ -4903,7 +5294,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 5 · Valute e differenze cambio
 
 
-### 200. Account usa e getta LAB-FX: avvia una nuova prova
+### 212. Account usa e getta LAB-FX: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -4927,7 +5318,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 201. Verifica il prerequisito: nessun cambio, nessuna fattura
+### 213. Verifica il prerequisito: nessun cambio, nessuna fattura
 
 **Percorso:** Valute → Documenti  
 **Schermata:** `erp_valute.documenti`
@@ -4953,7 +5344,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 202. Inserisci cambi datati e controlla la quotazione
+### 214. Inserisci cambi datati e controlla la quotazione
 
 **Percorso:** Valute → Tassi di cambio  
 **Schermata:** `erp_valute.tassi`
@@ -4975,7 +5366,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 203. Credito e debito USD con reverse charge simulato
+### 215. Credito e debito USD con reverse charge simulato
 
 **Percorso:** Valute → Documenti  
 **Schermata:** `erp_valute.documenti`
@@ -4997,7 +5388,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 204. Regola due documenti e separa utile e perdita realizzati
+### 216. Regola due documenti e separa utile e perdita realizzati
 
 **Percorso:** Valute → Incassi e pagamenti in valuta  
 **Schermata:** `erp_valute.regolazioni`
@@ -5019,7 +5410,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 205. Valuta il credito aperto e verifica lo storno automatico
+### 217. Valuta il credito aperto e verifica lo storno automatico
 
 **Percorso:** Valute → Valutazione di fine periodo  
 **Schermata:** `erp_valute.valutazione`
@@ -5043,7 +5434,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 206. Chiudi in agosto al cambio storico ripristinato
+### 218. Chiudi in agosto al cambio storico ripristinato
 
 **Percorso:** Valute → Regolazioni; Documenti  
 **Schermata:** `erp_valute.regolazioni`
@@ -5068,7 +5459,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 6 · Presenze, paghe e costo del personale
 
 
-### 207. Account usa e getta LAB-PAGHE: avvia una nuova prova
+### 219. Account usa e getta LAB-PAGHE: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -5092,7 +5483,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 208. Leggi i tre dipendenti e salva parametri didattici
+### 220. Leggi i tre dipendenti e salva parametri didattici
 
 **Percorso:** Paghe → Dipendenti e parametri  
 **Schermata:** `erp_paghe.dipendenti`
@@ -5112,7 +5503,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 209. Rileva straordinari, assenze, ferie e ROL
+### 221. Rileva straordinari, assenze, ferie e ROL
 
 **Percorso:** Paghe → Presenze e cedolino  
 **Schermata:** `erp_paghe.cedolino`
@@ -5136,7 +5527,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 210. Correggi prima della contabilizzazione e stampa solo una prova
+### 222. Correggi prima della contabilizzazione e stampa solo una prova
 
 **Percorso:** Paghe → Presenze e cedolino  
 **Schermata:** `erp_paghe.cedolino`
@@ -5160,7 +5551,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 211. Contabilizza novembre, paga netti e F24
+### 223. Contabilizza novembre, paga netti e F24
 
 **Percorso:** Paghe → Contabilità e pagamenti  
 **Schermata:** `erp_paghe.contabilita`
@@ -5184,7 +5575,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 212. Dicembre: tredicesima, conguaglio e blocco del ricalcolo
+### 224. Dicembre: tredicesima, conguaglio e blocco del ricalcolo
 
 **Percorso:** Paghe → Presenze / Calcolo; Contabilità  
 **Schermata:** `erp_paghe.cedolino`
@@ -5211,7 +5602,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 7 · Cespiti e chiusura completa con utile
 
 
-### 213. Account usa e getta LAB-CHIUSURA: avvia una nuova prova
+### 225. Account usa e getta LAB-CHIUSURA: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -5235,7 +5626,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 214. Crea ricavi, costo pluriperiodale e un incasso verificabile
+### 226. Crea ricavi, costo pluriperiodale e un incasso verificabile
 
 **Percorso:** Contabilità → Fatture servizi / Passive; Vendite → Incassi  
 **Schermata:** `erp_fi.fatture`
@@ -5259,7 +5650,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 215. Tre cespiti: due classi e aliquota personalizzata
+### 227. Tre cespiti: due classi e aliquota personalizzata
 
 **Percorso:** Cespiti → Acquisto di un cespite  
 **Schermata:** `erp_cespiti.acquisto`
@@ -5281,7 +5672,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 216. Cessione con plusvalenza e con minusvalenza
+### 228. Cessione con plusvalenza e con minusvalenza
 
 **Percorso:** Cespiti → Cessione  
 **Schermata:** `erp_cespiti.cessione`
@@ -5303,7 +5694,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 217. Anteprima, AFAB e doppio binario
+### 229. Anteprima, AFAB e doppio binario
 
 **Percorso:** Cespiti → Ammortamenti  
 **Schermata:** `erp_cespiti.ammortamenti`
@@ -5325,7 +5716,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 218. Sopravvenienza: riconoscimento e incasso in due tempi
+### 230. Sopravvenienza: riconoscimento e incasso in due tempi
 
 **Percorso:** Contabilità → Sopravvenienze attive  
 **Schermata:** `erp_fi.sopravvenienze`
@@ -5345,7 +5736,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 219. Quattro assestamenti a giorni, con anteprima
+### 231. Quattro assestamenti a giorni, con anteprima
 
 **Percorso:** Chiusura → Ratei e risconti  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -5369,7 +5760,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 220. IVA periodica e F24: registra tutti i periodi con movimenti
+### 232. IVA periodica e F24: registra tutti i periodi con movimenti
 
 **Percorso:** Chiusura → Liquidazione IVA  
 **Schermata:** `erp_chiusura.iva`
@@ -5393,7 +5784,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 221. Simula variazioni prima di registrare IRES e IRAP
+### 233. Simula variazioni prima di registrare IRES e IRAP
 
 **Percorso:** Chiusura → Imposte  
 **Schermata:** `erp_chiusura.imposte`
@@ -5415,7 +5806,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 222. Chiudi solo dopo i controlli, poi riapri
+### 234. Chiudi solo dopo i controlli, poi riapri
 
 **Percorso:** Chiusura → Chiusura esercizio → Riapertura  
 **Schermata:** `erp_chiusura.chiusura`
@@ -5437,7 +5828,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 223. Gira ratei/risconti e destina l’utile senza duplicarlo
+### 235. Gira ratei/risconti e destina l’utile senza duplicarlo
 
 **Percorso:** Chiusura → Ratei/risconti; poi Riapertura  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -5462,7 +5853,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 8 · Ruoli, salvataggio e comandi controllati
 
 
-### 224. Account usa e getta LAB-ADMIN: avvia una nuova prova
+### 236. Account usa e getta LAB-ADMIN: avvia una nuova prova
 
 **Percorso:** Launchpad → Avvio e dati di base → Avvio del sistema  
 **Schermata:** `erp_dati.avvio`
@@ -5486,7 +5877,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 225. Un rifiuto SU53 verificabile e recuperabile
+### 237. Un rifiuto SU53 verificabile e recuperabile
 
 **Percorso:** Dati di base → Ruoli e autorizzazioni  
 **Schermata:** `erp_dati.ruoli`
@@ -5513,7 +5904,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## 9 · Backup e ripristino: ciò che esiste davvero
 
 
-### 226. Distingui backup consegna, archivio docente e importazione mancante
+### 238. Distingui backup consegna, archivio docente e importazione mancante
 
 **Percorso:** Verifica delle possibilità disponibili nel percorso integrato  
 **Schermata:** `erp_dati.avvio`
@@ -5535,7 +5926,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 227. Docente: round trip di archivio su due soli account di prova
+### 239. Docente: round trip di archivio su due soli account di prova
 
 **Percorso:** Pannello docente di prova → Passa il lavoro  
 **Schermata:** `docente.passa`
@@ -5564,7 +5955,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## D · Report da riconciliare
 
 
-### 228. Registro cespiti: riconcilia costo, fondo e valore netto
+### 240. Registro cespiti: riconcilia costo, fondo e valore netto
 
 **Percorso:** Cespiti → Registro dei cespiti  
 **Schermata:** `erp_cespiti.registro`
@@ -5583,7 +5974,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 229. KE24: dal margine alla singola riga del documento
+### 241. KE24: dal margine alla singola riga del documento
 
 **Percorso:** Redditività → Righe singole CO-PA  
 **Schermata:** `erp_copa.ke24`
@@ -5602,7 +5993,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 230. CK13N: leggi le stime prima di modificare il costo
+### 242. CK13N: leggi le stime prima di modificare il costo
 
 **Percorso:** Costi del prodotto → Calcolo del costo standard  
 **Schermata:** `erp_costi.calcolo`
@@ -5621,7 +6012,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 231. F110: controlla la proposta e rileggi la distinta
+### 243. F110: controlla la proposta e rileggi la distinta
 
 **Percorso:** Tesoreria → Pagamenti automatici  
 **Schermata:** `erp_tesoreria.pagamenti`
@@ -5642,7 +6033,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 232. FF7A/FF7B: separa saldo di cassa e previsione
+### 244. FF7A/FF7B: separa saldo di cassa e previsione
 
 **Percorso:** Tesoreria → Posizione di cassa e previsione  
 **Schermata:** `erp_tesoreria.posizione`
@@ -5664,7 +6055,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## D · Uso del programma
 
 
-### 233. Naviga senza creare nuove aziende
+### 245. Naviga senza creare nuove aziende
 
 **Percorso:** Launchpad → Moduli → Avvio e dati di base → Clienti e materiali  
 **Schermata:** `erp_dati.anagrafiche`
@@ -5686,7 +6077,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 234. Usa i comandi della finestra Esercizio
+### 246. Usa i comandi della finestra Esercizio
 
 **Percorso:** Barra superiore → Esercizio passo passo  
 **Schermata:** `erp_dati.anagrafiche`
@@ -5710,7 +6101,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 235. Ricostruisci la scrittura: verifica, aiuto e prosecuzione
+### 247. Ricostruisci la scrittura: verifica, aiuto e prosecuzione
 
 **Percorso:** Contabilità → Fatture attive di servizi; poi finestra Esercizio  
 **Schermata:** `erp_fi.fatture`
@@ -5736,7 +6127,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 236. Verifica salvataggio, uscita e ripresa
+### 248. Verifica salvataggio, uscita e ripresa
 
 **Percorso:** Libro giornale → La mia area → Esci → accesso del portale  
 **Schermata:** `erp_fi.giornale`
@@ -5760,7 +6151,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 237. Consegna le evidenze senza mescolare i laboratori
+### 249. Consegna le evidenze senza mescolare i laboratori
 
 **Percorso:** La mia area → Consegna il lavoro  
 **Schermata:** `allievo.consegna`
@@ -5785,7 +6176,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 ## E · Dimostrazione controllata del docente
 
 
-### 238. Caricamento sostitutivo e azzeramento: solo nell’account sacrificabile
+### 250. Caricamento sostitutivo e azzeramento: solo nell’account sacrificabile
 
 **Percorso:** Avvio del sistema → Parti da febbraio / Ricomincia  
 **Schermata:** `erp_dati.avvio`
@@ -5812,6 +6203,12 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 
 ---
+
+# Aggiornamento della mappa comandi — 19 ottobre 2026
+
+Alla mappa della revisione precedente si aggiungono: Nuova azienda vuota; scarica backup prima ripartenza; conferma testuale della ripartenza; selezione e consultazione mastrino con ritorno al documento; attivazione CPM; salvataggio budget centri, Generale e volume annuo; salvataggio distinta/ciclo; report budget/consuntivo; conferma esplicita SOSTITUISCI per il solo standard iniziale di costituzione prima dei movimenti. La guida contiene consegne su questi comandi, oltre ai laboratori precedenti. Non equivale a collaudo su tutti i dispositivi o nell’app online.
+
+La mappa sotto è il censimento di base del 18 ottobre: i nomi dei comandi di quarantena sono stati chiariti nella nuova guida e non sono azioni contabili aggiuntive.
 
 # Mappa di copertura del programma attivo
 
