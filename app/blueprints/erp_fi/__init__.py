@@ -18,6 +18,11 @@ def bilancio():
     return render_lab("erp_fi", "bilancio")
 
 
+@bp.route("/mastro")
+def mastro():
+    return render_lab("erp_fi", "mastro")
+
+
 @bp.route("/sdi")
 def sdi():
     return render_lab("erp_fi", "sdi")

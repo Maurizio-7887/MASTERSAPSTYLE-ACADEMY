@@ -15,10 +15,11 @@ for versione in ['vuoto','completo']:
     assert r.status_code==200
     html=r.get_data(as_text=True)
     assert '"esercizio": "completo-formas"' in html
-    assets=['dicembre-wms-legacy.js','dicembre-wms.js','magazzino-formas.js','laboratori-completi.js','uso-programma.js','completo-formas.js','ragioneria.js','pannello.js']
+    assets=['dicembre-wms-legacy.js','cpm-formas.js','dicembre-wms.js','magazzino-formas.js','laboratori-completi.js','uso-programma.js','completo-formas.js','ragioneria.js','pannello.js']
     for a,b in zip(assets,assets[1:]): assert html.index(a)<html.index(b),(a,b)
     n+=len(assets)
     endpoints=json.loads((R/'tests/_completo/endpoints.json').read_text())
+    assert {'erp_costi.scheda','erp_costi.calcolo','erp_fi.giornale','erp_fi.mastro'} <= set(endpoints)
     with app.test_request_context():
         urls=[url_for(ep,versione=versione) for ep in endpoints]
     for u in urls:

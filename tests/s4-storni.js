@@ -215,9 +215,49 @@ for (const m of ['07', '08', '09', '10', '11', '12']) prova(() => PY.calcola({pe
   vicino(d.progressivi.irpef, d.conguaglioDettaglio.dovuta, 'dopo il conguaglio la trattenuta dell\'anno è l\'imposta dovuta'); }
 
 // ── pagine ──
+// Stesso solver DOM della regressione operativa S/4: nessuna modifica diretta
+// a tentativi/coda; conserva e verifica tutte le registrazioni contabili.
+function verificaQuiz(w) {
+  const S = w.MSA_STATO_CORRENTE(), Q = w.MSA_RAGIONERIA;
+  const libro = JSON.stringify(S.registrazioni);
+  const corpo = w.document.createElement('aside');
+  w.document.body.appendChild(corpo);
+  const esc = w.LabMotore.esc;
+  function disegna() { corpo.innerHTML = Q.pendente(S) ? Q.html(S, esc) : ''; }
+  corpo.addEventListener('click', ev => {
+    if (Q.click(ev.target, corpo, S, w.MSA_SALVA_STATO_CORRENTE)) disegna();
+  });
+  const limite = (S.msaRagioneria.coda || []).length;
+  for (let n = 0; Q.pendente(S); n++) {
+    if (n >= limite) throw Error('solver quiz S/4: coda non diminuisce');
+    const q = Q.pendente(S), prima = S.msaRagioneria.coda.length;
+    disegna();
+    if (!Q.tentativoValido(q) || (!q.corretto && !q.aiuto)) {
+      const rs = q.documento.righe.map((r,i)=>({r,i})).sort((a,b)=>String(a.r.conto).localeCompare(String(b.r.conto),'it',{numeric:true})||a.i-b.i).map(x=>x.r);
+      const righe = [...corpo.querySelectorAll('.msa-q-riga')];
+      if (righe.length !== rs.length) throw Error('solver quiz S/4: righe DOM mancanti');
+      righe.forEach((el,i)=>{
+        el.querySelector('.msa-q-conto').value=rs[i].conto;
+        el.querySelector('.msa-q-sezione').value=rs[i].dareAvere;
+        el.querySelector('input').value=rs[i].importo.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+      });
+      corpo.querySelector('.msa-q-verifica').click();
+      ok(q.corretto && Q.tentativoValido(q), 'quiz DOM corretto: ' + q.documento.tipo);
+      if (!q.corretto) throw Error('solver quiz S/4: tentativo non corretto');
+    }
+    const continua = corpo.querySelector('.msa-q-continua');
+    if (!continua) throw Error('solver quiz S/4: pulsante Continua assente');
+    continua.click();
+    if (S.msaRagioneria.coda.length !== prima - 1) throw Error('solver quiz S/4: esito non archiviato');
+  }
+  corpo.remove();
+  ok(JSON.stringify(S.registrazioni) === libro, 'quiz non modifica o duplica le scritture');
+}
+w.eval(R('app/blueprints/guida/static/ragioneria.js'));
+verificaQuiz(w);
 const pagina = nome => { const x = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
   x.localStorage.setItem(CHIAVE, w.localStorage.getItem(CHIAVE)); x.LAB_PAGINA = {chiave: CHIAVE, pagina: nome, slot: 'erp-ft'};
-  LOGICA.concat([nome === 'cedolino' ? 'app/blueprints/erp_paghe/static/py-pagine.js' : nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
+  LOGICA.concat(['app/blueprints/guida/static/ragioneria.js', nome === 'cedolino' ? 'app/blueprints/erp_paghe/static/py-pagine.js' : nome === 'lotti' ? 'app/blueprints/erp_magazzino/static/wm-pagine.js' : nome === 'ruoli' ? 'app/blueprints/erp_dati/static/dati-pagine.js' : nome === 'richieste' ? 'app/blueprints/erp_acquisti/static/mm-pagine.js' : nome === 'crediti' ? 'app/blueprints/erp_vendite/static/sd-pagine.js' : 'app/blueprints/erp_fi/static/fi-pagine.js']).forEach(f => x.eval(R(f))); return x; };
 let pg = pagina('cedolino'); ok(/Tredicesima mensilità/.test(pg.document.body.textContent) && /Conguaglio IRPEF di fine anno/.test(pg.document.body.textContent) && /Ferie e permessi/.test(pg.document.body.textContent), 'cedolino di dicembre a video');
 pg = pagina('lotti'); ok(/Giacenza per lotto/.test(pg.document.body.textContent) && /COL-7781/.test(pg.document.body.textContent), 'pagina lotti');
 pg.document.querySelector('#sn').value = 'sn000001'; pg.document.querySelector('#snv').click(); ok(/SN000001/.test(pg.document.body.textContent) && /TR-ALTA/.test(pg.document.body.textContent) && /Numeri di serie/.test(pg.document.body.textContent), 'pagina IQ03: numero di serie');
@@ -229,8 +269,10 @@ pg = pagina('sdi'); ok(/Trasmissione allo SdI/.test(pg.document.body.textContent
 pg = pagina('storni'); const tx = pg.document.body.textContent;
 ok(/VF11/.test(tx) && /MBST/.test(tx) && /LT15/.test(tx) && /Documenti stornati/.test(tx) && new RegExp(f1.contabile).test(tx), 'pagina storni');
 pg.document.getElementById('vf-fattura').value = f2.numero; pg.document.querySelector('[data-azione="vf"]').click();
-ok(/SdI/.test(pg.document.getElementById('vf-esito').textContent), 'pagina storni: VF11 rifiutato dopo lo SdI');
-pg = pagina('giornale'); ok(/stornato dal/.test(pg.document.body.textContent), 'giornale con i documenti stornati');
+const esitoVF = pg.document.getElementById('vf-esito').textContent;
+verificaQuiz(pg);
+ok(/SdI/.test(esitoVF), 'pagina storni: VF11 rifiutato dopo lo SdI');
+pg = pagina('giornale'); ok(/stornato dal/i.test(pg.document.body.textContent), 'giornale con i documenti stornati');
 quadra('agosto con gli storni');
 console.log(errori ? '❌ ' + errori + ' errori su ' + controlli : '✅ storni, fattura elettronica (SdI), fido e disponibilità (ATP), richieste d\'acquisto e rilascio, ruoli e autorizzazioni, lotti e tracciabilità, cedolino completo: ' + controlli + ' controlli');
 process.exit(errori ? 1 : 0);

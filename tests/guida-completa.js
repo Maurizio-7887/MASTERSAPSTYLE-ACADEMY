@@ -12,7 +12,7 @@ function carica(state){
   const storage=new Map();
   const window={MSA_STATO_CORRENTE:()=>state,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{throw Error('La guida non deve scrivere nello stato');}}};
   const ctx=vm.createContext({window,console});
-  for(const f of ['dicembre-wms-legacy.js','dicembre-wms.js','magazzino-formas.js','laboratori-completi.js','uso-programma.js','completo-formas.js']) vm.runInContext(fs.readFileSync(path.join(dir,f),'utf8'),ctx,{filename:f});
+  for(const f of ['dicembre-wms-legacy.js','cpm-formas.js','dicembre-wms.js','magazzino-formas.js','laboratori-completi.js','uso-programma.js','completo-formas.js']) vm.runInContext(fs.readFileSync(path.join(dir,f),'utf8'),ctx,{filename:f});
   ok(JSON.stringify(state)===raw,'Lettura guida senza modificare il lavoro');
   return window;
 }
@@ -29,6 +29,8 @@ for(const p of E.passi){
  for(const row of p.campi)ok(Array.isArray(row)&&row.length===2,'Campi nome/valore');
 }
 ok(E.passi[1].nota.includes('Preserva'),'Nessun invito ad azzerare il lavoro principale');
+ok(E.passi.filter(p=>p.id==='cpm-attivazione').length===1,'Nuovo CPM presente una volta sola');
+ok(E.passi.some(p=>p.dove.ep==='erp_fi.mastro'),'Mastrini integrati nel percorso');
 for(const uf of ['UF8','UF9','UF10','UF11'])ok(JSON.stringify(w.MSA_MAGAZZINO_FORMAS).replace(/UF\s+(\d+)/g,'UF$1').includes(uf),'Copertura calendario '+uf);
 const legacyState={costituzione:{data:'2026-12-01'},registrazioni:[{numero:'storico'}],produzione:[]};
 const l=carica(legacyState).MSA_ESERCIZIO;

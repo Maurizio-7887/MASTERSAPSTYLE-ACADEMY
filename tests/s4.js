@@ -1,7 +1,11 @@
 // Sistema integrato S/4 — fase «Vendite e redditività» eseguita dalle PAGINE (moduli e pulsanti), non dalle funzioni:
 // numeri di controllo, quadratura, CO-PA, finestra passo passo. Salva tests/lab-erp-finale.json per test_accessi.
 const fs = require('fs'), path = require('path'), {JSDOM} = require('jsdom');
-const R = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
+const sorgenti = new Map(); // Solo sorgenti immutabili; mai stato o fixture JSON.
+const R = p => {
+  if (!sorgenti.has(p)) sorgenti.set(p, fs.readFileSync(path.join(__dirname, '..', p), 'utf8'));
+  return sorgenti.get(p);
+};
 let errori = 0, controlli = 0;
 const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
@@ -10,15 +14,66 @@ const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_cop
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
   'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/blueprints/erp_fi/static/fs-logica.js', 'app/blueprints/erp_cespiti/static/ce-logica.js', 'app/blueprints/erp_tesoreria/static/rb-logica.js', 'app/blueprints/erp_chiusura/static/ch-logica.js', 'app/static/js/erp/ruoli.js',
   'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
-let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
+let memoria = null, ultima = null, p = null;   // il localStorage passa da una pagina all'altra come nel browser
+let finestre = [];
+let pagineAperte = 0;
+// Regressione operativa: il percorso didattico è verificato nei test quiz dedicati.
+// Come negli esercizio-ragioneria-*, compiliamo davvero i controlli DOM, senza
+// alterare flag o coda. Conserviamo le window ancora referenziate da p/ultima:
+// guidaStati può riusare p anche dopo apri() eseguiti solo per un'asserzione.
+function verificaQuiz(w) {
+  const S = w.MSA_STATO_CORRENTE(), Q = w.MSA_RAGIONERIA;
+  const libro = JSON.stringify(S.registrazioni);
+  const corpo = w.document.createElement('aside');
+  w.document.body.appendChild(corpo);
+  const esc = w.LabMotore.esc;
+  function disegna() { corpo.innerHTML = Q.pendente(S) ? Q.html(S, esc) : ''; }
+  corpo.addEventListener('click', ev => {
+    if (Q.click(ev.target, corpo, S, w.MSA_SALVA_STATO_CORRENTE)) disegna();
+  });
+  const limite = (S.msaRagioneria.coda || []).length;
+  for (let n = 0; Q.pendente(S); n++) {
+    if (n >= limite) throw Error('solver quiz S/4: coda non diminuisce');
+    const q = Q.pendente(S), prima = S.msaRagioneria.coda.length;
+    disegna();
+    if (!Q.tentativoValido(q) || (!q.corretto && !q.aiuto)) {
+      const rs = q.documento.righe.map((r,i)=>({r,i})).sort((a,b)=>String(a.r.conto).localeCompare(String(b.r.conto),'it',{numeric:true})||a.i-b.i).map(x=>x.r);
+      const righe = [...corpo.querySelectorAll('.msa-q-riga')];
+      if (righe.length !== rs.length) throw Error('solver quiz S/4: righe DOM mancanti');
+      righe.forEach((el,i)=>{
+        el.querySelector('.msa-q-conto').value=rs[i].conto;
+        el.querySelector('.msa-q-sezione').value=rs[i].dareAvere;
+        el.querySelector('input').value=rs[i].importo.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+      });
+      corpo.querySelector('.msa-q-verifica').click();
+      ok(q.corretto && Q.tentativoValido(q), 'quiz DOM corretto: ' + q.documento.tipo);
+      if (!q.corretto) throw Error('solver quiz S/4: tentativo non corretto');
+    }
+    const continua = corpo.querySelector('.msa-q-continua');
+    if (!continua) throw Error('solver quiz S/4: pulsante Continua assente');
+    continua.click();
+    if (S.msaRagioneria.coda.length !== prima - 1) throw Error('solver quiz S/4: esito non archiviato');
+  }
+  corpo.remove();
+  ok(JSON.stringify(S.registrazioni) === libro, 'quiz non modifica o duplica le scritture');
+}
 function apri(bp, pagina) {
-  if (ultima) memoria = ultima.localStorage.getItem(CHIAVE) || memoria;
+  if (typeof process !== 'undefined' && process.env.ACADEMY_TEST_PROGRESS) console.log('S4 pagina', bp, pagina);
+  if (ultima) { verificaQuiz(ultima); memoria = ultima.localStorage.getItem(CHIAVE) || memoria; }
+  finestre = finestre.filter(w => {
+    if (w === ultima || (p && w === p.w)) return true;
+    w.close(); return false;
+  });
+  // --expose-gc può ridurre il picco nel lungo harness senza chiudere window
+  // ancora usate da guidaStati. Nessuna dipendenza da GC per la correttezza.
+  if (globalThis.gc && ++pagineAperte % 10 === 0) globalThis.gc();
   const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
+  finestre.push(w);
   ultima = w;
   if (memoria) w.localStorage.setItem(CHIAVE, memoria);
   w.confirm = () => true;
   w.LAB_PAGINA = {chiave: CHIAVE, pagina: pagina, slot: 'erp-ft'};
-  LOGICA.concat(['app/blueprints/' + bp + '/static/' + PAGINE[bp]]).forEach(f => w.eval(R(f)));
+  LOGICA.concat(['app/blueprints/guida/static/ragioneria.js', 'app/blueprints/' + bp + '/static/' + PAGINE[bp]]).forEach(f => w.eval(R(f)));
   const lab = w.document.getElementById('lab');
   const P = {w, lab, S: () => w.MSA_STATO_CORRENTE(),
     // compila il modulo con prefisso e preme il pulsante; restituisce il messaggio di esito
@@ -31,8 +86,10 @@ function apri(bp, pagina) {
       const b = lab.querySelector('[data-prefisso="' + pref + '"] [data-azione="' + (azione || pref) + '"]'); if (!b) throw Error('pulsante ' + pref + ' assente');
       b.click();
       const es = lab.querySelector('#' + pref + '-esito');
+      const esito = es ? es.className + ' ' + es.textContent : '';
+      verificaQuiz(w);
       memoria = w.localStorage.getItem(CHIAVE);
-      return es ? es.className + ' ' + es.textContent : '';
+      return esito;
     },
     testo: () => lab.textContent};
   return P;
@@ -41,8 +98,8 @@ const bene = (r, m) => ok(/ ok /.test(' ' + r.split(' ')[1] + ' ') || /lab-esito
 const num = S => n => n;   // segnaposto leggibile
 
 // avvio, condizioni
-let p = apri('erp_dati', 'avvio');
-ok(/Avvia il sistema/.test(p.testo()), 'pagina di avvio');
+p = apri('erp_dati', 'avvio');
+ok(/Nuova azienda/.test(p.testo()) && /Carica saldi pronti/.test(p.testo()), 'pagina di avvio');
 p.fai('av', {data: '2027-01-02'}); ok(p.S().avviato === '2027-01-02' && /Sistema avviato/.test(p.testo()), 'avvio del sistema');
 p = apri('erp_dati', 'condizioni');
 bene(p.fai('vk', {tipo: 'PR00', cliente: 'C200', materiale: 'TR-ALTA', valore: '70'}), 'VK11 PR00 Delta');
@@ -110,7 +167,7 @@ p = apri('erp_copa', 'ke30'); ok(/19\.946,00/.test(p.testo()) && /18\.593,81/.te
 p.lab.querySelector('#dim').value = 'materiale'; p.lab.querySelector('#dim').dispatchEvent(new p.w.Event('change'));
 ok(/TR-ALTA/.test(p.testo()), 'KE30 per materiale');
 ok(apri('erp_copa', 'ke24').lab.querySelectorAll('tr').length === 7, 'KE24: 6 righe CO-PA');
-ok(/Totali/.test(apri('erp_fi', 'bilancio').testo()) && /Doc\. 100000001/.test(apri('erp_fi', 'giornale').testo()), 'giornale e bilancio');
+ok(/Totali/.test(apri('erp_fi', 'bilancio').testo()) && /100000001/.test(apri('erp_fi', 'giornale').testo()), 'giornale e bilancio');
 
 // finestra passo passo: a fine gennaio sono fatti tutti i passi di gennaio e nessuno di febbraio
 const guidaStati = (w, chiave) => {

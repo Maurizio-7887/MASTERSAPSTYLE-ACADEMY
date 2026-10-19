@@ -18,12 +18,17 @@ c = docente()
 h = c.get('/vuoto/').get_data(as_text=True)
 assert 'Dicembre: dalla costituzione alla riapertura' in h and 'esercizio_guida=dicembre-wms' in h
 assert c.get('/static/guida/esercizi/dicembre-wms.js').status_code == 200
+assert c.get('/static/guida/esercizi/cpm-formas.js').status_code == 200
 assert config(c.get('/vuoto/s4/dati/?esercizio_guida=dicembre-wms').get_data(as_text=True))['esercizio'] == 'dicembre-wms'
 assert config(c.get('/vuoto/m/wms').get_data(as_text=True))['esercizio'] == 'dicembre-wms'   # la scelta resta nella sessione
 g = config(c.get('/vuoto/m/pp').get_data(as_text=True))
 src = c.get('/static/guida/esercizi/dicembre-wms.js').get_data(as_text=True)
 prefixes = dict(re.findall(r"([A-Z])='(erp_\w+\.)'", src))
-endpoints = sorted(set(prefixes[p] + name for p, name in re.findall(r"ep:([A-Z])\+'(\w+)'", src))) + ['allievo.consegna']
+cpm_src = c.get('/static/guida/esercizi/cpm-formas.js').get_data(as_text=True)
+endpoints = sorted(set(prefixes[p] + name for p, name in re.findall(r"ep:([A-Z])\+'(\w+)'", src)) | set(re.findall(r"ep:'(erp_\w+\.\w+)'", cpm_src)) | {'allievo.consegna'})
+assert {'erp_costi.scheda','erp_costi.calcolo','erp_fi.mastro'} <= set(endpoints)
+page = c.get('/vuoto/s4/dati/?esercizio_guida=dicembre-wms').get_data(as_text=True)
+assert page.index('cpm-formas.js') < page.index('esercizi/dicembre-wms.js')
 for ep in endpoints:
     assert ep in g['url'], ep
     r = c.get(g['url'][ep])

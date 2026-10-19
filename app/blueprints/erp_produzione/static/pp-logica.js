@@ -31,9 +31,11 @@ window.PP4 = (function () {
   function ordine(i) {
     var n = N(), data = n.data(i.data), mat = i.materiale, m = n.materiale(mat), q = L.num(i.qta, 'Quantità', 1);
     if (m.tipo !== 'FERT' && m.tipo !== 'HALB') throw Error('Si producono prodotti finiti e semilavorati: ' + mat + ' si acquista.');
-    var cp = m.comp || {mat: 'FERRO', q: m.ferro};
-    var o = {numero: n.numero('produzione'), materiale: mat, qta: q, data: data, eventi: [], piano: window.PC4.pianifica(mat, q, data), componente: {mat: cp.mat, q: cp.q}};
-    if (m.fasi) o.fasi = m.fasi.slice(); // snapshot del ciclo: non cambia i vecchi ordini
+    var piano = window.PC4.pianifica(mat, q, data), snapshot = piano.par.snapshot;
+    var cp = snapshot ? snapshot.componente : m.comp || {mat: 'FERRO', q: m.ferro};
+    var o = {numero: n.numero('produzione'), materiale: mat, qta: q, data: data, eventi: [], piano: piano, componente: {mat: cp.mat, q: cp.q}};
+    if (snapshot && snapshot.fasi) o.fasi = snapshot.fasi.slice();
+    else if (m.fasi) o.fasi = m.fasi.slice(); // snapshot del ciclo: non cambia i vecchi ordini
     S().produzione.push(o); n.salva();
     return '<p class="lab-nota">Ordine di produzione <b>' + o.numero + '</b> (tipo PP01) rilasciato: ' + q + ' pz ' + mat + '. Componente da prelevare: ' + L.n0(cp.q * q) + ' ' + (n.materiale(cp.mat).um || 'kg') + ' di ' + cp.mat +
       '. Costi pianificati per questo lotto ' + L.eur(o.piano.totale) + ' € (' + L.eur(o.piano.totale / q) + ' €/pz). Nessuna scrittura.</p>';
@@ -68,8 +70,11 @@ window.PP4 = (function () {
       var disponibili = idx ? faseQta(o, o.fasi[idx - 1]) : somma(o, '261', 'kg') / comp(o).q;
       if (faseQta(o, fase) + q > disponibili + 1e-9) throw Error(idx ? 'Conferma prima i pezzi della fase precedente.' : 'Preleva prima il materiale necessario con 261.');
     }
-    var t = S().costing.scheda.tariffa, val = r2((set + ore) * t);
+    var snap = o.piano.par.snapshot;
+    if (snap && snap.versione === 'cpm-centri-v1' && set > 0 && fase !== snap.centroSet) throw Error('Lo snapshot attribuisce l’attrezzaggio al centro ' + snap.centroSet + '.');
+    var t = window.PC4.cpm.tariffa(o, fase), val = r2((set + ore) * t);
     var evento = {tipo: 'CO11N', data: data, attrezzaggio: set, ore: ore, valoreSet: r2(set * t), valoreOre: r2(ore * t), valore: val};
+    if (snap) { evento.centro = fase || Object.keys(snap.ore)[0]; evento.tariffa = t; evento.revisioneStandard = snap.revisione || snap.versione; }
     if (o.fasi) { evento.fase = fase; evento.qta = q; }
     o.eventi.push(evento);
     var r = n.post({data: data, tipo: 'CONFERMA', rif: o.numero, descrizione: 'CO11N ordine ' + o.numero + ' (' + o.materiale + ')' + (fase ? ' · fase ' + fase + ' · ' + q + ' pz' : '') + ': attrezzaggio ' + L.n0(set) + ' h + lavorazione ' + L.n0(ore) + ' h × ' + L.eur(t) + ' €/h',
@@ -97,7 +102,7 @@ window.PP4 = (function () {
   function teco(i) { var o = ord(i.ordine); aperto(o); o.teco = N().data(i.data); N().salva(); return '<p class="lab-nota">Ordine ' + o.numero + ' chiuso tecnicamente (TECO): non riceve altri costi; ora si può liquidare.</p>'; }
   // costi effettivi per elemento (KKBC)
   function effettivi(o) {
-    var sc = S().costing.scheda;
+    var sc = o.piano.par && o.piano.par.snapshot ? o.piano.par.snapshot.scheda : S().costing.scheda;
     var mat = somma(o, '261', 'valore'), set = somma(o, 'CO11N', 'valoreSet'), lav = somma(o, 'CO11N', 'valoreOre');
     var sm = somma(o, 'KGI2', 'mat'), sp = somma(o, 'KGI2', 'prod');
     return {kg: somma(o, '261', 'kg'), ore: somma(o, 'CO11N', 'ore'), oreSet: somma(o, 'CO11N', 'attrezzaggio'), mat: mat, lav: lav, set: set, sovrMat: sm, sovrProd: sp,

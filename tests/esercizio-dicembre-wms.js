@@ -36,10 +36,11 @@ function apri(bp, pagina) {
       });
       const b = lab.querySelector('[data-prefisso="' + pref + '"] [data-azione="' + (azione || pref) + '"]'); if (!b) throw Error('pulsante ' + pref + ' assente');
       b.click();
-      verificaQuiz(w,regPrima);
       const es = lab.querySelector('#' + pref + '-esito');
+      const esito = es ? es.className + ' ' + es.textContent : '';
+      verificaQuiz(w,regPrima);
       memoria = w.localStorage.getItem(CHIAVE);
-      return es ? es.className + ' ' + es.textContent : '';
+      return esito;
     },
     testo: () => lab.textContent};
   return P;
@@ -52,7 +53,8 @@ function verificaQuiz(w,regPrima) {
     const q=S.msaRagioneria.coda[0], rs=q.documento.righe.map((r,i)=>({r,i})).sort((a,b)=>String(a.r.conto).localeCompare(String(b.r.conto),'it',{numeric:true})||a.i-b.i).map(x=>x.r);
     ok(!!w.document.querySelector('.msa-q-verifica'),'domanda immediata per '+q.documento.tipo);
     [...w.document.querySelectorAll('.msa-q-riga')].forEach((el,i)=>{
-      el.querySelector('select').value=rs[i].dareAvere;
+      el.querySelector('.msa-q-conto').value=rs[i].conto;
+      el.querySelector('.msa-q-sezione').value=rs[i].dareAvere;
       el.querySelector('input').value=rs[i].importo.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
     });
     w.document.querySelector('.msa-q-verifica').click();
@@ -218,10 +220,10 @@ p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F300',data:'2026-12-18
 vicinoS('20',0,'fornitori pagati'); vicinoS('10',32321.18,'banca dopo i pagamenti');
 // 11 · sopravvenienza
 p = apri('erp_fi','sopravvenienze'); bene(p.fai('sv',{compagnia:'F400',rif:'LIQ-4471',testo:'indennizzo per il sinistro del furgone del 10/12',importo:'500',data:'2026-12-21'}),'sopravvenienza'); fino('riconosce un indennizzo');
-p = apri('erp_fi','sopravvenienze'); bene(p.fai('ii',{sopravvenienza:'LIQ-4471',data:'2026-12-28'}),'incasso indennizzo'); fino('Incassa l’indennizzo');
 // 12 · cessioni
 p = apri('erp_cespiti','cessione'); bene(p.fai('cs',{cespite:'CE-0004',cliente:'C600',prezzo:'10500',iva:'22',data:'2026-12-22'}),'cessione carrello'); fino('carrello elevatore: minusvalenza');
 p = apri('erp_cespiti','cessione'); bene(p.fai('cs',{cespite:'CE-0005',cliente:'C600',prezzo:'2800',iva:'22',data:'2026-12-22'}),'cessione sega'); fino('sega circolare: plusvalenza');
+p = apri('erp_fi','sopravvenienze'); bene(p.fai('ii',{sopravvenienza:'LIQ-4471',data:'2026-12-28'}),'incasso indennizzo'); fino('Incassa l’indennizzo');
 vicinoS('46',1300,'minusvalenza'); vicinoS('45',-816.67,'plusvalenza');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C600',importo:'16226',rif:'CESSIONI CARRELLO E SEGA',data:'2026-12-29'}),'incasso cessioni'); fino('incassa le due cessioni');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C200',importo:'8608,32',rif:'SALDO FATTURA DELTA',data:'2026-12-30'}),'incasso Delta'); fino('Delta paga');

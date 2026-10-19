@@ -1,0 +1,16 @@
+.fi-nav {display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}
+.fi-scroll {overflow-x:auto;max-width:100%;margin:.8rem 0}
+.fi-tabella {border-collapse:collapse;width:100%;min-width:40rem;font-size:1rem;line-height:1.5}
+.fi-tabella th,.fi-tabella td {padding:.7rem .9rem;border-bottom:1px solid #9aa7b1;vertical-align:top;text-align:left}
+.fi-tabella thead th {background:#e9eff4;color:#142d40}
+.fi-tabella .fi-importo {text-align:right;white-space:nowrap;min-width:9rem;font-variant-numeric:tabular-nums;border-left:2px solid #8595a2}
+.fi-tabella tfoot {font-weight:bold;background:#f1f5f8;color:#142d40}
+.fi-documento {margin:1.4rem 0;padding:1rem;border:1px solid #8c9eac;border-radius:.4rem;scroll-margin-top:6rem}
+.fi-documento:target {outline:3px solid #005a9c}
+.fi-documento h3 {font-size:1.15rem;overflow-wrap:anywhere}
+.fi-quadratura {font-weight:bold}
+.fi-avviso {padding:1rem;border:2px solid #795700;background:#fff7d6;color:#332700;margin:1rem 0}
+.fi-tabella caption {text-align:left;font-weight:bold;padding:.5rem 0}
+.fi-scroll:focus-visible,.fi-tabella a:focus-visible,.fi-nav a:focus-visible {outline:3px solid #005a9c;outline-offset:3px}
+@media(max-width:40rem) {.fi-documento {padding:.6rem}.fi-tabella th,.fi-tabella td {padding:.6rem}.fi-scroll {border:1px solid #8c9eac}}
+@media print {.fi-nav,.fi-filtro {display:none}.fi-scroll {overflow:visible}.fi-tabella {min-width:0;font-size:10pt}.fi-tabella .fi-importo {min-width:0}.fi-documento {break-inside:avoid}.fi-avviso {border:2px solid black;background:white;color:black}#lab:before {content:'SIMULAZIONE DIDATTICA — NON VALIDO AI FINI FISCALI O COMMERCIALI';display:block;font-weight:bold;margin-bottom:1rem}}

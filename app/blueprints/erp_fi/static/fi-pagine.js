@@ -8,12 +8,66 @@
   var avviso = function () { return U && U.avviso ? U.avviso(S()) : ''; };
   var nomeCli = function (c) { return (S().clienti[c] || {}).nome || c; };
   var opz = function (lista, vuoto) { return lista.length ? lista : [['', vuoto || '— nessun documento —']]; };
+  // Il quiz è incluso dopo questo renderer. Fallback iniziale fail-closed,
+  // uguale al contratto MSA_RAGIONERIA, senza fidarsi del vecchio contatore.
+  function compilato(q, as) {
+    var rs = (q.documento || {}).righe || [];
+    return rs.length > 0 && Array.isArray(as) && as.length === rs.length && as.every(function (a) {
+      if (!a || ['DARE', 'AVERE'].indexOf(a.sezione) < 0 || (q.versioneTentativo === 2 && !a.conto)) return false;
+      var s = String(a.importo == null ? '' : a.importo).trim().replace(/\s/g, '');
+      if (s.indexOf(',') >= 0) { if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+),\d{1,2}$/.test(s)) return false; s = s.replace(/\./g, '').replace(',', '.'); }
+      else if (/^\d{1,3}(?:\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+      else if (!/^\d+(?:\.\d{1,2})?$/.test(s)) return false;
+      return Number(s) > 0 && Number(s) <= Number.MAX_SAFE_INTEGER / 100;
+    });
+  }
+  function bloccati() {
+    if (window.MSA_RAGIONERIA) return window.MSA_RAGIONERIA.bloccati(S());
+    return ((S().msaRagioneria || {}).coda || []).filter(function (q) {
+      return !(q.tentato === true && (q.cronologiaTentativi || []).some(function (t) { return compilato(q, t.risposte); })) &&
+        !(q.versioneTentativo !== 2 && q.tentativi > 0 && compilato(q, q.risposte));
+    });
+  }
+  function registrazioni() {
+    var qs = bloccati();
+    return S().registrazioni.filter(function (r) { return !qs.some(function (q) { var d = q.documento || {}; return d.id != null && r.id != null ? String(d.id) === String(r.id) : String(d.numero) === String(r.numero); }); });
+  }
+  function totali(rs) {
+    return rs.reduce(function (t, x) { t[x.dareAvere === 'DARE' ? 'dare' : 'avere'] += Math.round(Number(x.importo) * 100); return t; }, {dare:0, avere:0});
+  }
+  function movimenti(regs, codice) {
+    var saldo = 0, out = [];
+    regs.map(function (r, i) { return {r:r, i:i}; }).sort(function (a, b) { return String(a.r.data).localeCompare(String(b.r.data)) || a.i - b.i; }).forEach(function (v) {
+      v.r.righe.forEach(function (x) { if (String(x.conto) !== String(codice)) return;
+        saldo += (x.dareAvere === 'DARE' ? 1 : -1) * Math.round(x.importo * 100);
+        out.push({documento:v.r, riga:x, saldo:saldo});
+      });
+    });
+    return out;
+  }
+  window.FI_DIDATTICA = {totali:totali, movimenti:movimenti, registrazioni:registrazioni};
+  function base() { return location.pathname.replace(/\/contabilita-s4(?:\/.*)?$/, '/contabilita-s4/'); }
+  function docId(r) { return 'fi-doc-' + encodeURIComponent(r.numero); }
+  function navigazione() { return '<nav class="fi-nav" aria-label="Consultazione contabile"><a href="'+e(base())+'">Libro giornale</a><a href="'+e(base()+'mastro')+'">Mastrini per conto</a></nav>'; }
+  function blocco() { var n = bloccati().length; return n ? '<p class="fi-avviso" role="status">'+n+' documenti esclusi: prima invia un tentativo completo e valutabile nel laboratorio di ragioneria. Anche saldi e totali sotto riportati escludono questi documenti e non rappresentano il saldo completo.</p>' : ''; }
+  function contoNome(codice) { var c = (S().pianoDeiConti || []).find(function (x) { return String(x.codice) === String(codice); }); return codice + (c ? ' · '+c.nome : ''); }
+  function importi(x) { return '<td class="fi-importo">'+(x.dareAvere === 'DARE' ? eur(x.importo) : '—')+'</td><td class="fi-importo">'+(x.dareAvere === 'AVERE' ? eur(x.importo) : '—')+'</td>'; }
+  function tabella(titolo, teste, corpo, piede) { return '<div class="fi-scroll" tabindex="0" role="region" aria-label="'+e(titolo)+'"><table class="fi-tabella"><caption>'+e(titolo)+'</caption><thead><tr>'+teste.map(function (t) { return '<th scope="col"'+(['Dare €','Avere €','Saldo progressivo €'].indexOf(t)>=0?' class="fi-importo"':'')+'>'+t+'</th>'; }).join('')+'</tr></thead><tbody>'+corpo+'</tbody>'+(piede?'<tfoot>'+piede+'</tfoot>':'')+'</table></div>'; }
   var PAGINE = {
     giornale: function () {
-      radice.innerHTML = L.scheda('📚', 'Libro giornale', 'FB03 · S_ALR_87012287', S().registrazioni.slice().reverse().map(function (r) {
-        return '<div class="lab-scr"><b>Doc. ' + r.numero + ' · ' + fd(r.data) + '</b> <span class="lab-bd blu">' + r.tipo + '</span>' + (r.stornato ? ' <span class="lab-bd arancio">stornato dal ' + r.stornato + '</span>' : '') + (r.stornoDi ? ' <span class="lab-bd giallo">storno del ' + r.stornoDi + '</span>' : '') + ' ' + e(r.descrizione) + '<ul>' + r.righe.map(function (y) {
-          return '<li class="' + (y.dareAvere === 'DARE' ? 'd' : 'a') + '">' + (y.dareAvere === 'DARE' ? 'Dare' : 'Avere') + ' ' + y.conto + (y.partner ? ' · ' + y.partner : '') + (y.testo ? ' · ' + e(y.testo) : '') + ' <span>' + eur(y.importo) + '</span></li>'; }).join('') + '</ul></div>';
-      }).join('') || '<p class="lab-vuoto">Nessuna scrittura.</p>');
+      var regs = registrazioni(), totale = totali(regs.reduce(function (a, r) { return a.concat(r.righe); }, []));
+      radice.innerHTML = navigazione()+blocco()+L.scheda('📚', 'Libro giornale', 'FB03 · S_ALR_87012287', (regs.slice().reverse().map(function (r) {
+        var t = totali(r.righe), righe = r.righe.map(function (x) { return '<tr><td><a href="'+e(base()+'mastro?conto='+encodeURIComponent(x.conto))+'">'+e(contoNome(x.conto))+'</a></td><td>'+e([x.partner,x.testo].filter(Boolean).join(' · '))+'</td>'+importi(x)+'</tr>'; }).join('');
+        return '<article class="fi-documento" id="'+e(docId(r))+'"><h3>Documento '+e(r.numero)+' · '+e(fd(r.data))+' · '+e(r.tipo)+'</h3><p>'+e(r.descrizione)+'</p>'+(r.stornato?'<p>Stornato dal '+e(r.stornato)+'</p>':'')+(r.stornoDi?'<p>Storno del '+e(r.stornoDi)+'</p>':'')+tabella('Scrittura documento '+r.numero, ['Conto / mastrino','Partner / descrizione','Dare €','Avere €'],righe,'<tr><th scope="row" colspan="2">Totali documento</th><td class="fi-importo">'+eur(t.dare/100)+'</td><td class="fi-importo">'+eur(t.avere/100)+'</td></tr>')+'<p class="fi-quadratura">'+(t.dare===t.avere?'✓ Documento quadrato: Dare = Avere.':'⚠ Documento NON quadrato. Differenza Dare − Avere: '+eur((t.dare-t.avere)/100)+' €.')+'</p></article>';
+      }).join('') || '<p class="lab-vuoto">Nessuna scrittura consultabile.</p>')+'<p class="fi-quadratura">Totali giornale consultabile — Dare '+eur(totale.dare/100)+' € · Avere '+eur(totale.avere/100)+' € · '+(totale.dare===totale.avere?'Quadrato':'NON quadrato')+'</p>');
+    },
+    mastro: function () {
+      var regs = registrazioni(), conti = (S().pianoDeiConti || []).slice();
+      regs.forEach(function (r) { r.righe.forEach(function (x) { if (!conti.some(function (c) { return String(c.codice)===String(x.conto); })) conti.push({codice:x.conto,nome:'Conto del documento'}); }); });
+      conti.sort(function (a,b) { return String(a.codice).localeCompare(String(b.codice),'it',{numeric:true}); });
+      var scelto = new URLSearchParams(location.search).get('conto') || (conti[0] || {}).codice || '', ms = movimenti(regs,scelto), t = totali(ms.map(function (m) { return m.riga; }));
+      var righe = ms.map(function (m) { var r=m.documento,x=m.riga; return '<tr><td>'+e(fd(r.data))+'</td><td><a href="'+e(base()+'#'+docId(r))+'">'+e(r.numero)+'</a></td><td>'+e([r.descrizione,x.partner,x.testo].filter(Boolean).join(' · '))+'</td>'+importi(x)+'<td class="fi-importo">'+eur(Math.abs(m.saldo)/100)+' '+(m.saldo>0?'Dare':m.saldo<0?'Avere':'(zero)')+'</td></tr>'; }).join('');
+      radice.innerHTML = navigazione()+blocco()+L.scheda('📖',e('Mastrino '+contoNome(scelto)),'FBL3N','<form class="fi-filtro" method="get"><label for="fi-conto">Conto</label> <select id="fi-conto" name="conto">'+conti.map(function (c) { return '<option value="'+e(c.codice)+'"'+(String(c.codice)===String(scelto)?' selected':'')+'>'+e(c.codice+' · '+c.nome)+'</option>'; }).join('')+'</select> <button type="submit" class="lab-btn">Mostra mastrino</button></form><p>Ordine cronologico per data; a parità di data, ordine originale del giornale. Saldo iniziale dei movimenti consultabili: 0,00 €.</p>'+tabella('Movimenti conto '+scelto,['Data','Documento / giornale','Descrizione','Dare €','Avere €','Saldo progressivo €'],righe || '<tr><td colspan="6">Nessun movimento consultabile.</td></tr>','<tr><th scope="row" colspan="3">Totali movimenti</th><td class="fi-importo">'+eur(t.dare/100)+'</td><td class="fi-importo">'+eur(t.avere/100)+'</td><td class="fi-importo">'+eur(Math.abs(t.dare-t.avere)/100)+' '+(t.dare>t.avere?'Dare':t.dare<t.avere?'Avere':'(zero)')+'</td></tr>'));
     },
     bilancio: function () { radice.innerHTML = L.scheda('⚖️', 'Bilancio di verifica', 'F.08', L.bilancio(S())); },
     sdi: function () {
@@ -93,6 +147,28 @@
       L.scheda('📋', 'Sopravvenienze attive', '', L.tabella(['Rif.', 'Data', 'Compagnia', 'Evento', 'Importo›', 'Incassato'], el.map(function (x) { return [e(x.rif), fd(x.data), e(nomeFor(x.compagnia)), e(x.testo), eur(x.importo), x.incassato ? fd(x.incassato) : 'no']; }), 'Nessuna sopravvenienza.'));
     L.collega(radice, 'sv', {sv: FS.sopravvenienza}, rendi); L.collega(radice, 'ii', {ii: FS.incassaIndennizzo}, rendi);
   };
-  function rendi() { (PAGINE[C.pagina] || PAGINE.giornale)(); }
+  function rendi() {
+    if (bloccati().length && ['giornale','mastro'].indexOf(C.pagina)<0) {
+      // Se la domanda nasce da un form, conserva il DOM e il suo esito:
+      // nasconderlo evita anche che il callback scriva su nodi staccati.
+      if (radice.dataset.fiReso === '1') { radice.dataset.fiSospeso = '1'; radice.hidden = true; return; }
+      radice.dataset.fiSospeso = '1';
+      radice.innerHTML = '<p role="status">Consultazione sospesa: invia prima un tentativo completo di conti, sezioni e importi nel laboratorio di ragioneria. Rapporti e documenti derivati possono rivelare la soluzione.</p>'; return;
+    }
+    radice.hidden = false;
+    radice.dataset.fiSospeso = '0';
+    (PAGINE[C.pagina] || PAGINE.giornale)();
+    radice.dataset.fiReso = '1';
+  }
+  function aggiornaVisibilita() {
+    if (['giornale','mastro','bilancio'].indexOf(C.pagina)>=0 || radice.dataset.fiSospeso === '1') { rendi(); return; }
+    radice.hidden = bloccati().length > 0;
+  }
+  window.addEventListener('msa:quiz-pronto',aggiornaVisibilita);
+  window.addEventListener('msa:quiz-aggiornato',aggiornaVisibilita);
+  window.addEventListener('msa:registrazioni-salvate',aggiornaVisibilita);
+  window.addEventListener('beforeprint',aggiornaVisibilita);
+  window.addEventListener('storage',function (ev) { if (ev.key === C.chiave || ev.key === null) location.reload(); });
+  window.addEventListener('pageshow',function (ev) { if (ev.persisted) location.reload(); });
   rendi();
 })();

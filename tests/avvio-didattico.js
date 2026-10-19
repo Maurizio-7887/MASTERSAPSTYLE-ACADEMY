@@ -1,0 +1,26 @@
+const fs=require('fs'),path=require('path'),assert=require('assert'),{JSDOM}=require('jsdom');
+const root=path.resolve(__dirname,'..');
+const w=new JSDOM('<!doctype html><body><div id="lab"></div></body>',{url:'https://academy.invalid/vuoto/s4/dati/',runScripts:'outside-only'}).window;
+const key='avvio-sintetico-erp-ft';w.LAB_PAGINA={slot:'erp-ft',chiave:key,pagina:'avvio'};
+for(const f of ['app/static/js/lab-motore.js','app/static/js/erp/nucleo.js','app/static/js/erp/ui.js','app/blueprints/erp_vendite/static/sd-logica.js','app/static/js/lab-copioni.js','app/blueprints/erp_dati/static/dati-pagine.js'])w.eval(fs.readFileSync(path.join(root,f),'utf8'));
+let n=0;function ok(x,m){assert.ok(x,m);n++;}
+const lab=w.document.querySelector('#lab');
+ok(lab.textContent.indexOf('Nuova azienda · parti da zero')<lab.textContent.indexOf('Alternativa: saldi già pronti'),'azienda vuota precede preset');
+ok(/non acquisti né giacenze/.test(lab.textContent),'anagrafica non equivale acquisto');
+ok(lab.querySelector('#azzera').disabled,'reset impossibile prima backup');
+lab.querySelector('#cs-data').value='2026-12-01';lab.querySelector('#cs-capitale').value='80000';
+lab.querySelector('[data-prefisso="cs"] [data-azione="cs"]').click();
+ok(w.MSA_STATO_CORRENTE().costituzione.capitale===80000,'società costituita');
+ok(Object.values(w.MSA_STATO_CORRENTE().giacenze).every(x=>x===0),'nessuna scorta iniziale gratuita');
+ok(w.MSA_STATO_CORRENTE().registrazioni.length===1,'solo sottoscrizione, nessun acquisto implicito');
+w.localStorage.setItem('account-test-da-preservare','credenziali-fittizie');
+w.localStorage.setItem('altro-laboratorio','documenti-fittizi');
+w.URL.createObjectURL=()=> 'blob:backup-fittizio';w.URL.revokeObjectURL=()=>{};
+w.HTMLAnchorElement.prototype.click=function(){};
+lab.querySelector('#backup-azienda').click();ok(!lab.querySelector('#azzera').disabled,'backup abilita conferma, non cancella');
+w.prompt=()=> 'NO';lab.querySelector('#azzera').click();ok(w.MSA_STATO_CORRENTE().registrazioni.length===1,'conferma diversa non cancella');
+w.prompt=()=> 'NUOVA AZIENDA';lab.querySelector('#azzera').click();
+ok(w.MSA_STATO_CORRENTE().registrazioni.length===0&&!w.MSA_STATO_CORRENTE().avviato,'conferma esplicita riparte vuota');
+ok(w.localStorage.getItem('account-test-da-preservare')==='credenziali-fittizie','dati esterni slot non cancellati');
+ok(w.localStorage.getItem('altro-laboratorio')==='documenti-fittizi','altro laboratorio invariato');
+console.log(`OK: ${n} controlli avvio, backup e ripartenza esplicita`);w.close();

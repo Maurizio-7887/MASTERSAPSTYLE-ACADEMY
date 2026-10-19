@@ -27,6 +27,8 @@ window.PC4 = (function () {
   // prezzo del componente: la stima non ancora rilasciata (calcolo a più livelli, CK11N «roll-up»), altrimenti lo standard
   var prezzoComp = function (mat) { var st = C().stime[mat]; return st && st.stato !== 'FR' ? st.unitario : N().materiale(mat).std; };
   function elementi(mat, q, par) {
+    if (par && par.snapshot) return elementiSnapshot(par.snapshot, q);
+    if (!par && cpm && cpm.attivo()) return elementiSnapshot(cpm.fotografia(mat), q);
     var m = N().materiale(mat), sc = par || C().scheda, cp = componente(m), prezzo = prezzoComp(cp.mat);
     var oreVar = Object.keys(m.ore).reduce(function (t, k) { return t + m.ore[k]; }, 0);
     var kg = r2(cp.q * q), x = {kg: kg, comp: cp.mat, um: N().materiale(cp.mat).um || 'kg', ore: r2(oreVar * q), oreSet: m.attrezzaggio, q: q};
@@ -35,6 +37,24 @@ window.PC4 = (function () {
     x.totale = r2(x.mat + x.sovrMat + x.lav + x.set + x.sovrProd);
     x.centri = Object.keys(m.ore).map(function (k) { return {centro: k, ore: r2(m.ore[k] * q), valore: r2(m.ore[k] * q * sc.tariffa)}; });
     x.par = {sovrMat: sc.sovrMat, sovrProd: sc.sovrProd, tariffa: sc.tariffa, lotto: sc.lotto};
+    // Anche i nuovi ordini del percorso storico congelano i dati utilizzati.
+    x.par.snapshot = {versione: 'legacy-snapshot-v1', materiale: mat, componente: {mat: cp.mat, q: cp.q, prezzo: prezzo},
+      ore: JSON.parse(JSON.stringify(m.ore)), attrezzaggio: m.attrezzaggio, centroSet: Object.keys(m.ore)[0],
+      tariffe: Object.keys(m.ore).reduce(function (t, k) { t[k] = sc.tariffa; return t; }, {}),
+      scheda: {sovrMat: sc.sovrMat, sovrProd: sc.sovrProd, tariffa: sc.tariffa, lotto: sc.lotto}, fasi: m.fasi ? m.fasi.slice() : null};
+    return x;
+  }
+  function elementiSnapshot(s, q) {
+    var sc = s.scheda, cp = s.componente, cs = Object.keys(s.ore).map(function (k) {
+      return {centro: k, ore: r2(s.ore[k] * q), tariffa: s.tariffe[k], valore: r2(s.ore[k] * q * s.tariffe[k])};
+    });
+    var x = {q: q, comp: cp.mat, um: N().materiale(cp.mat).um || 'kg', kg: r2(cp.q * q),
+      ore: r2(cs.reduce(function (t, c) { return t + c.ore; }, 0)), oreSet: s.attrezzaggio, centri: cs};
+    x.mat = r2(cp.q * q * cp.prezzo); x.sovrMat = r2(x.mat * sc.sovrMat / 100);
+    x.lav = r2(cs.reduce(function (t, c) { return t + c.valore; }, 0));
+    x.set = r2(s.attrezzaggio * (s.tariffe[s.centroSet] == null ? sc.tariffa : s.tariffe[s.centroSet])); x.sovrProd = r2((x.lav + x.set) * sc.sovrProd / 100);
+    x.totale = r2(x.mat + x.sovrMat + x.lav + x.set + x.sovrProd);
+    x.par = Object.assign({}, sc, {snapshot: JSON.parse(JSON.stringify(s))});
     return x;
   }
   function scheda(i) {
@@ -74,14 +94,24 @@ window.PC4 = (function () {
     var n = N(), data = n.data(i.data), per = mese(data);
     var mats = Object.keys(C().stime).filter(function (m) { return C().stime[m].stato === 'VO'; });
     if (!mats.length) throw Error('Nessuna stima marcata: prima «Marca» (CK24).');
+    var bootstrap = [];
     mats.forEach(function (m) {
-      if (C().rilasci.some(function (r) { return r.materiale === m && mese(r.data) === per; })) throw Error('Costo standard di ' + m + ' già rilasciato nel periodo ' + per + ': un solo rilascio per periodo.');
+      var conflitti = C().rilasci.filter(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM; });
+      if (conflitti.length) {
+        var snap = C().stime[m].elementi.par.snapshot;
+        var primoCPM = cpm.attivo() && snap && snap.versione === 'cpm-centri-v1' && !C().rilasci.some(function (r) { return r.cpm; });
+        var vuoto = !S().produzione.length && !S().ordini.length && !S().movimenti.length && Object.keys(S().giacenze).every(function (k) { return Math.abs(S().giacenze[k]) < 1e-9; });
+        if (i.sostituisciBootstrap === 'SOSTITUISCI' && primoCPM && vuoto && conflitti.every(function (r) { return r.costituzione === true; })) bootstrap = bootstrap.concat(conflitti);
+        else throw Error('Costo standard di ' + m + ' già rilasciato nel periodo ' + per + ': un solo rilascio per periodo. Solo il primo CPM può sostituire esplicitamente il bootstrap di costituzione, con stock, movimenti e ordini vuoti (scrivi SOSTITUISCI).');
+      }
+      if (cpm.attivo() && (!C().stime[m].elementi.par.snapshot || C().stime[m].elementi.par.snapshot.revisione !== cpm.modello().revisione)) throw Error('Stima non aggiornata alla revisione CPM: ricalcola prima del rilascio.');
       if (S().movimenti.some(function (x) { return x.mat === m && mese(x.data) === per && x.data < data; })) throw Error(m + ' ha già movimenti di magazzino nel periodo ' + per + ': il nuovo standard si rilascia all\'inizio del periodo.');
     });
+    bootstrap.forEach(function (r) { r.sostituitoCPM = {data: data, revisione: cpm.modello().revisione}; });
     var righe = [], dett = [];
     mats.forEach(function (m) {
       var st = C().stime[m], mm = n.materiale(m), g = S().giacenze[m] || 0, delta = r2(g * (st.unitario - mm.std));
-      dett.push({materiale: m, data: data, vecchio: mm.std, nuovo: st.unitario, giacenza: g, rivalutazione: delta});
+      dett.push({materiale: m, data: data, vecchio: mm.std, nuovo: st.unitario, giacenza: g, rivalutazione: delta, cpm: cpm.attivo() ? cpm.modello().revisione : null});
       if (Math.abs(delta) > 0.004) righe.push({conto: '13', dareAvere: 'DARE', importo: delta, testo: m + ' ' + g + ' pz × (' + L.eur(st.unitario) + ' − ' + L.eur(mm.std) + ')'});
       mm.std = st.unitario; st.stato = 'FR'; st.rilascio = data;
     });
@@ -95,7 +125,9 @@ window.PC4 = (function () {
   function pianifica(mat, q, data) {
     var st = C().stime[mat];
     if (!st || st.stato !== 'FR') throw Error('Per ' + mat + ' manca un costo standard rilasciato (CK11N + CK24): senza, l\'ordine non ha costi obiettivo.');
-    var el = elementi(mat, q); el.stima = {data: st.data, lotto: st.lotto, totale: st.elementi.totale, unitario: st.unitario};
+    if (cpm.attivo() && (!st.elementi.par.snapshot || st.elementi.par.snapshot.revisione !== cpm.modello().revisione))
+      throw Error('Budget o standard CPM modificato: ricalcola e rilascia lo standard (CK11N/CK24) prima di nuovi ordini. Gli ordini già avviati conservano lo snapshot.');
+    var el = cpm.attivo() ? elementi(mat, q, st.elementi.par) : elementi(mat, q); el.stima = {data: st.data, lotto: st.lotto, totale: st.elementi.totale, unitario: st.unitario};
     return el;
   }
   // KGI2: sovraccosti sugli ordini aperti, sui costi effettivi
@@ -225,7 +257,155 @@ window.PC4 = (function () {
     C().ml.push(JSON.parse(JSON.stringify(res)));
     n.salva(); return r;
   }
-  return {elementi: elementi, scheda: scheda, calcola: calcola, tabellaStima: tabellaStima, marca: marca, rilascia: rilascia, pianifica: pianifica,
+  // Laboratorio opt-in: nessuna migrazione dei saldi, nessuna scrittura FI di budget/consuntivo CO.
+  var cpm = (function () {
+    var CENTRI = ['Taglio', 'Piegatura', 'Saldatura'], NAT = ['personale', 'indiretti'];
+    var copia = function (x) { return JSON.parse(JSON.stringify(x)); };
+    function numero(v, nome, min) {
+      // LabMotore presenta i campi in formato italiano (0,25; 36.000,00).
+      // Parsing rigoroso: niente parseFloat parziale, Infinity o campi vuoti.
+      if (typeof v === 'string') {
+        v = v.trim();
+        if (!/^-?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?$/.test(v)) throw Error(nome + ': valore numerico richiesto (virgola per i decimali).');
+        v = Number(v.replace(/\./g, '').replace(',', '.'));
+      }
+      if (v === '' || v == null || !Number.isFinite(Number(v)) || Number(v) < (min || 0)) throw Error(nome + ': valore numerico non negativo richiesto.');
+      return Number(v);
+    }
+    function modello() { return C().cpm || null; }
+    function attivo() { return !!(modello() && modello().versione === 'cpm-centri-v1'); }
+    function richiesto() { if (!attivo()) throw Error('Attiva esplicitamente il laboratorio CPM.'); return modello(); }
+    function attiva(i) {
+      if (attivo()) throw Error('Laboratorio CPM già attivo: usa le modifiche versionate.');
+      if (String((i || {}).conferma) !== 'ATTIVA') throw Error('Scrivi ATTIVA per creare il nuovo percorso CPM, senza modificare gli ordini pregressi.');
+      var standard = {};
+      Object.keys(S().materiali).forEach(function (mat) {
+        var m = S().materiali[mat]; if (!m.ore) return;
+        standard[mat] = {componente: copia(m.comp || {mat: 'FERRO', q: m.ferro}), ore: copia(m.ore), attrezzaggio: m.attrezzaggio || 0,
+          centroSet: Object.keys(m.ore)[0], fasi: CENTRI.filter(function (k) { return m.ore[k] > 0; })};
+      });
+      // Nuova versione didattica dichiarata, non reinterpretazione della distinta storica.
+      standard['TR-STD'] = {componente: {mat: 'FERRO', q: 8}, ore: {Taglio: .25, Piegatura: .20, Saldatura: .40}, attrezzaggio: 0, centroSet: 'Taglio', fasi: CENTRI.slice()};
+      var centri = {}; CENTRI.forEach(function (k) { centri[k] = {personale: 36000, indiretti: 0, capacita: 1500, orePiano: 1500, percentuale: 100 / 3}; });
+      C().cpm = {versione: 'cpm-centri-v1', revisione: 1, anno: Number(String(S().avviato || '2026').slice(0, 4)),
+        centri: centri, generale: {produttivi: 18000, amministrativi: 0, driver: 'ore'}, volumi: {'TR-STD': 1200}, standard: standard, consuntivi: []};
+      N().salva(); return '<p class="lab-nota">CPM v1 attivo: nuova distinta TR-STD 8 kg, tre operazioni, setup zero. Nessun saldo o ordine pregresso modificato. Ricalcola e rilascia CK11N/CK24. Budget annuo 1.200 pz, distinto dall’ordine di 300.</p>';
+    }
+    function salvaBudget(i) {
+      var m = richiesto(), b = copia(m), anno = numero(i.anno, 'Anno', 2000);
+      if (!Number.isInteger(anno) || anno > 2100) throw Error('Anno richiesto fra 2000 e 2100.');
+      // Il cambio esercizio richiede un nuovo spazio: non sovrascrive il budget di esercizi storici.
+      if (anno !== m.anno) throw Error('Questo laboratorio è annuale: per un altro anno crea un nuovo spazio azienda.');
+      b.generale = {produttivi: numero(i.produttivi, 'Generale produttivo'), amministrativi: numero(i.amministrativi, 'Generale amministrativo'), driver: i.driver};
+      if (['ore', 'percentuali'].indexOf(i.driver) < 0) throw Error('Driver ammessi: ore o percentuali.');
+      CENTRI.forEach(function (k) { var c = i.centri && i.centri[k]; if (!c) throw Error('Manca il centro ' + k);
+        b.centri[k] = {personale: numero(c.personale, k + ' personale'), indiretti: numero(c.indiretti, k + ' indiretti'), capacita: numero(c.capacita, k + ' capacità', .001),
+          orePiano: numero(c.orePiano, k + ' ore tariffa', .001), percentuale: numero(c.percentuale, k + ' quota %')};
+        if (b.centri[k].orePiano > b.centri[k].capacita) throw Error(k + ': le ore pianificate tariffa non possono superare la capacità disponibile.');
+      });
+      if (i.driver === 'percentuali' && Math.abs(CENTRI.reduce(function (t, k) { return t + b.centri[k].percentuale; }, 0) - 100) > .001) throw Error('Le quote devono sommare a 100%.');
+      var vol = {}; Object.keys(i.volumi || {}).forEach(function (mat) { if (!b.standard[mat]) throw Error('Prodotto non valido: ' + mat); vol[mat] = numero(i.volumi[mat], 'Volume annuo ' + mat); });
+      if (!Object.keys(vol).length) throw Error('Inserisci almeno un volume annuale.');
+      b.volumi = vol; b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">Budget annuale aggiornato, revisione ' + b.revisione + '. Nessuna scrittura FI. Nuovi standard da calcolare/rilasciare; ordini esistenti invariati.</p>';
+    }
+    function validaStandard(mat, s, tutti) {
+      if (!S().materiali[mat] || ['FERT', 'HALB'].indexOf(S().materiali[mat].tipo) < 0 || !tutti[mat]) throw Error('Materiale prodotto non valido.');
+      if (!s.componente || !S().materiali[s.componente.mat]) throw Error('Componente inesistente.');
+      s.componente.q = numero(s.componente.q, 'Quantità componente per pezzo', .000001);
+      s.attrezzaggio = numero(s.attrezzaggio, 'Attrezzaggio');
+      if (!s.ore || !Object.keys(s.ore).length || Object.keys(s.ore).some(function (k) { return CENTRI.indexOf(k) < 0; })) throw Error('Usa i centri Taglio, Piegatura, Saldatura.');
+      Object.keys(s.ore).forEach(function (k) { s.ore[k] = numero(s.ore[k], k + ' ore per pezzo'); });
+      s.fasi = CENTRI.filter(function (k) { return s.ore[k] > 0; });
+      if (!s.fasi.length) throw Error('Almeno una fase con tempo positivo richiesta.');
+      if (CENTRI.indexOf(s.centroSet) < 0 || !s.ore[s.centroSet]) throw Error('Il centro attrezzaggio deve essere una fase del ciclo.');
+      var visti = [mat], cp = s.componente.mat;
+      while (tutti[cp]) { if (visti.indexOf(cp) >= 0) throw Error('Ciclo nella distinta base.'); visti.push(cp); cp = tutti[cp].componente.mat; }
+      if (cp === mat) throw Error('Distinta autoreferenziale.');
+    }
+    function salvaStandard(i) {
+      var m = richiesto(), all = copia(m.standard), s = {componente: {mat: i.componente, q: i.quantita}, ore: copia(i.ore || {}), attrezzaggio: i.attrezzaggio, centroSet: i.centroSet};
+      all[i.materiale] = s; validaStandard(i.materiale, s, all);
+      m.standard = all; m.revisione++; N().salva(); return '<p class="lab-nota">Distinta/ciclo CPM salvati, revisione ' + m.revisione + '. Ricalcola e rilascia lo standard. Nessun ordine storico rivalutato.</p>';
+    }
+    function tariffe() {
+      var m = richiesto(), base = CENTRI.reduce(function (t, k) { return t + m.centri[k].orePiano; }, 0), fatto = 0, out = {};
+      CENTRI.forEach(function (k, idx) {
+        var c = m.centri[k], quota = m.generale.driver === 'ore' ? c.orePiano / base : c.percentuale / 100;
+        var rib = idx === CENTRI.length - 1 ? r2(m.generale.produttivi - fatto) : r2(m.generale.produttivi * quota); fatto = r2(fatto + rib);
+        out[k] = {personale: c.personale, indiretti: c.indiretti, ribaltato: rib, budget: r2(c.personale + c.indiretti + rib), orePiano: c.orePiano,
+          capacita: c.capacita, tariffa: (c.personale + c.indiretti + rib) / c.orePiano};
+      }); return out;
+    }
+    function fotografia(mat) {
+      var m = richiesto(), s = m.standard[mat]; if (!s) throw Error('Standard CPM mancante per ' + mat);
+      var t = tariffe(), cp = s.componente;
+      return {versione: m.versione, revisione: m.revisione, anno: m.anno, materiale: mat, componente: {mat: cp.mat, q: cp.q, prezzo: prezzoComp(cp.mat)},
+        ore: copia(s.ore), attrezzaggio: s.attrezzaggio, centroSet: s.centroSet, fasi: s.fasi.slice(),
+        tariffe: CENTRI.reduce(function (o, k) { o[k] = t[k].tariffa; return o; }, {}),
+        scheda: {sovrMat: 0, sovrProd: 0, tariffa: 28, lotto: C().scheda.lotto}};
+    }
+    function tariffa(o, fase) {
+      var s = o.piano.par.snapshot;
+      if (!s) return S().costing.scheda.tariffa; // solo ordini pre-snapshot
+      if (fase && s.tariffe[fase] != null) return s.tariffe[fase];
+      if (s.versione === 'cpm-centri-v1' && Object.keys(s.ore).length > 1) throw Error('Seleziona il centro/fase dello snapshot.');
+      var t = s.tariffe[Object.keys(s.ore)[0]]; return t == null ? s.scheda.tariffa : t;
+    }
+    function consuntivo(i) {
+      var m = richiesto(), data = N().data(i.data), rif = String(i.riferimento || '').trim(), centro = i.centro, natura = i.natura;
+      if (Number(data.slice(0, 4)) !== m.anno) throw Error('Il consuntivo deve appartenere all’anno di budget.');
+      if (CENTRI.concat(['Generale']).indexOf(centro) < 0 || (centro === 'Generale' ? ['produttivi', 'amministrativi'] : NAT).indexOf(natura) < 0) throw Error('Centro/natura non validi.');
+      if (!rif) throw Error('Riferimento fonte obbligatorio: usa il documento FI oppure una fonte sintetica univoca.');
+      if (m.consuntivi.some(function (x) { return x.riferimento === rif && x.centro === centro && x.natura === natura; })) throw Error('Fonte già rilevata per questo centro e natura: nessun doppio conteggio.');
+      m.consuntivi.push({data: data, riferimento: rif, centro: centro, natura: natura, importo: numero(i.importo, 'Costo primario')});
+      N().salva(); return '<p class="lab-nota">Costo primario riportato solo nel prospetto CO: nessuna nuova spesa, attività o passività FI. Non aggiungere di nuovo le attività D72/A75 ai costi primari.</p>';
+    }
+    function report(anno) {
+      var m = richiesto(); if (anno != null && Number(anno) !== m.anno) throw Error('Budget disponibile solo per ' + m.anno);
+      var ts = tariffe(), richieste = {}, assorbito = {}, oreEff = {}, standardOutput = {}, primari = {}, generale = {produttivi: 0, amministrativi: 0};
+      CENTRI.forEach(function (k) { richieste[k] = assorbito[k] = oreEff[k] = standardOutput[k] = primari[k] = 0; });
+      Object.keys(m.volumi).forEach(function (mat) { var st = m.standard[mat]; CENTRI.forEach(function (k) { richieste[k] += (st.ore[k] || 0) * m.volumi[mat]; }); });
+      m.consuntivi.forEach(function (x) { if (x.centro === 'Generale') generale[x.natura] += x.importo; else primari[x.centro] += x.importo; });
+      var esclusiLegacy = 0;
+      S().produzione.forEach(function (o) {
+        var snap = o.piano.par.snapshot;
+        if (!snap || snap.versione !== m.versione || snap.anno !== m.anno) { esclusiLegacy++; return; }
+        o.eventi.filter(function (e) { return e.tipo === 'CO11N' && !e.stornato && Number(e.data.slice(0, 4)) === m.anno; }).forEach(function (e) {
+          var k = e.centro || e.fase || snap.fasi[0]; assorbito[k] += e.valore; oreEff[k] += e.ore + e.attrezzaggio;
+          standardOutput[k] += (snap.ore[k] || 0) * (e.qta || 0) * snap.tariffe[k];
+        });
+      });
+      var base = CENTRI.reduce(function (t, k) { return t + m.centri[k].orePiano; }, 0), fatto = 0;
+      var righe = CENTRI.map(function (k, idx) {
+        var t = ts[k], quota = m.generale.driver === 'ore' ? m.centri[k].orePiano / base : m.centri[k].percentuale / 100;
+        var rib = idx === 2 ? r2(generale.produttivi - fatto) : r2(generale.produttivi * quota); fatto = r2(fatto + rib);
+        var eff = r2(primari[k] + rib), ass = r2(assorbito[k]);
+        return Object.assign({centro: k}, t, {oreRichieste: r2(richieste[k]), saturazione: richieste[k] / t.capacita * 100,
+          oreEffettive: r2(oreEff[k]), primari: r2(primari[k]), ribaltatoEffettivo: rib, consuntivo: eff, assorbito: ass,
+          residuo: r2(eff - ass), varianzaSpesa: r2(eff - t.budget), varianzaAssorbimento: r2(t.budget - ass),
+          varianzaEfficienza: r2(ass - standardOutput[k])});
+      });
+      var prodotti = Object.keys(m.volumi).map(function (mat) {
+        var st = elementi(mat, C().scheda.lotto), finiti = 0, costo = 0, accredito = 0, wip = 0;
+        S().produzione.filter(function (o) { var sn = o.piano.par.snapshot; return o.materiale === mat && sn && sn.versione === m.versione && sn.anno === m.anno; }).forEach(function (o) {
+          var costi = 0, out = 0, q = 0;
+          o.eventi.filter(function (e) { return !e.stornato && Number(e.data.slice(0, 4)) === m.anno; }).forEach(function (e) {
+            if (e.tipo === '101') { q += e.qta; out += e.valore; }
+            else if (e.tipo === '261' || e.tipo === 'CO11N') costi += e.valore;
+            else if (e.tipo === 'KGI2') costi += e.mat + e.prod;
+          });
+          finiti += q; costo += costi; accredito += out; wip += Math.max(0, costi - out);
+        });
+        return {materiale: mat, volumeBudget: m.volumi[mat], finiti: finiti, varianzaVolume: finiti - m.volumi[mat], standardUnitario: r2(st.totale / st.q),
+          budgetProduzione: r2(m.volumi[mat] * st.totale / st.q), costiOrdini: r2(costo), accredito: r2(accredito), saldoOrdini: r2(costo - accredito), wip: r2(wip)};
+      });
+      return {anno: m.anno, revisione: m.revisione, centri: righe, prodotti: prodotti, generale: {budgetProduttivi: m.generale.produttivi, budgetAmministrativi: m.generale.amministrativi,
+        produttivi: r2(generale.produttivi), amministrativi: r2(generale.amministrativi), residuoProduttivo: 0}, esclusiLegacy: esclusiLegacy,
+        note: 'Costi primari riportati manualmente con riferimento fonte: non importati automaticamente da FI. Assorbito = attività secondarie delle conferme, non ulteriore personale. Residuo = consuntivo − assorbito = varianza spesa + varianza assorbimento. Efficienza confronta ore dichiarate e standard dei pezzi confermati; comprende attrezzaggio. Ore annue richieste solo variabili: setup fisso escluso senza un piano annuale dei lotti. Budget valore prodotti al lotto di calcolo corrente: stima comparabile, non piano lotti annuale. Saldo prodotti = costi annuali degli ordini − accrediti annuali, prima della liquidazione; dettaglio WIP operativo e varianze finali nelle pagine PP/KKS2. Nessuna esplosione MRP multilivello automatica: pianificare i semilavorati autonomi separatamente.'};
+    }
+    return {attivo: attivo, modello: modello, attiva: attiva, salvaBudget: salvaBudget, salvaStandard: salvaStandard, tariffe: tariffe, fotografia: fotografia, tariffa: tariffa, consuntivo: consuntivo, report: report, centri: CENTRI.slice()};
+  })();
+  return {cpm: cpm, elementi: elementi, scheda: scheda, calcola: calcola, tabellaStima: tabellaStima, marca: marca, rilascia: rilascia, pianifica: pianifica,
     sovraccosti: sovraccosti, varianze: varianze, liquida: liquida, ml: ml,
     chiusuraML: function (i) { return ml(String(i.periodo || ''), true, i.data); }};
 })();
