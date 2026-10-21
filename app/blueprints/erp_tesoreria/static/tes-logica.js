@@ -46,11 +46,24 @@ window.TS4 = (function () {
     return {fasce: fasce.map(function (f) { return f[0]; }), righe: tot};
   }
   // ── posizione di cassa e previsione di liquidità per settimane ──
+  function saldoBanca(conto, alla) {
+    return r2(S().registrazioni.filter(function (r) { return !alla || r.data <= alla; }).reduce(function (t, r) {
+      return t + r.righe.filter(function (x) { return x.conto === conto; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0);
+    }, 0));
+  }
+  function posizione(alla) {
+    return N().contiBancari().map(function (c) { return {conto: c.codice, nome: c.nome, saldo: saldoBanca(c.codice, alla)}; });
+  }
+  function giroconto(i) {
+    var n = N(), data = n.data(i.data), da = n.contoBancario(i.da), a = n.contoBancario(i.a), imp = L.num(i.importo, 'Importo', 0.01);
+    if (da === a) throw Error('Scegli due conti bancari diversi.');
+    if (imp > saldoBanca(da, data) + 0.005) throw Error('Saldo insufficiente sul conto di origine alla data del giroconto.');
+    var r = n.post({data: data, tipo: 'GIROCONTO_BANCARIO', descrizione: 'Giroconto simulato da ' + da + ' a ' + a,
+      righe: [{conto: a, dareAvere: 'DARE', importo: imp}, {conto: da, dareAvere: 'AVERE', importo: imp}]});
+    n.salva(); return r;
+  }
   function previsione(dal, settimane) {
-    var n = N(), banca = n.saldo('10'), trans = n.saldo('18');
-    var regs = S().registrazioni.filter(function (r) { return r.data <= dal; });
-    var saldo = function (c) { return r2(regs.reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === c; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0)); };
-    banca = r2(saldo('10') + saldo('18'));
+    var banca = r2(posizione(dal).reduce(function (t, c) { return t + c.saldo; }, 0) + saldoBanca('18', dal));
     var col = [], inizio = dal;
     for (var i = 0; i < (settimane || 6); i++) { var fine = piuGiorni(inizio, 6); col.push({dal: inizio, al: fine, incassi: 0, pagamenti: 0}); inizio = piuGiorni(fine, 1); }
     var scaduti = {incassi: 0, pagamenti: 0};
@@ -87,22 +100,34 @@ window.TS4 = (function () {
   }
   // ── estratto conto elettronico ──
   function caricaEstratto(i) {
-    var n = N(), data = n.data(i.data), righe = String(i.righe || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x, k) {
+    var n = N(), data = n.data(i.data), conto = n.contoBancario(i.banca), righe = String(i.righe || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x, k) {
       var p = x.split(';'); if (p.length < 3) throw Error('Riga ' + (k + 1) + ': servono data;importo;descrizione.');
       return {id: k + 1, data: L.dataOk(p[0].trim()), importo: L.num(p[1], 'Importo riga ' + (k + 1)), descrizione: p.slice(2).join(';').trim(), stato: 'da abbinare'};
     });
     if (!righe.length) throw Error('Estratto vuoto.');
+    if (righe.some(function (x) { return x.data > data || x.data < S().avviato; })) throw Error('Date dei movimenti fuori dal periodo avvio / data estratto.');
     var primo = righe.reduce(function (d, x) { return x.data < d ? x.data : d; }, righe[0].data);
-    var e = {numero: String(n.numero('estratto')), data: data, banca: 'Banca c/c (conto 10)', righe: righe, saldoIniziale: saldo10(function (d) { return d < primo; })};   // saldo d'apertura: il giorno prima del primo movimento
+    var e = {numero: String(n.numero('estratto')), data: data, contoBanca: conto, banca: conto + ' · ' + S().pianoDeiConti.find(function (c) { return c.codice === conto; }).nome, righe: righe, saldoIniziale: saldoConto(conto, function (d) { return d < primo; })};   // solo il conto scelto; nessun saldo inventato
     e.saldoFinale = r2(e.saldoIniziale + righe.reduce(function (t, x) { return t + x.importo; }, 0));
     T().estratti.push(e); n.salva();
     return '<p class="lab-nota">Estratto conto n. ' + e.numero + ' del ' + L.fd(data) + ' caricato: ' + righe.length + ' movimenti. Ora l\'abbinamento automatico.</p>';
   }
   var estratto = function (n) { var e = T().estratti.find(function (x) { return x.numero === String(n); }); if (!e) throw Error('Estratto inesistente.'); return e; };
+  function pagamentiRegistrati(e, x) {
+    var conto = N().contoBancario(e.contoBanca), usati = [];
+    T().estratti.forEach(function (ec) { ec.righe.forEach(function (r) { if (r.contabile) usati.push(r.contabile); }); });
+    return S().registrazioni.filter(function (r) {
+      return r.tipo === 'PAGAMENTO_FORNITORE' && !r.stornato && !r.stornoDi && r.data <= e.data && usati.indexOf(r.numero) < 0 &&
+        r.righe.some(function (v) { return v.conto === conto && v.dareAvere === 'AVERE' && Math.abs(v.importo + x.importo) < 0.005; });
+    });
+  }
   function regola(e, x) {   // che cosa propone l'abbinamento automatico per una riga
     var testo = x.descrizione.toUpperCase();
     if (x.importo < 0) {
-      var run = T().pagamenti.find(function (r) { return !r.addebitato && Math.abs(r.totale + x.importo) < 0.005; });
+      var gia = pagamentiRegistrati(e, x), rif = gia.filter(function (r) { return testo.split(/[^A-Z0-9]+/).indexOf(r.numero) >= 0; });
+      if (rif.length !== 1) rif = gia.filter(function (r) { return r.data === x.data; });
+      if (rif.length === 1) return {tipo: 'giaRegistrato', documento: rif[0].numero, spiega: 'pagamento F-53 già contabilizzato: nessuna nuova scrittura'};
+      var run = T().pagamenti.find(function (r) { return N().contoBancario(e.contoBanca) === '10' && !r.addebitato && Math.abs(r.totale + x.importo) < 0.005; });
       if (run) return {tipo: 'pagamento', run: run.numero, spiega: 'addebito del programma di pagamento ' + run.numero};
       if (/COMMISSION|SPESE|CANONE/.test(testo)) return {tipo: 'conto', conto: '58', spiega: 'parola chiave «commissioni/spese» → conto 58'};
       return null;
@@ -116,12 +141,17 @@ window.TS4 = (function () {
     return null;
   }
   function registraRiga(e, x, a, data) {
-    var n = N(), imp = Math.abs(x.importo), righe;
+    var n = N(), imp = Math.abs(x.importo), righe, banca = n.contoBancario(e.contoBanca);
+    if (a.tipo === 'giaRegistrato') {
+      var gia = pagamentiRegistrati(e, x).find(function (r) { return r.numero === String(a.documento); });
+      if (!gia) throw Error('Pagamento già abbinato, stornato o non coerente con banca e importo.');
+      x.stato = 'riconciliata (già registrata)'; x.contabile = gia.numero; x.regola = a.spiega; return gia;
+    }
     if (a.tipo === 'pagamento') { var run = T().pagamenti.find(function (r) { return r.numero === a.run; }); run.addebitato = x.data;
-      righe = [{conto: '18', dareAvere: 'DARE', importo: imp, testo: run.numero}, {conto: '10', dareAvere: 'AVERE', importo: imp}]; }
-    else if (a.tipo === 'conto') righe = x.importo < 0 ? [{conto: a.conto, dareAvere: 'DARE', importo: imp}, {conto: '10', dareAvere: 'AVERE', importo: imp}] : [{conto: '10', dareAvere: 'DARE', importo: imp}, {conto: a.conto, dareAvere: 'AVERE', importo: imp}];
-    else if (a.tipo === 'cliente') righe = [{conto: '10', dareAvere: 'DARE', importo: imp}, {conto: '11', dareAvere: 'AVERE', importo: imp, partner: a.partner, pareggio: a.doc || '', testo: a.doc ? 'incasso ' + a.doc : 'incasso in conto'}];
-    else if (a.tipo === 'fornitore') righe = [{conto: '20', dareAvere: 'DARE', importo: imp, partner: a.partner, pareggio: a.doc || ''}, {conto: '10', dareAvere: 'AVERE', importo: imp}];
+      righe = [{conto: '18', dareAvere: 'DARE', importo: imp, testo: run.numero}, {conto: banca, dareAvere: 'AVERE', importo: imp}]; }
+    else if (a.tipo === 'conto') righe = x.importo < 0 ? [{conto: a.conto, dareAvere: 'DARE', importo: imp}, {conto: banca, dareAvere: 'AVERE', importo: imp}] : [{conto: banca, dareAvere: 'DARE', importo: imp}, {conto: a.conto, dareAvere: 'AVERE', importo: imp}];
+    else if (a.tipo === 'cliente') righe = [{conto: banca, dareAvere: 'DARE', importo: imp}, {conto: '11', dareAvere: 'AVERE', importo: imp, partner: a.partner, pareggio: a.doc || '', testo: a.doc ? 'incasso ' + a.doc : 'incasso in conto'}];
+    else if (a.tipo === 'fornitore') righe = [{conto: '20', dareAvere: 'DARE', importo: imp, partner: a.partner, pareggio: a.doc || ''}, {conto: banca, dareAvere: 'AVERE', importo: imp}];
     else throw Error('Abbinamento sconosciuto.');
     var r = n.post({data: data || x.data, tipo: 'ESTRATTO_CONTO', rif: 'EC ' + e.numero + '/' + x.id, descrizione: 'Estratto conto ' + e.numero + ' riga ' + x.id + ': ' + x.descrizione + ' — ' + (a.spiega || 'abbinamento manuale'), righe: righe});
     x.stato = a.manuale ? 'registrata a mano' : 'abbinata in automatico'; x.contabile = r.numero; x.regola = a.spiega || 'manuale (FEBAN)';
@@ -139,18 +169,19 @@ window.TS4 = (function () {
     var e = estratto(i.estratto), x = e.righe.find(function (r) { return r.id === +i.riga; }); if (!x) throw Error('Riga inesistente.');
     if (x.stato !== 'da abbinare') throw Error('Riga già registrata.');
     var a = {manuale: true};
-    if (i.cliente) { N().cliente(i.cliente); a.tipo = 'cliente'; a.partner = i.cliente; a.doc = String(i.doc || ''); a.spiega = 'manuale: incasso ' + (a.doc ? 'fattura ' + a.doc : 'in conto') + ' da ' + S().clienti[i.cliente].nome; }
+    if (i.giaRegistrato) { a.tipo = 'giaRegistrato'; a.documento = String(i.giaRegistrato); a.spiega = 'manuale: pagamento F-53 già registrato'; }
+    else if (i.cliente) { N().cliente(i.cliente); a.tipo = 'cliente'; a.partner = i.cliente; a.doc = String(i.doc || ''); a.spiega = 'manuale: incasso ' + (a.doc ? 'fattura ' + a.doc : 'in conto') + ' da ' + S().clienti[i.cliente].nome; }
     else if (i.fornitore) { N().fornitore(i.fornitore); a.tipo = 'fornitore'; a.partner = i.fornitore; a.doc = String(i.doc || ''); a.spiega = 'manuale: pagamento a ' + S().fornitori[i.fornitore].nome; }
     else if (i.conto) { if (!S().pianoDeiConti.some(function (c) { return c.codice === String(i.conto); })) throw Error('Conto ' + i.conto + ' inesistente.'); a.tipo = 'conto'; a.conto = String(i.conto); a.spiega = 'manuale: conto ' + i.conto; }
     else throw Error('Indica il cliente, il fornitore o il conto.');
     var r = registraRiga(e, x, a); N().salva(); return r;
   }
-  function saldo10(filtro) { return r2(S().registrazioni.filter(function (r) { return filtro(r.data); }).reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === '10'; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0)); }
+  function saldoConto(conto, filtro) { return r2(S().registrazioni.filter(function (r) { return filtro(r.data); }).reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === conto; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0)); }
   function riconciliazione(n) {
-    var e = estratto(n), banca = saldo10(function (d) { return d <= e.data; });   // conto banca alla data dell'estratto
+    var e = estratto(n), banca = saldoConto(N().contoBancario(e.contoBanca), function (d) { return d <= e.data; });   // vecchi estratti senza contoBanca: conto 10
     var registrate = e.righe.filter(function (x) { return x.contabile; });
     return {saldoBanca: e.saldoFinale, saldoConto: banca, daRegistrare: e.righe.filter(function (x) { return !x.contabile; }), ok: Math.abs(e.saldoFinale - banca) < 0.005 && registrate.length === e.righe.length};
   }
   return {partite: partite, anzianita: anzianita, previsione: previsione, propostaPagamenti: propostaPagamenti, eseguiPagamenti: eseguiPagamenti, sepa: sepa,
-    caricaEstratto: caricaEstratto, regola: regola, abbina: abbina, manuale: manuale, riconciliazione: riconciliazione, T: T, piuGiorni: piuGiorni, gg: gg};
+    caricaEstratto: caricaEstratto, regola: regola, abbina: abbina, manuale: manuale, riconciliazione: riconciliazione, T: T, piuGiorni: piuGiorni, gg: gg, posizione: posizione, saldoBanca: saldoBanca, giroconto: giroconto};
 })();

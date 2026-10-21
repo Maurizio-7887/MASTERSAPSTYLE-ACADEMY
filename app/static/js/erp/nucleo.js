@@ -8,7 +8,7 @@
   var r2 = L.r2;
 
   var CONTI = [
-    ['10', 'Banca c/c', 'ATTIVO'], ['11', 'Crediti verso clienti', 'ATTIVO'], ['13', 'Magazzino prodotti finiti', 'ATTIVO'],
+    ['10', 'Banca c/c', 'ATTIVO'], ['10.02', 'Banca c/c secondaria (simulata)', 'ATTIVO'], ['11', 'Crediti verso clienti', 'ATTIVO'], ['13', 'Magazzino prodotti finiti', 'ATTIVO'],
     ['19', 'Acconti da clienti (CoGe speciale A)', 'PASSIVO'], ['21', 'IVA a debito', 'PASSIVO'], ['26', 'Debiti verso agenti (provvigioni maturate)', 'PASSIVO'],
     ['30', 'Capitale e riserve', 'PASSIVO'],
     ['40', 'Ricavi di vendita (prezzo lordo PR00)', 'RICAVO'], ['47', 'Sconti su vendite (K007, ZSCA)', 'RICAVO'], ['48', 'Ricavi per trasporti addebitati (KF00)', 'RICAVO'],
@@ -122,6 +122,11 @@
     baseRagioneria(S);
     var N = {
       get S() { return S; },
+      // Conti di dettaglio distinti: 10 resta il conto operativo storico, NON
+      // un totale gerarchico. L'aggregato si calcola senza duplicare saldi.
+      contiBancari: function () { return S.pianoDeiConti.filter(function (c) { return c.tipo === 'ATTIVO' && ['10', '10.02'].indexOf(c.codice) >= 0; }); },
+      contoBancario: function (codice) { var c = String(codice == null || codice === '' ? '10' : codice).trim(); if (!N.contiBancari().some(function (x) { return x.codice === c; })) throw Error('Scegli un conto bancario valido (10 o 10.02).'); return c; },
+      saldoBanche: function () { return r2(N.contiBancari().reduce(function (t, c) { return t + N.saldo(c.codice); }, 0)); },
       salva: function () {
         var prima = JSON.parse(JSON.stringify(baseRagioneria(S))), q = S.msaRagioneria;
         var visti = new Set(q.visti), aggiunti = 0;
