@@ -42,13 +42,13 @@ window.FS4 = (function () {
   }
   // ── F-53: pagamento manuale a un fornitore (bonifico dalla banca), su una fattura o in acconto sul totale aperto ──
   function paga(i) {
-    var n = N(), data = n.data(i.data), f = n.fornitore(i.fornitore), aperto = r2(-n.saldo('20', i.fornitore));
+    var n = N(), data = n.data(i.data), banca = n.contoBancario(i.banca), f = n.fornitore(i.fornitore), aperto = r2(-n.saldo('20', i.fornitore));
     if (aperto <= 0.004) throw Error(f.nome + ' non ha debiti aperti.');
     var imp = i.importo == null || i.importo === '' ? aperto : L.num(i.importo, 'Importo', 0.01);
     if (imp > aperto + 0.005) throw Error('Verso ' + f.nome + ' ci sono debiti aperti per ' + L.eur(aperto) + ' €: non si paga di più.');
     var doc = String(i.documento || '').trim(), riga = {conto: '20', dareAvere: 'DARE', importo: imp, partner: i.fornitore, testo: 'pagamento ' + (doc || 'debiti aperti')}; if (doc) riga.pareggio = doc;
     var r = n.post({data: data, tipo: 'PAGAMENTO_FORNITORE', rif: String(i.rif || '').trim() || 'F-53 ' + i.fornitore, descrizione: 'F-53 bonifico a ' + f.nome + (doc ? ' per la fattura ' + doc : '') + ': ' + L.eur(imp) + ' €',
-      righe: [riga, {conto: '10', dareAvere: 'AVERE', importo: imp, testo: 'bonifico ' + f.nome}]});
+      righe: [riga, {conto: banca, dareAvere: 'AVERE', importo: imp, testo: 'bonifico ' + f.nome}]});
     n.salva(); return r;
   }
   // ── sopravvenienza attiva: un provento non previsto (indennizzo di un'assicurazione per un sinistro) che nasce nell'esercizio ──

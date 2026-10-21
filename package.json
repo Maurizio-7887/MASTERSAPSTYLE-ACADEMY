@@ -20,7 +20,8 @@
     "test:s4": "node tests/s4.js && node tests/s4-storni.js",
     "test:solo-integrato": "python3 tests/test_solo_integrato.py",
     "test:completo-formas": "node tests/guida-completa.js && python3 tests/test_guida_completa.py && node tests/laboratori-completi-smoke.js && node tests/magazzino-completo-smoke.js && node tests/magazzino-rf-regression.js",
-    "test:didattica": "node tests/fi-didattica.test.js && node tests/presidio-didattico.js && node tests/avvio-didattico.js && node tests/cpm-centri.js && node tests/percorso-ordinato.js && node tests/percorso-cpm-completo.js"
+    "test:didattica": "node tests/fi-didattica.test.js && node tests/presidio-didattico.js && node tests/avvio-didattico.js && node tests/cpm-centri.js && node tests/percorso-ordinato.js && node tests/percorso-cpm-completo.js && npm run test:migliorie",
+    "test:migliorie": "node tests/quiz-ordine-ricerca.js && node tests/cespiti-codifica.js && node tests/budget-guida-campi.js && node tests/pagamenti-banca.js && node tests/wms-guida-campi.js && node tests/esercizio-migliorie.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"

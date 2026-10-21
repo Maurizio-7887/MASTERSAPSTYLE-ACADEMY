@@ -16,10 +16,44 @@
       s = s.replace(/\./g,'').replace(',','.');
     } else if (/^\d{1,3}(?:\.\d{3})+$/.test(s)) s = s.replace(/\./g,'');
     else if (!/^\d+(?:\.\d{1,2})?$/.test(s)) return null;
-    var n = Number(s);
-    return Number.isFinite(n) && n > 0 && n <= Number.MAX_SAFE_INTEGER/100 ? Math.round(n*100) : null;
+    var parti = s.split('.'), n = Number(parti[0])*100 + Number(((parti[1] || '')+'00').slice(0,2));
+    return Number.isSafeInteger(n) && n > 0 ? n : null;
   }
   function euro(n) { return Number(n).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function etichetta(c) { return c.codice+' · '+(c.nome || c.descrizione || ''); }
+  function identifica(S, valore) {
+    var testo = String(valore || '').trim(), piano = S.pianoDeiConti || [];
+    var codice = piano.find(function(c) { return String(c.codice) === testo; });
+    if (codice) return String(codice.codice);
+    var candidati = piano.filter(function(c) {
+      return etichetta(c).toLocaleLowerCase('it') === testo.toLocaleLowerCase('it') ||
+        String(c.nome || c.descrizione || '').toLocaleLowerCase('it') === testo.toLocaleLowerCase('it');
+    });
+    // Descrizioni omonime non identificano un conto: occorre scegliere il codice.
+    return candidati.length === 1 ? String(candidati[0].codice) : testo;
+  }
+  function confronta(q) {
+    var attese = righe(q).map(function(r) {
+      return {conto:String(r.conto), sezione:r.dareAvere, centesimi:Math.round(Number(r.importo)*100)};
+    }), usate = [], abbinate = [];
+    // Multinsieme, non insieme e non totali per conto: ogni riga consuma una sola
+    // occorrenza. Due duplicati uguali sono intercambiabili, mai eliminabili.
+    q.risposte.forEach(function(a,i) {
+      var j = attese.findIndex(function(r,k) {
+        return !usate[k] && String(a.conto) === r.conto && a.sezione === r.sezione &&
+          Number.isSafeInteger(r.centesimi) && importo(a.importo) === r.centesimi;
+      });
+      if (j >= 0) { usate[j] = true; abbinate[i] = true; }
+    });
+    return q.risposte.map(function(a,i) {
+      if (abbinate[i]) return '';
+      var stessoConto = attese.filter(function(r,k) { return !usate[k] && String(a.conto) === r.conto; });
+      if (!stessoConto.length) return 'Conto non corretto o riga duplicata in eccesso.';
+      if (stessoConto.some(function(r) { return a.sezione === r.sezione; })) return 'Importo non corretto per conto e sezione.';
+      if (stessoConto.some(function(r) { return importo(a.importo) === r.centesimi; })) return 'Sezione non corretta per questo conto.';
+      return 'Sezione e importo non corrispondono per questo conto.';
+    });
+  }
   // I vecchi quiz mostravano già i conti: un tentativo storico completo conserva
   // il suo valore, ma un vecchio clic vuoto non sblocca alcun documento.
   function compilato(q, risposte, S) {
@@ -61,15 +95,18 @@
     var h = '<section class="msa-ragioneria"><div class="msa-g-gruppo">Laboratorio di ragioneria · documento 1 di '+coda+'</div>' +
       '<h3>Ricostruisci la scrittura</h3><div class="msa-g-esito">⚠️ <b>ATTENZIONE, L’OPERAZIONE CHE HAI FATTO MOVIMENTA LIBRO GIORNALE E MASTRI.</b><br>Prova a vedere se riesci a ricostruirla da te.</div>' +
       '<p class="msa-q-info">Documento '+esc(q.documento.numero || q.documento.id)+' · '+esc(q.documento.data)+'<br>'+esc(q.documento.descrizione || q.documento.tipo)+'</p>' +
-      '<p>Per ciascun conto scegli <b>Dare o Avere</b> e indica l’<b>importo in euro</b>. La scrittura è già registrata: questa prova non la registra una seconda volta.</p>';
+      '<p>Cerca ciascun conto per <b>codice o descrizione</b>, scegli <b>Dare o Avere</b> e indica l’<b>importo in euro</b>. Le righe possono essere inserite in qualsiasi ordine. La scrittura è già registrata: questa prova non la registra una seconda volta.</p>';
     rs.forEach(function (r,i) {
       var a = (q.risposte || [])[i] || {}, f = (q.errori || [])[i];
+      var scelto = a.conto || (q.versioneTentativo !== 2 && valutato ? r.conto : '');
       h += '<fieldset class="msa-q-riga" data-riga="'+i+'"><legend>Riga '+(i+1)+'</legend>' +
-        '<label>Conto<select class="msa-q-conto" aria-label="Conto, riga '+(i+1)+'" '+(concluso ? 'disabled' : '')+'><option value="">Scegli un conto…</option>' +
-        (S.pianoDeiConti || []).map(function(c) { var scelto = a.conto || (q.versioneTentativo !== 2 && q.risposte && q.risposte.length ? r.conto : ''); return '<option value="'+esc(c.codice)+'" '+(String(scelto)===String(c.codice)?'selected':'')+'>'+esc(c.codice+' · '+c.nome)+'</option>'; }).join('')+'</select></label>' +
         '<label>Sezione<select class="msa-q-sezione" aria-label="Dare o Avere, riga '+(i+1)+'" '+(concluso ? 'disabled' : '')+'>' +
         '<option value="">Scegli…</option><option value="DARE" '+(a.sezione==='DARE'?'selected':'')+'>Dare</option><option value="AVERE" '+(a.sezione==='AVERE'?'selected':'')+'>Avere</option></select></label>' +
         '<label>Importo €<input class="msa-q-importo" inputmode="decimal" autocomplete="off" placeholder="es. 1.234,56" aria-label="Importo, riga '+(i+1)+'" value="'+esc(a.importo || '')+'" '+(concluso ? 'disabled' : '')+'></label>' +
+        '<label style="grid-column:1/-1">Conto — cerca codice o descrizione<input type="search" class="msa-q-conto" list="msa-q-conti-'+i+'" autocomplete="off" placeholder="Digita codice o descrizione…" aria-label="Conto, riga '+(i+1)+'" value="'+esc(scelto)+'" '+(concluso ? 'disabled' : '')+'>' +
+        '<datalist id="msa-q-conti-'+i+'">'+(S.pianoDeiConti || []).slice().sort(function(a,b) {
+          return String(a.codice).localeCompare(String(b.codice),'it',{numeric:true});
+        }).map(function(c) { return '<option value="'+esc(etichetta(c))+'">'+esc(etichetta(c))+'</option>'; }).join('')+'</datalist></label>' +
         (f ? '<small class="msa-q-errore">'+esc(f)+'</small>' : '')+'</fieldset>';
     });
     if (q.tentativi) h += '<p class="msa-q-totali">Il tuo totale Dare: '+euro((q.totali || {}).dare/100 || 0)+' €<br>Il tuo totale Avere: '+euro((q.totali || {}).avere/100 || 0)+' €<br>Tentativi: '+q.tentativi+'</p>';
@@ -83,11 +120,11 @@
     h += '<p class="msa-q-messaggio" role="status">'+esc(q.messaggio || '')+'</p>';
     if (!concluso) h += '<button type="button" class="msa-q-verifica">Verifica la mia scrittura</button>' + (valutato ? '<button type="button" class="msa-q-aiuto">Mostra soluzione (con aiuto)</button>' : '');
     else h += '<button type="button" class="msa-q-continua">'+(coda>1?'Prossima scrittura ➜':'Prosegui con l’esercizio ➜')+'</button>';
-    return h+'<p class="msa-q-info">Prima compila conti, sezioni e importi di tutte le righe e invia un tentativo valutabile: solo allora puoi confrontarlo con giornale, mastri e soluzione, anche se è errato. Ordina i conti per codice crescente. Il controllo confronta il documento del simulatore e non certifica il modello SAP.</p></section>';
+    return h+'<p class="msa-q-info">Prima compila conti, sezioni e importi di tutte le righe e invia un tentativo valutabile: solo allora puoi confrontarlo con giornale, mastri e soluzione, anche se è errato. I suggerimenti mostrano l’intero piano dei conti, non la risposta attesa. Il controllo confronta il documento del simulatore e non certifica il modello SAP.</p></section>';
   }
-  function leggi(corpo) {
+  function leggi(corpo,S) {
     return Array.prototype.map.call(corpo.querySelectorAll('.msa-q-riga'), function (r) {
-      return {conto:r.querySelector('.msa-q-conto').value, sezione:r.querySelector('.msa-q-sezione').value, importo:r.querySelector('.msa-q-importo').value};
+      return {conto:identifica(S,r.querySelector('.msa-q-conto').value), sezione:r.querySelector('.msa-q-sezione').value, importo:r.querySelector('.msa-q-importo').value};
     });
   }
   function persisti(S, salva, cambia) {
@@ -101,7 +138,7 @@
   }
   function bozza(corpo,S,salva) {
     var q=pendente(S); if (!q || (tentativoValido(q) && (q.corretto || q.aiuto))) return;
-    if (!persisti(S,salva,function(){conservaTentativoStorico(q);q.versioneTentativo=2;q.risposte=leggi(corpo);})) erroreSalvataggio(corpo);
+    if (!persisti(S,salva,function(){conservaTentativoStorico(q);q.versioneTentativo=2;q.risposte=leggi(corpo,S);})) erroreSalvataggio(corpo);
   }
   function click(t,corpo,S,salva) {
     var q=pendente(S); if (!q) return false;
@@ -114,23 +151,16 @@
         // Migrazione non distruttiva del primo tentativo storico completo.
         conservaTentativoStorico(q);
         if (!tentativoValido(q)) { q.corretto=false; q.aiuto=false; }
-        q.risposte=leggi(corpo); q.versioneTentativo=2;
+        q.risposte=leggi(corpo,S); q.versioneTentativo=2;
         if (!compilato(q,q.risposte,S)) {
-          q.errori=q.risposte.map(function(a) { return !a.conto || (a.sezione!=='DARE' && a.sezione!=='AVERE') || importo(a.importo)===null ? 'Completa conto, sezione e importo positivo (massimo due decimali).' : ''; });
+          q.errori=q.risposte.map(function(a) { return !a.conto || !(S.pianoDeiConti || []).some(function(c) { return String(c.codice) === String(a.conto); }) || (a.sezione!=='DARE' && a.sezione!=='AVERE') || importo(a.importo)===null ? 'Scegli un conto valido e completa sezione e importo positivo (massimo due decimali).' : ''; });
           q.messaggio='Tentativo non acquisito: completa tutte le righe. La consultazione resta bloccata.';
           return;
         }
         q.tentativi=(q.tentativi || 0)+1;
         q.totali={dare:0,avere:0};
-        q.errori=righe(q).map(function(r,i){
-          var a=q.risposte[i] || {}, n=importo(a.importo), errori=[];
-          if (String(a.conto)!==String(r.conto)) errori.push('Conto non corretto (usa ordine crescente di codice).');
-          if (a.sezione!=='DARE' && a.sezione!=='AVERE') errori.push('Scegli Dare o Avere.');
-          else { if (n!==null) q.totali[a.sezione==='DARE'?'dare':'avere']+=n; if(a.sezione!==r.dareAvere) errori.push('Sezione non corretta.'); }
-          if(n===null) errori.push('Inserisci un importo positivo con massimo due decimali.');
-          else if(n!==Math.round(r.importo*100)) errori.push('Importo non corretto.');
-          return errori.join(' ');
-        });
+        q.risposte.forEach(function(a) { q.totali[a.sezione==='DARE'?'dare':'avere']+=importo(a.importo); });
+        q.errori=confronta(q);
         q.corretto=q.errori.every(function(e){return !e;});
         q.tentato=true;
         (q.cronologiaTentativi=q.cronologiaTentativi || []).push({risposte:JSON.parse(JSON.stringify(q.risposte)),errori:q.errori.slice(),corretto:q.corretto,totali:JSON.parse(JSON.stringify(q.totali)),inviatoIl:new Date().toISOString()});

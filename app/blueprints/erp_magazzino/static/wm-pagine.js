@@ -53,7 +53,8 @@
       if (sel) {
         var u = WM.ubicazione(sel);
         det = L.scheda('🔎', 'Ubicazione ' + sel, 'LS26 · /SCWM/MON', '<p class="lab-nota">Tipo ' + u.tipo + ' (' + WM.TIPI[u.tipo].nome + ')' + (u.cap ? ' · capacità ' + u.cap + ' UdC · occupate ' + u.occupazione : '') + (u.blocco ? ' · <b>bloccata: ' + e(u.blocco) + '</b>' : '') + '</p>' +
-          L.tabella(['Quanto', 'Materiale', 'Quantità›', 'UdC', 'Data di entrata (FIFO)', 'Riferimento'], u.quanti.map(function (q) { return [q.id, q.mat, n0(q.qta) + ' ' + um(q.mat), q.udc, fd(q.data), e(q.rif)]; }), 'Ubicazione vuota.') +
+          L.tabella(['Quanto', 'Materiale', 'Quantità›', 'UdC', 'Impegnata da compiti›', 'Non impegnata da compiti›', 'Data di entrata (FIFO)', 'Riferimento'], u.quanti.map(function (q) { var ris = WM.riservato(q.id); return [q.id, q.mat, n0(q.qta) + ' ' + um(q.mat), q.udc, n0(ris), n0(Math.max(0, q.qta - ris)), fd(q.data), e(q.rif)]; }), 'Ubicazione vuota.') +
+          '<p class="lab-nota">Non impegnata da compiti non significa ATP vendibile: verifica tipo stock e area, blocco inventario e impegni commerciali. L’occupazione comprende UdC presenti e destinazioni prenotate da compiti aperti; una prenotazione non prova l’arrivo fisico.</p>' +
           tabCompiti(WM.aperti().filter(function (t) { return t.da === sel || t.a === sel; }), 'Nessun compito aperto su questa ubicazione.'));
       }
       radice.innerHTML = '<p class="lab-nota">Colori: <span class="ubic m-TR-STD" style="display:inline;padding:2px 6px">TR-STD</span> <span class="ubic m-TR-ALTA" style="display:inline;padding:2px 6px">TR-ALTA</span> <span class="ubic m-TR-PED" style="display:inline;padding:2px 6px">TR-PED</span> <span class="ubic m-FERRO" style="display:inline;padding:2px 6px">FERRO</span> · bordo tratteggiato = merce in arrivo · righe rosse = bloccata per inventario. Tocca un\'ubicazione per vederne il contenuto.</p>' +
@@ -70,7 +71,14 @@
         L.scheda('🔁', 'Trasferimento tra ubicazioni', 'LT10 · /SCWM/ADHU', L.modulo('tr', [['udc', 'Unità di carico', 'text'], ['a', 'Ubicazione di destinazione (vuoto = proposta)', 'text'], ['motivo', 'Motivo', 'text'], ['data', 'Data', 'date']], [['tr', 'Crea compito']])) +
         L.scheda('🖥️', 'Conferma da scrivania', 'LT12', L.modulo('cf', [['compito', 'Compito aperto', 'select', '', U.lista(ap, function (t) { return t.numero + ' · ' + WM.TIPI_COMPITO[t.tipo] + ' · ' + t.da + ' → ' + t.a + ' · ' + n0(t.qta) + ' ' + t.mat; }, '— nessun compito aperto —')],
           ['risorsa', 'Risorsa', 'select', W().risorse[0], W().risorse], ['data', 'Data', 'date']], [['cf', 'Conferma']]) + '<p class="lab-nota">In magazzino si conferma con la pistola RF, che controlla ubicazioni e UdC lette: qui è la conferma del capo magazzino, senza scansioni.</p>') +
-        '</div>' + L.scheda('📋', 'Compiti aperti', '/SCWM/MON · LT22', tabCompiti(ap, 'Nessun compito aperto: magazzino in ordine.')) +
+        '</div>' + L.scheda('🧮', 'Fabbisogni e impegni dei componenti', 'lettura prima di creare STAGING',
+          '<p class="lab-nota">Il fabbisogno è quello totale da distinta, non un suggerimento automatico di ulteriore prelievo. Confronta consumi già registrati, viaggi aperti e PSA prima di compilare la quantità. La scorta PSA è condivisa per materiale: non è una riserva esclusiva dell’ordine. Il motore non sottrae automaticamente questi valori quando lasci vuota la quantità.</p>' +
+          L.tabella(['Ordine', 'Componente', 'Fabbisogno totale›', 'Consumato 261›', 'STAGING aperto ordine›', 'Scorta PSA condivisa›'], ordini.map(function (o) {
+            var cp = window.PP4.comp(o), consumo = (o.eventi || []).filter(function (x) { return x.tipo === '261' && (!x.mat || x.mat === cp.mat); }).reduce(function (tot, x) { return tot + x.kg; }, 0);
+            var viaggio = ap.filter(function (t) { return t.tipo === 'STAGING' && t.ordine === o.numero && t.mat === cp.mat; }).reduce(function (tot, t) { return tot + t.qta; }, 0);
+            var psa = WM.inUbic('PSA-L1').filter(function (q) { return q.mat === cp.mat; }).reduce(function (tot, q) { return tot + q.qta; }, 0);
+            return [o.numero, cp.mat, n0(cp.q * o.qta) + ' ' + um(cp.mat), n0(consumo), n0(viaggio), n0(psa)];
+          }), 'Nessun ordine di produzione aperto.')) + L.scheda('📋', 'Compiti aperti', '/SCWM/MON · LT22', tabCompiti(ap, 'Nessun compito aperto: magazzino in ordine.')) +
         L.scheda('✅', 'Compiti confermati', 'LT22', tabCompiti(W().compiti.filter(function (t) { return t.stato !== 'aperto'; }).slice().reverse(), 'Nessuno.'));
       L.collega(radice, 'sg', {sg: WM.approvvigiona}, rendi); L.collega(radice, 'tr', {tr: WM.trasferisci}, rendi);
       L.collega(radice, 'cf', {cf: function (v) { return WM.conferma({compito: v.compito, risorsa: v.risorsa, data: v.data}); }}, rendi);
@@ -160,6 +168,7 @@
           if (r.ubic !== v || (sec && !r.riconta)) return '';
           return '<div class="rf-campo"><label>' + (r.mat ? r.mat + (r.udc ? ' · UdC ' + r.udc : '') : 'Ubicazione vuota: se trovi merce, scrivi il materiale') + (r.mat ? '' : '<input id="rf-m' + k + '" placeholder="MATERIALE">') + '<input id="rf-c' + k + '" inputmode="decimal" placeholder="quantità contata"></label></div>';
         }).join('') + '<button type="button" class="rf-btn" id="rf-conta">Registra la conta</button><div class="lab-esito" id="rf-ce"></div></div>';
+        window.WMGuida.rfCampi(radice);
         radice.querySelector('#rf-conta').onclick = function () {
           var val = {numero: d.numero, parziale: true, contatore: radice.querySelector('#rf-ris').value};
           d.righe.forEach(function (r, k) { var c = radice.querySelector('#rf-c' + k); if (c && c.value !== '') { val['r' + k] = c.value; var m = radice.querySelector('#rf-m' + k); if (m) val['m' + k] = m.value; } });
@@ -246,6 +255,10 @@
       radice.querySelector('#sn').onkeydown = function (ev) { if (ev.key === 'Enter') radice.querySelector('#snv').click(); };
     },
   };
-  function rendi() { (PAGINE[C.pagina] || PAGINE.struttura)(); }
+  function rendi() {
+    (PAGINE[C.pagina] || PAGINE.struttura)();
+    radice.insertAdjacentHTML('afterbegin', window.WMGuida.pagina(C.pagina));
+    window.WMGuida.rfCampi(radice);
+  }
   rendi();
 })();
