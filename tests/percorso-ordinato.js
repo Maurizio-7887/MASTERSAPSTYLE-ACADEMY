@@ -15,16 +15,16 @@ const w=guida(null),E=w.MSA_ESERCIZIO,ps=E.passi;
 const index=t=>ps.findIndex(p=>p.titolo.includes(t));
 function prima(a,b){ok(index(a)>=0&&index(a)<index(b),a+' prima di '+b);}
 prima('Prima di cominciare','Costituisci');prima('Costituisci','I soci versano');prima('I soci versano','Attiva il magazzino');
-prima('Attiva il magazzino','compra la taglierina');prima('compra una sega','Attiva il nuovo percorso CPM');
-prima('Attiva il nuovo percorso CPM','Salva il budget annuale');prima('Salva il budget annuale','Salva distinta e ciclo');
+prima('Attiva il magazzino','compra la taglierina');prima('compra una sega','Passo 1 del ciclo CO');
+prima('Passo 1 del ciclo CO','KP06: pianifica');prima('KP06: pianifica','Tabella di controllo del budget');prima('Tabella di controllo del budget','KP26 e LTP');prima('KP26 e LTP','KSU1:');prima('KSU1:','Salva distinta e ciclo');prima('Salva il solo HALB','KSPI: calcola');prima('KSPI: calcola','CK11N:');
 prima('Salva il solo HALB','CK11N:');prima('CK11N:','CK24:');prima('CK24:','Leggi il ciclo');
 prima('Leggi il ciclo','VA01: Beta');prima('VA01: Delta','Dalla domanda ai fabbisogni');
 prima('Dalla domanda ai fabbisogni','ME21N: ordina');prima('ME21N: ordina','MIGO 101: ricevi il ferro');
 prima('MIRO: fattura del riordino','CO01: un ordine per 300');prima('CO01: un ordine per 300','CO11N: Taglio');
 prima('CO11N: Taglio','CO11N: Piegatura');prima('CO11N: Piegatura','CO11N: Saldatura');
 prima('CO11N: Saldatura','101: carica a magazzino le 300');prima('101: carica a magazzino le 300','CO01: ordine autonomo');
-prima('CO11N: conferma 5 ore','Confronta budget, attività');prima('Registra le paghe','Riconcilia le fonti');
-prima('Riconcilia le fonti','KO88:');prima('compra il carrello','Vendi il carrello');prima('compra una sega','Vendi la sega');
+prima('CO11N: conferma 5 ore','Confronta budget, attività');prima('Registra le paghe','KSB1: leggi i costi effettivi');
+prima('KSB1: leggi i costi effettivi','KO88:');prima('compra il carrello','Vendi il carrello');prima('compra una sega','Vendi la sega');
 prima('compra la taglierina','AFAB:');
 let previous='';
 for(const p of ps){
@@ -45,7 +45,7 @@ ok(guida(legacy).MSA_ESERCIZIO.passi.every(p=>!p.id||!p.id.startsWith('cpm-')),'
 const {JSDOM}=require('jsdom');
 const win=new JSDOM('<!doctype html><div id="lab"></div>',{url:'https://sim.local/',runScripts:'outside-only'}).window;
 win.confirm=()=>true;win.LAB_PAGINA={chiave:'percorso-ordinato-sintetico',pagina:'avvio'};
-const logica=['app/static/js/lab-motore.js','app/static/js/erp/nucleo.js','app/static/js/erp/ui.js','app/blueprints/erp_vendite/static/sd-logica.js','app/blueprints/erp_acquisti/static/mm-logica.js','app/blueprints/erp_produzione/static/pp-logica.js','app/blueprints/erp_costi/static/copc-logica.js','app/blueprints/erp_magazzino/static/wm-logica.js','app/blueprints/erp_cespiti/static/ce-logica.js'];
+const logica=['app/static/js/lab-motore.js','app/static/js/erp/nucleo.js','app/static/js/erp/ui.js','app/blueprints/erp_vendite/static/sd-logica.js','app/blueprints/erp_acquisti/static/mm-logica.js','app/blueprints/erp_produzione/static/pp-logica.js','app/blueprints/erp_costi/static/copc-logica.js','app/blueprints/erp_bpc/static/bpc-logica.js','app/blueprints/erp_controllo/static/co-percorso.js','app/blueprints/erp_magazzino/static/wm-logica.js','app/blueprints/erp_cespiti/static/ce-logica.js','app/blueprints/erp_paghe/static/py-logica.js'];
 logica.forEach(f=>win.eval(read(f)));let N=win.SD4.avvia(win.LAB_PAGINA.chiave),S=N.S;
 function pagina(bp,file,p){win.LAB_PAGINA.pagina=p;win.eval(read('app/blueprints/'+bp+'/static/'+file));N=win.SD4.N;S=N.S;}
 function fai(pref,values,action){
@@ -67,15 +67,22 @@ for(const p of ps.filter(p=>p.titolo.startsWith('F-90:'))){
 }
 ok(S.cespiti.length===5&&S.cespiti.every(c=>c.acquisto<=c.inFunzione),'Acquisti e date cespiti dalle istruzioni');
 const fiPrima=JSON.stringify(S.registrazioni);
-pagina('erp_costi','copc-pagine.js','scheda');fai('cpm-start',{conferma:'ATTIVA'},'start');
+pagina('erp_controllo','co-pagine.js','centri');fai('cpm-start',{conferma:'ATTIVA'},'start');
 const m=win.PC4.cpm.modello();
-const budget={anno:2026,produttivi:18000,amministrativi:0,driver:'ore','vol_TR-STD':1200};
-for(const k of win.PC4.cpm.centri)Object.assign(budget,{[k+'_personale']:36000,[k+'_indiretti']:0,[k+'_capacita']:1500,[k+'_orePiano']:1500,[k+'_percentuale']:100/3});
-Object.keys(m.standard).filter(k=>k!=='TR-STD').forEach(k=>budget['vol_'+k]=0);
-fai('cpm-budget',budget,'budget');
+pagina('erp_controllo','co-pagine.js','kp06');
+const centro=c=>{const x=win.document.getElementById('cdc');x.value=c;x.dispatchEvent(new win.Event('change'));};
+for(const c of ['4210','4220','4230']){centro(c);fai('kp06',{k80:36000,k54:0},'kp06');}
+centro('4200');fai('kp06',{k86:12000,k50:2900,k54:3100},'kp06');
+fai('pcp',{versione:'1'},'pcp');
+pagina('erp_controllo','co-pagine.js','kp26');
+const kp={};for(const k of win.PC4.cpm.centri)Object.assign(kp,{[k+'_capacita']:1500,[k+'_orePiano']:1500});fai('kp26',kp,'kp26');
+const vol={};Object.keys(m.standard).forEach(k=>vol['vol_'+k]=k==='TR-STD'?1200:0);fai('ltp',vol,'ltp');
+pagina('erp_controllo','co-pagine.js','ksu');fai('ksu1',{driver:'ore'},'ksu1');
+pagina('erp_costi','copc-pagine.js','scheda');
 fai('cpm-standard',{materiale:'TR-STD',componente:'FERRO',quantita:8,Taglio:0.25,Piegatura:0.20,Saldatura:0.40,attrezzaggio:0,centroSet:'Taglio'},'standard');
 win.document.getElementById('cpm-materiale').value='SL-TAGLIO';win.document.getElementById('cpm-materiale').dispatchEvent(new win.Event('change'));
 fai('cpm-standard',{materiale:'SL-TAGLIO',componente:'FERRO',quantita:8,Taglio:0.25,Piegatura:0,Saldatura:0,attrezzaggio:0,centroSet:'Taglio'},'standard');
+pagina('erp_controllo','co-pagine.js','kspi');fai('kspi',{data:'2026-12-01'},'kspi');
 pagina('erp_costi','copc-pagine.js','calcolo');
 for(const mat of ['TR-STD','SL-TAGLIO'])fai('ck',{materiale:mat,data:'2026-12-01'});
 fai('cr',{data:'2026-12-01'},'marca');fai('cr',{data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});

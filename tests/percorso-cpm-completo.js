@@ -27,28 +27,45 @@ if(!source.includes("w.eval(R('app/blueprints/guida/static/esercizi/cpm-formas.j
 const lettura="p = apri('erp_produzione','ordini'); ok(/WIP/.test(p.testo()),'ciclo a fasi e WIP spiegati');\np = apri('erp_costi','calcolo'); ok(/14,60/.test(p.testo()) && /31,40/.test(p.testo()),'standard HALB e finito visibili');";
 replaceOne(lettura,'// Lettura ciclo dopo il rilascio CPM, sotto.');
 const setup=String.raw`
-// Nuovo percorso: il budget analitico precede domanda cliente e qualsiasi movimento.
-p=apri('erp_costi','scheda');
+// Nuovo percorso: il ciclo di pianificazione CO precede domanda cliente e qualsiasi movimento.
+p=apri('erp_controllo','centri');
 const fiPrimaCPM=JSON.stringify(p.S().registrazioni);
+ok(/Passo 1/.test(p.testo()) && /NON fa/.test(p.testo()),'passo 1 spiegato prima di aprire il piano');
 p.fai('cpm-start',{conferma:'ATTIVA'},'start');
-ok(p.w.PC4.cpm.attivo(),'CPM esplicitamente attivo prima degli ordini');fino('Attiva il nuovo percorso CPM');
-const modelloCPM=p.w.PC4.cpm.modello();
-const valoriBudget={anno:'2026',produttivi:'18000',amministrativi:'0',driver:'ore'};
-for(const centro of p.w.PC4.cpm.centri){
- Object.assign(valoriBudget,{[centro+'_personale']:'36000',[centro+'_indiretti']:'0',[centro+'_capacita']:'1500',[centro+'_orePiano']:'1500'});
-}
-Object.keys(modelloCPM.standard).forEach(mat=>valoriBudget['vol_'+mat]=mat==='TR-STD'?'1200':'0');
-bene(p.fai('cpm-budget',valoriBudget,'budget'),'salva budget CPM annuale');fino('Salva il budget annuale');
+ok(p.w.PC4.cpm.attivo(),'piano CO aperto prima degli ordini');fino('Passo 1 del ciclo CO');
+ok(/4210/.test(p.testo()) && /OKB9/.test(p.testo()),'anagrafiche e OKB9 visibili');
+p=apri('erp_controllo','kp06');
+for(const cdc of ['4210','4220','4230']){p.lab.querySelector('#cdc').value=cdc;p.lab.querySelector('#cdc').dispatchEvent(new p.w.Event('change'));bene(p.fai('kp06',{k80:'36000',k54:'0'},'kp06'),'KP06 '+cdc);}
+p.lab.querySelector('#cdc').value='4200';p.lab.querySelector('#cdc').dispatchEvent(new p.w.Event('change'));
+bene(p.fai('kp06',{k86:'12000',k50:'2900',k54:'3100'},'kp06'),'KP06 4200 costi comuni');
+fino('KP06: pianifica');
+bene(p.fai('pcp',{versione:'1'},'pcp'),'PCP dalle paghe nella versione 1');
+const ctrl=p.w.PC4.cpm.controlloPersonale(), paghe=Object.fromEntries(ctrl.map(r=>[r.cdc,r.paghe]));
+ok(Math.abs(paghe['4100']-37807.06)<0.01 && Math.abs(paghe['4200']-40507.57)<0.01 && Math.abs(paghe['4300']-46808.74)<0.01,'paghe a regime per centro '+JSON.stringify(paghe));
+ok(/Tabella di controllo del budget del personale/.test(p.testo()),'tabella di controllo visibile');
+fino('Tabella di controllo del budget');
+p=apri('erp_controllo','kp26');
+const kp={};for(const k of p.w.PC4.cpm.centri)Object.assign(kp,{[k+'_capacita']:'1500',[k+'_orePiano']:'1500'});
+bene(p.fai('kp26',kp,'kp26'),'KP26');
+const vol={};Object.keys(p.w.PC4.cpm.modello().standard).forEach(mat=>vol['vol_'+mat]=mat==='TR-STD'?'1200':'0');
+bene(p.fai('ltp',vol,'ltp'),'LTP volumi');
+p=apri('erp_controllo','ksu');bene(p.fai('ksu1',{driver:'ore'},'ksu1'),'KSU1 ciclo');
+ok(/6\.?000,00/.test(p.testo()),'ribaltamento 6.000 per reparto');
+p=apri('erp_costi','scheda');
 bene(p.fai('cpm-standard',{materiale:'TR-STD',componente:'FERRO',quantita:'8',Taglio:'0,25',Piegatura:'0,20',Saldatura:'0,40',attrezzaggio:'0',centroSet:'Taglio'},'standard'),'salva ciclo TR CPM');
 p.lab.querySelector('#cpm-materiale').value='SL-TAGLIO';p.lab.querySelector('#cpm-materiale').dispatchEvent(new p.w.Event('change'));
 bene(p.fai('cpm-standard',{materiale:'SL-TAGLIO',componente:'FERRO',quantita:'8',Taglio:'0,25',Piegatura:'0',Saldatura:'0',attrezzaggio:'0',centroSet:'Taglio'},'standard'),'salva ciclo HALB CPM');
+p=apri('erp_costi','calcolo');
+ok(/KSPI/.test(p.fai('ck',{materiale:'TR-STD',data:'2026-12-01'})),'CK11N bloccato senza KSPI');
+p=apri('erp_controllo','kspi');bene(p.fai('kspi',{data:'2026-12-01'},'kspi'),'KSPI');
+ok(/28,00/.test(p.testo()),'tariffa 28');fino('KSPI: calcola');
 p=apri('erp_costi','calcolo');
 for(const mat of ['TR-STD','SL-TAGLIO'])bene(p.fai('ck',{materiale:mat,data:'2026-12-01'}),'CK11N CPM '+mat);
 fino('CK11N:');
 bene(p.fai('cr',{data:'2026-12-01'},'marca'),'marca entrambi gli standard CPM');
 bene(p.fai('cr',{data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'}),'rilascio CPM iniziale esplicito');
 fino('CK24:');
-ok(JSON.stringify(p.S().registrazioni)===fiPrimaCPM,'attivazione budget e standard senza duplicazione FI');
+ok(JSON.stringify(p.S().registrazioni)===fiPrimaCPM,'piano CO e standard senza scritture FI');
 ok(p.w.PC4.cpm.report(2026).centri.map(c=>c.oreRichieste).join('/')==='300/240/480','budget annuo1200 distinto da ordine300');
 `;
 replaceOne('// 3 · assicurazione',setup+'\n'+lettura+'\n// 3 · assicurazione');
@@ -98,7 +115,10 @@ const report=cp.report(2026);
 check(report.centri.map(c=>c.assorbito).join('/')==='2240/1680/3360','Assorbimenti riportati dopo ricaricamento');
 check(report.centri.reduce((v,c)=>v+c.assorbito,0)===7280,'Attività totali7280, non doppio costo');
 check(report.centri.every(c=>c.varianzaEfficienza===0),'Varianze efficienza nulle per ore standard');
-check(report.centri.every(c=>c.consuntivo===0&&c.residuo===-c.assorbito),'Nessun costo primario inventato; residui distinguibili dalle varianze efficienza');
+check(report.centri.every(c=>c.primari===0&&Math.abs(c.consuntivo-c.ribaltatoEffettivo)<0.01&&Math.abs(c.residuo-(c.consuntivo-c.assorbito))<0.01),'Reparti senza costi primari propri: consuntivo = costi comuni effettivi ribaltati; residuo = consuntivo − assorbito');
+const eff=cp.effettivi(2026).perCentro, tot=k=>cp.totale(eff[k]);
+check(tot('4100')>0&&tot('4200')>0&&tot('4300')>0,'Consuntivo automatico dalla contabilità sui centri delle paghe e OKB9 '+JSON.stringify({a:tot('4100'),b:tot('4200'),c:tot('4300')}));
+check(Math.abs(report.centri.reduce((v,c)=>v+c.ribaltatoEffettivo,0)-(tot('4100')+tot('4200')))<0.02,'Costi effettivi di 4100+4200 interamente ribaltati');
 const vecchi=n.S.produzione.map(o=>({numero:o.numero,piano:JSON.stringify(o.piano),eventi:JSON.stringify(o.eventi),eff:JSON.stringify(win.PP4.effettivi(o))}));
 const m=JSON.parse(JSON.stringify(cp.modello()));m.centri.Taglio.personale=40000;
 cp.salvaBudget({anno:m.anno,produttivi:m.generale.produttivi,amministrativi:m.generale.amministrativi,driver:m.generale.driver,centri:m.centri,volumi:m.volumi});

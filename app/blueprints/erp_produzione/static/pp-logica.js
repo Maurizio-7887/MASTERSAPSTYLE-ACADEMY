@@ -33,7 +33,9 @@ window.PP4 = (function () {
     if (m.tipo !== 'FERT' && m.tipo !== 'HALB') throw Error('Si producono prodotti finiti e semilavorati: ' + mat + ' si acquista.');
     var piano = window.PC4.pianifica(mat, q, data), snapshot = piano.par.snapshot;
     var cp = snapshot ? snapshot.componente : m.comp || {mat: 'FERRO', q: m.ferro};
+    var fine = i.fine ? L.dataOk(i.fine) : null; if (fine && fine < data) throw Error('La data di fine pianificata non può precedere l’inizio.');
     var o = {numero: n.numero('produzione'), materiale: mat, qta: q, data: data, eventi: [], piano: piano, componente: {mat: cp.mat, q: cp.q}};
+    if (fine) o.fine = fine;   // data di fine pianificata: è la data in cui il controllo di disponibilità conta i pezzi in arrivo
     if (snapshot && snapshot.fasi) o.fasi = snapshot.fasi.slice();
     else if (m.fasi) o.fasi = m.fasi.slice(); // snapshot del ciclo: non cambia i vecchi ordini
     S().produzione.push(o); n.salva();

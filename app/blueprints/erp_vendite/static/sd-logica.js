@@ -80,6 +80,54 @@ window.SD4 = (function () {
       ris += Math.min(apertoOrd(o), Math.max(0, (o.confermata == null ? o.qta : o.confermata) - o.consegnato - inPrelievo(o))); });
     return {giacenza: r2(g), inConsegna: r2(cons), riservato: r2(ris), disponibile: r2(Math.max(0, g - cons - ris))};
   }
+  // ── Controllo di disponibilità con entrate pianificate (ATP cumulativo, come VA01 / CO09) ──
+  // Elementi: giacenza libera (meno merce bloccata e già in consegna) + entrate pianificate (ordini di produzione aperti alla
+  // data di fine pianificata; ordini d'acquisto aperti alla data di consegna) − fabbisogni degli ordini cliente aperti, serviti
+  // in ordine di data (chi ha ordinato prima è servito prima). Ogni ordine riceve le sue righe di schedulazione.
+  var piuGiorni = function (d, g) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + g); return x.toISOString().slice(0, 10); };
+  function entrate(mat) {
+    var out = [];
+    S().produzione.forEach(function (p) {
+      if (p.materiale !== mat || p.teco || p.liquidazione) return;
+      var entrati = p.eventi.filter(function (e) { return e.tipo === '101' && !e.stornato; }).reduce(function (t, e) { return t + e.qta; }, 0), resta = r2(p.qta - entrati);
+      if (resta > 1e-9) out.push({data: p.fine || piuGiorni(p.data, 5), qta: resta, fonte: 'ordine di produzione ' + p.numero});
+    });
+    (S().acquisti || []).forEach(function (a) {
+      if (a.materiale !== mat || (a.rilascio && a.rilascio.stato !== 'rilasciato')) return;
+      var resta = r2((a.qta || 0) - (a.entrato || 0));
+      if (resta > 1e-9) out.push({data: a.consegna || a.data, qta: resta, fonte: 'ordine d\'acquisto ' + a.numero});
+    });
+    return out.sort(function (x, y) { return x.data < y.data ? -1 : x.data > y.data ? 1 : 0; });
+  }
+  function pianoATP(mat) {
+    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0), cons = 0, res = {};
+    S().ordini.forEach(function (o) { if (vivo(o) && o.materiale === mat) cons += inPrelievo(o); });
+    var libero = r2(Math.max(0, g - cons)), coda = entrate(mat).map(function (x) { return Object.assign({}, x); });
+    S().ordini.filter(function (o) { return vivo(o) && o.materiale === mat && apertoOrd(o) > 1e-9; })
+      .sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : (+a.numero) - (+b.numero); }).forEach(function (o) {
+        var serve = apertoOrd(o), daStock = Math.min(serve, libero), righe = [];
+        libero = r2(libero - daStock); serve = r2(serve - daStock);
+        if (daStock > 1e-9) righe.push({data: o.data, qta: r2(daStock), fonte: 'giacenza'});
+        while (serve > 1e-9 && coda.length) {
+          var x = coda[0], q = Math.min(serve, x.qta);
+          righe.push({data: x.data, qta: r2(q), fonte: x.fonte}); serve = r2(serve - q); x.qta = r2(x.qta - q);
+          if (x.qta <= 1e-9) coda.shift();
+        }
+        res[o.numero] = {righe: righe, scoperto: r2(serve), daStock: r2(daStock)};
+      });
+    return res;
+  }
+  // semaforo: verde = tutto confermato alla data richiesta · giallo = confermabile più tardi o solo in parte · rosso = niente
+  function confermabilita(o) {
+    if (!vivo(o) || apertoOrd(o) <= 1e-9) return {stato: 'consegnato', semaforo: 'grigio', testo: 'evaso', righe: [], scoperto: 0};
+    var p = pianoATP(o.materiale)[o.numero] || {righe: [], scoperto: apertoOrd(o)}, richiesta = o.consegnaRichiesta || o.data;
+    var coperto = r2(p.righe.reduce(function (t, r) { return t + r.qta; }, 0)), ultima = p.righe.length ? p.righe[p.righe.length - 1].data : null;
+    var stato = !coperto ? 'rosso' : p.scoperto > 1e-9 || ultima > richiesta ? 'giallo' : 'verde';
+    var testo = stato === 'verde' ? 'confermabile alla data richiesta' : stato === 'rosso' ? 'non confermabile: niente a magazzino né in arrivo'
+      : (p.scoperto > 1e-9 ? 'confermabile ' + L.n0(coperto) + ' su ' + L.n0(apertoOrd(o)) : 'confermabile per intero') + (ultima > richiesta ? ' dal ' + L.fd(ultima) : '');
+    return {stato: stato, semaforo: stato === 'verde' ? 'verde' : stato === 'giallo' ? 'giallo' : 'arancio', testo: testo, righe: p.righe, scoperto: p.scoperto,
+      coperto: coperto, dataConfermata: ultima, richiesta: richiesta};
+  }
   // V_V2: riprogramma gli ordini aperti in ordine di data (chi ha ordinato prima è servito prima)
   function riconferma(mat) {
     var liberi = {}, out = [];
@@ -108,6 +156,7 @@ window.SD4 = (function () {
     var data = N.data(i.data), cliente = i.cliente, mat = i.materiale, qta = L.num(i.qta, 'Quantità', 1);
     var p = prezzi(cliente, mat, qta);
     var o = {numero: N.numero('ordine'), tipo: 'OR', data: data, cliente: cliente, materiale: mat, qta: qta, rif: String(i.rif || '').trim(), prezzi: p, consegnato: 0, fatturato: 0};
+    if (i.consegna) { var rq = L.dataOk(i.consegna); if (rq < data) throw Error('La data di consegna richiesta non può precedere la data dell’ordine.'); o.consegnaRichiesta = rq; }
     var a = atp(mat, o); o.confermata = Math.min(qta, a.disponibile); o.atp = a;
     S().ordini.push(o);
     o.credito = controlloCredito(o);
@@ -116,6 +165,8 @@ window.SD4 = (function () {
     return '<p class="lab-nota">Ordine cliente <b>' + o.numero + '</b> (tipo OR) creato. Netto ' + L.eur(p.netto) + ' € + IVA ' + L.eur(p.iva) + ' = ' + L.eur(p.totale) + ' €. Margine a costo standard ' + L.eur(p.margine) + ' €. Nessuna scrittura contabile.</p>' +
       '<p class="lab-nota">📦 <b>Disponibilità (ATP)</b>: giacenza ' + L.n0(a.giacenza) + ' − già in consegna ' + L.n0(a.inConsegna) + ' − confermato ad altri ordini ' + L.n0(a.riservato) + ' = <b>' + L.n0(a.disponibile) + '</b> pz. ' +
         (o.confermata >= qta ? 'Ordine <b>confermato per intero</b>.' : '<b>Confermati ' + L.n0(o.confermata) + ' pz su ' + L.n0(qta) + '</b>: il resto aspetta la produzione (si conferma da solo all\'entrata dei pezzi, o con V_V2).') + '</p>' +
+      (function () { var c = confermabilita(o); return '<p class="lab-nota"><span class="lab-bd ' + c.semaforo + '">● ' + c.stato.toUpperCase() + '</span> <b>Confermabilità</b>: ' + c.testo + '. ' +
+        (c.righe.length ? 'Righe di schedulazione: ' + c.righe.map(function (r) { return L.n0(r.qta) + ' pz il ' + L.fd(r.data) + ' (' + r.fonte + ')'; }).join(' · ') + '.' : '') + (c.scoperto > 1e-9 ? ' Scoperti ' + L.n0(c.scoperto) + ' pz: serve un nuovo ordine di produzione.' : '') + '</p>'; })() +
       (o.credito.stato === 'B' ? '<p class="lab-nota">⛔ <b>Blocco crediti</b> (stato B): ' + o.credito.motivo + ' — esposizione ' + L.eur(o.credito.esposizione) + ' € su un fido di ' + L.eur(cli.fido) + ' €. L\'ordine è salvato ma <b>non si consegna</b> finché il responsabile crediti non lo rilascia (VKM1, Vendite → Gestione crediti).</p>'
         : '<p class="lab-nota">💳 <b>Controllo crediti superato</b>: esposizione ' + L.eur(o.credito.esposizione) + ' € su un fido di ' + L.eur(cli.fido) + ' €.</p>');
   }
@@ -331,7 +382,7 @@ window.SD4 = (function () {
       return {data: r.data, numero: r.numero, descrizione: r.descrizione, importo: r2(v)};
     });
   }
-  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
+  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, entrate: entrate, pianoATP: pianoATP, confermabilita: confermabilita, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
     incassoAcconto: incassoAcconto, consegna: consegna, uscitaMerci: uscitaMerci, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
     richiestaAbbuono: richiestaAbbuono, approvaAbbuono: approvaAbbuono, notaCreditoAbbuono: notaCreditoAbbuono, incasso: incasso, flusso: flusso, partite: partite,
     avviaSistema: function (i) { return N.avvia(i); }};

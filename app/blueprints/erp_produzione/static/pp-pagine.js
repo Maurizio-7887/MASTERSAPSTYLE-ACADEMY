@@ -21,7 +21,7 @@
   var PAGINE = {
     ordini: function () {
       radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
-        L.scheda('🆕', 'Crea ordine di produzione', 'CO01 · tipo PP01', L.modulo('co', [['materiale', 'Materiale', 'select', 'TR-STD', U.materiali(S())], ['qta', 'Quantità (pz)', 'num'], ['data', 'Data di inizio', 'date']], [['piano', 'Mostra costi pianificati', 'sec'], ['co', 'Rilascia ordine']])) +
+        L.scheda('🆕', 'Crea ordine di produzione', 'CO01 · tipo PP01', L.modulo('co', [['materiale', 'Materiale', 'select', 'TR-STD', U.materiali(S())], ['qta', 'Quantità (pz)', 'num'], ['data', 'Data di inizio', 'date'], ['fine', 'Data di fine pianificata (vuota = inizio + 5 giorni)', 'date']], [['piano', 'Mostra costi pianificati', 'sec'], ['co', 'Rilascia ordine']])) +
         L.scheda('🧾', 'Distinta e ciclo', 'CS03 · CA03', L.tabella(['Materiale', 'Tipo', 'Componente per pezzo›', 'Taglio h/pz›', 'Piegatura h/pz›', 'Saldatura h/pz›', 'Attrezzaggio h/lotto›', 'Standard›', 'Scorta›'], U.materiali(S()).map(function (x) {
           var m = S().materiali[x[0]], standard = PC.cpm.attivo() ? PC.cpm.modello().standard[x[0]] : null, ciclo = standard || m, cp = standard ? standard.componente : m.comp || {mat: 'FERRO', q: m.ferro};
           return [x[0], m.tipo, n0(cp.q) + ' ' + (S().materiali[cp.mat].um || '') + ' ' + cp.mat, n0(ciclo.ore.Taglio || 0), n0(ciclo.ore.Piegatura || 0), n0(ciclo.ore.Saldatura || 0), n0(ciclo.attrezzaggio), eur(m.std), n0(S().giacenze[x[0]] || 0)]; })) +

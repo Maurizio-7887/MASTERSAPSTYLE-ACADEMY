@@ -28,6 +28,8 @@ ok(cp.modello().volumi['TR-STD'] === 1200, 'volume annuale distinto ordine');
 near(rep.centri[0].oreRichieste, 300, 'Taglio annuo'); near(rep.centri[1].oreRichieste, 240, 'Piega annua'); near(rep.centri[2].oreRichieste, 480, 'Saldatura annua');
 near(pc.elementi('TR-STD', 300).totale, 9420, 'costo 300×31,40');
 reject(() => pp.ordine({materiale:'TR-STD',qta:300,data:'2026-12-01'}), /ricalcola/, 'rilascio CPM necessario');
+reject(() => pc.calcola({materiale:'TR-STD',data:'2026-12-01'}), /KSPI/, 'CK11N richiede KSPI');
+cp.eseguiKSPI({data:'2026-12-01'});
 ['TR-STD','SL-TAGLIO'].forEach(materiale => pc.calcola({materiale,data:'2026-12-01'})); pc.marca({});
 reject(() => pc.rilascia({data:'2026-12-01'}), /SOSTITUISCI/, 'bootstrap non sostituito implicitamente');
 pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
@@ -76,18 +78,23 @@ near(rep.prodotti[0].finiti,300,'consuntivo volume'); near(rep.prodotti[0].varia
 // Percentuali esplicite e saturazione.
 b=budget(); b.driver='percentuali'; b.centri.Taglio.percentuale=50;b.centri.Piegatura.percentuale=30;b.centri.Saldatura.percentuale=20;b.volumi['TR-STD']=10000; cp.salvaBudget(b);
 near(cp.tariffe().Taglio.ribaltato,9000,'driver %'); ok(cp.report().centri[0].saturazione>100,'sovraccarico segnalato');
-// UI: modulo reale, cambio materiale, salvataggio budget e render prodotto.
+// UI: la scheda di calcolo contiene solo distinta e ciclo; budget e ore nelle pagine CO-OM (KP06, KP26).
+const CO = ['app/blueprints/erp_controllo/static/co-percorso.js'];
+CO.forEach(f => w.eval(fs.readFileSync(path.join(root, f), 'utf8')));
 w.LAB_PAGINA={chiave:key,pagina:'scheda'}; w.eval(fs.readFileSync(path.join(root,'app/blueprints/erp_costi/static/copc-pagine.js'),'utf8'));
-ok(w.document.querySelector('#cpm-budget-Taglio_orePiano'),'campi budget renderizzati');
+ok(!w.document.querySelector('#cpm-budget-Taglio_orePiano'),'il budget non sta più nella scheda di calcolo');
 const sel=w.document.querySelector('#cpm-materiale'); sel.value='SL-TAGLIO'; sel.dispatchEvent(new w.Event('change'));
 ok(w.document.querySelector('#cpm-standard-materiale').value==='SL-TAGLIO','cambio materiale');
-ok(w.document.body.textContent.includes('Residuo'),'report visibile');
-w.document.querySelector('#cpm-budget-vol_TR-STD').value='1300';
-w.document.querySelector('[data-prefisso="cpm-budget"] [data-azione="budget"]').click();
-ok(cp.modello().volumi['TR-STD']===1300,'salvataggio budget dal pulsante reale');
+ok(w.document.body.textContent.includes('Ciclo di pianificazione CO'),'barra del ciclo visibile');
 w.document.querySelector('#cpm-standard-quantita').value='7,5';
 w.document.querySelector('[data-prefisso="cpm-standard"] [data-azione="standard"]').click();
 near(cp.modello().standard['SL-TAGLIO'].componente.q,7.5,'salvataggio distinta dal pulsante reale: '+w.document.querySelector('#cpm-standard-esito').textContent);
+w.LAB_PAGINA={chiave:key,pagina:'kp26'}; w.eval(fs.readFileSync(path.join(root,'app/blueprints/erp_controllo/static/co-pagine.js'),'utf8'));
+w.document.querySelector('#ltp-vol_TR-STD').value='1300';
+w.document.querySelector('[data-prefisso="ltp"] [data-azione="ltp"]').click();
+ok(cp.modello().volumi['TR-STD']===1300,'volumi LTP dal pulsante reale');
+w.LAB_PAGINA={chiave:key,pagina:'report'}; w.eval(fs.readFileSync(path.join(root,'app/blueprints/erp_controllo/static/co-pagine.js'),'utf8'));
+ok(w.document.body.textContent.includes('Residuo'),'report visibile');
 // Persistenza/reload conserva versione e snapshot ordine.
 n.salva(); const saved=JSON.parse(w.localStorage.getItem(key)); w.close(); w=fresh(saved); n=w.SD4.N;s=n.S;pc=w.PC4;cp=pc.cpm;pp=w.PP4;
 ok(cp.attivo()&&s.produzione[0].piano.par.snapshot.tariffe.Piegatura===28,'reload snapshot');
@@ -97,13 +104,14 @@ w=fresh(legacy); n=w.SD4.N;s=n.S;pc=w.PC4;cp=pc.cpm;
 ok(!cp.attivo(),'fixture storica resta legacy'); const hist=JSON.stringify(s.produzione); cp.attiva({conferma:'ATTIVA'});
 ok(JSON.stringify(s.produzione)===hist,'attivazione non migra ordini storici');
 ok(cp.report().esclusiLegacy===s.produzione.length,'report esclude legacy');
-pc.calcola({materiale:'TR-STD',data:'2026-12-01'});pc.marca({materiale:'TR-STD'});
+cp.eseguiKSPI({data:'2026-12-01'});pc.calcola({materiale:'TR-STD',data:'2026-12-01'});pc.marca({materiale:'TR-STD'});
 reject(()=>pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'}), /già rilasciato|movimenti/, 'nessuna sostituzione bootstrap su storico con movimenti');
 w.close(); w=fresh(); n=w.SD4.N;s=n.S;pc=w.PC4;cp=pc.cpm;pp=w.PP4;
 n.avvia({modo:'costituzione',data:'2026-12-01'});cp.attiva({conferma:'ATTIVA'});
 b=budget();b.centri.Piegatura.personale=51000;cp.salvaBudget(b);
 near(cp.tariffe().Piegatura.tariffa,38,'tariffa Piegatura distinta');
 near(pc.elementi('TR-STD',300).totale,10020,'costing per centro');
+cp.eseguiKSPI({data:'2026-12-01'});
 ['TR-STD','SL-TAGLIO'].forEach(materiale=>pc.calcola({materiale,data:'2026-12-01'}));pc.marca({});pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
 pc.calcola({materiale:'TR-STD',data:'2026-12-01'});pc.marca({materiale:'TR-STD'});
 reject(()=>pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'}), /già rilasciato/, 'deroga bootstrap non ripetibile');

@@ -298,14 +298,16 @@ LABORATORI = {
 }
 # ── SISTEMA INTEGRATO S/4: più blueprint (un modulo SAP per cartella), un solo stato «erp-ft» e un solo libro giornale ──
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
-               ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"),
+               ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("erp_bpc.static", "bpc-logica.js"), ("erp_controllo.static", "co-percorso.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
                ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"),
                ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
-               "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
+               "erp_controllo": "Contabilità dei centri di costo (CO-OM) · ciclo di pianificazione",
+               "erp_costi": "Costi del prodotto (CO-PC) e Material Ledger",
+               "erp_bpc": "Pianificazione e budget (SAP BPC)", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
                "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)",
                "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)",
                "erp_tesoreria": "Tesoreria (cassa, pagamenti, estratti conto)", "erp_valute": "Valute estere", "erp_paghe": "Paghe e costo del personale",
@@ -330,7 +332,18 @@ _ERP_PAGINE = {
                      {"endpoint": "fatture", "titolo": "Fatture fornitore", "icona": "🧾", "tcode": "MIRO"}],
     "erp_produzione": [{"endpoint": "ordini", "titolo": "Ordini di produzione", "icona": "🏭", "tcode": "CO01 · COOIS"},
                        {"endpoint": "avanzamento", "titolo": "Prelievi, conferme, entrate", "icona": "⏱️", "tcode": "261 · CO11N · 101 · TECO"}],
-    "erp_costi": [{"endpoint": "scheda", "titolo": "Budget centri e costi standard", "icona": "🧮", "tcode": "CO-CCA · KP26 · CO-PC"},
+    "erp_controllo": [{"endpoint": "centri", "titolo": "1 · Centri, attività e classi di costo", "icona": "🌳", "tcode": "KS03 · KSH3 · KL03 · KA03 · OKB9"},
+                      {"endpoint": "kp06", "titolo": "2 · Pianificazione costi per centro", "icona": "✏️", "tcode": "KP06 · PCP paghe"},
+                      {"endpoint": "kp26", "titolo": "3 · Pianificazione attività e volumi", "icona": "⏱️", "tcode": "KP26 · LTP"},
+                      {"endpoint": "ksu", "titolo": "4 · Ribaltamento dei costi comuni", "icona": "🔁", "tcode": "KSU1 · KSU8 · KSU5"},
+                      {"endpoint": "kspi", "titolo": "5 · Calcolo delle tariffe", "icona": "🧮", "tcode": "KSPI"},
+                      {"endpoint": "ksb1", "titolo": "Consuntivo dei centri", "icona": "📄", "tcode": "KSB1 · KB11N"},
+                      {"endpoint": "report", "titolo": "Piano/consuntivo e scostamenti", "icona": "📊", "tcode": "S_ALR_87013611 · KSBT"}],
+    "erp_bpc": [{"endpoint": "modello", "titolo": "Modello e Data Manager", "icona": "🗂️", "tcode": "BPC · FT_PLAN · LOAD · COPY"},
+                {"endpoint": "input", "titolo": "Modulo di inserimento del budget", "icona": "🧮", "tcode": "EPM · input form"},
+                {"endpoint": "processo", "titolo": "Approvazione e ritrasferimento in S/4", "icona": "🚦", "tcode": "BPF · work status · retraction"},
+                {"endpoint": "report", "titolo": "Budget, forecast e consuntivo", "icona": "📈", "tcode": "EPM report"}],
+    "erp_costi": [{"endpoint": "scheda", "titolo": "Distinta, ciclo e scheda di calcolo", "icona": "🔧", "tcode": "CS02 · CA02 · KZS2"},
                   {"endpoint": "calcolo", "titolo": "Calcolo del costo standard", "icona": "🏷️", "tcode": "CK11N · CK24 · CK13N"},
                   {"endpoint": "chiusura", "titolo": "Chiusura degli ordini e varianze", "icona": "⚖️", "tcode": "KGI2 · KKS2 · KO88"},
                   {"endpoint": "ml", "titolo": "Material Ledger", "icona": "📒", "tcode": "CKM3 · CKMLCP"}],
@@ -390,7 +403,7 @@ _ERP_PAGINE = {
                {"endpoint": "sdi", "titolo": "Fattura elettronica (SdI)", "icona": "📤", "tcode": "FatturaPA · TD01 · TD04"},
                {"endpoint": "storni", "titolo": "Storni e annullamenti", "icona": "↩️", "tcode": "VF11 · VL09 · MBST · MR8M · FB08"}],
 }
-_ERP_JS = {"erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
+_ERP_JS = {"erp_controllo": "co-pagine.js", "erp_bpc": "bpc-pagine.js", "erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
            "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js",
            "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js",
@@ -480,7 +493,8 @@ MODULI = [
     next(m for m in MODULI_ARCHIVIO if m["codice"] == "wms"),
     _integrato("img", "DATI", "Avvio e dati di base", "⚙️", "impostazioni", ["erp_dati"]),
     _integrato("fi", "FI", "Contabilità", "🏛️", "contabilita", ["erp_fi", "erp_cespiti", "erp_chiusura"]),
-    _integrato("co", "CO", "Costi e redditività", "📊", "controllo", ["erp_costi", "erp_copa"]),
+    _integrato("co", "CO", "Controllo di gestione", "📊", "controllo", ["erp_controllo", "erp_costi", "erp_copa"]),
+    _integrato("bpc", "BPC", "Pianificazione e budget", "📈", "pianificazione", ["erp_bpc"]),
     _integrato("tes", "TES", "Tesoreria", "🏦", "contabilita", ["erp_tesoreria"]),
     _integrato("val", "FX", "Valute estere", "💱", "contabilita", ["erp_valute"]),
     _integrato("hr", "HR", "Paghe e personale", "👤", "personale", ["erp_paghe"]),
@@ -489,6 +503,6 @@ MODULI = [
 for _bp, _lab in LABORATORI.items():
     if _lab["slot"] == "erp-ft":
         _lab["codice"] = ({"erp_dati": "img", "erp_vendite": "sd", "erp_acquisti": "mm",
-                           "erp_produzione": "pp", "erp_costi": "co", "erp_copa": "co",
+                           "erp_produzione": "pp", "erp_costi": "co", "erp_controllo": "co", "erp_bpc": "bpc", "erp_copa": "co",
                            "erp_fi": "fi", "erp_tesoreria": "tes", "erp_valute": "val",
                            "erp_paghe": "hr", "erp_cespiti": "fi", "erp_chiusura": "fi"}).get(_bp, "wms")

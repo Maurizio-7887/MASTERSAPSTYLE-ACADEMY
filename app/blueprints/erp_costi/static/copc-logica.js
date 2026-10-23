@@ -68,6 +68,7 @@ window.PC4 = (function () {
   function calcola(i) {
     var data = N().data(i.data), mat = i.materiale, m = N().materiale(mat);
     if (m.tipo !== 'FERT' && m.tipo !== 'HALB') throw Error('Il calcolo del costo si fa sui prodotti finiti e sui semilavorati; il ferro ha un prezzo d\'acquisto.');
+    if (cpm.attivo()) cpm.richiediKSPI();
     var lotto = C().scheda.lotto, el = elementi(mat, lotto);
     var st = {materiale: mat, data: data, lotto: lotto, elementi: el, unitario: r2(el.totale / lotto), stato: 'KA', variante: 'PPC1'};
     C().stime[mat] = st; N().salva();
@@ -274,7 +275,7 @@ window.PC4 = (function () {
     }
     function modello() { return C().cpm || null; }
     function attivo() { return !!(modello() && modello().versione === 'cpm-centri-v1'); }
-    function richiesto() { if (!attivo()) throw Error('Attiva esplicitamente il laboratorio CPM.'); return modello(); }
+    function richiesto() { if (!attivo()) throw Error('Prima apri il piano CO dell’anno (CO → Centri, attività e classi di costo → passo 1).'); var m = modello(); migra(m); return m; }
     function attiva(i) {
       if (attivo()) throw Error('Laboratorio CPM già attivo: usa le modifiche versionate.');
       if (String((i || {}).conferma) !== 'ATTIVA') throw Error('Scrivi ATTIVA per creare il nuovo percorso CPM, senza modificare gli ordini pregressi.');
@@ -289,6 +290,7 @@ window.PC4 = (function () {
       var centri = {}; CENTRI.forEach(function (k) { centri[k] = {personale: 36000, indiretti: 0, capacita: 1500, orePiano: 1500, percentuale: 100 / 3}; });
       C().cpm = {versione: 'cpm-centri-v1', revisione: 1, anno: Number(String(S().avviato || '2026').slice(0, 4)),
         centri: centri, generale: {produttivi: 18000, amministrativi: 0, driver: 'ore'}, volumi: {'TR-STD': 1200}, standard: standard, consuntivi: []};
+      migra(C().cpm);
       N().salva(); return '<p class="lab-nota">CPM v1 attivo: nuova distinta TR-STD 8 kg, tre operazioni, setup zero. Nessun saldo o ordine pregresso modificato. Ricalcola e rilascia CK11N/CK24. Budget annuo 1.200 pz, distinto dall’ordine di 300.</p>';
     }
     function salvaBudget(i) {
@@ -306,7 +308,7 @@ window.PC4 = (function () {
       if (i.driver === 'percentuali' && Math.abs(CENTRI.reduce(function (t, k) { return t + b.centri[k].percentuale; }, 0) - 100) > .001) throw Error('Le quote devono sommare a 100%.');
       var vol = {}; Object.keys(i.volumi || {}).forEach(function (mat) { if (!b.standard[mat]) throw Error('Prodotto non valido: ' + mat); vol[mat] = numero(i.volumi[mat], 'Volume annuo ' + mat); });
       if (!Object.keys(vol).length) throw Error('Inserisci almeno un volume annuale.');
-      b.volumi = vol; b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">Budget annuale aggiornato, revisione ' + b.revisione + '. Nessuna scrittura FI. Nuovi standard da calcolare/rilasciare; ordini esistenti invariati.</p>';
+      b.volumi = vol; b.piano = b.piano || {}; b.piano['0'] = pianoDaCampi(b); b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">Budget annuale aggiornato, revisione ' + b.revisione + '. Nessuna scrittura FI. Nuovi standard da calcolare/rilasciare; ordini esistenti invariati.</p>';
     }
     function validaStandard(mat, s, tutti) {
       if (!S().materiali[mat] || ['FERT', 'HALB'].indexOf(S().materiali[mat].tipo) < 0 || !tutti[mat]) throw Error('Materiale prodotto non valido.');
@@ -366,6 +368,10 @@ window.PC4 = (function () {
       CENTRI.forEach(function (k) { richieste[k] = assorbito[k] = oreEff[k] = standardOutput[k] = primari[k] = 0; });
       Object.keys(m.volumi).forEach(function (mat) { var st = m.standard[mat]; CENTRI.forEach(function (k) { richieste[k] += (st.ore[k] || 0) * m.volumi[mat]; }); });
       m.consuntivi.forEach(function (x) { if (x.centro === 'Generale') generale[x.natura] += x.importo; else primari[x.centro] += x.importo; });
+      // consuntivo automatico (S/4: ogni costo FI porta il centro di costo; senza centro vale la tabella OKB9)
+      var fi = effettivi(m.anno).perCentro;
+      Object.keys(fi).forEach(function (cdc) { var tot = totale(fi[cdc]), c = cdcDi(cdc); if (!c) return;
+        if (c.centro) primari[c.centro] += tot; else if (c.tipo === 'servizio') generale.produttivi += tot; else generale.amministrativi += tot; });
       var esclusiLegacy = 0;
       S().produzione.forEach(function (o) {
         var snap = o.piano.par.snapshot;
@@ -401,9 +407,180 @@ window.PC4 = (function () {
       });
       return {anno: m.anno, revisione: m.revisione, centri: righe, prodotti: prodotti, generale: {budgetProduttivi: m.generale.produttivi, budgetAmministrativi: m.generale.amministrativi,
         produttivi: r2(generale.produttivi), amministrativi: r2(generale.amministrativi), residuoProduttivo: 0}, esclusiLegacy: esclusiLegacy,
-        note: 'Costi primari riportati manualmente con riferimento fonte: non importati automaticamente da FI. Assorbito = attività secondarie delle conferme, non ulteriore personale. Residuo = consuntivo − assorbito = varianza spesa + varianza assorbimento. Efficienza confronta ore dichiarate e standard dei pezzi confermati; comprende attrezzaggio. Ore annue richieste solo variabili: setup fisso escluso senza un piano annuale dei lotti. Budget valore prodotti al lotto di calcolo corrente: stima comparabile, non piano lotti annuale. Saldo prodotti = costi annuali degli ordini − accrediti annuali, prima della liquidazione; dettaglio WIP operativo e varianze finali nelle pagine PP/KKS2. Nessuna esplosione MRP multilivello automatica: pianificare i semilavorati autonomi separatamente.'};
+        note: 'Costi primari effettivi letti automaticamente dalla contabilità FI dell’anno (centro della riga o assegnazione OKB9), più le eventuali rettifiche manuali. Assorbito = attività secondarie delle conferme, non ulteriore personale. Residuo = consuntivo − assorbito = varianza spesa + varianza assorbimento. Efficienza confronta ore dichiarate e standard dei pezzi confermati; comprende attrezzaggio. Ore annue richieste solo variabili: setup fisso escluso senza un piano annuale dei lotti. Budget valore prodotti al lotto di calcolo corrente: stima comparabile, non piano lotti annuale. Saldo prodotti = costi annuali degli ordini − accrediti annuali, prima della liquidazione; dettaglio WIP operativo e varianze finali nelle pagine PP/KKS2. Nessuna esplosione MRP multilivello automatica: pianificare i semilavorati autonomi separatamente.'};
     }
-    return {attivo: attivo, modello: modello, attiva: attiva, salvaBudget: salvaBudget, salvaStandard: salvaStandard, tariffe: tariffe, fotografia: fotografia, tariffa: tariffa, consuntivo: consuntivo, report: report, centri: CENTRI.slice()};
+    // ── Anagrafiche CO (KS01 · KSH1 · KL01 · KA01): stessi codici dei centri delle paghe (PA30) ──
+    var CDC = [
+      {codice: '4100', nome: 'Magazzino', tipo: 'servizio', gruppo: 'H-SERV Centri di servizio di stabilimento', responsabile: 'Capo magazzino'},
+      {codice: '4200', nome: 'Produzione · costi comuni di stabilimento', tipo: 'servizio', gruppo: 'H-SERV Centri di servizio di stabilimento', responsabile: 'Direttore di stabilimento'},
+      {codice: '4210', nome: 'Taglio', tipo: 'produttivo', centro: 'Taglio', attivita: 'ORE-TAG', gruppo: 'H-PROD Centri produttivi', responsabile: 'Capo reparto taglio'},
+      {codice: '4220', nome: 'Piegatura', tipo: 'produttivo', centro: 'Piegatura', attivita: 'ORE-PIE', gruppo: 'H-PROD Centri produttivi', responsabile: 'Capo reparto piegatura'},
+      {codice: '4230', nome: 'Saldatura', tipo: 'produttivo', centro: 'Saldatura', attivita: 'ORE-SAL', gruppo: 'H-PROD Centri produttivi', responsabile: 'Capo reparto saldatura'},
+      {codice: '4300', nome: 'Amministrazione', tipo: 'amministrativo', gruppo: 'H-AMM Amministrazione e vendite', responsabile: 'Direzione amministrativa'}];
+    var CODICE = {Taglio: '4210', Piegatura: '4220', Saldatura: '4230'};
+    // classi di costo primarie (tipo 1) = conti di costo del piano dei conti; secondarie (tipo 42/43) solo CO
+    var CLASSI = [['80', 'Salari e stipendi', 'personale'], ['81', 'Oneri sociali', 'personale'], ['82', 'Trattamento di fine rapporto', 'personale'],
+      ['50', 'Ammortamenti', 'indiretti'], ['54', 'Consulenze e servizi (energia, manutenzioni)', 'indiretti'], ['83', 'Assicurazioni', 'indiretti'], ['86', 'Fitti passivi', 'indiretti']];
+    var SECONDARIE = [['943000', 'Ribaltamento costi di stabilimento (KSU5)', '42 · ribaltamento'], ['944000', 'Attività ore addebitate agli ordini (CO11N → conti 72/75)', '43 · computo interno attività']];
+    var OKB9 = {'50': '4200', '54': '4200', '83': '4300', '86': '4200', '80': '4300', '81': '4300', '82': '4300'};
+    var VERSIONI = {'0': 'Piano/consuntivo (versione operativa: tariffe e costi standard)', '1': 'Costi del personale dalle paghe (PCP)'};
+    var ESCLUSI = ['EPILOGO', 'RISULTATO', 'CHIUSURA_SP', 'APERTURA', 'RIAPERTURA', 'DESTINAZIONE_UTILE', 'COSTITUZIONE'];
+    function cdcDi(cod) { return CDC.find(function (c) { return c.codice === String(cod); }) || null; }
+    function totale(o) { return r2(Object.keys(o || {}).reduce(function (t, k) { return t + (Number(o[k]) || 0); }, 0)); }
+    function pianoDaCampi(m) {
+      var p = {'4100': {}, '4200': {}, '4300': {}};
+      CENTRI.forEach(function (k) { var c = m.centri[k], x = {}; if (c.personale) x['80'] = c.personale; if (c.indiretti) x['54'] = c.indiretti; p[CODICE[k]] = x; });
+      if (m.generale.produttivi) p['4200']['54'] = m.generale.produttivi;
+      if (m.generale.amministrativi) p['4300']['54'] = m.generale.amministrativi;
+      return p;
+    }
+    // modelli creati prima delle anagrafiche: il piano per classi nasce dai valori salvati, senza cambiare un euro
+    function migra(m) {
+      if (!m.piano) m.piano = {'0': pianoDaCampi(m), '1': {}};
+      if (!m.piano['1']) m.piano['1'] = {};
+      if (!m.okb9) m.okb9 = copia(OKB9);
+      if (!m.riattribuzioni) m.riattribuzioni = [];
+      return m;
+    }
+    function deriva(b) {
+      var p = b.piano['0'], pers = function (cdc) { return CLASSI.reduce(function (t, c) { return t + (c[2] === 'personale' ? Number((p[cdc] || {})[c[0]]) || 0 : 0); }, 0); };
+      CENTRI.forEach(function (k) { var cdc = CODICE[k]; b.centri[k].personale = r2(pers(cdc)); b.centri[k].indiretti = r2(totale(p[cdc]) - pers(cdc)); });
+      b.generale.produttivi = r2(totale(p['4100']) + totale(p['4200']));
+      b.generale.amministrativi = r2(totale(p['4300']));
+    }
+    function nuovaRevisione(b, testo, passo) { if (passo) { b.fatti = b.fatti || {}; b.fatti[passo] = true; } b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">' + testo + ' Revisione del piano ' + b.revisione + ': esegui di nuovo il calcolo delle tariffe (KSPI), poi CK11N e CK24 prima dei nuovi ordini. Nessuna scrittura FI; gli ordini già avviati conservano il loro snapshot.</p>'; }
+    // KP06: pianificazione costi primari per centro e classe di costo, in una versione
+    function salvaKP06(i) {
+      var b = copia(richiesto()), ver = String(i.versione == null ? '0' : i.versione), cdc = String(i.cdc || '');
+      if (!VERSIONI[ver]) throw Error('Versione di piano non valida: usa 0 (operativa) o 1 (paghe).');
+      if (!cdcDi(cdc)) throw Error('Centro di costo inesistente: ' + cdc + '.');
+      var riga = {};
+      CLASSI.forEach(function (c) { var v = i['k' + c[0]]; if (v === undefined || v === '') v = 0; var n = numero(v, 'Classe ' + c[0] + ' ' + c[1]); if (n) riga[c[0]] = n; });
+      migra(b); b.piano[ver][cdc] = riga;
+      if (ver !== '0') { C().cpm = b; N().salva(); return '<p class="lab-nota">Versione ' + ver + ' del centro ' + cdc + ' salvata: è un piano di confronto, non cambia tariffe né costi standard.</p>'; }
+      deriva(b);
+      return nuovaRevisione(b, 'Piano dei costi del centro ' + cdc + ' ' + cdcDi(cdc).nome + ' salvato: totale ' + L.eur(totale(riga)) + ' €.', 'kp06');
+    }
+    // PCP (pianificazione costi del personale): costo annuo a regime dei dipendenti in forza, per centro, dalle paghe
+    function costoPaghe() {
+      var py = window.PY4; if (!py) return {};
+      var H = py.H(), p = H.parametri, out = {};
+      H.dipendenti.forEach(function (d) {
+        var o = out[d.cdc] = out[d.cdc] || {'80': 0, '81': 0, '82': 0, dipendenti: []};
+        var lordo = r2(d.lordo * p.mensilita);
+        o['80'] = r2(o['80'] + lordo); o['81'] = r2(o['81'] + lordo * (p.inpsDitta + p.inail) / 100); o['82'] = r2(o['82'] + lordo / p.tfrDivisore);
+        o.dipendenti.push(d.nome + ' (' + d.mansione + ')');
+      });
+      return out;
+    }
+    function trasferisciPaghe(i) {
+      var b = copia(richiesto()), ver = String(i.versione == null ? '1' : i.versione), pc = costoPaghe();
+      if (!VERSIONI[ver]) throw Error('Versione di piano non valida.');
+      if (ver === '0' && i.conferma !== 'SOSTITUISCI') throw Error('Nella versione 0 il trasferimento sostituisce il personale pianificato dei centri delle paghe e cambia le tariffe: scrivi SOSTITUISCI per confermare, oppure usa la versione 1 (confronto).');
+      if (!Object.keys(pc).length) throw Error('Nessun dipendente nelle paghe (PA30).');
+      migra(b);
+      Object.keys(pc).forEach(function (cdc) { var r = b.piano[ver][cdc] = Object.assign({}, b.piano[ver][cdc] || {}); ['80', '81', '82'].forEach(function (k) { r[k] = r2(pc[cdc][k]); }); });
+      var testo = 'Costi del personale trasferiti dalle paghe nella versione ' + ver + ': ' + Object.keys(pc).sort().map(function (k) { return k + ' ' + L.eur(pc[k]['80'] + pc[k]['81'] + pc[k]['82']) + ' €'; }).join(' · ') + '.';
+      if (ver !== '0') { C().cpm = b; N().salva(); return '<p class="lab-nota">' + testo + ' Confrontali con il piano operativo nella tabella di controllo.</p>'; }
+      deriva(b); return nuovaRevisione(b, testo, 'kp06');
+    }
+    // KP26: capacità e quantità di attività pianificata (ore tariffa) per centro
+    function salvaKP26(i) {
+      var b = copia(richiesto());
+      CENTRI.forEach(function (k) {
+        var cap = i[k + '_capacita'], ore = i[k + '_orePiano'];
+        if (cap === undefined && ore === undefined) return;
+        b.centri[k].capacita = numero(cap, k + ' capacità', .001); b.centri[k].orePiano = numero(ore, k + ' ore pianificate (denominatore della tariffa)', .001);
+        if (b.centri[k].orePiano > b.centri[k].capacita) throw Error(k + ': le ore pianificate non possono superare la capacità disponibile.');
+      });
+      return nuovaRevisione(b, 'Attività pianificate salvate (tipo attività ORE dei tre centri produttivi).', 'kp26');
+    }
+    // LTP: volumi annui dei prodotti (servono a misurare la saturazione)
+    function salvaVolumi(i) {
+      var b = copia(richiesto()), vol = {};
+      Object.keys(b.standard).forEach(function (mat) { var v = i['vol_' + mat]; if (v === undefined || v === '') v = b.volumi[mat] || 0; vol[mat] = numero(v, 'Volume annuo ' + mat); });
+      b.volumi = vol; return nuovaRevisione(b, 'Volumi annui dei prodotti salvati.', 'ltp');
+    }
+    // KSU1: ciclo di ribaltamento dei centri di servizio 4100+4200 sui tre centri produttivi
+    function salvaCiclo(i) {
+      var b = copia(richiesto());
+      if (['ore', 'percentuali'].indexOf(i.driver) < 0) throw Error('Regola del ciclo: ore pianificate oppure percentuali fisse.');
+      b.generale.driver = i.driver;
+      CENTRI.forEach(function (k) { if (i[k + '_percentuale'] !== undefined) b.centri[k].percentuale = numero(i[k + '_percentuale'], k + ' quota %'); });
+      if (i.driver === 'percentuali' && Math.abs(CENTRI.reduce(function (t, k) { return t + b.centri[k].percentuale; }, 0) - 100) > .001) throw Error('Le quote del ciclo devono sommare a 100%.');
+      return nuovaRevisione(b, 'Ciclo di ribaltamento FT-STAB salvato: regola ' + (i.driver === 'ore' ? 'ore pianificate' : 'percentuali fisse') + '.', 'ksu');
+    }
+    // KSPI: calcolo iterativo delle tariffe di piano (qui un solo passo: i centri di servizio non ricevono attività)
+    function eseguiKSPI(i) {
+      var m = richiesto(), data = N().data(i.data), t = tariffe();
+      m.kspi = {revisione: m.revisione, data: data, tariffe: CENTRI.reduce(function (o, k) { o[k] = t[k].tariffa; return o; }, {})};
+      N().salva();
+      return '<p class="lab-nota">Tariffe di piano calcolate per la revisione ' + m.revisione + ': ' + CENTRI.map(function (k) { return CODICE[k] + ' ' + k + ' ' + L.eur(t[k].tariffa) + ' €/h'; }).join(' · ') + '. Ora CK11N può calcolare il costo standard.</p>';
+    }
+    function richiediKSPI() {
+      var m = richiesto();
+      if (!m.kspi || m.kspi.revisione !== m.revisione) throw Error('Manca il calcolo delle tariffe (KSPI) per la revisione ' + m.revisione + ' del piano: CO → Calcolo delle tariffe → Esegui. Senza tariffa delle attività CK11N non può valorizzare le ore.');
+    }
+    function okb9(i) {
+      var m = richiesto();
+      CLASSI.forEach(function (c) { var v = i['c' + c[0]]; if (v !== undefined && v !== '') { if (!cdcDi(v)) throw Error('Centro ' + v + ' inesistente.'); m.okb9[c[0]] = String(v); } });
+      N().salva(); return '<p class="lab-nota">Assegnazioni automatiche OKB9 salvate: valgono per le righe di costo senza centro, anche già registrate (il consuntivo si rilegge dalla contabilità).</p>';
+    }
+    // consuntivo effettivo dei centri dalla contabilità FI (ACDOCA): riga con centro, altrimenti OKB9
+    function effettivi(anno, mese) {
+      var m = modello() ? migra(modello()) : {okb9: OKB9, riattribuzioni: []}, perCentro = {}, righe = [];
+      var add = function (cdc, classe, imp) { var o = perCentro[cdc] = perCentro[cdc] || {}; o[classe] = r2((o[classe] || 0) + imp); };
+      S().registrazioni.forEach(function (r) {
+        if (ESCLUSI.indexOf(r.tipo) >= 0 || r.chiusura || Number(String(r.data).slice(0, 4)) !== Number(anno)) return;
+        if (mese && Number(String(r.data).slice(5, 7)) > Number(mese)) return;
+        r.righe.forEach(function (x) {
+          if (!CLASSI.some(function (c) { return c[0] === x.conto; })) return;
+          var cdc = x.cdc || m.okb9[x.conto], imp = x.dareAvere === 'DARE' ? x.importo : -x.importo;
+          add(cdc, x.conto, imp);
+          righe.push({data: r.data, documento: r.numero, tipo: r.tipo, cdc: cdc, origine: x.cdc ? 'riga FI' : 'OKB9', classe: x.conto, importo: r2(imp), testo: x.testo || r.descrizione});
+        });
+      });
+      (m.riattribuzioni || []).forEach(function (x) {
+        if (Number(String(x.data).slice(0, 4)) !== Number(anno) || (mese && Number(String(x.data).slice(5, 7)) > Number(mese))) return;
+        add(x.da, x.classe, -x.importo); add(x.a, x.classe, x.importo);
+        righe.push({data: x.data, documento: 'KB11N ' + x.numero, tipo: 'RIATTRIBUZIONE', cdc: x.da, origine: 'KB11N', classe: x.classe, importo: -x.importo, testo: x.testo});
+        righe.push({data: x.data, documento: 'KB11N ' + x.numero, tipo: 'RIATTRIBUZIONE', cdc: x.a, origine: 'KB11N', classe: x.classe, importo: x.importo, testo: x.testo});
+      });
+      return {perCentro: perCentro, righe: righe};
+    }
+    // KB11N: riattribuzione manuale di un costo primario da un centro a un altro (solo CO, nessuna scrittura FI)
+    function riattribuisci(i) {
+      var m = richiesto(), data = N().data(i.data), da = String(i.da || ''), a = String(i.a || ''), classe = String(i.classe || '');
+      if (!cdcDi(da) || !cdcDi(a) || da === a) throw Error('Scegli due centri di costo diversi.');
+      if (!CLASSI.some(function (c) { return c[0] === classe; })) throw Error('Classe di costo primaria non valida.');
+      if (Number(data.slice(0, 4)) !== m.anno) throw Error('La riattribuzione deve cadere nell’anno del piano ' + m.anno + '.');
+      var imp = numero(i.importo, 'Importo', .01), disp = (effettivi(m.anno).perCentro[da] || {})[classe] || 0;
+      if (imp > disp + 0.004) throw Error('Sul centro ' + da + ' per la classe ' + classe + ' ci sono solo ' + L.eur(disp) + ' € effettivi: non si riattribuisce più di quanto registrato.');
+      m.riattribuzioni.push({numero: m.riattribuzioni.length + 1, data: data, da: da, a: a, classe: classe, importo: imp, testo: String(i.testo || '').trim() || 'riattribuzione manuale'});
+      N().salva(); return '<p class="lab-nota">KB11N: ' + L.eur(imp) + ' € della classe ' + classe + ' spostati dal centro ' + da + ' al centro ' + a + '. Solo CO: la contabilità FI non cambia.</p>';
+    }
+    // tabella di controllo del budget del personale: paghe (PCP) ↔ piano ↔ consuntivo delle paghe registrate
+    function controlloPersonale() {
+      var m = richiesto(), pc = costoPaghe(), eff = effettivi(m.anno).perCentro, pers = function (o) { return r2(['80', '81', '82'].reduce(function (t, k) { return t + (Number((o || {})[k]) || 0); }, 0)); };
+      return CDC.map(function (c) {
+        var paghe = pc[c.codice] ? pers(pc[c.codice]) : 0, v0 = pers(m.piano['0'][c.codice]), v1 = pers(m.piano['1'][c.codice]), cons = pers(eff[c.codice]);
+        return {cdc: c.codice, nome: c.nome, tipo: c.tipo, dipendenti: pc[c.codice] ? pc[c.codice].dipendenti : [], paghe: paghe, piano: v0, versione1: v1, differenza: r2(v0 - paghe), consuntivo: cons,
+          consumo: v0 ? cons / v0 * 100 : null};
+      });
+    }
+    function primo(m) { return migra(m); }
+    // BPC → S/4 (retraction): il budget approvato sostituisce la versione 0 di KP06 per i centri ricevuti
+    function retract(piano, testo) {
+      var b = copia(richiesto()); migra(b);
+      Object.keys(piano).forEach(function (cdc) { if (!cdcDi(cdc)) throw Error('Centro ' + cdc + ' inesistente.'); var r = {};
+        Object.keys(piano[cdc]).forEach(function (k) { if (!CLASSI.some(function (c) { return c[0] === k; })) throw Error('Classe ' + k + ' non pianificabile.'); var v = r2(piano[cdc][k]); if (v < 0) throw Error('Importi negativi non ammessi nel piano.'); if (v) r[k] = v; });
+        b.piano['0'][cdc] = r; });
+      deriva(b); return nuovaRevisione(b, testo, 'kp06');
+    }
+    return {attivo: attivo, modello: modello, attiva: attiva, salvaBudget: salvaBudget, salvaStandard: salvaStandard, tariffe: tariffe, fotografia: fotografia, tariffa: tariffa, consuntivo: consuntivo, report: report, centri: CENTRI.slice(),
+      CDC: CDC, CODICE: CODICE, CLASSI: CLASSI, SECONDARIE: SECONDARIE, VERSIONI: VERSIONI, cdcDi: cdcDi, totale: totale, prepara: function () { return primo(richiesto()); },
+      salvaKP06: salvaKP06, trasferisciPaghe: trasferisciPaghe, costoPaghe: costoPaghe, salvaKP26: salvaKP26, salvaVolumi: salvaVolumi, salvaCiclo: salvaCiclo,
+      eseguiKSPI: eseguiKSPI, richiediKSPI: richiediKSPI, retract: retract, okb9: okb9, effettivi: effettivi, riattribuisci: riattribuisci, controlloPersonale: controlloPersonale};
   })();
   return {cpm: cpm, elementi: elementi, scheda: scheda, calcola: calcola, tabellaStima: tabellaStima, marca: marca, rilascia: rilascia, pianifica: pianifica,
     sovraccosti: sovraccosti, varianze: varianze, liquida: liquida, ml: ml,

@@ -1,100 +1,102 @@
-// Solo dati sintetici, nessuna rete o azione reale. node tests/budget-guida-campi.js
+// Solo dati sintetici, nessuna rete. node tests/budget-guida-campi.js
+// Ciclo di pianificazione CO come in SAP: passo 1 spiegato, KP06 per centro e classe (versioni, PCP dalle paghe e
+// tabella di controllo), KP26/LTP, KSU1, KSPI obbligatorio prima di CK11N, KSB1 automatico da FI e KB11N.
 const fs = require('fs'), path = require('path'), assert = require('assert'), {JSDOM} = require('jsdom');
 const root = path.join(__dirname, '..'), key = 'budget-guida-test';
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 const scripts = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js',
   'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
   'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js',
-  'app/blueprints/erp_costi/static/copc-logica.js'];
+  'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_bpc/static/bpc-logica.js', 'app/blueprints/erp_controllo/static/co-percorso.js',
+  'app/blueprints/erp_paghe/static/py-logica.js'];
 let checks = 0;
 function ok(v, text) { checks++; assert.ok(v, text); }
-function near(a, b, text) { ok(Math.abs(a-b) < .006, text + ': ' + a); }
+function near(a, b, text) { ok(Math.abs(a - b) < .006, text + ': ' + a); }
 function fresh(saved) {
-  const w = new JSDOM('<!doctype html><div id="lab"></div>', {url:'https://sim.local/', runScripts:'outside-only'}).window;
+  const w = new JSDOM('<!doctype html><div id="lab"></div>', {url: 'https://sim.local/vuoto/s4/controllo/', runScripts: 'outside-only'}).window;
   w.confirm = () => true;
   if (saved) w.localStorage.setItem(key, JSON.stringify(saved));
   scripts.forEach(f => w.eval(read(f))); w.SD4.avvia(key); return w;
 }
-function render(w) { w.LAB_PAGINA = {chiave:key, pagina:'scheda'}; w.eval(read('app/blueprints/erp_costi/static/copc-pagine.js')); }
-function field(w, id, v) { const x = w.document.getElementById(id); if (v !== undefined) x.value = v; return x; }
-function click(w, form, action) { w.document.querySelector('[data-prefisso="'+form+'"] [data-azione="'+action+'"]').click(); }
+function pagina(w, p) { w.LAB_PAGINA = {chiave: key, pagina: p}; w.eval(read('app/blueprints/erp_controllo/static/co-pagine.js')); return w.document.body.textContent; }
+function field(w, id, v) { const x = w.document.getElementById(id); assert.ok(x, 'campo ' + id); if (v !== undefined) x.value = v; return x; }
+function click(w, form, action) { w.document.querySelector('[data-prefisso="' + form + '"] [data-azione="' + action + '"]').click(); return w.document.getElementById(form + '-esito'); }
+function scegli(w, id, v) { const x = field(w, id, v); x.dispatchEvent(new w.Event('change')); }
+
 let w = fresh(), n = w.SD4.N, cp = w.PC4.cpm;
-n.avvia({modo:'costituzione', data:'2026-12-01'});
-let before = JSON.stringify(n.S); render(w);
-ok(JSON.stringify(n.S) === before && !cp.attivo(), 'render legacy non attiva CPM né muta lo stato');
+n.avvia({modo: 'costituzione', data: '2026-12-01'});
+// Passo 1: spiegato, poi conferma esplicita
+let before = JSON.stringify(n.S), testo = pagina(w, 'centri');
+ok(JSON.stringify(n.S) === before && !cp.attivo(), 'aprire la pagina non apre il piano');
+for (const t of ['Passo 1', 'Che cosa fa questo passo', 'Che cosa NON fa', '4100 Magazzino', '4230 Saldatura', 'ORE', 'Ciclo di pianificazione CO']) ok(testo.includes(t), 'passo 1 spiega: ' + t);
+let es = click(w, 'cpm-start', 'start'); ok(es.classList.contains('ko') && !cp.attivo(), 'serve la conferma');
 field(w, 'cpm-start-conferma', 'ATTIVA'); click(w, 'cpm-start', 'start');
-before = JSON.stringify(n.S); render(w);
-ok(JSON.stringify(n.S) === before, 'aiuti e natura iniziale non modificano i dati');
-const inputs = w.document.querySelectorAll('[data-prefisso="cpm-budget"] input, [data-prefisso="cpm-budget"] select');
-for (const input of inputs) {
-  const help = w.document.getElementById(input.getAttribute('aria-describedby'));
-  ok(help && help.textContent.length > 70, 'guida esplicita e accessibile per '+input.id);
-  ok(!help.id.startsWith('cpm-budget-'), 'aiuto non raccolto come campo dal motore');
-}
-const text = w.document.body.textContent;
-for (const term of ['ammortamenti', 'vita utile', '28 €/h', '31,40 €/pz', '9.420', '10.500', 'stagionalità', 'snapshot', 'non prezzo di vendita']) {
-  ok(text.includes(term), 'guida espone '+term);
-}
-for (const id of ['data','riferimento','centro','natura','importo']) {
-  ok(!!field(w,'cpm-actual-'+id).getAttribute('aria-describedby'), 'guida fonte '+id);
-}
-const fi = JSON.stringify(n.S.registrazioni), materiali = JSON.stringify(n.S.materiali);
-field(w,'cpm-budget-Taglio_personale','36.000,00');
-field(w,'cpm-budget-vol_TR-STD','1.200'); click(w,'cpm-budget','budget');
-ok(cp.modello().revisione === 2, 'salvataggio dal modulo incrementa solo la revisione prevista');
-ok(w.document.querySelector('#cpm-budget-esito').classList.contains('ok'), 'budget valido accettato');
-ok(JSON.stringify(n.S.registrazioni) === fi && JSON.stringify(n.S.materiali) === materiali, 'nessuna FI o modifica materiali');
-cp.report().centri.forEach((r,i) => {
-  near(r.budget,42000,'budget centro'); near(r.ribaltato,6000,'riparto non duplicato'); near(r.tariffa,28,'tariffa');
-  near(r.oreRichieste,[300,240,480][i],'ore volume annuo'); near(r.saturazione,[20,16,32][i],'saturazione');
-});
-near(w.PC4.elementi('TR-STD',300).totale,9420,'esempio ordine mensile invariato');
-function invalid(id, value, re) {
-  const state = JSON.stringify(n.S), old = field(w,id).value; field(w,id,value); click(w,'cpm-budget','budget');
-  const esito = field(w,'cpm-budget-esito');
-  ok(esito.classList.contains('ko') && re.test(esito.textContent), 'errore leggibile per '+id);
-  ok(esito.textContent.includes('dati precedenti restano invariati'), 'spiega mancato salvataggio');
-  ok(JSON.stringify(n.S) === state && field(w,id).value === value, 'errore preserva stato e input da correggere');
-  field(w,id,old);
-}
-invalid('cpm-budget-Taglio_orePiano','0',/ore tariffa/);
-invalid('cpm-budget-Taglio_orePiano','1600',/capacità/);
-invalid('cpm-budget-Taglio_personale','abc',/numerico/);
-invalid('cpm-budget-produttivi','-1',/non negativo/);
-invalid('cpm-budget-anno','2027',/annuale/);
-field(w,'cpm-budget-driver','percentuali'); invalid('cpm-budget-Taglio_percentuale','50',/100%/);
-field(w,'cpm-budget-Taglio_percentuale','50'); field(w,'cpm-budget-Piegatura_percentuale','30'); field(w,'cpm-budget-Saldatura_percentuale','20');
-click(w,'cpm-budget','budget'); near(cp.tariffe().Taglio.ribaltato,9000,'percentuali esplicite restano ammesse');
-// Le opzioni del consuntivo prevengono combinazioni centro/natura invalide senza scritture.
-before = JSON.stringify(n.S);
-let centro = field(w,'cpm-actual-centro'), natura = field(w,'cpm-actual-natura');
-ok(Array.from(natura.options).map(x=>x.value).join('/') === 'personale/indiretti', 'nature reparti');
-centro.value = 'Generale'; centro.dispatchEvent(new w.Event('change'));
-ok(Array.from(natura.options).map(x=>x.value).join('/') === 'produttivi/amministrativi', 'nature Generale');
-centro.value = 'Taglio'; centro.dispatchEvent(new w.Event('change'));
-ok(natura.value === 'personale' && JSON.stringify(n.S) === before, 'cambio centro solo UI');
-field(w,'cpm-actual-data','2026-12-31'); field(w,'cpm-actual-riferimento','PAG-SIM-2026-12-Taglio'); field(w,'cpm-actual-importo','3000');
-click(w,'cpm-actual','actual');
-ok(cp.modello().consuntivi.length === 1 && JSON.stringify(n.S.registrazioni) === fi, 'fonte analitica senza FI');
-field(w,'cpm-actual-data','2026-12-31'); field(w,'cpm-actual-riferimento','PAG-SIM-2026-12-Taglio'); field(w,'cpm-actual-importo','3000');
-before = JSON.stringify(n.S); click(w,'cpm-actual','actual');
-ok(field(w,'cpm-actual-esito').textContent.includes('già rilevata') && JSON.stringify(n.S) === before, 'duplicati respinti');
+ok(cp.attivo(), 'piano CO aperto');
+ok(w.COPERCORSO.tappe(n.S).map(t => !!t[3]).join() === 'true,false,false,false,false,false,false', 'dopo il passo 1 la barra indica KP06 come prossimo');
+testo = w.document.body.textContent;
+for (const t of ['H-FT', 'KSH3', 'KL03', 'KA03', 'OKB9', '943000', '944000', 'Sara Bianchi']) ok(testo.includes(t), 'anagrafiche: ' + t);
+const fi = JSON.stringify(n.S.registrazioni);
+// KP06: per centro, versione 0
+testo = pagina(w, 'kp06');
+ok(testo.includes('Tabella di controllo del budget del personale') && testo.includes('Come si compila e come si usa'), 'tabella di controllo spiegata');
+scegli(w, 'cdc', '4200'); field(w, 'kp06-k54', '3100'); field(w, 'kp06-k50', '2900'); field(w, 'kp06-k86', '12.000,00');
+es = click(w, 'kp06', 'kp06'); ok(es.classList.contains('ok'), 'KP06 4200 salvato: ' + es.textContent);
+near(cp.modello().generale.produttivi, 18000, 'costi comuni 18.000 dalle classi');
+near(cp.tariffe().Taglio.tariffa, 28, 'tariffa invariata a parità di totale');
+ok(JSON.stringify(n.S.registrazioni) === fi, 'KP06 senza scritture FI');
+before = JSON.stringify(n.S); field(w, 'kp06-k80', 'abc'); es = click(w, 'kp06', 'kp06');
+ok(es.classList.contains('ko') && /numer/.test(es.textContent) && JSON.stringify(n.S) === before, 'errore leggibile senza salvare');
+// PCP dalle paghe nella versione 1: tariffe invariate
+const rev = cp.modello().revisione;
+field(w, 'pcp-versione', '1'); es = click(w, 'pcp', 'pcp'); ok(es.classList.contains('ok'), 'PCP versione 1');
+ok(cp.modello().revisione === rev, 'la versione 1 non crea revisioni');
+const ctrl = Object.fromEntries(cp.controlloPersonale().map(r => [r.cdc, r]));
+near(ctrl['4100'].paghe, 37807.06, 'Rossi 4100'); near(ctrl['4200'].paghe, 40507.57, 'Bianchi 4200'); near(ctrl['4300'].paghe, 46808.74, 'Verdi 4300');
+near(ctrl['4210'].differenza, 36000, 'reparto: personale da assumere'); near(ctrl['4200'].versione1, 40507.57, 'versione 1 compilata');
+field(w, 'pcp-versione', '0'); es = click(w, 'pcp', 'pcp'); ok(es.classList.contains('ko') && /SOSTITUISCI/.test(es.textContent), 'versione 0 solo con conferma');
+// KP26 / LTP
+testo = pagina(w, 'kp26');
+field(w, 'kp26-Taglio_orePiano', '1600'); es = click(w, 'kp26', 'kp26'); ok(es.classList.contains('ko') && /capacità/.test(es.textContent), 'ore oltre la capacità');
+field(w, 'kp26-Taglio_orePiano', '1500'); es = click(w, 'kp26', 'kp26'); ok(es.classList.contains('ok'), 'KP26 salvato');
+es = click(w, 'ltp', 'ltp'); ok(es.classList.contains('ok'), 'LTP salvato');
+ok(/300/.test(w.document.body.textContent) && /20/.test(w.document.body.textContent), 'ore richieste e saturazione');
+// KSU1
+pagina(w, 'ksu'); field(w, 'ksu1-driver', 'percentuali'); field(w, 'ksu1-Taglio_percentuale', '50'); es = click(w, 'ksu1', 'ksu1');
+ok(es.classList.contains('ko') && /100%/.test(es.textContent), 'percentuali devono fare 100');
+field(w, 'ksu1-driver', 'ore'); es = click(w, 'ksu1', 'ksu1'); ok(es.classList.contains('ok'), 'ciclo a ore');
+// KSPI obbligatorio prima di CK11N
+assert.throws(() => w.PC4.calcola({materiale: 'TR-STD', data: '2026-12-01'}), /KSPI/); checks++;
+testo = pagina(w, 'kspi'); ok(/non sono calcolate/.test(testo), 'avviso KSPI mancante');
+field(w, 'kspi-data', '2026-12-01'); es = click(w, 'kspi', 'kspi'); ok(es.classList.contains('ok') && /28,00/.test(es.textContent), 'KSPI 28 €/h');
+w.PC4.calcola({materiale: 'TR-STD', data: '2026-12-01'}); near(n.S.costing.stime['TR-STD'].unitario, 31.40, 'CK11N dopo KSPI');
+const tappe = w.COPERCORSO.tappe(n.S); ok(tappe.slice(0, 5).every(t => t[3]), 'barra: prime cinque tappe fatte');
+n = w.SD4.N;
+// KSB1: consuntivo automatico da FI (paghe con centro, altri costi con OKB9) e KB11N solo CO
+n.post({data: '2026-12-31', tipo: 'PAGHE', rif: 'PAGHE 2026-12', descrizione: 'paghe di prova', righe: [
+  {conto: '80', dareAvere: 'DARE', importo: 2437.5, cdc: '4200'}, {conto: '81', dareAvere: 'DARE', importo: 757.57, cdc: '4200'}, {conto: '27', dareAvere: 'AVERE', importo: 3195.07}]});
+n.post({data: '2026-12-31', tipo: 'ASSESTAMENTO', descrizione: 'rateo fitto', righe: [{conto: '86', dareAvere: 'DARE', importo: 1033.33}, {conto: '39', dareAvere: 'AVERE', importo: 1033.33}]});
+n.salva();
+const eff = cp.effettivi(2026).perCentro;
+near(cp.totale(eff['4200']), 4228.40, 'consuntivo 4200 = paga + fitto via OKB9');
+testo = pagina(w, 'ksb1'); ok(/OKB9/.test(testo) && /riga FI/.test(testo), 'origine delle righe visibile');
+const fi2 = JSON.stringify(n.S.registrazioni);
+field(w, 'kb11n-data', '2026-12-31'); field(w, 'kb11n-importo', '2437,50'); es = click(w, 'kb11n', 'kb11n');
+ok(es.classList.contains('ok'), 'KB11N registrata'); ok(JSON.stringify(n.S.registrazioni) === fi2, 'KB11N solo CO');
+near(cp.totale(cp.effettivi(2026).perCentro['4230']), 2437.5, 'costo spostato su 4230');
+field(w, 'kb11n-data', '2026-12-31'); field(w, 'kb11n-importo', '99999'); es = click(w, 'kb11n', 'kb11n');
+ok(es.classList.contains('ko') && /solo/.test(es.textContent), 'non si sposta più del registrato');
+testo = pagina(w, 'report');
+for (const t of ['S_ALR_87013611', 'stagionalità', 'Residuo', 'Assorbito']) ok(testo.includes(t), 'report: ' + t);
+const r = cp.report(); near(r.centri[2].primari, 2437.5, 'primari Saldatura dal KB11N');
+// controllo del personale: il consuntivo del registro paghe appare
+near(Object.fromEntries(cp.controlloPersonale().map(x => [x.cdc, x.consuntivo]))['4200'], 757.57, 'consuntivo paghe 4200 dopo KB11N della classe 80');
+// guida dell'esercizio allineata alle transazioni
 w.eval(read('app/blueprints/guida/static/esercizi/cpm-formas.js'));
 const guida = JSON.stringify(w.MSA_CPM_FORMAS);
-for (const term of ['Ammortamenti senza duplicazioni','Capacità / Ore pianificate tariffa','Annuale vs mensile','Imputazione a una commessa mensile','9420','TFR']) ok(guida.includes(term),'esercizio descrive '+term);
-// Compatibilità: apertura della pagina non modifica ordini legacy né snapshot già persistiti.
+for (const t of ['KP06', 'KP26', 'KSU1', 'KSPI', 'KB11N', 'Tabella di controllo', 'NON fa', '37.807,06', 'erp_controllo.kspi']) ok(guida.includes(t), 'esercizio: ' + t);
+// compatibilità: un modello salvato prima delle anagrafiche si migra senza cambiare tariffe
 w.close();
 const legacy = JSON.parse(read('tests/fixtures/dicembre-wms-legacy.json'));
-w = fresh(legacy); before = JSON.stringify(w.SD4.N.S); render(w);
-ok(JSON.stringify(w.SD4.N.S) === before && !w.PC4.cpm.attivo(), 'vecchi dati inalterati dopo apertura'); w.close();
-w = fresh(); n = w.SD4.N; cp = w.PC4.cpm;
-n.avvia({modo:'costituzione', data:'2026-12-01'}); cp.attiva({conferma:'ATTIVA'});
-for (const materiale of ['TR-STD','SL-TAGLIO']) w.PC4.calcola({materiale,data:'2026-12-01'});
-w.PC4.marca({}); w.PC4.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
-w.PP4.ordine({materiale:'TR-STD',qta:300,data:'2026-12-02'});
-const piano = JSON.stringify(n.S.produzione[0].piano); render(w);
-field(w,'cpm-budget-Taglio_personale','51000'); click(w,'cpm-budget','budget');
-ok(JSON.stringify(n.S.produzione[0].piano) === piano, 'budget guidato preserva snapshot ordine avviato');
-n.salva(); const saved = JSON.parse(w.localStorage.getItem(key)); w.close(); w = fresh(saved); render(w);
-ok(JSON.stringify(w.SD4.N.S.produzione[0].piano) === piano, 'snapshot preservato al reload'); w.close();
-console.log('✓ Budget guidato, aiuti campo per campo, annuale/mese, fonti e compatibilità: '+checks+' controlli');
+w = fresh(legacy); before = JSON.stringify(w.SD4.N.S); pagina(w, 'kp06');
+ok(JSON.stringify(w.SD4.N.S) === before && !w.PC4.cpm.attivo(), 'dati storici inalterati dopo apertura'); w.close();
+console.log('✓ Ciclo CO SAP: passo 1, KP06, PCP e tabella di controllo, KP26, KSU1, KSPI, KSB1/KB11N, report: ' + checks + ' controlli');
