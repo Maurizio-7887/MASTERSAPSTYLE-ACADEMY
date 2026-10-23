@@ -161,7 +161,8 @@ vicino(saldo('90') + saldo('91') + saldo('92'), 0, 'conti di chiusura a zero');
 ok(p.w.TS4.partite('cliente').length === 0 && p.w.TS4.partite('fornitore').length === 0, 'nessuna partita fantasma dopo la riapertura');
 ok(p.w.WM4.quadratura().every(q => q.ok) && p.S().giacenze.FERRO === 2200, 'magazzino invariato e quadrato');
 { const S = p.S(); ok(!S.msaRagioneria.coda.length && S.msaRagioneria.esiti.every(e => e.corretto && !e.conAiuto), 'quiz di ragioneria tutti risolti');
-  ok(S.registrazioni.filter(r => r.quiz === false).length === 3, 'epilogo, chiusura e riapertura senza domanda'); }
+  ok(S.registrazioni.filter(r => r.quiz === false).length === 0, 'epilogo, chiusura e riapertura ricostruiti dall’allievo come gli altri documenti');
+  ok(['EPILOGO','CHIUSURA_SP','RIAPERTURA'].every(t => S.msaRagioneria.visti.some(k => S.registrazioni.some(r => r.tipo === t))), 'domande di chiusura e riapertura presentate'); }
 for (const passo of p.w.MSA_ESERCIZIO.passi.filter(x => x.fatto)) ok(passo.fatto({S: p.S()}), 'spunta automatica: ' + passo.titolo);
 fs.writeFileSync(path.join(__dirname, 'ragioneria-chiusura-finale.json'), JSON.stringify(p.S()));
 p.w.close();

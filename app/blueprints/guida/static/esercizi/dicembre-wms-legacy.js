@@ -266,7 +266,7 @@
      attesa:'Epilogo dei costi e dei ricavi nel conto 90; utile: D 90 / A 32 Utile d’esercizio 1.855,36; chiusura delle attività e passività nel 91. Dopo, nessuna scrittura con data 2026.',
      nota:'Il pannello chiede di ricostruire solo il documento dell’utile: epilogo e chiusura dei conti patrimoniali sono riporti meccanici. Leggili nel libro giornale.',fatto:function(h){return !!(h.S.chiusure || {})['2026'];}},
     // ── 16 · riapertura e gennaio ──
-    {g:'16 · Riapertura e gennaio',data:'01/01/2027',titolo:'Riapri i conti al 1° gennaio 2027',dove:{ep:H+'riapertura'},percorso:'FI → IVA, imposte, chiusura → Riapertura',campi:[['Nuovo esercizio','2027'],['Data','01/01/2027']],
+    {g:'16 · Riapertura e gennaio',data:'01/01/2027',titolo:'Riapri i conti al 1° gennaio 2027',contabile:true,dove:{ep:H+'riapertura'},percorso:'FI → IVA, imposte, chiusura → Riapertura',campi:[['Nuovo esercizio','2027'],['Data','01/01/2027']],
      attesa:'D attività / A 92 e D 92 / A passività per 99.365,38: macchine 29.000 (fondo 241,67), risconto 1.098,08, semilavorati 333,40, ferro 703, banca 51.886,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.855,36, anticipo bancario 10.329,98, rateo 1.033,33, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.',
      fatto:function(h){var c=(h.S.chiusure || {})['2026'];return !!c && !!c.riapertura;}},
     {g:'16 · Riapertura e gennaio',data:'01/01/2027',titolo:'Storna il risconto e il rateo',contabile:true,dove:{ep:H+'assestamenti'},percorso:'FI → IVA, imposte, chiusura → Ratei e risconti → Storno al 1° gennaio',campi:[['Data dello storno','01/01/2027']],

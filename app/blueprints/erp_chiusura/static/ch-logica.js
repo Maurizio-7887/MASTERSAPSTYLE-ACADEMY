@@ -145,7 +145,7 @@ window.CH4 = (function () {
     var righe = [], tot = 0;
     ce.forEach(function (x) { righe.push({conto: x.conto, dareAvere: x.saldo > 0 ? 'AVERE' : 'DARE', importo: Math.abs(x.saldo), testo: 'epilogo'}); tot = r2(tot + x.saldo); });
     if (Math.abs(tot) > 0.004) righe.push({conto: '90', dareAvere: tot > 0 ? 'DARE' : 'AVERE', importo: Math.abs(tot), testo: tot > 0 ? 'totale costi meno ricavi' : 'totale ricavi meno costi'});
-    var r1 = righe.length ? n.post({data: al, tipo: 'EPILOGO', rif: 'CHIUSURA ' + anno, descrizione: 'Epilogo ' + anno + ': costi e ricavi chiusi nel Conto economico (90)', righe: righe, chiusura: 'epilogo', quiz: false}) : null;
+    var r1 = righe.length ? n.post({data: al, tipo: 'EPILOGO', rif: 'CHIUSURA ' + anno, descrizione: 'Epilogo ' + anno + ': costi e ricavi chiusi nel Conto economico (90)', righe: righe, chiusura: 'epilogo'}) : null;
     // 2. risultato d'esercizio al conto 32
     var utile = r2(-tot), r2doc = Math.abs(utile) > 0.004 ? n.post({data: al, tipo: 'RISULTATO', rif: 'CHIUSURA ' + anno, descrizione: (utile >= 0 ? 'Utile' : 'Perdita') + ' d\'esercizio ' + anno + ': ' + L.eur(Math.abs(utile)), chiusura: 'risultato',
       righe: utile >= 0 ? [{conto: '90', dareAvere: 'DARE', importo: utile, testo: 'chiusura conto economico'}, {conto: '32', dareAvere: 'AVERE', importo: utile, testo: 'utile ' + anno}]
@@ -156,7 +156,7 @@ window.CH4 = (function () {
     var righe3 = [], dare91 = 0, avere91 = 0;
     sp2.forEach(function (x) { var y = {conto: x.conto, dareAvere: x.saldo > 0 ? 'AVERE' : 'DARE', importo: Math.abs(x.saldo), testo: 'chiusura'}; if (x.partner) y.partner = x.partner; righe3.push(y); if (x.saldo > 0) dare91 += x.saldo; else avere91 -= x.saldo; });
     righe3.push({conto: '91', dareAvere: 'DARE', importo: r2(dare91), testo: 'attività'}, {conto: '91', dareAvere: 'AVERE', importo: r2(avere91), testo: 'passività e patrimonio netto'});
-    var r3 = n.post({data: al, tipo: 'CHIUSURA_SP', rif: 'CHIUSURA ' + anno, descrizione: 'Chiusura ' + anno + ': attività e passività nello Stato patrimoniale finale (91)', righe: righe3, chiusura: 'stato patrimoniale', quiz: false});
+    var r3 = n.post({data: al, tipo: 'CHIUSURA_SP', rif: 'CHIUSURA ' + anno, descrizione: 'Chiusura ' + anno + ': attività e passività nello Stato patrimoniale finale (91)', righe: righe3, chiusura: 'stato patrimoniale'});
     s.chiusure[anno] = {data: al, utile: utile, epilogo: r1 ? r1.numero : '', risultato: r2doc ? r2doc.numero : '', chiusuraSP: r3.numero, saldi: sp2, avvertenze: c};
     n.salva(); return r2doc || r3;
   }
@@ -169,7 +169,7 @@ window.CH4 = (function () {
     var righe = [], d92 = 0, a92 = 0;
     ch.saldi.forEach(function (x) { var y = {conto: x.conto, dareAvere: x.saldo > 0 ? 'DARE' : 'AVERE', importo: Math.abs(x.saldo), testo: 'riapertura'}; if (x.partner) y.partner = x.partner; righe.push(y); if (x.saldo > 0) a92 += x.saldo; else d92 -= x.saldo; });
     righe.push({conto: '92', dareAvere: 'AVERE', importo: r2(a92), testo: 'attività'}, {conto: '92', dareAvere: 'DARE', importo: r2(d92), testo: 'passività e patrimonio netto'});
-    var r = n.post({data: data, tipo: 'RIAPERTURA', rif: 'RIAPERTURA ' + anno, descrizione: 'Riapertura ' + anno + ': attività e passività dallo Stato patrimoniale iniziale (92), come i saldi di chiusura ' + prec, righe: righe, chiusura: 'riapertura', quiz: false});
+    var r = n.post({data: data, tipo: 'RIAPERTURA', rif: 'RIAPERTURA ' + anno, descrizione: 'Riapertura ' + anno + ': attività e passività dallo Stato patrimoniale iniziale (92), come i saldi di chiusura ' + prec, righe: righe, chiusura: 'riapertura'});
     ch.riapertura = r.numero; n.salva(); return r;
   }
   // destinazione dell'utile deliberata dall'assemblea: 5% a riserva legale, il resto a riserve (conto 30)

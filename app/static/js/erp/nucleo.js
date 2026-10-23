@@ -134,7 +134,7 @@
           var k = chiaveRagioneria(r);
           if (!visti.has(k)) {
             visti.add(k); q.visti.push(k);
-            if (r.quiz === false) return;   // epilogo, chiusura e riapertura dei conti: scritture meccaniche, niente domanda
+            if (r.quiz === false) return;   // solo documenti salvati prima con quiz:false; epilogo, chiusura e riapertura ora si ricostruiscono come le altre
             q.coda.push({chiave: k, documento: JSON.parse(JSON.stringify(r)), risposte: [], tentativi: 0});
             aggiunti++;
           }

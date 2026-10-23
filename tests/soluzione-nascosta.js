@@ -30,8 +30,13 @@ for (const [codice, e] of Object.entries(ESERCIZI)) {
     ok(!SCRITTURA.test(p.nota || ''), codice + ': la nota visibile prima del tentativo rivela la scrittura in «' + p.titolo + '»');
     for (const c of p.campi || []) ok(!SCRITTURA.test(c[1]), codice + ': un campo rivela la scrittura in «' + p.titolo + '»: ' + c[1]);
   }
+  if (codice !== 'completo-formas')   // i laboratori FORMAS separati non fanno parte del caso principale
+    for (const p of E.passi) if (SCRITTURA.test(p.attesa || '')) ok(p.contabile, codice + ': passo con scrittura non marcato contabile: «' + p.titolo + '»');
+  ok(E.passi.filter(p => /^Riapri i conti/.test(p.titolo)).every(p => p.contabile), codice + ': la riapertura si ricostruisce prima di vedere la soluzione');
   w.close();
 }
+// epilogo, chiusura nello stato patrimoniale e riapertura generano la domanda di ragioneria come gli altri documenti
+ok(!/quiz: *false/.test(fs.readFileSync(path.join(__dirname, '../app/blueprints/erp_chiusura/static/ch-logica.js'), 'utf8')), 'chiusura e riapertura non escluse dal laboratorio di ragioneria');
 // pannello reale: ragioneria, passo 2 «Avvia l'azienda didattica» (contabile)
 function corpo(w) { return w.document.querySelector('.msa-g-pannello').textContent; }
 let w = carica('ragioneria-wms', {}, 1); w.eval(G('pannello.js'));
