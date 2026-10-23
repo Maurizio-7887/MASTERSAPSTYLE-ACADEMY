@@ -52,8 +52,12 @@
     'TR-PED': {nome: 'Transenna pedonale (base)', tipo: 'FERT', um: 'pz', std: 29.55, peso: 9, ferro: 9, ore: {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.30}, attrezzaggio: 3},
     'FERRO': {nome: 'Tubo di ferro', tipo: 'ROH', um: 'kg', std: 0.95, peso: 1},
   };
-  var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg', iban: 'IT60X0542811101000000123456'},
+  // ferro: true = fornitore di tubolare, interpellato nelle richieste di offerta (ME41)
+  var FORNITORI = {'F100': {nome: 'Acciaierie Umbre Spa', regione: 'Umbria', pagamento: '60 gg', iban: 'IT60X0542811101000000123456', ferro: true},
                    'F200': {nome: 'Gamma Steel Engineering LLC', regione: 'USA', pagamento: '30 gg', valuta: 'USD', iban: 'US-ABA 026009593 / 4417 2210'},
+                   'F500': {nome: 'Siderurgica Toscana Spa', regione: 'Toscana', pagamento: '60 gg', iban: 'IT22K0306902887100000011223', ferro: true},
+                   'F600': {nome: 'Ferro Lombardo Srl', regione: 'Lombardia', pagamento: '90 gg', iban: 'IT71M0503411701000000044556', ferro: true},
+                   'F700': {nome: 'Acciai del Tevere Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT05P0200803284000000077889', ferro: true},
                    'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'},
                    'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'}};
   // azienda nuova: i tre stadi della transenna standard diventano materiali veri, con scorta e ordine propri (taglio → piega → saldatura)
@@ -72,7 +76,7 @@
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
     compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0,
-    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, seriale: 0, cespite: 0, riba: 0, factoring: 0, fatturaServizi: 0};
+    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, rfq: 6000000000, seriale: 0, cespite: 0, riba: 0, factoring: 0, fatturaServizi: 0};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',
@@ -99,7 +103,7 @@
       S.seriali[m] = {}; Object.keys((S.lotti || {})[m] || {}).forEach(function (l) { for (var i = 0; i < Math.round(S.lotti[m][l].qta); i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); S.seriali[m][sn] = {stato: 'magazzino', lotto: l, cliente: '', storia: [{data: S.avviato || '', tipo: '561', rif: 'seriali attivati su uno stato esistente'}]}; } }); }); }
     if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }
     Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; else if (S.clienti[k].fido == null) { S.clienti[k].fido = n.clienti[k].fido; S.clienti[k].rischio = n.clienti[k].rischio; } });
-    Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; });
+    Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else { if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; if (n.fornitori[k].ferro && S.fornitori[k].ferro == null) S.fornitori[k].ferro = true; } });
     return S;
   }
 

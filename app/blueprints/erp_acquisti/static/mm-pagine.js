@@ -1,4 +1,4 @@
-/* SISTEMA INTEGRATO — Acquisti: ME21N ordine d'acquisto, MIGO 101 entrata merci, MIRO fattura fornitore. */
+/* SISTEMA INTEGRATO — Acquisti: ME41/ME47/ME49 richieste di offerta e confronto, ME21N ordine d'acquisto, MIGO 101 entrata merci, MIRO fattura fornitore. */
 (function () {
   'use strict';
   var L = window.LabMotore, U = window.S4UI, SD = window.SD4, MM = window.MM4, C = window.LAB_PAGINA || {};
@@ -8,10 +8,56 @@
   var roh = function () { return Object.keys(S().materiali).filter(function (k) { return S().materiali[k].tipo === 'ROH'; }).map(function (k) { return [k, k + ' — ' + S().materiali[k].nome + ' (standard ' + eur(S().materiali[k].std) + ' €/' + S().materiali[k].um + ')']; }); };
   var etich = function (o) { return o.numero + ' · ' + e(S().fornitori[o.fornitore].nome) + ' · ' + n0(o.qta) + ' ' + o.materiale + ' a ' + eur(o.prezzo); };
   var elenco = function () {
-    return L.scheda('📋', 'Ordini d\'acquisto', 'ME2N', L.tabella(['Ordine', 'Data', 'Richiesta', 'Fornitore', 'Materiale', 'Q.tà›', 'Prezzo›', 'Valore›', 'Rilascio', 'Entrato›', 'Fatturato›'], S().acquisti.map(function (o) {
-      return [o.numero, fd(o.data), o.rda || '', e(S().fornitori[o.fornitore].nome), o.materiale, n0(o.qta), eur(o.prezzo), eur(o.qta * o.prezzo), !o.rilascio ? 'non serve' : o.rilascio.stato === 'rilasciato' ? '<span class="lab-bd verde">rilasciato</span>' : '<span class="lab-bd arancio">' + o.rilascio.stato + '</span>', n0(o.entrato), n0(o.fatturato)]; }), 'Nessun ordine d\'acquisto.'));
+    return L.scheda('📋', 'Ordini d\'acquisto', 'ME2N', L.tabella(['Ordine', 'Data', 'Richiesta / RFQ', 'Fornitore', 'Materiale', 'Q.tà›', 'Prezzo›', 'Valore›', 'Rilascio', 'Entrato›', 'Fatturato›'], S().acquisti.map(function (o) {
+      return [o.numero, fd(o.data), [o.rda, o.rfq ? 'RFQ ' + o.rfq : ''].filter(Boolean).join(' · '), e(S().fornitori[o.fornitore].nome), o.materiale, n0(o.qta), eur(o.prezzo), eur(o.qta * o.prezzo), !o.rilascio ? 'non serve' : o.rilascio.stato === 'rilasciato' ? '<span class="lab-bd verde">rilasciato</span>' : '<span class="lab-bd arancio">' + o.rilascio.stato + '</span>', n0(o.entrato), n0(o.fatturato)]; }), 'Nessun ordine d\'acquisto.'));
   };
+  var bd = function (cls, t) { return '<span class="lab-bd ' + cls + '">' + t + '</span>'; };
+  var statoRfq = function (r) { return r.stato === 'assegnata' ? bd('blu', 'assegnata') : r.fornitori.every(function (x) { return x.prezzo > 0; }) ? bd('verde', 'offerte complete') : bd('giallo', 'in attesa di offerte'); };
   var PAGINE = {
+    offerte: function () {
+      var R = MM.R(), P = MM.P(), app = P.rda.filter(function (r) { return r.stato === 'approvata' && !R.rfq.some(function (q) { return q.rda === r.numero && q.stato === 'aperta'; }); });
+      var aperte = R.rfq.filter(function (r) { return r.stato === 'aperta'; });
+      var voci = []; aperte.forEach(function (r) { r.fornitori.forEach(function (x) { voci.push([r.numero + '|' + x.fid, r.numero + ' · ' + S().fornitori[x.fid].nome + (x.prezzo ? ' · già offerto ' + eur(x.prezzo) : ' · offerta da registrare')]); }); });
+      var forn = Object.keys(S().fornitori).map(function (k) { return ['f_' + k, k + ' — ' + e(S().fornitori[k].nome) + ' (' + e(S().fornitori[k].regione || '') + ', pagamento ' + e(S().fornitori[k].pagamento || '') + ')', 'check', !!S().fornitori[k].ferro]; });
+      var confronti = R.rfq.slice().reverse().map(function (r) {
+        var c = MM.confronto(r), um = S().materiali[r.materiale].um;
+        var tab = L.tabella(['Fornitore', 'Prezzo €/' + um + '›', 'vs standard›', 'Consegna', 'In tempo?', 'Pagamento gg›', 'Totale offerta›', 'Esito'], r.fornitori.map(function (x) {
+          var y = c.righe.find(function (z) { return z.fid === x.fid; });
+          if (!y) return [e(S().fornitori[x.fid].nome), '—', '', '', '', '', '', bd('grigio', 'offerta non ancora arrivata')];
+          return [e(y.nome), eur(y.prezzo), '<span style="color:' + (y.vsStd > 0 ? '#BB0000' : '#107E3E') + '">' + (y.vsStd > 0 ? '+' : '') + y.vsStd.toFixed(1).replace('.', ',') + '%</span>', fd(y.arrivo) + ' (' + y.gg + ' gg)',
+            y.inTempo ? bd('verde', 'sì') : bd('arancio', 'oltre il ' + fd(r.consegna)), String(y.pag), '<b>' + eur(y.totale) + '</b>',
+            r.vincitore === y.fid ? bd('blu', '🏆 assegnata → ordine ' + r.ordine) : r.stato === 'assegnata' ? bd('grigio', 'non assegnata') : y.fid === c.consigliato ? bd('verde', '★ consigliata') : ''];
+        }));
+        var x = c.righe.find(function (z) { return z.fid === c.consigliato; });
+        var consiglio = !c.righe.length ? '<p class="lab-nota">Registra le offerte per vedere il confronto.</p>'
+          : '<p class="lab-nota">' + (r.stato === 'assegnata' ? '📌 Assegnata a <b>' + e(S().fornitori[r.vincitore].nome) + '</b> (' + e(r.motivo || '') + ').'
+            : '👉 <b>Compra da ' + e(x.nome) + '</b>: ' + eur(x.prezzo) + ' €/' + um + ', totale ' + eur(x.totale) + ' €, consegna il ' + fd(x.arrivo) + (c.secondo ? ', ' + eur(c.risparmio) + ' € in meno della seconda offerta (' + e(c.secondo.nome) + ')' : '') + '.' +
+              (c.inTempo ? '' : ' ⚠️ Nessun fornitore consegna entro il ' + fd(r.consegna) + ': è la più conveniente, ma va concordata una nuova data.') +
+              (x.vsStd > 0 ? ' Il prezzo è sopra lo standard di ' + eur(c.std) + ': all\'entrata merci ' + eur(x.diffStd) + ' € andranno sul conto 63 (differenza prezzo).' : '') +
+              (c.completo ? '' : ' Mancano ancora offerte: puoi aspettarle o assegnare ora.')) + '</p>';
+        return L.scheda('⚖️', 'Confronto offerte · RFQ ' + r.numero + ' · ' + n0(r.qta) + ' ' + um + ' ' + r.materiale + ' per il ' + fd(r.consegna), 'ME49', tab + consiglio);
+      }).join('');
+      // assegnazione: per ogni RFQ aperta con almeno 2 offerte, le offerte in ordine con la consigliata per prima
+      var scelte = [];
+      aperte.forEach(function (r) { var c = MM.confronto(r); if (c.righe.length < 2) return;
+        c.righe.slice().sort(function (a, b) { return (b.fid === c.consigliato) - (a.fid === c.consigliato) || a.totale - b.totale; }).forEach(function (y) {
+          scelte.push([r.numero + '|' + y.fid, 'RFQ ' + r.numero + ' → ' + y.nome + (y.fid === c.consigliato ? ' (consigliata)' : '') + ' · ' + eur(y.totale) + ' €']); }); });
+      var assegna = L.scheda('🏆', 'Assegna e crea l\'ordine d\'acquisto', 'ME49 → ME21N', L.modulo('as', [['voce', 'Offerta da accettare', 'select', '', scelte.length ? scelte : [['', '— nessuna richiesta con almeno 2 offerte —']]],
+        ['motivo', 'Motivo se scegli un\'offerta diversa dalla consigliata', 'text'], ['data', 'Data dell\'ordine', 'date']], [['as', 'Assegna e crea l\'ordine']]) +
+        '<p class="lab-nota">L\'ordine nasce al prezzo e con i tempi dell\'offerta accettata. Se scegli un\'offerta diversa dalla consigliata scrivi il motivo: resta nel documento.</p>');
+      radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+        L.scheda('✉️', 'Richiesta di offerta', 'ME41 · da 2 a 4 fornitori', L.modulo('rf', [['rda', 'Da richiesta d\'acquisto approvata', 'select', '', [['', '— senza richiesta —']].concat(app.map(function (r) { return [r.numero, r.numero + ' · ' + n0(r.qta) + ' ' + r.materiale + ' · per il ' + fd(r.consegna)]; }))],
+          ['materiale', 'Materiale', 'select', 'FERRO', roh()], ['qta', 'Quantità (vuoto = quella della richiesta)', 'num'], ['consegna', 'Consegna richiesta entro', 'date'], ['data', 'Data', 'date']].concat(forn), [['rf', 'Crea e invia la richiesta di offerta']]) +
+          '<p class="lab-nota">Si chiede l\'offerta a più fornitori (spuntati quelli di tubolare) per comprare alle condizioni migliori. Nessuna scrittura: è una richiesta, non un impegno.</p>') +
+        L.scheda('📨', 'Registra le offerte ricevute', 'ME47', L.modulo('of', [['voce', 'Richiesta e fornitore', 'select', '', voci.length ? voci : [['', '— nessuna richiesta di offerta aperta —']]],
+          ['prezzo', 'Prezzo offerto €/unità', 'num'], ['gg', 'Consegna in giorni', 'num'], ['pag', 'Pagamento a giorni (vuoto = condizioni del fornitore)', 'num'], ['data', 'Data dell\'offerta', 'date']], [['of', 'Salva l\'offerta']]) +
+          '<p class="lab-nota">Per ogni fornitore interpellato registra prezzo, tempi di consegna e di pagamento. Il confronto si aggiorna subito.</p>') + '</div>' +
+        (confronti || L.scheda('⚖️', 'Confronto offerte', 'ME49', '<p class="lab-vuoto">Nessuna richiesta di offerta.</p>')) + assegna +
+        L.scheda('📋', 'Richieste di offerta', 'ME4L', L.tabella(['RFQ', 'Data', 'Materiale', 'Q.tà›', 'Consegna entro', 'Fornitori', 'Offerte', 'Stato', 'Ordine'], R.rfq.map(function (r) {
+          return [r.numero, fd(r.data), r.materiale, n0(r.qta), fd(r.consegna), r.fornitori.map(function (x) { return e(S().fornitori[x.fid].nome); }).join(', '), r.fornitori.filter(function (x) { return x.prezzo > 0; }).length + '/' + r.fornitori.length, statoRfq(r), r.ordine || '']; }), 'Nessuna richiesta di offerta.'));
+      L.collega(radice, 'rf', {rf: MM.rfq}, rendi); L.collega(radice, 'of', {of: MM.offerta}, rendi);
+      L.collega(radice, 'as', {as: MM.assegna}, rendi);
+    },
     richieste: function () {
       var P = MM.P(), daApp = P.rda.filter(function (r) { return r.stato === 'da approvare'; });
       radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +

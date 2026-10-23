@@ -128,6 +128,18 @@ window.SD4 = (function () {
     return {stato: stato, semaforo: stato === 'verde' ? 'verde' : stato === 'giallo' ? 'giallo' : 'arancio', testo: testo, righe: p.righe, scoperto: p.scoperto,
       coperto: coperto, dataConfermata: ultima, richiesta: richiesta};
   }
+  // Controllo di disponibilità PRIMA di confermare (VA01 «Disponibilità», CO09): quanta merce c'è, cosa si conferma subito,
+  // cosa arriva da ordini di produzione già aperti e quanto bisogna ancora produrre
+  function disponibilita(mat, qta) {
+    var a = atp(mat), q = qta == null || qta === '' ? 0 : L.num(qta, 'Quantità', 1), bloccata = r2((S().bloccato || {})[mat] || 0);
+    var piano = pianoATP(mat), usatoInArrivo = 0;
+    Object.keys(piano).forEach(function (k) { piano[k].righe.forEach(function (r) { if (r.fonte !== 'giacenza') usatoInArrivo += r.qta; }); });
+    var arrivi = entrate(mat), totArrivi = r2(arrivi.reduce(function (t, x) { return t + x.qta; }, 0)), liberoInArrivo = r2(Math.max(0, totArrivi - usatoInArrivo));
+    var subito = r2(Math.min(q, a.disponibile)), dopo = r2(Math.min(q - subito, liberoInArrivo)), produrre = r2(Math.max(0, q - subito - dopo));
+    var esito = !q ? '' : produrre > 1e-9 ? 'produrre' : dopo > 1e-9 ? 'in arrivo' : 'confermabile';
+    return {materiale: mat, richiesta: q, giacenza: r2((S().giacenze[mat] || 0)), bloccata: bloccata, inConsegna: a.inConsegna, riservato: a.riservato, disponibile: a.disponibile,
+      inArrivo: totArrivi, liberoInArrivo: liberoInArrivo, arrivi: arrivi, subito: subito, dopo: dopo, produrre: produrre, esito: esito};
+  }
   // V_V2: riprogramma gli ordini aperti in ordine di data (chi ha ordinato prima è servito prima)
   function riconferma(mat) {
     var liberi = {}, out = [];
@@ -382,7 +394,7 @@ window.SD4 = (function () {
       return {data: r.data, numero: r.numero, descrizione: r.descrizione, importo: r2(v)};
     });
   }
-  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, entrate: entrate, pianoATP: pianoATP, confermabilita: confermabilita, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
+  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, disponibilita: disponibilita, entrate: entrate, pianoATP: pianoATP, confermabilita: confermabilita, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
     incassoAcconto: incassoAcconto, consegna: consegna, uscitaMerci: uscitaMerci, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
     richiestaAbbuono: richiestaAbbuono, approvaAbbuono: approvaAbbuono, notaCreditoAbbuono: notaCreditoAbbuono, incasso: incasso, flusso: flusso, partite: partite,
     avviaSistema: function (i) { return N.avvia(i); }};
