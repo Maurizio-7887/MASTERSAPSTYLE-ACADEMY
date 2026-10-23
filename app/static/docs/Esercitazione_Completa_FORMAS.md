@@ -2435,7 +2435,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** D 80 Salari 7.529,17 + D 81 Oneri sociali 2.340,07 + D 82 TFR 557,72 / A 27 Netti 5.769,08 + A 28 INPS 2.956,71 + A 24 INAIL 112,94 + A 29 Ritenute 1.068,16 + A 31 Fondo TFR 520,07.
 
 
-**Attenzione e ragionamento:** Nel giornale il programma scrive una riga per dipendente, con il centro di costo: 80, 81 e 82 compaiono tre volte (es. Salari 2.275,00 + 2.437,50 + 2.816,67 = 7.529,17). La somma per conto è quella qui sopra. Nel laboratorio di ragioneria puoi ricostruirla riga per riga oppure con un’unica riga per conto.
+**Dopo il tentativo:** Nel giornale il programma scrive una riga per dipendente, con il centro di costo: 80, 81 e 82 compaiono tre volte (es. Salari 2.275,00 + 2.437,50 + 2.816,67 = 7.529,17). La somma per conto è quella qui sopra. Nel laboratorio di ragioneria puoi ricostruirla riga per riga oppure con un’unica riga per conto.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2533,7 +2533,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** Una mensilità per le tre macchine rimaste: taglierina 15.000 × 10% / 12 = 125 · piegatubi 66,67 · saldatrice 50 = 241,67 (D 50 / A 02). Carrello e sega sono già ammortizzati fino alla cessione.
 
 
-**Attenzione e ragionamento:** Il fisco ammette nel primo anno metà del coefficiente: 750, 400, 300. La quota di bilancio è più bassa: nessuna variazione fiscale. Nel giornale il programma scrive una coppia di righe per cespite (D 50 125 / A 02 125, poi 66,67 e 50); nel laboratorio di ragioneria puoi ricostruirla così oppure con un’unica riga D 50 241,67 / A 02 241,67. Se trovi 20% invece di 10% hai scritto un’aliquota diversa all’acquisto.
+**Dopo il tentativo:** Nel giornale il programma scrive una coppia di righe per cespite (D 50 125 / A 02 125, poi 66,67 e 50); nel laboratorio di ragioneria puoi ricostruirla così oppure con un’unica riga D 50 241,67 / A 02 241,67. Se trovi 20% invece di 10% hai scritto un’aliquota diversa all’acquisto.
+
+
+**Attenzione e ragionamento:** Il fisco ammette nel primo anno metà del coefficiente: 750, 400, 300. La quota di bilancio è più bassa: nessuna variazione fiscale.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  

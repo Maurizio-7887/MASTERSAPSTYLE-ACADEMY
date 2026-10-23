@@ -164,7 +164,11 @@
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';
       }).join('') + '</table>';
     }
-    if (p.attesa && !(E.verificaRagioneria && p.contabile && !st)) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+    // Passi contabili: soluzione e spiegazioni sulla scrittura restano nascoste finché l'allievo non registra e ricostruisce la partita doppia
+    var nascosto = E.verificaRagioneria && p.contabile && !st;
+    if (p.attesa && !nascosto) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+    if (p.dopo && !nascosto) h += '<p class="msa-g-nota">📒 ' + esc(p.dopo) + '</p>';
+    if (nascosto) h += '<div class="msa-g-esito">✍️ Registra l’operazione nel programma: poi qui a destra ricostruirai tu la scrittura in partita doppia (conto, Dare/Avere, importo). La soluzione compare solo dopo il tuo tentativo.</div>';
     if (p.nota) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
     if (st === 'auto') h += '<div class="msa-g-esito ok">✓ Fatto: il programma lo ha già registrato.</div>';
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';

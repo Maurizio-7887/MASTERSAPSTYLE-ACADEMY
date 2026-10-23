@@ -73,7 +73,8 @@ function documento(chi) {
     out.push(etichetta('Spunta', p.fatto ? 'automatica, quando l’operazione è registrata' : 'a mano con «Fatto», dopo la lettura e il controllo', {italics: true}));
     if (p.campi && p.campi.length) { out.push(par('', {after: 20})); out.push(tabella(p.campi, ['Campo / riquadro', 'Che cosa scrivere o fare'])); }
     if (p.attesa) out.push(par([t((p.contabile ? 'Scrittura / controllo atteso' : 'Controllo atteso') + ': ', {bold: true}), t(p.attesa)], {before: 100}));
-    if (p.attesa && p.contabile) out.push(par([t('Nel programma questo riquadro compare dopo che hai registrato e ricostruito la scrittura.', {italics: true, size: 18, color: '555555'})]));
+    if (p.dopo) out.push(par([t('Dopo il tentativo: ', {bold: true}), t(p.dopo)], {before: 60}));
+    if (p.attesa && p.contabile) out.push(par([t('Nel programma la soluzione compare dopo che hai registrato e ricostruito la scrittura.', {italics: true, size: 18, color: '555555'})]));
     if (p.nota) out.push(par([t('Attenzione: ', {bold: true}), t(p.nota)], {before: 60}));
     out.push(par([t('Evidenza: documento ________  ·  prima/dopo ________  ·  spiegazione ________', {size: 18, color: '555555'})], {before: 60}));
   });
