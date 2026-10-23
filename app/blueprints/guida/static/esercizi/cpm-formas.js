@@ -9,6 +9,9 @@
   var snapshot = function(h,mat){var s=stima(h,mat);return s && s.elementi && s.elementi.par && s.elementi.par.snapshot;};
   var piano0 = function(h,cdc){var m=modello(h);return ((m && m.piano && m.piano['0']) || {})[cdc] || {};};
   var CO = function(ep,percorso){return {dove:{ep:'erp_controllo.'+ep},percorso:percorso};};
+  var bpc = function(h){return (h.S.costing || {}).bpc;};
+  var CDC6 = ['4100','4200','4210','4220','4230','4300'];
+  var STAGIONE = [400,350,300,200,150,150,200,100,200,300,350,400];
   var passo = function(id,titolo,campi,extra){return Object.assign({id:id,g:'2 · Preparazione: budget e standard',data:'01/12/2026',titolo:titolo,dove:{ep:'erp_controllo.centri'},percorso:'CO → Controllo di gestione → 1 · Centri, attività e classi di costo',campi:campi},extra || {});};
   window.MSA_CPM_FORMAS = {
     passiPreparazione:[
@@ -52,8 +55,30 @@
       passo('cpm-standard-halb','Salva il solo HALB autonomo: 20 kit non sono fasi',[
         ['Prodotto da modificare','SL-TAGLIO'],['Componente / Quantità per pezzo','FERRO / 8'],['Taglio h/pz','0,25'],['Piegatura h/pz / Saldatura h/pz','0 / 0'],['Setup h/lotto / Centro del setup','0 / Taglio'],['Pulsante','Salva distinta/ciclo versionati']
       ],{dove:{ep:'erp_costi.scheda'},percorso:'CO → Controllo di gestione → Distinta, ciclo e scheda di calcolo',attesa:'7,60 materiale + 7,00 Taglio = 14,60 €/kit. Ordine autonomo futuro: 20 kit, 160 kg, 5 h, valore 292. Non creare SL-PIEGA né consumare questi kit nella transenna.'}),
+      passo('bpc-modello','BPC · Modello e Data Manager: porta il piano KP06 nel modello di budget',[
+        ['Pagina','Launchpad → Pianificazione e budget → Modello e Data Manager'],
+        ['Leggi prima','Il modello COSTI_CENTRI ha cinque dimensioni: CONTO (classi di costo), CENTRO (i sei centri), CATEGORIA (ACTUAL, BUDGET, FORECAST), VERSIONE, TEMPO (12 mesi del 2026)'],
+        ['Per confermare scrivi CREA','CREA'],['Pulsante','Crea il modello'],
+        ['Controlla','BUDGET V1 = piano KP06 versione 0 diviso in 12 mesi uguali: 4210, 4220, 4230 3.000 al mese di classe 80; 4200 fitto 1.000 al mese']
+      ],{dove:{ep:'erp_bpc.modello'},percorso:'BPC → Pianificazione e budget → 1 · Modello e Data Manager',attesa:'Ambiente FT_PLAN, modello COSTI_CENTRI 2026 creato. Nessuna scrittura contabile, nessuna modifica al piano di S/4.',nota:'In SAP il budget di dettaglio si prepara in BPC (Business Planning and Consolidation) e poi torna in S/4. Qui il punto di partenza è il piano che hai appena scritto in KP06.',
+        fatto:function(h){var b=bpc(h);return !!b && !!b.dati && Object.keys(b.dati).some(function(k){return k.indexOf('BUDGET|V1|')===0;});}}),
+      passo('bpc-input','BPC · Modulo di inserimento: l’energia del centro 4200 mese per mese',[
+        ['Pagina','Pianificazione e budget → 2 · Modulo di inserimento (EPM)'],['Categoria / Versione / Centro','BUDGET / V1 / 4200 Produzione'],
+        ['Riga 54 Consulenze e servizi (energia e manutenzioni)','Gen 400 · Feb 350 · Mar 300 · Apr 200 · Mag 150 · Giu 150 · Lug 200 · Ago 100 · Set 200 · Ott 300 · Nov 350 · Dic 400'],
+        ['Altre righe','Lasciale come sono: 50 Ammortamenti 241,67 al mese (dicembre 241,63 per l’arrotondamento), 86 Fitti passivi 1.000 al mese'],['Pulsante','Salva nel modello'],
+        ['Controlla','Totale riga 54 = 3.100,00 come in KP06; totale centro 4200 = 18.000,00']
+      ],{dove:{ep:'erp_bpc.input'},percorso:'BPC → Pianificazione e budget → 2 · Modulo di inserimento (EPM)',attesa:'Il budget annuo non cambia (3.100 di energia e servizi): cambia solo la distribuzione nei mesi, più alta d’inverno. Quindi le tariffe restano 28 €/h.',nota:'Il fitto è un costo di competenza di 1.000 al mese anche se si paga a trimestre: nel budget dei costi conta la competenza, non il pagamento.',
+        fatto:function(h){var b=bpc(h),r=b && b.dati && b.dati['BUDGET|V1|4200|54'];return !!r && STAGIONE.every(function(v,k){return circa(r[k],v);});}}),
+      passo('bpc-processo','BPC · Approvazione: ogni centro invia, il controller approva, poi ritrasferisci in S/4',[
+        ['Pagina','Pianificazione e budget → 3 · Approvazione e ritrasferimento in S/4'],
+        ['Per ognuno dei sei centri (4100, 4200, 4210, 4220, 4230, 4300)','Centro → Azione «Invia al controller» → Esegui'],
+        ['Poi, per ognuno dei sei centri','Centro → Azione «Approva (controller)» → Nota «ok» → Esegui'],
+        ['Prova facoltativa','Prima di approvare puoi respingere un centro: la nota è obbligatoria e il centro torna modificabile. Poi invialo di nuovo'],
+        ['Ritrasferimento','Quando i sei centri sono verdi: scrivi TRASFERISCI → Ritrasferisci in S/4']
+      ],{dove:{ep:'erp_bpc.processo'},percorso:'BPC → Pianificazione e budget → 3 · Approvazione e ritrasferimento in S/4',attesa:'Il budget approvato diventa il piano KP06 versione 0 con una nuova revisione. Gli importi annui sono gli stessi (126.000), quindi dopo KSPI le tariffe restano 28 €/h. Nessuna scrittura FI.',nota:'Un budget inviato o approvato è bloccato (work status): per correggerlo il controller deve respingerlo. Dopo il ritrasferimento la barra del ciclo CO torna sul passo 5: le tariffe vanno ricalcolate.',
+        fatto:function(h){var b=bpc(h);return !!b && (b.retract || []).length>0 && CDC6.every(function(c){return ((b.stato || {})['BUDGET|V1|'+c] || {}).stato==='approvato';});}}),
       passo('cpm-kspi','KSPI: calcola le tariffe orarie dei reparti',[
-        ['Prima','Controlla che il pallino giallo della barra sia sul passo 5: KP06, KP26, ciclo e distinte/cicli sono salvati'],
+        ['Prima','Controlla che il pallino giallo della barra sia sul passo 5: KP06, KP26, ciclo, distinte/cicli e ritrasferimento dal BPC sono fatti'],
         ['Data di esecuzione','01/12/2026'],['Pulsante','Esegui il calcolo delle tariffe'],
         ['Leggi','4210, 4220, 4230: personale 36.000 + altri costi 0 + ribaltato 6.000 = 42.000 € / 1.500 h = 28 €/h']
       ],Object.assign(CO('kspi','CO → Controllo di gestione → 5 · Calcolo delle tariffe'),{attesa:'Tariffe di piano 28 €/h per ORE-TAG, ORE-PIE, ORE-SAL. Senza questo passo CK11N si ferma: non saprebbe quanto vale un’ora.',nota:'Ogni nuova revisione del piano (anche una distinta o un ciclo salvati di nuovo) richiede di rieseguire KSPI.',fatto:function(h){var m=modello(h);return attivo(h) && !!m.kspi && m.kspi.revisione===m.revisione && centri.every(function(k){return circa(m.kspi.tariffe[k],28);});}})),
@@ -84,6 +109,12 @@
          ['Lettura del report','Residuo = consuntivo − assorbito = scostamento di spesa + scostamento di assorbimento. Efficienza confronta ore effettive e ore standard dei pezzi confermati. Report cumulativo dell’anno, non del solo mese'],
          ['Attenzione','Il piano è annuo e l’azienda ha lavorato solo dicembre: piano/12 è un confronto indicativo solo se dichiari che non c’è stagionalità']],
        attesa:'Il consuntivo dei centri coincide con le scritture FI dell’anno: paghe sul centro del dipendente, gli altri costi con la tabella OKB9. Nessuna scrittura aggiuntiva, il risultato FI del caso non cambia.',nota:'In S/4HANA FI e CO stanno nello stesso libro giornale (ACDOCA): per questo il consuntivo non si ricopia. Non concludere «inefficienza» dal solo residuo e non generare scritture FI di WIP.'}
+      ,{id:'bpc-consuntivo',g:'14 · Controllo costi di fine mese',data:'31/12/2026',titolo:'BPC · carica il consuntivo di dicembre e crea il forecast 11+1',dove:{ep:'erp_bpc.modello'},percorso:'BPC → Pianificazione e budget → 1 · Modello e Data Manager; poi 4 · Budget, forecast e consuntivo',
+       campi:[['Carica il consuntivo da S/4','Fino al mese 12 → Carica il consuntivo'],['Crea un forecast','Nome della versione F1 · Mesi a consuntivo 11 → Crea il forecast'],
+         ['Leggi il report (fino a Dic, forecast F1)','Per ogni centro: budget dell’anno, consuntivo, forecast. Il forecast F1 = gennaio–novembre a consuntivo (zero: la società non esisteva) + dicembre a budget'],
+         ['Centro 4200 a dicembre','Forecast F1 = budget di dicembre: 400 energia + 241,63 ammortamenti + 1.000 fitto = 1.641,63. Consuntivo 4.867,30 = paga di Sara Bianchi 2.437,50 + oneri 757,57 + TFR 180,56 + fitto del rateo 1.033,33 + ammortamenti di dicembre 458,34'],['Centri 4100 e 4300','Consuntivo 3.150,60 (Marco Rossi) e 4.002,65 (Giulia Verdi) contro forecast 0: il budget versione 0 non prevede personale su questi centri. È la stessa differenza della tabella di controllo del personale'],['Reparti 4210, 4220, 4230','Forecast 3.000 ciascuno (dicembre del budget), consuntivo 0: il personale dei reparti è ancora da assumere']],
+       attesa:'Il consuntivo nel BPC è lo stesso del KSB1: viene dalle righe del libro giornale con il loro centro o con OKB9. Il forecast 11+1 mostra il costo atteso per il 2026 di un’azienda che ha lavorato solo a dicembre.',nota:'Il confronto giusto è dicembre con dicembre: il budget annuo contro un solo mese di consuntivo non dice niente. Il BPC non registra niente in contabilità.',
+       fatto:function(h){var b=bpc(h);return !!b && b.actualFino===12 && b.versioni.FORECAST.indexOf('F1')>=0;}}
     ]
   };
 })();

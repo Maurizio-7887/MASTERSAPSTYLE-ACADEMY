@@ -12,7 +12,7 @@
   // Distinta e ciclo standard del piano CO (CS02 · CA02): il budget dei centri è nelle pagine CO-OM, non qui.
   function pannelloCPM() {
     var cp = PC.cpm, m = cp.modello();
-    if (!m) return '<div class="lab-esito ko">Il controllo di gestione per centri (budget, tariffe orarie per reparto) si apre in ' + link('controllo/', 'CO → 1 · Centri, attività e classi di costo') + '. Finché non lo apri, il costo standard usa la scheda di calcolo storica qui sotto.</div>';
+    if (!m) return '<div class="lab-nota">📌 Il costo standard parte dal piano dei centri: prima ' + link('controllo/', 'CO → 1 · Centri, attività e classi di costo') + ' (passo 1), poi KP06, KP26, KSU1 e KSPI. Qui sotto la distinta e il ciclo compaiono dopo il passo 1; la scheda di calcolo con la tariffa unica resta solo per i lavori iniziati senza piano CO.</div>';
     var mat = radice.dataset.cpmMat || 'TR-STD', st = m.standard[mat], mats = Object.keys(m.standard).map(function (k) { return [k, k]; });
     return L.scheda('🔧', 'Distinta e ciclo standard', 'CS02 · CA02 · nuova revisione del piano',
         '<p class="lab-nota">Per ogni prodotto: componente e quantità per pezzo (distinta) e ore per pezzo in ogni centro produttivo (ciclo). Le ore si valorizzano alle tariffe calcolate con KSPI. Ogni salvataggio crea una nuova revisione del piano: poi ' + link('controllo/kspi', 'KSPI') + ' e CK11N.</p>' +
@@ -30,18 +30,18 @@
     scheda: function () {
       var x = sc();
       var storico = PC.cpm.attivo();
-      radice.innerHTML = U.avviso(S()) + barra('costi/') + pannelloCPM() + (storico ? '<details class="lab-nota"><summary><b>Scheda di calcolo storica (tariffa unica e sovraccosti)</b>: serve solo ai lavori fatti prima del piano CO; il lotto di calcolo vale anche per il piano CO</summary>' : '') + '<div class="lab-griglia">' +
-        L.scheda('🧮', 'Scheda di calcolo ZFT01 e percentuali', 'KZS2 · KZZ2 · KP26', L.modulo('sk', [['sovrMat', 'Sovraccosto materiale % (riga 20)', 'num', x.sovrMat], ['sovrProd', 'Sovraccosto di produzione % (riga 50)', 'num', x.sovrProd],
-          ['tariffa', 'Tariffa delle attività €/h (KP26)', 'num', x.tariffa], ['lotto', 'Lotto di calcolo (pz)', 'num', x.lotto]], [['sk', 'Salva la scheda']]) +
+      radice.innerHTML = U.avviso(S()) + barra('costi/') + pannelloCPM() + (storico ? '<p class="lab-nota"><b>Scheda di calcolo ZFT01</b> (costing sheet): i sovraccosti % e il lotto di calcolo si aggiungono alle tariffe dei reparti calcolate da KSPI. La tariffa unica qui sotto serve solo ai lavori senza piano CO.</p>' : '') + '<div class="lab-griglia">' +
+        L.scheda('🧮', 'Scheda di calcolo ZFT01 e percentuali', 'KZS2 · KZZ2', L.modulo('sk', [['sovrMat', 'Sovraccosto materiale % (riga 20)', 'num', x.sovrMat], ['sovrProd', 'Sovraccosto di produzione % (riga 50)', 'num', x.sovrProd],
+          ['tariffa', storico ? 'Tariffa unica €/h (solo senza piano CO: ora valgono le tariffe KSPI)' : 'Tariffa delle attività €/h (KP26)', 'num', x.tariffa], ['lotto', 'Lotto di calcolo (pz)', 'num', x.lotto]], [['sk', 'Salva la scheda']]) +
           (x.confermata ? '<p class="lab-nota">✓ Scheda confermata.</p>' : '<p class="lab-nota">Controlla le percentuali e premi «Salva la scheda».</p>')) +
         L.scheda('💡', 'Che cosa sono i sovraccosti', '', '<ul class="lab-elenco"><li>Il costo standard di gennaio (31,40 per la TR-STD) conteneva solo <b>ferro e ore</b>.</li>' +
           '<li>Ma acquistare, ricevere e tenere a magazzino il ferro costa: il <b>sovraccosto materiale</b> lo attribuisce in % del materiale.</li>' +
           '<li>Capireparto, manutenzione, servizi di produzione: il <b>sovraccosto di produzione</b> in % delle attività.</li>' +
-          '<li>L\'<b>attrezzaggio</b> è fisso per lotto: nel costo standard pesa 3 h / ' + n0(x.lotto) + ' pz.</li></ul>') + '</div>' +
+          '<li>L\'<b>attrezzaggio</b> è fisso per lotto: nel costo standard pesa le sue ore / ' + n0(x.lotto) + ' pz del lotto di calcolo.</li></ul>') + '</div>' +
         L.scheda('🔧', 'Righe della scheda di calcolo', 'KZS2', L.tabella(['Riga', 'Base', 'Descrizione', 'Sovraccosto', 'Da riga'], [
           ['10', 'Elemento 510', 'Materiale diretto', '', ''], ['20', '', 'Sovraccosto materiale', n0(x.sovrMat) + ' %', '10'],
           ['30', 'Elemento 620', 'Lavorazione (attività)', '', ''], ['40', 'Elemento 625', 'Attrezzaggio (attività fissa)', '', ''],
-          ['50', '', 'Sovraccosto di produzione', n0(x.sovrProd) + ' %', '30 – 40'], ['100', '', 'Costo di produzione', '', '10 – 50']])) + (storico ? '</details>' : '');
+          ['50', '', 'Sovraccosto di produzione', n0(x.sovrProd) + ' %', '30 – 40'], ['100', '', 'Costo di produzione', '', '10 – 50']]));
       L.collega(radice, 'sk', {sk: PC.scheda}, rendi);
       collegaCPM();
     },

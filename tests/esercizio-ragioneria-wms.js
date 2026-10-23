@@ -5,9 +5,9 @@ let errori = 0, controlli = 0;
 const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
 const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ', ottenuto ' + a);
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
-const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js', erp_tesoreria: 'tes-pagine.js', erp_valute: 'val-pagine.js', erp_paghe: 'py-pagine.js', erp_cespiti: 'ce-pagine.js', erp_chiusura: 'ch-pagine.js', erp_innovazione: 'in-pagine.js'};
+const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_controllo: 'co-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js', erp_tesoreria: 'tes-pagine.js', erp_valute: 'val-pagine.js', erp_paghe: 'py-pagine.js', erp_cespiti: 'ce-pagine.js', erp_chiusura: 'ch-pagine.js', erp_innovazione: 'in-pagine.js'};
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/blueprints/erp_fi/static/fs-logica.js', 'app/blueprints/erp_cespiti/static/ce-logica.js', 'app/blueprints/erp_tesoreria/static/rb-logica.js', 'app/blueprints/erp_chiusura/static/ch-logica.js', 'app/static/js/erp/ruoli.js',
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_bpc/static/bpc-logica.js', 'app/blueprints/erp_controllo/static/co-percorso.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/blueprints/erp_fi/static/fs-logica.js', 'app/blueprints/erp_cespiti/static/ce-logica.js', 'app/blueprints/erp_tesoreria/static/rb-logica.js', 'app/blueprints/erp_chiusura/static/ch-logica.js', 'app/static/js/erp/ruoli.js',
   'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
 let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
 function apri(bp, pagina) {
@@ -102,8 +102,21 @@ let p = apri('erp_dati','avvio');
 p.fai('av',{data:'2027-01-02'}); ok(p.S().avviato==='2027-01-02','avvio'); checkpoint('Apertura');
 p = apri('erp_magazzino','struttura'); p.fai('at',{data:'2027-01-02'}); ok(p.S().wm.attivo==='2027-01-02','W100'); checkpoint('WMS iniziale');
 ok(p.S().wm.carico.length === 20,'20 pallet iniziali');
+// 2 · costo standard con il ciclo CO, come nell'esercizio di dicembre: piano dei centri, tariffe KSPI, scheda dei sovraccosti, CK11N
+p = apri('erp_controllo','centri'); const fiPrimaCO = JSON.stringify(p.S().registrazioni);
+p.fai('cpm-start',{conferma:'ATTIVA'},'start'); ok(p.w.PC4.cpm.attivo() && p.w.PC4.cpm.modello().anno===2027,'piano CO 2027 aperto');
+p = apri('erp_controllo','kp06');
+for (const cdc of ['4210','4220','4230']) { p.lab.querySelector('#cdc').value=cdc; p.lab.querySelector('#cdc').dispatchEvent(new p.w.Event('change')); bene(p.fai('kp06',{k80:'36000'},'kp06'),'KP06 '+cdc); }
+p.lab.querySelector('#cdc').value='4200'; p.lab.querySelector('#cdc').dispatchEvent(new p.w.Event('change'));
+bene(p.fai('kp06',{k86:'12000',k54:'6000',k50:'0'},'kp06'),'KP06 4200 costi comuni');
+p = apri('erp_controllo','kp26'); { const kp={}; for (const k of p.w.PC4.cpm.centri) Object.assign(kp,{[k+'_capacita']:'1500',[k+'_orePiano']:'1500'}); bene(p.fai('kp26',kp,'kp26'),'KP26'); }
+{ const vol={}; Object.keys(p.w.PC4.cpm.modello().standard).forEach(mat=>vol['vol_'+mat]=mat==='TR-STD'?'1200':'0'); bene(p.fai('ltp',vol,'ltp'),'LTP'); }
+p = apri('erp_controllo','ksu'); bene(p.fai('ksu1',{driver:'ore'},'ksu1'),'KSU1');
 p = apri('erp_costi','scheda'); bene(p.fai('sk',{sovrMat:'5',sovrProd:'10',tariffa:'28',lotto:'100'}),'scheda');
-p = apri('erp_costi','calcolo'); bene(p.fai('ck',{materiale:'TR-STD',data:'2027-02-03'}),'calcolo');
+bene(p.fai('cpm-standard',{materiale:'TR-STD',componente:'FERRO',quantita:'8',Taglio:'0,25',Piegatura:'0,20',Saldatura:'0,40',attrezzaggio:'3',centroSet:'Taglio'},'standard'),'distinta e ciclo TR-STD');
+p = apri('erp_controllo','kspi'); bene(p.fai('kspi',{data:'2027-02-03'},'kspi'),'KSPI'); ok(['Taglio','Piegatura','Saldatura'].every(k=>p.w.PC4.cpm.tariffe()[k].tariffa===28),'tariffe 28');
+ok(JSON.stringify(p.S().registrazioni)===fiPrimaCO,'ciclo CO senza scritture FI');
+p = apri('erp_costi','calcolo'); bene(p.fai('ck',{materiale:'TR-STD',data:'2027-02-03'}),'calcolo'); vicino(p.S().costing.stime['TR-STD'].unitario,35.08,'standard CK11N con piano CO');
 bene(p.fai('cr',{data:'2027-02-03'},'marca'),'marca'); bene(p.fai('cr',{data:'2027-02-03'}),'rilascio'); checkpoint('Standard rilasciato');
 p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'3000',prezzo:'1',data:'2027-02-04'}),'ordine fornitore');
 const oa=p.S().acquisti[0].numero;
@@ -119,7 +132,9 @@ ok(JSON.stringify(p.S().giacenze)===prima && p.S().registrazioni.length===nreg,'
 p=apri('erp_magazzino','compiti'); bene(p.fai('sg',{ordine:op,kg:'800',data:'2027-02-08'}),'staging');
 rfTutti('2027-02-08','STAGING'); checkpoint('Ferro in PSA');
 p=apri('erp_produzione','avanzamento'); bene(p.fai('pr',{ordine:op,kg:'800',data:'2027-02-08'}),'261'); checkpoint('Consumo produzione');
-bene(p.fai('cf',{ordine:op,attrezzaggio:'3',ore:'85',data:'2027-02-09'}),'conferma ore');
+bene(p.fai('cf',{ordine:op,fase:'Taglio',attrezzaggio:'3',ore:'25',data:'2027-02-09'}),'conferma Taglio');
+bene(p.fai('cf',{ordine:op,fase:'Piegatura',attrezzaggio:'0',ore:'20',data:'2027-02-09'}),'conferma Piegatura');
+bene(p.fai('cf',{ordine:op,fase:'Saldatura',attrezzaggio:'0',ore:'40',data:'2027-02-09'}),'conferma Saldatura');
 bene(p.fai('en',{ordine:op,qta:'100',data:'2027-02-10'}),'101 PF'); checkpoint('Entrata prodotto finito');
 ok(p.w.WM4.inUbic('GR-ZONE').reduce((s,q)=>s+(q.mat==='TR-STD'?q.qta:0),0)===100,'PF nuovi in ricevimento');
 rfTutti('2027-02-10','PUTAWAY'); checkpoint('Prodotti a dimora');
@@ -150,7 +165,7 @@ p=apri('erp_tesoreria','estratti'); bene(p.fai('ec',{data:'2027-04-09',righe:'20
 fs.writeFileSync(path.join(__dirname,'ragioneria-wms-finale.json'),JSON.stringify(p.S(),null,2));
 for (const passo of p.w.MSA_ESERCIZIO.passi.filter(x=>x.fatto && !/^1\d /.test(x.g))) ok(passo.fatto({S:p.S()}), 'spunta automatica finale: '+passo.titolo);
 for (const passo of p.w.MSA_ESERCIZIO.passi.filter(x=>x.fatto && /^1\d /.test(x.g))) ok(!passo.fatto({S:p.S()}), 'seconda parte ancora da fare: '+passo.titolo);
-ok(p.w.MSA_GUIDA_API.stati().filter(x=>x==='auto').length===33,'33 verifiche automatiche nella finestra');
+ok(p.w.MSA_GUIDA_API.stati().filter(x=>x==='auto').length===38,'38 verifiche automatiche nella finestra (5 in più per il ciclo CO)');
 fs.writeFileSync(path.join(__dirname,'ragioneria-wms-controlli.json'),JSON.stringify(traccia,null,2));
 console.log(JSON.stringify({controlli,errori,finale:traccia.at(-1),standard:p.S().materiali['TR-STD'].std,ml:p.S().costing.ml},null,2));
 p.w.close();

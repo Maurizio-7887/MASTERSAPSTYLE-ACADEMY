@@ -319,7 +319,7 @@ _ERP_PAGINE = {
                  {"endpoint": "condizioni", "titolo": "Condizioni di prezzo", "icona": "🏷️", "tcode": "VK11 · VK13 · V/08"},
                  {"endpoint": "ruoli", "titolo": "Ruoli e autorizzazioni", "icona": "🔐", "tcode": "PFCG · SU01 · SU53"}],
     "erp_vendite": [{"endpoint": "ordini", "titolo": "Ordini cliente", "icona": "📝", "tcode": "VA01 · VA05"},
-                    {"endpoint": "crediti", "titolo": "Gestione crediti e disponibilità", "icona": "💳", "tcode": "VKM1 · FD32 · FD33 · V_V2"},
+                    {"endpoint": "crediti", "titolo": "Gestione crediti e disponibilità", "icona": "💳", "tcode": "VKM1 · FD32 · FD33 · CO09 · V_V2"},
                     {"endpoint": "acconti", "titolo": "Acconti clienti", "icona": "💰", "tcode": "F-37 · F-29"},
                     {"endpoint": "consegne", "titolo": "Consegne", "icona": "🚚", "tcode": "VL01N · 601"},
                     {"endpoint": "fatture", "titolo": "Fatturazione", "icona": "🧾", "tcode": "VF01 · VF05"},

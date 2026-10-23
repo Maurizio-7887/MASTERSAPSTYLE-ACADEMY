@@ -13,6 +13,12 @@ MATERIALI = [
      "testo": "Caso principale, UF 8–11 e laboratori dei comandi: dati simulati, verifiche e mappa di copertura."},
     {"file": "Esercitazione_Completa_FORMAS.md", "titolo": "Esercitazione completa — sorgente modificabile",
      "testo": "Testo modificabile della stessa esercitazione, generato dalle guide del programma."},
+    {"file": "Esercitazione_Dicembre_2026.docx", "titolo": "Dicembre 2026: dalla costituzione alla riapertura (Word)",
+     "testo": "Gli stessi passi della finestra «Esercizio passo passo»: ciclo CO, BPC, semaforo di disponibilità, chiusura e riapertura di gennaio."},
+    {"file": "Esercitazione_Dicembre_2026.pdf", "titolo": "Dicembre 2026: dalla costituzione alla riapertura (PDF)",
+     "testo": "Versione stampabile del testo Word."},
+    {"file": "Esercitazione_Ragioneria_con_WMS.docx", "titolo": "Ragioneria con WMS — guida passo passo (Word)",
+     "testo": "Gli stessi passi della finestra, con il costo standard dal ciclo CO."},
     {"file": "Esercitazione_Ragioneria_con_WMS.pdf", "titolo": "Ragioneria con WMS — guida passo passo (PDF)",
      "testo": "Acquisto, produzione, vendita, chiusura costi e banca: percorso integrato con magazzino attivo dall'apertura."},
     {"file": "Guida-esercizio-integrato.pdf", "titolo": "Esercizio guidato passo passo (PDF)",
@@ -78,7 +84,7 @@ def tutto(versione):
 def materiale(file):
     if file not in {x["file"] for x in MATERIALI}:
         abort(404)
-    return send_from_directory(STATIC / "docs", file, as_attachment=file.endswith(".html"))
+    return send_from_directory(STATIC / "docs", file, as_attachment=file.endswith((".html", ".docx")))
 
 
 # Indirizzi della prima versione del portale

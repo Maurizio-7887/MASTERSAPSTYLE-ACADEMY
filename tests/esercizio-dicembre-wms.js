@@ -123,9 +123,11 @@ fino('sega circolare'); vicinoS('20',-52460,'debito Macchine Alfa'); controlla('
 p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F400',rif:'POL-2026-118',conto:'83',testo:'premio annuo polizza incendio e furto',imponibile:'1200',iva:'0',dal:'2026-12-01',al:'2027-11-30',scadenza:'2026-12-02',data:'2026-12-01'}),'FB60 polizza'); fino('polizza annuale');
 p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F400',documento:'POL-2026-118',data:'2026-12-02'}),'F-53 polizza'); fino('paga la polizza'); vicinoS('10',78800,'banca dopo la polizza');
 // 4 · ordini cliente
-p = apri('erp_vendite','ordini'); bene(p.fai('va',{cliente:'C100',materiale:'TR-STD',qta:'180',rif:'BETA-180',data:'2026-12-02'}),'VA01 Beta');
+p = apri('erp_vendite','ordini'); bene(p.fai('va',{cliente:'C100',materiale:'TR-STD',qta:'180',rif:'BETA-180',data:'2026-12-02',consegna:'2026-12-14'}),'VA01 Beta');
 ok(!p.lab.querySelector('#va-materiale option[value="SL-TAGLIO"]'),'i semilavorati non si vendono');
-bene(p.fai('va',{cliente:'C200',materiale:'TR-STD',qta:'120',rif:'DELTA-120',data:'2026-12-02'}),'VA01 Delta'); fino('Delta ordina');
+bene(p.fai('va',{cliente:'C200',materiale:'TR-STD',qta:'120',rif:'DELTA-120',data:'2026-12-02',consegna:'2026-12-14'}),'VA01 Delta'); fino('Delta ordina');
+ok(p.S().ordini.every(o => p.w.SD4.confermabilita(o).stato === 'rosso'), 'ATP: due ordini rossi senza giacenza né entrate');
+ok(/non confermabile/.test(p.testo()), 'semaforo rosso visibile in VA05');
 ok(p.S().ordini.every(o => o.confermata === 0), 'ordini in attesa della produzione');
 vicino(p.S().ordini[0].prezzi.totale,12912.48,'totale Beta'); vicino(p.S().ordini[1].prezzi.totale,8608.32,'totale Delta');
 // 5 · ferro
@@ -143,7 +145,10 @@ p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa2,ddt:'DDT-AU-5530
 rfTutti('2026-12-06','PUTAWAY',1); fino('fascio urgente'); ok(p.w.WM4.inUbic('F-02').length===2,'due colate in F-02');
 p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa2,rif:'FR-2026-902',data:'2026-12-06'}),'MIRO riordino'); fino('fattura del riordino'); controlla('Ferro');
 // 6 · un unico ordine TR-STD: ferro e tre conferme di fase, nessun 101 intermedio
-p = apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:'TR-STD',qta:'300',data:'2026-12-07'}),'CO01 TR-STD'); fino('un ordine per 300');
+p = apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:'TR-STD',qta:'300',data:'2026-12-07',fine:'2026-12-12'}),'CO01 TR-STD'); fino('un ordine per 300');
+{ const atp = p.S().ordini.map(o => p.w.SD4.confermabilita(o));
+  ok(atp.every(c => c.stato === 'verde' && c.dataConfermata === '2026-12-12' && c.righe.length === 1 && /produzione/.test(c.righe[0].fonte)), 'ATP: verdi con l’ordine di produzione in arrivo il 12/12 ' + JSON.stringify(atp.map(c => [c.stato, c.dataConfermata]))); }
+p = apri('erp_vendite','crediti'); ok(/Righe di schedulazione/.test(p.testo()) && /ordine di produzione/.test(p.testo()), 'CO09 mostra le righe di schedulazione');
 const op = ordineDi('TR-STD'); ok(op==='1000001','primo ordine è il finito');
 p = apri('erp_produzione','avanzamento'); let nr = p.S().registrazioni.length;
 ok(/ko/.test(p.fai('pr',{ordine:op,kg:'2400',data:'2026-12-07'})),'261 rifiutato senza staging');

@@ -46,12 +46,12 @@ for v in ['vuoto', 'completo']:
                 'alta_varieta', 'ripetitiva'}, (u, href)
             assert ep != 'portale.tutto', (u, href)
             if ep == 'portale.materiale':
-                assert args.get('file') in {'Esercitazione_Ragioneria_con_WMS.pdf', 'Esercitazione_Completa_FORMAS.pdf'}, (u, href)
+                assert args.get('file') in {'Esercitazione_Ragioneria_con_WMS.pdf', 'Esercitazione_Ragioneria_con_WMS.docx', 'Esercitazione_Dicembre_2026.docx', 'Esercitazione_Completa_FORMAS.pdf'}, (u, href)
             assert args.get('codice') not in {'s4', 'hmlv', 'rem', 'pian', 'rep'}, (u, href)
         if '/m/' in u or u == f'/{v}/':
             assert config(html, 'MSA_SYNC')['versione'] == 'erp-ft'
             guide = config(html, 'MSA_GUIDA')
-            assert guide['esercizio'] == 'ragioneria-wms', u
+            assert guide['esercizio'] == 'dicembre-wms', u  # uso libero: dicembre 2026 con riapertura
             assert guide['chiave'] == 'ferro-transenne-fi-2026-erp-ft-civilistico'
         checks += 1
 
@@ -66,7 +66,7 @@ for v in ['vuoto', 'completo']:
                 html = r.get_data(as_text=True)
                 assert config(html, 'LAB_PAGINA')['slot'] == 'erp-ft', u
                 assert config(html, 'MSA_SYNC')['versione'] == 'erp-ft', u
-                assert config(html, 'MSA_GUIDA')['esercizio'] == 'ragioneria-wms', u
+                assert config(html, 'MSA_GUIDA')['esercizio'] == 'dicembre-wms', u
                 assert f'/m/{lab["codice"]}' in html, u
                 assert lab['codice'] in {m['codice'] for m in MODULI}
                 assert 'separato dal simulatore principale' not in html, u

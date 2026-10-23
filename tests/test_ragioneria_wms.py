@@ -15,7 +15,7 @@ def config(html):
 c = docente()
 h = c.get('/vuoto/').get_data(as_text=True)
 assert 'Esercitazione ragioneria con WMS' in h
-assert config(h)['esercizio'] == 'ragioneria-wms'
+assert config(h)['esercizio'] == 'dicembre-wms'
 assert c.get('/static/guida/esercizi/ragioneria-wms.js').status_code == 200
 assert c.get('/static/guida/ragioneria.js').status_code == 200
 page = c.get('/vuoto/s4/dati/').get_data(as_text=True)
@@ -25,7 +25,7 @@ assert pdf.status_code == 200 and pdf.data.startswith(b'%PDF')
 assert config(c.get('/vuoto/s4/dati/?esercizio_guida=s4-integrato').get_data(as_text=True))['esercizio'] == 's4-integrato'
 assert config(c.get('/vuoto/m/wms').get_data(as_text=True))['esercizio'] == 's4-integrato'
 assert config(c.get('/vuoto/?esercizio_guida=ragioneria-wms').get_data(as_text=True))['esercizio'] == 'ragioneria-wms'
-assert config(c.get('/vuoto/m/mm?esercizio_guida=non-valido').get_data(as_text=True))['esercizio'] == 'ragioneria-wms'
+assert config(c.get('/vuoto/m/mm?esercizio_guida=non-valido').get_data(as_text=True))['esercizio'] == 'ragioneria-wms'  # resta la scelta fatta
 g = config(c.get('/vuoto/m/pp').get_data(as_text=True))
 src = c.get('/static/guida/esercizi/ragioneria-wms.js').get_data(as_text=True)
 prefixes = dict(re.findall(r"([A-Z])='(erp_\w+\.)'", src))

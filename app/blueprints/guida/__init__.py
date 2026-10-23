@@ -23,9 +23,9 @@ def config_guida(versione, esercizio=None, chiave=None):
         scelta = request.args.get("esercizio_guida")
         if scelta in scelte:
             session["guida_integrata"] = scelta
-        esercizio = session.get("guida_integrata", "ragioneria-wms")
+        esercizio = session.get("guida_integrata", "dicembre-wms")   # uso libero: l’esercizio di dicembre 2026 con riapertura
         if esercizio not in scelte:
-            esercizio = "ragioneria-wms"
+            esercizio = "dicembre-wms"
     if not esercizio or utente_corrente() is None:
         return None
     url = {f"{a['blueprint']}.{p['endpoint']}": url_for(f"{a['blueprint']}.{p['endpoint']}", versione=versione) for a, p in tutte_le_pagine()}

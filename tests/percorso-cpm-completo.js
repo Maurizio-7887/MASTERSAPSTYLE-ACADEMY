@@ -55,6 +55,18 @@ p=apri('erp_costi','scheda');
 bene(p.fai('cpm-standard',{materiale:'TR-STD',componente:'FERRO',quantita:'8',Taglio:'0,25',Piegatura:'0,20',Saldatura:'0,40',attrezzaggio:'0',centroSet:'Taglio'},'standard'),'salva ciclo TR CPM');
 p.lab.querySelector('#cpm-materiale').value='SL-TAGLIO';p.lab.querySelector('#cpm-materiale').dispatchEvent(new p.w.Event('change'));
 bene(p.fai('cpm-standard',{materiale:'SL-TAGLIO',componente:'FERRO',quantita:'8',Taglio:'0,25',Piegatura:'0',Saldatura:'0',attrezzaggio:'0',centroSet:'Taglio'},'standard'),'salva ciclo HALB CPM');
+// BPC sopra il piano CO: modello, energia stagionale del 4200, approvazione e ritrasferimento in KP06 v0.
+p=apri('erp_bpc','modello');p.fai('bpc-crea',{conferma:'CREA'},'crea');ok(!!p.w.BPC4.M()&&/Data Manager/.test(p.testo()),'BPC modello creato');fino('BPC · Modello');
+p=apri('erp_bpc','input');p.lab.querySelector('#cdc').value='4200';p.lab.querySelector('#cdc').dispatchEvent(new p.w.Event('change'));
+{const st=[400,350,300,200,150,150,200,100,200,300,350,400],v={};st.forEach((x,k)=>v['m54_'+(k+1)]=String(x));bene(p.fai('epm',v,'salva'),'EPM 4200 energia stagionale');}
+ok(p.w.BPC4.totaleRiga(p.w.BPC4.riga('BUDGET','V1','4200','54'))===3100,'energia annua invariata 3.100');fino('BPC · Modulo di inserimento');
+p=apri('erp_bpc','processo');
+for(const c of ['4100','4200','4210','4220','4230','4300'])bene(p.fai('bpf',{cdc:c,azione:'invia'},'bpf'),'BPC invia '+c);
+ok(/motivo/.test(p.fai('bpf',{cdc:'4100',azione:'respingi',nota:''},'bpf')),'respingere richiede il motivo');
+for(const c of ['4100','4200','4210','4220','4230','4300'])bene(p.fai('bpf',{cdc:c,azione:'approva',nota:'ok'},'bpf'),'BPC approva '+c);
+{const rev=p.w.PC4.cpm.modello().revisione;bene(p.fai('retract',{conferma:'TRASFERISCI'},'retract'),'BPC ritrasferito in KP06');
+ ok(p.w.PC4.cpm.modello().revisione===rev+1 && p.w.PC4.cpm.modello().generale.produttivi===18000,'nuova revisione, costi comuni sempre 18.000');}
+fino('BPC · Approvazione');
 p=apri('erp_costi','calcolo');
 ok(/KSPI/.test(p.fai('ck',{materiale:'TR-STD',data:'2026-12-01'})),'CK11N bloccato senza KSPI');
 p=apri('erp_controllo','kspi');bene(p.fai('kspi',{data:'2026-12-01'},'kspi'),'KSPI');
@@ -72,6 +84,10 @@ replaceOne('// 3 · assicurazione',setup+'\n'+lettura+'\n// 3 · assicurazione')
 // CPM conserva anche la singola operazione HALB nello snapshot: la sua fase va
 // dichiarata esplicitamente, diversamente dal ciclo aggregato pre-CPM.
 replaceOne("ordine:oh,fase:'',attrezzaggio:'0',ore:'5'","ordine:oh,fase:'Taglio',attrezzaggio:'0',ore:'5'");
+
+// BPC di fine mese: consuntivo di dicembre da S/4 e forecast 11+1, prima di KO88.
+const ko88="p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length;";
+replaceOne(ko88,"p=apri('erp_bpc','modello');bene(p.fai('bpc-actual',{mese:'12'},'actual'),'BPC consuntivo di dicembre');bene(p.fai('bpc-copia',{destinazione:'F1',mesiActual:'11'},'copia'),'BPC forecast 11+1');\n{const B=p.w.BPC4,r=B.report({mese:12,forecast:'F1'}).find(x=>x.cdc==='4200');ok(Math.abs(r.forecast-1641.63)<0.01,'forecast 11+1 del 4200 = budget di dicembre '+r.forecast);ok(r.actualYTD>0,'consuntivo 4200 caricato '+r.actualYTD);console.log('BPC 4200 dicembre: budget anno '+r.budget+' consuntivo '+r.actualYTD+' forecast '+r.forecast+' '+JSON.stringify(B.report({mese:12,forecast:'F1'}).map(x=>[x.cdc,x.actualYTD,x.forecast]))+' '+JSON.stringify(Object.fromEntries(['80','81','82','50','54','83','86'].map(k=>[k,B.riga('ACTUAL','A','4200',k)[11]]))));}\np = apri('erp_bpc','report'); ok(/Budget, consuntivo e forecast per centro/.test(p.testo()),'report BPC');\n"+ko88);
 
 // Conservare tutte le operazioni ma rispettare il calendario 22/12 -> 28/12.
 const incasso=source.match(/^p = apri\('erp_fi','sopravvenienze'\); bene\(p\.fai\('ii'.*$/m);

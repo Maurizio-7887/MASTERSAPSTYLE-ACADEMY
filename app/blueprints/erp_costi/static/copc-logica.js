@@ -344,7 +344,8 @@ window.PC4 = (function () {
       return {versione: m.versione, revisione: m.revisione, anno: m.anno, materiale: mat, componente: {mat: cp.mat, q: cp.q, prezzo: prezzoComp(cp.mat)},
         ore: copia(s.ore), attrezzaggio: s.attrezzaggio, centroSet: s.centroSet, fasi: s.fasi.slice(),
         tariffe: CENTRI.reduce(function (o, k) { o[k] = t[k].tariffa; return o; }, {}),
-        scheda: {sovrMat: 0, sovrProd: 0, tariffa: 28, lotto: C().scheda.lotto}};
+        // la scheda di calcolo (sovraccosti % e lotto) si somma alle tariffe dei centri, come il costing sheet di SAP accanto a KSPI
+        scheda: {sovrMat: C().scheda.sovrMat || 0, sovrProd: C().scheda.sovrProd || 0, tariffa: 28, lotto: C().scheda.lotto}};
     }
     function tariffa(o, fase) {
       var s = o.piano.par.snapshot;
