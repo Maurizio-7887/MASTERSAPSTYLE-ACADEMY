@@ -23,6 +23,11 @@ def fatture():
     return render_lab("erp_acquisti", "fatture")
 
 
+@bp.route("/offerte")
+def offerte():
+    return render_lab("erp_acquisti", "offerte")
+
+
 @bp.route("/richieste")
 def richieste():
     return render_lab("erp_acquisti", "richieste")

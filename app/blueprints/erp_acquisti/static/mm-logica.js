@@ -1,4 +1,4 @@
-/* SISTEMA INTEGRATO — MM acquisti: ordine d'acquisto (ME21N), entrata merci (MIGO 101), fattura fornitore (MIRO).
+/* SISTEMA INTEGRATO — MM acquisti: richiesta di offerta e confronto (ME41 · ME47 · ME49), ordine d'acquisto (ME21N), entrata merci (MIGO 101), fattura fornitore (MIRO).
    Il ferro è a prezzo standard (controllo prezzo S): l'entrata merci carica il magazzino a standard,
    il conto WE/RE (22) al prezzo dell'ordine e la differenza va sul conto differenze prezzo (63) — e nel Material Ledger.
    La fattura chiude il WE/RE; se il prezzo fatturato è diverso da quello dell'ordine, nasce un'altra differenza prezzo. */
@@ -84,5 +84,61 @@ window.MM4 = (function () {
     S().fattureFornitore.push({numero: numero, rif: rif, ordine: o.numero, fornitore: o.fornitore, data: data, qta: q, prezzo: p, imponibile: imponibile, iva: iva, totale: r2(imponibile + iva), contabile: r.numero});
     n.salva(); return r;
   }
-  return {richiesta: richiesta, approva: approva, ordine: ordine, rilascia: rilascia, parametri: parametri, entrata: entrata, fattura: fattura, IVA: IVA, P: P};
+  // ── RICHIESTE DI OFFERTA: ME41 crea e invia a 2-4 fornitori, ME47 registra le offerte, ME49 confronta, l'assegnazione crea l'ordine ──
+  var R = function () { var s = P(); if (!s.rfq) s.rfq = []; return s; };
+  var rfqDi = function (n) { var r = R().rfq.find(function (x) { return x.numero === String(n); }); if (!r) throw Error('Richiesta di offerta ' + n + ' inesistente.'); return r; };
+  var piuGiorni = function (d, g) { var x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + g); return x.toISOString().slice(0, 10); };
+  var vero = function (v) { return v === true || v === 'true' || v === 'on' || v === 'si'; };
+  function rfq(i) {
+    var n = N(), data = n.data(i.data), r0 = i.rda ? rdaDi(i.rda) : null;
+    if (r0 && r0.stato !== 'approvata') throw Error('La richiesta d\'acquisto ' + r0.numero + ' è «' + r0.stato + '»: si chiede l\'offerta solo per una richiesta approvata.');
+    var mat = r0 ? r0.materiale : (i.materiale || 'FERRO'), m = n.materiale(mat); if (m.tipo !== 'ROH') throw Error('Le offerte si chiedono per le materie prime (ROH).');
+    var q = r0 && (i.qta == null || i.qta === '') ? r0.qta : L.num(i.qta, 'Quantità', 1);
+    var cons = i.consegna ? n.data(i.consegna) : (r0 ? r0.consegna : piuGiorni(data, 15)); if (cons < data) throw Error('La consegna richiesta non può precedere la richiesta di offerta.');
+    var scelti = Object.keys(S().fornitori).filter(function (f) { return vero(i['f_' + f]); });
+    if (scelti.length < 2) throw Error('Scegli almeno 2 fornitori: la richiesta di offerta serve a confrontare.');
+    if (scelti.length > 4) throw Error('Al massimo 4 fornitori per richiesta di offerta.');
+    var r = {numero: n.numero('rfq'), data: data, materiale: mat, qta: q, consegna: cons, rda: r0 ? r0.numero : '', stato: 'aperta',
+      fornitori: scelti.map(function (f) { return {fid: f, prezzo: null, gg: null, pag: null}; })};
+    R().rfq.push(r); n.salva();
+    return '<p class="lab-nota">Richiesta di offerta <b>' + r.numero + '</b> (ME41) inviata a ' + scelti.length + ' fornitori: ' + scelti.map(function (f) { return S().fornitori[f].nome; }).join(', ') +
+      '. ' + L.n0(q) + ' ' + m.um + ' ' + mat + ' per il ' + L.fd(cons) + '. Ora registra le offerte che arrivano (ME47). Nessuna scrittura.</p>';
+  }
+  function offerta(i) {
+    var n = N(), parti = String(i.voce || '').split('|'), r = rfqDi(i.rfq || parti[0]), fid = i.fornitore || parti[1];
+    if (r.stato !== 'aperta') throw Error('La richiesta di offerta ' + r.numero + ' è già ' + r.stato + '.');
+    var f = r.fornitori.find(function (x) { return x.fid === fid; }); if (!f) throw Error('Il fornitore ' + fid + ' non è tra quelli interpellati.');
+    f.prezzo = L.num(i.prezzo, 'Prezzo offerto', 0.0001);
+    f.gg = i.gg == null || i.gg === '' ? 0 : L.num(i.gg, 'Giorni di consegna', 0);
+    f.pag = i.pag == null || i.pag === '' ? parseInt(S().fornitori[fid].pagamento, 10) || 0 : L.num(i.pag, 'Giorni di pagamento', 0);
+    f.data = n.data(i.data || r.data); n.salva();
+    var mancano = r.fornitori.filter(function (x) { return !x.prezzo; }).length;
+    return '<p class="lab-nota">Offerta di <b>' + S().fornitori[fid].nome + '</b> registrata (ME47): ' + L.eur(f.prezzo) + ' €/' + n.materiale(r.materiale).um + ', consegna in ' + f.gg + ' giorni, pagamento a ' + f.pag + ' giorni. ' +
+      (mancano ? 'Mancano ancora ' + mancano + ' offerte.' : 'Tutte le offerte sono arrivate: guarda il <b>confronto</b> (ME49) e assegna.') + '</p>';
+  }
+  // ME49: totale, data di consegna e scelta consigliata (prezzo più basso tra chi consegna in tempo; a parità, chi consegna prima e chi paga più tardi)
+  function confronto(n0) {
+    var r = typeof n0 === 'object' ? n0 : rfqDi(n0), std = N().materiale(r.materiale).std;
+    var righe = r.fornitori.filter(function (x) { return x.prezzo > 0; }).map(function (x) {
+      var arrivo = piuGiorni(x.data || r.data, x.gg || 0);
+      return {fid: x.fid, nome: S().fornitori[x.fid].nome, prezzo: x.prezzo, gg: x.gg, pag: x.pag, arrivo: arrivo, inTempo: arrivo <= r.consegna,
+        totale: r2(r.qta * x.prezzo), vsStd: std ? r2((x.prezzo - std) / std * 100) : 0, diffStd: r2(r.qta * (x.prezzo - std))};
+    });
+    var ord = function (a, b) { return a.totale - b.totale || a.gg - b.gg || b.pag - a.pag; };
+    var validi = righe.filter(function (x) { return x.inTempo; }).sort(ord), tutti = righe.slice().sort(ord);
+    var best = validi[0] || tutti[0] || null, secondo = best ? (validi.length ? validi : tutti).filter(function (x) { return x.fid !== best.fid; })[0] : null;
+    return {righe: righe, consigliato: best ? best.fid : '', inTempo: !!validi.length, risparmio: best && secondo ? r2(secondo.totale - best.totale) : 0, secondo: secondo, completo: r.fornitori.every(function (x) { return x.prezzo > 0; }), std: std};
+  }
+  function assegna(i) {
+    var parti = String(i.voce || '').split('|'), n = N(), r = rfqDi(i.rfq || parti[0]), c = confronto(r); if (r.stato !== 'aperta') throw Error('La richiesta di offerta ' + r.numero + ' è già ' + r.stato + '.');
+    if (c.righe.length < 2) throw Error('Servono almeno 2 offerte registrate per confrontare e assegnare.');
+    var fid = i.fornitore || parti[1] || c.consigliato, x = c.righe.find(function (y) { return y.fid === fid; }); if (!x) throw Error('Il fornitore scelto non ha presentato un\'offerta.');
+    var data = n.data(i.data || r.data);
+    var msg = ordine({rda: r.rda, fornitore: fid, materiale: r.materiale, qta: r.qta, prezzo: x.prezzo, data: data});
+    var o = S().acquisti[S().acquisti.length - 1]; o.rfq = r.numero; o.consegna = piuGiorni(data, x.gg || 0);
+    r.stato = 'assegnata'; r.vincitore = fid; r.ordine = o.numero; r.motivo = fid === c.consigliato ? 'offerta consigliata' : String(i.motivo || 'scelta diversa dalla consigliata'); n.salva();
+    return '<p class="lab-nota">Richiesta di offerta ' + r.numero + ' <b>assegnata a ' + x.nome + '</b>' + (fid === c.consigliato ? ' (offerta consigliata)' : ' — attenzione: non è l\'offerta consigliata, il motivo resta nel documento') + '.</p>' + msg;
+  }
+  return {richiesta: richiesta, approva: approva, ordine: ordine, rilascia: rilascia, parametri: parametri, entrata: entrata, fattura: fattura,
+    rfq: rfq, offerta: offerta, confronto: confronto, assegna: assegna, R: R, IVA: IVA, P: P};
 })();

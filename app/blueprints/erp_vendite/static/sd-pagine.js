@@ -7,13 +7,28 @@
   var e = L.esc, eur = L.eur, n0 = L.n0, fd = L.fd, S = function () { return N.S; };
   var nome = function (c) { return e(U.nome(S(), c)); };
   var ordiniOR = function () { return S().ordini.filter(function (o) { return o.tipo === 'OR'; }); };
+  var tabDisp = function (d) {
+    return L.tabella(['Materiale', 'Giacenza›', 'Bloccata›', 'Già in consegna›', 'Confermata ad altri ordini›', 'Disponibile ora (ATP)›', 'In arrivo da produzione/acquisti›', 'Di cui ancora libero›'],
+      [[d.materiale, n0(d.giacenza), n0(d.bloccata), n0(d.inConsegna), n0(d.riservato), '<b>' + n0(d.disponibile) + '</b>', n0(d.inArrivo), n0(d.liberoInArrivo)]]);
+  };
+  // la videata che il venditore guarda prima di confermare al cliente
+  var esitoDisp = function (d) {
+    var sem = d.esito === 'confermabile' ? 'verde' : d.esito === 'in arrivo' ? 'giallo' : 'arancio';
+    var testo = d.esito === 'confermabile' ? 'CONFERMABILE: i ' + n0(d.richiesta) + ' pz ci sono a magazzino, puoi confermare subito al cliente.'
+      : d.esito === 'in arrivo' ? 'CONFERMABILE IN PARTE SUBITO: ' + n0(d.subito) + ' pz da magazzino, gli altri ' + n0(d.dopo) + ' arrivano da ordini già aperti (' + d.arrivi.map(function (x) { return e(x.fonte) + ' il ' + fd(x.data); }).join(', ') + '). Conferma al cliente le due date.'
+      : 'DEVI PRODURRE: ' + (d.subito ? n0(d.subito) + ' pz confermabili subito' + (d.dopo ? ', ' + n0(d.dopo) + ' in arrivo' : '') + ', ' : '') + 'mancano <b>' + n0(d.produrre) + ' pz</b>. Apri un ordine di produzione (<a href="../produzione/">Produzione → CO01</a>) prima di promettere la data al cliente.';
+    return '<p class="lab-nota"><span class="lab-bd ' + sem + '">● ' + (d.esito === 'confermabile' ? 'VERDE' : d.esito === 'in arrivo' ? 'GIALLO' : 'ROSSO') + '</span> ' + testo + '</p>';
+  };
   var PAGINE = {
     ordini: function () {
       radice.innerHTML = U.avviso(S()) +
         '<div class="lab-griglia">' +
         L.scheda('🆕', 'Crea ordine cliente', 'VA01 · tipo OR', L.modulo('va', [['cliente', 'Committente', 'select', 'C100', U.clienti(S())], ['materiale', 'Materiale', 'select', 'TR-STD', U.vendibili(S())],
-          ['qta', 'Quantità (pz)', 'num'], ['rif', 'Riferimento cliente', 'text'], ['data', 'Data documento', 'date'], ['consegna', 'Data di consegna richiesta (vuota = data documento)', 'date']], [['prezzi', 'Mostra condizioni', 'sec'], ['va', 'Salva ordine']])) +
-        L.scheda('💡', 'Come legge i prezzi', '', '<p class="lab-nota">Il prezzo non si scrive: il sistema lo <b>determina</b> leggendo le tabelle condizioni con la procedura ZFT001 (Dati di base → Condizioni). Premi «Mostra condizioni» per vedere la videata prezzi prima di salvare.</p>') +
+          ['qta', 'Quantità (pz)', 'num'], ['rif', 'Riferimento cliente', 'text'], ['data', 'Data documento', 'date'], ['consegna', 'Data di consegna richiesta (vuota = data documento)', 'date']], [['disp', 'Controlla disponibilità', 'sec'], ['prezzi', 'Mostra condizioni', 'sec'], ['va', 'Salva ordine']])) +
+        L.scheda('📦', 'Merce a magazzino', 'MMBE · CO09', '<p class="lab-nota">Prima di confermare al cliente premi <b>«Controlla disponibilità»</b>: ti dice se i pezzi ci sono, se arrivano da un ordine già aperto o se devi produrre.</p>' +
+          L.tabella(['Materiale', 'Giacenza›', 'Già in consegna›', 'Confermata ad altri ordini›', 'Disponibile›', 'In arrivo›'], U.vendibili(S()).map(function (x) { var d = SD.disponibilita(x[0]);
+            return [x[0], n0(d.giacenza), n0(d.inConsegna), n0(d.riservato), '<b>' + n0(d.disponibile) + '</b>', n0(d.inArrivo)]; })) +
+          '<p class="lab-nota">Il prezzo non si scrive: il sistema lo <b>determina</b> con la procedura ZFT001 (Dati di base → Condizioni). «Mostra condizioni» fa vedere la videata prezzi prima di salvare.</p>') +
         '</div>' +
         L.scheda('📑', 'Ordini cliente', 'VA05 · semaforo di disponibilità come VA01', '<p class="lab-nota">Semaforo: <span class="lab-bd verde">● verde</span> confermabile per intero alla data richiesta · <span class="lab-bd giallo">● giallo</span> confermabile più tardi (pezzi in arrivo dalla produzione o dagli acquisti) o solo in parte · <span class="lab-bd arancio">● rosso</span> niente a magazzino né in arrivo. Si ricalcola a ogni movimento.</p>' +
           L.tabella(['Ordine', 'Tipo', 'Data', 'Cliente', 'Materiale', 'Q.tà›', 'Consegna richiesta', 'Disponibilità', 'Data confermabile', 'Confermata da giacenza›', 'Crediti', 'Netto›', 'Totale›', 'Margine›', 'Consegnato›', 'Fatturato›'], S().ordini.map(function (o) {
@@ -22,7 +37,7 @@
           return [o.numero, o.tipo, fd(o.data), nome(o.cliente), o.materiale, n0(o.qta), o.tipo === 'OR' ? fd(o.consegnaRichiesta || o.data) : '',
             atp ? '<span class="lab-bd ' + atp.semaforo + '" title="' + e(atp.testo) + '">● ' + e(atp.testo) + '</span>' : '', atp && atp.dataConfermata ? fd(atp.dataConfermata) : '',
             o.confermata == null ? '' : (o.confermata < o.qta ? '<b>' + n0(o.confermata) + '</b>' : n0(o.confermata)), cr, o.prezzi ? eur(o.prezzi.netto) : eur(o.importo), o.prezzi ? eur(o.prezzi.totale) : '', o.prezzi && o.prezzi.margine != null ? eur(o.prezzi.margine) : '', n0(o.consegnato || 0), n0(o.fatturato || 0)]; }), 'Nessun ordine.'));
-      L.collega(radice, 'va', {va: SD.ordine, prezzi: function (v) { return '<!--info-->' + U.righePrezzi(SD.prezzi(v.cliente, v.materiale, L.num(v.qta, 'Quantità', 1))); }}, rendi);
+      L.collega(radice, 'va', {va: SD.ordine, disp: function (v) { var d = SD.disponibilita(v.materiale, L.num(v.qta, 'Quantità', 1)); return '<!--info-->' + tabDisp(d) + esitoDisp(d); }, prezzi: function (v) { return '<!--info-->' + U.righePrezzi(SD.prezzi(v.cliente, v.materiale, L.num(v.qta, 'Quantità', 1))); }}, rendi);
     },
     crediti: function () {
       var cli = Object.keys(S().clienti), bloccati = ordiniOR().filter(function (o) { return o.credito && o.credito.stato === 'B' && !o.rifiutato; });

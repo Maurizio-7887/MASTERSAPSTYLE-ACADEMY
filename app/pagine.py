@@ -327,6 +327,7 @@ _ERP_PAGINE = {
                     {"endpoint": "incassi", "titolo": "Incassi e partite", "icona": "🏦", "tcode": "F-28 · FBL5N"},
                     {"endpoint": "flusso", "titolo": "Flusso documenti", "icona": "🔗", "tcode": "VA03"}],
     "erp_acquisti": [{"endpoint": "richieste", "titolo": "Richieste d'acquisto e approvazione", "icona": "🙋", "tcode": "ME51N · ME54N · ME5A"},
+                     {"endpoint": "offerte", "titolo": "Richieste di offerta e confronto", "icona": "✉️", "tcode": "ME41 · ME47 · ME49"},
                      {"endpoint": "ordini", "titolo": "Ordini d'acquisto e rilascio", "icona": "🛒", "tcode": "ME21N · ME29N · ME2N"},
                      {"endpoint": "entrate", "titolo": "Entrata merci", "icona": "📥", "tcode": "MIGO 101 · MMBE"},
                      {"endpoint": "fatture", "titolo": "Fatture fornitore", "icona": "🧾", "tcode": "MIRO"}],
