@@ -32,34 +32,62 @@
     // Descrizioni omonime non identificano un conto: occorre scegliere il codice.
     return candidati.length === 1 ? String(candidati[0].codice) : testo;
   }
+  function vuota(a) { return !a || (!String(a.conto || '').trim() && !a.sezione && !String(a.importo == null ? '' : a.importo).trim()); }
+  function piene(risposte) { return (risposte || []).filter(function (a) { return !vuota(a); }); }
+  function gruppiAttesi(q) {
+    var g = {};
+    righe(q).forEach(function(r) {
+      var k = String(r.conto)+'|'+r.dareAvere;
+      (g[k] = g[k] || []).push(Math.round(Number(r.importo)*100));
+    });
+    return g;
+  }
+  /* Per ogni conto e sezione la risposta è giusta in due modi:
+     - riga per riga come il documento (un dipendente, un cespite per riga): multinsieme, ogni riga
+       consuma una sola occorrenza, duplicati intercambiabili ma mai eliminabili;
+     - una sola riga con il TOTALE del conto in quella sezione, come la scrittura riepilogativa del
+       libro di testo (D 80 Salari 7.529,17 invece di tre righe per dipendente).
+     Aggregazioni parziali o importi inventati che danno lo stesso totale restano errori. */
   function confronta(q) {
-    var attese = righe(q).map(function(r) {
-      return {conto:String(r.conto), sezione:r.dareAvere, centesimi:Math.round(Number(r.importo)*100)};
-    }), usate = [], abbinate = [];
-    // Multinsieme, non insieme e non totali per conto: ogni riga consuma una sola
-    // occorrenza. Due duplicati uguali sono intercambiabili, mai eliminabili.
-    q.risposte.forEach(function(a,i) {
-      var j = attese.findIndex(function(r,k) {
-        return !usate[k] && String(a.conto) === r.conto && a.sezione === r.sezione &&
-          Number.isSafeInteger(r.centesimi) && importo(a.importo) === r.centesimi;
+    var attese = gruppiAttesi(q), conti = {}, perGruppo = {}, errori = [], mancanti = false;
+    Object.keys(attese).forEach(function(k) { conti[k.split('|')[0]] = true; });
+    (q.risposte || []).forEach(function(a, i) {
+      errori[i] = '';
+      if (vuota(a)) return;
+      var k = String(a.conto)+'|'+a.sezione;
+      (perGruppo[k] = perGruppo[k] || []).push({i:i, c:importo(a.importo)});
+    });
+    Object.keys(perGruppo).forEach(function(k) {
+      var date = perGruppo[k], att = attese[k];
+      if (!att) {
+        // il conto c'è ma nell'altra sezione: se quella è già scritta, questa riga è in eccesso
+        var c = k.split('|')[0], altra = c+'|'+(k.split('|')[1] === 'DARE' ? 'AVERE' : 'DARE');
+        date.forEach(function(d) { errori[d.i] = conti[c] && !perGruppo[altra] ? 'Sezione non corretta per questo conto.' : 'Conto non corretto o riga in eccesso.'; });
+        return;
+      }
+      var totale = att.reduce(function(s, c) { return s + c; }, 0);
+      if (date.length === 1 && date[0].c === totale) return;
+      var usate = [];
+      date.forEach(function(d) {
+        var j = att.findIndex(function(c, n) { return !usate[n] && Number.isSafeInteger(c) && c === d.c; });
+        if (j >= 0) usate[j] = true;
+        else errori[d.i] = 'Importo non corretto per conto e sezione: scrivi le righe del documento una per una oppure un’unica riga con il totale del conto.';
       });
-      if (j >= 0) { usate[j] = true; abbinate[i] = true; }
+      if (att.some(function(c, n) { return !usate[n]; }) && date.every(function(d) { return !errori[d.i]; })) mancanti = true;
     });
-    return q.risposte.map(function(a,i) {
-      if (abbinate[i]) return '';
-      var stessoConto = attese.filter(function(r,k) { return !usate[k] && String(a.conto) === r.conto; });
-      if (!stessoConto.length) return 'Conto non corretto o riga duplicata in eccesso.';
-      if (stessoConto.some(function(r) { return a.sezione === r.sezione; })) return 'Importo non corretto per conto e sezione.';
-      if (stessoConto.some(function(r) { return importo(a.importo) === r.centesimi; })) return 'Sezione non corretta per questo conto.';
-      return 'Sezione e importo non corrispondono per questo conto.';
-    });
+    Object.keys(attese).forEach(function(k) { if (!perGruppo[k]) mancanti = true; });
+    errori.mancanti = mancanti;
+    return errori;
   }
   // I vecchi quiz mostravano già i conti: un tentativo storico completo conserva
   // il suo valore, ma un vecchio clic vuoto non sblocca alcun documento.
+  // Le righe vuote si ignorano: chi scrive la scrittura riepilogativa (un totale per conto) ne usa meno.
+  // Servono almeno tante righe complete quanti sono i conti/sezioni del documento.
   function compilato(q, risposte, S) {
-    var rs = (q.documento || {}).righe || [];
-    return !!rs.length && Array.isArray(risposte) && risposte.length === rs.length && risposte.every(function (a) {
-      return a && (a.sezione === 'DARE' || a.sezione === 'AVERE') && importo(a.importo) !== null &&
+    var rs = (q.documento || {}).righe || [], usate = piene(risposte);
+    if (!rs.length || !Array.isArray(risposte) || usate.length < Object.keys(gruppiAttesi(q)).length) return false;
+    return usate.every(function (a) {
+      return (a.sezione === 'DARE' || a.sezione === 'AVERE') && importo(a.importo) !== null &&
         (q.versioneTentativo !== 2 || (!!a.conto && (!S || (S.pianoDeiConti || []).some(function (c) { return String(c.codice) === String(a.conto); }))));
     });
   }
@@ -95,7 +123,8 @@
     var h = '<section class="msa-ragioneria"><div class="msa-g-gruppo">Laboratorio di ragioneria · documento 1 di '+coda+'</div>' +
       '<h3>Ricostruisci la scrittura</h3><div class="msa-g-esito">⚠️ <b>ATTENZIONE, L’OPERAZIONE CHE HAI FATTO MOVIMENTA LIBRO GIORNALE E MASTRI.</b><br>Prova a vedere se riesci a ricostruirla da te.</div>' +
       '<p class="msa-q-info">Documento '+esc(q.documento.numero || q.documento.id)+' · '+esc(q.documento.data)+'<br>'+esc(q.documento.descrizione || q.documento.tipo)+'</p>' +
-      '<p>Cerca ciascun conto per <b>codice o descrizione</b>, scegli <b>Dare o Avere</b> e indica l’<b>importo in euro</b>. Le righe possono essere inserite in qualsiasi ordine. La scrittura è già registrata: questa prova non la registra una seconda volta.</p>';
+      '<p>Cerca ciascun conto per <b>codice o descrizione</b>, scegli <b>Dare o Avere</b> e indica l’<b>importo in euro</b>. Le righe possono essere inserite in qualsiasi ordine. La scrittura è già registrata: questa prova non la registra una seconda volta.</p>' +
+      '<p class="msa-q-info">Il programma registra una riga per ogni dipendente, cespite o centro di costo. Puoi ricostruirla <b>riga per riga</b> come nel giornale oppure in forma <b>riepilogativa</b>, con un’unica riga per conto e sezione con il totale (come nella scrittura dell’esercizio): le righe che non ti servono lasciale vuote.</p>';
     rs.forEach(function (r,i) {
       var a = (q.risposte || [])[i] || {}, f = (q.errori || [])[i];
       var scelto = a.conto || (q.versioneTentativo !== 2 && valutato ? r.conto : '');
@@ -153,18 +182,22 @@
         if (!tentativoValido(q)) { q.corretto=false; q.aiuto=false; }
         q.risposte=leggi(corpo,S); q.versioneTentativo=2;
         if (!compilato(q,q.risposte,S)) {
-          q.errori=q.risposte.map(function(a) { return !a.conto || !(S.pianoDeiConti || []).some(function(c) { return String(c.codice) === String(a.conto); }) || (a.sezione!=='DARE' && a.sezione!=='AVERE') || importo(a.importo)===null ? 'Scegli un conto valido e completa sezione e importo positivo (massimo due decimali).' : ''; });
-          q.messaggio='Tentativo non acquisito: completa tutte le righe. La consultazione resta bloccata.';
+          var poche = piene(q.risposte).length < Object.keys(gruppiAttesi(q)).length;
+          q.errori=q.risposte.map(function(a) { return vuota(a) ? (poche ? 'Riga vuota: servono altre righe.' : '') : (!a.conto || !(S.pianoDeiConti || []).some(function(c) { return String(c.codice) === String(a.conto); }) || (a.sezione!=='DARE' && a.sezione!=='AVERE') || importo(a.importo)===null ? 'Scegli un conto valido e completa sezione e importo positivo (massimo due decimali).' : ''); });
+          q.messaggio='Tentativo non acquisito: ogni riga usata va completata e serve almeno una riga per ogni conto e sezione del documento. La consultazione resta bloccata.';
           return;
         }
         q.tentativi=(q.tentativi || 0)+1;
         q.totali={dare:0,avere:0};
-        q.risposte.forEach(function(a) { q.totali[a.sezione==='DARE'?'dare':'avere']+=importo(a.importo); });
-        q.errori=confronta(q);
-        q.corretto=q.errori.every(function(e){return !e;});
+        piene(q.risposte).forEach(function(a) { q.totali[a.sezione==='DARE'?'dare':'avere']+=importo(a.importo); });
+        var esame=confronta(q);
+        q.errori=esame.slice();
+        q.corretto=q.errori.every(function(e){return !e;}) && !esame.mancanti;
         q.tentato=true;
         (q.cronologiaTentativi=q.cronologiaTentativi || []).push({risposte:JSON.parse(JSON.stringify(q.risposte)),errori:q.errori.slice(),corretto:q.corretto,totali:JSON.parse(JSON.stringify(q.totali)),inviatoIl:new Date().toISOString()});
-        q.messaggio=q.corretto?'Ottimo: ora puoi proseguire.':'Riprova: anche una scrittura in pareggio può usare sezioni o importi sbagliati.';
+        q.messaggio=q.corretto?'Ottimo: ora puoi proseguire.':(esame.mancanti && q.errori.every(function(e){return !e;}) ?
+          'Le righe scritte sono giuste ma ne manca almeno una: controlla che ci siano tutti i conti (o tutte le righe del documento).' :
+          'Riprova: anche una scrittura in pareggio può usare sezioni o importi sbagliati.');
       } else if(aiuto) { q.aiuto=true; q.messaggio='Confronta la soluzione con il tuo tentativo e spiega il motivo delle sezioni.'; }
       else if(avanti) {
         S.msaRagioneria.esiti.push({chiave:q.chiave,documento:q.documento.numero || q.documento.id,data:q.documento.data,tipo:q.documento.tipo,

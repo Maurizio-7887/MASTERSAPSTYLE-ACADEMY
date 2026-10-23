@@ -95,6 +95,28 @@ for (const risposta of [
   const p = scenario(duplicati); p.compila(risposta); p.premi('msa-q-verifica');
   ok(!p.q().corretto, 'nessuna aggregazione, riuso di occorrenze o riga vuota accettati'); p.w.close();
 }
+// Scrittura riepilogativa: un'unica riga per conto e sezione con il totale (righe vuote ignorate).
+{
+  const p = scenario(duplicati); p.compila([risp('10','AVERE','12'),{},risp('10','DARE','12'),{}]); p.premi('msa-q-verifica');
+  ok(p.q().corretto, 'totale per conto e sezione accettato come la scrittura del libro di testo');
+  ok(p.q().totali.dare===1200 && p.q().totali.avere===1200, 'righe vuote escluse dai totali'); p.w.close();
+}
+{
+  // stipendi: tre dipendenti per conto; misto riga-per-riga e riepilogativo su conti diversi
+  const paghe = [riga('10','DARE',2275),riga('10','DARE',2437.5),riga('10','DARE',2816.67),
+    riga('20','DARE',707.08),riga('20','DARE',757.57),riga('20','DARE',875.42),riga('30','AVERE',9869.24)];
+  const p = scenario(paghe);
+  p.compila([risp('10','DARE','7.529,17'),risp('20','DARE','707,08'),risp('20','DARE','757,57'),risp('20','DARE','875,42'),risp('30','AVERE','9.869,24')]);
+  p.premi('msa-q-verifica'); ok(p.q().corretto, 'un conto riepilogato e uno riga per riga'); p.w.close();
+  const m = scenario(paghe);
+  m.compila([risp('10','DARE','2275'),risp('10','DARE','5254,17'),risp('20','DARE','2340,07'),risp('30','AVERE','9869,24')]);
+  m.premi('msa-q-verifica'); ok(!m.q().corretto, 'aggregazione parziale con importi inventati resta errata'); m.w.close();
+}
+{
+  const p = scenario(duplicati); p.compila([risp('10','DARE',5),risp('10','DARE',2),risp('10','AVERE',12),{}]); p.premi('msa-q-verifica');
+  ok(!p.q().corretto && p.q().errori.every(e => !e), 'riga mancante: nessuna riga sbagliata ma scrittura incompleta');
+  ok(p.q().messaggio.includes('ne manca'), 'messaggio sulla riga mancante'); p.w.close();
+}
 for (const incompleta of [
   [], [corretta[0]], [risp('inesistente','DARE',12.34),corretta[1],corretta[2]],
   [risp('10','DARE','0'),corretta[1],corretta[2]],
