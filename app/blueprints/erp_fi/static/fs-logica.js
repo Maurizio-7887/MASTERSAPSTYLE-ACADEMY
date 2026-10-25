@@ -46,7 +46,15 @@ window.FS4 = (function () {
     if (aperto <= 0.004) throw Error(f.nome + ' non ha debiti aperti.');
     var imp = i.importo == null || i.importo === '' ? aperto : L.num(i.importo, 'Importo', 0.01);
     if (imp > aperto + 0.005) throw Error('Verso ' + f.nome + ' ci sono debiti aperti per ' + L.eur(aperto) + ' €: non si paga di più.');
-    var doc = String(i.documento || '').trim(), riga = {conto: '20', dareAvere: 'DARE', importo: imp, partner: i.fornitore, testo: 'pagamento ' + (doc || 'debiti aperti')}; if (doc) riga.pareggio = doc;
+    var doc = String(i.documento || '').trim();
+    if (doc) {   // la fattura indicata deve essere del fornitore scelto: evita di pagare la polizza al fornitore proposto dal modulo
+      var fp = P().filter(function (x) { return String(x.rif).toUpperCase() === doc.toUpperCase(); })[0];
+      if (fp && fp.fornitore !== i.fornitore) {
+        var g = n.fornitore(fp.fornitore);
+        throw Error('La fattura ' + fp.rif + ' è di ' + g.nome + ' (' + fp.fornitore + '), non di ' + f.nome + ' (' + i.fornitore + '): scegli il fornitore ' + fp.fornitore + '.');
+      }
+    }
+    var riga = {conto: '20', dareAvere: 'DARE', importo: imp, partner: i.fornitore, testo: 'pagamento ' + (doc || 'debiti aperti')}; if (doc) riga.pareggio = doc;
     var r = n.post({data: data, tipo: 'PAGAMENTO_FORNITORE', rif: String(i.rif || '').trim() || 'F-53 ' + i.fornitore, descrizione: 'F-53 bonifico a ' + f.nome + (doc ? ' per la fattura ' + doc : '') + ': ' + L.eur(imp) + ' €',
       righe: [riga, {conto: banca, dareAvere: 'AVERE', importo: imp, testo: 'bonifico ' + f.nome}]});
     n.salva(); return r;

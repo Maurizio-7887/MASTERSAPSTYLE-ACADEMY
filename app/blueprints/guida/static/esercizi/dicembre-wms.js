@@ -79,7 +79,7 @@
      attesa:'D 83 Assicurazioni / A 20 Fornitore 1.200, senza IVA. Il premio copre 12 mesi, ma solo dicembre è del 2026: lo sistemeremo a fine anno con il risconto.',
      fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return f.rif==='POL-2026-118';});}},
     {g:'3 · Assicurazione',data:'02/12/2026',titolo:'F-53: paga la polizza',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
-     campi:[['Fornitore','F400'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],attesa:'D 20 / A 10 Banca 1.200. Banca 78.800.',fatto:function(h){return paga(h,'F400','2026-12-02');}},
+     campi:[['Fornitore','F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],attesa:'D 20 / A 10 Banca 1.200. Banca 78.800.',fatto:function(h){return paga(h,'F400','2026-12-02');}},
     // ── 4 · ordini cliente ──
     {id:'dicembre-inizio-ciclo-operativo',g:'4 · CICLO OPERATIVO: ordini dei clienti',data:'02/12/2026',titolo:'VA01: Beta ordina 180 TR-STD',dove:{ep:V+'ordini'},percorso:'SD → Ordini cliente',
      campi:[['Committente','C100 Beta Costruzioni'],['Materiale','TR-STD'],['Quantità','180'],['Riferimento cliente','BETA-180'],['Data','02/12/2026'],['Data di consegna richiesta','14/12/2026']],
@@ -269,7 +269,7 @@
      nota:'Spunta a mano dopo aver letto. I controlli prima della chiusura devono essere tutti verdi.'},
     {g:'15 · IVA, imposte e chiusura',data:'31/12/2026',titolo:'Chiudi l’esercizio 2026',contabile:true,dove:{ep:H+'chiusura'},percorso:'FI → IVA, imposte, chiusura → Chiusura dell’esercizio',campi:[['Esercizio','2026'],['Chiudi anche con avvertenze','no']],
      attesa:'Epilogo dei costi e dei ricavi nel conto 90; utile: D 90 / A 32 Utile d’esercizio 1.814,98; chiusura delle attività e passività nel 91. Dopo, nessuna scrittura con data 2026.',
-     nota:'Il pannello chiede di ricostruire solo il documento dell’utile: epilogo e chiusura dei conti patrimoniali sono riporti meccanici. Leggili nel libro giornale.',fatto:function(h){return !!(h.S.chiusure || {})['2026'];}},
+     nota:'Il pannello chiede di ricostruire tutti e tre i documenti della chiusura: l’epilogo dei costi e dei ricavi, la rilevazione dell’utile e la chiusura delle attività e passività nello stato patrimoniale finale. Per epilogo e chiusura puoi scrivere una riga per conto oppure una riga riepilogativa per lato (totale costi, totale ricavi; totale attività, totale passività): conta che la scrittura quadri con i saldi. Poi confronta con il libro giornale.',fatto:function(h){return !!(h.S.chiusure || {})['2026'];}},
     // ── 16 · riapertura e gennaio ──
     {g:'16 · Riapertura e gennaio',data:'01/01/2027',titolo:'Riapri i conti al 1° gennaio 2027',contabile:true,dove:{ep:H+'riapertura'},percorso:'FI → IVA, imposte, chiusura → Riapertura',campi:[['Nuovo esercizio','2027'],['Data','01/01/2027']],
      attesa:'D attività / A 92 e D 92 / A passività per 99.309,38: macchine 29.000 (fondo 241,67), risconto 1.098,08, semilavorati 277,40, ferro 703, banca 51.886,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.814,98, anticipo bancario 10.329,98, rateo 1.033,33, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.',

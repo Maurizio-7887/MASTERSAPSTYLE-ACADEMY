@@ -51,9 +51,13 @@ ok(N.saldo('10')===10000&&N.saldo('10.02')===0,'Nessuna liquidità inventata');
 w.TS4.giroconto({da:'10',a:'10.02',importo:3000,data:'2027-05-02'});
 ok(N.saldo('10')===7000&&N.saldo('10.02')===3000,'Giroconto del laboratorio');
 w.FS4.fatturaPassiva({fornitore:'F400',rif:'LAB-DUE-POL',conto:'83',testo:'Polizza simulata due banche',imponibile:1200,iva:0,scadenza:'2027-05-03',data:'2027-05-03'});
+w.FS4.fatturaPassiva({fornitore:'F300',rif:'LAB-MAC',conto:'83',testo:'Altro fornitore con debito aperto',imponibile:5000,iva:0,scadenza:'2027-05-03',data:'2027-05-03'});
+{const prima=N.S.registrazioni.length;let msg='';try{w.FS4.paga({fornitore:'F300',banca:'10',documento:'LAB-DUE-POL',data:'2027-05-04'});}catch(e){msg=e.message;}
+ok(/F400/.test(msg)&&N.S.registrazioni.length===prima&&N.saldo('20','F300')===-5000,'Fattura di F400 pagata a F300: rifiutata, nessun documento (errore dell’allievo)');}
+w.FS4.paga({fornitore:'F300',banca:'10',documento:'LAB-MAC',data:'2027-05-04'});
 w.FS4.paga({fornitore:'F400',banca:'10.02',documento:'LAB-DUE-POL',importo:400,data:'2027-05-04'});
 w.FS4.paga({fornitore:'F400',banca:'10',documento:'LAB-DUE-POL',importo:800,data:'2027-05-05'});
-ok(N.saldo('20','F400')===0&&N.saldo('10')===6200&&N.saldo('10.02')===2600,'Due pagamenti stessa fattura');
+ok(N.saldo('20','F400')===0&&N.saldo('10')===1200&&N.saldo('10.02')===2600,'Due pagamenti stessa fattura');
 const righe=find('lab-migliorie-banche-estratto').campi.find(r=>r[0]==='Movimenti (una riga ciascuno)')[1];
 const count=N.S.registrazioni.length;
 w.TS4.caricaEstratto({banca:'10.02',data:'2027-05-06',righe});
@@ -61,7 +65,7 @@ const es=w.TS4.T().estratti.slice(-1)[0];
 ok(es.saldoIniziale===3000,'Saldo iniziale derivato dai documenti');
 w.TS4.abbina({estratto:es.numero});
 ok(N.S.registrazioni.length===count+1,'Solo commissione aggiunta, non secondo pagamento');
-ok(N.saldo('10')===6200&&N.saldo('10.02')===2595&&N.saldoBanche()===8795,'Saldi finali della consegna verificati');
+ok(N.saldo('10')===1200&&N.saldo('10.02')===2595&&N.saldoBanche()===3795,'Saldi finali della consegna verificati');
 ok(w.TS4.riconciliazione(es.numero).ok,'Estratto seconda banca riconciliato');
 w.close();
 console.log('OK: '+checks+' controlli esercizio aggiornato, compatibilità e laboratorio due banche reale in memoria.');

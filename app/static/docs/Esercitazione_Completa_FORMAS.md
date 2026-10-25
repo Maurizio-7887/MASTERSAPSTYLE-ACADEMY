@@ -953,7 +953,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 **Data aziendale simulata:** 02/12/2026
 
-- **Fornitore:** F400
+- **Fornitore:** F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti
 
 - **Fattura:** POL-2026-118
 
@@ -2932,7 +2932,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Risultato / controllo atteso:** Epilogo dei costi e dei ricavi nel conto 90; utile: D 90 / A 32 Utile d’esercizio 1.814,98; chiusura delle attività e passività nel 91. Dopo, nessuna scrittura con data 2026.
 
 
-**Attenzione e ragionamento:** Il pannello chiede di ricostruire solo il documento dell’utile: epilogo e chiusura dei conti patrimoniali sono riporti meccanici. Leggili nel libro giornale.
+**Attenzione e ragionamento:** Il pannello chiede di ricostruire tutti e tre i documenti della chiusura: l’epilogo dei costi e dei ricavi, la rilevazione dell’utile e la chiusura delle attività e passività nello stato patrimoniale finale. Per epilogo e chiusura puoi scrivere una riga per conto oppure una riga riepilogativa per lato (totale costi, totale ricavi; totale attività, totale passività): conta che la scrittura quadri con i saldi. Poi confronta con il libro giornale.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
