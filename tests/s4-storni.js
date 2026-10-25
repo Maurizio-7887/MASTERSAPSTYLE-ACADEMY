@@ -210,7 +210,7 @@ for (const m of ['07', '08', '09', '10', '11', '12']) prova(() => PY.calcola({pe
   const g = ced('2027-06', '00001'); ok(g.progressivi.storico === 5 && g.ratei.tredicesima === 1050 && g.ratei.ferieResidue === 19, 'giugno: 5 mesi di storico, rateo 13ª 6/12, ferie residue 6 + 13');
   const a = ced('2027-08', '00001'); ok(a.ratei.ferieGodute === 10 && a.ratei.rolGoduti === 4 && a.netto === g.netto - 0 || a.ratei.ferieGodute === 10, 'agosto: 10 giorni di ferie e 4 ore di ROL goduti, pagati');
   const d = ced('2027-12', '00001'); vicino(d.tredicesima, 2100, 'dicembre: tredicesima di Marco'); vicino(d.irpef13, 438.61, 'IRPEF sulla tredicesima ad aliquota marginale');
-  vicino(d.conguaglio, 4.51, 'conguaglio IRPEF di Marco (straordinari di giugno)'); vicino(d.netto, 3171.26, 'netto di dicembre di Marco'); vicino(d.ratei.ferieResidue, 22, 'ferie residue a fine anno');
+  vicino(d.conguaglio, 4.51, 'conguaglio IRPEF di Marco (straordinari di giugno)'); vicino(d.netto, 3199.26, 'netto di dicembre di Marco (a dicembre nessuna rata di addizionali)'); ok(d.addizionali === 0 && d.addizionaliAnno && d.addizionaliAnno.regionale > 0 && d.addizionaliAnno.comunale === 0, 'addizionali dell’anno determinate al conguaglio, da trattenere l’anno dopo'); vicino(d.ratei.ferieResidue, 22, 'ferie residue a fine anno');
   vicino(d.conguaglioDettaglio.dovuta - d.conguaglioDettaglio.trattenuta, d.conguaglio, 'conguaglio = dovuta − trattenuta');
   vicino(d.progressivi.irpef, d.conguaglioDettaglio.dovuta, 'dopo il conguaglio la trattenuta dell\'anno è l\'imposta dovuta'); }
 

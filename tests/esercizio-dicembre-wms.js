@@ -234,7 +234,10 @@ p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C600',importo:'1622
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C200',importo:'8608,32',rif:'SALDO FATTURA DELTA',data:'2026-12-30'}),'incasso Delta'); fino('Delta paga');
 // 13 · stipendi
 p = apri('erp_paghe','cedolino'); bene(p.fai('ca',{periodo:'2026-12'}),'calcolo paghe'); fino('Calcola le paghe');
-vicino(p.S().hr.cedolini.reduce((t,c)=>t+c.netto,0),5769.08,'netti'); vicino(p.S().hr.cedolini.reduce((t,c)=>t+c.costo,0),10426.96,'costo azienda');
+vicino(p.S().hr.cedolini.reduce((t,c)=>t+c.netto,0),5865.08,'netti'); vicino(p.S().hr.cedolini.reduce((t,c)=>t+c.costo,0),10426.96,'costo azienda');
+{ const t = ultima.document.getElementById('lab').textContent, cs = p.S().hr.cedolini;
+  ok(cs.every(c => c.addizionali === 0) && /Da trattenere nel 2027/.test(t) && /Toscana/.test(t) && /Firenze/.test(t), 'cedolino: addizionali 2026 determinate al conguaglio, nessuna rata a dicembre');
+  vicino(cs.reduce((x,c)=>x+c.addizionaliAnno.regionale,0),90.19,'addizionale regionale Toscana 2026 da trattenere nel 2027'); ok(cs.every(c => c.addizionaliAnno.comunale === 0),'comunale di Firenze esente sotto 25.000 €'); }
 ok(p.S().hr.cedolini.every(c => c.ratei.mesi === 1 && Math.abs(c.tredicesima - c.base / 12) < 0.01),'13ª di un mese per gli assunti a dicembre');
 p = apri('erp_paghe','contabilita'); bene(p.fai('rg',{periodo:'2026-12',data:'2026-12-31'}),'registra paghe'); fino('Registra le paghe');
 bene(p.fai('pn',{periodo:'2026-12',data:'2026-12-31'}),'netti pagati'); fino('Paga gli stipendi');
@@ -265,10 +268,10 @@ vicino(calcoloImposte.irap,Math.round(calcoloImposte.risultato*3.9)/100,'IRAP ca
 p.fai('ir',{anno:'2026',aumenti:'',diminuzioni:'',data:'2026-12-31'}); ok(/Imposte 2026 registrate/.test(p.testo()),'imposte'); fino('IRES e IRAP');
 vicinoS('23',-604.16,'IRES'); vicinoS('35',-98.18,'IRAP');
 p = apri('erp_chiusura','chiusura'); { const t=p.testo(), i=t.search(/1.?814,98/); ok(i>=0,'utile nel prospetto di chiusura: '+t.slice(t.indexOf('Conto economico'),t.indexOf('Conto economico')+1500)); }
-p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,1814.98,'utile'); vicinoS('10',51886.42,'banca al 31/12');
+p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,1814.98,'utile'); vicinoS('10',51790.42,'banca al 31/12');
 fs.writeFileSync(path.join(__dirname,'dicembre-wms-31-12.json'),JSON.stringify(p.S(),null,2));
 // 16 · riapertura e gennaio
-p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,99309.38,'totale riapertura'); } fino('Riapri i conti');
+p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,99213.38,'totale riapertura'); } fino('Riapri i conti');
 p = apri('erp_chiusura','assestamenti'); bene(p.fai('st',{data:'2027-01-01'}),'storno ratei e risconti'); fino('Storna il risconto');
 vicinoS('06',0,'risconto stornato'); vicinoS('39',0,'rateo stornato'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='83').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1098.08,'assicurazione di competenza 2027 (334 giorni)');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C100',importo:'12912,48',rif:'SALDO FATTURA BETA',data:'2027-01-14'}),'incasso Beta'); fino('Beta paga');

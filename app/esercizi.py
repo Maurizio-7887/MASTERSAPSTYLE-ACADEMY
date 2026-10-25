@@ -271,4 +271,14 @@ def attesi_esercizio(codice, stato=None):
     """Numeri di controllo secondo il modello salvato, senza migrare l'archivio."""
     esercizio = ESERCIZI.get(codice) or ESERCIZI["libero"]
     modello = (stato or {}).get("produzioneModello")
-    return esercizio.get("attesi_per_modello", {}).get(modello, esercizio["attesi"])
+    attesi = esercizio.get("attesi_per_modello", {}).get(modello, esercizio["attesi"])
+    if codice == "dicembre-wms" and stato is not None and not _addizionali_trattenute_a_dicembre(stato):
+        # paghe come nella realtà: a dicembre 2026 nessuna rata di addizionali (si trattengono a rate nel 2027),
+        # quindi in busta e in banca escono 96 € in più rispetto ai lavori salvati prima della correzione
+        attesi = [(k, label, 51790.42 if k == "dc_banca_31_12" else v, tol) for k, label, v, tol in attesi]
+    return attesi
+
+
+def _addizionali_trattenute_a_dicembre(stato):
+    cedolini = (((stato or {}).get("hr") or {}).get("cedolini")) or []
+    return any(c.get("periodo") == "2026-12" and (c.get("addizionali") or 0) > 0 for c in cedolini)

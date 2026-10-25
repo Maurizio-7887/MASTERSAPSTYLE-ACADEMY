@@ -503,7 +503,7 @@ p = apri('erp_magazzino', 'lotti'); p.lab.querySelector('#lc').value = cAgo().fi
 ok(/L1000004/.test(p.testo()) && /Acciaierie Umbre/.test(p.testo()) && /Numeri di serie consegnati/.test(p.testo()), 'MB56 dal reclamo di Delta');
 p.lab.querySelector('#sn').value = 'SN000291'; p.lab.querySelector('#snv').click(); ok(/presso il cliente/.test(p.testo()) && /Delta/.test(p.testo()), 'IQ03 SN000291');
 ruolo('PAGHE'); for (const m of ['07', '08', '09', '10', '11', '12']) { p = apri('erp_paghe', 'cedolino'); bene(p.fai('ca', {periodo: '2027-' + m}), 'paghe 2027-' + m); }
-{ const d = p.S().hr.cedolini.find(c => c.periodo === '2027-12' && c.matricola === '00001'); vicino(d.tredicesima, 2100, 'tredicesima di Marco'); vicino(d.conguaglio, 4.51, 'conguaglio di Marco'); vicino(d.netto, 3171.26, 'netto di dicembre di Marco'); }
+{ const d = p.S().hr.cedolini.find(c => c.periodo === '2027-12' && c.matricola === '00001'); vicino(d.tredicesima, 2100, 'tredicesima di Marco'); vicino(d.conguaglio, 4.51, 'conguaglio di Marco'); vicino(d.netto, 3199.26, 'netto di dicembre di Marco (a dicembre nessuna rata di addizionali)'); ok(d.addizionali === 0 && d.addizionaliAnno && d.addizionaliAnno.regionale > 0 && d.addizionaliAnno.comunale === 0, 'addizionali dell’anno determinate al conguaglio, da trattenere l’anno dopo'); }
 ruolo('ADMIN');
 { const S8 = p.S(); let d8 = 0, a8 = 0; S8.registrazioni.forEach(r => r.righe.forEach(x => { if (x.dareAvere === 'DARE') d8 += x.importo; else a8 += x.importo; })); ok(Math.abs(d8 - a8) < 0.005, 'agosto: quadratura Dare = Avere');
   ok(Object.keys(S8.seriali['TR-ALTA']).filter(k => S8.seriali['TR-ALTA'][k].stato === 'magazzino').length === S8.giacenze['TR-ALTA'], 'seriali in magazzino = giacenza');

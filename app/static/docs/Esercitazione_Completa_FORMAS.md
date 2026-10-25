@@ -2410,10 +2410,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Periodo:** 2026-12
 
 
-**Risultato / controllo atteso:** 3 cedolini (assunti il 01/12: un solo mese). Con la tredicesima di 1/12 e il conguaglio IRPEF: netti 5.769,08; costo per l’azienda 10.426,96. Nessuna scrittura.
+**Risultato / controllo atteso:** 3 cedolini (assunti il 01/12: un solo mese). Con la tredicesima di 1/12 e il conguaglio IRPEF: netti 5.865,08; costo per l’azienda 10.426,96. Nessuna addizionale trattenuta a dicembre. Nessuna scrittura.
 
 
-**Attenzione e ragionamento:** Leggi un cedolino: la 13ª matura per i mesi lavorati, le detrazioni per lavoro dipendente si rapportano al periodo di lavoro.
+**Attenzione e ragionamento:** Leggi un cedolino: la 13ª matura per i mesi lavorati, le detrazioni per lavoro dipendente si rapportano al periodo di lavoro. Leggi anche il riquadro delle addizionali: la regionale della Toscana (1,42% fino a 15.000 €) e la comunale di Firenze (0,20%, esente fino a 25.000 €) del 2026 si calcolano al conguaglio sull’imponibile dell’anno, ma si trattengono nel 2027 in 11 rate da gennaio a novembre. Assunti a dicembre, in busta non c’è nessuna rata: regionale 27,25 + 29,20 + 33,74 = 90,19 € da trattenere nel 2027, comunale zero (sotto i 25.000 €).
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2432,7 +2432,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data:** 31/12/2026
 
 
-**Risultato / controllo atteso:** D 80 Salari 7.529,17 + D 81 Oneri sociali 2.340,07 + D 82 TFR 557,72 / A 27 Netti 5.769,08 + A 28 INPS 2.956,71 + A 24 INAIL 112,94 + A 29 Ritenute 1.068,16 + A 31 Fondo TFR 520,07.
+**Risultato / controllo atteso:** D 80 Salari 7.529,17 + D 81 Oneri sociali 2.340,07 + D 82 TFR 557,72 / A 27 Netti 5.865,08 + A 28 INPS 2.956,71 + A 24 INAIL 112,94 + A 29 Ritenute 972,16 + A 31 Fondo TFR 520,07.
 
 
 **Dopo il tentativo:** Nel giornale il programma scrive una riga per dipendente, con il centro di costo: 80, 81 e 82 compaiono tre volte (es. Salari 2.275,00 + 2.437,50 + 2.816,67 = 7.529,17). La somma per conto è quella qui sopra. Nel laboratorio di ragioneria puoi ricostruirla riga per riga oppure con un’unica riga per conto.
@@ -2454,7 +2454,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data:** 31/12/2026
 
 
-**Risultato / controllo atteso:** D 27 / A 10 5.769,08. Ritenute e contributi si versano con l’F24 a gennaio: a fine anno sono debiti.
+**Risultato / controllo atteso:** D 27 / A 10 5.865,08. Ritenute e contributi si versano con l’F24 a gennaio: a fine anno sono debiti. Le addizionali 2026 no: non sono ancora state trattenute, quindi al 31/12 non sono un debito dell’azienda.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2954,7 +2954,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data:** 01/01/2027
 
 
-**Risultato / controllo atteso:** D attività / A 92 e D 92 / A passività per 99.309,38: macchine 29.000 (fondo 241,67), risconto 1.098,08, semilavorati 277,40, ferro 703, banca 51.886,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.814,98, anticipo bancario 10.329,98, rateo 1.033,33, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.
+**Risultato / controllo atteso:** D attività / A 92 e D 92 / A passività per 99.213,38: macchine 29.000 (fondo 241,67), risconto 1.098,08, semilavorati 277,40, ferro 703, banca 51.790,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.814,98, anticipo bancario 10.329,98, rateo 1.033,33, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -3034,10 +3034,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data di versamento:** 18/01/2027
 
 
-**Risultato / controllo atteso:** D 29 Erario 1.068,16 + D 28 INPS 2.956,71 / A 10 4.024,87. Banca 50.419,05.
+**Risultato / controllo atteso:** D 29 Erario 972,16 + D 28 INPS 2.956,71 / A 10 3.928,87. Banca 50.419,05.
 
 
-**Attenzione e ragionamento:** Il 16 gennaio 2027 è sabato: la scadenza slitta al lunedì 18.
+**Attenzione e ragionamento:** Il 16 gennaio 2027 è sabato: la scadenza slitta al lunedì 18. Nell’F24 c’è solo il codice 1001 (IRPEF): le addizionali regionali (3802) e comunali (3848, acconto 3847) compariranno negli F24 del 2027, dopo ogni rata trattenuta in busta.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -3068,7 +3068,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Percorso:** FI → Contabilità → Bilancio di verifica; WMS → Monitor  
 **Schermata:** `erp_fi.bilancio`
 
-- **Banca:** 31/12/2026: 51.886,42 · dopo il 18/01/2027: 50.419,05
+- **Banca:** 31/12/2026: 51.790,42 · dopo il 18/01/2027: 50.419,05
 
 - **Scorte:** FERRO 740 kg · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto
 
