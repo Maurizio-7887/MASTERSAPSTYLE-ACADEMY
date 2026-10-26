@@ -101,6 +101,8 @@ function rfTutti(data, tipo, n) {
   if (n != null) ok(fatti === n, 'RF ' + tipo + ': attesi ' + n + ' compiti, confermati ' + fatti);
   ok(p.S().registrazioni.length === regs, 'RF non genera scritture');
 }
+const invio=(pp,id,v)=>{const el=pp.lab.querySelector('#'+id);el.value=v;el.dispatchEvent(new pp.w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));};
+const scheda=(pp,s)=>{pp.lab.querySelector('.rf-schede button[data-s="'+s+'"]').click();};
 const ordineDi = mat => p.S().produzione.find(o => o.materiale === mat).numero;
 // 0 · sistema vuoto
 p = apri('erp_dati','avvio'); fino('Prima di cominciare');
@@ -198,20 +200,37 @@ const g=p.S().giacenze; ok(g.FERRO===740 && g['SL-TAGLIO']===20 && !g['SL-PIEGA'
 vicinoS('12',703,'ferro a scorta'); vicinoS('07',292,'HALB a scorta'); vicinoS('13',9420,'prodotti finiti');
 vicinoS('70',2432,'ferro consumato totale'); vicinoS('71',0,'nessun consumo semilavorati'); vicinoS('72',7280,'attività due ordini'); vicinoS('75',-7280,'attività accreditate ai centri'); vicinoS('73',-9712,'output totale indipendente: 9420 finito + 292 HALB');
 ok(p.S().ordini.every(o=>o.confermata===o.qta),'ordini cliente confermati dalla produzione'); controlla('Produzione completa');
+// 8b · 13/12: interroga, blocca/sblocca, slotting
+p = apri('erp_magazzino','rf'); scheda(p,'interroga'); invio(p,'rf-q','03-05-2'); ok(/SL-TAGLIO/.test(p.testo()) && /20/.test(p.testo()),'RF interroga 03-05-2');
+{ const udcTR = p.w.WM4.quanti(q=>q.mat==='TR-STD')[0].udc; scheda(p,'interroga'); invio(p,'rf-q',udcTR); ok(/TR-STD/.test(p.testo()),'RF interroga il pallet '+udcTR);
+  p = apri('erp_magazzino','bloccato'); bene(p.fai('bl',{udc:udcTR,qta:'',motivo:'pallet urtato dal carrello, da controllare',data:'2026-12-13'}),'blocca pallet TR'); fino('Blocca un pallet di transenne');
+  ok(p.S().giacenze['TR-STD']===300,'bloccare non cambia la giacenza contabile');
+  rfTutti('2026-12-13','BLOCCO',1); fino('porta il pallet in quarantena');
+  p = apri('erp_magazzino','bloccato'); bene(p.fai('dq',{udc:udcTR,motivo:'imballo integro, transenne non danneggiate',data:'2026-12-13'},'sb'),'sblocca 343'); fino('sblocca il pallet');
+  rfTutti('2026-12-13','PUTAWAY',1); fino('rimetti a scaffale il pallet sbloccato');
+  p = apri('erp_magazzino','compiti'); bene(p.fai('tr',{udc:udcTR,a:'03-04-1',motivo:'lavori al pavimento davanti alla corsia 01',data:'2026-12-13'}),'LT10 in fondo'); fino('lavori al pavimento');
+  rfTutti('2026-12-13','TRASF',1); fino('spostamento in fondo'); }
+p = apri('erp_innovazione','slotting'); bene(p.fai('sl',{data:'2026-12-13'}),'slotting'); fino('Slotting: avvicina');
+rfTutti('2026-12-13','TRASF'); fino('trasferimenti dello slotting'); controlla('Quarantena e slotting');
 // 9 · consegna con picking
+p = apri('erp_innovazione','ondate'); bene(p.fai('mo',{ondate:'si',crossDock:'no'}),'ondate attive'); fino('Attiva il prelievo a ondate');
 p = apri('erp_vendite','consegne'); const ob = p.S().ordini[0].numero, od = p.S().ordini[1].numero;
 bene(p.fai('vl',{ordine:ob,data:'2026-12-14'}),'consegna Beta'); fino('consegna per Beta');
 bene(p.fai('vl',{ordine:od,data:'2026-12-14'}),'consegna Delta'); fino('consegna per Delta');
-ok(p.w.WM4.aperti().length===7,'7 compiti di prelievo');
+ok(p.w.WM4.aperti().length===0,'consegne in attesa dell’ondata');
+p = apri('erp_innovazione','ondate'); bene(p.fai('on',{data:'2026-12-14'}),'ONDA-1'); fino('Rilascia l’ondata');
+ok(p.w.WM4.aperti().length===7,'7 compiti di prelievo dall’ondata');
 rfTutti('2026-12-14','PICK',7); fino('preleva i 7');
 const cb = p.S().consegne[0].numero, cd = p.S().consegne[1].numero;
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cb,imballo:'EUR',perCollo:'50',data:'2026-12-14'}),'imballo Beta'); fino('Beta in 4 colli');
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cd,imballo:'EUR',perCollo:'40',data:'2026-12-14'}),'imballo Delta'); fino('Delta in 3 colli');
 p = apri('erp_spedizione','trasporti'); bene(p.fai('vt',{consegne:cb+', '+cd,vettore:'V10',targa:'AA000AA',autista:'Mario Esempio',porto:'franco',data:'2026-12-15'}),'trasporto'); fino('Crea un trasporto');
 const tr = p.S().sped.trasporti[0].numero;
-for (const x of p.S().sped.colli.slice()) bene(p.fai('ca',{sscc:x.sscc,data:'2026-12-15'}),'carico '+x.sscc);
-fino('Carica i 7 colli');
-bene(p.fai('pt',{trasporto:tr,data:'2026-12-15'}),'partenza'); fino('Partenza'); vicinoS('41',9420,'costo del venduto'); ok(p.S().giacenze['TR-STD']===0,'transenne spedite'); controlla('Spedizione');
+p = apri('erp_magazzino','rf'); p.lab.querySelector('#rf-data').value='2026-12-15';
+for (const x of p.S().sped.colli.filter(c=>c.consegna===cb)) { scheda(p,'carico'); p.lab.querySelector('#rf-data').value='2026-12-15'; invio(p,'rf-sscc',x.sscc); memoria = p.w.localStorage.getItem(CHIAVE); }
+ok(p.S().sped.colli.filter(c=>c.consegna===cb).every(c=>c.caricato),'4 colli Beta caricati con RF'); fino('RF Carico');
+p = apri('erp_innovazione','rfid'); bene(p.fai('rf',{trasporto:tr,data:'2026-12-15'}),'varco RFID'); fino('Varco RFID');
+p = apri('erp_spedizione','trasporti'); bene(p.fai('pt',{trasporto:tr,data:'2026-12-15'}),'partenza'); fino('Partenza'); vicinoS('41',9420,'costo del venduto'); ok(p.S().giacenze['TR-STD']===0,'transenne spedite'); controlla('Spedizione');
 // 10 · fatture, SdI, anticipo, pagamenti
 p = apri('erp_vendite','fatture'); bene(p.fai('vf',{consegna:cb,data:'2026-12-15'}),'fattura Beta'); fino('fattura Beta');
 p = apri('erp_vendite','fatture'); bene(p.fai('vf',{consegna:cd,data:'2026-12-15'}),'fattura Delta'); fino('fattura Delta');
@@ -250,9 +269,13 @@ vicinoS('06',1098.08,'risconto'); vicinoS('39',-1033.33,'rateo');
 p = apri('erp_cespiti','ammortamenti'); bene(p.fai('af',{data:'2026-12-31'}),'AFAB'); fino('AFAB'); vicinoS('50',458.34,'ammortamenti');
 // inventario di fine anno
 p = apri('erp_magazzino','mappa'); const occ = ['F-02','03-05-2'].map(b => p.w.WM4.inUbic(b).map(q => q.mat + ' ' + q.qta).join('+')); ok(occ.join('|')==='FERRO 240+FERRO 500|SL-TAGLIO 20','ubicazioni occupate: '+occ.join('|'));
-p = apri('erp_inventario','documenti'); bene(p.fai('in',{tipo:'ubicazioni',selezione:'F-02, 03-05-2',tolleranza:'20',data:'2026-12-31'}),'LI01N'); fino('ubicazioni occupate');
+p = apri('erp_inventario','documenti'); bene(p.fai('in',{tipo:'ubicazioni',selezione:'F-02, 03-05-2',tolleranza:'10',data:'2026-12-31'}),'LI01N'); fino('ubicazioni occupate');
 p = apri('erp_inventario','documenti'); p.fai('ia',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='attivo','attiva inventario'); fino('Attiva l’inventario');
-p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {contatore:'Allievo'}; d.righe.forEach((r,k) => v['r'+k] = r.mat === 'SL-TAGLIO' ? '19' : String(r.libro)); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='contato','conta'); } fino('registra la conta');
+p = apri('erp_magazzino','rf'); scheda(p,'inventario'); invio(p,'rf-inv','F-02');
+{ const d = p.S().wm.inventari[0]; d.righe.forEach((r,k)=>{ const c=p.lab.querySelector('#rf-c'+k); if(c) c.value=String(r.libro); }); p.lab.querySelector('#rf-conta').click(); memoria = p.w.localStorage.getItem(CHIAVE);
+  ok(p.S().wm.inventari[0].righe.filter(r=>r.ubic==='F-02').every(r=>r.conta1!==null),'F-02 contata con la pistola'); } fino('RF Inventario');
+p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {contatore:'Allievo'}; d.righe.forEach((r,k) => { if (r.ubic==='03-05-2') v['r'+k] = '19'; }); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='riconta','oltre la tolleranza: riconta'); } fino('LI11N: registra alla scrivania');
+p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {}; d.righe.forEach((r,k) => { if (r.riconta) v['r'+k] = '19'; }); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='contato','riconta registrata'); } fino('LI14: riconta');
 p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='chiuso','chiudi inventario'); fino('LI20');
 p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2026-12-31'}),'LI21'); fino('LI21'); vicinoS('65',14.60,'differenza inventariale'); ok(p.S().giacenze['SL-TAGLIO']===19,'19 kit dopo l’inventario');
 { const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); console.log('VALORIZZAZIONE FERRO', JSON.stringify({g:v.giacenza,fifo:v.fifo,lifo:v.lifo,cmp:v.cmp,std:v.standard})); vicino(v.fifo,780,'FIFO ferro'); vicino(v.lifo,740,'LIFO ferro'); }
