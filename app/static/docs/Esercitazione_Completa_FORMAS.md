@@ -1759,6 +1759,10 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **4 · Ordini e WIP:** Transenne: materiali 2.280 + attività 7.140 = 9.420 · kit HALB: 152 + 140 = 292 · versato a magazzino 9.712, WIP 0: ogni euro contato una volta
 
+- **Da dove vengono i numeri:** Tariffa 28 €/h = costo annuo del reparto (36.000 personale KP06 + 6.000 costi comuni ribaltati KSU1 = 42.000) ÷ 1.500 ore pianificate (KP26). Ore = pezzi × tempo del ciclo: Taglio 300 × 0,25 = 75 + 20 kit × 0,25 = 5; Piegatura 300 × 0,20 = 60; Saldatura 300 × 0,40 = 120. Ferro: 300 × 8 kg = 2.400 kg × 0,95 = 2.280; kit 20 × 8 kg = 160 kg × 0,95 = 152. Attività transenne 7.140 = (75 + 60 + 120) × 28; kit 140 = 5 × 28
+
+- **Scostamenti del riquadro 3, reparto per reparto:** Taglio: spesa = consuntivo 0 − budget del periodo 3.500 = −3.500; assorbimento = 3.500 − 2.240 = 1.260; somma −2.240 = residuo. Piegatura: −3.500 + (3.500 − 1.680 = 1.820) = −1.680. Saldatura: −3.500 + (3.500 − 3.360 = 140) = −3.360. Efficienza 0: ore dichiarate = ore standard dei pezzi confermati
+
 
 **Risultato / controllo atteso:** Le attività valorizzate (7.280) sono costo dei centri spostato sugli ordini, non un secondo costo del personale: compaiono nel riquadro 1 e nel 4, mai nel consuntivo del riquadro 2. A metà mese il residuo negativo è normale.
 
