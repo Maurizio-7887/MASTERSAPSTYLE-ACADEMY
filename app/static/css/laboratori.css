@@ -21,6 +21,7 @@
 .lab-esito{margin-top:8px;font-size:13px}
 .lab-esito.ok{border-left:4px solid var(--f-verde);background:#F1FDF6;padding:8px 10px;border-radius:4px}
 .lab-esito.ko{border-left:4px solid var(--f-rosso);background:#FFEBEB;padding:8px 10px;border-radius:4px}
+.lab-esito.attenzione{border-left:4px solid #C98A00;background:#FFF7E0;padding:8px 10px;border-radius:4px}
 .lab-scroll{overflow-x:auto}
 .lab-tab{width:100%;border-collapse:collapse;font-size:12.8px;background:#fff}
 .lab-tab th{text-align:left;background:#F5F6FA;color:var(--f-attenuato);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--f-bordo);white-space:nowrap}

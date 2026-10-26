@@ -1744,28 +1744,26 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 ### 59. Confronta budget, attività assorbite e WIP senza duplicazioni
 
-**Percorso:** CO → Controllo di gestione → Piano/consuntivo e scostamenti; poi Consuntivo dei centri (KSB1)  
+**Percorso:** CO → Controllo di gestione → Piano/consuntivo e scostamenti (la pagina si legge in 4 riquadri, dall’alto in basso)  
 **Schermata:** `erp_controllo.report`
 
 **Data aziendale simulata:** 12/12/2026
 
-- **Taglio:** 75 h transenne + 5 h kit = 80 h × 28 = 2.240
+- **Periodo:** dicembre 2026: 1 mese su 12, quindi il budget del periodo è il budget annuo ÷ 12 (reparti 42.000 → 3.500; ore 1.500 → 125)
 
-- **Piegatura:** 60 h × 28 = 1.680
+- **1 · Attività:** Taglio 75 h transenne + 5 h kit = 80 h × 28 = 2.240 · Piegatura 60 h × 28 = 1.680 · Saldatura 120 h × 28 = 3.360 · totale 260 h = 7.280, uguale al conto 72 (D 72 / A 75): la pagina mostra ✓. Var. efficienza 0
 
-- **Saldatura:** 120 h × 28 = 3.360
+- **2 · Costi effettivi:** Consuntivo letto da solo dalla contabilità: c’è solo 4300 Amministrazione 1.200 (polizza, via OKB9). Reparti, 4100 e 4200 a zero: le paghe di dicembre non sono ancora registrate (riquadro giallo). Le 7.280 di attività NON si sommano qui
 
-- **Totale attività:** 260 h e 7.280, coincidenti con le conferme D72/A75 dei due ordini (KSB1, classe 944000)
+- **3 · Residuo dei reparti:** Consuntivo 0 − attività 2.240 / 1.680 / 3.360 = residuo −2.240 / −1.680 / −3.360: gli ordini hanno già ricevuto il costo delle ore, i costi veri arriveranno con le paghe e le scritture di fine mese. Spesa −3.500 e assorbimento 1.260 / 1.820 / 140 si leggono a fine mese
 
-- **Piano annuale / consuntivo ordini:** Ore annuali 300/240/480 contro ore effettivamente dichiarate 80/60/120; il budget non rappresenta produzione già avvenuta
-
-- **Costi primari:** Arrivano da soli dalla contabilità: a metà dicembre ci sono solo i costi già registrati (per esempio nessuna paga). Zero non significa personale gratuito: la paga di dicembre non è ancora registrata
+- **4 · Ordini e WIP:** Transenne: materiali 2.280 + attività 7.140 = 9.420 · kit HALB: 152 + 140 = 292 · versato a magazzino 9.712, WIP 0: ogni euro contato una volta
 
 
-**Risultato / controllo atteso:** Le attività valorizzate sono costi attribuiti agli ordini, non un secondo costo del personale. Le ore coincidono con lo standard dei pezzi confermati: varianza di efficienza zero in questo caso.
+**Risultato / controllo atteso:** Le attività valorizzate (7.280) sono costo dei centri spostato sugli ordini, non un secondo costo del personale: compaiono nel riquadro 1 e nel 4, mai nel consuntivo del riquadro 2. A metà mese il residuo negativo è normale.
 
 
-**Attenzione e ragionamento:** Residuo centro = costi primari effettivi più costi comuni effettivi ribaltati meno attività assorbite: non equivale automaticamente a inefficienza. Gli output dei due ordini sono 9.420 + 292 = 9.712; WIP analitico residuo zero dopo i 101, senza capitalizzazione FI automatica.
+**Attenzione e ragionamento:** Residuo = consuntivo − attività assorbite = scostamento di spesa + scostamento di assorbimento; non è automaticamente inefficienza. Nel menu «Periodo» puoi scegliere il mese: il budget del periodo cambia con i mesi trascorsi. Il dettaglio delle righe del consuntivo è in Consuntivo dei centri (KSB1).
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  

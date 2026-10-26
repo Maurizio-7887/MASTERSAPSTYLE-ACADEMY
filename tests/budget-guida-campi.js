@@ -86,7 +86,7 @@ near(cp.totale(cp.effettivi(2026).perCentro['4230']), 2437.5, 'costo spostato su
 field(w, 'kb11n-data', '2026-12-31'); field(w, 'kb11n-importo', '99999'); es = click(w, 'kb11n', 'kb11n');
 ok(es.classList.contains('ko') && /solo/.test(es.textContent), 'non si sposta più del registrato');
 testo = pagina(w, 'report');
-for (const t of ['S_ALR_87013611', 'stagionalità', 'Residuo', 'Assorbito']) ok(testo.includes(t), 'report: ' + t);
+for (const t of ['S_ALR_87013611', 'stagionalità', 'Residuo', 'Attività assorbite', 'Ordini e WIP']) ok(testo.includes(t), 'report: ' + t);
 const r = cp.report(); near(r.centri[2].primari, 2437.5, 'primari Saldatura dal KB11N');
 // controllo del personale: il consuntivo del registro paghe appare
 near(Object.fromEntries(cp.controlloPersonale().map(x => [x.cdc, x.consuntivo]))['4200'], 757.57, 'consuntivo paghe 4200 dopo KB11N della classe 80');

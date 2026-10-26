@@ -363,21 +363,43 @@ window.PC4 = (function () {
       m.consuntivi.push({data: data, riferimento: rif, centro: centro, natura: natura, importo: numero(i.importo, 'Costo primario')});
       N().salva(); return '<p class="lab-nota">Costo primario riportato solo nel prospetto CO: nessuna nuova spesa, attività o passività FI. Non aggiungere di nuovo le attività D72/A75 ai costi primari.</p>';
     }
-    function report(anno) {
+    // periodo del report: dal mese di avvio (o gennaio) fino al mese scelto; di default l'ultimo mese con movimenti
+    function periodo(m, mese) {
+      var anno = m.anno, ultimo = '';
+      S().registrazioni.forEach(function (r) { var d = String(r.data || ''); if (Number(d.slice(0, 4)) === anno && ESCLUSI.indexOf(r.tipo) < 0 && !r.chiusura && d > ultimo) ultimo = d; });
+      S().produzione.forEach(function (o) { o.eventi.forEach(function (e) { var d = String(e.data || ''); if (!e.stornato && Number(d.slice(0, 4)) === anno && d > ultimo) ultimo = d; }); });
+      var avv = String(S().avviato || ''), inizio = Number(avv.slice(0, 4)) === anno ? Number(avv.slice(5, 7)) : 1;
+      var fine = mese != null && mese !== '' ? Number(mese) : (ultimo ? Number(ultimo.slice(5, 7)) : 12);
+      if (!(fine >= 1 && fine <= 12)) throw Error('Mese non valido.');
+      if (fine < inizio) fine = inizio;
+      var mesi = fine - inizio + 1, per = anno + '-' + String(fine).padStart(2, '0');
+      var paghe = S().registrazioni.some(function (r) { return r.tipo === 'PAGHE' && r.rif === 'PAGHE ' + per; });
+      return {anno: anno, inizio: inizio, mese: fine, mesi: mesi, quota: mesi / 12, ultimaData: ultimo, pagheRegistrate: paghe, etichetta: per};
+    }
+    // saldo Dare − Avere di un conto FI nell'anno fino al mese (scritture di chiusura escluse)
+    function saldoFI(conto, anno, mese) {
+      var t = 0;
+      S().registrazioni.forEach(function (r) { var d = String(r.data || '');
+        if (ESCLUSI.indexOf(r.tipo) >= 0 || r.chiusura || Number(d.slice(0, 4)) !== anno || Number(d.slice(5, 7)) > mese) return;
+        r.righe.forEach(function (x) { if (x.conto === conto) t += x.dareAvere === 'DARE' ? x.importo : -x.importo; }); });
+      return r2(t);
+    }
+    function report(anno, opz) {
       var m = richiesto(); if (anno != null && Number(anno) !== m.anno) throw Error('Budget disponibile solo per ' + m.anno);
+      var P = periodo(m, (opz || {}).mese), nelPeriodo = function (d) { d = String(d || ''); return Number(d.slice(0, 4)) === m.anno && Number(d.slice(5, 7)) <= P.mese; };
       var ts = tariffe(), richieste = {}, assorbito = {}, oreEff = {}, standardOutput = {}, primari = {}, generale = {produttivi: 0, amministrativi: 0};
       CENTRI.forEach(function (k) { richieste[k] = assorbito[k] = oreEff[k] = standardOutput[k] = primari[k] = 0; });
       Object.keys(m.volumi).forEach(function (mat) { var st = m.standard[mat]; CENTRI.forEach(function (k) { richieste[k] += (st.ore[k] || 0) * m.volumi[mat]; }); });
       m.consuntivi.forEach(function (x) { if (x.centro === 'Generale') generale[x.natura] += x.importo; else primari[x.centro] += x.importo; });
       // consuntivo automatico (S/4: ogni costo FI porta il centro di costo; senza centro vale la tabella OKB9)
-      var fi = effettivi(m.anno).perCentro;
+      var fi = effettivi(m.anno, P.mese).perCentro;
       Object.keys(fi).forEach(function (cdc) { var tot = totale(fi[cdc]), c = cdcDi(cdc); if (!c) return;
         if (c.centro) primari[c.centro] += tot; else if (c.tipo === 'servizio') generale.produttivi += tot; else generale.amministrativi += tot; });
       var esclusiLegacy = 0;
       S().produzione.forEach(function (o) {
         var snap = o.piano.par.snapshot;
         if (!snap || snap.versione !== m.versione || snap.anno !== m.anno) { esclusiLegacy++; return; }
-        o.eventi.filter(function (e) { return e.tipo === 'CO11N' && !e.stornato && Number(e.data.slice(0, 4)) === m.anno; }).forEach(function (e) {
+        o.eventi.filter(function (e) { return e.tipo === 'CO11N' && !e.stornato && nelPeriodo(e.data); }).forEach(function (e) {
           var k = e.centro || e.fase || snap.fasi[0]; assorbito[k] += e.valore; oreEff[k] += e.ore + e.attrezzaggio;
           standardOutput[k] += (snap.ore[k] || 0) * (e.qta || 0) * snap.tariffe[k];
         });
@@ -386,27 +408,29 @@ window.PC4 = (function () {
       var righe = CENTRI.map(function (k, idx) {
         var t = ts[k], quota = m.generale.driver === 'ore' ? m.centri[k].orePiano / base : m.centri[k].percentuale / 100;
         var rib = idx === 2 ? r2(generale.produttivi - fatto) : r2(generale.produttivi * quota); fatto = r2(fatto + rib);
-        var eff = r2(primari[k] + rib), ass = r2(assorbito[k]);
+        var eff = r2(primari[k] + rib), ass = r2(assorbito[k]), bp = r2(t.budget * P.quota);
         return Object.assign({centro: k}, t, {oreRichieste: r2(richieste[k]), saturazione: richieste[k] / t.capacita * 100,
+          budgetPeriodo: bp, orePianoPeriodo: r2(t.orePiano * P.quota),
           oreEffettive: r2(oreEff[k]), primari: r2(primari[k]), ribaltatoEffettivo: rib, consuntivo: eff, assorbito: ass,
-          residuo: r2(eff - ass), varianzaSpesa: r2(eff - t.budget), varianzaAssorbimento: r2(t.budget - ass),
+          residuo: r2(eff - ass), varianzaSpesa: r2(eff - bp), varianzaAssorbimento: r2(bp - ass),
           varianzaEfficienza: r2(ass - standardOutput[k])});
       });
       var prodotti = Object.keys(m.volumi).map(function (mat) {
-        var st = elementi(mat, C().scheda.lotto), finiti = 0, costo = 0, accredito = 0, wip = 0;
+        var st = elementi(mat, C().scheda.lotto), finiti = 0, costo = 0, accredito = 0, wip = 0, mat261 = 0, attOrd = 0;
         S().produzione.filter(function (o) { var sn = o.piano.par.snapshot; return o.materiale === mat && sn && sn.versione === m.versione && sn.anno === m.anno; }).forEach(function (o) {
-          var costi = 0, out = 0, q = 0;
-          o.eventi.filter(function (e) { return !e.stornato && Number(e.data.slice(0, 4)) === m.anno; }).forEach(function (e) {
+          var costi = 0, out = 0, q = 0, att = 0;
+          o.eventi.filter(function (e) { return !e.stornato && nelPeriodo(e.data); }).forEach(function (e) {
             if (e.tipo === '101') { q += e.qta; out += e.valore; }
-            else if (e.tipo === '261' || e.tipo === 'CO11N') costi += e.valore;
+            else if (e.tipo === '261' || e.tipo === 'CO11N') { costi += e.valore; if (e.tipo === 'CO11N') att += e.valore; }
             else if (e.tipo === 'KGI2') costi += e.mat + e.prod;
           });
-          finiti += q; costo += costi; accredito += out; wip += Math.max(0, costi - out);
+          finiti += q; costo += costi; accredito += out; wip += Math.max(0, costi - out); mat261 += costi - att; attOrd += att;
         });
-        return {materiale: mat, volumeBudget: m.volumi[mat], finiti: finiti, varianzaVolume: finiti - m.volumi[mat], standardUnitario: r2(st.totale / st.q),
+        return {materiale: mat, materiali: r2(mat261), attivita: r2(attOrd), volumeBudget: m.volumi[mat], volumeBudgetPeriodo: r2(m.volumi[mat] * P.quota), finiti: finiti, varianzaVolume: finiti - m.volumi[mat], standardUnitario: r2(st.totale / st.q),
           budgetProduzione: r2(m.volumi[mat] * st.totale / st.q), costiOrdini: r2(costo), accredito: r2(accredito), saldoOrdini: r2(costo - accredito), wip: r2(wip)};
       });
-      return {anno: m.anno, revisione: m.revisione, centri: righe, prodotti: prodotti, generale: {budgetProduttivi: m.generale.produttivi, budgetAmministrativi: m.generale.amministrativi,
+      return {anno: m.anno, revisione: m.revisione, periodo: P, fi: {attivita: saldoFI('72', m.anno, P.mese), accreditiCentri: saldoFI('75', m.anno, P.mese), output: saldoFI('73', m.anno, P.mese), materiali: saldoFI('70', m.anno, P.mese)},
+        costiCentri: effettivi(m.anno, P.mese), centri: righe, prodotti: prodotti, generale: {budgetProduttivi: m.generale.produttivi, budgetAmministrativi: m.generale.amministrativi,
         produttivi: r2(generale.produttivi), amministrativi: r2(generale.amministrativi), residuoProduttivo: 0}, esclusiLegacy: esclusiLegacy,
         note: 'Costi primari effettivi letti automaticamente dalla contabilità FI dell’anno (centro della riga o assegnazione OKB9), più le eventuali rettifiche manuali. Assorbito = attività secondarie delle conferme, non ulteriore personale. Residuo = consuntivo − assorbito = varianza spesa + varianza assorbimento. Efficienza confronta ore dichiarate e standard dei pezzi confermati; comprende attrezzaggio. Ore annue richieste solo variabili: setup fisso escluso senza un piano annuale dei lotti. Budget valore prodotti al lotto di calcolo corrente: stima comparabile, non piano lotti annuale. Saldo prodotti = costi annuali degli ordini − accrediti annuali, prima della liquidazione; dettaglio WIP operativo e varianze finali nelle pagine PP/KKS2. Nessuna esplosione MRP multilivello automatica: pianificare i semilavorati autonomi separatamente.'};
     }

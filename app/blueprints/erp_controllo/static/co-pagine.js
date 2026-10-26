@@ -10,6 +10,7 @@
   var e = L.esc, eur = L.eur, n0 = L.n0, fd = L.fd, S = function () { return N.S; }, cp = PC.cpm;
   var barra = function (qui) { return window.COPERCORSO ? window.COPERCORSO.html(S(), qui) : ''; };
   var link = function (dove, testo) { return '<a href="' + window.COPERCORSO.url(dove) + '">' + testo + '</a>'; };
+  var r2 = function (x) { return Math.round((Number(x) || 0) * 100) / 100; };
   var nomeCdc = function (k) { var c = cp.cdcDi(k); return c ? k + ' ' + c.nome : k; };
   var TIPI = {servizio: 'Centro di servizio (si ribalta)', produttivo: 'Centro produttivo (tipo attività ORE)', amministrativo: 'Amministrazione (escluso dal costo prodotto)'};
 
@@ -173,24 +174,52 @@
       L.collega(radice, 'kb11n', {kb11n: cp.riattribuisci}, rendi);
     },
 
-    // ── S_ALR_87013611: piano/consuntivo e scostamenti ──
+    // ── S_ALR_87013611 · KSBT · KKBC: piano/consuntivo del periodo, attività assorbite e WIP ──
     report: function () {
       var m = pronto('controllo/report'); if (!m) return;
-      var r = cp.report(), eff = cp.effettivi(m.anno).perCentro;
+      var r = cp.report(m.anno, {mese: radice.dataset.mese || ''}), P = r.periodo, eff = r.costiCentri.perCentro;
+      var MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+      var nomeP = (P.mesi === 1 ? MESI[P.mese - 1] : MESI[P.inizio - 1] + '–' + MESI[P.mese - 1]) + ' ' + P.anno;
+      var oreTot = function (f) { return r.centri.reduce(function (t, x) { return t + x[f]; }, 0); };
+      var att = r2(oreTot('assorbito')), quadra = Math.abs(att - r.fi.attivita) < 0.01 && Math.abs(att + r.fi.accreditiCentri) < 0.01;
+      var out = r.prodotti.reduce(function (t, p) { return t + p.accredito; }, 0), wip = r.prodotti.reduce(function (t, p) { return t + p.saldoOrdini; }, 0);
+      var righeFI = r.costiCentri.righe.length;
+      var avviso = P.pagheRegistrate ? '' : '<p class="lab-esito attenzione">⚠ Le paghe di ' + MESI[P.mese - 1] + ' non sono ancora registrate: il consuntivo del periodo è <b>parziale</b> (contiene solo le scritture già fatte). Spesa e assorbimento si leggono dopo la registrazione delle paghe e le scritture di fine mese.</p>';
       radice.innerHTML = U.avviso(S()) + barra('controllo/report') +
-        L.scheda('📊', 'Centri di costo: piano/consuntivo', 'S_ALR_87013611 · anno ' + m.anno + ' · versione 0',
-          L.tabella(['Centro', 'Piano €›', 'Consuntivo €›', 'Scostamento €›', 'Scost. %›'], cp.CDC.map(function (c) {
-            var p = cp.totale(m.piano['0'][c.codice]), a = cp.totale(eff[c.codice]);
-            return [c.codice + ' ' + e(c.nome), eur(p), eur(a), eur(a - p), p ? n0((a - p) / p * 100) + ' %' : '—']; })) +
-          '<p class="lab-nota">Il piano è annuo; il consuntivo cresce durante l’anno. Confronta un mese con piano/12 solo se dichiari che non c’è stagionalità.</p>') +
-        L.scheda('🎯', 'Centri produttivi: assorbimento e scostamenti', 'KSBT · KSB5 · analisi degli scostamenti',
-          L.tabella(['Centro', 'Budget €›', 'Primari €›', 'Ribaltato effettivo €›', 'Consuntivo €›', 'Ore eff.›', 'Assorbito €›', 'Residuo €›', 'Var. spesa €›', 'Var. assorbimento €›', 'Var. efficienza €›'], r.centri.map(function (x) {
-            return [cp.CODICE[x.centro] + ' ' + x.centro, eur(x.budget), eur(x.primari), eur(x.ribaltatoEffettivo), eur(x.consuntivo), n0(x.oreEffettive), eur(x.assorbito), eur(x.residuo), eur(x.varianzaSpesa), eur(x.varianzaAssorbimento), eur(x.varianzaEfficienza)]; })) +
-          '<ul class="lab-elenco"><li><b>Assorbito</b> = ore confermate × tariffa: il costo passato agli ordini.</li><li><b>Residuo</b> = consuntivo − assorbito = scostamento di spesa + scostamento di assorbimento.</li>' +
-          '<li><b>Spesa</b> = consuntivo − budget. <b>Assorbimento</b> = budget − assorbito (ore pianificate non usate). <b>Efficienza</b> = ore dichiarate rispetto allo standard dei pezzi.</li></ul>') +
-        L.scheda('📦', 'Prodotti: volume e costo', 'KKBC · KKS2', L.tabella(['Prodotto', 'Volume budget›', 'Finiti effettivi›', 'Scost. volume›', 'Standard €/pz›', 'Budget produzione €›', 'Costi ordini €›', 'Accrediti €›', 'Saldo prima di KO88 €›'], r.prodotti.map(function (p) {
-          return [p.materiale, n0(p.volumeBudget), n0(p.finiti), n0(p.varianzaVolume), eur(p.standardUnitario), eur(p.budgetProduzione), eur(p.costiOrdini), eur(p.accredito), eur(p.saldoOrdini)]; })) +
-          '<p class="lab-nota">' + e(r.note) + '</p>');
+        '<div class="lab-filtro"><label>Periodo: da ' + MESI[P.inizio - 1] + ' a <select id="mese">' + MESI.map(function (n, k) { return k + 1 < P.inizio ? '' : '<option value="' + (k + 1) + '"' + (k + 1 === P.mese ? ' selected' : '') + '>' + n + '</option>'; }).join('') + '</select></label>' +
+        ' <span class="lab-nota">' + P.mesi + (P.mesi === 1 ? ' mese' : ' mesi') + ' di attività su 12: il budget del periodo è il budget annuo × ' + P.mesi + '/12 (nessuna stagionalità dichiarata). Ultimo movimento: ' + (P.ultimaData ? fd(P.ultimaData) : '—') + '.</span></div>' +
+        '<div class="lab-nota"><b>Come si legge questa pagina, in 4 passi.</b> 1 · quante ore hanno lavorato i reparti e quanto valgono (attività passate agli ordini); 2 · quanto è costato davvero ogni centro (consuntivo letto dalla contabilità); 3 · la differenza fra i due (residuo del centro); 4 · dove sono finite le attività (ordini → magazzino) senza contarle due volte.</div>' +
+
+        L.scheda('⏱️', '1 · Attività: ore dichiarate e valore passato agli ordini', 'KSBT · tariffe di piano · ' + nomeP,
+          L.tabella(['Centro', 'Ore piano anno›', 'Ore piano del periodo›', 'Ore dichiarate (CO11N)›', 'Tariffa €/h›', 'Attività assorbite €›', 'Var. efficienza €›'], r.centri.map(function (x) {
+            return [cp.CODICE[x.centro] + ' ' + x.centro, n0(x.orePiano), n0(x.orePianoPeriodo), n0(x.oreEffettive), eur(x.tariffa), '<b>' + eur(x.assorbito) + '</b>', eur(x.varianzaEfficienza)]; })
+            .concat([{cls: 'tot', celle: ['Totale', n0(oreTot('orePiano')), n0(oreTot('orePianoPeriodo')), n0(oreTot('oreEffettive')), '', eur(att), eur(oreTot('varianzaEfficienza'))]}])) +
+          '<p class="lab-nota">Attività assorbite = ore dichiarate × tariffa. In contabilità sono la scrittura D 72 / A 75 delle conferme: conto 72 = <b>' + eur(r.fi.attivita) + '</b>, conto 75 = <b>' + eur(-r.fi.accreditiCentri) + '</b> ' +
+          (quadra ? '✓ coincidono con la tabella.' : '⚠ non coincidono con la tabella: controlla le conferme stornate o registrate in un altro periodo.') +
+          ' Non sono un secondo costo del personale: sono il costo dei centri <b>spostato</b> sugli ordini. Var. efficienza = ore dichiarate rispetto alle ore standard dei pezzi confermati (zero se coincidono).</p>') +
+
+        L.scheda('📊', '2 · Costi effettivi dei centri: piano/consuntivo', 'S_ALR_87013611 · versione 0 · ' + nomeP,
+          avviso +
+          L.tabella(['Centro', 'Piano annuo €›', 'Piano del periodo €›', 'Consuntivo del periodo €›', 'Scostamento €›', 'Scost. %›'], cp.CDC.map(function (c) {
+            var pa = cp.totale(m.piano['0'][c.codice]), pp = r2(pa * P.quota), a = cp.totale(eff[c.codice]);
+            return [c.codice + ' ' + e(c.nome), eur(pa), eur(pp), '<b>' + eur(a) + '</b>', eur(a - pp), pp ? n0((a - pp) / pp * 100) + ' %' : '—']; })) +
+          '<p class="lab-nota">Il consuntivo <b>non si scrive a mano</b>: sono le righe di costo della contabilità (conti 50, 54, 80–83, 86) lette con il centro della riga o, se manca, con la tabella OKB9 (' + righeFI + (righeFI === 1 ? ' riga' : ' righe') + ' nel periodo: dettaglio in ' + link('controllo/ksb1', 'Consuntivo dei centri (KSB1)') + '). ' +
+          'Le attività del passo 1 <b>non</b> entrano qui: sommarle ai costi sarebbe una duplicazione. Uno zero non vuol dire costo gratuito: vuol dire che la scrittura non c’è ancora (per esempio le paghe del mese).</p>') +
+
+        L.scheda('🎯', '3 · Centri produttivi: residuo e scostamenti', 'KSB5 · analisi degli scostamenti · ' + nomeP,
+          L.tabella(['Centro', 'Budget del periodo €›', 'Costi propri €›', 'Costi comuni ribaltati €›', 'Consuntivo €›', 'Attività assorbite €›', 'Residuo €›', 'Var. spesa €›', 'Var. assorbimento €›'], r.centri.map(function (x) {
+            return [cp.CODICE[x.centro] + ' ' + x.centro, eur(x.budgetPeriodo), eur(x.primari), eur(x.ribaltatoEffettivo), '<b>' + eur(x.consuntivo) + '</b>', eur(x.assorbito), '<b>' + eur(x.residuo) + '</b>', eur(x.varianzaSpesa), eur(x.varianzaAssorbimento)]; })) +
+          '<ul class="lab-elenco"><li><b>Consuntivo del reparto</b> = costi propri del reparto (passo 2, centri 4210–4230) + costi comuni effettivi di 4100 e 4200 ribaltati con la regola del ciclo KSU1.</li>' +
+          '<li><b>Residuo</b> = consuntivo − attività assorbite. Negativo: gli ordini hanno ricevuto più costo di quello registrato finora (tipico a metà mese, prima delle paghe). Positivo: costi rimasti sul centro.</li>' +
+          '<li><b>Var. spesa</b> = consuntivo − budget del periodo. <b>Var. assorbimento</b> = budget del periodo − attività assorbite (ore pianificate non lavorate). Spesa + assorbimento = residuo.</li></ul>') +
+
+        L.scheda('📦', '4 · Ordini e WIP: le attività finiscono nel prodotto una volta sola', 'KKBC · KKS2 · ' + nomeP,
+          L.tabella(['Prodotto', 'Volume budget del periodo›', 'Pezzi versati›', 'Materiali €›', 'Attività €›', 'Costi degli ordini €›', 'Versato a magazzino (101) €›', 'WIP / saldo ordini €›'], r.prodotti.filter(function (p) { return p.volumeBudget || p.finiti || p.costiOrdini; }).map(function (p) {
+            return [p.materiale, n0(p.volumeBudgetPeriodo), n0(p.finiti), eur(p.materiali), eur(p.attivita), eur(p.costiOrdini), eur(p.accredito), '<b>' + eur(p.saldoOrdini) + '</b>']; }), 'Nessun ordine nel periodo.') +
+          '<p class="lab-nota">Il percorso del costo: ferro consumato (conto 70 = ' + eur(r.fi.materiali) + ') + attività dei centri (conto 72 = ' + eur(r.fi.attivita) + ') entrano negli ordini; con il versamento 101 escono verso il magazzino come prodotto (conto 73 = ' + eur(-r.fi.output) + '). ' +
+          'Versato a magazzino ' + eur(out) + ', WIP residuo ' + eur(wip) + (Math.abs(wip) < 0.01 ? ': ordini chiusi, nessun costo rimasto in produzione.' : ': costi ancora negli ordini aperti (si liquidano con KO88 a fine mese).') +
+          ' Ogni euro è contato una volta: nel centro finché non è assorbito, nell’ordine finché non è versato, nel magazzino dopo.</p>');
+      var x = radice.querySelector('#mese'); if (x) x.onchange = function () { radice.dataset.mese = this.value; rendi(); };
     }
   };
   function rendi() { (PAGINE[C.pagina] || PAGINE.centri)(); }
