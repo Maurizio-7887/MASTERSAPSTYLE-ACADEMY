@@ -139,6 +139,7 @@
           if (!visti.has(k)) {
             visti.add(k); q.visti.push(k);
             if (r.quiz === false) return;   // solo documenti salvati prima con quiz:false; epilogo, chiusura e riapertura ora si ricostruiscono come le altre
+            if (S.quizContabile === false) return;   // percorso logistico: le scritture restano nel giornale, senza domanda bloccante
             q.coda.push({chiave: k, documento: JSON.parse(JSON.stringify(r)), risposte: [], tentativi: 0});
             aggiunti++;
           }
@@ -243,17 +244,33 @@
       avvia: function (i) {
         if (S.avviato) throw Error('Sistema già avviato il ' + L.fd(S.avviato) + '. Per ripartire usa «Azzera».');
         var data = L.dataOk(i.data);
-        if (i.modo === 'costituzione') {
-          var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
-          S.avviato = data; S.costituzione = {data: data, capitale: cap};
+        // Nuovi esercizi: un solo ordine della transenna, tre operazioni senza scorte intermedie.
+        // Non si modifica alcuna azienda salvata: vale solo per la costituzione e per il percorso logistico.
+        var modelloFasi = function () {
           Object.keys(SEMILAVORATI).forEach(function (m) { S.materiali[m] = JSON.parse(JSON.stringify(SEMILAVORATI[m])); S.giacenze[m] = 0; });
-          // Nuovi esercizi: un solo ordine della transenna, tre operazioni senza scorte intermedie.
-          // Non si modifica alcuna azienda salvata: questo ramo vale solo alla costituzione.
           delete S.materiali['SL-PIEGA']; delete S.giacenze['SL-PIEGA'];
           S.produzioneModello = 'wip-fasi-v1';
           var tr = S.materiali['TR-STD']; tr.comp = {mat: 'FERRO', q: 8};
           tr.ore = {Taglio: 0.25, Piegatura: 0.20, Saldatura: 0.40}; tr.attrezzaggio = 0;
           tr.fasi = ['Taglio', 'Piegatura', 'Saldatura'];
+        };
+        if (i.modo === 'logistica') {
+          // Percorso logistico (corsi di magazzino): azienda già avviata con prodotti finiti a scaffale, produzione a tre fasi.
+          // Ricostruzione delle scritture come sempre (ragioneria di magazzino); con quiz «no» la classe solo operativa non la vede.
+          S.avviato = data; S.percorso = 'logistica'; if (i.quiz === 'no') S.quizContabile = false;
+          modelloFasi();
+          if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
+          var scorte = {'TR-STD': 200, 'TR-ALTA': 200, 'TR-PED': 300}, valore = 0;
+          Object.keys(scorte).forEach(function (m) { N.movimento(m, scorte[m], data, '561', 'APERTURA'); valore += scorte[m] * S.materiali[m].std; });
+          valore = Math.round(valore * 100) / 100;
+          var ra = N.post({data: data, tipo: 'APERTURA', descrizione: 'Saldi di apertura del percorso logistico: banca e prodotti finiti a scaffale (561)',
+            righe: [{conto: '10', dareAvere: 'DARE', importo: 50000}, {conto: '13', dareAvere: 'DARE', importo: valore}, {conto: '30', dareAvere: 'AVERE', importo: 50000 + valore}]});
+          N.salva(); return ra;
+        }
+        if (i.modo === 'costituzione') {
+          var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
+          S.avviato = data; S.costituzione = {data: data, capitale: cap};
+          modelloFasi();
           var rc = N.post({data: data, tipo: 'COSTITUZIONE', rif: 'COSTITUZIONE', descrizione: 'Costituzione di ' + S.societa + ': i soci sottoscrivono il capitale sociale di ' + L.eur(cap) + ' €',
             righe: [{conto: '08', dareAvere: 'DARE', importo: cap, testo: 'capitale sottoscritto e non ancora versato'}, {conto: '30', dareAvere: 'AVERE', importo: cap, testo: 'capitale sociale'}]});
           if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });

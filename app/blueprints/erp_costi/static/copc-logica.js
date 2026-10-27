@@ -12,7 +12,7 @@ window.PC4 = (function () {
 
   // azienda nuova: scheda di calcolo senza sovraccosti, tariffa 28 €/h, lotto 100; costi standard già rilasciati per i tre livelli
   window.S4.dopoAvvio.push(function (n, i) {
-    if (!i || i.modo !== 'costituzione') return;
+    if (!i || (i.modo !== 'costituzione' && i.modo !== 'logistica')) return;
     var s = n.S; s.costing.scheda = {sovrMat: 0, sovrProd: 0, tariffa: 28, lotto: 100, confermata: true};
     var ordine = ['SL-TAGLIO', 'SL-PIEGA'].filter(function (m) { return !!s.materiali[m]; }).concat(Object.keys(s.materiali).filter(function (m) { return s.materiali[m].tipo === 'FERT'; }));
     ordine.forEach(function (m) {

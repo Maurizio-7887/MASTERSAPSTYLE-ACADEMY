@@ -279,6 +279,21 @@ class Lavoro:
                 "dc_riaperto": "sì" if ch26.get("riapertura") else "no",
                 "dc_banca_31_12": s26("10"),
             })
+            # «Magazziniere 5.0: un mese di magazzino» (percorso logistico, gennaio 2027)
+            def sg(conto):
+                return sc(conto, fino="2027-01-31")
+            base.update({
+                "mg_percorso": s.get("percorso") or "",
+                "mg_scorte": "/".join(str(round(g.get(m, 0))) for m in ("FERRO", "TR-STD", "TR-ALTA", "TR-PED")),
+                "mg_valore_magazzino": round(sg("12") + sg("13"), 2),
+                "mg_differenze_prezzo": sg("63"),
+                "mg_rottamazioni": sg("69"),
+                "mg_differenza_inventario": sg("65"),
+                "mg_costo_venduto": sg("41"),
+                "mg_colli": len((s.get("sped") or {}).get("colli") or []),
+                "mg_ondate": len(wm.get("ondateRilasciate") or []),
+                "mg_inventari_chiusi": sum(1 for d in wm.get("inventari") or [] if d.get("stato") == "chiuso"),
+            })
         return base
 
     def indicatori(self):

@@ -5,6 +5,24 @@ gli indicatori disponibili sono quelli di report.indicatori().
 """
 
 ESERCIZI = {
+    "magazziniere-5": {
+        "titolo": "Magazziniere 5.0: un mese di magazzino — percorso logistico (UF 8-11)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("mg_percorso", "Percorso logistico avviato", "logistica", None),
+            ("mg_scorte", "Scorte finali: ferro kg / TR-STD / TR-ALTA / TR-PED", "438/0/50/300", None),
+            ("mg_valore_magazzino", "Valore del magazzino a costo standard (conti 12 + 13)", 11380.10, 0.005),
+            ("mg_differenze_prezzo", "Differenze prezzo del ferro (MIGO + MIRO, conto 63)", 210.00, 0.005),
+            ("mg_rottamazioni", "Rottamazioni (ferro piegato e reso difettoso, conto 69)", 456.50, 0.005),
+            ("mg_differenza_inventario", "Differenza inventariale (12 kg di ferro, conto 65)", 11.40, 0.005),
+            ("mg_costo_venduto", "Costo del venduto al netto del reso (conto 41)", 20927.00, 0.005),
+            ("mg_colli", "Colli con SSCC spediti", 13, 0),
+            ("mg_ondate", "Ondate di prelievo rilasciate", 1, 0),
+            ("mg_inventari_chiusi", "Documenti d'inventario chiusi", 1, 0),
+            ("rw_compiti_aperti", "Compiti WMS ancora aperti", 0, 0),
+            ("quadratura_im_wm", "Quantità IM e WMS riconciliate", "sì", None),
+        ],
+    },
     "dicembre-wms": {
         "titolo": "Dicembre: dalla costituzione alla riapertura — azienda nuova con WMS e produzione",
         "versione": "erp-ft",

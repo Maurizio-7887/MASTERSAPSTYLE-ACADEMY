@@ -26,7 +26,7 @@ window.PY4 = (function () {
     h.dipendenti.forEach(function (d) { var x = DIPENDENTI.find(function (y) { return y.matricola === d.matricola; }) || {}; if (d.ferieAP == null) { d.ferieAP = x.ferieAP || 0; d.rolAP = x.rolAP || 0; } }); return h; }; })();
   // azienda nuova: i tre dipendenti sono assunti il giorno della costituzione (niente mesi precedenti, niente ferie arretrate)
   window.S4.dopoAvvio.push(function (n, i) {
-    if (!i || i.modo !== 'costituzione') return;
+    if (!i || (i.modo !== 'costituzione' && i.modo !== 'logistica')) return;
     H().dipendenti.forEach(function (d) { d.assunzione = n.S.avviato; d.ferieAP = 0; d.rolAP = 0; d.addizionali = 0; });
   });
   // primo mese di lavoro nell'anno (1 = gennaio): per chi è assunto durante l'anno, il mese di assunzione
