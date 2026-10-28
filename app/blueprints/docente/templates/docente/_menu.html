@@ -3,6 +3,7 @@
   <a href="{{ url_for('docente.tempi_pagina') }}" class="{{ 'attivo' if request.endpoint == 'docente.tempi_pagina' }}">Tempi e costi</a>
   <a href="{{ url_for('docente.passa') }}" class="{{ 'attivo' if request.endpoint == 'docente.passa' }}">⇄ Passa il lavoro</a>
   <a href="{{ url_for('docente.nuovo_allievo') }}" class="{{ 'attivo' if request.endpoint == 'docente.nuovo_allievo' }}">+ Nuovo allievo</a>
+  <a href="{{ url_for('privati.docente') }}" class="{{ 'attivo' if request.endpoint == 'privati.docente' }}">Iscritti online</a>
   <a href="{{ url_for('docente.impostazioni') }}" class="{{ 'attivo' if request.endpoint == 'docente.impostazioni' }}">Costo orario</a>
   <a href="{{ url_for('portale.ingresso', versione='vuoto') }}">Simulatore</a>
 </div>

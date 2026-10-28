@@ -1,0 +1,17 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Verifica attestato{% endblock %}
+{% block contenuto %}
+<div class="msa-card stretta" style="text-align:left">
+  <h1 style="margin-top:0">Verifica di un attestato</h1>
+  {% if a and not a.revocato %}
+    <div class="msa-msg ok">Attestato valido · {{ a.codice }}</div>
+    <p><b>{{ a.nome_completo }}</b> ha completato il corso online <b>{{ a.titolo }}</b> ({{ a.ore|ore }} ore) superando l'esame finale con
+    {{ a.punteggio|round(0)|int }}/100, il {{ ora_italiana(a.emesso, '%d/%m/%Y') }}.</p>
+    <p style="font-size:12px;color:var(--f-attenuato)">Attestato privato rilasciato da Maurizio Gustinicchi Consulting, Città di Castello (PG): non costituisce titolo di studio con valore legale.</p>
+  {% elif codice %}
+    <div class="msa-msg errore">Nessun attestato valido con il codice {{ codice }}.</div>
+  {% endif %}
+  <form method="get" action="{{ url_for('privati.verifica_form') }}" class="msa-form"><label for="codice">Codice dell'attestato</label>
+    <input id="codice" name="codice" placeholder="ERP-XXXXXXXX" required><button class="msa-btn">Verifica</button></form>
+</div>
+{% endblock %}

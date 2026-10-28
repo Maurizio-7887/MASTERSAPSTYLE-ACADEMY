@@ -1,3 +1,21 @@
+# Corsi online per privati (ottobre 2026)
+
+ERP in stile SAP (80 ore) e Magazzino e Magazziniere 5.0 (60 ore) si vendono ai privati come le altre Academy:
+
+- pagine pubbliche con il programma: `/corsi/erp`, `/corsi/magazzino` (dati in `app/corsi_privati.py`);
+- iscrizione con prova gratuita (`/corsi/<corso>/iscriviti`): nome utente = email; aperti programma e prime lezioni
+  «Che situazione hai?», il resto porta a `/corsi/<corso>/acquista` (297 € di lancio, bonifico o PayPal, `PAYPAL_URL`);
+- il docente attiva l'iscrizione da **Iscritti online** (per il Magazziniere inserisce il codice della MasterSupplyChain
+  Academy, classe con percorso «Magazzino e Magazziniere 5.0»);
+- esame: 20 domande (70%) + confronto automatico del lavoro nel sistema integrato con i numeri attesi dell'esercizio
+  (80%: `dicembre-wms` per l'ERP, `magazziniere-5` per il Magazziniere), 3 tentativi, 45 minuti;
+- attestato PDF con QR (`/corsi/attestato/<codice>.pdf`) e verifica pubblica `/corsi/verifica/<codice>`.
+
+Tabelle nuove (`iscrizione`, `tentativo_esame`, `attestato`) create all'avvio; nessuna modifica alle tabelle esistenti.
+Gli allievi delle classi in aula non hanno iscrizioni: per loro non cambia nulla. Test: `python tests/test_corsi_privati.py`.
+
+---
+
 # Aggiornamento Pistoia — solo sistema integrato
 
 ## Produzione: ordine unico a operazioni e semilavorato autonomo

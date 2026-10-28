@@ -1,0 +1,12 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Esito dell'esame{% endblock %}
+{% block contenuto %}
+<div class="msa-card" style="text-align:left;max-width:760px">
+  <h1 style="margin-top:0">{{ 'ESAME SUPERATO' if t.superato else 'Esame non superato' }}</h1>
+  <p>Teoria: <b>{{ (t.teoria*100)|round(0)|int }}%</b> (soglia {{ (soglia_t*100)|int }}%) · Pratica: <b>{{ (t.pratica*100)|round(0)|int }}%</b> dei numeri attesi (soglia {{ (soglia_p*100)|int }}%).</p>
+  {% if scaduto %}<div class="msa-msg errore">Tempo scaduto: il tentativo non è valido.</div>{% endif %}
+  {% if att %}<p><a class="msa-btn" href="{{ url_for('privati.attestato_pdf', codice=att.codice) }}">Scarica l'attestato {{ att.codice }}</a></p>
+  {% else %}<p>Tentativi rimasti: {{ rimasti if rimasti > 0 else 0 }}. Ripassa le lezioni e completa l'esercizio, poi riprova.</p>{% endif %}
+  <p><a href="{{ url_for('privati.area', slug=slug) }}">← Torna al corso</a></p>
+</div>
+{% endblock %}

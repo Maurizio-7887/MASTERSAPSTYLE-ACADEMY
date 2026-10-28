@@ -1,0 +1,27 @@
+{# Il programma del corso: moduli con ore, contenuti, lezioni e app collegate #}
+<div class="msa-tiles" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+{% for m in c.moduli %}
+  <div class="msa-card" style="text-align:left">
+    <div class="l">Modulo {{ loop.index }} · {{ m[1]|ore }} h{% if links and m[3] and loop.index == 1 and prova %} · <b>prova gratuita</b>{% endif %}</div>
+    <h3 style="margin:6px 0">{{ m[0] }}</h3>
+    <p style="font-size:13px;margin:0 0 8px">{{ m[2] }}</p>
+    {% if links %}
+      {% for s in m[3] %}{% set aperta = (not prova) or (s in c.gratis) %}
+        <div style="font-size:13px">🎓 {% if aperta %}<a href="{{ url_for('formazione.' ~ s.replace('-', '_'), versione='vuoto') }}">{{ caso_titolo(s) }}</a>{% else %}<span title="Si apre con l'iscrizione">🔒 {{ caso_titolo(s) }}</span>{% endif %}</div>
+      {% endfor %}
+      {% for ep, et in m[4] %}
+        <div style="font-size:13px">🖥️ {% if not prova %}<a href="{{ url_for(ep, versione='vuoto') }}">{{ et }}</a>{% else %}<span title="Si apre con l'iscrizione">🔒 {{ et }}</span>{% endif %}</div>
+      {% endfor %}
+      {% if c.scm and loop.last %}<div style="font-size:13px">🔗 {% if not prova %}<a href="{{ scm_url }}" target="_blank" rel="noopener">MasterSupplyChain Academy</a>{% if isc and isc.codice_scm %} · codice di attivazione <b>{{ isc.codice_scm }}</b>{% else %} · il codice di attivazione arriva dal docente{% endif %}{% else %}🔒 MasterSupplyChain Academy{% endif %}</div>{% endif %}
+    {% else %}
+      {% if m[3] %}<p style="font-size:12px;color:var(--f-attenuato);margin:0">Lezioni: {% for s in m[3] %}{{ caso_titolo(s) }}{{ '; ' if not loop.last }}{% endfor %}</p>{% endif %}
+    {% endif %}
+  </div>
+{% endfor %}
+  <div class="msa-card" style="text-align:left;border-top-color:var(--f-arancio)">
+    <div class="l">Esame finale</div>
+    <h3 style="margin:6px 0">Teoria + i numeri dell'esercizio</h3>
+    <p style="font-size:13px;margin:0">Domande estratte a caso e il confronto automatico del tuo lavoro nel sistema integrato con i numeri attesi
+    dell'esercizio guidato. Superato l'esame scarichi l'attestato in PDF con codice {{ c.prefisso }}- e QR di verifica.</p>
+  </div>
+</div>

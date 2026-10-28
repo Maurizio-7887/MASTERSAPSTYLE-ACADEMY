@@ -7,7 +7,10 @@ from flask import abort, g, jsonify, redirect, request, session, url_for
 from .db import Utente, db
 
 # pagine visibili senza accesso
-PUBBLICHE = {"accessi.accesso", "portale.home", "portale.health", "portale.materiale", "static"}
+PUBBLICHE = {"accessi.accesso", "portale.home", "portale.health", "portale.materiale", "static",
+             # corsi online per privati: programma, iscrizione, acquisto e verifica degli attestati
+             "privati.corso_pubblico", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
+             "privati.static"}
 
 
 def utente_corrente():
@@ -61,7 +64,8 @@ def controlla_accesso():
             abort(400, "Modulo scaduto: ricarica la pagina e riprova.")
     if u.deve_cambiare_password and ep not in {"accessi.password", "accessi.esci"} and not api:
         return redirect(url_for("accessi.password"))
-    return None
+    from .blueprints.privati import controlla_prova     # corsi per privati: in prova solo programma e prime lezioni
+    return controlla_prova(u)
 
 
 def solo_docente(f):

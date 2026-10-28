@@ -1,0 +1,19 @@
+{% extends "academy/base.html" %}
+{% block titolo %}{{ c.breve }}{% endblock %}
+{% block contenuto %}
+<div class="msa-card" style="text-align:left">
+  <div class="l">Corso online per privati · {{ c.ore|ore }} ore · attestato con QR</div>
+  <h1 style="margin:8px 0">{{ c.titolo }}</h1>
+  <p style="max-width:780px">{{ c.sottotitolo }}</p>
+  <p style="max-width:780px">Lavori in un <b>simulatore didattico in stile SAP</b> sull'azienda Ferro & Transenne: ogni passo dell'esercizio guidato
+  è controllato in automatico e ogni documento genera le sue scritture. Non è un prodotto SAP.</p>
+  <p style="font-size:20px;margin:10px 0"><s style="color:var(--f-attenuato)">€ {{ c.prezzo_pieno }}</s> <b>€ {{ c.prezzo }},00</b> <span style="font-size:13px;color:var(--f-attenuato)">IVA inclusa · accesso 12 mesi</span></p>
+  <p>{% if u %}<a class="msa-btn" href="{{ url_for('privati.area', slug=slug) }}">Vai al tuo corso</a>
+     {% else %}<a class="msa-btn" href="{{ url_for('privati.iscriviti', slug=slug) }}">Prova gratis le prime lezioni</a>
+     <a href="{{ url_for('accessi.accesso') }}" style="margin-left:12px">Ho già un accesso</a>{% endif %}
+     <a href="{{ url_for('privati.acquista', slug=slug) }}" style="margin-left:12px">Iscrizione al corso completo</a></p>
+</div>
+<h2>Il programma · {{ c.moduli|length }} moduli, {{ c.ore|ore }} ore</h2>
+{% with links=False, prova=True, isc=None %}{% include "privati/_programma.html" %}{% endwith %}
+<p style="font-size:12px;color:var(--f-attenuato)">Attestato privato di formazione, non certificato da produttori di software ERP. SAP è un marchio di SAP SE.</p>
+{% endblock %}

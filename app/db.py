@@ -115,6 +115,45 @@ class Consegna(db.Model):
     letta = db.Column(db.Boolean, default=False, nullable=False)
 
 
+class Iscrizione(db.Model):
+    """Corso online per privati (ERP, Magazziniere 5.0): prova gratuita finché il docente non registra il pagamento."""
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)
+    corso = db.Column(db.String(30), nullable=False)
+    stato = db.Column(db.String(20), default="prova", nullable=False)      # prova | attivo
+    creata = db.Column(db.DateTime, default=adesso, nullable=False)
+    attivata = db.Column(db.DateTime, nullable=True)
+    codice_scm = db.Column(db.String(60), default="")                      # codice per la MasterSupplyChain Academy
+    nota = db.Column(db.String(300), default="")
+    utente = db.relationship("Utente")
+    __table_args__ = (db.UniqueConstraint("utente_id", "corso", name="uq_iscrizione_utente_corso"),)
+
+
+class TentativoEsame(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)
+    corso = db.Column(db.String(30), nullable=False)
+    domande = db.Column(db.Text, nullable=False)            # json: indici delle domande estratte
+    iniziato = db.Column(db.DateTime, default=adesso, nullable=False)
+    chiuso = db.Column(db.DateTime, nullable=True)
+    teoria = db.Column(db.Float, nullable=True)             # 0-1
+    pratica = db.Column(db.Float, nullable=True)            # 0-1
+    superato = db.Column(db.Boolean, default=False, nullable=False)
+
+
+class Attestato(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    codice = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)
+    corso = db.Column(db.String(30), nullable=False)
+    nome_completo = db.Column(db.String(200), nullable=False)
+    titolo = db.Column(db.String(200), nullable=False)
+    ore = db.Column(db.Float, nullable=False)
+    punteggio = db.Column(db.Float, nullable=False)
+    emesso = db.Column(db.DateTime, default=adesso, nullable=False)
+    revocato = db.Column(db.Boolean, default=False, nullable=False)
+
+
 def costo_orario_generale():
     r = db.session.get(Impostazione, "costo_orario")
     try:

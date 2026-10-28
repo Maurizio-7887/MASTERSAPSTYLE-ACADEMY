@@ -1,0 +1,6 @@
+{% extends "academy/base.html" %}
+{% block titolo %}I miei corsi{% endblock %}
+{% block contenuto %}
+<h1>I miei corsi</h1>
+<div class="msa-tiles">{% for i in isc %}<a class="msa-tile g-magazzino" href="{{ url_for('privati.area', slug=i.corso) }}"><b>{{ corsi[i.corso].titolo }}</b><p>{{ 'Iscritto' if i.stato == 'attivo' else 'Prova gratuita' }}</p></a>{% endfor %}</div>
+{% endblock %}

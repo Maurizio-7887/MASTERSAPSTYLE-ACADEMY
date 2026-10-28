@@ -1,0 +1,28 @@
+{% extends "academy/base.html" %}
+{% block titolo %}{{ c.breve }}{% endblock %}
+{% block contenuto %}
+<h1>{{ c.titolo }}</h1>
+{% if isc and prova %}<div class="msa-msg errore">Prova gratuita: sono aperti il programma e le lezioni segnate. <a href="{{ url_for('privati.acquista', slug=slug) }}"><b>Iscriviti al corso completo</b></a> per usare il sistema integrato, l'esame e l'attestato.</div>{% endif %}
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Stato</div><div class="v" style="font-size:18px">{{ 'Prova gratuita' if prova else 'Iscritto' }}</div></div>
+  <div class="msa-card"><div class="l">Numeri dell'esercizio esatti</div><div class="v">{{ pratica.esatti }}/{{ pratica.totale or '–' }}</div></div>
+  <div class="msa-card"><div class="l">Tentativi d'esame rimasti</div><div class="v">{{ rimasti }}</div></div>
+  <div class="msa-card"><div class="l">Attestato</div><div class="v" style="font-size:16px">{% if att %}<a href="{{ url_for('privati.attestato_pdf', codice=att.codice) }}">Scarica il PDF</a>{% elif not prova %}<a href="{{ url_for('privati.esame', slug=slug) }}">Vai all'esame</a>{% else %}dopo l'esame{% endif %}</div></div>
+</div>
+{% if not prova %}
+<div class="msa-tiles">
+  <a class="msa-tile g-magazzino" href="{{ url_for('portale.ingresso', versione='vuoto') }}"><span class="ic" aria-hidden="true">🏢</span><b>Apri il sistema integrato</b>
+    <p>L'esercizio passo passo «{{ 'Dicembre: dalla costituzione alla riapertura' if c.esercizio == 'dicembre-wms' else 'Magazziniere 5.0: un mese di magazzino' }}» si apre dalla finestra 📘.</p></a>
+  <a class="msa-tile g-personale" href="{{ url_for('allievo.consegna') }}"><span class="ic" aria-hidden="true">📤</span><b>Consegna il lavoro</b><p>Il docente ti risponde nella tua area.</p></a>
+  <a class="msa-tile g-controllo" href="{{ url_for('allievo.area') }}"><span class="ic" aria-hidden="true">👤</span><b>Tempi e consegne</b><p>Collegamento e risposte del docente.</p></a>
+</div>
+{% endif %}
+<h2>Il programma</h2>
+{% with links=True %}{% include "privati/_programma.html" %}{% endwith %}
+{% if pratica.righe %}
+<h2>I numeri del tuo esercizio</h2>
+<div class="msa-scroll"><table class="msa-tab"><tr><th>Controllo</th><th>Atteso</th><th>Il tuo lavoro</th><th></th></tr>
+{% for r in pratica.righe %}<tr><td>{{ r.etichetta }}</td><td>{{ r.atteso }}</td><td>{{ r.reale if r.reale is not none else '–' }}</td><td>{{ '✓' if r.ok else '○' }}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+{% endblock %}

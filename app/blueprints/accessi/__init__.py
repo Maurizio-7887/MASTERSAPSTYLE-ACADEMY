@@ -24,7 +24,12 @@ def _sicura(dest):
 
 
 def _casa(u):
-    return url_for("docente.pannello") if u.docente else url_for("allievo.area")
+    if u.docente:
+        return url_for("docente.pannello")
+    from ...db import Iscrizione
+    if Iscrizione.query.filter_by(utente_id=u.id).first():     # iscritto online a un corso per privati
+        return url_for("privati.area_generale")
+    return url_for("allievo.area")
 
 
 @bp.route("/accesso", methods=["GET", "POST"])

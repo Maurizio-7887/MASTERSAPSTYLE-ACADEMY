@@ -1,0 +1,22 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Iscritti online{% endblock %}
+{% block contenuto %}
+<h1>Iscritti online · corsi per privati</h1>
+{% include "docente/_menu.html" %}
+<p style="font-size:13px">Pagine pubbliche: {% for s, c in corsi.items() %}<a href="{{ url_for('privati.corso_pubblico', slug=s) }}" target="_blank">{{ c.breve }}</a>{{ ' · ' if not loop.last }}{% endfor %}.
+Quando arriva il pagamento (bonifico o PayPal) premi «Attiva». Per il corso Magazziniere inserisci il codice della MasterSupplyChain Academy
+(classe con il percorso «Magazzino e Magazziniere 5.0»).</p>
+{% if righe %}
+<div class="msa-scroll"><table class="msa-tab"><tr><th>Iscritto</th><th>Email</th><th>Corso</th><th>Dal</th><th>Stato</th><th>Attestato</th><th>Azioni</th></tr>
+{% for r in righe %}<tr>
+  <td>{{ r.utente.nome }}</td><td>{{ r.utente.username }}</td><td>{{ corsi[r.corso].breve }}</td><td>{{ ora_italiana(r.creata, '%d/%m/%Y') }}</td>
+  <td>{{ 'attivo dal ' ~ ora_italiana(r.attivata, '%d/%m/%Y') if r.stato == 'attivo' else 'prova gratuita' }}</td>
+  <td>{% set a = att.get((r.utente_id, r.corso)) %}{% if a %}<a href="{{ url_for('privati.attestato_pdf', codice=a.codice) }}">{{ a.codice }}</a>{% else %}–{% endif %}</td>
+  <td><form method="post" action="{{ url_for('privati.attiva', iid=r.id) }}" style="display:inline-flex;gap:6px;align-items:center">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      {% if corsi[r.corso].scm %}<input name="codice_scm" value="{{ r.codice_scm }}" placeholder="codice SCM" style="width:150px">{% endif %}
+      <button class="msa-btn">{{ 'Aggiorna' if r.stato == 'attivo' else 'Attiva' }}</button></form>
+      <form method="post" action="{{ url_for('privati.azzera_tentativi', iid=r.id) }}" style="display:inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="msa-btn" style="background:#666">Azzera tentativi</button></form></td>
+</tr>{% endfor %}</table></div>
+{% else %}<p>Ancora nessun iscritto online.</p>{% endif %}
+{% endblock %}
