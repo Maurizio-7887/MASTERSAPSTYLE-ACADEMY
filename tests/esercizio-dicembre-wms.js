@@ -137,6 +137,7 @@ p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'
 const oa = p.S().acquisti[0].numero;
 p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa,ddt:'DDT-AU-5512',lotto:'COL-1204',danneggiati:'200',danno:'tubi schiacciati nel trasporto',data:'2026-12-04'}),'MIGO con danneggiati'); fino('200 kg sono schiacciati');
 ok(p.w.WM4.bloccato('FERRO')===200,'200 kg in stock bloccato');
+{ p = apri('erp_magazzino','allocare'); const x = p.w.WM4.daAllocare('2026-12-04'); ok(x.righe.length===3 && x.righe.reduce((t,r)=>t+r.qta,0)===2800 && x.righe.map(r=>r.a).join(',')==='F-01,F-01,F-02' && !x.orfani.length,'merce da mettere a posto: 3 fasci, 2.800 kg verso F-01, F-01, F-02'); ok(/Metti a posto/.test(p.testo()),'pagina merce da mettere a posto'); }
 rfTutti('2026-12-04','PUTAWAY',3); fino('3 fasci buoni');
 p = apri('erp_magazzino','bloccato'); const qz = p.w.WM4.bloccati()[0];
 bene(p.fai('dq',{udc:qz.udc,motivo:'tubi schiacciati, non riparabili',data:'2026-12-05'},'ro'),'rottamazione'); fino('decidi sui 200 kg'); vicinoS('69',190,'rottamazione');
@@ -193,6 +194,7 @@ bene(p.fai('en',{ordine:oh,data:'2026-12-12'}),'101 HALB'); fino('20 kit autonom
 rfTutti('2026-12-12','PUTAWAY',1); fino('cassone SL-TAGLIO');
 const c20=p.S().wm.quant.find(q=>q.mat==='SL-TAGLIO'&&q.qta===20);
 ok(!!c20,'un cassone autonomo da 20 a scaffale');
+{ p = apri('erp_magazzino','mappa'); const dv = p.w.WM4.dove('FERRO'); ok(dv.righe.length===2 && dv.righe.every(r=>r.ubic==='F-02' && r.libera) && dv.prelevabile===740 && dv.im===740,'Dove si trova FERRO: 740 kg in F-02'); }
 p=apri('erp_magazzino','compiti'); bene(p.fai('tr',{udc:c20.udc,a:'03-05-2',motivo:'resti in fondo al magazzino',data:'2026-12-12'}),'trasferimento HALB'); fino('sposta il cassone');
 rfTutti('2026-12-12','TRASF',1); fino('conferma lo spostamento');
 ok(p.w.WM4.inUbic('03-05-2')[0].qta===20,'cassone HALB in 03-05-2');
@@ -213,6 +215,8 @@ p = apri('erp_magazzino','rf'); scheda(p,'interroga'); invio(p,'rf-q','03-05-2')
 p = apri('erp_innovazione','slotting'); bene(p.fai('sl',{data:'2026-12-13'}),'slotting'); fino('Slotting: avvicina');
 rfTutti('2026-12-13','TRASF'); fino('trasferimenti dello slotting'); controlla('Quarantena e slotting');
 // 9 · consegna con picking
+{ p = apri('erp_magazzino','arretrato'); const a = p.w.WM4.arretrato('2026-12-14'); ok(a.clienti.length===2 && a.clienti.every(x=>x.sem.cls==='arancio') && !a.fornitori.length && !a.produzione.length && !a.lavoro.length,'arretrato 14/12: Beta e Delta scadono oggi, nient’altro');
+  ok(p.w.WM4.arretrato('2026-12-15').ritardi.clienti===2,'il 15/12 Beta e Delta sono in ritardo di un giorno'); }
 p = apri('erp_innovazione','ondate'); bene(p.fai('mo',{ondate:'si',crossDock:'no'}),'ondate attive'); fino('Attiva il prelievo a ondate');
 p = apri('erp_vendite','consegne'); const ob = p.S().ordini[0].numero, od = p.S().ordini[1].numero;
 bene(p.fai('vl',{ordine:ob,data:'2026-12-14'}),'consegna Beta'); fino('consegna per Beta');
@@ -278,6 +282,7 @@ p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {
 p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {}; d.righe.forEach((r,k) => { if (r.riconta) v['r'+k] = '19'; }); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='contato','riconta registrata'); } fino('LI14: riconta');
 p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='chiuso','chiudi inventario'); fino('LI20');
 p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2026-12-31'}),'LI21'); fino('LI21'); vicinoS('65',14.60,'differenza inventariale'); ok(p.S().giacenze['SL-TAGLIO']===19,'19 kit dopo l’inventario');
+p = apri('erp_magazzino','scorte'); { const regs = p.S().registrazioni.length; bene(p.fai('sm',{materiale:'FERRO',minimo:'1000',massimo:'3000'}),'scorta minima ferro'); fino('Scorta minima del ferro'); const f = p.w.WM4.scorte().find(x=>x.mat==='FERRO'); ok(f.stato==='riordina' && f.proposta===2260 && f.libera===740,'ferro 740 sotto 1.000: proposta 2.260 kg'); ok(p.S().registrazioni.length===regs,'scorta minima senza scritture'); }
 { const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); console.log('VALORIZZAZIONE FERRO', JSON.stringify({g:v.giacenza,fifo:v.fifo,lifo:v.lifo,cmp:v.cmp,std:v.standard})); vicino(v.fifo,780,'FIFO ferro'); vicino(v.lifo,740,'LIFO ferro'); }
 controlla('Inventario');
 p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length; p.fai('ko',{data:'2026-12-31'}); fino('KO88'); ok(p.S().registrazioni.length===nk,'varianza zero: nessuna scrittura'); vicinoS('61',0,'varianze');

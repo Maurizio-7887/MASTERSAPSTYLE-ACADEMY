@@ -46,3 +46,18 @@ def bloccato():
 @bp.route("/lotti")
 def lotti():
     return render_lab("erp_magazzino", "lotti")
+
+
+@bp.route("/allocare")
+def allocare():
+    return render_lab("erp_magazzino", "allocare")
+
+
+@bp.route("/arretrato")
+def arretrato():
+    return render_lab("erp_magazzino", "arretrato")
+
+
+@bp.route("/scorte")
+def scorte():
+    return render_lab("erp_magazzino", "scorte")

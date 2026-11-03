@@ -36,10 +36,11 @@
     },
     mappa: function () {
       if (!WM.attivo()) { radice.innerHTML = nonAttivo(); return; }
-      var w = W(), sel = radice.dataset.ubic || '';
+      var w = W(), sel = radice.dataset.ubic || '', cerca = radice.dataset.dove || '';
       var cella = function (b) {
         var qs = WM.inUbic(b), x = w.ubicazioni[b], arr = WM.aperti().some(function (t) { return t.a === b; }), m = qs[0] ? qs[0].mat : '';
-        return '<div class="ubic ' + (qs.length ? 'm-' + m : 'vuota') + (x.blocco ? ' bloc' : '') + (arr ? ' arrivo' : '') + (b === sel ? ' sel' : '') + '" data-u="' + b + '"><b>' + b + '</b>' +
+        var trovata = cerca && qs.some(function (q) { return q.mat === cerca; });
+        return '<div class="ubic ' + (qs.length ? 'm-' + m : 'vuota') + (x.blocco ? ' bloc' : '') + (arr ? ' arrivo' : '') + (b === sel ? ' sel' : '') + (trovata ? ' trovata' : '') + '" data-u="' + b + '"><b>' + b + '</b>' +
           (qs.length ? qs.map(function (q) { return e(q.mat) + ' ' + n0(q.qta); }).join('<br>') : 'vuota') + (x.blocco ? '<br>🔒' : '') + '</div>';
       };
       var corsie = ['01', '02', '03'].map(function (c) {
@@ -57,8 +58,20 @@
           '<p class="lab-nota">Non impegnata da compiti non significa ATP vendibile: verifica tipo stock e area, blocco inventario e impegni commerciali. L’occupazione comprende UdC presenti e destinazioni prenotate da compiti aperti; una prenotazione non prova l’arrivo fisico.</p>' +
           tabCompiti(WM.aperti().filter(function (t) { return t.da === sel || t.a === sel; }), 'Nessun compito aperto su questa ubicazione.'));
       }
-      radice.innerHTML = '<p class="lab-nota">Colori: <span class="ubic m-TR-STD" style="display:inline;padding:2px 6px">TR-STD</span> <span class="ubic m-TR-ALTA" style="display:inline;padding:2px 6px">TR-ALTA</span> <span class="ubic m-TR-PED" style="display:inline;padding:2px 6px">TR-PED</span> <span class="ubic m-FERRO" style="display:inline;padding:2px 6px">FERRO</span> · bordo tratteggiato = merce in arrivo · righe rosse = bloccata per inventario. Tocca un\'ubicazione per vederne il contenuto.</p>' +
-        det + '<div class="mappa">' + corsie + ferro + interim + '</div>';
+      var trova = '<div class="lab-filtro dove-cerca"><label>🔎 <b>Dove si trova?</b> Articolo <select id="dove-mat"><option value="">— scegli l’articolo —</option>' + Object.keys(S().materiali).map(function (m) { return '<option value="' + m + '"' + (m === cerca ? ' selected' : '') + '>' + m + ' — ' + e(S().materiali[m].nome) + '</option>'; }).join('') + '</select></label></div>';
+      if (cerca) {
+        var dv = WM.dove(cerca);
+        trova += L.scheda('📍', 'Dove si trova ' + dv.mat + ' — ' + e(dv.nome), 'LS24 · LX02 · /SCWM/MON per prodotto',
+          '<div class="kpi4"><div><b>' + n0(dv.prelevabile) + ' ' + dv.um + '</b><span>libere a scaffale: si possono prelevare</span></div><div><b>' + n0(dv.wms) + ' ' + dv.um + '</b><span>in tutte le ubicazioni del magazzino</span></div>' +
+          '<div><b>' + n0(dv.im) + ' ' + dv.um + '</b><span>giacenza contabile (deve essere uguale)</span></div><div><b>' + n0(dv.bloccata) + ' ' + dv.um + '</b><span>di cui bloccate in quarantena</span></div></div>' +
+          L.tabella(['Ubicazione', 'UdC', 'Quantità›', 'Entrata il', 'Che cosa significa'], dv.righe.map(function (r) {
+            return {cls: r.libera ? '' : 'riga-ferma', celle: ['<b>' + r.ubic + '</b>', r.udc || '—', n0(r.qta) + ' ' + dv.um, fd(r.data), (r.libera ? '✅ ' : '⛔ ') + e(r.cosa)]}; }), 'Questo articolo non è in nessuna ubicazione: giacenza zero.') +
+          (window.LT4 ? '<p class="lab-nota">Lotti in giacenza (si preleva prima il più vecchio): ' + (window.LT4.elenco().filter(function (x) { return x.mat === cerca && x.qta > 1e-9; }).map(function (x) { return '<b>' + e(x.lotto) + '</b> ' + n0(x.qta) + ' ' + dv.um + ' del ' + fd(x.data); }).join(' · ') || 'nessuno') + '.</p>' : '') +
+          '<p class="lab-nota">Sulla mappa le ubicazioni con questo articolo hanno il bordo arancione. «Libera a scaffale» = puoi prelevarla; le altre righe esistono ma sono ferme (bloccate, già impegnate da un compito o in un’area di passaggio).</p>');
+      }
+      radice.innerHTML = trova + '<p class="lab-nota">Colori: <span class="ubic m-TR-STD" style="display:inline;padding:2px 6px">TR-STD</span> <span class="ubic m-TR-ALTA" style="display:inline;padding:2px 6px">TR-ALTA</span> <span class="ubic m-TR-PED" style="display:inline;padding:2px 6px">TR-PED</span> <span class="ubic m-FERRO" style="display:inline;padding:2px 6px">FERRO</span> · bordo tratteggiato = merce in arrivo · righe rosse = bloccata per inventario. Tocca un\'ubicazione per vederne il contenuto.</p>' +
+        det + '<div class="mappa' + (cerca ? ' cerca' : '') + '">' + corsie + ferro + interim + '</div>';
+      radice.querySelector('#dove-mat').onchange = function () { radice.dataset.dove = this.value; rendi(); };
       radice.querySelectorAll('.ubic[data-u]').forEach(function (x) { x.onclick = function () { radice.dataset.ubic = x.dataset.u; rendi(); if (window.scrollY) window.scrollTo(0, 0); }; });
     },
     compiti: function () {
@@ -91,6 +104,7 @@
         '<label>Data di lavoro<input type="date" id="rf-data" value="' + e(dl) + '"></label><button type="button" class="rf-pieno-btn" id="rf-pieno">' + (document.body.classList.contains('rf-pieno') ? '↩ Menu' : '⛶ Schermo pistola') + '</button></div>' +
         '<div class="rf-schede">' + [['compiti', '📦 Compiti'], ['carico', '🚛 Carico'], ['interroga', '🔎 Interroga'], ['inventario', '📝 Inventario']].map(function (x) { return '<button type="button" data-s="' + x[0] + '" class="' + (x[0] === scheda ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div>';
       var corpo = '';
+      if (!radice.dataset.daUrl) { radice.dataset.daUrl = '1'; try { var cu = new URLSearchParams(location.search).get('compito'); if (cu) radice.dataset.compito = cu; } catch (x) { /* nessun parametro */ } }
       if (scheda === 'compiti') {
         var ap = WM.aperti(), sel = radice.dataset.compito && ap.find(function (t) { return t.numero === radice.dataset.compito; }) || ap.find(function (t) { return t.risorsa === ris; }) || ap[0];
         if (!sel) corpo = '<p class="lab-nota" style="font-size:17px">✓ Nessun compito aperto. Ottimo lavoro!</p>';
@@ -115,7 +129,7 @@
         }).join('') + '<div class="rf-campo"><label>Leggi l\'SSCC del collo da caricare<input id="rf-sscc" autocomplete="off"></label></div><div class="lab-esito" id="rf-ce"></div>'
           : '<p class="lab-nota">Nessun trasporto da caricare: crealo da Spedizione → Trasporti.</p>';
       } else if (scheda === 'interroga') {
-        corpo = '<div class="rf-campo"><label>Leggi un\'ubicazione o un\'unità di carico<input id="rf-q" autocomplete="off"></label></div><div id="rf-ris-q"></div>';
+        corpo = '<div class="rf-campo"><label>Leggi un\'ubicazione, un\'unità di carico o un articolo<input id="rf-q" autocomplete="off"></label></div><div id="rf-ris-q"></div>';
       } else {
         var docs = w.inventari.filter(function (d) { return d.stato === 'attivo' || d.stato === 'riconta'; });
         corpo = docs.length ? '<p class="lab-nota">Documenti in conta: ' + docs.map(function (d) { return d.numero + ' (' + d.stato + ')'; }).join(', ') + '. Conta «cieca»: la quantità a sistema non si vede.</p>' +
@@ -153,6 +167,11 @@
       };
       function interroga(v) {
         var box = radice.querySelector('#rf-ris-q'), q = WM.quanti(function (x) { return x.udc === v; })[0];
+        if (!q && S().materiali[v]) {   // codice articolo: tutte le sue ubicazioni, prima quelle da cui si può prelevare
+          var dv = WM.dove(v);
+          box.innerHTML = '<div class="rf-compito"><h3>Articolo ' + v + ' · prelevabili ' + n0(dv.prelevabile) + ' ' + dv.um + '</h3>' + (dv.righe.length ? dv.righe.map(function (r) { return '<div class="rf-riga"><span>' + (r.libera ? '✅ ' : '⛔ ') + '<b>' + r.ubic + '</b> · UdC ' + (r.udc || '—') + ' · ' + e(r.cosa) + '</span><b>' + n0(r.qta) + ' ' + dv.um + '</b></div>'; }).join('') : '<p>In nessuna ubicazione.</p>') + '</div>';
+          var i0 = radice.querySelector('#rf-q'); i0.value = ''; i0.focus(); return;
+        }
         try {
           var u = q ? WM.ubicazione(q.ubic) : WM.ubicazione(v);
           box.innerHTML = '<div class="rf-compito"><h3>' + (q ? 'UdC ' + v + ' in ' + q.ubic : 'Ubicazione ' + u.id) + (u.blocco ? ' 🔒' : '') + '</h3>' + (u.quanti.length ? u.quanti.map(function (x) { return '<div class="rf-riga"><span>' + x.mat + ' · UdC ' + (x.udc || '—') + ' · ' + fd(x.data) + '</span><b>' + n0(x.qta) + ' ' + um(x.mat) + '</b></div>'; }).join('') : '<p>Vuota.</p>') + '</div>';
@@ -185,7 +204,9 @@
         b.forEach(function (k) { cap += u[k].cap; var x = {}; WM.inUbic(k).forEach(function (q) { x[q.udc || q.id] = 1; }); o += Object.keys(x).length; }); return cap ? Math.round(o / cap * 100) : 0; };
       var diff = WM.inUbic('DIFF'), quad = WM.quadratura(), consegne = S().consegne.filter(function (c) { return c.wm; });
       var perRis = {}; conf.forEach(function (t) { perRis[t.risorsa || '(scrivania)'] = (perRis[t.risorsa || '(scrivania)'] || 0) + 1; });
-      radice.innerHTML = '<div class="kpi4"><div><b>' + ap.length + '</b><span>compiti aperti</span></div><div><b>' + conf.length + '</b><span>compiti confermati</span></div>' +
+      var ss = WM.sottoScorta(), cartella = location.pathname.replace(/\/[^/]*$/, '/');
+      radice.innerHTML = (ss.length ? '<div class="lab-esito ko">⚠ <b>Sotto la scorta minima:</b> ' + ss.map(function (x) { return x.mat + ' (riordina ' + n0(x.proposta) + ' ' + x.um + ')'; }).join(' · ') + ' — <a href="' + cartella + 'scorte">Scorta minima e riordino</a></div>' : '') +
+        '<div class="kpi4"><div><b>' + ap.length + '</b><span>compiti aperti</span></div><div><b>' + conf.length + '</b><span>compiti confermati</span></div>' +
         '<div><b>' + occ('001') + ' %</b><span>occupazione scaffali (001)</span></div><div><b>' + occ('002') + ' %</b><span>occupazione catasta (002)</span></div>' +
         '<div><b>' + diff.length + '</b><span>differenze nella 999</span></div><div><b>' + (quad.every(function (q) { return q.ok; }) ? '✓' : '⚠') + '</b><span>quadratura IM–WMS</span></div></div>' +
         L.scheda('⚖️', 'Confronto giacenze contabilità di magazzino (IM) – WMS', 'LX23 · /SCWM/STOCK_COMP', L.tabella(['Materiale', 'IM (MMBE)›', 'WMS (somma quanti)›', 'di cui nella 999›', 'Esito'], quad.map(function (q) { return [q.mat, n0(q.im) + ' ' + um(q.mat), n0(q.wm), n0(q.diff999), q.ok ? '✓ quadra' : '<b>⚠ differenza ' + n0(q.im - q.wm) + '</b>']; })) +
@@ -253,6 +274,59 @@
       radice.querySelector('#lc').onchange = function () { radice.dataset.cons = this.value; rendi(); };
       radice.querySelector('#snv').onclick = function () { radice.dataset.sn = radice.querySelector('#sn').value.trim().toUpperCase(); rendi(); };
       radice.querySelector('#sn').onkeydown = function (ev) { if (ev.key === 'Enter') radice.querySelector('#snv').click(); };
+    },
+    allocare: function () {
+      if (!WM.attivo()) { radice.innerHTML = nonAttivo(); return; }
+      var al = radice.dataset.al || WM.oggi(), x = WM.daAllocare(al), cartella = location.pathname.replace(/\/[^/]*$/, '/');
+      var perMat = {}; x.righe.forEach(function (r) { perMat[r.mat] = (perMat[r.mat] || 0) + r.qta; });
+      var vecchia = x.righe.reduce(function (m, r) { return Math.max(m, r.attesa); }, 0);
+      var da = function (r) { return r.da === 'GR-ZONE' ? 'ricevimento (GR-ZONE)' : r.da === 'Q-ZONE' ? 'quarantena: merce sbloccata' : r.da; };
+      radice.innerHTML = '<div class="lab-filtro"><label>Data di oggi <input type="date" id="al-data" value="' + e(al) + '"></label></div>' +
+        '<div class="kpi4"><div><b>' + x.righe.length + '</b><span>UdC da mettere a posto</span></div><div><b>' + (x.righe.length ? vecchia + ' gg' : '—') + '</b><span>attesa più lunga</span></div>' +
+        Object.keys(perMat).map(function (m) { return '<div><b>' + n0(perMat[m]) + ' ' + um(m) + '</b><span>' + m + ' in attesa</span></div>'; }).join('') + '</div>' +
+        (x.orfani.length ? '<div class="lab-esito ko">⚠ In ricevimento ci sono ' + x.orfani.length + ' UdC <b>senza compito</b> di messa a posto (' + x.orfani.map(function (q) { return q.udc + ' · ' + n0(q.qta) + ' ' + q.mat; }).join(', ') + '): avvisa il capo magazzino, non spostarle a mano.</div>' : '') +
+        L.scheda('📥', 'Merce arrivata da mettere a posto', '/SCWM/PRDI · messe a posto aperte', L.tabella(['Compito', 'Articolo', 'Quantità›', 'UdC', 'Da dove arriva', 'Va in (proposta)', 'Arrivata il', 'Attesa', 'Riferimento', ''], x.righe.map(function (r) {
+          return [r.compito, '<b>' + r.mat + '</b>', n0(r.qta) + ' ' + um(r.mat), r.udc, da(r), '<b>' + r.a + '</b>', fd(r.arrivo),
+            r.attesa ? '<span class="lab-bd ' + (r.attesa >= 2 ? 'rosso' : 'giallo') + '">' + r.attesa + (r.attesa === 1 ? ' giorno' : ' giorni') + '</span>' : '<span class="lab-bd verde">oggi</span>', e(r.rif),
+            '<a class="lab-btn sec" href="' + cartella + 'rf?compito=' + r.compito + '">▶ Metti a posto</a>']; }), 'Niente da mettere a posto: tutta la merce arrivata è già a scaffale. 👍') +
+          '<p class="lab-nota"><b>Perché è importante:</b> la merce in ricevimento è già nostra e già in contabilità, ma finché non è a scaffale <b>non si può prelevare</b> e intasa la zona di scarico. «Metti a posto» apre la pistola RF con quel compito: leggi origine, UdC e la destinazione proposta, poi conferma. La pagina non sposta niente da sola.</p>');
+      radice.querySelector('#al-data').onchange = function () { radice.dataset.al = this.value; rendi(); };
+    },
+    arretrato: function () {
+      var al = radice.dataset.al || WM.oggi(), a;
+      try { a = WM.arretrato(al); } catch (err) { radice.innerHTML = '<div class="lab-esito ko">⛔ ' + e(err.message) + '</div>'; return; }
+      var bd = function (x) { return '<span class="lab-bd ' + x.sem.cls + '">' + (x.sem.cls === 'rosso' ? '🔴 ' : x.sem.cls === 'arancio' ? '🟠 ' : x.sem.cls === 'giallo' ? '🟡 ' : x.sem.cls === 'verde' ? '🟢 ' : '') + x.sem.testo + '</span>'; };
+      var riga = function (x) { return {cls: x.sem.cls === 'rosso' ? 'riga-ritardo' : '', celle: [bd(x), x.numero, e(x.chi), '<b>' + x.mat + '</b>', n0(x.qta) + ' ' + um(x.mat), x.scad ? fd(x.scad) : '—', e(x.punto)]}; };
+      var testa = ['Stato', 'Documento', 'Chi', 'Articolo', 'Manca›', 'Data promessa', 'A che punto è'];
+      radice.innerHTML = '<div class="lab-filtro"><label>Data di oggi <input type="date" id="ar-data" value="' + e(a.al) + '"></label> <span class="lab-nota">🔴 in ritardo · 🟠 scade oggi · 🟡 scade entro 3 giorni · 🟢 in tempo</span></div>' +
+        '<div class="kpi4"><div><b>' + a.ritardi.clienti + '</b><span>consegne ai clienti in ritardo</span></div><div><b>' + a.ritardi.fornitori + '</b><span>arrivi dai fornitori in ritardo</span></div>' +
+        '<div><b>' + a.ritardi.produzione + '</b><span>ordini di produzione in ritardo</span></div><div><b>' + a.ritardi.lavoro + '</b><span>compiti di magazzino arretrati</span></div></div>' +
+        L.scheda('🚚', '1 · Clienti che aspettano la merce', 'VL10 · VA05 · ordini da consegnare', L.tabella(testa, a.clienti.map(riga), 'Nessun ordine cliente da consegnare.') +
+          '<p class="lab-nota">Data promessa = data di consegna richiesta dal cliente. Un ordine resta qui finché la merce non è partita (uscita merci).</p>') +
+        L.scheda('🏭', '2 · Fornitori: merce che deve arrivare', 'ME2M · ordini d’acquisto aperti', L.tabella(testa, a.fornitori.map(riga), 'Nessun ordine d’acquisto da ricevere.') +
+          '<p class="lab-nota">Data promessa = data di consegna prevista scritta nell’ordine d’acquisto (ME21N o assegnazione dell’offerta). Se manca, la riga è grigia: chiedi la data al fornitore.</p>') +
+        L.scheda('⚙️', '3 · Produzione: pezzi che devono entrare a magazzino', 'COOIS · data di fine pianificata', L.tabella(testa, a.produzione.map(riga), 'Nessun ordine di produzione aperto.')) +
+        L.scheda('📋', '4 · Lavoro di magazzino arretrato', '/SCWM/MON · compiti aperti', L.tabella(['Stato', 'Compito', 'Tipo', 'Articolo', 'Quantità›', 'Da', 'A', 'Creato il'], a.lavoro.map(function (t) {
+          return {cls: t.sem.cls === 'rosso' ? 'riga-ritardo' : '', celle: [bd(t), t.numero, t.tipo, '<b>' + t.mat + '</b>', n0(t.qta) + ' ' + um(t.mat), t.da, t.a, fd(t.creato)]}; }), WM.attivo() ? 'Nessun compito aperto: il magazzino è in pari.' : 'WMS non attivo.') +
+          '<p class="lab-nota">Un compito aperto da ieri o prima è lavoro rimasto indietro: la merce è ferma a metà strada. Si chiude con la pistola RF.</p>') +
+        '<p class="lab-nota"><b>Come si legge:</b> parti dalle righe rosse, poi arancio e gialle. È solo una lettura: per recuperare si usano consegne e spedizione, entrata merci, produzione e pistola RF.</p>';
+      radice.querySelector('#ar-data').onchange = function () { radice.dataset.al = this.value; rendi(); };
+    },
+    scorte: function () {
+      var tutte = WM.scorte(), sotto = tutte.filter(function (x) { return x.stato === 'riordina'; }), s4 = location.pathname.replace(/\/magazzino\/[^/]*$/, '/');
+      var bd = {riordina: '<span class="lab-bd rosso">🔴 SOTTO SCORTA: riordina</span>', 'in arrivo': '<span class="lab-bd giallo">🟡 sotto il minimo, già in arrivo</span>', ok: '<span class="lab-bd verde">🟢 sopra il minimo</span>', nessuno: '<span class="lab-bd grigio">minimo non impostato</span>'};
+      radice.innerHTML = (sotto.length ? '<div class="lab-esito ko">⚠ <b>' + sotto.length + (sotto.length === 1 ? ' materiale sotto' : ' materiali sotto') + ' la scorta minima:</b> ' + sotto.map(function (x) { return x.mat + ' → riordina ' + n0(x.proposta) + ' ' + x.um; }).join(' · ') + '</div>' : '') +
+        '<div class="lab-griglia">' + L.scheda('📉', 'Imposta la scorta minima', 'MM02 · punto di riordino', L.modulo('sm', [['materiale', 'Materiale', 'select', radice.dataset.mat || 'FERRO', Object.keys(S().materiali).map(function (m) { return [m, m + ' — ' + S().materiali[m].nome + ' (' + S().materiali[m].um + ')']; })],
+          ['minimo', 'Scorta minima (punto di riordino)', 'num'], ['massimo', 'Scorta massima (vuoto = riporta al minimo)', 'num']], [['sm', 'Salva la scorta minima']])) +
+        L.scheda('🧠', 'Come ragiona il sistema', '', '<ol class="lab-elenco"><li><b>Libera</b> = giacenza − merce bloccata.</li><li><b>In arrivo</b> = ordini d’acquisto non ancora ricevuti + pezzi degli ordini di produzione non ancora versati.</li>' +
+          '<li>Se <b>libera + in arrivo</b> è sotto la <b>scorta minima</b> → 🔴 riordina.</li><li><b>Proposta</b> = scorta massima (o minima) − libera − in arrivo.</li><li>Il sistema <b>propone</b>: la richiesta d’acquisto o l’ordine di produzione li fai tu.</li></ol>') + '</div>' +
+        L.scheda('📦', 'Scorte e semaforo', 'MD04 · MMBE', L.tabella(['Materiale', 'Giacenza›', 'di cui bloccata›', 'Libera›', 'In arrivo›', 'Libera + in arrivo›', 'Minima›', 'Massima›', 'Stato', 'Proposta di riordino›'], tutte.map(function (x) {
+          return {cls: x.stato === 'riordina' ? 'riga-ritardo' : '', celle: ['<b>' + x.mat + '</b> ' + e(x.nome), n0(x.giacenza) + ' ' + x.um, x.bloccata ? n0(x.bloccata) : '0', n0(x.libera), n0(x.arrivo), '<b>' + n0(x.disponibile) + '</b>',
+            x.min == null ? '—' : n0(x.min), x.max == null ? '—' : n0(x.max), bd[x.stato], x.proposta ? '<b>' + n0(x.proposta) + ' ' + x.um + '</b>' : '']}; }))) +
+        (sotto.length ? L.scheda('🛒', 'Proposte di riordino', 'da trasformare a mano', '<ul class="lab-elenco">' + sotto.map(function (x) {
+          return '<li><b>' + x.mat + '</b>: ' + n0(x.proposta) + ' ' + x.um + ' → ' + (x.azione === 'acquisto' ? '<a href="' + s4 + 'acquisti/richieste">richiesta d’acquisto (ME51N)</a> e poi ordine al fornitore' : '<a href="' + s4 + 'produzione/ordini">ordine di produzione (CO01)</a>') + '</li>'; }).join('') + '</ul>' +
+          '<p class="lab-nota">Prima di ordinare controlla i fabbisogni dei clienti e della produzione: la scorta minima protegge dagli imprevisti, non sostituisce il calcolo del fabbisogno.</p>') : '');
+      L.collega(radice, 'sm', {sm: function (v) { radice.dataset.mat = v.materiale; return WM.impostaScorta(v); }}, rendi);
     },
   };
   function rendi() {

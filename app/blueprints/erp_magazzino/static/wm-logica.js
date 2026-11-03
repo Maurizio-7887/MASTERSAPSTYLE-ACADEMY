@@ -253,9 +253,118 @@ window.WM4 = (function () {
     });
   }
   function ubicazione(b) { b = String(b || '').trim().toUpperCase(); var x = W().ubicazioni[b]; if (!x) throw Error('Ubicazione ' + b + ' inesistente.'); return {id: b, tipo: x.tipo, cap: x.cap, blocco: x.blocco, quanti: inUbic(b), occupazione: occupazione(b)}; }
+
+  // ── domande di tutti i giorni del magazziniere: dove si trova, che cosa aspetta di essere messo a posto, chi è in ritardo,
+  //    che cosa è sotto la scorta minima. Sono LETTURE: nessun movimento e nessuna scrittura (la scorta minima è solo un parametro). ──
+  var giorni = function (da, a) { return Math.round((Date.parse(a + 'T00:00:00Z') - Date.parse(da + 'T00:00:00Z')) / 864e5); };
+  function oggi() {   // l'ultima data di lavoro registrata nel sistema: è la «data di oggi» proposta nelle interrogazioni
+    var s = S(), d = s.avviato || '';
+    var su = function (x) { if (x && /^\d{4}-\d\d-\d\d$/.test(x) && x > d) d = x; };
+    (s.movimenti || []).forEach(function (m) { su(m.data); });
+    (s.registrazioni || []).forEach(function (r) { su(r.data); });
+    (s.ordini || []).forEach(function (o) { su(o.data); });
+    (s.acquisti || []).forEach(function (o) { su(o.data); });
+    (s.produzione || []).forEach(function (o) { su(o.data); });
+    (s.consegne || []).forEach(function (c) { su(c.data); su(c.pgi || ''); });
+    ((s.wm || {}).compiti || []).forEach(function (t) { su(t.creato); su(t.confermato || ''); });
+    return d;
+  }
+  var COSA = {'902': 'IN RICEVIMENTO: arrivata, ma ancora da mettere a scaffale', '980': 'BLOCCATA in quarantena: non si può spedire', '916': 'IN SPEDIZIONE: già prelevata, pronta a partire',
+    '100': 'A BORDO LINEA: portata alla produzione', '999': 'DIFFERENZA d’inventario da registrare'};
+  // «Dove si trova?»: tutte le ubicazioni di un articolo, con che cosa significa ogni riga per chi deve prelevare
+  function dove(mat) {
+    var s = S(), m = String(mat || '').trim().toUpperCase(); if (!s.materiali[m]) throw Error('Articolo ' + (mat || '') + ' inesistente: scegli un codice dall’elenco.');
+    var u = W().ubicazioni, ap = aperti();
+    var righe = quanti(function (q) { return q.mat === m; }).map(function (q) {
+      var x = u[q.ubic] || {}, ris = riservato(q.id), t = ap.filter(function (c) { return c.quant === q.id; })[0];
+      var cosa = COSA[x.tipo] || (x.blocco ? 'FERMA: ubicazione bloccata per l’inventario' : t && ris >= q.qta - 1e-9 ? 'GIÀ IMPEGNATA dal compito ' + t.numero + ' (' + TIPI_COMPITO[t.tipo].toLowerCase() + ' → ' + t.a + ')'
+        : t ? 'IN PARTE IMPEGNATA: ' + L.n0(ris) + ' dal compito ' + t.numero : 'LIBERA a scaffale: si può prelevare');
+      var libera = !COSA[x.tipo] && !x.blocco && ris < q.qta - 1e-9;
+      return {ubic: q.ubic, tipo: x.tipo, udc: q.udc, qta: q.qta, data: q.data, rif: q.rif, cosa: cosa, libera: libera, prelevabile: libera ? r2(q.qta - ris) : 0};
+    }).sort(function (a, b) { return (b.libera - a.libera) || (a.data < b.data ? -1 : a.data > b.data ? 1 : a.ubic < b.ubic ? -1 : 1); });
+    return {mat: m, nome: s.materiali[m].nome, um: s.materiali[m].um, righe: righe, im: r2(s.giacenze[m] || 0),
+      wms: r2(righe.reduce(function (t, x) { return t + x.qta; }, 0)), prelevabile: r2(righe.reduce(function (t, x) { return t + x.prelevabile; }, 0)), bloccata: bloccato(m)};
+  }
+  // «Merce da mettere a posto»: messe a posto (PUTAWAY) ancora aperte, da qualunque area arrivino, e merce in ricevimento senza compito
+  function daAllocare(rif) {
+    var w = W(), coperti = {}, al = rif || oggi();
+    var righe = aperti().filter(function (t) { return t.tipo === 'PUTAWAY'; }).map(function (t) {
+      coperti[t.quant] = 1; var q = w.quant.find(function (x) { return x.id === t.quant; }) || {};
+      return {compito: t.numero, mat: t.mat, qta: t.qta, udc: t.udc, da: t.da, a: t.a, arrivo: q.data || t.creato, creato: t.creato, attesa: Math.max(0, giorni(t.creato, al)), rif: t.rif, motivo: t.motivo || ''};
+    }).sort(function (a, b) { return a.creato < b.creato ? -1 : a.creato > b.creato ? 1 : (+a.compito) - (+b.compito); });
+    var orfani = quanti(function (q) { return q.ubic === 'GR-ZONE' && q.qta > 0 && !coperti[q.id] && riservato(q.id) === 0; });
+    return {righe: righe, orfani: orfani, al: al};
+  }
+  // «Arretrato e scadenze»: clienti, fornitori, produzione e lavoro di magazzino rispetto alla data di oggi
+  function semaforo(scad, al) {
+    if (!scad) return {cls: 'grigio', testo: 'data non indicata', peso: 4};
+    var g = giorni(al, scad);
+    return g < 0 ? {cls: 'rosso', testo: 'IN RITARDO di ' + (-g) + (g === -1 ? ' giorno' : ' giorni'), peso: 0, g: g}
+      : g === 0 ? {cls: 'arancio', testo: 'SCADE OGGI', peso: 1, g: g}
+      : g <= 3 ? {cls: 'giallo', testo: 'scade fra ' + g + (g === 1 ? ' giorno' : ' giorni'), peso: 2, g: g}
+      : {cls: 'verde', testo: 'in tempo (mancano ' + g + ' giorni)', peso: 3, g: g};
+  }
+  var perGravita = function (a, b) { return a.sem.peso - b.sem.peso || ((a.scad || '9') < (b.scad || '9') ? -1 : (a.scad || '9') > (b.scad || '9') ? 1 : 0); };
+  function arretrato(rif) {
+    var s = S(), al = rif ? N().data(rif) : oggi(), wmOn = attivo();
+    var clienti = (s.ordini || []).filter(function (o) { return o.tipo === 'OR' && !o.rifiutato && o.data <= al && o.qta - (o.consegnato || 0) > 1e-9; }).map(function (o) {
+      var aperte = (s.consegne || []).filter(function (c) { return c.ordine === o.numero && c.tipo === 'LF' && c.pgi === false; });
+      var punto = !aperte.length ? 'consegna non ancora creata' : aperte.map(function (c) {
+        if (!c.wm || !wmOn) return 'consegna ' + c.numero;
+        var p = statoPrelievo(c);
+        return 'consegna ' + c.numero + ': ' + (c.ondata === 'in attesa' && !p.compiti.length ? 'aspetta l’ondata' : p.stato === 'C' ? 'prelevata, da imballare e spedire' : p.stato === 'B' ? 'prelievo a metà' : 'da prelevare');
+      }).join(' · ');
+      var scad = o.consegnaRichiesta || o.data;
+      return {numero: o.numero, chi: (s.clienti[o.cliente] || {}).nome || o.cliente, mat: o.materiale, qta: r2(o.qta - (o.consegnato || 0)), scad: scad, sem: semaforo(scad, al), punto: punto};
+    }).sort(perGravita);
+    var fornitori = (s.acquisti || []).filter(function (o) { return o.data <= al && o.qta - (o.entrato || 0) > 1e-9 && !(o.rilascio && o.rilascio.stato === 'rifiutato'); }).map(function (o) {
+      return {numero: o.numero, chi: (s.fornitori[o.fornitore] || {}).nome || o.fornitore, mat: o.materiale, qta: r2(o.qta - (o.entrato || 0)), scad: o.consegna || '', sem: semaforo(o.consegna, al),
+        punto: o.rilascio && o.rilascio.stato === 'bloccato' ? 'ordine bloccato: aspetta il rilascio (ME29N)' : (o.entrato ? 'arrivato in parte' : 'non ancora arrivato')};
+    }).sort(perGravita);
+    var PP = window.PP4;
+    var produzione = (s.produzione || []).filter(function (o) { return o.data <= al && !o.teco && !o.liquidazione && (!PP || PP.somma(o, '101', 'qta') < o.qta - 1e-9); }).map(function (o) {
+      var fatti = PP ? PP.somma(o, '101', 'qta') : 0;
+      return {numero: o.numero, chi: 'produzione interna', mat: o.materiale, qta: r2(o.qta - fatti), scad: o.fine || '', sem: semaforo(o.fine, al), punto: fatti ? 'versati ' + L.n0(fatti) + ' su ' + L.n0(o.qta) : 'nessun pezzo ancora versato'};
+    }).sort(perGravita);
+    var lavoro = wmOn ? aperti().filter(function (t) { return t.creato <= al; }).map(function (t) {
+      var g = giorni(t.creato, al);
+      return {numero: t.numero, tipo: TIPI_COMPITO[t.tipo], mat: t.mat, qta: t.qta, da: t.da, a: t.a, creato: t.creato, giorni: g,
+        sem: g >= 1 ? {cls: 'rosso', testo: 'aperto da ' + g + (g === 1 ? ' giorno' : ' giorni'), peso: 0} : {cls: 'giallo', testo: 'creato oggi: da fare', peso: 2}};
+    }).sort(function (a, b) { return a.sem.peso - b.sem.peso || (a.creato < b.creato ? -1 : 1); }) : [];
+    var rossi = function (l) { return l.filter(function (x) { return x.sem.cls === 'rosso'; }).length; };
+    return {al: al, clienti: clienti, fornitori: fornitori, produzione: produzione, lavoro: lavoro,
+      ritardi: {clienti: rossi(clienti), fornitori: rossi(fornitori), produzione: rossi(produzione), lavoro: rossi(lavoro)}};
+  }
+  // «Scorta minima e riordino» (in SAP: punto di riordino, pianificazione VB in MD04): parametro per materiale e proposta di riordino
+  function scorte() {
+    var s = S(), sc = s.scorte || {}, PP = window.PP4;
+    return Object.keys(s.materiali).map(function (m) {
+      var mm = s.materiali[m], g = r2(s.giacenze[m] || 0), b = bloccato(m), lib = r2(g - b);
+      var acq = r2((s.acquisti || []).filter(function (o) { return o.materiale === m && !(o.rilascio && o.rilascio.stato === 'rifiutato'); }).reduce(function (t, o) { return t + Math.max(0, o.qta - (o.entrato || 0)); }, 0));
+      var prod = r2((s.produzione || []).filter(function (o) { return o.materiale === m && !o.teco && !o.liquidazione; }).reduce(function (t, o) { return t + Math.max(0, o.qta - (PP ? PP.somma(o, '101', 'qta') : 0)); }, 0));
+      var arrivo = r2(acq + prod), disp = r2(lib + arrivo), x = sc[m] || null, min = x ? x.min : null, max = x ? x.max : null;
+      var stato = !x ? 'nessuno' : disp < min - 1e-9 ? 'riordina' : lib < min - 1e-9 ? 'in arrivo' : 'ok';
+      return {mat: m, nome: mm.nome, um: mm.um, tipo: mm.tipo, giacenza: g, bloccata: b, libera: lib, acquisti: acq, produzione: prod, arrivo: arrivo, disponibile: disp,
+        min: min, max: max, stato: stato, proposta: stato === 'riordina' ? r2((max != null ? max : min) - disp) : 0, azione: mm.tipo === 'ROH' ? 'acquisto' : 'produzione'};
+    });
+  }
+  var sottoScorta = function () { return scorte().filter(function (x) { return x.stato === 'riordina'; }); };
+  function impostaScorta(i) {
+    var n = N(), s = S(), mat = String(i.materiale || '').trim(); n.materiale(mat);
+    var min = L.num(i.minimo, 'Scorta minima', 0), max = i.massimo == null || String(i.massimo).trim() === '' ? null : L.num(i.massimo, 'Scorta massima', 0);
+    if (max != null && max < min) throw Error('La scorta massima (' + L.n0(max) + ') non può essere più bassa della minima (' + L.n0(min) + ').');
+    if (!s.scorte) s.scorte = {};
+    if (min === 0 && max == null) delete s.scorte[mat]; else s.scorte[mat] = {min: min, max: max};
+    n.salva();
+    var x = scorte().find(function (y) { return y.mat === mat; }), um = s.materiali[mat].um;
+    if (!s.scorte[mat]) return '<p class="lab-nota">Scorta minima di ' + mat + ' tolta: il materiale non è più controllato.</p>';
+    return '<p class="lab-nota">Scorta minima di <b>' + mat + '</b>: ' + L.n0(min) + ' ' + um + (max != null ? ', massima ' + L.n0(max) + ' ' + um : '') + '. Oggi: libera ' + L.n0(x.libera) + ' + in arrivo ' + L.n0(x.arrivo) + ' = ' + L.n0(x.disponibile) + ' ' + um + ' → ' +
+      (x.stato === 'riordina' ? '<b>SOTTO SCORTA: proposta di riordino ' + L.n0(x.proposta) + ' ' + um + '</b>.' : x.stato === 'in arrivo' ? 'sotto il minimo a scaffale, ma il riordino è già in arrivo.' : 'sopra il minimo, nessun riordino.') + ' Nessun movimento e nessuna scrittura.</p>';
+  }
   return {TIPI: TIPI, TIPI_COMPITO: TIPI_COMPITO, UDC: UDC, attivo: attivo, attiva: attiva, entrata: entrata, creaPrelievo: creaPrelievo, compitiDi: compitiDi, statoPrelievo: statoPrelievo,
     uscitaSpedizione: uscitaSpedizione, approvvigiona: approvvigiona, consumaPSA: consumaPSA, trasferisci: trasferisci, conferma: conferma, quadratura: quadratura,
     entrataBloccata: entrataBloccata, blocca: blocca, sblocca: sblocca, rottama: rottama, bloccati: bloccati, bloccato: bloccato,
+    oggi: oggi, dove: dove, daAllocare: daAllocare, arretrato: arretrato, semaforo: semaforo, scorte: scorte, sottoScorta: sottoScorta, impostaScorta: impostaScorta,
     ubicazione: ubicazione, quanti: quanti, inUbic: inUbic, aperti: aperti, occupazione: occupazione, nuovoQuant: nuovoQuant, libera: libera, richiesto: richiesto, compito: compito, fifo: fifo, riservato: riservato};
 })();
 
@@ -302,6 +411,10 @@ window.WMGuida = (function () {
     mo: ['ondate,crossDock', 'Innovazione → Ondate', 'Controlla come vuoi generare i nuovi prelievi.', 'Salva le opzioni prima di creare le nuove consegne.', 'Con ondate sì le consegne attendono il rilascio; con cross-docking sì la merce idonea in GR-ZONE può andare direttamente a GI-ZONE anziché a scaffale.', {ondate: 'Sì = PICK al rilascio dell’ondata; no = PICK subito alla consegna.', crossDock: 'Sì = usa il ricevimento ancora da mettere a posto se idoneo, annullando il relativo PUTAWAY. Non autorizza a saltare la conferma RF.'}],
     on: ['data', 'Innovazione → Rilascia ondata', 'Prima abilita le ondate e crea consegne in attesa.', 'Premi Rilascia l’ondata, poi esegui la coda RF in ordine di percorso.', 'Crea PICK e sequenza di prelievo, non l’uscita contabile 601.', {data: data}],
     sl: ['data', 'Innovazione → Slotting', 'Esamina le proposte di riordino e le destinazioni disponibili.', 'Crea i compiti proposti e confermali in RF.', 'Migliora il dove; lascia invariati giacenze IM e valori. Una proposta non è uno spostamento già eseguito.', {data: data}],
+    sm: ['materiale,minimo,massimo', 'Magazzino → Scorta minima e riordino', 'Scegli il materiale; scrivi la quantità minima sotto la quale va riordinato e, se vuoi, la massima a cui riportarlo. Usa l’unità del materiale (FERRO: kg).', 'Premi Salva la scorta minima una sola volta; per toglierla scrivi 0 e lascia vuota la massima.', 'Cambia solo il parametro del materiale: nessun movimento, nessuna scrittura e nessun ordine automatico. Leggi semaforo e proposta di riordino nella tabella: l’ordine (ME51N/ME21N o CO01) resta una decisione da fare a mano.', {
+      materiale: 'Codice del materiale da controllare: FERRO si compra (proposta di acquisto), transenne e kit si producono (proposta di produzione).',
+      minimo: 'Scorta minima o punto di riordino, nell’unità del materiale: quando libera + in arrivo scende sotto questo numero il sistema propone di riordinare. 0 = nessun controllo.',
+      massimo: 'Facoltativa: la quantità a cui riportare la scorta con il riordino (proposta = massima − libera − in arrivo). Vuota = si riporta solo al minimo. Non può essere sotto la minima.'}],
     rf: ['trasporto,data', 'Innovazione → RFID (simulato)', 'Prima crea il trasporto con colli SSCC.', 'Scegli il trasporto e fai passare il carrello dal varco simulato.', 'Registra il carico dei colli come la lettura RF, non la partenza o il 601. Nessun lettore o servizio esterno reale.', {trasporto: 'Trasporto in carico i cui tag EPC derivano dagli SSCC.', data: data}]
   };
   function guida(r, pref) {
@@ -332,7 +445,10 @@ window.WMGuida = (function () {
   };
   var percorso = {
     struttura: 'Controlla la situazione iniziale → scegli la data → attiva W100 → verifica UdC iniziali e Monitor. L’attivazione distribuisce stock esistente: non è MIGO 101. Non caricare scenari sostitutivi per ottenere una semplice guida.',
-    mappa: 'Tocca un’ubicazione → leggi materiale, quanto, quantità e UdC → controlla compiti da/a → per spostare vai a Compiti, non modificare un saldo. Bordo di arrivo = destinazione impegnata, non merce già presente.',
+    mappa: 'Per sapere DOVE SI TROVA un articolo sceglilo nel menu «Dove si trova?»: le sue ubicazioni si colorano e la tabella dice quali sono libere da prelevare e quali sono bloccate, impegnate o in un’area di passaggio. Oppure tocca un’ubicazione → leggi materiale, quanto, quantità e UdC → controlla compiti da/a → per spostare vai a Compiti, non modificare un saldo. Bordo di arrivo = destinazione impegnata, non merce già presente.',
+    allocare: 'Scegli la data di oggi → leggi le UdC arrivate e non ancora messe a scaffale (ricevimento, resi, merce sbloccata) con la destinazione proposta e i giorni di attesa → premi «Metti a posto»: si apre la pistola RF con quel compito → conferma origine, UdC e destinazione. La pagina non sposta niente da sola.',
+    arretrato: 'Scegli la data di oggi → leggi in rosso chi è IN RITARDO e in giallo/arancio chi scade nei prossimi giorni: consegne ai clienti, arrivi dai fornitori, ordini di produzione, compiti di magazzino ancora aperti → parti dalle righe rosse. È solo una lettura: per recuperare si usano le pagine di consegna, entrata merci, produzione e la pistola RF.',
+    scorte: 'Scegli il materiale → scrivi scorta minima (e massima) → Salva → leggi il semaforo: libera + in arrivo sotto il minimo = SOTTO SCORTA con la quantità da riordinare. Il sistema propone, non ordina: la richiesta d’acquisto o l’ordine di produzione si fanno a mano.',
     compiti: 'Scegli approvvigionamento produzione o trasferimento → compila il modulo relativo → crea il compito → esegui RF → verifica ubicazione e Monitor. Non duplicare i compiti già aperti.',
     rf: 'Scegli risorsa e data → Compiti: origine, UdC (il materiale è accettato come alternativa), quantità, destinazione → Conferma → verifica coda e Mappa. Carico legge SSCC, Interroga legge ubicazione/UdC e non modifica nulla, Inventario registra la conta di documenti già attivi.',
     monitor: 'Leggi compiti aperti e quadratura IM–WMS → confronta materiale per materiale → controlla DIFF/999 e messe a posto. Il totale WMS include ricevimento, linea, spedizione, quarantena e differenze: non è soltanto lo scaffale.',
@@ -378,7 +494,10 @@ window.WMGuida = (function () {
       'rf-qta': 'Quantità effettivamente prelevata nell’unità mostrata (kg/pz). PUTAWAY/TRASF/BLOCCO: intera e non modificabile. Solo PICK/STAGING consentono meno: controlla differenza 999 e nuovo compito, non confondere con un trasferimento parziale libero.',
       'rf-a': 'Leggi la destinazione esatta dopo aver portato la merce; Invio sull’ultimo campo conferma. Controlla prima la quantità.',
       'rf-sscc': 'Leggi le 18 cifre SSCC di un collo già assegnato al trasporto, poi Invio. Registra carico, non uscita merci 601.',
-      'rf-q': 'Codice ubicazione (es. F-01) o UdC, poi Invio: mostra contenuto senza spostamenti. Non cerca lotto o SSCC.',
+      'rf-q': 'Codice ubicazione (es. F-01), UdC oppure codice articolo (es. TR-STD), poi Invio: mostra contenuto o tutte le ubicazioni dell’articolo senza spostamenti. Non cerca lotto o SSCC.',
+      'dove-mat': 'Scegli il codice dell’articolo da cercare: le sue ubicazioni si colorano sulla mappa e la tabella dice dove prelevare. È una lettura: non sposta niente.',
+      'al-data': 'Data di oggi nella simulazione: serve solo a contare i giorni di attesa. Vuota = ultima data di lavoro registrata.',
+      'ar-data': 'Data di oggi nella simulazione: il confronto con le date promesse decide rosso (in ritardo), arancio (scade oggi), giallo (entro 3 giorni). Vuota = ultima data di lavoro registrata.',
       'rf-inv': 'Codice ubicazione inclusa in un inventario attivo o in riconta, poi Invio: compaiono le righe da contare.'
     };
     radice.querySelectorAll('input, select').forEach(function (input) {

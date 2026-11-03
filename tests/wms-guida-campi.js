@@ -31,7 +31,7 @@ try{
  let page=apri('erp_dati','avvio');act(page,'av',{data:'2027-01-01'});
  page=apri('erp_magazzino','struttura');aiuti(page,'at');act(page,'at',{data:'2027-01-01'});
  const baseline=JSON.stringify(page.S());
- for(const nome of ['struttura','mappa','compiti','rf','monitor','etichette','bloccato','lotti']){
+ for(const nome of ['struttura','mappa','compiti','rf','monitor','etichette','bloccato','lotti','allocare','arretrato','scorte']){
    page=apri('erp_magazzino',nome);
    check(page.lab.querySelectorAll('.wms-guida-pagina').length===1,'guida pagina '+nome);
    const text=page.lab.querySelector('.wms-guida-pagina').textContent;

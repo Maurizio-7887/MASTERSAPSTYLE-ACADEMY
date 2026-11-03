@@ -104,3 +104,11 @@ body.rf-pieno .msa-lp{padding-top:6px}
 .rf-testa .rf-pieno-btn{margin-left:auto;align-self:flex-end;background:#123B5C;color:#fff;border:1px solid #5d7d99;border-radius:6px;padding:6px 10px;font-size:14px}
 .s4-et-sscc{font-size:15px!important}
 .lab-bd.verde{background:#E3F5EA;color:#1E6B3A}.lab-bd.giallo{background:#FFF4D6;color:#7A5300}.lab-bd.grigio{background:#EEF1F4;color:#556}
+/* interrogazioni del magazziniere: dove si trova, merce da mettere a posto, arretrato, scorta minima */
+.lab-bd.rosso{color:#fff;border-color:#BB0000;background:#BB0000;font-weight:700}
+.lab-bd.arancio{font-weight:700}
+.ubic.trovata{box-shadow:0 0 0 4px #E9730C;font-weight:700}
+.mappa.cerca .ubic:not(.trovata){opacity:.45}
+.dove-cerca{font-size:15px}.dove-cerca select{font-size:15px;padding:4px 6px}
+.lab-tab tr.riga-ritardo td{background:#FFF0F0}
+.lab-tab tr.riga-ferma td{color:#667}

@@ -111,6 +111,13 @@ p = apri('erp_dati','avvio'); p.fai('lg',{data:'2027-01-04',quiz:QUIZ}); ok(/Per
 ok(p.S().quizContabile === (QUIZ === 'no' ? false : undefined), 'ricostruzione delle scritture ' + QUIZ);
 vicinoC('13',22785,'prodotti finiti in apertura');
 p = apri('erp_magazzino','struttura'); p.fai('at',{data:'2027-01-04'}); fino('Attiva il magazzino'); ok(p.S().wm.quant.length===14,'14 UdC create');
+// «Dove si trova?» sulla mappa e nella pistola (lettura: niente cambia)
+{ p = apri('erp_magazzino','mappa'); const prima = JSON.stringify(p.S()); const sel = p.lab.querySelector('#dove-mat'); ok(!!sel && !!sel.getAttribute('aria-describedby'),'menu Dove si trova con aiuto');
+  sel.value = 'TR-ALTA'; sel.dispatchEvent(new p.w.Event('change')); const dv = p.w.WM4.dove('TR-ALTA');
+  ok(dv.righe.length===4 && dv.prelevabile===200 && dv.im===200 && dv.wms===200,'TR-ALTA: 4 pallet, 200 prelevabili = IM = WMS');
+  ok(p.lab.querySelectorAll('.ubic.trovata').length===4 && /LIBERA a scaffale/.test(p.testo()),'mappa colora le 4 ubicazioni e spiega');
+  p = apri('erp_magazzino','rf'); scheda(p,'interroga'); invio(p,'rf-q','TR-PED'); ok(/Articolo TR-PED/.test(p.testo()) && p.lab.querySelectorAll('#rf-ris-q .rf-riga').length===6,'RF Interroga per articolo: 6 pallet TR-PED');
+  ok(JSON.stringify(p.S())===prima,'Dove si trova non modifica lo stato'); }
 // ── vendite ──
 p = apri('erp_vendite','ordini');
 bene(p.fai('va',{cliente:'C100',materiale:'TR-STD',qta:'350',rif:'BETA-350',data:'2027-01-05',consegna:'2027-01-15'}),'VA01 Beta'); fino('Beta ordina');
@@ -118,10 +125,17 @@ bene(p.fai('va',{cliente:'C200',materiale:'TR-ALTA',qta:'150',rif:'DELTA-150',da
 bene(p.fai('va',{cliente:'C300',materiale:'TR-STD',qta:'150',rif:'GAMMA-150',data:'2027-01-05',consegna:'2027-01-22'}),'VA01 Gamma'); fino('Comune di Gamma');
 ok(/confermabile 200 su 350/.test(p.testo()),'Beta confermabile 200 su 350');
 // ── UF 8 · acquisti ──
-p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'3000',prezzo:'1',data:'2027-01-05'}),'ME21N'); fino('ordina 3.000');
+p = apri('erp_magazzino','scorte'); { const regs = p.S().registrazioni.length; bene(p.fai('sm',{materiale:'FERRO',minimo:'500',massimo:'3000'}),'scorta minima ferro'); fino('Scorta minima del ferro');
+  const f = p.w.WM4.scorte().find(x=>x.mat==='FERRO'); ok(f.stato==='riordina' && f.proposta===3000,'ferro sotto scorta: proposta 3.000 kg'); ok(/SOTTO SCORTA/.test(p.testo()),'avviso sotto scorta'); ok(p.S().registrazioni.length===regs,'scorta minima senza scritture'); }
+p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'3000',prezzo:'1',data:'2027-01-05',consegna:'2027-01-07'}),'ME21N'); fino('ordina 3.000');
+ok(p.S().acquisti[0].consegna==='2027-01-07','consegna prevista sull’ordine d’acquisto');
+{ const f = p.w.WM4.scorte().find(x=>x.mat==='FERRO'); ok(f.stato==='in arrivo' && f.arrivo===3000,'dopo l’ordine: ferro in arrivo'); const a = p.w.WM4.arretrato('2027-01-08'); ok(a.fornitori.length===1 && a.fornitori[0].sem.cls==='rosso','ferro non arrivato l’8/1: fornitore in ritardo'); }
 const oa = p.S().acquisti[0].numero;
 p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa,ddt:'DDT-AU-0107',lotto:'COL-0107',danneggiati:'150',danno:'fasci piegati nel trasporto',data:'2027-01-07'}),'MIGO'); fino('150 kg sono piegati');
 vicinoC('63',150,'differenza prezzo alla MIGO'); vicinoC('22',-3000,'fatture da ricevere');
+p = apri('erp_magazzino','allocare'); { const x = p.w.WM4.daAllocare('2027-01-07'); ok(x.righe.length===3 && x.righe.every(r=>r.mat==='FERRO') && x.righe.reduce((t,r)=>t+r.qta,0)===2850 && !x.orfani.length,'merce da mettere a posto: 3 fasci, 2.850 kg');
+  ok(p.lab.querySelectorAll('a[href*="rf?compito="]').length===3,'pulsante Metti a posto per ogni riga');
+  ok(x.righe.map(r=>r.a).join(',')==='F-01,F-01,F-02','destinazioni proposte F-01, F-01, F-02');}
 rfTutti('2027-01-07','PUTAWAY',3); fino('3 fasci buoni');
 p = apri('erp_magazzino','bloccato'); const qz = p.w.WM4.bloccati()[0]; ok(qz && qz.qta===150,'150 kg in quarantena');
 bene(p.fai('dq',{udc:qz.udc,motivo:'fasci piegati, non recuperabili',data:'2027-01-07'},'ro'),'rottamazione'); fino('rottama i 150 kg'); vicinoC('69',142.5,'rottamazione ferro');
@@ -151,6 +165,10 @@ p = apri('erp_innovazione','slotting'); bene(p.fai('sl',{data:'2027-01-13'}),'sl
 rfTutti('2027-01-13','TRASF',3); fino('trasferimenti dello slotting'); controlla('movimenti interni');
 // ── spedizione a ondate ──
 p = apri('erp_innovazione','ondate'); bene(p.fai('mo',{ondate:'si',crossDock:'no'}),'ondate attive'); fino('Attiva il prelievo a ondate');
+{ p = apri('erp_magazzino','arretrato'); const a = p.w.WM4.arretrato('2027-01-14');
+  ok(a.clienti.length===3 && a.clienti.filter(x=>x.sem.cls==='giallo').length===2 && a.clienti.find(x=>x.mat==='TR-STD' && x.qta===150).sem.cls==='verde','arretrato 14/01: Beta e Delta gialli, Gamma verde');
+  ok(!a.fornitori.length && !a.produzione.length && !a.lavoro.length,'nessun fornitore, ordine o compito arretrato');
+  const b = p.w.WM4.arretrato('2027-01-16'); ok(b.ritardi.clienti===2,'il 16/01 Beta e Delta sarebbero in ritardo'); p.lab.querySelector('#ar-data').value='2027-01-14'; p.lab.querySelector('#ar-data').dispatchEvent(new p.w.Event('change')); ok(/scade fra 1 giorno/.test(p.testo()) && p.lab.querySelectorAll('.lab-bd.giallo').length===2,'pagina arretrato con i gialli'); }
 p = apri('erp_vendite','consegne'); const [ob,od,og]=p.S().ordini.map(o=>o.numero);
 bene(p.fai('vl',{ordine:ob,data:'2027-01-14'}),'VL Beta'); fino('consegna per Beta');
 bene(p.fai('vl',{ordine:od,data:'2027-01-14'}),'VL Delta'); fino('consegna per Delta'); ok(p.w.WM4.aperti().length===0,'nessun compito prima dell’ondata');
@@ -199,7 +217,9 @@ p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2027-01-29'}); fino('L
 p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2027-01-29'}),'LI21'); fino('LI21'); vicinoC('65',11.4,'differenza inventariale');
 // ── valori e controlli finali ──
 vicinoC('12',416.1,'ferro a standard'); ok(p.S().giacenze.FERRO===438,'438 kg di ferro');
-vicinoC('13',10964,'prodotti finiti a standard'); ok(p.S().giacenze['TR-ALTA']===50 && p.S().giacenze['TR-PED']===300,'TR-ALTA 50, TR-PED 300');
+vicinoC('13',10964,'prodotti finiti a standard');
+p = apri('erp_magazzino','monitor'); ok(/Sotto la scorta minima/.test(p.testo()),'avviso sotto scorta nel monitor');
+{ const f = p.w.WM4.scorte().find(x=>x.mat==='FERRO'); ok(f.stato==='riordina' && f.proposta===2562,'fine mese: ferro 438 sotto 500, proposta 2.562 kg'); } ok(p.S().giacenze['TR-ALTA']===50 && p.S().giacenze['TR-PED']===300,'TR-ALTA 50, TR-PED 300');
 controlla('fine del mese');
 // tutti i passi con controllo automatico risultano fatti
 p = apri('erp_dati','avvio');

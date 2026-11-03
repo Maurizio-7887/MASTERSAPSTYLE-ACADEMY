@@ -34,10 +34,12 @@ window.MM4 = (function () {
     var q = L.num(i.qta == null || i.qta === '' ? (r ? r.qta : i.qta) : i.qta, 'Quantità', 1), p = L.num(i.prezzo, 'Prezzo netto', 0.0001);
     var o = {numero: n.numero('acquisto'), fornitore: f, materiale: mat, qta: q, prezzo: p, data: data, entrato: 0, fatturato: 0, valoreEntrato: 0};
     if (r) { o.rda = r.numero; r.stato = 'ordinata'; r.ordine = o.numero; }
+    if (i.consegna) { var cons = n.data(i.consegna); if (cons < data) throw Error('La data di consegna prevista non può precedere la data dell’ordine.'); o.consegna = cons; }   // serve all’arretrato e al controllo di disponibilità
     var soglia = P().acqParam.soglia, val = r2(q * p);
     if (soglia && val > soglia) o.rilascio = {stato: 'bloccato', soglia: soglia};
     S().acquisti.push(o); n.salva();
     return '<p class="lab-nota">Ordine d\'acquisto <b>' + o.numero + '</b>' + (r ? ' (da richiesta ' + r.numero + ')' : '') + ': ' + L.n0(q) + ' ' + m.um + ' ' + mat + ' a ' + L.eur(p) + ' €/' + m.um + ' (valore ' + L.eur(val) + ' €). Il costo standard del ' + mat + ' è ' + L.eur(m.std) + ': all\'entrata merci la differenza andrà sul conto 63. Nessuna scrittura: è un impegno.</p>' +
+      (o.consegna ? '<p class="lab-nota">Consegna prevista il ' + L.fd(o.consegna) + ': se la merce non arriva entro quella data l’ordine diventa rosso in Magazzino → Arretrato e scadenze.</p>' : '') +
       (o.rilascio ? '<p class="lab-nota">🔒 Valore oltre la soglia di ' + L.eur(soglia) + ' €: l\'ordine è <b>bloccato</b> dalla strategia di rilascio. Non si invia al fornitore e non riceve merce finché il responsabile acquisti non lo rilascia (ME29N).</p>' : '');
   }
   // ME29N rilascio dell'ordine d'acquisto sopra soglia
