@@ -147,7 +147,8 @@
     radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
     radice.querySelector('.msa-g-av').disabled = !!pendente;
     if (pendente) {
-      corpo.innerHTML = quiz.html(stato(), esc);
+      corpo.innerHTML = '<button type="button" class="msa-g-vai-saldi">📒 Non ricordi un saldo? Apri i saldi dei conti e i tuoi appunti ↓</button>' + quiz.html(stato(), esc) + strumenti(true);
+      ripristinaFuoco();
       num.textContent = 'Laboratorio di ragioneria';
       disegnaElenco();
       return;
@@ -159,27 +160,147 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
-    if (p.campi && p.campi.length) {
-      h += '<table class="msa-g-campi">' + p.campi.map(function (c) {
+    var tabellaCampi = (p.campi && p.campi.length) ? '<table class="msa-g-campi">' + p.campi.map(function (c) {
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';
-      }).join('') + '</table>';
-    }
+      }).join('') + '</table>' : '';
     // Passi contabili: soluzione e spiegazioni sulla scrittura restano nascoste finché l'allievo non registra e ricostruisce la partita doppia
     var nascosto = E.verificaRagioneria && p.contabile && !st;
-    if (p.attesa && !nascosto) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+    if (p.fai) {
+      // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
+      if (p.idea) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
+      h += '<div class="msa-g-fai"><b>👉 Cosa fai</b><ol>' + p.fai.map(function (f) {
+        return Array.isArray(f) ? '<li>' + esc(f[0]) + ' <button type="button" class="msa-g-val" title="Clic per copiare">' + esc(f[1]) + '</button></li>' : '<li>' + esc(f) + '</li>';
+      }).join('') + '</ol></div>';
+      if (p.vedi && p.vedi.length) h += '<div class="msa-g-vedi"><b>✅ Cosa devi vedere</b><ul>' + p.vedi.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ul></div>';
+      var spiega = (p.perche ? '<p>' + esc(p.perche) + '</p>' : '') + (p.attesa && !nascosto ? '<p>' + esc(p.attesa) + '</p>' : '') + (p.nota ? '<p>💡 ' + esc(p.nota) + '</p>' : '');
+      if (spiega) h += '<details class="msa-g-piu"><summary>📖 Perché? Da dove vengono i numeri</summary>' + spiega + '</details>';
+      if (tabellaCampi) h += '<details class="msa-g-piu"><summary>🔎 Tutti i dati del passo (valori da copiare)</summary>' + tabellaCampi + '</details>';
+    } else {
+      h += tabellaCampi;
+      if (p.attesa && !nascosto) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+    }
     if (p.dopo && !nascosto) h += '<p class="msa-g-nota">📒 ' + esc(p.dopo) + '</p>';
     if (nascosto) h += '<div class="msa-g-esito">✍️ Registra l’operazione nel programma: poi qui a destra ricostruirai tu la scrittura in partita doppia (conto, Dare/Avere, importo). La soluzione compare solo dopo il tuo tentativo.</div>';
-    if (p.nota) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
+    if (p.nota && !p.fai) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
     if (st === 'auto') h += '<div class="msa-g-esito ok">✓ Fatto: il programma lo ha già registrato.</div>';
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';
     else if (p.fatto) h += '<div class="msa-g-esito">○ Non ancora registrato: quando confermi, il passo si spunta da solo.' + (guidata ? ' Il pannello mostrerà automaticamente il passaggio successivo.' : ' <button type="button" class="msa-g-mano">segna fatto a mano</button>') + '</div>';
     else h += '<div class="msa-g-esito">○ Questo passo si spunta a mano. <button type="button" class="msa-g-mano">✓ Fatto</button></div>';
-    corpo.innerHTML = h;
+    corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
   }
+  // ── saldi dei conti e appunti: per il bilancio e la chiusura non serve ricordare i valori a memoria ──
+  var T = {aperto: ss('msa-g-tools') === '1', cerca: ss('msa-g-tools-cerca') || '', data: ss('msa-g-tools-data') || '', senzaChiusura: ss('msa-g-tools-sc') === '1'};
+  var ultimoCampo = null;                       // ultima casella del laboratorio toccata: {riga, tipo}
+  var GRUPPI = [['ATTIVO', 'Attività', 1], ['PASSIVO', 'Passività e patrimonio netto', -1], ['COSTO', 'Costi', 1], ['RICAVO', 'Ricavi', -1], ['CHIUSURA', 'Conti di chiusura', 1], ['ALTRO', 'Altri conti', 1]];
+  var euroIt = function (n) { return Number(n).toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}); };
+  function registrazioniVisibili(S) {
+    var regs = quiz && quiz.visibili ? quiz.visibili(S) : (S.registrazioni || []);
+    return regs;
+  }
+  function dataPredefinita(S, inQuizOra) {
+    var q = inQuizOra && quiz.pendente(S);
+    if (q && q.documento && q.documento.data) return String(q.documento.data).slice(0, 10);
+    return registrazioniVisibili(S).reduce(function (m, r) { return r.data && r.data > m ? r.data : m; }, '').slice(0, 10);
+  }
+  function saldi(S, fino) {
+    var piano = {}, out = {};
+    (S.pianoDeiConti || []).forEach(function (c) { piano[String(c.codice)] = c; });
+    registrazioniVisibili(S).forEach(function (r) {
+      if (fino && r.data && r.data.slice(0, 10) > fino) return;
+      if (T.senzaChiusura && r.chiusura) return;
+      (r.righe || []).forEach(function (x) {
+        var k = String(x.conto), v = Math.round(Number(x.importo || 0) * 100) * (x.dareAvere === 'DARE' ? 1 : -1);
+        out[k] = (out[k] || 0) + v;
+      });
+    });
+    return Object.keys(out).filter(function (k) { return out[k] !== 0; }).map(function (k) {
+      var c = piano[k] || {};
+      return {codice: k, nome: c.nome || c.descrizione || 'Conto ' + k, tipo: c.tipo || 'ALTRO', saldo: out[k] / 100};
+    }).sort(function (a, b) { return a.codice.localeCompare(b.codice, 'it', {numeric: true}); });
+  }
+  function tabellaSaldi(inQuizOra) {
+    var S = stato(), fino = T.data || dataPredefinita(S, inQuizOra), elenco = saldi(S, fino);
+    var f = T.cerca.toLocaleLowerCase('it').trim();
+    var mostra = elenco.filter(function (c) { return !f || (c.codice + ' ' + c.nome).toLocaleLowerCase('it').indexOf(f) >= 0; });
+    var tot = {}, h = '';
+    elenco.forEach(function (c) { tot[c.tipo] = (tot[c.tipo] || 0) + c.saldo; });
+    GRUPPI.forEach(function (g) {
+      var righe = mostra.filter(function (c) { return (GRUPPI.some(function (x) { return x[0] === c.tipo; }) ? c.tipo : 'ALTRO') === g[0]; });
+      if (!righe.length) return;
+      h += '<tr class="msa-g-tgr"><th colspan="2">' + g[1] + '</th><th>' + euroIt(g[2] * (tot[g[0]] || 0)) + '</th></tr>';
+      righe.forEach(function (c) {
+        var lato = c.saldo > 0 ? 'D' : 'A';
+        h += '<tr><td><button type="button" class="msa-g-ins-conto" data-v="' + esc(c.codice + ' · ' + c.nome) + '" title="Inserisci il conto nella casella del laboratorio (o copia)">' + esc(c.codice) + '</button></td>' +
+          '<td>' + esc(c.nome) + '</td><td class="n"><button type="button" class="msa-g-ins-imp" data-v="' + euroIt(Math.abs(c.saldo)) + '" title="Inserisci l’importo nella casella del laboratorio (o copia)">' + euroIt(Math.abs(c.saldo)) + '</button> <small>' + lato + '</small></td></tr>';
+      });
+    });
+    var costi = tot.COSTO || 0, ricavi = -(tot.RICAVO || 0);
+    var dare = elenco.reduce(function (s, c) { return s + (c.saldo > 0 ? c.saldo : 0); }, 0), avere = elenco.reduce(function (s, c) { return s + (c.saldo < 0 ? -c.saldo : 0); }, 0);
+    var riepilogo = '<div class="msa-g-riep">Costi <b>' + euroIt(costi) + '</b> · Ricavi <b>' + euroIt(ricavi) + '</b> · ' + (ricavi - costi >= 0 ? 'Utile' : 'Perdita') + ' <b>' + euroIt(Math.abs(ricavi - costi)) + '</b><br>' +
+      'Totale saldi Dare <b>' + euroIt(dare) + '</b> · Avere <b>' + euroIt(avere) + '</b>' + (Math.abs(dare - avere) < 0.005 ? ' ✓ quadra' : ' ⚠️ non quadra') + '</div>';
+    return riepilogo + (h ? '<table class="msa-g-saldi">' + h + '</table>' : '<p class="msa-g-nota">Nessun conto con saldo' + (f ? ' per «' + esc(T.cerca) + '»' : '') + ' fino al ' + esc(fino) + '.</p>');
+  }
+  function appunti() { var S = stato(); return ((S.msaAppunti || {})[E.codice]) || ''; }
+  var timerAppunti = null;
+  function salvaAppunti(testo) {
+    var S = stato();
+    S.msaAppunti = S.msaAppunti || {};
+    S.msaAppunti[E.codice] = testo;
+    clearTimeout(timerAppunti);
+    timerAppunti = setTimeout(function () {
+      if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); return; } catch (e) { /* ripiego */ } }
+      try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
+    }, 700);
+  }
+  function strumenti(inQuizOra) {
+    // il contenuto si disegna solo quando la sezione è aperta: le caselle del laboratorio restano le uniche visibili
+    return '<details class="msa-g-tools"' + (T.aperto ? ' open' : '') + '><summary>📒 Saldi dei conti e appunti</summary><div class="msa-g-tcorpo">' +
+      (T.aperto ? contenutoStrumenti(inQuizOra) : '') + '</div></details>';
+  }
+  function contenutoStrumenti(inQuizOra) {
+    var S = stato(), fino = T.data || dataPredefinita(S, inQuizOra);
+    return '<p class="msa-g-nota">I saldi di tutti i conti alla data scelta, letti dal tuo libro giornale' + (inQuizOra ? ' (senza la scrittura che stai ricostruendo)' : '') + '. ' +
+      (inQuizOra ? 'Clic su un codice o su un importo: va nell’ultima casella del laboratorio che hai toccato.' : 'Clic su un valore per copiarlo.') + '</p>' +
+      '<div class="msa-g-tfiltri"><label>Fino al <input type="date" class="msa-g-tdata" value="' + esc(fino) + '"></label>' +
+      '<label><input type="checkbox" class="msa-g-tsc"' + (T.senzaChiusura ? ' checked' : '') + '> senza chiusura</label></div>' +
+      '<input type="search" class="msa-g-tcerca" placeholder="Cerca conto: codice o nome (es. 80, banca, ricavi)…" value="' + esc(T.cerca) + '">' +
+      '<div class="msa-g-tsaldi">' + tabellaSaldi(inQuizOra) + '</div>' +
+      '<label class="msa-g-tapp"><b>📝 I miei appunti</b> <small>(restano salvati con il tuo lavoro)</small><textarea class="msa-g-appunti" rows="6" placeholder="Es. totale costi 2026 = …; IRES …; da ricontrollare …">' + esc(appunti()) + '</textarea></label>';
+  }
+  function apriStrumenti(d) {
+    var c = d.querySelector('.msa-g-tcorpo');
+    if (d.open && c && !c.firstChild) c.innerHTML = contenutoStrumenti(!!inQuiz());
+  }
+  function aggiornaSaldi() { var d = corpo.querySelector('.msa-g-tsaldi'); if (d) d.innerHTML = tabellaSaldi(!!inQuiz()); }
+  function ripristinaFuoco() { /* la casella scelta resta memorizzata come riga e tipo: niente da fare qui */ }
+  function inserisci(valore, tipo) {
+    var cella = ultimoCampo && ultimoCampo.tipo === tipo && corpo.querySelector('.msa-q-riga[data-riga="' + ultimoCampo.riga + '"] .msa-q-' + tipo);
+    if (cella && !cella.disabled) {
+      cella.value = valore;
+      cella.dispatchEvent(new Event('change', {bubbles: true}));
+      cella.classList.add('msa-g-riempito'); setTimeout(function () { cella.classList.remove('msa-g-riempito'); }, 900);
+      return true;
+    }
+    try { navigator.clipboard.writeText(valore); } catch (er) { /* niente appunti */ }
+    return false;
+  }
+  corpo.addEventListener('focusin', function (e) {
+    var t = e.target, r = t.closest && t.closest('.msa-q-riga');
+    if (r && (t.classList.contains('msa-q-conto') || t.classList.contains('msa-q-importo'))) ultimoCampo = {riga: r.getAttribute('data-riga'), tipo: t.classList.contains('msa-q-conto') ? 'conto' : 'importo'};
+  });
+  corpo.addEventListener('toggle', function (e) {
+    if (e.target.classList && e.target.classList.contains('msa-g-tools')) { T.aperto = e.target.open; ss('msa-g-tools', T.aperto ? '1' : '0'); apriStrumenti(e.target); }
+  }, true);
+  corpo.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.classList.contains('msa-g-tcerca')) { T.cerca = t.value; ss('msa-g-tools-cerca', T.cerca); aggiornaSaldi(); }
+    else if (t.classList.contains('msa-g-appunti')) salvaAppunti(t.value);
+  });
+
   function vaiA(i, manuale) { pos = Math.max(0, Math.min(N - 1, i)); if (manuale) ss(POS, String(pos)); disegna(); corpo.scrollTop = 0; }
 
   function apri(si) {
@@ -198,6 +319,17 @@
   sel.addEventListener('change', function () { vaiA(parseInt(sel.value, 10), true); });
   corpo.addEventListener('click', function (e) {
     var t = e.target;
+    if (t.classList.contains('msa-g-vai-saldi')) {
+      var d = corpo.querySelector('details.msa-g-tools');
+      if (d) { d.open = true; T.aperto = true; ss('msa-g-tools', '1'); apriStrumenti(d); if (d.scrollIntoView) d.scrollIntoView({behavior: 'smooth', block: 'start'}); }
+      return;
+    }
+    if (t.classList.contains('msa-g-ins-conto') || t.classList.contains('msa-g-ins-imp')) {
+      var ok = inserisci(t.getAttribute('data-v'), t.classList.contains('msa-g-ins-conto') ? 'conto' : 'importo');
+      t.classList.add('copiato'); t.setAttribute('data-esito', ok ? 'inserito' : 'copiato');
+      setTimeout(function () { t.classList.remove('copiato'); }, 900);
+      return;
+    }
     if (inQuiz()) {
       if (quiz.click(t, corpo, stato(), salvaQuiz)) { disegna(); if (!inQuiz()) riprendi(); }
       return;
@@ -212,7 +344,11 @@
     }
   });
 
-  corpo.addEventListener('change', function () {
+  corpo.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.classList.contains('msa-g-tdata')) { T.data = t.value; ss('msa-g-tools-data', T.data); aggiornaSaldi(); return; }
+    if (t.classList.contains('msa-g-tsc')) { T.senzaChiusura = t.checked; ss('msa-g-tools-sc', t.checked ? '1' : '0'); aggiornaSaldi(); return; }
+    if (t.classList.contains('msa-g-appunti') || t.classList.contains('msa-g-tcerca')) return;
     if (inQuiz()) quiz.bozza(corpo, stato(), salvaQuiz);
   });
   function riprendi() {
