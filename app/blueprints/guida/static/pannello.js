@@ -170,9 +170,18 @@
     if (p.fai) {
       // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
       if (p.idea && !p.grande) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
-      h += '<div class="msa-g-fai"><b>👉 Cosa fai</b><ol>' + p.fai.map(function (f) {
+      var spunte = spunteDi(p), nFatte = 0;
+      var righeFai = p.fai.map(function (f, k) {
+        if (f && f.fai) {           // riga punto per punto: dove guardare, che cosa fare, valore da copiare; si spunta
+          var si = !!spunte[k]; if (si) nFatte++;
+          return '<li class="msa-g-punto' + (si ? ' fatto' : '') + '"><label><input type="checkbox" class="msa-g-spunta" data-k="' + k + '"' + (si ? ' checked' : '') + '>' +
+            '<span><small>📍 ' + esc(f.dove) + '</small><b>' + esc(f.fai) + '</b></span></label>' +
+            (f.valore ? '<button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(f.valore) + '</button>' : '') + '</li>';
+        }
         return Array.isArray(f) ? '<li>' + esc(f[0]) + ' <button type="button" class="msa-g-val" title="Clic per copiare">' + esc(f[1]) + '</button></li>' : '<li>' + esc(f) + '</li>';
-      }).join('') + '</ol></div>';
+      }).join('');
+      var punti = p.fai.some(function (f) { return f && f.fai; });
+      h += '<div class="msa-g-fai"><b>👉 Cosa fai, una cosa alla volta</b>' + (punti ? '<small class="msa-g-conta">Spunta ogni riga quando l’hai fatta: ' + nFatte + ' di ' + p.fai.length + '</small>' : '') + '<ol>' + righeFai + '</ol></div>';
       if (p.vedi && p.vedi.length) h += '<div class="msa-g-vedi"><b>✅ Cosa devi vedere</b><ul>' + p.vedi.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ul></div>';
       var spiega = (p.perche ? '<p>' + esc(p.perche) + '</p>' : '') + (p.attesa && !nascosto ? '<p>' + esc(p.attesa) + '</p>' : '') + (p.nota ? '<p>💡 ' + esc(p.nota) + '</p>' : '');
       if (spiega) h += '<details class="msa-g-piu"><summary>📖 Perché? Da dove vengono i numeri</summary>' + spiega + '</details>';
@@ -194,6 +203,10 @@
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
   }
+  // spunte delle righe «Cosa fai» (per scheda del browser): aiutano a non perdere il segno, non cambiano lo stato
+  function spunteDi(p) { try { return JSON.parse(ss('msa-g-punti-' + E.codice + '-' + (p.id || p.titolo)) || '{}'); } catch (e) { return {}; } }
+  function spunta(p, k, si) { var x = spunteDi(p); if (si) x[k] = 1; else delete x[k]; ss('msa-g-punti-' + E.codice + '-' + (p.id || p.titolo), JSON.stringify(x)); }
+
   // ── mappa delle tappe (es. ciclo CPM e budget): dove sei, a che cosa serve, che cosa porta alla tappa dopo ──
   function mappaHtml(m) {
     var t = m.tappe, i = m.attuale, cur = t[i];
@@ -360,6 +373,7 @@
 
   corpo.addEventListener('change', function (e) {
     var t = e.target;
+    if (t.classList.contains('msa-g-spunta')) { spunta(PASSI[pos], t.getAttribute('data-k'), t.checked); var y = corpo.scrollTop; disegna(); corpo.scrollTop = y; return; }
     if (t.classList.contains('msa-g-tdata')) { T.data = t.value; ss('msa-g-tools-data', T.data); aggiornaSaldi(); return; }
     if (t.classList.contains('msa-g-tsc')) { T.senzaChiusura = t.checked; ss('msa-g-tools-sc', t.checked ? '1' : '0'); aggiornaSaldi(); return; }
     if (t.classList.contains('msa-g-appunti') || t.classList.contains('msa-g-tcerca')) return;
