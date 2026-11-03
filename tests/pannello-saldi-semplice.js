@@ -22,13 +22,14 @@ const testo = w => w.document.querySelector('.msa-g-pannello').textContent;
 // 1) tutti i passi del controllo di gestione hanno la versione semplice
 let w = carica({});
 const P = w.MSA_ESERCIZIO.passi, co = P.filter(p => /^(cpm|bpc)-/.test(p.id || ''));
-ok(co.length === 18 && co.every(p => p.fai && p.fai.length && p.vedi && p.idea && p.mappa), 'passi CO semplici con la mappa: ' + co.length);
+ok(co.length === 18 && co.every(p => p.fai && p.fai.length && p.vedi && p.idea && p.mappa && p.grande), 'passi CO semplici con la mappa: ' + co.length);
 ok(co[0].id === 'cpm-mappa' && P.indexOf(co[0]) < P.findIndex(p => p.id === 'cpm-attivazione'), 'introduzione prima del passo 1 del ciclo CO');
 const k = P.findIndex(p => p.id === 'cpm-attivita');
 w.close();
 w = carica({}, k);
 const t = testo(w);
 ok(/Tappa 8 di 8 · Controllo/.test(t) && /A cosa serve/.test(t), 'mappa: dove sei');
+ok(!!w.document.querySelector('.msa-g-grande') && /A CHE COSA SERVE QUESTO PASSO/.test(t), 'spiegazione a grandi lettere');
 ok(/Cosa fai/.test(t) && /Cosa devi vedere/.test(t) && /260 ore × 28 = 7\.280/.test(t), 'report: cosa fai e cosa vedere');
 ok(w.document.querySelectorAll('details.msa-g-piu').length === 2, 'spiegazioni e dati completi a scomparsa');
 ok(/Da dove vengono i numeri/.test(t) && /S_ALR|riquadro|Residuo/.test(t), 'i testi completi restano disponibili');

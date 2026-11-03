@@ -225,4 +225,30 @@
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (MAPPA[p.id] != null) p.mappa = {tappe: TAPPE, attuale: MAPPA[p.id]}; else if (p.id === 'cpm-mappa') p.mappa = {tappe: TAPPE, attuale: -1}; });
   });
+
+  /* Spiegazione a grandi lettere, per chi non ha mai fatto controllo di gestione: il codice SAP resta nel titolo,
+     qui si dice con parole di tutti i giorni a che cosa serve il passo nel quadro d'insieme. */
+  var GRANDE = {
+    'cpm-mappa': 'Vogliamo sapere QUANTO COSTA FARE UNA TRANSENNA. Per saperlo servono tre cose: quanto spende ogni reparto, quante ore lavora, quanto ferro e quante ore servono per un pezzo. Le 8 tappe servono a mettere insieme queste tre cose.',
+    'cpm-attivazione': 'Prima di contare i soldi bisogna dire DOVE si spendono. Qui dividi l’azienda in «cassetti»: un cassetto per ogni reparto (Taglio, Piegatura, Saldatura) e uno per i servizi comuni.',
+    'cpm-budget': 'Scrivi QUANTO PENSI DI SPENDERE in un anno in ogni cassetto. È come il budget di casa per l’anno: stipendi dei reparti, affitto del capannone, energia. Non si paga niente: è una previsione.',
+    'cpm-paghe': 'CONTROLLA LA PREVISIONE CON LE PAGHE VERE. Il programma prende gli stipendi veri dei dipendenti e li mette accanto al budget: così vedi dove la previsione è diversa dalla realtà.',
+    'cpm-kp26': 'Scrivi QUANTE ORE LAVORA OGNI REPARTO in un anno e QUANTE TRANSENNE pensi di fare. Le ore servono dopo: per sapere quanto costa UN’ORA di reparto.',
+    'cpm-ciclo': 'L’affitto e l’energia non sono di un solo reparto: sono di tutti. Qui li DIVIDI FRA I TRE REPARTI in parti uguali alle loro ore: 6.000 € a testa.',
+    'cpm-standard-tr': 'Scrivi la RICETTA DELLA TRANSENNA: quanti kg di ferro e quanti minuti in ogni reparto servono per fare UN pezzo. È come la ricetta di una torta: ingredienti e tempi.',
+    'cpm-standard-halb': 'Scrivi la RICETTA DEL KIT TAGLIATO (il pezzo a metà lavorazione che teniamo a scorta): solo ferro e taglio.',
+    'bpc-modello': 'Prendi il budget dell’anno e lo DIVIDI NEI 12 MESI. Serve per sapere ogni mese se stiamo spendendo più o meno del previsto.',
+    'bpc-input': 'Non tutti i mesi sono uguali: d’INVERNO L’ENERGIA COSTA DI PIÙ. Qui sistemi l’energia mese per mese. Il totale dell’anno resta lo stesso.',
+    'bpc-processo': 'Il budget deve essere APPROVATO DAL CAPO: ogni reparto lo invia, il controller dice «ok», poi il budget approvato torna nel gestionale. Come un preventivo firmato.',
+    'cpm-kspi': 'Adesso il programma calcola QUANTO COSTA UN’ORA DI LAVORO in ogni reparto: soldi del reparto in un anno diviso ore dell’anno = 28 € all’ora.',
+    'cpm-tariffe': 'CONTROLLA CHE I CONTI TORNINO: 42.000 € diviso 1.500 ore fa davvero 28 € l’ora? Qui non si scrive niente, si verifica soltanto.',
+    'cpm-calcolo': 'Ora metti insieme tutto: RICETTA × COSTO DI UN’ORA + FERRO = QUANTO COSTA UN PEZZO. La transenna costa 31,40 €, il kit 14,60 €.',
+    'cpm-rilascio': 'Rendi UFFICIALE il costo dei pezzi. Da questo momento ogni transenna che entra o esce dal magazzino vale 31,40 €: è il valore che vedi nel magazzino.',
+    'cpm-attivita': 'A metà mese guardi IL PIANO CONTRO LA REALTÀ: quante ore hanno lavorato i reparti, quanto è costato davvero, se c’è una differenza. Qui si legge soltanto.',
+    'cpm-fonti-fine-mese': 'A fine mese guardi I COSTI VERI DI OGNI REPARTO: stipendi, affitto, ammortamenti. Arrivano da soli dalla contabilità, non si scrive niente a mano.',
+    'bpc-consuntivo': 'Metti i COSTI VERI DI DICEMBRE accanto al budget e fai una PREVISIONE DI FINE ANNO: è il lavoro che il controller porta alla direzione.'
+  };
+  ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
+    (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (GRANDE[p.id]) p.grande = GRANDE[p.id]; });
+  });
 })();

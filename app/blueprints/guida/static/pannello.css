@@ -104,3 +104,5 @@
 #msa-guida .msa-g-tappe li{margin:4px 0}
 #msa-guida .msa-g-tappe li.fatta{color:#6A6D70}
 #msa-guida .msa-g-tappe li.qui{background:#fff;border-radius:4px;padding:2px 4px;outline:2px solid #8a63d2}
+#msa-guida .msa-g-grande{background:#FFF3C4;border:2px solid #E6B800;border-radius:8px;padding:10px 12px;margin:0 0 10px;font-size:17px;line-height:1.45;font-weight:600;color:#2b2200}
+#msa-guida .msa-g-grande span{display:block;font-size:11.5px;letter-spacing:.6px;color:#7a5c00;margin-bottom:4px}

@@ -165,10 +165,11 @@
       }).join('') + '</table>' : '';
     // Passi contabili: soluzione e spiegazioni sulla scrittura restano nascoste finché l'allievo non registra e ricostruisce la partita doppia
     var nascosto = E.verificaRagioneria && p.contabile && !st;
+    if (p.grande) h += '<div class="msa-g-grande"><span>A CHE COSA SERVE QUESTO PASSO</span>' + esc(p.grande) + '</div>';
     if (p.mappa) h += mappaHtml(p.mappa);
     if (p.fai) {
       // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
-      if (p.idea) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
+      if (p.idea && !p.grande) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
       h += '<div class="msa-g-fai"><b>👉 Cosa fai</b><ol>' + p.fai.map(function (f) {
         return Array.isArray(f) ? '<li>' + esc(f[0]) + ' <button type="button" class="msa-g-val" title="Clic per copiare">' + esc(f[1]) + '</button></li>' : '<li>' + esc(f) + '</li>';
       }).join('') + '</ol></div>';
