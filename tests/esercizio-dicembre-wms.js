@@ -283,6 +283,12 @@ p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {
 p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2026-12-31'}); ok(p.S().wm.inventari[0].stato==='chiuso','chiudi inventario'); fino('LI20');
 p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2026-12-31'}),'LI21'); fino('LI21'); vicinoS('65',14.60,'differenza inventariale'); ok(p.S().giacenze['SL-TAGLIO']===19,'19 kit dopo l’inventario');
 p = apri('erp_magazzino','scorte'); { const regs = p.S().registrazioni.length; bene(p.fai('sm',{materiale:'FERRO',minimo:'1000',massimo:'3000'}),'scorta minima ferro'); fino('Scorta minima del ferro'); const f = p.w.WM4.scorte().find(x=>x.mat==='FERRO'); ok(f.stato==='riordina' && f.proposta===2260 && f.libera===740,'ferro 740 sotto 1.000: proposta 2.260 kg'); ok(p.S().registrazioni.length===regs,'scorta minima senza scritture'); }
+{ const regs = p.S().registrazioni.length; p = apri('erp_magazzino','depositi'); bene(p.fai('ub',{da:'W100',materiale:'SL-TAGLIO',qta:'10',data:'2026-12-31',consegna:'2027-01-02'}),'trasferimento kit'); fino('10 kit al deposito');
+  rfTutti('2026-12-31','DEPOSITO',1); fino('preleva i 10 kit per il deposito');
+  p = apri('erp_magazzino','depositi'); bene(p.fai('us',{trasferimento:'UB001',data:'2026-12-31'}),'uscita 351 kit'); fino('i kit sono in viaggio');
+  const x = p.w.WM4.perLuogo().find(y=>y.mat==='SL-TAGLIO'); ok(x.w100===9 && x.viaggio===10 && x.contabile===19,'kit: 9 in W100 + 10 in viaggio = 19');
+  ok(p.w.WM4.dove('SL-TAGLIO').prelevabile===9,'9 kit prelevabili'); ok(p.w.WM4.arretrato('2026-12-31').viaggi[0].sem.cls==='giallo','arretrato: viaggio giallo');
+  ok(p.S().registrazioni.length===regs,'trasferimento senza scritture'); }
 { const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); console.log('VALORIZZAZIONE FERRO', JSON.stringify({g:v.giacenza,fifo:v.fifo,lifo:v.lifo,cmp:v.cmp,std:v.standard})); vicino(v.fifo,780,'FIFO ferro'); vicino(v.lifo,740,'LIFO ferro'); }
 controlla('Inventario');
 p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length; p.fai('ko',{data:'2026-12-31'}); fino('KO88'); ok(p.S().registrazioni.length===nk,'varianza zero: nessuna scrittura'); vicinoS('61',0,'varianze');
@@ -301,6 +307,7 @@ fs.writeFileSync(path.join(__dirname,'dicembre-wms-31-12.json'),JSON.stringify(p
 // 16 · riapertura e gennaio
 p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,99213.38,'totale riapertura'); } fino('Riapri i conti');
 p = apri('erp_chiusura','assestamenti'); bene(p.fai('st',{data:'2027-01-01'}),'storno ratei e risconti'); fino('Storna il risconto');
+p = apri('erp_magazzino','depositi'); bene(p.fai('er',{trasferimento:'UB001',qta:'',data:'2027-01-02'}),'entrata kit al deposito'); fino('i kit sono arrivati'); { const x = p.w.WM4.perLuogo().find(y=>y.mat==='SL-TAGLIO'); ok(x.w100===9 && x.d200===10 && x.viaggio===0,'kit nel deposito'); }
 vicinoS('06',0,'risconto stornato'); vicinoS('39',0,'rateo stornato'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='83').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1098.08,'assicurazione di competenza 2027 (334 giorni)');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C100',importo:'12912,48',rif:'SALDO FATTURA BETA',data:'2027-01-14'}),'incasso Beta'); fino('Beta paga');
 p = apri('erp_tesoreria','anticipi'); bene(p.fai('ae',{anticipo:'ANT-001',interessi:'25',data:'2027-01-14'}),'estinzione anticipo'); fino('ripaga l’anticipo');

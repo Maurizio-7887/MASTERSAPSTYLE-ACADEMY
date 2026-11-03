@@ -28,6 +28,7 @@
   var evento = function(h,mat,tipo) { var o=prod(h,mat); return !!o && o.eventi.some(function(e){return e.tipo===tipo && !e.stornato;}); };
   var fase = function(h,nome) { var o=prod(h,'TR-STD');return !!o && o.eventi.filter(function(e){return e.tipo==='CO11N' && e.fase===nome && !e.stornato;}).reduce(function(q,e){return q+(e.qta || 0);},0)>=o.qta; };
   var compiti = function(h,tipo,f) { return ((h.S.wm || {}).compiti || []).filter(function(t){return t.tipo===tipo && t.stato!=='annullato' && (!f || f(t));}); };
+  var trasfKit = function(h){return ((h.S.wm||{}).trasferimenti||[]).filter(function(t){return t.mat==='SL-TAGLIO';})[0];};
   var fatti = function(ts,n) { return ts.length>=n && ts.every(function(t){return t.stato==='confermato' && Math.abs(t.qtaEff-t.qta)<1e-6;}); };
   var diOrdine = function(h,mat) { var o=prod(h,mat); return function(t){return !!o && t.ordine===o.numero;}; };
   var entrataDi = function(h,mat) { var o=prod(h,mat), docs=o?o.eventi.filter(function(e){return e.tipo==='101';}).map(function(e){return e.doc;}):[]; return function(t){return t.mat===mat && docs.indexOf(t.rif)>=0;}; };
@@ -308,6 +309,20 @@
      campi:[['Materiale','FERRO'],['Scorta minima (punto di riordino)','1000'],['Scorta massima','3000'],['Pulsante','Salva la scorta minima']],
      attesa:'Riga FERRO: libera 740 + in arrivo 0 = 740 kg, sotto il minimo di 1.000 → 🔴 SOTTO SCORTA, proposta di riordino 2.260 kg (3.000 − 740). L’avviso rosso compare anche nel Monitor. Nessun movimento e nessuna scrittura.',
      nota:'Il sistema PROPONE, non ordina: la richiesta d’acquisto si farà a gennaio, in questo esercizio NON crearla. Le transenne e i kit non hanno un minimo: riga grigia.',fatto:function(h){return !!(h.S.scorte && h.S.scorte.FERRO && h.S.scorte.FERRO.min===1000);}},
+    {g:'14 · Inventario di fine anno',data:'31/12/2026',titolo:'Trasferimento: 10 kit al deposito esterno D200',dove:{ep:M+'depositi'},percorso:'WMS → Deposito esterno e merce in viaggio → 1 · Crea il trasferimento',
+     campi:[['Da dove parte','dal magazzino W100 al deposito esterno D200'],['Materiale','SL-TAGLIO'],['Quantità da trasferire','10'],['Data','31/12/2026'],['Arrivo previsto','02/01/2027'],['Pulsante','Crea il trasferimento']],
+     attesa:'Trasferimento UB001 e 1 compito «Prelievo per il deposito esterno»: 10 kit dal cassone in 03-05-2 alla banchina GI-ZONE. Nessuna scrittura: la merce resta nostra.',
+     nota:'La filiale vicina ai cantieri vuole 10 kit pronti per gennaio. In SAP è un ordine di trasferimento (tipo UB) tra due depositi della stessa azienda.',fatto:function(h){return !!trasfKit(h);}},
+    {g:'14 · Inventario di fine anno',data:'31/12/2026',titolo:'RF: preleva i 10 kit per il deposito',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',campi:[['Data di lavoro','31/12/2026'],['Compito','il «Prelievo per il deposito esterno» da 03-05-2 a GI-ZONE']],
+     attesa:'10 kit in banchina GI-ZONE, 9 restano nel cassone in 03-05-2. Il trasferimento è «prelevato, pronto da spedire».',nota:rf,fatto:function(h){return fatti(compiti(h,'DEPOSITO'),1);}},
+    {g:'14 · Inventario di fine anno',data:'31/12/2026',titolo:'Uscita 351: il camion parte, i kit sono in viaggio',dove:{ep:M+'depositi'},percorso:'WMS → Deposito esterno e merce in viaggio → 2 · Carica il camion',
+     campi:[['Trasferimento','UB001 · W100 → D200 · 10 SL-TAGLIO'],['Data di partenza','31/12/2026'],['Pulsante','Registra l’uscita 351 (merce in viaggio)']],
+     attesa:'Stato 🚚 «IN VIAGGIO: non è né qua né là». Tabella per luogo, SL-TAGLIO: W100 9 + in viaggio 10 + D200 0 = 19 contabili. Nessuna scrittura.',
+     nota:'Il camion parte l’ultimo giorno dell’anno e arriva il 2 gennaio: a fine anno questi 10 kit sono sulla strada.',fatto:function(h){var t=trasfKit(h);return !!t && !!t.partito;}},
+    {g:'14 · Inventario di fine anno',data:'31/12/2026',titolo:'Dove si trova? I kit sul camion a fine anno',dove:{ep:M+'mappa'},percorso:'WMS → Mappa delle ubicazioni → «🔎 Dove si trova?» SL-TAGLIO; poi WMS → Arretrato e scadenze',
+     campi:[['Dove si trova','SL-TAGLIO: 9 ✅ libere in 03-05-2; 10 ⛔ «SUL CAMION tra due depositi»'],['Mappa','in fondo il riquadro «Fuori dal magazzino W100»: IN-VIAGGIO con 10 SL-TAGLIO'],['Arretrato','data di oggi 31/12/2026: «5 · Merce in viaggio tra depositi», UB001 🟡 scade fra 2 giorni']],
+     attesa:'19 kit in contabilità, ma solo 9 prelevabili da W100. Al 31/12 anche i 10 sul camion sono nelle rimanenze di bilancio (conto 07): sono nostri, anche se non sono né qua né là.',
+     nota:'Lettura: spunta a mano. È lo «stock in transito» della rete dei depositi che si studia nella MasterSupplyChain Academy.'},
     {g:'14 · Inventario di fine anno',titolo:'KPI di magazzino di dicembre',dove:{ep:Z+'kpi'},percorso:'WMS → Innovazione → KPI di magazzino',campi:[['Leggi','accuratezza dell’inventario, ordini perfetti, tempo dal ricevimento allo scaffale, compiti per risorsa']],
      nota:'Facoltativo: spunta a mano dopo la lettura.'},
     {g:'14 · Ratei, risconti, ammortamenti',data:'31/12/2026',titolo:'KO88: chiudi i due ordini indipendenti',dove:{ep:C+'chiusura'},percorso:'CO → Chiusura degli ordini e varianze → Varianze e liquidazione',campi:[['Data','31/12/2026']],
@@ -338,6 +353,9 @@
     {g:'16 · Riapertura e gennaio',data:'01/01/2027',titolo:'Storna il risconto e il rateo',contabile:true,dove:{ep:H+'assestamenti'},percorso:'FI → IVA, imposte, chiusura → Ratei e risconti → Storno al 1° gennaio',campi:[['Data dello storno','01/01/2027']],
      attesa:'D 83 Assicurazioni / A 06 Risconti attivi 1.098,08 · D 39 Ratei passivi / A 86 Fitti passivi 1.033,33. Il 2027 ha così 11 mesi di polizza; quando a febbraio arriverà la fattura del fitto (3.000), al 2027 resteranno 1.966,67.',
      fatto:function(h){return reg(h,'STORNO_ASSESTAMENTI','2027-01-01');}},
+    {g:'16 · Riapertura e gennaio',data:'02/01/2027',titolo:'Entrata 101 al deposito: i kit sono arrivati',dove:{ep:M+'depositi'},percorso:'WMS → Deposito esterno e merce in viaggio → 3 · Ricevi all’arrivo',
+     campi:[['Trasferimento','UB001 in viaggio'],['Quantità contata all’arrivo','vuoto = tutti i 10'],['Data di arrivo','02/01/2027'],['Pulsante','Registra l’entrata 101']],
+     attesa:'Stato «arrivato il 02/01/2027». SL-TAGLIO: W100 9 + in viaggio 0 + D200 10 = 19. Nessuna scrittura.',nota:'Se all’arrivo ne mancasse uno, la differenza andrebbe nella zona 999 e si registrerebbe con l’inventario (LI21).',fatto:function(h){var t=trasfKit(h);return !!t && !!t.arrivato;}},
     {g:'16 · Riapertura e gennaio',data:'14/01/2027',titolo:'F-28: Beta paga la fattura alla scadenza',contabile:true,dove:{ep:V+'incassi'},percorso:'SD → Incassi e partite',campi:[['Cliente','C100 Beta Costruzioni'],['Importo','12912,48'],['Riferimento','SALDO FATTURA BETA'],['Data valuta','14/01/2027']],
      attesa:'D 10 / A 11 12.912,48. Il credito verso Beta va a zero.',fatto:function(h){return reg(h,'INCASSO','2027-01-14');}},
     {g:'16 · Riapertura e gennaio',data:'14/01/2027',titolo:'La banca si ripaga l’anticipo con gli interessi',contabile:true,dove:{ep:T+'anticipi'},percorso:'Tesoreria → Anticipo su fatture → Estingui l’anticipo',campi:[['Anticipo','ANT-001 Beta'],['Interessi','25'],['Data','14/01/2027']],
