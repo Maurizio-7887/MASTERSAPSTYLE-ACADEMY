@@ -96,3 +96,11 @@
 #msa-guida .msa-g-appunti{box-sizing:border-box;width:100%;margin-top:3px;border:1px solid #89919a;border-radius:4px;padding:6px;font:13px "Segoe UI",Arial,sans-serif;resize:vertical}
 #msa-guida .msa-g-riempito{outline:2px solid var(--g-verde);background:#DFF5E5}
 #msa-guida .msa-g-vai-saldi{display:block;width:100%;margin:6px 0 4px;background:#FFF8D6;border:1px solid #E6C84F;border-radius:5px;padding:7px;cursor:pointer;font:600 12.5px "Segoe UI",Arial,sans-serif;color:#5b4500;text-align:left}
+#msa-guida .msa-g-mappa{border:1px solid #c9b8e8;background:#F7F3FE;border-radius:6px;padding:7px 9px;margin-bottom:8px;font-size:12.5px}
+#msa-guida .msa-g-mappa>b{color:#4b2a8a}
+#msa-guida .msa-g-mappa p{margin:4px 0}
+#msa-guida .msa-g-mappa summary{cursor:pointer;color:#4b2a8a;font-weight:600}
+#msa-guida .msa-g-tappe{margin:4px 0;padding-left:20px}
+#msa-guida .msa-g-tappe li{margin:4px 0}
+#msa-guida .msa-g-tappe li.fatta{color:#6A6D70}
+#msa-guida .msa-g-tappe li.qui{background:#fff;border-radius:4px;padding:2px 4px;outline:2px solid #8a63d2}

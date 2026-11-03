@@ -199,4 +199,30 @@
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (SEMPLICE[p.id]) Object.assign(p, SEMPLICE[p.id]); });
   });
+
+  /* Mappa del ciclo CPM e budget: 8 tappe nell'ordine dell'esercizio. Ogni passo CO mostra in quale tappa sei,
+     a che cosa serve e che cosa porta alla tappa dopo; il passo introduttivo spiega tutta la catena. */
+  var TAPPE = [
+    {nome:'Apri il controllo di gestione', serve:'Dividi l’azienda in centri di costo: chi spende (i reparti e i servizi).', porta:'I centri su cui scriverai il budget.', passi:['cpm-attivazione']},
+    {nome:'Budget annuo dei centri', serve:'Quanto spenderà ogni centro in un anno: 36.000 per reparto, 18.000 di costi comuni. Lo confronti con le paghe vere.', porta:'Gli euro da trasformare in costo orario.', passi:['cpm-budget','cpm-paghe']},
+    {nome:'Ore e ripartizione dei costi comuni', serve:'Quante ore lavora un reparto in un anno (1.500) e come i 18.000 comuni si dividono fra i reparti (6.000 ciascuno).', porta:'Euro e ore di ogni reparto: servono per il costo orario.', passi:['cpm-kp26','cpm-ciclo']},
+    {nome:'Ricette dei prodotti', serve:'Quanto ferro e quante ore di ogni reparto servono per una transenna e per un kit.', porta:'Le quantità che, moltiplicate per il costo orario, danno il costo del prodotto.', passi:['cpm-standard-tr','cpm-standard-halb']},
+    {nome:'Budget mese per mese e approvazione (BPC)', serve:'Lo stesso budget annuo diviso nei 12 mesi (l’energia costa di più d’inverno), inviato dai centri e approvato dal controller, poi rimandato al gestionale.', porta:'Un budget ufficiale e approvato: solo ora ha senso calcolare il costo orario.', passi:['bpc-modello','bpc-input','bpc-processo']},
+    {nome:'Costo orario dei reparti', serve:'42.000 € (36.000 + 6.000) ÷ 1.500 ore = 28 € per ogni ora di Taglio, Piegatura e Saldatura.', porta:'Il prezzo interno di un’ora, da usare nelle ricette.', passi:['cpm-kspi','cpm-tariffe']},
+    {nome:'Costo standard dei prodotti', serve:'Ricetta × costo orario + ferro: transenna 31,40 €, kit 14,60 €. Lo rendi ufficiale prima di comprare il ferro.', porta:'Il valore con cui il magazzino e la produzione registrano ogni pezzo.', passi:['cpm-calcolo','cpm-rilascio']},
+    {nome:'Controllo: budget contro realtà', serve:'Durante e a fine mese confronti ore lavorate, costi veri e budget: residui, scostamenti e forecast.', porta:'Le decisioni del controller: dove si spende più del previsto e perché.', passi:['cpm-attivita','cpm-fonti-fine-mese','bpc-consuntivo']}
+  ];
+  var MAPPA = {};
+  TAPPE.forEach(function (t, i) { t.passi.forEach(function (id) { MAPPA[id] = i; }); });
+  var introduzione = {id:'cpm-mappa',g:'2 · Preparazione: budget e standard',data:'01/12/2026',titolo:'Prima del controllo di gestione: la mappa delle 8 tappe',dove:{ep:'erp_controllo.centri'},percorso:'CO → Controllo di gestione',
+    campi:[['Domanda di fondo','Quanto costa davvero una transenna?'],['Costo orario','(36.000 + 6.000) € ÷ 1.500 h = 28 €/h'],['Costo standard TR-STD','0,85 h × 28 + 7,60 di ferro = 31,40 €'],['In contabilità','nessuna registrazione: è il piano']],
+    idea:'Prima di cominciare leggi la mappa: tutto il budget serve a rispondere a una sola domanda, «quanto costa davvero una transenna?».',
+    fai:['Leggi la catena qui sotto, dall’alto in basso','Apri «Perché?» per l’esempio con i numeri','Premi «✓ Fatto» qui sotto'],
+    vedi:TAPPE.slice(0, 7).map(function (t, i) { return (i + 1) + ' · ' + t.nome + ': ' + t.serve; }).concat(['Dopo, durante il mese: 8 · ' + TAPPE[7].nome + '.']),
+    perche:'La catena in una riga: budget in euro (tappa 2) ÷ ore dei reparti (tappa 3) = costo orario 28 €/h (tappa 6); ricetta (tappa 4) × costo orario + ferro = costo standard 31,40 € (tappa 7). Esempio: Taglio 0,25 h + Piegatura 0,20 h + Saldatura 0,40 h = 0,85 h × 28 = 23,80 € di lavoro + 8 kg × 0,95 = 7,60 € di ferro = 31,40 €. Il BPC (tappa 5) non cambia i totali: li distribuisce nei mesi e li fa approvare; per questo dopo l’approvazione il costo orario va ricalcolato. Nessuna di queste tappe registra niente in contabilità: sono il piano. La contabilità arriva con gli acquisti, la produzione e le paghe, e alla tappa 8 confronti il piano con la realtà.'};
+  window.MSA_CPM_FORMAS.passiPreparazione.unshift(introduzione);
+  window.MSA_CPM_FORMAS.tappe = TAPPE;
+  ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
+    (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (MAPPA[p.id] != null) p.mappa = {tappe: TAPPE, attuale: MAPPA[p.id]}; else if (p.id === 'cpm-mappa') p.mappa = {tappe: TAPPE, attuale: -1}; });
+  });
 })();

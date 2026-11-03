@@ -165,6 +165,7 @@
       }).join('') + '</table>' : '';
     // Passi contabili: soluzione e spiegazioni sulla scrittura restano nascoste finché l'allievo non registra e ricostruisce la partita doppia
     var nascosto = E.verificaRagioneria && p.contabile && !st;
+    if (p.mappa) h += mappaHtml(p.mappa);
     if (p.fai) {
       // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
       if (p.idea) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
@@ -192,6 +193,18 @@
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
   }
+  // ── mappa delle tappe (es. ciclo CPM e budget): dove sei, a che cosa serve, che cosa porta alla tappa dopo ──
+  function mappaHtml(m) {
+    var t = m.tappe, i = m.attuale, cur = t[i];
+    var elenco = '<ol class="msa-g-tappe">' + t.map(function (x, k) {
+      return '<li class="' + (k < i ? 'fatta' : k === i ? 'qui' : '') + '"><b>' + esc(x.nome) + '</b>' + (k === i ? ' ← sei qui' : '') + '<br><small>' + esc(x.serve) + '</small></li>';
+    }).join('') + '</ol>';
+    if (i < 0) return '<div class="msa-g-mappa"><b>🗺️ La mappa: ' + t.length + ' tappe</b>' + elenco + '</div>';
+    return '<div class="msa-g-mappa"><b>🗺️ Tappa ' + (i + 1) + ' di ' + t.length + ' · ' + esc(cur.nome) + '</b>' +
+      '<p><b>A cosa serve:</b> ' + esc(cur.serve) + '</p><p><b>Che cosa ottieni:</b> ' + esc(cur.porta) + (t[i + 1] ? ' Poi: ' + esc(t[i + 1].nome) + '.' : '') + '</p>' +
+      '<details><summary>Vedi tutta la mappa</summary>' + elenco + '</details></div>';
+  }
+
   // ── saldi dei conti e appunti: per il bilancio e la chiusura non serve ricordare i valori a memoria ──
   var T = {aperto: ss('msa-g-tools') === '1', cerca: ss('msa-g-tools-cerca') || '', data: ss('msa-g-tools-data') || '', senzaChiusura: ss('msa-g-tools-sc') === '1'};
   var ultimoCampo = null;                       // ultima casella del laboratorio toccata: {riga, tipo}
