@@ -215,6 +215,21 @@ fino('mancano 12 kg');
 p = apri('erp_inventario','documenti'); { const d = p.S().wm.inventari[0], v = {}; d.righe.forEach((r,k) => { if (r.riconta) v['r'+k] = '438'; }); p.fai('ic',v); ok(p.S().wm.inventari[0].stato==='contato','riconta registrata'); } fino('LI14');
 p = apri('erp_inventario','documenti'); p.fai('ix',{data:'2027-01-29'}); fino('LI20');
 p = apri('erp_inventario','differenze'); bene(p.fai('rg',{data:'2027-01-29'}),'LI21'); fino('LI21'); vicinoC('65',11.4,'differenza inventariale');
+// ── deposito esterno: la merce sul camion non è né qua né là ──
+{ const regs = p.S().registrazioni.length;
+  p = apri('erp_magazzino','depositi'); bene(p.fai('ub',{da:'W100',materiale:'TR-PED',qta:'100',data:'2027-01-30',consegna:'2027-01-31'}),'trasferimento UB'); fino('100 TR-PED al deposito');
+  ok(p.w.WM4.aperti().filter(t=>t.tipo==='DEPOSITO').length===2,'2 prelievi per il deposito');
+  rfTutti('2027-01-30','DEPOSITO',2); fino('preleva i 2 pallet per il deposito');
+  p = apri('erp_magazzino','depositi'); bene(p.fai('us',{trasferimento:'UB001',data:'2027-01-30'}),'uscita 351'); fino('il camion parte');
+  const viaggio = p.w.WM4.perLuogo().find(x=>x.mat==='TR-PED'); ok(viaggio.w100===200 && viaggio.viaggio===100 && viaggio.d200===0 && viaggio.contabile===300,'TR-PED 200 + 100 in viaggio = 300');
+  ok(/né qua né là/.test(p.testo()),'pagina depositi spiega la merce in viaggio');
+  const dv = p.w.WM4.dove('TR-PED'); ok(dv.prelevabile===200 && dv.righe.some(r=>/SUL CAMION/.test(r.cosa)),'Dove si trova: 100 sul camion');
+  const ar = p.w.WM4.arretrato('2027-01-30'); ok(ar.viaggi.length===1 && ar.viaggi[0].sem.cls==='giallo','arretrato: viaggio in scadenza'); ok(p.w.WM4.arretrato('2027-02-01').ritardi.viaggi===1,'il 01/02 il viaggio è in ritardo');
+  ok(p.w.WM4.quadratura().every(x=>x.ok),'IM = WMS con la merce in viaggio');
+  { const v = apri('erp_vendite','ordini'); const a = v.w.SD4 && v.w.SD4.atp ? v.w.SD4.atp('TR-PED') : null; if (a) ok(a.giacenza===200,'ATP di W100: le 100 TR-PED in viaggio non sono vendibili'); p = apri('erp_magazzino','depositi'); }
+  p = apri('erp_magazzino','depositi'); bene(p.fai('er',{trasferimento:'UB001',qta:'',data:'2027-01-31'}),'entrata 101 al deposito'); fino('Entrata 101 al deposito');
+  const fine = p.w.WM4.perLuogo().find(x=>x.mat==='TR-PED'); ok(fine.w100===200 && fine.viaggio===0 && fine.d200===100,'TR-PED: 200 in W100, 100 nel deposito');
+  ok(p.S().registrazioni.length===regs,'il trasferimento non genera scritture'); controlla('deposito esterno'); }
 // ── valori e controlli finali ──
 vicinoC('12',416.1,'ferro a standard'); ok(p.S().giacenze.FERRO===438,'438 kg di ferro');
 vicinoC('13',10964,'prodotti finiti a standard');

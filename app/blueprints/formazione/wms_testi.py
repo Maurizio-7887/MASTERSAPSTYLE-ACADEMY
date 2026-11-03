@@ -26,6 +26,8 @@ GLOSSARIO = [
     ("Movimenti", "Monitor del magazzino", "/SCWM/MON", "La vista d'insieme: compiti aperti, risorse, ubicazioni piene e vuote."),
     ("Movimenti", "Scorta minima (punto di riordino)", "MD04 · pianificazione VB", "La quantità sotto la quale un materiale va riordinato: se libera + in arrivo scende sotto il minimo il sistema propone quanto ordinare (fino alla scorta massima)."),
     ("Movimenti", "Arretrato", "VL10 · ME2M", "Quello che doveva essere fatto e non lo è ancora: consegne, arrivi, produzione o compiti oltre la data promessa (rosso), in scadenza (arancio/giallo)."),
+    ("Movimenti", "Trasferimento tra depositi", "UB · 351 · 101", "Spostare merce dal magazzino principale a un deposito esterno (o indietro): prelievo, uscita 351 sul camion, entrata 101 all'arrivo. Cambia il posto, non il proprietario: nessuna scrittura."),
+    ("Movimenti", "Merce in viaggio (stock in transito)", "MB5T", "La merce sul camion tra due depositi: non è né qua né là, ma è nostra e a bilancio. Non si può vendere né prelevare finché non arriva."),
     ("Movimenti", "Quadratura IM–WMS", "LX23", "Contabilità di magazzino (IM) e magazzino a ubicazioni (WMS) devono avere le stesse quantità."),
     ("Movimenti", "Lotto", "MSC3N", "Gruppo di merce con la stessa origine: la colata del ferro, l'ordine di produzione delle transenne."),
     ("Movimenti", "Tracciabilità", "MB56", "Da un lotto risalire a monte (fornitore) e scendere a valle (clienti): serve per reclami e richiami."),

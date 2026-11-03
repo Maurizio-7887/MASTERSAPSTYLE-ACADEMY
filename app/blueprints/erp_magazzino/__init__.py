@@ -61,3 +61,8 @@ def arretrato():
 @bp.route("/scorte")
 def scorte():
     return render_lab("erp_magazzino", "scorte")
+
+
+@bp.route("/depositi")
+def depositi():
+    return render_lab("erp_magazzino", "depositi")

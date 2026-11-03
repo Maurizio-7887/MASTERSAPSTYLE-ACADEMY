@@ -72,9 +72,11 @@ window.SD4 = (function () {
   var inPrelievo = function (o) { return S().consegne.filter(function (c) { return c.ordine === o.numero && c.tipo === 'LF' && c.pgi === false; }).reduce(function (t, c) { return t + c.qta; }, 0); };
   var apertoOrd = function (o) { return Math.max(0, o.qta - o.consegnato - inPrelievo(o)); };
   var vivo = function (o) { return o.tipo === 'OR' && !o.rifiutato; };
+  // merce nostra ma non spedibile dal magazzino W100: in viaggio verso un deposito o già nel deposito esterno
+  var fuoriSede = function (mat) { return window.WM4 && window.WM4.fuoriSede ? window.WM4.fuoriSede(mat) : 0; };
   // ATP = giacenza − merce già in consegna (non ancora uscita) − quantità confermate agli altri ordini aperti (precedenti)
   function atp(mat, escludi) {
-    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0), ris = 0, cons = 0;   // la merce bloccata non è disponibile
+    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0) - fuoriSede(mat), ris = 0, cons = 0;   // la merce bloccata, sul camion o nel deposito esterno non è disponibile
     S().ordini.forEach(function (o) { if (!vivo(o) || o.materiale !== mat) return; cons += inPrelievo(o);
       if (o === escludi) return; if (escludi && (o.data > escludi.data || (o.data === escludi.data && +o.numero > +escludi.numero))) return;
       ris += Math.min(apertoOrd(o), Math.max(0, (o.confermata == null ? o.qta : o.confermata) - o.consegnato - inPrelievo(o))); });
@@ -97,10 +99,11 @@ window.SD4 = (function () {
       var resta = r2((a.qta || 0) - (a.entrato || 0));
       if (resta > 1e-9) out.push({data: a.consegna || a.data, qta: resta, fonte: 'ordine d\'acquisto ' + a.numero});
     });
+    if (window.WM4 && window.WM4.inArrivoW100) window.WM4.inArrivoW100(mat).forEach(function (x) { out.push(x); });   // rientri dal deposito esterno ancora in viaggio
     return out.sort(function (x, y) { return x.data < y.data ? -1 : x.data > y.data ? 1 : 0; });
   }
   function pianoATP(mat) {
-    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0), cons = 0, res = {};
+    var g = (S().giacenze[mat] || 0) - ((S().bloccato || {})[mat] || 0) - fuoriSede(mat), cons = 0, res = {};
     S().ordini.forEach(function (o) { if (vivo(o) && o.materiale === mat) cons += inPrelievo(o); });
     var libero = r2(Math.max(0, g - cons)), coda = entrate(mat).map(function (x) { return Object.assign({}, x); });
     S().ordini.filter(function (o) { return vivo(o) && o.materiale === mat && apertoOrd(o) > 1e-9; })
@@ -144,7 +147,7 @@ window.SD4 = (function () {
   function riconferma(mat) {
     var liberi = {}, out = [];
     S().ordini.filter(function (o) { return vivo(o) && (!mat || o.materiale === mat); }).sort(function (a, b) { return a.data < b.data ? -1 : a.data > b.data ? 1 : (+a.numero) - (+b.numero); }).forEach(function (o) {
-      var m = o.materiale; if (liberi[m] == null) { var a = atp(m); liberi[m] = r2((S().giacenze[m] || 0) - a.inConsegna); }
+      var m = o.materiale; if (liberi[m] == null) { var a = atp(m); liberi[m] = r2((S().giacenze[m] || 0) - fuoriSede(m) - a.inConsegna); }
       var serve = apertoOrd(o), c = Math.min(serve, Math.max(0, liberi[m])), prima = o.confermata;
       o.confermata = r2(o.consegnato + inPrelievo(o) + c); liberi[m] = r2(liberi[m] - c);
       if (prima !== o.confermata) out.push(o.numero + ' ' + m + ': confermati ' + o.confermata + ' su ' + o.qta);

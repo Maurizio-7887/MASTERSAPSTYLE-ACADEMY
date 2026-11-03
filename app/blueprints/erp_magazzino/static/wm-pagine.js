@@ -49,7 +49,8 @@
         return '<div class="mappa-corsia"><h4>Corsia ' + c + ' · livello 2 (sopra) e 1 (sotto) · campate 1 → 5</h4><div class="mappa-griglia">' + celle.join('') + '</div></div>';
       }).join('');
       var ferro = '<div class="mappa-corsia"><h4>Catasta ferro (tipo 002)</h4><div class="mappa-griglia">' + ['F-01', 'F-02', 'F-03', 'F-04', 'F-05', 'F-06'].map(cella).join('') + '</div></div>';
-      var interim = '<div class="mappa-corsia"><h4>Aree interim</h4><div class="mappa-griglia">' + ['GR-ZONE', 'PSA-L1', 'GI-ZONE', 'DIFF', 'Q-ZONE'].filter(function (b) { return W().ubicazioni[b]; }).map(cella).join('') + '</div></div>';
+      var interim = '<div class="mappa-corsia"><h4>Aree interim</h4><div class="mappa-griglia">' + ['GR-ZONE', 'PSA-L1', 'GI-ZONE', 'DIFF', 'Q-ZONE'].filter(function (b) { return W().ubicazioni[b]; }).map(cella).join('') + '</div></div>' +
+        (W().ubicazioni['IN-VIAGGIO'] ? '<div class="mappa-corsia"><h4>Fuori dal magazzino W100: sul camion e nel deposito esterno</h4><div class="mappa-griglia">' + ['IN-VIAGGIO', 'D200'].map(cella).join('') + '</div></div>' : '');
       var det = '';
       if (sel) {
         var u = WM.ubicazione(sel);
@@ -309,6 +310,7 @@
         L.scheda('📋', '4 · Lavoro di magazzino arretrato', '/SCWM/MON · compiti aperti', L.tabella(['Stato', 'Compito', 'Tipo', 'Articolo', 'Quantità›', 'Da', 'A', 'Creato il'], a.lavoro.map(function (t) {
           return {cls: t.sem.cls === 'rosso' ? 'riga-ritardo' : '', celle: [bd(t), t.numero, t.tipo, '<b>' + t.mat + '</b>', n0(t.qta) + ' ' + um(t.mat), t.da, t.a, fd(t.creato)]}; }), WM.attivo() ? 'Nessun compito aperto: il magazzino è in pari.' : 'WMS non attivo.') +
           '<p class="lab-nota">Un compito aperto da ieri o prima è lavoro rimasto indietro: la merce è ferma a metà strada. Si chiude con la pistola RF.</p>') +
+        (a.viaggi.length ? L.scheda('🚚', '5 · Merce in viaggio tra depositi', 'UB · 351 / 101', L.tabella(testa, a.viaggi.map(riga)) + '<p class="lab-nota">Data promessa = arrivo previsto scritto nel trasferimento. Finché non arriva, la merce non è né qua né là.</p>') : '') +
         '<p class="lab-nota"><b>Come si legge:</b> parti dalle righe rosse, poi arancio e gialle. È solo una lettura: per recuperare si usano consegne e spedizione, entrata merci, produzione e pistola RF.</p>';
       radice.querySelector('#ar-data').onchange = function () { radice.dataset.al = this.value; rendi(); };
     },
@@ -318,15 +320,42 @@
       radice.innerHTML = (sotto.length ? '<div class="lab-esito ko">⚠ <b>' + sotto.length + (sotto.length === 1 ? ' materiale sotto' : ' materiali sotto') + ' la scorta minima:</b> ' + sotto.map(function (x) { return x.mat + ' → riordina ' + n0(x.proposta) + ' ' + x.um; }).join(' · ') + '</div>' : '') +
         '<div class="lab-griglia">' + L.scheda('📉', 'Imposta la scorta minima', 'MM02 · punto di riordino', L.modulo('sm', [['materiale', 'Materiale', 'select', radice.dataset.mat || 'FERRO', Object.keys(S().materiali).map(function (m) { return [m, m + ' — ' + S().materiali[m].nome + ' (' + S().materiali[m].um + ')']; })],
           ['minimo', 'Scorta minima (punto di riordino)', 'num'], ['massimo', 'Scorta massima (vuoto = riporta al minimo)', 'num']], [['sm', 'Salva la scorta minima']])) +
-        L.scheda('🧠', 'Come ragiona il sistema', '', '<ol class="lab-elenco"><li><b>Libera</b> = giacenza − merce bloccata.</li><li><b>In arrivo</b> = ordini d’acquisto non ancora ricevuti + pezzi degli ordini di produzione non ancora versati.</li>' +
+        L.scheda('🧠', 'Come ragiona il sistema', '', '<ol class="lab-elenco"><li><b>Libera</b> = giacenza − merce bloccata − merce sul camion o nel deposito esterno.</li><li><b>In arrivo</b> = ordini d’acquisto non ancora ricevuti + pezzi degli ordini di produzione non ancora versati.</li>' +
           '<li>Se <b>libera + in arrivo</b> è sotto la <b>scorta minima</b> → 🔴 riordina.</li><li><b>Proposta</b> = scorta massima (o minima) − libera − in arrivo.</li><li>Il sistema <b>propone</b>: la richiesta d’acquisto o l’ordine di produzione li fai tu.</li></ol>') + '</div>' +
-        L.scheda('📦', 'Scorte e semaforo', 'MD04 · MMBE', L.tabella(['Materiale', 'Giacenza›', 'di cui bloccata›', 'Libera›', 'In arrivo›', 'Libera + in arrivo›', 'Minima›', 'Massima›', 'Stato', 'Proposta di riordino›'], tutte.map(function (x) {
-          return {cls: x.stato === 'riordina' ? 'riga-ritardo' : '', celle: ['<b>' + x.mat + '</b> ' + e(x.nome), n0(x.giacenza) + ' ' + x.um, x.bloccata ? n0(x.bloccata) : '0', n0(x.libera), n0(x.arrivo), '<b>' + n0(x.disponibile) + '</b>',
+        L.scheda('📦', 'Scorte e semaforo', 'MD04 · MMBE', L.tabella(['Materiale', 'Giacenza›', 'di cui bloccata›', 'in viaggio o nel deposito›', 'Libera in W100›', 'In arrivo›', 'Libera + in arrivo›', 'Minima›', 'Massima›', 'Stato', 'Proposta di riordino›'], tutte.map(function (x) {
+          return {cls: x.stato === 'riordina' ? 'riga-ritardo' : '', celle: ['<b>' + x.mat + '</b> ' + e(x.nome), n0(x.giacenza) + ' ' + x.um, x.bloccata ? n0(x.bloccata) : '0', x.fuori ? n0(x.fuori) : '0', n0(x.libera), n0(x.arrivo), '<b>' + n0(x.disponibile) + '</b>',
             x.min == null ? '—' : n0(x.min), x.max == null ? '—' : n0(x.max), bd[x.stato], x.proposta ? '<b>' + n0(x.proposta) + ' ' + x.um + '</b>' : '']}; }))) +
         (sotto.length ? L.scheda('🛒', 'Proposte di riordino', 'da trasformare a mano', '<ul class="lab-elenco">' + sotto.map(function (x) {
           return '<li><b>' + x.mat + '</b>: ' + n0(x.proposta) + ' ' + x.um + ' → ' + (x.azione === 'acquisto' ? '<a href="' + s4 + 'acquisti/richieste">richiesta d’acquisto (ME51N)</a> e poi ordine al fornitore' : '<a href="' + s4 + 'produzione/ordini">ordine di produzione (CO01)</a>') + '</li>'; }).join('') + '</ul>' +
           '<p class="lab-nota">Prima di ordinare controlla i fabbisogni dei clienti e della produzione: la scorta minima protegge dagli imprevisti, non sostituisce il calcolo del fabbisogno.</p>') : '');
       L.collega(radice, 'sm', {sm: function (v) { radice.dataset.mat = v.materiale; return WM.impostaScorta(v); }}, rendi);
+    },
+    depositi: function () {
+      if (!WM.attivo()) { radice.innerHTML = nonAttivo(); return; }
+      var tr = WM.trasferimenti(), pl = WM.perLuogo(), mats = Object.keys(S().materiali).map(function (m) { return [m, m + ' — ' + S().materiali[m].nome + ' (' + S().materiali[m].um + ')']; });
+      var etT = function (t) { return t.numero + ' · ' + t.da + ' → ' + t.a + ' · ' + n0(t.spedito || t.qta) + ' ' + t.mat; };
+      var pronti = tr.filter(function (t) { return WM.statoTrasf(t).codice === 'pronto'; }), viaggio = tr.filter(function (t) { return t.partito && !t.arrivato; });
+      var bd = {prelievo: 'giallo', pronto: 'blu', viaggio: 'arancio', arrivato: 'verde'};
+      var tot = function (k) { return pl.filter(function (x) { return x[k] > 0; }).map(function (x) { return n0(x[k]) + ' ' + x.um + ' ' + x.mat; }).join(' · ') || 'niente'; };
+      radice.innerHTML = '<div class="lab-esito dep-idea"><b>🚚 LA MERCE SUL CAMION NON È NÉ QUA NÉ LÀ.</b> Quando mandiamo merce al deposito esterno (o la riportiamo indietro) per qualche giorno non è più nel magazzino W100 e non è ancora arrivata: <b>è nostra</b> e resta nel magazzino contabile, ma <b>non si può vendere né prelevare</b>. Il sistema la tiene in un posto apposta: «merce in viaggio».</div>' +
+        '<div class="kpi4"><div><b>' + viaggio.length + '</b><span>camion in viaggio</span></div><div><b>' + e(tot('viaggio')) + '</b><span>sul camion: né qua né là</span></div><div><b>' + e(tot('d200')) + '</b><span>nel deposito esterno D200</span></div></div>' +
+        '<div class="lab-griglia">' +
+        L.scheda('1️⃣', 'Crea il trasferimento', 'ME21N tipo UB · ordine di trasferimento', L.modulo('ub', [['da', 'Da dove parte', 'select', 'W100', [['W100', 'dal magazzino W100 al deposito esterno D200'], ['D200', 'dal deposito esterno D200 al magazzino W100']]], ['materiale', 'Materiale', 'select', 'TR-PED', mats],
+          ['qta', 'Quantità da trasferire', 'num'], ['data', 'Data', 'date'], ['consegna', 'Arrivo previsto (facoltativo)', 'date']], [['ub', 'Crea il trasferimento']]) +
+          '<p class="lab-nota">Da W100 nascono i compiti di prelievo (FIFO) verso la banchina GI-ZONE: confermali con la pistola RF.</p>') +
+        L.scheda('2️⃣', 'Carica il camion: uscita 351', 'VL10B · MIGO 351', L.modulo('us', [['trasferimento', 'Trasferimento pronto', 'select', '', U.lista(pronti, etT, '— nessun trasferimento pronto —')], ['data', 'Data di partenza', 'date']], [['us', 'Registra l’uscita 351 (merce in viaggio)']]) +
+          '<p class="lab-nota">Da qui la merce è «in viaggio»: esce dal magazzino di partenza, non entra ancora in quello di arrivo.</p>') +
+        L.scheda('3️⃣', 'Ricevi all’arrivo: entrata 101', 'MIGO 101 · con riferimento al trasferimento', L.modulo('er', [['trasferimento', 'Trasferimento in viaggio', 'select', '', U.lista(viaggio, etT, '— niente in viaggio —')], ['qta', 'Quantità contata all’arrivo (vuoto = tutta)', 'num'], ['data', 'Data di arrivo', 'date']], [['er', 'Registra l’entrata 101']]) +
+          '<p class="lab-nota">Se all’arrivo manca qualcosa, la differenza va nella zona 999 e si registra con l’inventario (LI21).</p>') + '</div>' +
+        L.scheda('📋', 'Trasferimenti tra depositi', 'ME2M · MB5T merce in transito', L.tabella(['Trasferimento', 'Data', 'Da → a', 'Materiale', 'Quantità›', 'Arrivo previsto', 'Partito', 'Arrivato', 'Stato'], tr.slice().reverse().map(function (t) {
+          var st = WM.statoTrasf(t);
+          return [t.numero, fd(t.data), t.da + ' → ' + t.a, '<b>' + t.mat + '</b>', n0(t.spedito || t.qta) + ' ' + um(t.mat) + (t.diff ? ' (mancano ' + n0(t.diff) + ')' : ''), t.consegna ? fd(t.consegna) : '—', t.partito ? fd(t.partito) : '', t.arrivato ? fd(t.arrivato) : '', '<span class="lab-bd ' + bd[st.codice] + '">' + (st.codice === 'viaggio' ? '🚚 ' : '') + e(st.testo) + '</span>']; }), 'Nessun trasferimento.')) +
+        L.scheda('📦', 'Dove sono le scorte: per luogo', 'MMBE · per deposito', L.tabella(['Materiale', 'Magazzino W100›', '🚚 In viaggio›', 'Deposito D200›', 'Totale contabile›'], pl.map(function (x) {
+          return [x.mat, n0(x.w100) + ' ' + x.um, x.viaggio ? '<b>' + n0(x.viaggio) + '</b>' : '0', n0(x.d200), n0(x.contabile) + ' ' + x.um]; })) +
+          '<p class="lab-nota">W100 + in viaggio + D200 = totale contabile: la merce cambia posto, non proprietario. Per questo non c’è nessuna scrittura. Solo la merce in W100 si può vendere e prelevare dal magazzino principale. La rete dei depositi (quanti depositi, dove, quanta scorta in ciascuno) si studia nella MasterSupplyChain Academy.</p>');
+      L.collega(radice, 'ub', {ub: WM.creaTrasferimento}, rendi);
+      L.collega(radice, 'us', {us: WM.spedisciTrasferimento}, rendi);
+      L.collega(radice, 'er', {er: WM.riceviTrasferimento}, rendi);
     },
   };
   function rendi() {

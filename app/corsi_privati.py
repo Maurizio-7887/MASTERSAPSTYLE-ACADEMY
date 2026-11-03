@@ -49,7 +49,7 @@ MODULI_MAG = [
      ["inventario-differenze", "inventario-rotazione"], [("erp_inventario.documenti", "Documenti d'inventario"), ("erp_inventario.lista", "Lista di conta"), ("erp_inventario.differenze", "Differenze"), ("erp_inventario.abc", "ABC")]),
     ("UF 10 · Sistemi informativi per la logistica", 6,
      "Il WMS integrato con vendite, acquisti e produzione: «Dove si trova?», merce da mettere a posto, pistola RF, quarantena, scorta minima e riordino, "
-     "arretrato e scadenze, approvvigionamento della linea, picking, imballo SSCC, trasporto e DDT.",
+     "arretrato e scadenze, deposito esterno e merce in viaggio, approvvigionamento della linea, picking, imballo SSCC, trasporto e DDT.",
      ["processo-spedizione", "prelievo-errori", "ddt-sscc"], [("erp_magazzino.rf", "Pistola RF"), ("erp_magazzino.scorte", "Scorta minima"), ("erp_magazzino.arretrato", "Arretrato"),
                                                              ("erp_spedizione.monitor", "Monitor delle consegne"), ("erp_spedizione.imballo", "Imballo e SSCC"), ("erp_spedizione.ddt", "DDT")]),
     ("UF 11 · Innovazione del magazzino 5.0", 3.5,

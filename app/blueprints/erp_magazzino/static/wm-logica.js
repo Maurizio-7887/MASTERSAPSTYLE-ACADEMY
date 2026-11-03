@@ -12,10 +12,11 @@ window.WM4 = (function () {
     '902': {nome: 'Zona di ricevimento (interim)', interim: true}, '001': {nome: 'Scaffalatura porta-pallet', interim: false},
     '002': {nome: 'Catasta ferro (a blocchi)', interim: false}, '100': {nome: 'Approvvigionamento produzione (PSA linea 1)', interim: true},
     '916': {nome: 'Zona di spedizione (interim)', interim: true}, '999': {nome: 'Differenze (interim)', interim: true},
-    '980': {nome: 'Merce bloccata (quarantena)', interim: true}};
+    '980': {nome: 'Merce bloccata (quarantena)', interim: true},
+    '930': {nome: 'Merce in viaggio tra depositi (sul camion)', interim: true}, '940': {nome: 'Deposito esterno D200 (filiale)', interim: true}};
   var UDC = {FERT: 50, ROH: 1000, HALB: 100};   // pezzi per pallet · kg per fascio · kit di semilavorati per cassone metallico
   var RISORSE = ['MAG01 Marco', 'MAG02 Sara', 'MAG03 Luca', 'MAG04 Giulia'];
-  var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni', BLOCCO: 'Porta in quarantena'};
+  var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni', BLOCCO: 'Porta in quarantena', DEPOSITO: 'Prelievo per il deposito esterno'};
 
   function layout() {
     var u = {'GR-ZONE': {tipo: '902', cap: 0}, 'PSA-L1': {tipo: '100', cap: 0}, 'GI-ZONE': {tipo: '916', cap: 0}, 'DIFF': {tipo: '999', cap: 0}, 'Q-ZONE': {tipo: '980', cap: 0}};
@@ -163,15 +164,15 @@ window.WM4 = (function () {
     if (eff > t.qta + 1e-9) throw Error('Non si conferma più della quantità del compito (' + L.n0(t.qta) + ').');
     if (eff < t.qta - 1e-9 && (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || t.tipo === 'BLOCCO')) throw Error('La messa a posto si conferma per l\'intera unità di carico.');
     var diff = r2(t.qta - eff), nuovo = null;
-    if (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || t.tipo === 'BLOCCO' || (eff === q.qta && diff === 0)) { q.ubic = t.a; if (t.consegna) q.rif = t.consegna; }
+    if (t.tipo === 'PUTAWAY' || t.tipo === 'TRASF' || t.tipo === 'BLOCCO' || (eff === q.qta && diff === 0)) { q.ubic = t.a; if (t.consegna) q.rif = t.consegna; if (t.trasf) q.rif = t.trasf; }
     else {
-      if (eff > 0) { q.qta = r2(q.qta - eff); nuovoQuant(t.a, t.mat, eff, t.tipo === 'PICK' ? '' : q.udc, q.data, t.consegna || t.ordine || ''); }
+      if (eff > 0) { q.qta = r2(q.qta - eff); nuovoQuant(t.a, t.mat, eff, t.tipo === 'PICK' ? '' : q.udc, q.data, t.consegna || t.ordine || t.trasf || ''); }
       if (diff > 0) {   // differenza: quello che manca va nella 999 e un nuovo compito prende il resto altrove
         q.qta = r2(q.qta - diff); nuovoQuant('DIFF', t.mat, diff, '', data, 'differenza compito ' + t.numero + ' su ' + t.da);
         t.qtaEff = eff; t.diff = diff; t.stato = 'confermato';
         var f = fifo(t.mat, diff, t.tipo === 'STAGING' ? ['002'] : ['001', '002']);
         if (f.mancante > 1e-9) throw Error('Differenza registrata ma non c\'è altra giacenza per completare: mancano ' + L.n0(f.mancante) + '.');
-        nuovo = f.righe.map(function (x) { return compito({tipo: t.tipo, mat: t.mat, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: t.a, creato: data, rif: t.rif, consegna: t.consegna, ordine: t.ordine, origine: t.numero}); });
+        nuovo = f.righe.map(function (x) { return compito({tipo: t.tipo, mat: t.mat, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: t.a, creato: data, rif: t.rif, consegna: t.consegna, ordine: t.ordine, trasf: t.trasf, origine: t.numero}); });
       }
     }
     t.qtaEff = eff; t.diff = diff; t.stato = 'confermato'; t.confermato = data; t.risorsa = String(i.risorsa || '');
@@ -270,6 +271,7 @@ window.WM4 = (function () {
     return d;
   }
   var COSA = {'902': 'IN RICEVIMENTO: arrivata, ma ancora da mettere a scaffale', '980': 'BLOCCATA in quarantena: non si può spedire', '916': 'IN SPEDIZIONE: già prelevata, pronta a partire',
+    '930': 'SUL CAMION tra due depositi: non è né qua né là, ma è nostra', '940': 'NEL DEPOSITO ESTERNO D200: non si preleva dal magazzino W100',
     '100': 'A BORDO LINEA: portata alla produzione', '999': 'DIFFERENZA d’inventario da registrare'};
   // «Dove si trova?»: tutte le ubicazioni di un articolo, con che cosa significa ogni riga per chi deve prelevare
   function dove(mat) {
@@ -331,20 +333,23 @@ window.WM4 = (function () {
       return {numero: t.numero, tipo: TIPI_COMPITO[t.tipo], mat: t.mat, qta: t.qta, da: t.da, a: t.a, creato: t.creato, giorni: g,
         sem: g >= 1 ? {cls: 'rosso', testo: 'aperto da ' + g + (g === 1 ? ' giorno' : ' giorni'), peso: 0} : {cls: 'giallo', testo: 'creato oggi: da fare', peso: 2}};
     }).sort(function (a, b) { return a.sem.peso - b.sem.peso || (a.creato < b.creato ? -1 : 1); }) : [];
+    var viaggi = trasferimenti().filter(function (t) { return t.data <= al && !t.arrivato; }).map(function (t) {
+      return {numero: t.numero, chi: t.da + ' → ' + t.a, mat: t.mat, qta: t.spedito || t.qta, scad: t.consegna || '', sem: semaforo(t.consegna, al), punto: statoTrasf(t).testo};
+    }).sort(perGravita);
     var rossi = function (l) { return l.filter(function (x) { return x.sem.cls === 'rosso'; }).length; };
-    return {al: al, clienti: clienti, fornitori: fornitori, produzione: produzione, lavoro: lavoro,
-      ritardi: {clienti: rossi(clienti), fornitori: rossi(fornitori), produzione: rossi(produzione), lavoro: rossi(lavoro)}};
+    return {al: al, clienti: clienti, fornitori: fornitori, produzione: produzione, lavoro: lavoro, viaggi: viaggi,
+      ritardi: {clienti: rossi(clienti), fornitori: rossi(fornitori), produzione: rossi(produzione), lavoro: rossi(lavoro), viaggi: rossi(viaggi)}};
   }
   // «Scorta minima e riordino» (in SAP: punto di riordino, pianificazione VB in MD04): parametro per materiale e proposta di riordino
   function scorte() {
     var s = S(), sc = s.scorte || {}, PP = window.PP4;
     return Object.keys(s.materiali).map(function (m) {
-      var mm = s.materiali[m], g = r2(s.giacenze[m] || 0), b = bloccato(m), lib = r2(g - b);
+      var mm = s.materiali[m], g = r2(s.giacenze[m] || 0), b = bloccato(m), fs = fuoriSede(m), lib = r2(g - b - fs);
       var acq = r2((s.acquisti || []).filter(function (o) { return o.materiale === m && !(o.rilascio && o.rilascio.stato === 'rifiutato'); }).reduce(function (t, o) { return t + Math.max(0, o.qta - (o.entrato || 0)); }, 0));
       var prod = r2((s.produzione || []).filter(function (o) { return o.materiale === m && !o.teco && !o.liquidazione; }).reduce(function (t, o) { return t + Math.max(0, o.qta - (PP ? PP.somma(o, '101', 'qta') : 0)); }, 0));
       var arrivo = r2(acq + prod), disp = r2(lib + arrivo), x = sc[m] || null, min = x ? x.min : null, max = x ? x.max : null;
       var stato = !x ? 'nessuno' : disp < min - 1e-9 ? 'riordina' : lib < min - 1e-9 ? 'in arrivo' : 'ok';
-      return {mat: m, nome: mm.nome, um: mm.um, tipo: mm.tipo, giacenza: g, bloccata: b, libera: lib, acquisti: acq, produzione: prod, arrivo: arrivo, disponibile: disp,
+      return {mat: m, nome: mm.nome, um: mm.um, tipo: mm.tipo, giacenza: g, bloccata: b, fuori: fs, libera: lib, acquisti: acq, produzione: prod, arrivo: arrivo, disponibile: disp,
         min: min, max: max, stato: stato, proposta: stato === 'riordina' ? r2((max != null ? max : min) - disp) : 0, azione: mm.tipo === 'ROH' ? 'acquisto' : 'produzione'};
     });
   }
@@ -361,7 +366,84 @@ window.WM4 = (function () {
     return '<p class="lab-nota">Scorta minima di <b>' + mat + '</b>: ' + L.n0(min) + ' ' + um + (max != null ? ', massima ' + L.n0(max) + ' ' + um : '') + '. Oggi: libera ' + L.n0(x.libera) + ' + in arrivo ' + L.n0(x.arrivo) + ' = ' + L.n0(x.disponibile) + ' ' + um + ' → ' +
       (x.stato === 'riordina' ? '<b>SOTTO SCORTA: proposta di riordino ' + L.n0(x.proposta) + ' ' + um + '</b>.' : x.stato === 'in arrivo' ? 'sotto il minimo a scaffale, ma il riordino è già in arrivo.' : 'sopra il minimo, nessun riordino.') + ' Nessun movimento e nessuna scrittura.</p>';
   }
-  return {TIPI: TIPI, TIPI_COMPITO: TIPI_COMPITO, UDC: UDC, attivo: attivo, attiva: attiva, entrata: entrata, creaPrelievo: creaPrelievo, compitiDi: compitiDi, statoPrelievo: statoPrelievo,
+  // ── trasferimento tra depositi (ordine di trasferimento UB, in due passi come in SAP: uscita 351 → merce in viaggio → entrata 101) ──
+  // W100 → D200: prelievo FIFO con la pistola verso GI-ZONE, poi uscita 351 sul camion (IN-VIAGGIO), poi entrata 101 al deposito.
+  // D200 → W100: il deposito non ha ubicazioni: uscita 351 diretta, poi entrata 101 in GR-ZONE con la messa a posto.
+  // La merce resta nostra e nella stessa contabilità: nessuna scrittura; cambia solo DOVE si trova. Una differenza all'arrivo va nella 999.
+  var DEPOSITI = {W100: 'Magazzino principale W100', D200: 'Deposito esterno D200 (filiale)'};
+  var assicuraDep = function () { var w = W(); if (!w.ubicazioni['IN-VIAGGIO']) w.ubicazioni['IN-VIAGGIO'] = {tipo: '930', cap: 0, blocco: ''}; if (!w.ubicazioni.D200) w.ubicazioni.D200 = {tipo: '940', cap: 0, blocco: ''}; if (!w.trasferimenti) w.trasferimenti = []; return w.trasferimenti; };
+  var trasferimenti = function () { return (W() && W().trasferimenti) || []; };
+  var trasfDi = function (n) { var t = trasferimenti().find(function (x) { return x.numero === String(n || '').trim(); }); if (!t) throw Error('Trasferimento ' + (n || '') + ' inesistente.'); return t; };
+  var registraDep = function (mat, data, tipo, rif) { S().movimenti.push({data: data, mat: mat, qta: 0, tipo: tipo, rif: rif, lotti: []}); };
+  function statoTrasf(t) {
+    if (t.arrivato) return {codice: 'arrivato', testo: 'arrivato il ' + L.fd(t.arrivato)};
+    if (t.partito) return {codice: 'viaggio', testo: 'IN VIAGGIO dal ' + L.fd(t.partito) + ': non è né qua né là'};
+    if (t.da === 'D200') return {codice: 'pronto', testo: 'pronto da spedire dal deposito'};
+    var c = W().compiti.filter(function (x) { return x.trasf === t.numero && x.stato !== 'annullato'; });
+    return c.length && c.every(function (x) { return x.stato === 'confermato'; }) ? {codice: 'pronto', testo: 'prelevato: in banchina, pronto da spedire'} : {codice: 'prelievo', testo: 'da prelevare con la pistola RF'};
+  }
+  function creaTrasferimento(i) {
+    richiesto(); var n = N(), data = n.data(i.data), lista = assicuraDep(), mat = String(i.materiale || '').trim(); n.materiale(mat);
+    var da = String(i.da || 'W100') === 'D200' ? 'D200' : 'W100', a = da === 'W100' ? 'D200' : 'W100';
+    var qta = L.num(i.qta, 'Quantità da trasferire', 0.001), cons = i.consegna ? n.data(i.consegna) : '';
+    if (cons && cons < data) throw Error('L’arrivo previsto non può precedere la data del trasferimento.');
+    var t = {numero: 'UB' + String(lista.length + 1).padStart(3, '0'), data: data, da: da, a: a, mat: mat, qta: r2(qta), consegna: cons, partito: '', arrivato: '', ricevuto: null, diff: 0};
+    if (da === 'W100') {
+      var f = fifo(mat, qta, ['001', '002']);
+      if (f.mancante > 1e-9) throw Error('A scaffale mancano ' + L.n0(f.mancante) + ' ' + mat + ' liberi da prelevare per il deposito.');
+      lista.push(t);
+      var c = f.righe.map(function (x) { return compito({tipo: 'DEPOSITO', mat: mat, qta: x.qta, quant: x.q.id, udc: x.q.udc, da: x.q.ubic, a: 'GI-ZONE', creato: data, rif: t.numero, trasf: t.numero}); });
+      n.salva();
+      return '<p class="lab-nota">Trasferimento <b>' + t.numero + '</b> (ordine di trasferimento UB): ' + L.n0(qta) + ' ' + mat + ' da W100 al deposito D200. ' + (c.length === 1 ? 'Creato 1 compito' : 'Creati ' + c.length + ' compiti') + ' di prelievo (FIFO) verso la banchina GI-ZONE: ' + c.map(function (x) { return x.numero + ' da ' + x.da; }).join(' · ') + '. Confermali con la pistola RF, poi registra l’uscita 351. Nessuna scrittura.</p>';
+    }
+    var disp = r2(inUbic('D200').filter(function (q) { return q.mat === mat; }).reduce(function (s0, q) { return s0 + q.qta; }, 0));
+    if (disp + 1e-9 < qta) throw Error('Nel deposito D200 ci sono solo ' + L.n0(disp) + ' ' + mat + '.');
+    lista.push(t); n.salva();
+    return '<p class="lab-nota">Trasferimento <b>' + t.numero + '</b>: ' + L.n0(qta) + ' ' + mat + ' dal deposito D200 al magazzino W100. Il deposito non ha ubicazioni: registra subito l’uscita 351. Nessuna scrittura.</p>';
+  }
+  function spedisciTrasferimento(i) {
+    richiesto(); var n = N(), t = trasfDi(i.trasferimento), data = n.data(i.data || t.data), st = statoTrasf(t);
+    if (t.partito) throw Error('Il trasferimento ' + t.numero + ' è già partito il ' + L.fd(t.partito) + '.');
+    if (data < t.data) throw Error('L’uscita non può precedere il trasferimento (' + L.fd(t.data) + ').');
+    if (st.codice !== 'pronto') throw Error('Prima conferma con la pistola RF tutti i compiti di prelievo del trasferimento ' + t.numero + '.');
+    var origine = t.da === 'W100' ? quanti(function (q) { return q.ubic === 'GI-ZONE' && q.rif === t.numero && q.qta > 0; }) : inUbic('D200').filter(function (q) { return q.mat === t.mat && q.qta > 0; });
+    var resto = t.qta, tot = 0;
+    origine.forEach(function (q) { if (resto <= 1e-9) return; var x = Math.min(q.qta, resto); q.qta = r2(q.qta - x); resto = r2(resto - x); tot = r2(tot + x); nuovoQuant('IN-VIAGGIO', t.mat, x, q.udc, q.data, t.numero); });
+    if (tot < 1e-9) throw Error('Non c’è merce del trasferimento ' + t.numero + ' da caricare.');
+    t.spedito = tot; t.partito = data; registraDep(t.mat, data, '351', t.numero); n.salva();
+    return '<p class="lab-nota">🚚 Uscita <b>351</b> del trasferimento ' + t.numero + ': ' + L.n0(tot) + ' ' + t.mat + ' sono sul camion verso ' + DEPOSITI[t.a] + '. Ora la merce <b>non è né qua né là</b>: non si può vendere da W100 e non è ancora nel deposito, ma è nostra e resta nel magazzino contabile (stock in transito). Nessuna scrittura.</p>';
+  }
+  function riceviTrasferimento(i) {
+    richiesto(); var n = N(), t = trasfDi(i.trasferimento), data = n.data(i.data || t.partito);
+    if (!t.partito) throw Error('Il trasferimento ' + t.numero + ' non è ancora partito: prima l’uscita 351.');
+    if (t.arrivato) throw Error('Il trasferimento ' + t.numero + ' è già arrivato.');
+    if (data < t.partito) throw Error('L’arrivo non può precedere la partenza (' + L.fd(t.partito) + ').');
+    var rec = i.qta == null || String(i.qta).trim() === '' ? t.spedito : L.num(i.qta, 'Quantità ricevuta', 0);
+    if (rec > t.spedito + 1e-9) throw Error('Non si riceve più di quanto è partito (' + L.n0(t.spedito) + ').');
+    var viaggio = quanti(function (q) { return q.ubic === 'IN-VIAGGIO' && q.rif === t.numero && q.qta > 0; }), resto = rec, out = [];
+    viaggio.forEach(function (q) {
+      var x = Math.min(q.qta, resto); resto = r2(resto - x);
+      if (x > 1e-9) { if (t.a === 'D200') nuovoQuant('D200', t.mat, x, q.udc, q.data, t.numero); else out = out.concat(entrata(t.mat, x, data, t.numero, 'rientro dal deposito D200')); }
+      q.qta = r2(q.qta - x);
+    });
+    var diff = r2(t.spedito - rec);
+    if (diff > 1e-9) { viaggio.forEach(function (q) { q.qta = 0; }); nuovoQuant('DIFF', t.mat, diff, '', data, 'differenza trasferimento ' + t.numero); }
+    t.arrivato = data; t.ricevuto = rec; t.diff = diff; registraDep(t.mat, data, '101 deposito', t.numero); n.salva();
+    return '<p class="lab-nota">✅ Entrata <b>101</b> al ' + DEPOSITI[t.a] + ': ' + L.n0(rec) + ' ' + t.mat + ' arrivati, il viaggio è chiuso.' +
+      (t.a === 'W100' ? ' La merce è in ricevimento GR-ZONE: ' + out.length + ' compiti di messa a posto da confermare con la pistola.' : ' Ora è nel deposito: non si preleva da W100.') +
+      (diff ? ' <b>Mancano ' + L.n0(diff) + ' ' + t.mat + '</b>: vanno nella zona differenze 999 e si registrano con l’inventario (LI21).' : '') + ' Nessuna scrittura.</p>';
+  }
+  var fuoriSede = function (mat) { var w = W(); if (!w || !w.trasferimenti) return 0; return r2(quanti(function (q) { return q.mat === mat && (q.ubic === 'IN-VIAGGIO' || q.ubic === 'D200'); }).reduce(function (s0, q) { return s0 + q.qta; }, 0)); };
+  var inArrivoW100 = function (mat) { return trasferimenti().filter(function (t) { return t.a === 'W100' && t.mat === mat && t.partito && !t.arrivato; }).map(function (t) { return {data: t.consegna || t.partito, qta: t.spedito, fonte: 'trasferimento ' + t.numero + ' dal deposito D200'}; }); };
+  function perLuogo() {
+    return Object.keys(S().materiali).map(function (m) {
+      var somma = function (f) { return r2(quanti(function (q) { return q.mat === m && f(q.ubic); }).reduce(function (s0, q) { return s0 + q.qta; }, 0)); };
+      var viaggio = somma(function (u) { return u === 'IN-VIAGGIO'; }), dep = somma(function (u) { return u === 'D200'; });
+      return {mat: m, um: S().materiali[m].um, w100: r2(somma(function () { return true; }) - viaggio - dep), viaggio: viaggio, d200: dep, contabile: r2(S().giacenze[m] || 0)};
+    });
+  }
+  return {TIPI: TIPI, TIPI_COMPITO: TIPI_COMPITO, UDC: UDC, DEPOSITI: DEPOSITI, trasferimenti: trasferimenti, statoTrasf: statoTrasf, creaTrasferimento: creaTrasferimento,
+    spedisciTrasferimento: spedisciTrasferimento, riceviTrasferimento: riceviTrasferimento, fuoriSede: fuoriSede, inArrivoW100: inArrivoW100, perLuogo: perLuogo, attivo: attivo, attiva: attiva, entrata: entrata, creaPrelievo: creaPrelievo, compitiDi: compitiDi, statoPrelievo: statoPrelievo,
     uscitaSpedizione: uscitaSpedizione, approvvigiona: approvvigiona, consumaPSA: consumaPSA, trasferisci: trasferisci, conferma: conferma, quadratura: quadratura,
     entrataBloccata: entrataBloccata, blocca: blocca, sblocca: sblocca, rottama: rottama, bloccati: bloccati, bloccato: bloccato,
     oggi: oggi, dove: dove, daAllocare: daAllocare, arretrato: arretrato, semaforo: semaforo, scorte: scorte, sottoScorta: sottoScorta, impostaScorta: impostaScorta,
@@ -411,6 +493,15 @@ window.WMGuida = (function () {
     mo: ['ondate,crossDock', 'Innovazione → Ondate', 'Controlla come vuoi generare i nuovi prelievi.', 'Salva le opzioni prima di creare le nuove consegne.', 'Con ondate sì le consegne attendono il rilascio; con cross-docking sì la merce idonea in GR-ZONE può andare direttamente a GI-ZONE anziché a scaffale.', {ondate: 'Sì = PICK al rilascio dell’ondata; no = PICK subito alla consegna.', crossDock: 'Sì = usa il ricevimento ancora da mettere a posto se idoneo, annullando il relativo PUTAWAY. Non autorizza a saltare la conferma RF.'}],
     on: ['data', 'Innovazione → Rilascia ondata', 'Prima abilita le ondate e crea consegne in attesa.', 'Premi Rilascia l’ondata, poi esegui la coda RF in ordine di percorso.', 'Crea PICK e sequenza di prelievo, non l’uscita contabile 601.', {data: data}],
     sl: ['data', 'Innovazione → Slotting', 'Esamina le proposte di riordino e le destinazioni disponibili.', 'Crea i compiti proposti e confermali in RF.', 'Migliora il dove; lascia invariati giacenze IM e valori. Una proposta non è uno spostamento già eseguito.', {data: data}],
+    ub: ['da,materiale,qta,data,consegna', 'Magazzino → Deposito esterno e merce in viaggio → 1 · Crea il trasferimento', 'Controlla in «Dove si trova?» quanta merce libera c’è nel luogo di partenza.', 'Premi Crea il trasferimento una sola volta; da W100 conferma poi i compiti di prelievo con la pistola RF.', 'Nasce l’ordine di trasferimento UB: da W100 i compiti portano la merce in banchina GI-ZONE. Nessun movimento contabile e nessuna scrittura.', {
+      da: 'W100 → D200 per rifornire il deposito esterno; D200 → W100 per riportare la merce nel magazzino principale.',
+      materiale: 'Codice del materiale da spostare: deve esserci abbastanza merce libera nel luogo di partenza.',
+      qta: 'Quantità da trasferire nell’unità del materiale (pz o kg). Da W100 il prelievo segue il FIFO: prima i pallet più vecchi.',
+      data: data, consegna: 'Facoltativa: quando il camion dovrebbe arrivare. Serve all’arretrato: se passa la data e la merce non è arrivata, la riga diventa rossa.'}],
+    us: ['trasferimento,data', 'Magazzino → Deposito esterno → 2 · Carica il camion', 'Da W100: tutti i compiti di prelievo del trasferimento confermati in RF (stato «pronto da spedire»).', 'Premi Registra l’uscita 351 quando il camion parte.', 'La merce passa nella zona «merce in viaggio»: non è più nel luogo di partenza e non è ancora arrivata. Il totale contabile non cambia: nessuna scrittura.', {
+      trasferimento: 'Trasferimento pronto: la riga mostra numero, da → a, quantità e materiale.', data: data}],
+    er: ['trasferimento,qta,data', 'Magazzino → Deposito esterno → 3 · Ricevi all’arrivo', 'Conta la merce scaricata dal camion e confrontala con il trasferimento.', 'Premi Registra l’entrata 101.', 'Il viaggio si chiude: la merce è nel deposito D200, oppure in ricevimento GR-ZONE di W100 con la messa a posto da confermare. Se manca qualcosa la differenza va nella 999. Nessuna scrittura.', {
+      trasferimento: 'Trasferimento in viaggio da ricevere.', qta: 'Quantità davvero contata all’arrivo. Vuoto = tutta quella partita. Meno = differenza nella zona 999, da registrare con l’inventario.', data: data}],
     sm: ['materiale,minimo,massimo', 'Magazzino → Scorta minima e riordino', 'Scegli il materiale; scrivi la quantità minima sotto la quale va riordinato e, se vuoi, la massima a cui riportarlo. Usa l’unità del materiale (FERRO: kg).', 'Premi Salva la scorta minima una sola volta; per toglierla scrivi 0 e lascia vuota la massima.', 'Cambia solo il parametro del materiale: nessun movimento, nessuna scrittura e nessun ordine automatico. Leggi semaforo e proposta di riordino nella tabella: l’ordine (ME51N/ME21N o CO01) resta una decisione da fare a mano.', {
       materiale: 'Codice del materiale da controllare: FERRO si compra (proposta di acquisto), transenne e kit si producono (proposta di produzione).',
       minimo: 'Scorta minima o punto di riordino, nell’unità del materiale: quando libera + in arrivo scende sotto questo numero il sistema propone di riordinare. 0 = nessun controllo.',
@@ -448,6 +539,7 @@ window.WMGuida = (function () {
     mappa: 'Per sapere DOVE SI TROVA un articolo sceglilo nel menu «Dove si trova?»: le sue ubicazioni si colorano e la tabella dice quali sono libere da prelevare e quali sono bloccate, impegnate o in un’area di passaggio. Oppure tocca un’ubicazione → leggi materiale, quanto, quantità e UdC → controlla compiti da/a → per spostare vai a Compiti, non modificare un saldo. Bordo di arrivo = destinazione impegnata, non merce già presente.',
     allocare: 'Scegli la data di oggi → leggi le UdC arrivate e non ancora messe a scaffale (ricevimento, resi, merce sbloccata) con la destinazione proposta e i giorni di attesa → premi «Metti a posto»: si apre la pistola RF con quel compito → conferma origine, UdC e destinazione. La pagina non sposta niente da sola.',
     arretrato: 'Scegli la data di oggi → leggi in rosso chi è IN RITARDO e in giallo/arancio chi scade nei prossimi giorni: consegne ai clienti, arrivi dai fornitori, ordini di produzione, compiti di magazzino ancora aperti → parti dalle righe rosse. È solo una lettura: per recuperare si usano le pagine di consegna, entrata merci, produzione e la pistola RF.',
+    depositi: 'Crea il trasferimento (UB) → da W100 conferma i prelievi con la pistola RF → registra l’uscita 351: la merce è SUL CAMION, né qua né là → all’arrivo registra l’entrata 101 → controlla la tabella per luogo: W100 + in viaggio + D200 = totale contabile. Nessuna scrittura: la merce cambia posto, non proprietario.',
     scorte: 'Scegli il materiale → scrivi scorta minima (e massima) → Salva → leggi il semaforo: libera + in arrivo sotto il minimo = SOTTO SCORTA con la quantità da riordinare. Il sistema propone, non ordina: la richiesta d’acquisto o l’ordine di produzione si fanno a mano.',
     compiti: 'Scegli approvvigionamento produzione o trasferimento → compila il modulo relativo → crea il compito → esegui RF → verifica ubicazione e Monitor. Non duplicare i compiti già aperti.',
     rf: 'Scegli risorsa e data → Compiti: origine, UdC (il materiale è accettato come alternativa), quantità, destinazione → Conferma → verifica coda e Mappa. Carico legge SSCC, Interroga legge ubicazione/UdC e non modifica nulla, Inventario registra la conta di documenti già attivi.',
