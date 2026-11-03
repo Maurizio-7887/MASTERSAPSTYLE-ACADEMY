@@ -95,3 +95,20 @@ const d = w.document.querySelector('.msa-g-tdata'); d.value = '2026-12-31'; d.di
 ok(testo(w).includes('Costi ' + eur(costi)), 'senza chiusura: bilancio 2026 prima dell’epilogo');
 w.close();
 console.log('✓ Pannello semplice e saldi interrogabili: ' + n + ' controlli');
+
+// 3) magazzino e produzione dell'esercizio di dicembre: stessi aiuti del controllo di gestione
+{
+  const G2 = f => fs.readFileSync(path.join(__dirname, '../app/blueprints/guida/static', f), 'utf8');
+  const w2 = new JSDOM('<body></body>', {runScripts: 'outside-only'}).window;
+  w2.MSA_STATO_CORRENTE = () => ({}); w2.MSA_GUIDA = {esercizio: 'dicembre-wms', chiave: 'x', url: {}};
+  for (const f of ['esercizi/dicembre-wms-legacy.js', 'esercizi/cpm-formas.js', 'esercizi/dicembre-wms.js', 'esercizi/dicembre-wms-semplice.js']) w2.eval(G2(f));
+  const GR = /^(1 · Preparazione: WMS|4 · CICLO|5 · |6 · |7 · |8 · |8b · |9 · |14 · Inventario)/;
+  const mag = w2.MSA_ESERCIZIO.passi.filter(p => GR.test(p.g));
+  ok(mag.length >= 70 && mag.every(p => p.fai && p.grande && p.vedi && p.mappa), 'magazzino e produzione: tutti i passi semplici ' + mag.length);
+  const RX = /\b(D|A) ?\d{2}(\.\d{2})?\b(?! ?(h|ore|pz|kg|%|anni|mesi))/;
+  ok(mag.filter(p => p.contabile).every(p => !RX.test(JSON.stringify([p.grande, p.fai, p.vedi]))), 'nessuna scrittura rivelata prima del tentativo');
+  const rfp = mag.filter(p => /^RF: /.test(p.titolo));
+  ok(rfp.length >= 12 && rfp.every(p => p.fai.some(r => /Conferma il compito/.test(r.fai))), 'pistola RF spiegata campo per campo');
+  w2.close();
+  console.log('✓ Magazzino e produzione punto per punto: ' + mag.length + ' passi');
+}
