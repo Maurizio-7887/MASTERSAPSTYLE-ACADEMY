@@ -7,9 +7,9 @@
   var e = L.esc, eur = L.eur, n0 = L.n0, S = function () { return N.S; };
   var PAGINE = {
     avvio: function () {
-      var capitaleDaVersare = !!(S().costituzione && N.saldo('08') > 0.004);
+      // Il reset non deve mai comparire automaticamente nel percorso didattico.
       var occupato = !!(S().avviato || S().costituzione || (S().registrazioni || []).length);
-      radice.innerHTML = (occupato && !capitaleDaVersare ? '<div class="reset-box" id="reset-box"><h2>♻️ In questo account c’è già un’azienda</h2>' +
+      radice.innerHTML = (false ? '<div class="reset-box" id="reset-box"><h2>♻️ In questo account c’è già un’azienda</h2>' +
           '<p>' + (S().costituzione ? 'Costituita il ' + L.fd(S().costituzione.data) : S().avviato ? 'Avviata il ' + L.fd(S().avviato) : 'Con documenti registrati') + ' · ' + (S().registrazioni || []).length + ' scritture nel libro giornale.</p>' +
           '<p><b>Vuoi continuare il lavoro?</b> Non premere niente qui: apri l’esercizio e vai al primo passo non spuntato.</p>' +
           '<p><b>Devi cominciare un esercizio nuovo da zero?</b> Premi il pulsante rosso: ti chiede conferma, salva una copia di sicurezza sul computer e poi svuota l’azienda.</p>' +
