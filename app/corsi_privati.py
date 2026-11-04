@@ -67,7 +67,7 @@ MODULI_MAG = [
 
 CORSI = {
     "erp": {
-        "titolo": "ERP in stile SAP: dal ciclo attivo alla produzione", "breve": "Corso ERP", "prefisso": "ERP",
+        "titolo": "Master ERP Enterprise: dal ciclo attivo alla produzione", "breve": "Master ERP Enterprise", "prefisso": "ERP",
         "prezzo": 297, "prezzo_pieno": 347, "moduli": MODULI_ERP, "esercizio": "dicembre-wms",
         "gratis": ["ciclo-completo", "chi-fa-cosa", "prezzi-sconti"],
         "sottotitolo": "Un ERP didattico integrato con un solo libro giornale: costituisci Ferro & Transenne e la porti fino alla riapertura "
