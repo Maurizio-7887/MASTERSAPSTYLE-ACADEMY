@@ -42,6 +42,20 @@
 </form>
 </div>
 
+<h2>Lavoro salvato e domande di ragioneria</h2>
+{% if lavori %}
+<div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Lavoro</th><th class="n">Scritture</th><th>Ultimo salvataggio</th><th>Domande aperte</th><th></th></tr>
+  {% for l in lavori %}
+  <tr><td>{{ l.nome }}</td><td class="n">{{ l.scritture }}</td><td>{{ ora_italiana(l.aggiornato) }}</td>
+      <td>{% if l.aperte %}{% for d in l.aperte %}doc. {{ d[0] }} ({{ d[1] }}){% if d[2] %}, {{ d[2] }} tentativi non acquisiti{% endif %}{% if not loop.last %}<br>{% endif %}{% endfor %}{% else %}nessuna{% endif %}</td>
+      <td>{% if l.aperte %}<form method="post" action="{{ url_for('docente.sblocca_quiz', uid=u.id) }}" onsubmit="return confirm('Sbloccare le domande aperte di {{ u.nome }}? Restano registrate come sbloccate dal docente; il lavoro attuale viene prima archiviato.')">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="versione" value="{{ l.versione }}"><button class="msa-btn" type="submit">Sblocca le domande</button></form>{% endif %}</td></tr>
+  {% endfor %}
+</table></div>
+<p class="msa-nota">Dopo lo sblocco l'allievo ricarica la pagina (F5): riceve il lavoro già sbloccato, senza perdere registrazioni. Se compare «Nessun lavoro», non ha ancora salvato nulla sul server.</p>
+{% else %}<p>Nessun lavoro salvato sul server.</p>{% endif %}
+
 <h2>Collegamenti (ultimi 100)</h2>
 {% if sessioni %}
 <div class="msa-scroll"><table class="msa-tab">

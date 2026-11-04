@@ -149,10 +149,64 @@ def allievo(uid):
         flash("Dati dell'allievo salvati.", "ok")
         return redirect(url_for("docente.allievo", uid=uid))
     sessioni = u.sessioni.order_by(Sessione.inizio.desc()).limit(100).all()
+    lavori = _lavori_con_domande(u)
     consegne = u.consegne.order_by(Consegna.consegnata.desc()).all()
     sec = u.secondi_totali()
     return render_template("docente/allievo.html", u=u, sessioni=sessioni, consegne=consegne, secondi=sec,
-                           costo=costo(sec, u.tariffa()), tariffa_generale=costo_orario_generale(), esercizi=ESERCIZI, costo_f=costo)
+                           costo=costo(sec, u.tariffa()), tariffa_generale=costo_orario_generale(), esercizi=ESERCIZI, costo_f=costo, lavori=lavori)
+
+
+def _quiz_aperti(dati):
+    """Le domande di ragioneria ancora aperte nel lavoro salvato: [(documento, data, tentativi non acquisiti)]."""
+    import json
+    try:
+        o = json.loads(dati)
+    except ValueError:
+        return None, []
+    coda = ((o.get("msaRagioneria") or {}).get("coda") or []) if isinstance(o, dict) else []
+    return o, [((q.get("documento") or {}).get("numero") or (q.get("documento") or {}).get("id"), (q.get("documento") or {}).get("data", ""), q.get("rifiuti", 0)) for q in coda]
+
+
+def _lavori_con_domande(u):
+    """I lavori salvati dell'allievo con le domande di ragioneria rimaste aperte (per sbloccarle dal portale del docente)."""
+    out = []
+    for st in StatoLavoro.query.filter_by(utente_id=u.id).order_by(StatoLavoro.aggiornato.desc()).all():
+        o, aperte = _quiz_aperti(st.dati)
+        if o is None:
+            continue
+        out.append({"versione": st.versione, "nome": LAVORI.get(st.versione, st.versione), "aggiornato": st.aggiornato, "rev": st.rev,
+                    "scritture": len(o.get("registrazioni") or []) if isinstance(o, dict) else 0, "aperte": aperte})
+    return out
+
+
+@bp.route("/allievo/<int:uid>/sblocca-quiz", methods=["POST"])
+def sblocca_quiz(uid):
+    """Chiude sul server le domande di ragioneria aperte: l'allievo, al prossimo accesso, riceve il lavoro già sbloccato.
+    Copia di sicurezza prima; le domande restano negli esiti come «sbloccate dal docente» (non contano come risposte corrette)."""
+    import json
+    u = _allievo(uid)
+    versione = request.form.get("versione", "")
+    st = StatoLavoro.query.filter_by(utente_id=u.id, versione=versione).first()
+    if st is None:
+        flash("Lavoro non trovato.", "errore")
+        return redirect(url_for("docente.allievo", uid=uid))
+    o, aperte = _quiz_aperti(st.dati)
+    if not aperte:
+        flash("Nessuna domanda aperta in questo lavoro.", "ok")
+        return redirect(url_for("docente.allievo", uid=uid))
+    db.session.add(ArchivioLavoro(utente_id=u.id, versione=versione, dati=st.dati, motivo="prima di sbloccare le domande di ragioneria"))
+    q = o["msaRagioneria"]
+    q.setdefault("esiti", [])
+    for d in q.get("coda", []):
+        doc = d.get("documento") or {}
+        q["esiti"].append({"chiave": d.get("chiave"), "documento": doc.get("numero") or doc.get("id"), "data": doc.get("data"), "tipo": doc.get("tipo"),
+                           "tentativi": d.get("tentativi", 0), "tentato": True, "corretto": False, "conAiuto": True, "sbloccatoDalDocente": True,
+                           "risposte": d.get("risposte", []), "cronologiaTentativi": d.get("cronologiaTentativi", []), "completatoIl": adesso().isoformat()})
+    q["coda"] = []
+    st.dati, st.rev, st.aggiornato = json.dumps(o, ensure_ascii=False, separators=(",", ":")), st.rev + 1, adesso()
+    db.session.commit()
+    flash(f"Sbloccate {len(aperte)} domande di ragioneria di {u.nome}. Deve ricaricare la pagina (F5) per ripartire.", "ok")
+    return redirect(url_for("docente.allievo", uid=uid))
 
 
 @bp.route("/allievo/<int:uid>/password", methods=["POST"])
