@@ -63,6 +63,7 @@ function verificaQuiz(w,regPrima) {
   ok(JSON.stringify(S.registrazioni)===libro,'quiz non duplica o cambia le scritture');
 }
 const bene = (r, m) => ok(/ ok /.test(' ' + r.split(' ')[1] + ' ') || /lab-esito ok/.test(r), m + ' → ' + r.slice(0, 160));
+const male = (r, m) => ok(/lab-esito ko/.test(r) && !/lab-esito ok/.test(r), m + ' → ' + r.slice(0, 160));
 const num = S => n => n;   // segnaposto leggibile
 
 
@@ -175,9 +176,21 @@ bene(p.fai('vl',{ordine:od,data:'2027-01-14'}),'VL Delta'); fino('consegna per D
 p = apri('erp_innovazione','ondate'); bene(p.fai('on',{data:'2027-01-14'}),'ONDA-1'); fino('Rilascia l’ondata');
 rfTutti('2027-01-14','PICK',10); fino('preleva i 10 pallet');
 const [cb,cd]=p.S().consegne.map(c=>c.numero);
+{ p = apri('erp_spedizione','imballi'); const regs = p.S().registrazioni.length;
+  bene(p.fai('ib',{imballo:'EUR',lung:'120',larg:'80',alt:'15',tara:'25',portata:'1000',impilabile:'si',sopra:'700'}),'misure EUR');
+  male(p.fai('rc',{materiale:'TR-STD',imballo:'EUR',pezzi:'90',alt:'125'}),'90 TR-STD su EUR: troppo pesante');
+  bene(p.fai('rc',{materiale:'TR-STD',imballo:'EUR',pezzi:'50',alt:'125'}),'regola TR-STD'); bene(p.fai('rc',{materiale:'TR-ALTA',imballo:'EUR',pezzi:'50',alt:'140'}),'regola TR-ALTA');
+  fino('quante transenne per collo'); ok(p.S().registrazioni.length===regs,'anagrafiche imballo senza scritture'); }
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cb,imballo:'EUR',perCollo:'50',data:'2027-01-14'}),'imballo Beta'); fino('Imballa Beta');
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cd,imballo:'EUR',perCollo:'50',data:'2027-01-14'}),'imballo Delta'); fino('Imballa Delta');
 p = apri('erp_spedizione','trasporti'); bene(p.fai('vt',{consegne:cb+', '+cd,vettore:'V10',targa:'AB123CD',autista:'Mario Esempio',porto:'franco',data:'2027-01-15'}),'VT01N'); fino('un camion per le due consegne');
+{ p = apri('erp_spedizione','piano'); const t = p.S().sped.trasporti[0].numero, SPx = p.w.SP4;
+  const f = SPx.calcolaPiano({trasporto:t,veicolo:'FURGONE',criterio:'fermate'}), m = SPx.calcolaPiano({trasporto:t,veicolo:'MOTRICE',criterio:'fermate'}), s2 = SPx.calcolaPiano({trasporto:t,veicolo:'MOTRICE',criterio:'saturazione'});
+  ok(f.kpi.caricati===1 && f.scarti.some(x=>/portata/.test(x.motivo)),'furgone: 1 collo, portata superata');
+  ok(m.kpi.caricati===10 && m.kpi.posti===7 && m.kpi.pile===3 && m.kpi.peso===6700,'motrice: 10 colli in 7 posti, 3 pile, 6.700 kg');
+  ok(m.posti.slice(0,3).every(q=>q.consegne[0]===p.S().sped.trasporti[0].consegne[1]),'per fermate: Delta (ultima fermata) vicino alla cabina');
+  bene(p.fai('ps',{trasporto:t,veicolo:'MOTRICE',criterio:'fermate'}),'piano di carico'); fino('quale camion');
+  ok(/CABINA/.test(p.testo()) || p.lab.querySelector('svg.piano-svg'),'disegno del camion'); }
 const tr = p.S().sped.trasporti[0].numero;
 p = apri('erp_magazzino','rf'); for (const x of p.S().sped.colli.filter(c=>c.consegna===cb)) { scheda(p,'carico'); p.lab.querySelector('#rf-data').value='2027-01-15'; invio(p,'rf-sscc',x.sscc); memoria = p.w.localStorage.getItem(CHIAVE); }
 fino('RF Carico');

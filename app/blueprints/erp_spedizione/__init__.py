@@ -31,3 +31,13 @@ def trasporti():
 @bp.route("/ddt")
 def ddt():
     return render_lab("erp_spedizione", "ddt")
+
+
+@bp.route("/imballi")
+def imballi():
+    return render_lab("erp_spedizione", "imballi")
+
+
+@bp.route("/piano-carico")
+def piano():
+    return render_lab("erp_spedizione", "piano")

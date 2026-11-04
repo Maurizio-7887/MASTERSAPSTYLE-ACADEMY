@@ -42,8 +42,9 @@
       var colli = sel ? SP.colliDi(sel) : [];
       radice.innerHTML = nonAttivo() + '<div class="lab-griglia no-stampa">' +
         L.scheda('📦', 'Imballa la consegna', 'VL02N Imballaggio · /SCWM/PACK', L.modulo('im', [['consegna', 'Consegna prelevata', 'select', '', U.lista(da, etich, '— nessuna consegna da imballare —')],
-          ['imballo', 'Materiale d\'imballo', 'select', 'EUR', Object.keys(SP.IMBALLI).map(function (k) { return [k, SP.IMBALLI[k].nome + ' · tara ' + SP.IMBALLI[k].tara + ' kg · max ' + SP.IMBALLI[k].max + ' pz']; })],
-          ['perCollo', 'Pezzi per collo (vuoto = massimo)', 'num'], ['data', 'Data', 'date']], [['im', 'Crea i colli (SSCC)']])) +
+          ['imballo', 'Materiale d\'imballo', 'select', 'EUR', Object.keys(SP.IMBALLI).map(function (k) { var im = SP.imballi()[k]; return [k, im.nome + ' · ' + im.lung + '×' + im.larg + ' cm · tara ' + im.tara + ' kg']; })],
+          ['perCollo', 'Pezzi per collo (vuoto = quelli della regola)', 'num'], ['data', 'Data', 'date']], [['im', 'Crea i colli (SSCC)']]) +
+          '<p class="lab-nota">Quanti pezzi stanno in un collo lo dice la <b>regola di confezionamento</b> (Spedizione → Imballi, regole e veicoli): per esempio TR-STD su pallet EUR = ' + (SP.regola('TR-STD', 'EUR') || {}).pezzi + ' pezzi.</p>') +
         L.scheda('🏷️', 'Che cos\'è l\'SSCC', 'GS1', '<p class="lab-nota">Il <b>Serial Shipping Container Code</b> identifica ogni collo in tutta la catena: 18 cifre = estensione + prefisso aziendale GS1 + numero progressivo + cifra di controllo. Si legge con il codice a barre GS1-128 «(00)». Qui il prefisso 8012345 è di fantasia.</p>') + '</div>' +
         (tutte.length ? '<div class="lab-filtro no-stampa"><label>Etichette della consegna <select id="ci">' + tutte.map(function (c) { return '<option value="' + c.numero + '"' + (c.numero === sel ? ' selected' : '') + '>' + e(etich(c)) + '</option>'; }).join('') + '</select></label> <button type="button" class="lab-btn" id="stampa">🖨️ Stampa le etichette</button></div>' +
           L.scheda('📦', 'Colli della consegna ' + sel, 'HU · SSCC', L.tabella(['SSCC', 'Imballo', 'Pezzi›', 'Peso netto kg›', 'Tara kg›', 'Peso lordo kg›', 'Caricato'], colli.map(function (x) { return [x.sscc, SP.IMBALLI[x.imballo].nome, n0(x.qta), n0(x.pesoNetto), n0(x.tara), n0(x.pesoLordo), x.caricato ? fd(x.caricato) + ' · trasp. ' + x.trasporto : '']; }))) +
@@ -59,7 +60,8 @@
       radice.innerHTML = nonAttivo() + '<div class="lab-griglia">' +
         L.scheda('🚛', 'Crea il trasporto', 'VT01N', L.modulo('vt', [['consegne', 'Consegne (numeri separati da virgola)', 'text', libere.map(function (c) { return c.numero; }).join(', ')],
           ['vettore', 'Vettore', 'select', 'V10', Object.keys(SP.VETTORI).map(function (k) { return [k, k + ' — ' + SP.VETTORI[k]]; })], ['targa', 'Targa del mezzo', 'text'], ['autista', 'Autista', 'text'],
-          ['porto', 'Porto', 'select', 'franco', [['franco', 'franco (trasporto pagato dal mittente)'], ['assegnato', 'assegnato (pagato dal destinatario)']]], ['data', 'Data di carico', 'date']], [['vt', 'Crea trasporto']]) +
+          ['porto', 'Porto', 'select', 'franco', [['franco', 'franco (trasporto pagato dal mittente)'], ['assegnato', 'assegnato (pagato dal destinatario)']]], ['data', 'Data di carico', 'date'],
+          ['veicolo', 'Veicolo (facoltativo, serve al piano di carico)', 'select', '', [['', '— da decidere —']].concat(Object.keys(SP.VEICOLI).map(function (k) { var v = SP.veicoli()[k]; return [k, v.nome + ' · ' + v.lung + '×' + v.larg + ' cm · ' + n0(v.portata) + ' kg']; }))]], [['vt', 'Crea trasporto']]) +
           '<p class="lab-nota">Consegne libere: ' + (libere.map(function (c) { return c.numero + ' (' + e(U.nome(S(), c.cliente)) + ')'; }).join(', ') || 'nessuna') + '. Più consegne sullo stesso camion = un giro di consegna; ogni destinatario avrà il suo DDT.</p>') +
         L.scheda('📥', 'Carico (da scrivania)', 'VT02N · alla porta di spedizione', L.modulo('ca', [['sscc', 'SSCC letto sul collo', 'text'], ['data', 'Data', 'date']], [['ca', 'Carica il collo']]) + '<p class="lab-nota">In magazzino si carica con la pistola: Magazzino → Pistola RF → Carico. Un collo di un\'altra consegna viene rifiutato.</p>') +
         L.scheda('🏁', 'Fine carico e uscita merci', 'VT02N · 601', L.modulo('pt', [['trasporto', 'Trasporto', 'select', '', U.lista(daPartire, function (t) { return t.numero + ' · ' + SP.VETTORI[t.vettore] + ' · ' + t.consegne.join(', ') + ' · ' + t.stato; }, '— nessun trasporto da far partire —')], ['data', 'Data di partenza', 'date']], [['pt', 'Registra la partenza e l\'uscita merci']]) +
@@ -68,6 +70,64 @@
           var col = t.consegne.reduce(function (a, k) { return a.concat(SP.colliDi(k)); }, []);
           return [t.numero, fd(t.data), SP.VETTORI[t.vettore], e(t.targa), e(t.autista), t.porto, t.consegne.join(', '), col.filter(function (x) { return x.caricato; }).length + ' / ' + col.length, t.partenza ? 'partito ' + fd(t.partenza) : t.stato]; }), 'Nessun trasporto.'));
       L.collega(radice, 'vt', {vt: SP.creaTrasporto}, rendi); L.collega(radice, 'ca', {ca: SP.carica}, rendi); L.collega(radice, 'pt', {pt: SP.parti}, rendi);
+    },
+    imballi: function () {
+      var IM = SP.imballi(), VE = SP.veicoli(), mats = Object.keys(S().materiali).filter(function (m) { return S().materiali[m].tipo !== 'ROH'; });
+      var siNo = [['si', 'sì: altri colli possono stare sopra'], ['no', 'no: niente sopra']];
+      radice.innerHTML = '<div class="lab-esito dep-idea">📐 <b>PRIMA DI CARICARE BISOGNA CONOSCERE LE MISURE.</b> Quanto è grande un pallet o una cassa, quanti pezzi ci stanno, quanto pesa il collo pieno e quanto è grande il camion: con questi numeri il programma calcola il <b>piano di carico</b>.</div>' +
+        '<div class="lab-griglia">' +
+        L.scheda('1️⃣', 'Imballo: pallet o cassa', 'misure in cm · pesi in kg', L.modulo('ib', [['imballo', 'Imballo', 'select', radice.dataset.ib || 'EUR', Object.keys(IM).map(function (k) { return [k, IM[k].nome]; })],
+          ['lung', 'Lunghezza (cm)', 'num', IM[radice.dataset.ib || 'EUR'].lung], ['larg', 'Larghezza (cm)', 'num', IM[radice.dataset.ib || 'EUR'].larg], ['alt', 'Altezza dell’imballo vuoto (cm)', 'num', IM[radice.dataset.ib || 'EUR'].alt],
+          ['tara', 'Tara: peso dell’imballo vuoto (kg)', 'num', IM[radice.dataset.ib || 'EUR'].tara], ['portata', 'Portata: quanto regge (kg)', 'num', IM[radice.dataset.ib || 'EUR'].portata],
+          ['impilabile', 'Impilabile?', 'select', IM[radice.dataset.ib || 'EUR'].impilabile === false ? 'no' : 'si', siNo], ['sopra', 'Peso massimo che regge sopra (kg)', 'num', IM[radice.dataset.ib || 'EUR'].sopra]], [['ib', 'Salva l’imballo']])) +
+        L.scheda('2️⃣', 'Regola di confezionamento', 'quanti pezzi per collo', L.modulo('rc', [['materiale', 'Articolo', 'select', 'TR-STD', mats.map(function (m) { return [m, m + ' — ' + S().materiali[m].nome + ' (' + (S().materiali[m].peso || 1) + ' kg/pz)']; })],
+          ['imballo', 'Su quale imballo', 'select', 'EUR', Object.keys(IM).map(function (k) { return [k, IM[k].nome]; })], ['pezzi', 'Pezzi per collo', 'num'], ['alt', 'Altezza del collo carico, imballo compreso (cm)', 'num']], [['rc', 'Salva la regola']]) +
+          '<p class="lab-nota">Il programma controlla che il collo pieno (pezzi × peso + tara) non superi la portata dell’imballo.</p>') +
+        L.scheda('3️⃣', 'Veicolo', 'pianale interno', L.modulo('ve', [['veicolo', 'Veicolo', 'select', radice.dataset.ve || 'MOTRICE', Object.keys(VE).map(function (k) { return [k, VE[k].nome]; })],
+          ['lung', 'Lunghezza del pianale (cm)', 'num', VE[radice.dataset.ve || 'MOTRICE'].lung], ['larg', 'Larghezza del pianale (cm)', 'num', VE[radice.dataset.ve || 'MOTRICE'].larg],
+          ['alt', 'Altezza utile (cm)', 'num', VE[radice.dataset.ve || 'MOTRICE'].alt], ['portata', 'Portata utile (kg)', 'num', VE[radice.dataset.ve || 'MOTRICE'].portata]], [['ve', 'Salva il veicolo']])) + '</div>' +
+        L.scheda('📦', 'Imballi', 'anagrafica', L.tabella(['Imballo', 'Misure cm', 'Tara kg›', 'Portata kg›', 'Impilabile', 'Regge sopra kg›'], Object.keys(IM).map(function (k) { var x = IM[k];
+          return [x.nome, x.lung + ' × ' + x.larg + ' × ' + x.alt, n0(x.tara), n0(x.portata), x.impilabile === false ? 'no' : 'sì', n0(x.sopra)]; }))) +
+        L.scheda('📏', 'Regole di confezionamento', 'articolo × imballo', L.tabella(['Articolo', 'Imballo', 'Pezzi per collo›', 'Altezza collo cm›', 'Peso lordo collo kg›', 'Chi l’ha decisa'], mats.reduce(function (a, m) {
+          return a.concat(Object.keys(IM).map(function (k) { var r = SP.regola(m, k); return r ? [m, IM[k].nome, n0(r.pezzi), n0(r.alt), n0(r.pezzi * (S().materiali[m].peso || 1) + IM[k].tara), r.definita ? '✏️ tu' : 'predefinita'] : null; }).filter(Boolean)); }, []))) +
+        L.scheda('🚛', 'Veicoli', 'anagrafica', L.tabella(['Veicolo', 'Pianale cm', 'Altezza utile cm›', 'Portata kg›', 'Posti EUR a terra (circa)›'], Object.keys(VE).map(function (k) { var v = VE[k];
+          return [v.nome, v.lung + ' × ' + v.larg, n0(v.alt), n0(v.portata), Math.floor(v.lung / 120) * Math.floor(v.larg / 80) > Math.floor(v.lung / 80) * Math.floor(v.larg / 120) ? Math.floor(v.lung / 120) * Math.floor(v.larg / 80) : Math.floor(v.lung / 80) * Math.floor(v.larg / 120)]; })));
+      var sel = radice.querySelector('#ib-imballo'); if (sel) sel.onchange = function () { radice.dataset.ib = this.value; rendi(); };
+      var sv = radice.querySelector('#ve-veicolo'); if (sv) sv.onchange = function () { radice.dataset.ve = this.value; rendi(); };
+      L.collega(radice, 'ib', {ib: SP.salvaImballo}, rendi); L.collega(radice, 'rc', {rc: SP.salvaRegola}, rendi); L.collega(radice, 've', {ve: SP.salvaVeicolo}, rendi);
+    },
+    piano: function () {
+      var tr = SP.SP().trasporti.filter(function (t) { return !t.partenza; }), sel = radice.dataset.tp || (tr.slice(-1)[0] || {}).numero || '', t = tr.find(function (x) { return x.numero === sel; });
+      var ve = radice.dataset.pv || (t && t.veicolo) || 'MOTRICE', crit = radice.dataset.pc || (t && t.piano && t.piano.criterio) || 'fermate', anteprima = null, errore = '';
+      if (t) { try { anteprima = SP.calcolaPiano({trasporto: t.numero, veicolo: ve, criterio: crit}); } catch (err) { errore = err.message; } }
+      var colore = ['#0A6ED1', '#E9730C', '#107E3E', '#925ACE', '#BB0000', '#1D7F8C'];
+      var disegno = function (p) {
+        var v = p.v, sc = Math.min(900 / v.lung, 3.2), W = v.lung * sc, H = v.larg * sc;
+        return '<svg class="piano-svg" viewBox="-60 -30 ' + (W + 130) + ' ' + (H + 60) + '" role="img" aria-label="Piano di carico visto dall’alto">' +
+          '<rect x="-55" y="0" width="50" height="' + H + '" fill="#d8dee6" rx="6"/><text x="-30" y="' + (H / 2) + '" font-size="12" text-anchor="middle" transform="rotate(-90 -30 ' + (H / 2) + ')">CABINA</text>' +
+          '<rect x="0" y="0" width="' + W + '" height="' + H + '" fill="#f7f7f5" stroke="#556" stroke-width="2"/>' +
+          '<text x="' + (W + 30) + '" y="' + (H / 2) + '" font-size="12" text-anchor="middle" transform="rotate(90 ' + (W + 30) + ' ' + (H / 2) + ')">PORTE ▸ si carica da qui</text>' +
+          p.posti.map(function (q) { var c = colore[t.consegne.indexOf(q.consegne[0]) % colore.length];
+            return '<g><rect x="' + (q.y * sc + 1) + '" y="' + (q.x * sc + 1) + '" width="' + (q.lung * sc - 2) + '" height="' + (q.larg * sc - 2) + '" fill="' + c + '" fill-opacity="' + (q.colli.length > 1 ? '0.95' : '0.6') + '" stroke="#223" rx="3"/>' +
+              '<text x="' + (q.y * sc + q.lung * sc / 2) + '" y="' + (q.x * sc + q.larg * sc / 2 + 5) + '" font-size="' + Math.max(10, Math.min(16, q.larg * sc / 3)) + '" text-anchor="middle" fill="#fff" font-weight="700">' + q.n + (q.colli.length > 1 ? ' ×' + q.colli.length : '') + '</text></g>'; }).join('') +
+          '<text x="0" y="-10" font-size="12">' + e(v.nome) + ' · pianale ' + v.lung + ' × ' + v.larg + ' cm · ' + p.kpi.metriUsati.toLocaleString('it-IT') + ' m usati</text></svg>';
+      };
+      radice.innerHTML = '<div class="lab-esito dep-idea">🚛 <b>IL PIANO DI CARICO DICE DOVE METTERE OGNI COLLO SUL CAMION</b>, prima di cominciare a caricare: così si vede subito se ci sta tutto, se si supera il peso e chi scarica per primo.</div>' +
+        '<div class="lab-filtro no-stampa"><label>Trasporto <select id="tp">' + (tr.length ? tr.map(function (x) { return '<option value="' + x.numero + '"' + (x.numero === sel ? ' selected' : '') + '>' + x.numero + ' · consegne ' + x.consegne.join(', ') + '</option>'; }).join('') : '<option value="">— nessun trasporto da caricare —</option>') + '</select></label> ' +
+        '<label>Veicolo <select id="pv">' + Object.keys(SP.VEICOLI).map(function (k) { return '<option value="' + k + '"' + (k === ve ? ' selected' : '') + '>' + e(SP.veicoli()[k].nome) + '</option>'; }).join('') + '</select></label> ' +
+        '<label>Criterio <select id="pc"><option value="fermate"' + (crit === 'fermate' ? ' selected' : '') + '>per fermate: l’ultimo cliente vicino alla cabina</option><option value="saturazione"' + (crit === 'saturazione' ? ' selected' : '') + '>massima saturazione del pianale</option></select></label></div>' +
+        (!t ? '<p class="lab-vuoto">Nessun trasporto da caricare: crea il trasporto in Spedizione → Trasporti e carico.</p>' : errore ? '<div class="lab-esito ko">⛔ ' + e(errore) + '</div>' :
+          '<div class="kpi4"><div><b>' + anteprima.kpi.caricati + ' / ' + anteprima.kpi.colli + '</b><span>colli che ci stanno</span></div><div><b>' + n0(anteprima.kpi.saturazioneArea) + '%</b><span>pianale occupato</span></div>' +
+          '<div><b>' + n0(anteprima.kpi.peso) + ' kg</b><span>' + n0(anteprima.kpi.saturazionePeso) + '% della portata</span></div><div><b>' + anteprima.kpi.posti + '</b><span>posti a terra' + (anteprima.kpi.pile ? ' (' + anteprima.kpi.pile + ' pile da due)' : '') + '</span></div></div>' +
+          (anteprima.scarti.length ? '<div class="lab-esito ko">⚠ <b>Restano a terra ' + anteprima.kpi.scartati + ' colli</b>: ' + e(anteprima.scarti.map(function (s0) { return s0.motivo; }).filter(function (m, z, a) { return a.indexOf(m) === z; }).join('; ')) + '. Prova un camion più grande o dividi il trasporto.</div>' : '<div class="lab-esito ok">✓ Tutti i colli ci stanno.</div>') +
+          L.scheda('🗺️', 'Il camion visto dall’alto', 'colori = clienti · ×2 = pila di due colli', disegno(anteprima) + '<p class="lab-nota">' + t.consegne.map(function (k, z) { var c = S().consegne.find(function (y) { return y.numero === k; }); return '<span style="color:' + colore[z % colore.length] + ';font-weight:700">■</span> ' + k + ' ' + e(U.nome(S(), c.cliente)) + ' (fermata ' + (z + 1) + ')'; }).join(' · ') + '</p>') +
+          L.scheda('📋', 'Ordine di carico', 'si carica dal posto 1 (cabina) verso le porte', L.tabella(['Posto', 'Colli (SSCC)', 'Consegna', 'Articolo', 'Altezza cm›', 'Peso kg›', 'Nota'], anteprima.posti.map(function (q) {
+            return [q.n, q.colli.join('<br>'), q.consegne.join(', '), q.materiali.join(' + '), n0(q.alt), n0(q.peso), (q.colli.length > 1 ? 'pila: il più pesante sotto' : '') + (q.scambio ? ' · recuperato con uno scambio' : '') + (q.ruotato ? ' · girato di 90°' : '')]; }))) +
+          L.modulo('ps', [['trasporto', 'Trasporto', 'select', t.numero, [[t.numero, t.numero]]], ['veicolo', 'Veicolo', 'select', ve, [[ve, SP.veicoli()[ve].nome]]], ['criterio', 'Criterio', 'select', crit, [[crit, crit === 'fermate' ? 'per fermate' : 'massima saturazione']]]], [['ps', 'Salva il piano sul trasporto']]) +
+          (t.piano ? '<p class="lab-nota">Piano salvato: ' + e(SP.veicoli()[t.piano.veicolo].nome) + ', ' + t.piano.kpi.caricati + '/' + t.piano.kpi.colli + ' colli. Con la pistola RF → Carico ogni collo ti dice in quale posto va.</p>' : '')) +
+        '<p class="lab-nota"><b>Come ragiona:</b> 1) i colli impilabili con la stessa base vanno uno sopra l’altro se ci stanno in altezza e quello sotto regge il peso; 2) i posti si riempiono a file dalla cabina verso le porte, prima i più grandi, girandoli di 90° se serve; 3) se un collo resta fuori, prova a scambiarlo con uno già messo; 4) controlla la portata. È lo stesso metodo del MasterLogistic WMS: un buon piano pratico, non l’ottimo matematico.</p>';
+      ['tp', 'pv', 'pc'].forEach(function (id) { var x = radice.querySelector('#' + id); if (x) x.onchange = function () { radice.dataset[id] = this.value; rendi(); }; });
+      L.collega(radice, 'ps', {ps: SP.salvaPiano}, rendi);
     },
     ddt: function () {
       var lista = uscita().filter(function (c) { return c.ddt; }), sc = scegli(lista, 'cd'), c = lista.find(function (x) { return x.numero === sc.sel; });
