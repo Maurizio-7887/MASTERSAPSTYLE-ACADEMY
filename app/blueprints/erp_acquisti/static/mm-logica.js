@@ -50,11 +50,35 @@ window.MM4 = (function () {
     o.rilascio.stato = 'rilasciato'; o.rilascio.data = data; n.salva();
     return '<p class="lab-nota">Ordine ' + o.numero + ' <b>rilasciato</b> (ME29N, codice AC): ora si invia al fornitore e può ricevere la merce.</p>';
   }
-  function parametri(i) { var x = L.num(i.soglia, 'Soglia di rilascio', 0); P().acqParam.soglia = x; N().salva(); return '<p class="lab-nota">Strategia di rilascio: gli ordini oltre ' + L.eur(x) + ' € vanno rilasciati dal responsabile acquisti.</p>'; }
+  // Conferma d'ordine del fornitore (in SAP: conferma AB, controllo conferme): l'ordine è un'offerta nostra finché il fornitore non risponde.
+  // Si registra la conferma tornata (riferimento, data, consegna e prezzo confermati) e si segnalano gli scostamenti da ciò che abbiamo ordinato.
+  function confermaFornitore(i) {
+    var n = N(), o = oda(i.ordine), data = n.data(i.data), rif = String(i.rif || '').trim();
+    if (o.rilascio && o.rilascio.stato !== 'rilasciato') throw Error('Ordine ' + o.numero + ' bloccato dalla strategia di rilascio: non è stato inviato al fornitore, quindi non può essere confermato.');
+    if (data < o.data) throw Error('La conferma del fornitore non può precedere l\'ordine (' + L.fd(o.data) + ').');
+    if (!rif) throw Error('Scrivi il riferimento della conferma d\'ordine che il fornitore ci ha rispedito (numero o data del suo documento).');
+    if (o.conferma && o.conferma.stato !== 'revocata') throw Error('La conferma dell\'ordine ' + o.numero + ' è già registrata (' + o.conferma.rif + '). Se il fornitore ne manda una nuova, prima revoca quella vecchia.');
+    var prezzo = i.prezzo == null || i.prezzo === '' ? o.prezzo : L.num(i.prezzo, 'Prezzo confermato', 0.0001), qta = i.qta == null || i.qta === '' ? o.qta : L.num(i.qta, 'Quantità confermata', 0.001);
+    var cons = i.consegna ? n.data(i.consegna) : (o.consegna || ''), scost = [];
+    if (cons && cons < o.data) throw Error('La consegna confermata non può precedere l\'ordine.');
+    if (Math.abs(prezzo - o.prezzo) > 0.00005) scost.push('prezzo confermato ' + L.eur(prezzo) + ' invece di ' + L.eur(o.prezzo));
+    if (Math.abs(qta - o.qta) > 0.0005) scost.push('quantità confermata ' + L.n0(qta) + ' invece di ' + L.n0(o.qta));
+    if (o.consegna && cons && cons > o.consegna) scost.push('consegna confermata il ' + L.fd(cons) + ', dopo quella richiesta del ' + L.fd(o.consegna));
+    o.conferma = {stato: scost.length ? 'con scostamenti' : 'conforme', rif: rif, data: data, prezzo: prezzo, qta: qta, consegna: cons, scostamenti: scost};
+    n.salva();
+    return '<p class="lab-nota">Conferma del fornitore registrata sull\'ordine <b>' + o.numero + '</b> (rif. ' + rif + ', ' + L.fd(data) + '): ' + (scost.length ? '<b>⚠ con scostamenti</b> — ' + scost.join('; ') + '. Non è un accordo finché non lo accetti: o ottieni dal fornitore la conferma alle condizioni ordinate, o correggi l\'ordine con il suo consenso.' : '<b>✓ conforme</b> a quanto ordinato: prezzo, quantità e consegna coincidono. Ora l\'ordine è un impegno reciproco.') + '</p>';
+  }
+  function revocaConferma(i) {
+    var n = N(), o = oda(i.ordine); if (!o.conferma || o.conferma.stato === 'revocata') throw Error('L\'ordine ' + o.numero + ' non ha una conferma da revocare.');
+    o.conferma.stato = 'revocata'; n.salva(); return '<p class="lab-nota">Conferma dell\'ordine ' + o.numero + ' revocata: torna «in attesa di conferma».</p>';
+  }
+  var confermato = function (o) { return !!(o.conferma && o.conferma.stato !== 'revocata'); };
+  function parametri(i) { var x = L.num(i.soglia, 'Soglia di rilascio', 0); P().acqParam.soglia = x; if (i.confermaObbligatoria === 'si' || i.confermaObbligatoria === 'no') P().acqParam.confermaObbligatoria = i.confermaObbligatoria === 'si'; N().salva(); return '<p class="lab-nota">Strategia di rilascio: gli ordini oltre ' + L.eur(x) + ' € vanno rilasciati dal responsabile acquisti.</p>'; }
   function entrata(i) {
     var n = N(), o = oda(i.ordine), data = n.data(i.data), q = L.num(i.qta == null || i.qta === '' ? o.qta - o.entrato : i.qta, 'Quantità', 0.001);
     if (data < o.data) throw Error('Entrata anteriore all\'ordine.');
     if (o.rilascio && o.rilascio.stato !== 'rilasciato') throw Error('Ordine ' + o.numero + ' bloccato dalla strategia di rilascio (' + o.rilascio.stato + '): prima il rilascio ME29N.');
+    if (P().acqParam.confermaObbligatoria && !confermato(o)) throw Error('Ordine ' + o.numero + ': il fornitore non ci ha ancora rispedito la conferma d\'ordine. Con il controllo conferme attivo non si riceve merce non confermata: registra prima la conferma del fornitore (ME2N → Conferma d\'ordine del fornitore).');
     if (q > o.qta - o.entrato + 1e-9) throw Error('Restano da ricevere ' + L.n0(o.qta - o.entrato) + ' ' + n.materiale(o.materiale).um + '.');
     var m = n.materiale(o.materiale), std = r2(q * m.std), ord = r2(q * o.prezzo), pd = r2(ord - std);
     var doc = n.numero('materiale');
@@ -142,5 +166,6 @@ window.MM4 = (function () {
     return '<p class="lab-nota">Richiesta di offerta ' + r.numero + ' <b>assegnata a ' + x.nome + '</b>' + (fid === c.consigliato ? ' (offerta consigliata)' : ' — attenzione: non è l\'offerta consigliata, il motivo resta nel documento') + '.</p>' + msg;
   }
   return {richiesta: richiesta, approva: approva, ordine: ordine, rilascia: rilascia, parametri: parametri, entrata: entrata, fattura: fattura,
+    confermaFornitore: confermaFornitore, revocaConferma: revocaConferma, confermato: confermato,
     rfq: rfq, offerta: offerta, confronto: confronto, assegna: assegna, R: R, IVA: IVA, P: P};
 })();

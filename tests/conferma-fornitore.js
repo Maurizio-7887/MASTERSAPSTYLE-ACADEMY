@@ -1,0 +1,38 @@
+// MM: conferma d'ordine del fornitore (flag sull'ordine, scostamenti, controllo conferme opzionale che blocca l'entrata merci).
+const fs = require('fs'), path = require('path'), {JSDOM} = require('jsdom');
+const R = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
+let errori = 0, controlli = 0;
+const ok = (c, m) => { controlli++; if (!c) { errori++; console.log('✗ ' + m); } };
+const src = fs.readFileSync(path.join(__dirname, 'esercizio-ragioneria-chiusura.js'), 'utf8');
+const LOGICA = eval(src.match(/const LOGICA = (\[[\s\S]*?\]);/)[1]);
+const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
+const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
+w.localStorage.setItem(CHIAVE, fs.readFileSync(path.join(__dirname, 'ragioneria-wms-finale.json'), 'utf8'));
+w.confirm = () => true; w.LAB_PAGINA = {chiave: CHIAVE, pagina: 'ordini', slot: 'erp-ft'};
+LOGICA.concat(['app/blueprints/erp_acquisti/static/mm-pagine.js']).forEach(f => w.eval(R(f)));
+const MM = w.MM4, S = () => w.SD4.N.S;
+const err = f => { try { f(); return ''; } catch (e) { return e.message; } };
+const d0 = '2032-02-01';
+const crea = (p, c) => { MM.ordine({fornitore: 'F100', materiale: 'FERRO', qta: 10, prezzo: p || 5, data: d0, consegna: c || '2032-02-20'}); return S().acquisti[S().acquisti.length - 1]; };
+let o = crea();
+ok(!MM.confermato(o), 'nuovo ordine: in attesa di conferma');
+ok(/riferimento/.test(err(() => MM.confermaFornitore({ordine: o.numero, data: '2032-02-03', rif: ''}))), 'senza riferimento: rifiutata');
+ok(/precedere/.test(err(() => MM.confermaFornitore({ordine: o.numero, data: '2031-12-01', rif: 'AB1'}))), 'conferma prima dell\'ordine: rifiutata');
+MM.confermaFornitore({ordine: o.numero, data: '2032-02-03', rif: 'AB-77'});
+ok(MM.confermato(o) && o.conferma.stato === 'conforme', 'conferma conforme registrata');
+ok(/già registrata/.test(err(() => MM.confermaFornitore({ordine: o.numero, data: '2032-02-04', rif: 'AB-78'}))), 'seconda conferma rifiutata');
+MM.revocaConferma({ordine: o.numero}); ok(!MM.confermato(o), 'revoca: torna in attesa');
+const o2 = crea(5, '2032-02-20');
+const msg = MM.confermaFornitore({ordine: o2.numero, data: '2032-02-03', rif: 'AB-9', prezzo: 5.5, consegna: '2032-03-05'});
+ok(o2.conferma.stato === 'con scostamenti' && o2.conferma.scostamenti.length === 2 && /scostamenti/.test(msg), 'prezzo e consegna diversi: segnalati (' + o2.conferma.scostamenti.length + ')');
+// controllo conferme: di default solo segnalazione, attivo blocca l'entrata
+const o3 = crea();
+ok(!err(() => MM.entrata({ordine: o3.numero, data: '2032-02-10', qta: 2})), 'senza controllo: l\'entrata non è bloccata');
+MM.parametri({soglia: MM.P().acqParam.soglia, confermaObbligatoria: 'si'});
+const o4 = crea();
+ok(/conferma d'ordine/.test(err(() => MM.entrata({ordine: o4.numero, data: '2032-02-10', qta: 2}))), 'controllo attivo: entrata senza conferma bloccata');
+MM.confermaFornitore({ordine: o4.numero, data: '2032-02-05', rif: 'AB-5'});
+ok(!err(() => MM.entrata({ordine: o4.numero, data: '2032-02-10', qta: 2})), 'con conferma: entrata ammessa');
+const lab = w.document.getElementById('lab'); lab.innerHTML = ''; w.eval(R('app/blueprints/erp_acquisti/static/mm-pagine.js'));
+ok(/in attesa/.test(lab.textContent) && /Conferma d'ordine del fornitore/.test(lab.textContent), 'pagina ordini: colonna e scheda conferma');
+console.log(controlli + ' controlli, ' + errori + ' errori'); process.exit(errori ? 1 : 0);
