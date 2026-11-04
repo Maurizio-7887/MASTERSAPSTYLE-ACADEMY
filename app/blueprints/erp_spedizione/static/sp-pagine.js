@@ -15,6 +15,40 @@
     return {sel: sel, html: '<div class="lab-filtro no-stampa"><label>Consegna <select id="sc">' + lista.map(function (c) { return '<option value="' + c.numero + '"' + (c.numero === sel ? ' selected' : '') + '>' + e(etich(c)) + (c.ddt ? ' · DDT ' + c.ddt : '') + '</option>'; }).join('') + '</select></label> <button type="button" class="lab-btn" id="stampa">🖨️ Stampa</button></div>'};
   };
   var legaScelta = function (chiave) { var s = radice.querySelector('#sc'); if (s) s.onchange = function () { radice.dataset[chiave] = this.value; rendi(); }; var b = radice.querySelector('#stampa'); if (b) b.onclick = function () { window.print(); }; };
+  // ── vista 3D del camion (three.js r128 nella cartella vendor del blueprint, caricato solo al primo uso) ──
+  var base3d = (function () { var s0 = Array.prototype.slice.call(document.scripts).map(function (x) { return x.src || ''; }).filter(function (x) { return /\/sp-pagine\.js/.test(x); })[0] || ''; return s0.replace(/sp-pagine\.js.*$/, ''); })();
+  var librerie3d = null;
+  function carica3d() {
+    if (window.Load3D && window.THREE && window.THREE.OrbitControls) return Promise.resolve();
+    if (librerie3d) return librerie3d;
+    var uno = function (src) { return new Promise(function (ok, ko) { var x = document.createElement('script'); x.src = base3d + src; x.onload = ok; x.onerror = function () { ko(Error('File 3D non caricato: ' + src)); }; document.head.appendChild(x); }); };
+    librerie3d = uno('vendor/three-0.128.0.min.js').then(function () { return uno('vendor/OrbitControls-0.128.0.js'); }).then(function () { return uno('piano-3d.js'); });
+    librerie3d.catch(function () { librerie3d = null; });
+    return librerie3d;
+  }
+  function dati3d(p, t, colori) {
+    var hex = function (c) { return parseInt(String(c).replace('#', ''), 16); }, col = function (k) { return hex(colori[Math.max(0, t.consegne.indexOf(k)) % colori.length]); };
+    var colli = [];
+    p.posti.forEach(function (q) {
+      var su = 0;
+      (q.strati || []).forEach(function (st, z) {
+        colli.push({codice: 'Posto ' + q.n + (q.strati.length > 1 ? (z ? ' · sopra' : ' · sotto') : '') + ' · SSCC ' + st.sscc, x_mm: q.y * 10, y_mm: q.x * 10, lunghezza_mm: q.lung * 10, larghezza_mm: q.larg * 10,
+          altezza_mm: st.alt * 10, base_mm: su * 10, pedana_mm: st.pedana * 10, colore: col(st.consegna), testo: st.materiale + ' · ' + n0(st.peso) + ' kg · consegna ' + st.consegna});
+        su += st.alt;
+      });
+    });
+    var fuori = [];
+    p.scarti.forEach(function (s0) { (s0.pezzi || []).forEach(function (c) { fuori.push({codice: 'SSCC ' + c.sscc, lunghezza_mm: c.lung * 10, larghezza_mm: c.larg * 10, altezza_mm: c.alt * 10, pedana_mm: c.pedana * 10, motivo: s0.motivo}); }); });
+    return {veicolo: {piano_lunghezza_mm: p.v.lung * 10, piano_larghezza_mm: p.v.larg * 10, altezza_mm: p.v.alt * 10, tipo: p.veicolo === 'FURGONE' ? 'furgone' : 'camion'}, colli: colli, non_allocati: fuori};
+  }
+  function vista3d(p, t, colori) {
+    var box = radice.querySelector('#truck-3d'), msg = radice.querySelector('#msg-3d'); if (!box) return;
+    carica3d().then(function () {
+      if (!window.Load3D.init(box)) { if (msg) msg.textContent = '⚠ ' + (window.Load3D.motivoIndisponibile() || '3D non disponibile') + ' Usa la vista dall’alto.'; return; }
+      window.Load3D.aggiorna(dati3d(p, t, colori));
+      radice.querySelectorAll('[data-v3]').forEach(function (b) { b.onclick = function () { var r = window.Load3D[b.getAttribute('data-v3')](); if (typeof r === 'string') b.textContent = (b.getAttribute('data-v3') === 'impostaTetto' ? 'tetto: ' : 'pareti: ') + r; }; });
+    }, function (err) { if (msg) msg.textContent = '⚠ ' + err.message + ' Usa la vista dall’alto.'; });
+  }
   var PAGINE = {
     monitor: function () {
       radice.innerHTML = nonAttivo() +
@@ -120,7 +154,9 @@
           '<div class="kpi4"><div><b>' + anteprima.kpi.caricati + ' / ' + anteprima.kpi.colli + '</b><span>colli che ci stanno</span></div><div><b>' + n0(anteprima.kpi.saturazioneArea) + '%</b><span>pianale occupato</span></div>' +
           '<div><b>' + n0(anteprima.kpi.peso) + ' kg</b><span>' + n0(anteprima.kpi.saturazionePeso) + '% della portata</span></div><div><b>' + anteprima.kpi.posti + '</b><span>posti a terra' + (anteprima.kpi.pile ? ' (' + anteprima.kpi.pile + ' pile da due)' : '') + '</span></div></div>' +
           (anteprima.scarti.length ? '<div class="lab-esito ko">⚠ <b>Restano a terra ' + anteprima.kpi.scartati + ' colli</b>: ' + e(anteprima.scarti.map(function (s0) { return s0.motivo; }).filter(function (m, z, a) { return a.indexOf(m) === z; }).join('; ')) + '. Prova un camion più grande o dividi il trasporto.</div>' : '<div class="lab-esito ok">✓ Tutti i colli ci stanno.</div>') +
-          L.scheda('🗺️', 'Il camion visto dall’alto', 'colori = clienti · ×2 = pila di due colli', disegno(anteprima) + '<p class="lab-nota">' + t.consegne.map(function (k, z) { var c = S().consegne.find(function (y) { return y.numero === k; }); return '<span style="color:' + colore[z % colore.length] + ';font-weight:700">■</span> ' + k + ' ' + e(U.nome(S(), c.cliente)) + ' (fermata ' + (z + 1) + ')'; }).join(' · ') + '</p>') +
+          L.scheda('🗺️', 'Il camion visto dall’alto', 'colori = clienti · ×2 = pila di due colli', '<div class="no-stampa vista-scelta"><button type="button" class="lab-btn' + (radice.dataset.v3 ? ' sec' : '') + '" id="v2d">🗺️ Vista dall’alto (2D)</button> <button type="button" class="lab-btn' + (radice.dataset.v3 ? '' : ' sec') + '" id="v3d">🧊 Camion in 3D</button>' +
+            (radice.dataset.v3 ? ' <span class="v3-comandi"><button type="button" class="lab-btn sec" data-v3="vistaProspettica">prospettiva</button> <button type="button" class="lab-btn sec" data-v3="vistaDallAlto">dall’alto</button> <button type="button" class="lab-btn sec" data-v3="vistaLaterale">di lato</button> <button type="button" class="lab-btn sec" data-v3="vistaPosteriore">dalle porte</button> <button type="button" class="lab-btn sec" data-v3="impostaPareti">pareti</button> <button type="button" class="lab-btn sec" data-v3="impostaTetto">tetto</button></span>' : '') + '</div>' +
+            (radice.dataset.v3 ? '<div class="truck-3d" id="truck-3d"><p class="lab-nota" style="color:#fff;padding:12px">Carico il camion in 3D…</p></div><div id="tooltip-collo" class="tooltip-3d"></div><p class="lab-nota">Trascina per girare il camion, rotella per avvicinarti, tasto destro per spostarti. Passa sopra un collo per leggerne posto, articolo e peso.</p><p class="lab-nota" id="msg-3d"></p>' : disegno(anteprima)) + '<p class="lab-nota">' + t.consegne.map(function (k, z) { var c = S().consegne.find(function (y) { return y.numero === k; }); return '<span style="color:' + colore[z % colore.length] + ';font-weight:700">■</span> ' + k + ' ' + e(U.nome(S(), c.cliente)) + ' (fermata ' + (z + 1) + ')'; }).join(' · ') + '</p>') +
           L.scheda('📋', 'Ordine di carico', 'si carica dal posto 1 (cabina) verso le porte', L.tabella(['Posto', 'Colli (SSCC)', 'Consegna', 'Articolo', 'Altezza cm›', 'Peso kg›', 'Nota'], anteprima.posti.map(function (q) {
             return [q.n, q.colli.join('<br>'), q.consegne.join(', '), q.materiali.join(' + '), n0(q.alt), n0(q.peso), (q.colli.length > 1 ? 'pila: il più pesante sotto' : '') + (q.scambio ? ' · recuperato con uno scambio' : '') + (q.ruotato ? ' · girato di 90°' : '')]; }))) +
           L.modulo('ps', [['trasporto', 'Trasporto', 'select', t.numero, [[t.numero, t.numero]]], ['veicolo', 'Veicolo', 'select', ve, [[ve, SP.veicoli()[ve].nome]]], ['criterio', 'Criterio', 'select', crit, [[crit, crit === 'fermate' ? 'per fermate' : 'massima saturazione']]]], [['ps', 'Salva il piano sul trasporto']]) +
@@ -128,6 +164,11 @@
         '<p class="lab-nota"><b>Come ragiona:</b> 1) i colli impilabili con la stessa base vanno uno sopra l’altro se ci stanno in altezza e quello sotto regge il peso; 2) i posti si riempiono a file dalla cabina verso le porte, prima i più grandi, girandoli di 90° se serve; 3) se un collo resta fuori, prova a scambiarlo con uno già messo; 4) controlla la portata. È lo stesso metodo del MasterLogistic WMS: un buon piano pratico, non l’ottimo matematico.</p>';
       ['tp', 'pv', 'pc'].forEach(function (id) { var x = radice.querySelector('#' + id); if (x) x.onchange = function () { radice.dataset[id] = this.value; rendi(); }; });
       L.collega(radice, 'ps', {ps: SP.salvaPiano}, rendi);
+      var b2 = radice.querySelector('#v2d'), b3 = radice.querySelector('#v3d');
+      if (b2) b2.onclick = function () { delete radice.dataset.v3; if (window.Load3D) window.Load3D.destroy(); rendi(); };
+      if (b3) b3.onclick = function () { radice.dataset.v3 = '1'; rendi(); };
+      if (radice.dataset.v3 && anteprima) vista3d(anteprima, t, colore);
+      else if (window.Load3D) window.Load3D.destroy();
     },
     ddt: function () {
       var lista = uscita().filter(function (c) { return c.ddt; }), sc = scegli(lista, 'cd'), c = lista.find(function (x) { return x.numero === sc.sel; });

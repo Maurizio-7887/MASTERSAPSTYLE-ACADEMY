@@ -121,3 +121,6 @@ body.rf-pieno .msa-lp{padding-top:6px}
 .reset-btn:hover{background:#8F0000}.reset-btn:disabled{opacity:.6;cursor:wait}
 .reset-esito{font-weight:700}
 .piano-svg{width:100%;max-width:1000px;height:auto;display:block;margin:6px 0}
+.truck-3d{height:460px;border-radius:8px;overflow:hidden;background:#0a1018;margin-top:8px}
+.tooltip-3d{display:none;position:fixed;z-index:9999;background:rgba(10,14,18,.92);color:#fff;padding:6px 10px;border-radius:6px;font-size:13px;pointer-events:none;max-width:320px}
+.vista-scelta{margin-bottom:6px}.v3-comandi .lab-btn{padding:4px 9px;font-size:12px}

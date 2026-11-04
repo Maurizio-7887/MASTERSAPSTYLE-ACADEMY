@@ -122,7 +122,7 @@ window.SP4 = (function () {
   function colliDelTrasporto(t) { return t.consegne.reduce(function (a, k) { return a.concat(colliDi(k)); }, []); }
   function misure(x) {
     var im = imballi()[x.imballo] || IMBALLI.EUR, rg = regola(x.materiale, x.imballo);
-    return {lung: im.lung, larg: im.larg, alt: x.alt || (rg && rg.alt) || im.alt + 100, peso: x.pesoLordo, impilabile: im.impilabile !== false && String(im.impilabile) !== 'no', sopra: +im.sopra || 0};
+    return {lung: im.lung, larg: im.larg, alt: x.alt || (rg && rg.alt) || im.alt + 100, peso: x.pesoLordo, pedana: im.alt, impilabile: im.impilabile !== false && String(im.impilabile) !== 'no', sopra: +im.sopra || 0};
   }
   function impila(colli, altezza) {
     var pile = [], liberi = colli.slice().sort(function (a, b) { return b.peso - a.peso; });
@@ -160,16 +160,16 @@ window.SP4 = (function () {
     var colli = colliDelTrasporto(t); if (!colli.length) throw Error('Il trasporto ' + t.numero + ' non ha ancora colli: prima imballa le consegne.');
     var scarti = [], unita = [];
     colli.forEach(function (x) {
-      var m = misure(x), u = {sscc: x.sscc, consegna: x.consegna, materiale: x.materiale, lung: m.lung, larg: m.larg, alt: m.alt, peso: m.peso, impilabile: m.impilabile, sopra: m.sopra,
+      var m = misure(x), u = {sscc: x.sscc, consegna: x.consegna, materiale: x.materiale, lung: m.lung, larg: m.larg, alt: m.alt, peso: m.peso, impilabile: m.impilabile, sopra: m.sopra, pedana: m.pedana,
         fermata: criterio === 'fermate' ? t.consegne.indexOf(x.consegna) : 0};
-      if (m.alt > v.alt + 1e-6) scarti.push({colli: [x.sscc], motivo: 'troppo alto: ' + m.alt + ' cm, il camion ne ha ' + v.alt}); else unita.push(u);
+      if (m.alt > v.alt + 1e-6) scarti.push({colli: [x.sscc], motivo: 'troppo alto: ' + m.alt + ' cm, il camion ne ha ' + v.alt, pezzi: [u]}); else unita.push(u);
     });
     var pile = impila(unita, v.alt);
     pile.sort(function (a, b) { return criterio === 'fermate' && a.fermata !== b.fermata ? b.fermata - a.fermata : b.lung * b.larg - a.lung * a.larg || b.peso - a.peso; });
     var file = [], avanti = 0, posti = [];
     pile.forEach(function (pl) {
       var u = {lung: pl.lung, larg: pl.larg, fermata: criterio === 'fermate' ? pl.fermata : undefined, pila: pl}, r = prova(u, file, v, avanti);
-      if (r.p) { avanti = r.avanti; posti.push(r.p); } else scarti.push({colli: pl.colli.map(function (c) { return c.sscc; }), motivo: 'non c’è più spazio sul pianale', pila: pl});
+      if (r.p) { avanti = r.avanti; posti.push(r.p); } else scarti.push({colli: pl.colli.map(function (c) { return c.sscc; }), motivo: 'non c’è più spazio sul pianale', pila: pl, pezzi: pl.colli});
     });
     // miglioramento locale: uno scartato entra al posto di uno piazzato solo se quest'ultimo trova un altro posto
     var scambi = 0;
@@ -187,12 +187,12 @@ window.SP4 = (function () {
     // portata: se si supera, restano a terra le ultime pile caricate (quelle verso le porte)
     posti.sort(function (a, b) { return a.y - b.y || a.x - b.x; });
     var peso = 0, tenuti = [];
-    posti.forEach(function (p) { if (peso + p.u.pila.peso <= v.portata + 1e-6) { peso += p.u.pila.peso; tenuti.push(p); } else scarti.push({colli: p.u.pila.colli.map(function (c) { return c.sscc; }), motivo: 'portata superata: il camion porta ' + L.n0(v.portata) + ' kg'}); });
+    posti.forEach(function (p) { if (peso + p.u.pila.peso <= v.portata + 1e-6) { peso += p.u.pila.peso; tenuti.push(p); } else scarti.push({colli: p.u.pila.colli.map(function (c) { return c.sscc; }), motivo: 'portata superata: il camion porta ' + L.n0(v.portata) + ' kg', pezzi: p.u.pila.colli}); });
     var area = tenuti.reduce(function (a, p) { return a + p.lung * p.larg; }, 0), ncolli = tenuti.reduce(function (a, p) { return a + p.u.pila.colli.length; }, 0);
     return {trasporto: t.numero, veicolo: i.veicolo || t.veicolo, criterio: criterio, v: v,
       posti: tenuti.map(function (p, k) { return {n: k + 1, x: p.x, y: p.y, lung: p.lung, larg: p.larg, ruotato: p.ruotato, alt: p.u.pila.alt, peso: r2(p.u.pila.peso), scambio: !!p.scambio,
-        colli: p.u.pila.colli.map(function (c) { return c.sscc; }), consegne: p.u.pila.colli.map(function (c) { return c.consegna; }).filter(function (c0, z, a) { return a.indexOf(c0) === z; }), materiali: p.u.pila.colli.map(function (c) { return c.materiale; })}; }),
-      scarti: scarti.map(function (s0) { return {colli: s0.colli, motivo: s0.motivo}; }),
+        colli: p.u.pila.colli.map(function (c) { return c.sscc; }), strati: p.u.pila.colli.map(function (c) { return {sscc: c.sscc, alt: c.alt, pedana: c.pedana, peso: r2(c.peso), materiale: c.materiale, consegna: c.consegna}; }), consegne: p.u.pila.colli.map(function (c) { return c.consegna; }).filter(function (c0, z, a) { return a.indexOf(c0) === z; }), materiali: p.u.pila.colli.map(function (c) { return c.materiale; })}; }),
+      scarti: scarti.map(function (s0) { return {colli: s0.colli, motivo: s0.motivo, pezzi: (s0.pezzi || []).map(function (c) { return {sscc: c.sscc, lung: c.lung, larg: c.larg, alt: c.alt, pedana: c.pedana, consegna: c.consegna, materiale: c.materiale}; })}; }),
       kpi: {colli: colli.length, caricati: ncolli, scartati: colli.length - ncolli, posti: tenuti.length, pile: tenuti.filter(function (p) { return p.u.pila.colli.length > 1; }).length, scambi: scambi,
         saturazioneArea: Math.round(area / (v.lung * v.larg) * 1000) / 10, peso: r2(peso), saturazionePeso: Math.round(peso / v.portata * 1000) / 10, metriUsati: Math.round(avanti) / 100}};
   }
