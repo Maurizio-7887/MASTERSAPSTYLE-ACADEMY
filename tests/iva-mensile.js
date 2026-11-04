@@ -40,6 +40,9 @@ t = tenta(() => CH.versaIva({periodo: '2029-03', data: '2029-04-16'})); ok(!t.e,
 // dopo marzo il conto 14 deve essere azzerato rispetto al suo valore iniziale e il 21 pure
 vicino(CH.saldo('14') - before14, 0, 'Iva a credito (14) azzerata a fine marzo');
 vicino(CH.saldo('21') - before21, 0, 'Iva a debito (21) azzerata a fine marzo');
+// i conti IVA del periodo sono chiusi dalla liquidazione; il credito riportato sta sull'Erario c/IVA (Dare)
+vicino(CH.saldo('25', '2029-02-28') - CH.saldo('25', '2028-12-31'), 300, 'credito riportato a fine febbraio sul conto 25 (Dare)');
+vicino(CH.saldo('14', '2029-02-28') - before14, 0, 'conto 14 chiuso a fine febbraio'); vicino(CH.saldo('21', '2029-02-28') - before21, 0, 'conto 21 chiuso a fine febbraio');
 // mese saltato: aprile a credito 80 NON liquidato, maggio a debito 400 vs 0 → deve avvisare o includere aprile
 iva('2029-04-10', 0, 80);
 iva('2029-05-10', 400, 0);

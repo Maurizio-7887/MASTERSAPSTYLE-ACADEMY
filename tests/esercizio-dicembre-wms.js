@@ -293,7 +293,7 @@ p = apri('erp_magazzino','scorte'); { const regs = p.S().registrazioni.length; b
 controlla('Inventario');
 p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length; p.fai('ko',{data:'2026-12-31'}); fino('KO88'); ok(p.S().registrazioni.length===nk,'varianza zero: nessuna scrittura'); vicinoS('61',0,'varianze');
 // 15 · IVA, imposte, chiusura
-p = apri('erp_chiusura','iva'); bene(p.fai('lq',{periodo:'2026-12',data:'2026-12-31'}),'liquidazione IVA'); fino('Liquida l’IVA'); vicinoS('14',3432,'credito IVA');
+p = apri('erp_chiusura','iva'); bene(p.fai('lq',{periodo:'2026-12',data:'2026-12-31'}),'liquidazione IVA'); fino('Liquida l’IVA'); vicinoS('25',3432,'credito IVA sull\'Erario c/IVA (Dare)'); vicinoS('14',0,'IVA a credito chiusa');
 p = apri('erp_chiusura','imposte');
 const calcoloImposte=p.w.CH4.calcolaImposte({anno:'2026',aumenti:'',diminuzioni:''});
 vicino(calcoloImposte.risultato,2573.32-(7336-7280),'ante imposte: attività accreditate inferiori di56 euro');

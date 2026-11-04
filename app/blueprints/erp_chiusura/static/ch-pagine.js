@@ -25,7 +25,7 @@
           ['data', 'Data del versamento', 'date']], [['vs', 'Registra l\'F24']]) + '<p class="lab-nota">D 25 Erario c/IVA · D 53 interessi / A 10 Banca. Dopo la scadenza servirebbe il ravvedimento operoso (sanzioni ridotte): qui il sistema lo segnala.</p>') + '</div>' +
         L.scheda('📋', 'Liquidazioni registrate', 'registro delle liquidazioni', L.tabella(['Periodo', 'Dal', 'Al', 'Debito›', 'Credito›', 'Riporto›', 'Saldo›', 'Interessi›', 'Scadenza', 'Versato'], liq.map(function (x) {
           return [x.periodo, fd(x.dal), fd(x.al), eur(x.debito), eur(x.credito), eur(x.riporto), x.saldo >= 0 ? eur(x.saldo) : 'credito ' + eur(-x.saldo), eur(x.interessi), fd(x.scadenza), x.versato ? fd(x.versato) : (x.daVersare ? '<b>da versare</b>' : '—')]; }), 'Nessuna liquidazione.') +
-          '<p class="lab-nota">Saldi oggi: IVA a debito (21) ' + eur(-N.saldo('21')) + ' · IVA a credito (14) ' + eur(N.saldo('14')) + ' · Erario c/IVA (25) ' + eur(-N.saldo('25')) + '.</p>');
+          '<p class="lab-nota">Saldi oggi: IVA a debito (21) ' + eur(-N.saldo('21')) + ' · IVA a credito (14) ' + eur(N.saldo('14')) + ' · Erario c/IVA (25) ' + (N.saldo('25') > 0.004 ? 'a credito ' + eur(N.saldo('25')) : 'a debito ' + eur(-N.saldo('25'))) + '.</p>');
       radice.querySelector('#per').onchange = function () { radice.dataset.p = this.value.trim(); rendi(); };
       L.collega(radice, 'lq', {lq: CH.liquidaIva}, rendi); L.collega(radice, 'vs', {vs: CH.versaIva}, rendi);
     },

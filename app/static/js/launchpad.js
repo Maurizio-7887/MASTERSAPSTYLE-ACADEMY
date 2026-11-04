@@ -25,7 +25,7 @@
     cespiti: () => [n(regs().filter(r => r.fi && (r.fi.cespite || r.fi.cespiteDisposto)).length), 'cespiti'],
     clienti: () => [n(((S.sdmm || {}).clienti || []).length), 'clienti'],
     fornitori: () => [n(((S.sdmm || {}).fornitori || []).length), 'fornitori'],
-    iva: () => { const v = conto('14') + conto('21') + conto('28'); return [eur(Math.abs(v)), v >= 0 ? '€ IVA a credito' : '€ IVA a debito']; },
+    iva: () => { const v = conto('14') + conto('21') + conto('25') + conto('28'); return [eur(Math.abs(v)), v >= 0 ? '€ IVA a credito' : '€ IVA a debito']; },
     costituzione: () => [(S.fi && S.fi.costituzione) ? S.fi.costituzione.split('-').reverse().join('/') : '—', 'costituzione'],
     budget: () => [n((S.budgetAnnuo || {}).volumeAnnuoPianificato), 'pz a budget'],
     budgetCO: () => [n(((S.fi || {}).budgetPool || []).length), 'mesi di budget'],

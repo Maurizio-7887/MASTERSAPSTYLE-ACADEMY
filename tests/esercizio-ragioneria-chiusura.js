@@ -138,7 +138,7 @@ p = apri('erp_vendite', 'incassi'); bene(p.fai('in', {cliente: 'C600', importo: 
 p = apri('erp_chiusura', 'chiusura'); ok(/Ammortamenti 2027 non registrati/.test(p.testo()) && /Imposte 2027 \(IRES e IRAP\) non registrate/.test(p.testo()), 'controlli prima della chiusura');
 ok(/ko/.test(p.fai('ch', {anno: '2027', forza: 'no'})), 'chiusura rifiutata con avvertenze');
 p = apri('erp_cespiti', 'ammortamenti'); bene(p.fai('af', {data: '2027-12-31'}), 'AFAB 2027'); vicino(saldo('02'), -800, 'fondo saldatrice 800');
-p = apri('erp_chiusura', 'iva'); bene(p.fai('lq', {periodo: '2027-T4', data: '2027-12-31'}), 'liquidazione T4'); vicino(saldo('14'), 110, 'credito IVA a fine anno');
+p = apri('erp_chiusura', 'iva'); bene(p.fai('lq', {periodo: '2027-T4', data: '2027-12-31'}), 'liquidazione T4'); vicino(saldo('25'), 110, 'credito IVA a fine anno: sta sull\'Erario c/IVA (Dare)'); vicino(saldo('14'), 0, 'IVA a credito (14) chiusa dalla liquidazione'); vicino(saldo('21'), 0, 'IVA a debito (21) chiusa dalla liquidazione');
 p = apri('erp_cespiti', 'ammortamenti'); ok(/a metà \(primo anno\)/.test(p.testo()) && /600,00/.test(p.testo()), 'doppio binario: massimo fiscale saldatrice 600');
 { const f = p.w.CE4.fiscale('2027'); vicino(f.totali.aumento, 333.33, 'ammortamenti non deducibili'); vicino(f.totali.recuperoCessione, 133.33, 'recupero alla cessione'); vicino(f.totali.eccedenzaFine, 200, 'differenza temporanea a fine anno'); }
 p = apri('erp_chiusura', 'imposte'); ok(/26\.?424,67/.test(p.testo()) && /26\.?624,67/.test(p.testo()) && /26\.?882,97/.test(p.testo()), 'prospetti IRES e IRAP');

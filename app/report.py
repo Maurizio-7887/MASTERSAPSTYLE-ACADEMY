@@ -273,7 +273,7 @@ class Lavoro:
                 "dc_rottamazione": s26("69"), "dc_differenza_inventario": s26("65"),
                 "dc_plusvalenza": -s26("45"), "dc_minusvalenza": s26("46"), "dc_sopravvenienza": -s26("84"),
                 "dc_risconto": s26("06"), "dc_rateo": -s26("39"), "dc_ammortamenti": s26("50"),
-                "dc_credito_iva": s26("14"), "dc_ires": -s26("23"), "dc_irap": -s26("35"),
+                "dc_credito_iva": s26("14") + max(s26("25"), 0), "dc_ires": -s26("23"), "dc_irap": -s26("35"),
                 "dc_utile": round(ch26.get("utile") or 0, 2),
                 "dc_chiuso": "sì" if ch26.get("risultato") and ch26.get("chiusuraSP") else "no",
                 "dc_riaperto": "sì" if ch26.get("riapertura") else "no",

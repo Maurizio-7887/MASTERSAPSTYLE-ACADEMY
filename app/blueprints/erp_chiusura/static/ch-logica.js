@@ -53,12 +53,15 @@ window.CH4 = (function () {
       if (r.righe.some(function (x) { return x.conto === '21' || x.conto === '14'; })) scoperti[r.data.slice(0, 7)] = 1; });
     var primo = Object.keys(scoperti).sort()[0];
     if (primo) throw Error('Prima di ' + c.periodo + ' liquida il periodo ' + primo + ': ha IVA non ancora liquidata, e il suo credito o debito va riportato in ordine.');
-    // chiude debito e credito del periodo (più il credito riportato, già sul 14) contro l'Erario
-    var usaCredito = r2(Math.min(c.credito + c.riporto, c.debito));
-    var righe = [{conto: '21', dareAvere: 'DARE', importo: c.debito, testo: 'IVA a debito ' + c.periodo}, {conto: '14', dareAvere: 'AVERE', importo: c.saldo > 0 ? r2(c.credito + c.riporto) : usaCredito, testo: 'IVA a credito ' + c.periodo + (c.riporto ? ' + credito riportato' : '')}];
-    if (c.saldo > 0) righe.push({conto: '25', dareAvere: 'AVERE', importo: c.saldo, testo: 'IVA da versare entro il ' + L.fd(c.scadenza)});
+    // La liquidazione chiude SEMPRE i conti IVA del periodo (21 IVA a debito e 14 IVA a credito) contro l'Erario c/IVA (25):
+    //   a debito  → Erario c/IVA in Avere (da versare);  a credito → Erario c/IVA in Dare (credito verso l'Erario, che si riporta al periodo dopo).
+    // Il credito riportato resta quindi sul conto 25 e non sul 14. Fanno eccezione i vecchi lavori salvati, dove il credito riportato era rimasto sul 14.
+    var ultimaLiq = X().iva.filter(function (x) { return x.al < c.dal; }).slice(-1)[0], sul14 = ultimaLiq && !ultimaLiq.su25 ? c.riporto : 0;
+    var diff = r2(c.debito - c.credito - sul14);   // + = debito del periodo verso l'Erario, − = credito del periodo
+    var righe = [{conto: '21', dareAvere: 'DARE', importo: c.debito, testo: 'IVA a debito ' + c.periodo}, {conto: '14', dareAvere: 'AVERE', importo: r2(c.credito + sul14), testo: 'IVA a credito ' + c.periodo + (sul14 ? ' + credito riportato' : '')},
+      {conto: '25', dareAvere: diff >= 0 ? 'AVERE' : 'DARE', importo: Math.abs(diff), testo: diff >= 0 ? 'Erario c/IVA: IVA a debito del periodo' + (c.saldo > 0 ? ', da versare entro il ' + L.fd(c.scadenza) : ', compensata dal credito riportato') : 'Erario c/IVA: IVA a credito del periodo, da riportare'}];
     var r = n.post({data: data, tipo: 'LIQUIDAZIONE_IVA', rif: 'IVA ' + c.periodo, descrizione: 'Liquidazione IVA ' + c.periodo + ': a debito ' + L.eur(c.debito) + ', a credito ' + L.eur(c.credito) + (c.riporto ? ', credito riportato ' + L.eur(c.riporto) : '') + ' → ' + (c.saldo > 0 ? 'da versare ' + L.eur(c.saldo) + (c.interessi ? ' + interessi 1% ' + L.eur(c.interessi) : '') + ' entro il ' + L.fd(c.scadenza) : 'credito da riportare ' + L.eur(c.creditoRiportato)), righe: righe});
-    c.contabile = r ? r.numero : null; c.data = data; c.versato = null; X().iva.push(c); n.salva(); return r;
+    c.contabile = r ? r.numero : null; c.su25 = true; c.data = data; c.versato = null; X().iva.push(c); n.salva(); return r;
   }
   function versaIva(i) {
     var n = N(), data = n.data(i.data), x = X().iva.find(function (y) { return y.periodo === String(i.periodo || '').trim(); });
@@ -240,7 +243,7 @@ window.CH4 = (function () {
     Object.keys(sal).forEach(function (k) { var c = k.split('|')[0], t = tipo(c); if (t === 'ATTIVO' || t === 'PASSIVO') voci[c] = r2((voci[c] || 0) + sal[k]); });
     var att = [], pas = [], ta = 0, tp = 0;
     Object.keys(voci).sort(function (a, b) { return a.localeCompare(b, 'it', {numeric: true}); }).forEach(function (c) { var v = voci[c]; if (Math.abs(v) < 0.005) return;
-      if (tipo(c) === 'ATTIVO') { att.push({conto: c, nome: nome(c), saldo: v}); ta += v; } else { pas.push({conto: c, nome: nome(c), saldo: -v}); tp -= v; } });
+      if (tipo(c) === 'ATTIVO' || (c === '25' && v > 0)) { att.push({conto: c, nome: c === '25' ? 'Erario c/IVA a credito' : nome(c), saldo: v}); ta += v; } else { pas.push({conto: c, nome: nome(c), saldo: -v}); tp -= v; } });
     return {attivo: att, passivo: pas, totaleAttivo: r2(ta), totalePassivo: r2(tp)};
   }
   return {periodo: periodo, calcolaIva: calcolaIva, liquidaIva: liquidaIva, versaIva: versaIva, contoEconomico: contoEconomico, calcolaIres: calcolaIres, calcolaImposte: calcolaImposte, registraIres: registraIres, registraImposte: registraIres,
