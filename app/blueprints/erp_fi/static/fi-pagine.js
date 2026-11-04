@@ -54,9 +54,43 @@
   function importi(x) { return '<td class="fi-importo">'+(x.dareAvere === 'DARE' ? eur(x.importo) : '—')+'</td><td class="fi-importo">'+(x.dareAvere === 'AVERE' ? eur(x.importo) : '—')+'</td>'; }
   function tabella(titolo, teste, corpo, piede) { return '<div class="fi-scroll" tabindex="0" role="region" aria-label="'+e(titolo)+'"><table class="fi-tabella"><caption>'+e(titolo)+'</caption><thead><tr>'+teste.map(function (t) { return '<th scope="col"'+(['Dare €','Avere €','Saldo progressivo €'].indexOf(t)>=0?' class="fi-importo"':'')+'>'+t+'</th>'; }).join('')+'</tr></thead><tbody>'+corpo+'</tbody>'+(piede?'<tfoot>'+piede+'</tfoot>':'')+'</table></div>'; }
   var PAGINE = {
+    prima_nota: function () {
+      var conti = (S().pianoDeiConti || []).slice().sort(function(a,b){return String(a.codice).localeCompare(String(b.codice),'it',{numeric:true});});
+      var opt = '<option value="">Seleziona conto Co.Ge.</option>' + conti.map(function(c){return '<option value="'+e(c.codice)+'">'+e(c.codice+' · '+c.nome)+'</option>';}).join('');
+      var today = new Date().toISOString().slice(0,10);
+      radice.innerHTML = navigazione() +
+        '<section class="fi-fiori"><header class="fi-fiori-head"><small>Contabilità finanziaria / General Ledger</small><h2>Post General Journal Entries <span>F0718</span></h2><p>Prima Nota libera · registrazione manuale sul libro giornale integrato</p></header>' +
+        '<form id="fi-free-form"><fieldset><legend>Dati di testata</legend><div class="fi-fiori-fields"><label>Data documento<input name="dataDoc" type="date" value="'+today+'" required></label><label>Data registrazione<input name="data" type="date" value="'+today+'" required></label><label>Tipo documento<select name="tipo"><option value="SA">SA · Contabilità generale</option></select></label><label>Valuta<input value="EUR" readonly aria-label="Valuta EUR"></label><label class="fi-wide">Testo testata<input name="descrizione" maxlength="160" required placeholder="Descrizione della registrazione"></label><label>Riferimento<input name="rif" maxlength="60" placeholder="Riferimento facoltativo"></label></div></fieldset>' +
+        '<fieldset><legend>Posizioni contabili</legend><div class="fi-scroll"><table class="fi-tabella" id="fi-free-rows"><thead><tr><th>Pos.</th><th>Conto Co.Ge.</th><th>Dare / Avere</th><th>Importo EUR</th><th>Testo posizione</th><th></th></tr></thead><tbody></tbody></table></div><button type="button" class="lab-btn sec" id="fi-free-add">+ Aggiungi posizione</button></fieldset>' +
+        '<div class="fi-free-summary" role="status" id="fi-free-total">Dare 0,00 € · Avere 0,00 €</div><p id="fi-free-msg" role="status"></p><button type="button" class="lab-btn sec" id="fi-free-check">Simula / Verifica</button> <button type="submit" class="lab-btn" id="fi-free-post">Registra documento</button> <a class="lab-btn sec" href="'+e(base())+'">Manage Journal Entries (F0717A)</a></form></section>';
+      var form = radice.querySelector('#fi-free-form'), tbody = radice.querySelector('#fi-free-rows tbody');
+      function add() {
+        var tr=document.createElement('tr'); tr.innerHTML='<td class="fi-pos"></td><td><select class="fi-conto" required>'+opt+'</select></td><td><select class="fi-da"><option value="DARE">Dare</option><option value="AVERE">Avere</option></select></td><td><input class="fi-val" type="number" min="0.01" step="0.01" required placeholder="0,00"></td><td><input class="fi-testo" maxlength="120" placeholder="Testo riga"></td><td><button type="button" class="fi-remove" aria-label="Rimuovi posizione">×</button></td>';
+        tbody.appendChild(tr); tr.querySelector('.fi-remove').onclick=function(){if(tbody.rows.length>2){tr.remove(); renumber(); calculate();}};
+        renumber(); calculate();
+      }
+      function renumber(){Array.prototype.forEach.call(tbody.rows,function(tr,i){tr.querySelector('.fi-pos').textContent=String(i+1);});}
+      function calculate(){
+        var d=0,a=0;Array.prototype.forEach.call(tbody.rows,function(tr){var v=Math.round(Number(tr.querySelector('.fi-val').value||0)*100);if(tr.querySelector('.fi-da').value==='DARE')d+=v;else a+=v;});
+        var ok=d>0&&d===a;radice.querySelector('#fi-free-total').textContent='Dare '+eur(d/100)+' € · Avere '+eur(a/100)+' € · Differenza '+eur((d-a)/100)+' €'+(ok?' · ✓ Quadrato':' · Da quadrare');return ok;
+      }
+      function collect(){
+        if(!form.reportValidity())throw Error('Completa i campi obbligatori.');
+        if(tbody.rows.length<2)throw Error('Inserisci almeno due posizioni.');
+        var rows=Array.prototype.map.call(tbody.rows,function(tr){var conto=tr.querySelector('.fi-conto').value,imp=Number(tr.querySelector('.fi-val').value);if(!conto||!Number.isFinite(imp)||imp<=0)throw Error('Conto e importo positivo obbligatori per ogni posizione.');return {conto:conto,dareAvere:tr.querySelector('.fi-da').value,importo:imp,testo:tr.querySelector('.fi-testo').value};});
+        if(!calculate())throw Error('Documento non quadrato: il totale Dare deve coincidere con Avere.');
+        var v=new FormData(form);if(v.get('data')<v.get('dataDoc'))throw Error('La data di registrazione non può precedere la data documento.');
+        return {data:v.get('data'),tipo:'SA',descrizione:v.get('descrizione'),rif:v.get('rif'),righe:rows,quiz:false};
+      }
+      radice.querySelector('#fi-free-add').onclick=add;
+      tbody.addEventListener('input',calculate);tbody.addEventListener('change',calculate);
+      radice.querySelector('#fi-free-check').onclick=function(){try{collect();radice.querySelector('#fi-free-msg').textContent='✓ Simulazione valida: documento quadrato, pronto per la registrazione.';}catch(err){radice.querySelector('#fi-free-msg').textContent='⚠ '+err.message;}};
+      form.onsubmit=function(ev){ev.preventDefault();try{var reg=collect();var doc=N.post(reg);if(!doc)throw Error('Documento senza posizioni.');N.salva();if(window.MSA_SALVA)window.MSA_SALVA();radice.querySelector('#fi-free-msg').innerHTML='✓ Documento <b>'+e(doc.numero)+'</b> registrato nel libro giornale. <a href="'+e(base())+'#'+docId(doc)+'">Apri documento</a>';form.querySelector('#fi-free-post').disabled=true;}catch(err){radice.querySelector('#fi-free-msg').textContent='⚠ '+err.message;}};
+      add();add();tbody.rows[1].querySelector('.fi-da').value='AVERE';calculate();
+    },
     giornale: function () {
       var regs = registrazioni(), totale = totali(regs.reduce(function (a, r) { return a.concat(r.righe); }, []));
-      radice.innerHTML = navigazione()+blocco()+L.scheda('📚', 'Libro giornale', 'FB03 · S_ALR_87012287', (regs.slice().reverse().map(function (r) {
+      radice.innerHTML = navigazione()+blocco()+L.scheda('📚', 'Libro giornale (Manage Journal Entries F0717A)', 'Ricerca e consultazione documenti contabili', (regs.slice().reverse().map(function (r) {
         var t = totali(r.righe), righe = r.righe.map(function (x) { return '<tr><td><a href="'+e(base()+'mastro?conto='+encodeURIComponent(x.conto))+'">'+e(contoNome(x.conto))+'</a></td><td>'+e([x.partner,x.testo].filter(Boolean).join(' · '))+'</td>'+importi(x)+'</tr>'; }).join('');
         return '<article class="fi-documento" id="'+e(docId(r))+'"><h3>Documento '+e(r.numero)+' · '+e(fd(r.data))+' · '+e(r.tipo)+'</h3><p>'+e(r.descrizione)+'</p>'+(r.stornato?'<p>Stornato dal '+e(r.stornato)+'</p>':'')+(r.stornoDi?'<p>Storno del '+e(r.stornoDi)+'</p>':'')+tabella('Scrittura documento '+r.numero, ['Conto / mastrino','Partner / descrizione','Dare €','Avere €'],righe,'<tr><th scope="row" colspan="2">Totali documento</th><td class="fi-importo">'+eur(t.dare/100)+'</td><td class="fi-importo">'+eur(t.avere/100)+'</td></tr>')+'<p class="fi-quadratura">'+(t.dare===t.avere?'✓ Documento quadrato: Dare = Avere.':'⚠ Documento NON quadrato. Differenza Dare − Avere: '+eur((t.dare-t.avere)/100)+' €.')+'</p></article>';
       }).join('') || '<p class="lab-vuoto">Nessuna scrittura consultabile.</p>')+'<p class="fi-quadratura">Totali giornale consultabile — Dare '+eur(totale.dare/100)+' € · Avere '+eur(totale.avere/100)+' € · '+(totale.dare===totale.avere?'Quadrato':'NON quadrato')+'</p>');
@@ -148,7 +182,7 @@
     L.collega(radice, 'sv', {sv: FS.sopravvenienza}, rendi); L.collega(radice, 'ii', {ii: FS.incassaIndennizzo}, rendi);
   };
   function rendi() {
-    if (bloccati().length && ['giornale','mastro'].indexOf(C.pagina)<0) {
+    if (bloccati().length && ['giornale','mastro','prima_nota'].indexOf(C.pagina)<0) {
       // Se la domanda nasce da un form, conserva il DOM e il suo esito:
       // nasconderlo evita anche che il callback scriva su nodi staccati.
       if (radice.dataset.fiReso === '1') { radice.dataset.fiSospeso = '1'; radice.hidden = true; return; }
@@ -161,7 +195,7 @@
     radice.dataset.fiReso = '1';
   }
   function aggiornaVisibilita() {
-    if (['giornale','mastro','bilancio'].indexOf(C.pagina)>=0 || radice.dataset.fiSospeso === '1') { rendi(); return; }
+    if (['giornale','mastro','bilancio','prima_nota'].indexOf(C.pagina)>=0 || radice.dataset.fiSospeso === '1') { rendi(); return; }
     radice.hidden = bloccati().length > 0;
   }
   window.addEventListener('msa:quiz-pronto',aggiornaVisibilita);
