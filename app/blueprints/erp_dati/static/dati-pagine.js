@@ -7,7 +7,12 @@
   var e = L.esc, eur = L.eur, n0 = L.n0, S = function () { return N.S; };
   var PAGINE = {
     avvio: function () {
-      radice.innerHTML =
+      var occupato = !!(S().avviato || S().costituzione || (S().registrazioni || []).length);
+      radice.innerHTML = (occupato ? '<div class="reset-box" id="reset-box"><h2>♻️ In questo account c’è già un’azienda</h2>' +
+          '<p>' + (S().costituzione ? 'Costituita il ' + L.fd(S().costituzione.data) : S().avviato ? 'Avviata il ' + L.fd(S().avviato) : 'Con documenti registrati') + ' · ' + (S().registrazioni || []).length + ' scritture nel libro giornale.</p>' +
+          '<p><b>Vuoi continuare il lavoro?</b> Non premere niente qui: apri l’esercizio e vai al primo passo non spuntato.</p>' +
+          '<p><b>Devi cominciare un esercizio nuovo da zero?</b> Premi il pulsante rosso: ti chiede conferma, salva una copia di sicurezza sul computer e poi svuota l’azienda.</p>' +
+          '<button type="button" class="reset-btn" id="reset-ora">♻️ RICOMINCIA DA ZERO (azienda vuota)</button><p class="reset-esito" id="reset-esito" role="status"></p></div>' : '') +
         L.scheda('🧭', 'Da dove si comincia?', 'scegli il percorso giusto', '<ol class="lab-elenco"><li><b>Esercizio libero o FORMAS da zero:</b> scegli <b>Nuova azienda</b>, costituisci la società e versa il capitale. Nessuna scorta viene regalata.</li><li><b>Prepara l’azienda:</b> acquista i beni strumentali, configura WMS, centri, budget annuo, distinta e ciclo standard.</li><li><b>Avvia il ciclo operativo su commessa:</b> ordini clienti → fabbisogni → acquisti materiali → ricevimento → produzione → consegna e fattura. La produzione per scorta è un caso alternativo.</li></ol><p class="lab-nota"><b>Stesso account = stessa azienda integrata.</b> Cambiare guida non crea archivi separati. Gli accessi personali non vengono cancellati dalla ripartenza dell’esercizio.</p>') +
         (!S().avviato ? L.scheda('🏛️', 'Nuova azienda · parti da zero', 'percorso consigliato FORMAS / esercizio libero', L.modulo('cs', [['data', 'Data di costituzione', 'date', '2026-12-01'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Crea nuova azienda vuota (costituzione)']]) + '<p class="lab-nota">Registra soltanto la sottoscrizione del capitale. Poi versa i soci, acquista i beni e i materiali con documenti espliciti. I materiali e i costi standard predefiniti sono dati di base, <b>non acquisti né giacenze</b>.</p>') : '') +
         (!S().avviato ? L.scheda('📦', 'Percorso logistico · Magazziniere 5.0', 'corsi di magazzino e logistica', L.modulo('lg', [['data', 'Data di avvio', 'date', '2027-01-04'], ['quiz', 'Ricostruzione delle scritture (ragioneria di magazzino)', 'select', 'si', [['si', 'sì: dopo ogni documento contabile l\'allievo ricostruisce la scrittura'], ['no', 'no: classe solo operativa, scritture visibili nel giornale']]]], [['lg', 'Avvia il percorso logistico']]) + '<p class="lab-nota">Azienda già avviata: banca 50.000 €, a scaffale 200 TR-STD, 200 TR-ALTA e 300 TR-PED; la TR-STD si produce con un ordine a tre fasi (Taglio, Piegatura, Saldatura). Ogni documento registra le sue scritture nel giornale come sempre. Con la ricostruzione attiva (consigliata, come FORMAS) dopo MIGO, MIRO, consumi, versamenti, rottamazioni e differenze d\'inventario l\'allievo ricostruisce Dare e Avere; per una classe solo operativa si può disattivare. È il percorso dell\'esercizio «Magazziniere 5.0: un mese di magazzino».</p>') : '') +
@@ -28,6 +33,22 @@
           '<li><b>Flusso documenti</b> (VA03): ordine → consegna → fattura → nota di credito.</li><li><b>CO-PA</b>: ogni fattura scrive i campi valore per cliente, materiale, regione, canale.</li></ul>') +
         L.scheda('⏩', 'Parti da febbraio', 'situazione pronta', '<button type="button" class="lab-btn sec" id="gennaio">Carica la situazione di fine gennaio (vendite completate)</button><p class="lab-nota">Esegue in automatico tutto gennaio dell\'esercizio (avvio, condizioni, quattro ordini, acconto, resi, abbuono, incasso): serve per cominciare dai costi del prodotto. Sostituisce il lavoro attuale del sistema integrato.</p>') +
         L.scheda('♻️', 'Nuova azienda: ricomincia nello stesso account', 'azione distruttiva solo su conferma', '<p class="lab-nota">Sostituisce l’azienda integrata corrente con un archivio vuoto. <b>Non crea uno spazio aggiuntivo.</b> Account e password restano; documenti, contabilità, magazzino, budget e progresso integrato vengono azzerati. Non modifica gli altri laboratori.</p><button type="button" class="lab-btn sec" id="backup-azienda">1 · Scarica il backup JSON dell’azienda attuale</button><button type="button" class="lab-btn rosso" id="azzera" disabled>2 · Riparti da azienda vuota</button><p id="backup-azienda-esito" role="status">Prima scarica il backup; conservarlo è responsabilità del docente. Nessuna cancellazione automatica.</p>');
+      var bottoneReset = radice.querySelector('#reset-ora');
+      if (bottoneReset) bottoneReset.onclick = function () {
+        if (!confirm('ATTENZIONE: vuoi davvero CANCELLARE tutta l’azienda di questo account e ricominciare da zero?\n\nDocumenti, contabilità, magazzino e spunte della guida vengono azzerati. Nome utente e password restano.\n\nOK = sì, ricomincia da zero      Annulla = no, tengo il lavoro')) return;
+        var esito = radice.querySelector('#reset-esito');
+        try {   // copia di sicurezza automatica prima di cancellare
+          var file = new Blob([JSON.stringify({formato: 'msa-erp-ft-backup-v1', creatoIl: new Date().toISOString(), stato: S()}, null, 2)], {type: 'application/json'});
+          var url = URL.createObjectURL(file), a = document.createElement('a');
+          a.href = url; a.download = 'Academy-azienda-backup-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+          document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        } catch (err) { /* il backup è una cortesia: la conferma esplicita è già stata data */ }
+        this.disabled = true; if (esito) esito.textContent = 'Sto svuotando l’azienda e salvando sul server…';
+        try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf('msa-g-') === 0) sessionStorage.removeItem(k); }); } catch (err) { /* nessuna spunta locale */ }
+        N.azzera();
+        var ricarica = function () { window.location.reload(); }, fatto = false, vai = function () { if (!fatto) { fatto = true; ricarica(); } };
+        if (window.MSA_SALVA) { window.MSA_SALVA().then(vai, vai); setTimeout(vai, 4000); } else vai();
+      };
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
       L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v); }}, rendi);
       L.collega(radice, 'lg', {lg: function (v) { v.modo = 'logistica'; return SD.avviaSistema(v); }}, rendi);
@@ -45,7 +66,7 @@
       };
       radice.querySelector('#azzera').onclick = function () {
         if (this.disabled) return;
-        if (prompt('Hai verificato il backup? Scrivi NUOVA AZIENDA per cancellare soltanto l’azienda integrata corrente. Account e password restano.') !== 'NUOVA AZIENDA') return;
+        if ((prompt('Hai verificato il backup? Scrivi NUOVA AZIENDA per cancellare soltanto l’azienda integrata corrente. Account e password restano.') || '').trim().toUpperCase().replace(/\s+/g, ' ') !== 'NUOVA AZIENDA') return;
         N.azzera();
         if (window.MSA_SALVA) window.MSA_SALVA();
         rendi();

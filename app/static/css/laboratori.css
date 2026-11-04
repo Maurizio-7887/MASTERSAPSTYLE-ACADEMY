@@ -113,3 +113,10 @@ body.rf-pieno .msa-lp{padding-top:6px}
 .lab-tab tr.riga-ritardo td{background:#FFF0F0}
 .lab-tab tr.riga-ferma td{color:#667}
 .dep-idea{font-size:15px;line-height:1.5}
+/* riquadro «ricomincia da zero» in cima ad Avvio del sistema */
+.reset-box{border:3px solid #BB0000;background:#FFF4F4;border-radius:8px;padding:14px 18px;margin:0 0 16px;font-size:16px;line-height:1.45}
+.reset-box h2{margin:0 0 8px;font-size:22px;color:#BB0000}
+.reset-box p{margin:6px 0}
+.reset-btn{margin-top:8px;background:#BB0000;color:#fff;border:0;border-radius:6px;padding:14px 22px;font-size:18px;font-weight:700;cursor:pointer}
+.reset-btn:hover{background:#8F0000}.reset-btn:disabled{opacity:.6;cursor:wait}
+.reset-esito{font-weight:700}

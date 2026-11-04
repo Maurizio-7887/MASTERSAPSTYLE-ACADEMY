@@ -31,7 +31,7 @@ for(const p of ps){
  ok(p.dove&&p.dove.ep&&p.campi&&p.campi.length,'Destinazione e campi '+p.titolo);
  if(p.data){const d=p.data.split('/').reverse().join('-');ok(!previous||d>=previous,'Data coerente '+p.titolo);previous=d;}
 }
-const intro=JSON.stringify(ps[0]);ok(intro.includes('NUOVA AZIENDA')&&intro.includes('backup JSON')&&intro.includes('stesso slot'),'Backup e consenso non spacciati per archivio separato');
+const intro=JSON.stringify(ps[0]);ok(intro.includes('RICOMINCIA DA ZERO')&&intro.includes('copia di sicurezza')&&intro.includes('conferma con OK')&&intro.includes('autorizzazione del docente'),'Ripartenza solo su conferma, con copia di sicurezza e autorizzazione del docente');
 ok(!intro.includes('premi «Azzera'),'Nessun reset diretto prescritto');
 ok(ps.filter(p=>p.titolo.startsWith('F-90:')).length===5,'Cinque acquisti F-90 conservati');
 ok(ps.some(p=>p.titolo==='Consegna il lavoro al docente'),'Consegna conservata');
