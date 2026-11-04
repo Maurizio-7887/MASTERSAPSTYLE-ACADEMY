@@ -164,6 +164,7 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    if (p.punti && p.punti.length) h += '<div class="msa-g-ora-c"></div>';
     var tabellaCampi = (p.campi && p.campi.length) ? '<table class="msa-g-campi">' + p.campi.map(function (c) {
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';
       }).join('') + '</table>' : '';
@@ -206,6 +207,7 @@
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
+    firmaPunti = ''; tickPunti(true);
   }
   // spunte delle righe «Cosa fai» (per scheda del browser): aiutano a non perdere il segno, non cambiano lo stato
   function spunteDi(p) { try { return JSON.parse(ss('msa-g-punti-' + E.codice + '-' + (p.id || p.titolo)) || '{}'); } catch (e) { return {}; } }
@@ -431,5 +433,129 @@
 
   apri(inQuiz() ? true : guidata ? ls(APERTA + '-' + E.codice) !== '0' : ls(APERTA) === '1');
   progB.textContent = stati.filter(Boolean).length + '/' + N;
+
+  // ══ GUIDA PUNTO PER PUNTO ══
+  // Un passo può avere p.punti: elenco ordinato dei punti in cui l'allievo deve scrivere, scegliere o premere.
+  // Ogni punto: {t:'campo'|'scelta'|'pulsante'|'leggi', sel:'selettore CSS nella pagina', valore:'cosa scrivere/scegliere',
+  //   nome:'come si chiama il campo', serve:'a cosa serve', fatto:function(h,el){…} (facoltativo, legge lo stato), ctx:function(){…} (il campo vale solo se…)}.
+  // Il PRIMO punto non ancora fatto fa «brillare» il bordo del campo reale, con un fumetto («Scrivi 36000 — serve a…») e il riquadro «Ora tocca a te» nel pannello.
+  var firmaPunti = '', ultimoPunto = '', bolla = document.createElement('div');
+  bolla.id = 'msa-g-bolla'; bolla.hidden = true; (document.body || document.documentElement).appendChild(bolla);
+  var salta = {}, clic = {};
+  function chiaveP(p, k) { return E.codice + '|' + (p.id || p.titolo) + '|' + k; }
+  function memP(nome) { try { return JSON.parse(ss('msa-g-' + nome) || '{}'); } catch (e) { return {}; } }
+  function segnaP(nome, key) { var m = memP(nome); m[key] = 1; ss('msa-g-' + nome, JSON.stringify(m)); }
+  function numeroP(v) {
+    var t = String(v == null ? '' : v).trim().replace(/\s/g, ''); if (!t) return null;
+    if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(',', '.');
+    var n = Number(t); return isFinite(n) ? n : null;
+  }
+  function ugualeP(a, b) { var x = numeroP(a), y = numeroP(b); if (x !== null && y !== null) return Math.abs(x - y) < 1e-9; return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+  function trovaP(sel) {
+    var els; try { els = document.querySelectorAll(sel); } catch (e) { return null; }
+    for (var i = 0; i < els.length; i++) if (!radice.contains(els[i]) && els[i].getBoundingClientRect) return els[i];
+    return null;
+  }
+  function fattoP(p, d, k, el, h) {
+    var key = chiaveP(p, k);
+    if (memP('salta')[key]) return true;
+    if (d.finale && stati[pos]) return true;
+    if (d.fatto) { try { if (d.fatto(h, el)) return true; } catch (e) { /* stato non pronto */ } }
+    if (d.solo === 'stato') return false;
+    if (d.t === 'leggi' || d.controlla) return !!memP('letto')[key];   // controlla: la casella può contenere già il valore giusto, lo conferma l'allievo
+    if (!el) return false;
+    if (d.ctx) { try { if (!d.ctx()) return false; } catch (e) { return false; } }
+    if (d.t === 'campo' || d.t === 'scelta') return d.valore !== undefined && ugualeP(el.value, d.valore);
+    return !!memP('clic')[key];
+  }
+  function vis(d) { if (d.mostra !== undefined) return d.mostra; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d.valore)); return m ? m[3] + '/' + m[2] + '/' + m[1] : d.valore; }
+  function tipoLabel(d) { return d.t === 'campo' ? '✍️ Scrivi' : d.t === 'scelta' ? '👆 Scegli' : d.t === 'pulsante' ? '🖱️ Premi' : '👀 Leggi'; }
+  function spegniPunti() {
+    var a = document.querySelectorAll('.msa-g-brilla'); for (var i = 0; i < a.length; i++) a[i].classList.remove('msa-g-brilla');
+    bolla.hidden = true; ultimoPunto = '';
+  }
+  function posizionaBolla(el) {
+    if (!el || !document.body.contains(el) || bolla.hidden) return;
+    var r = el.getBoundingClientRect(), bw = Math.min(330, window.innerWidth - 16), bh = bolla.offsetHeight || 70;
+    bolla.style.width = bw + 'px';
+    var sotto = r.bottom + bh + 20 < window.innerHeight, sopra = !sotto && r.top - bh - 12 > 56, top = sopra ? r.top - bh - 12 : Math.min(r.bottom + 12, window.innerHeight - bh - 8);
+    var maxL = window.innerWidth - bw - (pannello.hidden ? 8 : 400);
+    bolla.style.top = Math.max(8, top) + 'px'; bolla.style.left = Math.max(8, Math.min(r.left, maxL)) + 'px';
+    bolla.className = sopra ? 'sopra' : (sotto ? 'sotto' : '');
+    bolla.style.setProperty('--freccia', Math.max(14, Math.min(bw - 24, r.left + r.width / 2 - parseFloat(bolla.style.left))) + 'px');
+  }
+  function tickPunti(forza) {
+    if (!bolla) return;   // il motore parte dopo il primo disegno: il primo giro lo fa il timer
+    var p = PASSI[pos], c = corpo.querySelector('.msa-g-ora-c');
+    if (!p || !p.punti || !c || pannello.hidden || inQuiz()) { if (!p || !p.punti || pannello.hidden || inQuiz()) spegniPunti(); return; }
+    var h = aiutanti(stato()), elenco = p.punti.map(function (d, k) {
+      var el = d.sel ? trovaP(d.sel) : null, ok = fattoP(p, d, k, el, h), key = chiaveP(p, k);
+      if (ok && !memP('ok')[key]) segnaP('ok', key);   // un punto fatto resta fatto, anche se poi la casella cambia (per esempio cambiando centro)
+      return {d: d, k: k, el: el, fatto: ok || !!memP('ok')[key]};
+    });
+    var primo = -1; for (var i = 0; i < elenco.length; i++) if (!elenco[i].fatto) { primo = i; break; }
+    var ora = primo < 0 ? null : elenco[primo];
+    var firma = pos + '|' + (ora ? ora.k + (ora.el ? 'e' : 'x') : 'fine') + '|' + elenco.map(function (x) { return x.fatto ? 1 : 0; }).join('');
+    if (firma !== firmaPunti || forza) {
+      firmaPunti = firma;
+      var fatti = elenco.filter(function (x) { return x.fatto; }).length;
+      var h2 = '<div class="msa-g-ora"><div class="msa-g-ora-t">🎯 ' + (ora ? 'ORA TOCCA A TE' : 'TUTTI I PUNTI FATTI') + '<small>punto ' + Math.min(fatti + 1, elenco.length) + ' di ' + elenco.length + '</small></div>' +
+        '<div class="msa-g-ora-barra"><span style="width:' + Math.round(fatti / elenco.length * 100) + '%"></span></div>';
+      if (ora) {
+        var d = ora.d;
+        h2 += '<div class="msa-g-ora-azione">' + tipoLabel(d) + (d.nome ? ' · <b>' + esc(d.nome) + '</b>' : '') + '</div>';
+        if (d.valore !== undefined && d.t !== 'pulsante') h2 += '<div class="msa-g-ora-val"><button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(vis(d)) + '</button><small>' + (d.t === 'campo' ? (d.controlla ? 'controlla la casella che brilla: se non c’è già, scrivilo tu' : 'scrivilo tu nella casella che brilla (clic per copiarlo)') : 'scegli questa voce nell’elenco che brilla') + '</small></div>';
+        if (d.t === 'pulsante') h2 += '<div class="msa-g-ora-val"><small>Premi il pulsante che brilla' + (d.nome ? ': «' + esc(d.nome) + '»' : '') + '.</small></div>';
+        h2 += '<div class="msa-g-ora-serve"><b>💡 A cosa serve</b>' + esc(d.serve || '') + '</div>';
+        if (!ora.el && d.t !== 'leggi') h2 += '<div class="msa-g-ora-dove">📍 Non vedo ancora questa schermata: premi <b>«Apri ➜»</b> qui sopra, poi la casella comincerà a brillare.</div>';
+        if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ La casella contiene ' + esc(vis(d)) + ', vai avanti' : '✓ Ho letto, vai avanti') + '</button>';
+        h2 += '<button type="button" class="msa-g-salta" data-k="' + ora.k + '">già fatto / salta questo punto</button>';
+      } else h2 += '<div class="msa-g-ora-serve">Ora controlla qui sotto «Cosa devi vedere» e passa al passo successivo.</div>';
+      h2 += '<details class="msa-g-ora-elenco"><summary>Tutti i punti di questo passo</summary><ol>' + elenco.map(function (x) {
+        return '<li class="' + (x.fatto ? 'fatto' : x === ora ? 'adesso' : '') + '">' + (x.fatto ? '✓ ' : '') + tipoLabel(x.d) + ' ' + esc(x.d.nome || '') + (x.d.valore !== undefined && x.d.t !== 'pulsante' ? ' → <code>' + esc(vis(x.d)) + '</code>' : '') + '</li>';
+      }).join('') + '</ol></details></div>';
+      c.innerHTML = h2;
+    }
+    // evidenziazione sulla pagina
+    var chiave = pos + '|' + (ora ? ora.k : 'fine');
+    var vecchi = document.querySelectorAll('.msa-g-brilla');
+    for (var j = 0; j < vecchi.length; j++) if (!ora || vecchi[j] !== ora.el) vecchi[j].classList.remove('msa-g-brilla');
+    if (ora && ora.el) {
+      ora.el.classList.add('msa-g-brilla');
+      var d2 = ora.d, breve = d2.breve || (function (t) { var f = t.split(/(?<=[.!?])\s/)[0]; return f.length > 130 ? f.slice(0, 127).replace(/\s+\S*$/, '') + '…' : f; })(d2.serve || '');
+      bolla.innerHTML = '<b>' + tipoLabel(d2) + (d2.valore !== undefined && d2.t !== 'pulsante' ? ' <code>' + esc(vis(d2)) + '</code>' : (d2.nome ? ' «' + esc(d2.nome) + '»' : '')) + '</b><span>' + esc(breve) + '</span>';
+      bolla.hidden = false;
+      if (chiave !== ultimoPunto || forza) {
+        ultimoPunto = chiave;
+        try { ora.el.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch (e) { /* vecchio browser */ }
+        if ((d2.t === 'campo') && (!document.activeElement || document.activeElement === document.body)) { try { ora.el.focus({preventScroll: true}); } catch (e) { /* niente fuoco */ } }
+      }
+      posizionaBolla(ora.el);
+    } else { bolla.hidden = true; ultimoPunto = chiave; }
+    tickPunti.el = ora && ora.el; tickPunti.k = ora ? ora.k : -1;
+  }
+  corpo.addEventListener('click', function (e) {
+    var t = e.target.closest ? e.target.closest('.msa-g-letto,.msa-g-salta') : null; if (!t) return;
+    var p = PASSI[pos], k = parseInt(t.getAttribute('data-k'), 10);
+    segnaP(t.classList.contains('msa-g-letto') ? 'letto' : 'salta', chiaveP(p, k)); firmaPunti = ''; tickPunti(true);
+  });
+  // clic sui pulsanti della pagina: il punto si segna fatto solo se l'operazione non è stata rifiutata (messaggio rosso)
+  document.addEventListener('click', function (e) {
+    var p = PASSI[pos]; if (!p || !p.punti || radice.contains(e.target)) return;
+    [tickPunti.k].forEach(function (k) {
+      var d = p.punti[k]; if (!d || d.t !== 'pulsante' || !d.sel) return;   // conta solo il pulsante che stava brillando
+      var el = trovaP(d.sel); if (!el || !el.contains(e.target)) return;
+      setTimeout(function () {
+        var m = el.closest ? el.closest('[data-prefisso]') : null, es = m ? document.getElementById(m.getAttribute('data-prefisso') + '-esito') : null;
+        if (es && /\bko\b/.test(es.className)) return;
+        segnaP('clic', chiaveP(p, k)); tickPunti();
+      }, 250);
+    });
+  }, true);
+  ['input', 'change'].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(function () { tickPunti(); }, 0); }, true); });
+  window.addEventListener('scroll', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); }, true);
+  window.addEventListener('resize', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); });
+  setInterval(function () { tickPunti(); }, 450);
+
   window.MSA_GUIDA_API = {stati: function () { return esiti(); }, vaiA: vaiA, apri: apri, passo: function () { return pos; }};
 })();

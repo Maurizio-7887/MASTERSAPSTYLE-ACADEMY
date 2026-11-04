@@ -278,4 +278,128 @@
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (PUNTI[p.id]) p.fai = PUNTI[p.id]; });
   });
+
+  /* ── GUIDA «ORA TOCCA A TE» ──────────────────────────────────────────────────────────────────────────
+     Per ogni passo del budget: l'elenco ordinato dei punti in cui l'allievo scrive, sceglie o preme.
+     Il pannello fa BRILLARE il bordo del campo vero, mostra un fumetto («Scrivi 36000») e spiega a che cosa serve.
+     campo = si scrive · scelta = si sceglie da un elenco · pulsante = si preme · leggi = si controlla (casella già compilata o tabella). */
+  var G = {
+    campo: function (sel, nome, valore, serve, x) { return Object.assign({t: 'campo', sel: sel, nome: nome, valore: valore, serve: serve}, x || {}); },
+    scelta: function (sel, nome, valore, serve, x) { return Object.assign({t: 'scelta', sel: sel, nome: nome, valore: valore, serve: serve}, x || {}); },
+    premi: function (sel, nome, serve, x) { return Object.assign({t: 'pulsante', sel: sel, nome: nome, serve: serve}, x || {}); },
+    leggi: function (sel, nome, serve, x) { return Object.assign({t: 'leggi', sel: sel, nome: nome, serve: serve}, x || {}); },
+    btn: function (pref, az) { return '[data-prefisso="' + pref + '"] [data-azione="' + az + '"]'; },
+    cdc: function (c) { return function () { var q = document.getElementById('cdc'); return !!q && q.value === c; }; }
+  };
+  var NOMI_CDC = {'4100': 'Magazzino', '4200': 'Produzione', '4210': 'Taglio', '4220': 'Piegatura', '4230': 'Saldatura', '4300': 'Amministrazione'};
+  var kpSalv = function (c, cl, v) { return function (h) { return circa((piano0(h, c) || {})[cl] || 0, v); }; };
+  var kpPunti = [G.scelta('#ver', 'Versione', '0', 'La versione 0 è quella «operativa»: è dal piano 0 che il programma ricava le tariffe orarie. Le altre versioni servono solo per confronti.')];
+  ['4210', '4220', '4230'].forEach(function (c) {
+    var salv = kpSalv(c, '80', 36000);
+    kpPunti.push(
+      G.scelta('#cdc', 'Centro di costo', c, 'Il piano si scrive un reparto alla volta: ogni centro è un «cassetto» di costi. Ora apri il cassetto ' + c + ' ' + NOMI_CDC[c] + '.'),
+      G.campo('#kp06-k80', '80 Salari e stipendi €/anno', '36000', 'Quanto pensi di spendere in un anno per i dipendenti del reparto ' + NOMI_CDC[c] + ': 3.000 € al mese × 12. È il costo che, diviso per le ore, darà il costo di un’ora di lavoro. Le altre classi restano a 0. Il programma l’ha già proposto: controlla che ci sia, altrimenti scrivilo.', {controlla: true}),
+      G.premi(G.btn('kp06', 'kp06'), 'Salva il piano del centro', 'Memorizza il piano di ' + NOMI_CDC[c] + '. Finché non salvi, il numero scritto non conta: se cambi centro senza salvare lo perdi.'));
+  });
+  var fit = kpSalv('4200', '86', 12000), amm = kpSalv('4200', '50', 2900), ser = kpSalv('4200', '54', 3100);
+  kpPunti.push(
+    G.scelta('#cdc', 'Centro di costo', '4200', 'Ora il centro «Produzione»: contiene i costi comuni di tutto lo stabilimento (affitto, ammortamenti, energia), non di un solo reparto.', {fatto: function (h) { return fit(h) && amm(h) && ser(h); }}),
+    G.campo('#kp06-k86', '86 Fitti passivi €/anno', '12000', 'L’affitto del capannone: 3.000 € a trimestre × 4. È un costo comune: più avanti verrà diviso fra i tre reparti.', {ctx: G.cdc('4200'), fatto: fit}),
+    G.campo('#kp06-k50', '50 Ammortamenti €/anno', '2900', 'La quota annua di ammortamento delle macchine: taglierina 1.500 + piegatubi 800 + saldatrice 600. Non è un’uscita di cassa ma è un costo di competenza.', {ctx: G.cdc('4200'), fatto: amm}),
+    G.campo('#kp06-k54', '54 Consulenze e servizi €/anno', '3100', 'Energia e manutenzioni dello stabilimento per tutto l’anno. Con l’affitto e gli ammortamenti fa 18.000 € di costi comuni.', {ctx: G.cdc('4200'), fatto: ser}),
+    G.premi(G.btn('kp06', 'kp06'), 'Salva il piano del centro', 'Memorizza il piano di Produzione (18.000 €). I centri 4100 Magazzino e 4300 Amministrazione restano a 0: il loro costo non entra nel prodotto.', {fatto: function (h) { return fit(h) && amm(h) && ser(h); }}),
+    G.leggi(null, 'Tabella del piano in fondo alla pagina', 'Controllo finale: 4210, 4220 e 4230 devono valere 36.000 ciascuno, 4200 18.000, totale 126.000. Se un numero non torna, scegli quel centro e correggilo.'));
+
+  var STAT_B = function (h, c) { var b = bpc(h); return b && b.stato && b.stato['BUDGET|V1|' + c] ? b.stato['BUDGET|V1|' + c].stato : 'aperto'; };
+  var bpcPunti = [];
+  CDC6.forEach(function (c) {
+    var fa = function (h) { var x = STAT_B(h, c); return x === 'inviato' || x === 'approvato'; };
+    bpcPunti.push(
+      G.scelta('#bpf-cdc', 'Centro', c, 'Ogni responsabile di centro invia il proprio budget: ora tocca a ' + c + ' ' + NOMI_CDC[c] + '.', {fatto: fa}),
+      G.scelta('#bpf-azione', 'Azione', 'invia', 'Inviare = dire al controller «il mio budget è pronto». Da quel momento il centro è bloccato e non si può più modificare.', {fatto: fa}),
+      G.premi(G.btn('bpf', 'bpf'), 'Esegui', 'Esegue l’invio del budget del centro ' + c + '.', {fatto: fa}));
+  });
+  CDC6.forEach(function (c) {
+    var fa = function (h) { return STAT_B(h, c) === 'approvato'; };
+    bpcPunti.push(
+      G.scelta('#bpf-cdc', 'Centro', c, 'Ora il controller approva, un centro alla volta: tocca a ' + c + ' ' + NOMI_CDC[c] + '.', {fatto: fa}),
+      G.scelta('#bpf-azione', 'Azione', 'approva', 'Approvare = il controller dice «ok, questo budget vale». Solo i budget approvati possono tornare nel gestionale.', {fatto: fa}),
+      G.campo('#bpf-nota', 'Nota / motivo', 'ok', 'Il motivo resta nello storico del centro: chi ha deciso, quando e perché. Qui basta «ok».', {fatto: fa}),
+      G.premi(G.btn('bpf', 'bpf'), 'Esegui', 'Registra l’approvazione del centro ' + c + '.', {fatto: fa}));
+  });
+  bpcPunti.push(
+    G.campo('#retract-conferma', 'Per confermare scrivi TRASFERISCI', 'TRASFERISCI', 'Il ritrasferimento SOSTITUISCE il piano KP06 versione 0 con il budget approvato: è una conferma voluta, per questo bisogna scriverla.', {fatto: function (h) { var b = bpc(h); return !!b && (b.retract || []).length > 0; }}),
+    G.premi(G.btn('retract', 'retract'), 'Ritrasferisci in S/4', 'Riporta nel gestionale i numeri approvati: da qui partono le tariffe.', {finale: true}));
+
+  var epm = [G.scelta('#cat', 'Categoria', 'BUDGET', 'Il modulo contiene più «famiglie» di numeri: BUDGET = previsione, ACTUAL = realtà, FORECAST = previsione aggiornata. Oggi lavori sul budget.'),
+    G.scelta('#ver', 'Versione', 'V1', 'Un budget può avere più versioni (V1, V2…): lavoriamo sulla V1.'),
+    G.scelta('#cdc', 'Centro', '4200', 'L’energia è un costo comune dello stabilimento: sta nel centro 4200 Produzione.')];
+  STAGIONE.forEach(function (v, k) {
+    var mese = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'][k];
+    epm.push(G.campo('#epm-m54_' + (k + 1), '54 Consulenze e servizi · ' + mese, String(v), k === 0 ? 'Energia e manutenzioni non costano uguale tutti i mesi: d’inverno si consuma di più. Compili la riga 54 mese per mese; il totale dell’anno deve restare 3.100 €.' : 'Stessa riga 54, mese di ' + mese.toLowerCase() + '. Il totale a destra deve arrivare a 3.100,00.', {fatto: function (h) { var b = bpc(h), r = b && b.dati && b.dati['BUDGET|V1|4200|54']; return !!r && circa(r[k], v); }}));
+  });
+  epm.push(G.premi(G.btn('epm', 'salva'), 'Salva nel modello', 'Scrive nel modello BPC i dodici importi. Prima di salvare controlla che il totale riga 54 sia 3.100,00.', {finale: true}));
+
+  var ckOk = function (mat) { return function (h) { return !!stima(h, mat); }; };
+  var GUIDA = {
+    'cpm-attivazione': [
+      G.leggi('[data-prefisso="cpm-start"]', 'Riquadro «Passo 1 · Apri il piano CO 2026»', 'Prima di premere, leggi cosa crea il passo (sei centri di costo, i tipi di attività, il ciclo TR-STD) e cosa NON fa (nessuna scrittura contabile, nessun ordine).'),
+      G.campo('#cpm-start-conferma', 'Per confermare scrivi ATTIVA', 'ATTIVA', 'È una conferma voluta: apri il piano del controllo di gestione solo se sei sicuro. Senza questa parola il programma non parte (è un’abitudine di sicurezza, come il «confermi?» prima di cancellare).', {fatto: function (h) { return attivo(h); }}),
+      G.premi(G.btn('cpm-start', 'start'), 'Apri il piano CO', 'Crea i «cassetti» (centri di costo) in cui, nei passi dopo, scriverai i costi di ogni reparto.', {finale: true})],
+    'cpm-budget': kpPunti,
+    'cpm-paghe': [
+      G.scelta('#pcp-versione', 'Versione di destinazione', '1', 'Le paghe vanno nella versione 1, che serve solo per CONFRONTO. NON scegliere la 0: sostituirebbe il tuo budget.'),
+      G.premi(G.btn('pcp', 'pcp'), 'Trasferisci dalle paghe', 'Prende gli stipendi veri dei dipendenti e li mette accanto al budget, per vedere dove la previsione si discosta dalla realtà.', {fatto: function (h) { var m = modello(h); return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80'] > 0); }}),
+      G.leggi(null, 'Tabella di controllo del personale', 'Leggi le differenze: i reparti 4210/4220/4230 hanno piano 36.000 ma paghe 0 (il budget prevede personale da assumere), mentre 4100/4200/4300 hanno paghe e piano 0. Non si scrive niente.')],
+    'cpm-kp26': [
+      G.leggi('#kp26-Taglio_capacita', 'Taglio · capacità e ore pianificate', 'Capacità = ore che il reparto può lavorare in un anno. Ore pianificate = ore su cui dividerai i costi per avere il costo di un’ora. Per il Taglio sono già 1500 e 1500: controllale.'),
+      G.leggi('#kp26-Piegatura_capacita', 'Piegatura · capacità e ore pianificate', 'Stesso controllo: 1500 e 1500. Le ore pianificate non possono superare la capacità.'),
+      G.leggi('#kp26-Saldatura_capacita', 'Saldatura · capacità e ore pianificate', 'Stesso controllo: 1500 e 1500.'),
+      G.premi(G.btn('kp26', 'kp26'), 'Salva le attività pianificate', 'Memorizza le ore dei tre reparti: sono il denominatore del costo orario (costo annuo ÷ ore).'),
+      G.campo('#ltp-vol_TR-STD', 'TR-STD · pezzi/anno', '1200', 'Quante transenne pensi di fare nell’anno (1.200, non il lotto di 300 di un ordine). Servono a calcolare quanto saranno saturi i reparti.'),
+      G.premi(G.btn('ltp', 'ltp'), 'Salva i volumi', 'Memorizza il volume annuo. Poi leggi la tabella: ore richieste 300 / 240 / 480 e saturazione 20% / 16% / 32%.', {finale: true})],
+    'cpm-ciclo': [
+      G.leggi('#ksu1-driver', 'Regola del ciclo', 'Scegli come dividere i costi comuni (18.000 €) fra i tre reparti: «Ore pianificate dei centri ricevitori». Più ore ha un reparto, più quota si prende. Qui è già impostata: controlla.'),
+      G.premi(G.btn('ksu1', 'ksu1'), 'Salva il ciclo', 'Registra la regola: 18.000 € × 1.500 / 4.500 = 6.000 € a ciascun reparto. È una ripartizione solo del controllo di gestione, non muove la contabilità.', {finale: true})],
+    'cpm-standard-tr': [
+      G.scelta('#cpm-materiale', 'Prodotto da modificare', 'TR-STD', 'La ricetta si scrive un prodotto alla volta: prima la transenna TR-STD.'),
+      G.scelta('#cpm-standard-componente', 'Componente', 'FERRO', 'Il materiale con cui è fatta la transenna.'),
+      G.campo('#cpm-standard-quantita', 'Quantità componente per pezzo', '8', 'Quanti kg di ferro servono per UN pezzo: 8. Con il prezzo standard 0,95 €/kg dà 7,60 € di materiale.'),
+      G.campo('#cpm-standard-Taglio', '4210 Taglio h/pz', '0,25', 'Ore di Taglio per UN pezzo: 0,25 h (15 minuti). Moltiplicate per 28 €/h danno 7 € di lavoro.'),
+      G.campo('#cpm-standard-Piegatura', '4220 Piegatura h/pz', '0,20', 'Ore di Piegatura per UN pezzo: 0,20 h (12 minuti).'),
+      G.campo('#cpm-standard-Saldatura', '4230 Saldatura h/pz', '0,40', 'Ore di Saldatura per UN pezzo: 0,40 h (24 minuti). In tutto 0,85 h per transenna.'),
+      G.campo('#cpm-standard-attrezzaggio', 'Setup h/lotto', '0', 'Ore di attrezzaggio per preparare le macchine: in questo caso zero.'),
+      G.premi(G.btn('cpm-standard', 'standard'), 'Salva distinta/ciclo versionati', 'Memorizza la ricetta: crea una nuova revisione del piano, che userà il costo orario per calcolare il costo del pezzo.', {finale: true})],
+    'cpm-standard-halb': [
+      G.scelta('#cpm-materiale', 'Prodotto da modificare', 'SL-TAGLIO', 'Ora la ricetta del kit tagliato (il semilavorato a scorta): solo ferro e taglio.'),
+      G.scelta('#cpm-standard-componente', 'Componente', 'FERRO', 'Anche il kit è fatto di ferro.'),
+      G.campo('#cpm-standard-quantita', 'Quantità componente per pezzo', '8', 'Kg di ferro per UN kit: 8.'),
+      G.campo('#cpm-standard-Taglio', '4210 Taglio h/pz', '0,25', 'Il kit passa solo dal Taglio: 0,25 h.'),
+      G.campo('#cpm-standard-Piegatura', '4220 Piegatura h/pz', '0', 'Il kit NON passa dalla Piegatura: zero. Lasciare 0 vuol dire «fase assente».'),
+      G.campo('#cpm-standard-Saldatura', '4230 Saldatura h/pz', '0', 'Il kit NON passa dalla Saldatura: zero.'),
+      G.premi(G.btn('cpm-standard', 'standard'), 'Salva distinta/ciclo versionati', 'Memorizza la ricetta del kit: 7,60 € di ferro + 7 € di taglio = 14,60 €.', {finale: true})],
+    'bpc-modello': [
+      G.campo('#bpc-crea-conferma', 'Per confermare scrivi CREA', 'CREA', 'Il modello BPC è il «foglio di budget» mensile. Si crea una volta sola, e per questo il programma chiede conferma.', {fatto: function (h) { var b = bpc(h); return !!b && !!b.dati; }}),
+      G.premi(G.btn('bpc-crea', 'crea'), 'Crea il modello', 'Crea il modello con il budget annuo già diviso in 12 mesi uguali (3.000 al mese per i reparti, 1.000 di fitto). Nessuna scrittura contabile.', {finale: true})],
+    'bpc-input': epm,
+    'bpc-processo': bpcPunti,
+    'cpm-kspi': [
+      G.campo('#kspi-data', 'Data di esecuzione', '2026-12-01', 'La data dalla quale vale la tariffa oraria. Usa il primo giorno del periodo (01/12/2026): così vale per tutto dicembre.'),
+      G.premi(G.btn('kspi', 'kspi'), 'Esegui il calcolo delle tariffe', 'Calcola quanto costa UN’ORA di ogni reparto: (36.000 personale + 6.000 costi comuni) ÷ 1.500 ore = 28 €/h. Senza questo passo CK11N non sa quanto vale un’ora.', {finale: true})],
+    'cpm-tariffe': [G.leggi(null, 'Tabella delle tariffe', 'Qui non si scrive: controlla che ogni reparto abbia costi 42.000 €, ore 1.500 e tariffa 28 €/h. Poi 42.000 ÷ 1.500 con la calcolatrice: deve fare 28.')],
+    'cpm-calcolo': [
+      G.scelta('#ck-materiale', 'Materiale', 'TR-STD', 'Il prodotto di cui vuoi sapere il costo: la transenna.', {fatto: ckOk('TR-STD')}),
+      G.campo('#ck-data', 'Data di calcolo', '2026-12-01', 'La data a cui calcoli il costo: 01/12/2026, inizio del periodo.', {fatto: ckOk('TR-STD')}),
+      G.premi(G.btn('ck', 'ck'), 'Calcola', 'Mette insieme ricetta × costo orario + ferro: la transenna deve costare 31,40 €.', {fatto: ckOk('TR-STD')}),
+      G.scelta('#ck-materiale', 'Materiale', 'SL-TAGLIO', 'Ora ripeti il calcolo per il kit tagliato.', {fatto: ckOk('SL-TAGLIO')}),
+      G.premi(G.btn('ck', 'ck'), 'Calcola', 'Deve venire 14,60 € per kit (7,60 ferro + 7 taglio). Controlla la data: sempre 01/12/2026.', {fatto: ckOk('SL-TAGLIO')})],
+    'cpm-rilascio': [
+      G.campo('#cr-data', 'Data di rilascio', '2026-12-01', 'Il nuovo costo vale da questa data: deve essere l’inizio del periodo, prima di qualsiasi movimento di magazzino.'),
+      G.premi(G.btn('cr', 'marca'), 'Marca tutte le stime calcolate', 'Prima si «marca» (segna) i costi calcolati che vuoi rendere ufficiali: è il controllo prima del rilascio.'),
+      G.campo('#cr-sostituisciBootstrap', 'Solo primo CPM: scrivi SOSTITUISCI', 'SOSTITUISCI', 'Solo se il programma lo chiede (casella presente): è il consenso a sostituire i costi iniziali di costituzione con i nuovi. NON è un reset dell’azienda.'),
+      G.premi(G.btn('cr', 'cr'), 'Rilascia', 'Rende UFFICIALI i costi standard: da qui ogni pezzo in magazzino vale 31,40 € (transenna) e 14,60 € (kit).', {finale: true})]
+  };
+  ['passiPreparazione', 'passiConsuntivo', 'passiRiconciliazione'].forEach(function (k) {
+    (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (GUIDA[p.id]) p.punti = GUIDA[p.id]; });
+  });
 })();
