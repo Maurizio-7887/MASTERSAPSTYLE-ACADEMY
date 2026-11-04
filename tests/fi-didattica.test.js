@@ -14,7 +14,7 @@ function fixture() {
   return {registrazioni:[r],pianoDeiConti:[{codice:'10',nome:'Banca test'},{codice:'30',nome:'Capitale test'}],msaRagioneria:{coda:[{chiave:'sintetica',documento:clone(r),risposte:[],tentativi:0}],esiti:[]}};
 }
 function env(S, pagina='giornale', withQuiz=true) {
-  const events = {}, radice = {innerHTML:'',dataset:{}};
+  const events = {}, radice = {innerHTML:'',dataset:{},querySelector:()=>({value:'',addEventListener(){},textContent:''}),querySelectorAll:()=>[]};
   const context = {console, URLSearchParams, Number, Set, CustomEvent:class {constructor(type){this.type=type;}},
     document:{getElementById:()=>radice}, location:{pathname:'/vuoto/s4/contabilita-s4/'+(pagina==='giornale'?'':pagina),search:'?conto=10',reload(){context.reloaded=true;}}};
   context.window=context;

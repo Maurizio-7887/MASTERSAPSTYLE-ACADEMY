@@ -84,13 +84,21 @@ window.SP4 = (function () {
     if (t.consegne.indexOf(x.consegna) < 0) throw Error('Collo sbagliato: la consegna ' + x.consegna + ' non viaggia sul trasporto ' + t.numero + '. Non caricarlo!');
     if (t.partenza) throw Error('Il camion del trasporto ' + t.numero + ' è già partito.');
     if (x.caricato) throw Error('Collo ' + x.sscc + ' già caricato.');
+    var sp = statoPiano(t);
+    if (sp.codice === 'ok' && t.piano.scarti.some(function (s0) { return s0.colli.indexOf(x.sscc) >= 0; }))
+      throw Error('Non caricarlo: nel piano di carico il collo ' + x.sscc + ' resta a terra (' + t.piano.scarti.find(function (s0) { return s0.colli.indexOf(x.sscc) >= 0; }).motivo + '). Ricalcola il piano con un camion più grande o dividi il trasporto.');
+    var vei = t.veicolo && veicoli()[t.veicolo];
+    if (vei) {
+      var gia = colliDelTrasporto(t).filter(function (y) { return y.caricato; }).reduce(function (a, y) { return a + (y.pesoLordo || 0); }, 0);
+      if (gia + (x.pesoLordo || 0) > vei.portata + 1e-6) throw Error('Portata superata: sul ' + vei.nome + ' ci sono già ' + L.n0(gia) + ' kg e il collo ne pesa ' + L.n0(x.pesoLordo) + ' (portata ' + L.n0(vei.portata) + ' kg). Non caricarlo.');
+    }
     x.caricato = n.data(i.data || t.data); x.trasporto = t.numero; t.stato = 'in carico';
     var tutti = t.consegne.every(function (k) { return colliDi(k).length && colliDi(k).every(function (y) { return y.caricato; }); });
     if (tutti) t.stato = 'caricato';
     n.salva();
     var mancano = t.consegne.reduce(function (s, k) { return s + colliDi(k).filter(function (y) { return !y.caricato; }).length; }, 0);
-    var pos = t.piano && t.piano.posti.find(function (p) { return p.colli.indexOf(x.sscc) >= 0; });
-    return '<p class="lab-nota">✓ Collo ' + x.sscc + ' caricato sul trasporto ' + t.numero + ' (consegna ' + x.consegna + ', ' + x.qta + ' pz ' + x.materiale + ')' + (pos ? ' nel <b>posto ' + pos.n + '</b> del piano di carico' + (pos.colli.length > 1 ? ' (pila di ' + pos.colli.length + ')' : '') : '') + '. ' + (mancano ? 'Mancano ' + mancano + ' colli.' : '<b>Carico completo</b>: si può registrare l\'uscita merci.') + '</p>';
+    var pos = sp.codice === 'ok' && t.piano.posti.find(function (p) { return p.colli.indexOf(x.sscc) >= 0; });
+    return '<p class="lab-nota">✓ Collo ' + x.sscc + ' caricato sul trasporto ' + t.numero + ' (consegna ' + x.consegna + ', ' + x.qta + ' pz ' + x.materiale + ')' + (pos ? ' nel <b>posto ' + pos.n + '</b> del piano di carico' + (pos.colli.length > 1 ? ' (pila di ' + pos.colli.length + ')' : '') : '') + '. ' + (sp.codice === 'vecchio' ? '⚠ ' + sp.testo + '. ' : '') + (mancano ? 'Mancano ' + mancano + ' colli.' : '<b>Carico completo</b>: si può registrare l\'uscita merci.') + '</p>';
   }
   // fine carico e uscita merci di tutte le consegne del trasporto (VT02N → attività «Fine carico» + 601)
   function parti(i) {
@@ -112,7 +120,7 @@ window.SP4 = (function () {
     var t = SP().trasporti.find(function (x) { return x.consegne.indexOf(c.numero) >= 0; });
     return {numero: c.ddt, anno: (c.pgi || c.data || '').slice(0, 4), data: c.pgi || '', consegna: c.numero, ordine: c.ordine, rifCliente: o ? o.rif : '', cliente: c.cliente, destinatario: cli,
       materiale: c.materiale, descrizione: N().materiale(c.materiale).nome, qta: c.qta, colli: st.colli, pesoLordo: r2(st.colli.reduce(function (s, x) { return s + x.pesoLordo; }, 0)),
-      pesoNetto: r2(st.colli.reduce(function (s, x) { return s + x.pesoNetto; }, 0)), trasporto: t, vettore: t ? VETTORI[t.vettore] : '', porto: t ? t.porto : ''};
+      pesoNetto: r2(st.colli.reduce(function (s, x) { return s + x.pesoNetto; }, 0)), trasporto: t, vettore: t ? VETTORI[t.vettore] : '', porto: t ? t.porto : '', veicolo: t && t.veicolo ? veicoli()[t.veicolo].nome : ''};
   }
   // ── piano di carico del camion (VT01N → pianificazione del carico) ──
   // Stesso metodo del MasterLogistic WMS, adattato: 1) i colli impilabili con la stessa base si mettono uno sopra l'altro se ci stanno
@@ -196,9 +204,18 @@ window.SP4 = (function () {
       kpi: {colli: colli.length, caricati: ncolli, scartati: colli.length - ncolli, posti: tenuti.length, pile: tenuti.filter(function (p) { return p.u.pila.colli.length > 1; }).length, scambi: scambi,
         saturazioneArea: Math.round(area / (v.lung * v.larg) * 1000) / 10, peso: r2(peso), saturazionePeso: Math.round(peso / v.portata * 1000) / 10, metriUsati: Math.round(avanti) / 100}};
   }
+  var firmaColli = function (t) { return colliDelTrasporto(t).map(function (x) { return x.sscc; }).sort().join(','); };
+  // il piano salvato vale finché i colli del trasporto sono gli stessi e il veicolo non è cambiato
+  function statoPiano(t) {
+    if (!t.piano) return {codice: 'manca', testo: 'piano di carico non ancora calcolato'};
+    if (t.piano.firma !== firmaColli(t)) return {codice: 'vecchio', testo: 'piano da ricalcolare: i colli del trasporto sono cambiati dopo il calcolo'};
+    if (t.veicolo && t.veicolo !== t.piano.veicolo) return {codice: 'vecchio', testo: 'piano da ricalcolare: il veicolo del trasporto è cambiato'};
+    return {codice: 'ok', testo: 'piano valido: ' + t.piano.kpi.caricati + '/' + t.piano.kpi.colli + ' colli su ' + veicoli()[t.piano.veicolo].nome};
+  }
   function salvaPiano(i) {
     var t = tr(i.trasporto); if (t.partenza) throw Error('Il trasporto è già partito.');
-    var p = calcolaPiano(i); t.veicolo = p.veicolo; t.piano = {veicolo: p.veicolo, criterio: p.criterio, posti: p.posti, scarti: p.scarti, kpi: p.kpi, data: t.data}; N().salva();
+    if (colliDelTrasporto(t).some(function (x) { return x.caricato; })) throw Error('Il carico è già cominciato: il piano si decide prima di caricare il primo collo.');
+    var p = calcolaPiano(i); t.veicolo = p.veicolo; t.piano = {veicolo: p.veicolo, criterio: p.criterio, posti: p.posti, scarti: p.scarti, kpi: p.kpi, data: t.data, firma: firmaColli(t)}; N().salva();
     return '<p class="lab-nota">Piano di carico salvato sul trasporto ' + t.numero + ' (' + p.v.nome + ', criterio ' + (p.criterio === 'fermate' ? 'per fermate: l’ultimo cliente vicino alla cabina' : 'massima saturazione') + '): <b>' + p.kpi.caricati + ' colli su ' + p.kpi.colli + '</b> in ' + p.kpi.posti + ' posti a terra' + (p.kpi.pile ? ' (' + p.kpi.pile + ' pile da due)' : '') + ', pianale occupato ' + L.n0(p.kpi.saturazioneArea) + '%, peso ' + L.n0(p.kpi.peso) + ' kg (' + L.n0(p.kpi.saturazionePeso) + '% della portata).' +
       (p.scarti.length ? ' <b>⚠ Restano a terra ' + p.kpi.scartati + ' colli</b>: ' + p.scarti.map(function (s0) { return s0.motivo; }).filter(function (m, z, a) { return a.indexOf(m) === z; }).join('; ') + '. Scegli un camion più grande o dividi il trasporto.' : ' Tutti i colli ci stanno.') + ' Nessuna scrittura.</p>';
   }
@@ -224,6 +241,6 @@ window.SP4 = (function () {
     if (!SP().veicoli) SP().veicoli = {}; SP().veicoli[k] = x; N().salva();
     return '<p class="lab-nota">Veicolo <b>' + VEICOLI[k].nome + '</b>: pianale ' + x.lung + ' × ' + x.larg + ' cm, altezza utile ' + x.alt + ' cm, portata ' + L.n0(x.portata) + ' kg. Nessuna scrittura.</p>';
   }
-  return {IMBALLI: IMBALLI, VEICOLI: VEICOLI, REGOLE: REGOLE, imballi: imballi, veicoli: veicoli, regola: regola, calcolaPiano: calcolaPiano, salvaPiano: salvaPiano,
+  return {statoPiano: statoPiano, IMBALLI: IMBALLI, VEICOLI: VEICOLI, REGOLE: REGOLE, imballi: imballi, veicoli: veicoli, regola: regola, calcolaPiano: calcolaPiano, salvaPiano: salvaPiano,
     salvaImballo: salvaImballo, salvaRegola: salvaRegola, salvaVeicolo: salvaVeicolo, colliDelTrasporto: colliDelTrasporto, VETTORI: VETTORI, sscc: sscc, stato: stato, colliDi: colliDi, imballa: imballa, creaTrasporto: creaTrasporto, carica: carica, parti: parti, ddt: ddt, SP: SP};
 })();

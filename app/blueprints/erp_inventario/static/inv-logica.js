@@ -33,7 +33,7 @@ window.IV4 = (function () {
       return mag.filter(function (b) { return WM().inUbic(b).some(function (q) { return mats.indexOf(q.mat) >= 0; }); });
     }
     var lista = String(selezione || '').toUpperCase().split(/[\s,;]+/).filter(Boolean);
-    lista.forEach(function (b) { if (!u[b]) throw Error('Ubicazione ' + b + ' inesistente.'); });
+    lista.forEach(function (b) { if (!u[b]) throw Error('Ubicazione ' + b + ' inesistente.'); if (u[b].tipo === '930') throw Error('La merce in viaggio non si conta: è sul camion. Si conta all’arrivo, con l’entrata 101.'); });
     return lista;
   }
   function crea(i) {

@@ -254,5 +254,6 @@ p = apri('erp_dati','avvio');
 p.w.MSA_ESERCIZIO.passi.filter(x=>x.fatto).forEach(x=>ok(x.fatto({S:p.S()}),'passo fatto a fine esercizio: '+x.titolo));
 ok(p.S().msaRagioneria.coda.length===0,'nessuna scrittura in sospeso');
 if (QUIZ === 'si') fs.writeFileSync(path.join(__dirname,'magazziniere-finale.json'),JSON.stringify(p.S(),null,2));
+if (process.env.MSA_STATO_FINALE) fs.writeFileSync(process.env.MSA_STATO_FINALE, JSON.stringify(p.S()));
 console.log((errori ? '✗ ' : '✓ ') + 'Magazziniere 5.0 (' + (QUIZ === 'no' ? 'senza' : 'con') + ' ricostruzione delle scritture): ' + controlli + ' controlli, ' + errori + ' errori');
 process.exit(errori ? 1 : 0);
