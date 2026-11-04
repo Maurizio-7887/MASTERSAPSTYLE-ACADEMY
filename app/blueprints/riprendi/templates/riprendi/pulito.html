@@ -1,0 +1,20 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Azienda nuova pronta{% endblock %}
+{% block contenuto %}
+<div style="max-width:700px;margin:30px auto;font-size:20px;text-align:center">
+  <h1>✅ Fatto: azienda vuota pronta</h1>
+  <p>Ti porto all’avvio del sistema con la guida dell’esercizio…</p>
+  <p><a href="{{ vai }}" style="font-weight:700">Se non succede niente, premi qui</a></p>
+</div>
+<script>
+(function () {
+  // il vecchio lavoro resta anche nella memoria del browser: lo togliamo, così non torna indietro
+  try {
+    var ls = window.localStorage, togli = [{{ chiave | tojson }}, 'msa-sporco-{{ slot }}', 'msa-rev-{{ slot }}'];
+    togli.forEach(function (k) { ls.removeItem(k); });
+  } catch (e) { /* nessuna memoria locale */ }
+  try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf('msa-') === 0) sessionStorage.removeItem(k); }); } catch (e) { /* niente */ }
+  setTimeout(function () { window.location.replace({{ vai | tojson }}); }, 900);
+})();
+</script>
+{% endblock %}

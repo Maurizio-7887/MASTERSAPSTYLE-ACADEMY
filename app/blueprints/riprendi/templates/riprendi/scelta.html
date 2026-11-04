@@ -1,0 +1,66 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Continua o ricomincia{% endblock %}
+{% block contenuto %}
+<style>
+.rp{max-width:900px;margin:0 auto}
+.rp h1{font-size:30px;margin:6px 0 4px}
+.rp .sotto{font-size:18px;color:#444;margin:0 0 22px}
+.rp-scelte{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:760px){.rp-scelte{grid-template-columns:1fr}}
+.rp-box{border-radius:12px;padding:22px;font-size:17px;line-height:1.45}
+.rp-box h2{margin:0 0 10px;font-size:24px}
+.rp-continua{border:3px solid #107E3E;background:#F1FBF4}
+.rp-nuovo{border:3px solid #BB0000;background:#FFF4F4}
+.rp-btn{display:block;width:100%;box-sizing:border-box;text-align:center;border:0;border-radius:10px;padding:18px 14px;font-size:21px;font-weight:700;cursor:pointer;text-decoration:none;margin-top:14px}
+.rp-btn.verde{background:#107E3E;color:#fff}.rp-btn.verde:hover{background:#0B5E2E}
+.rp-btn.rosso{background:#BB0000;color:#fff}.rp-btn.rosso:hover{background:#8F0000}.rp-btn.rosso:disabled{background:#d99;cursor:not-allowed}
+.rp select{width:100%;font-size:16px;padding:8px;margin:6px 0 10px}
+.rp-conf{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px dashed #BB0000;border-radius:8px;padding:10px;margin-top:8px;font-weight:600}
+.rp-conf input{width:24px;height:24px;flex:0 0 auto;margin-top:2px}
+.rp-nota{font-size:14px;color:#555;margin-top:10px}
+</style>
+<div class="rp">
+  <h1>Ciao {{ u.nome }} 👋</h1>
+  <p class="sotto">Che cosa vuoi fare oggi nel sistema integrato?</p>
+  <div class="rp-scelte">
+    <div class="rp-box rp-continua">
+      <h2>▶ CONTINUA l’esercizio</h2>
+      {% if lavoro %}
+        <p>Riprendi <b>esattamente da dove eri arrivata/o l’ultima volta</b>.</p>
+        <p>Ultimo salvataggio: <b>{{ ora_italiana(lavoro.aggiornato) }}</b><br>{{ lavoro.scritture }} scritture nel libro giornale{% if lavoro.ultima %} · ultima operazione del {{ lavoro.ultima }}{% endif %}.</p>
+        <a class="rp-btn verde" href="{{ continua }}">▶ CONTINUA DALL’ULTIMA VOLTA</a>
+        <p class="rp-nota">Poi apri «Esercizio passo passo» e vai al primo passo non spuntato.</p>
+      {% else %}
+        <p>Non hai ancora un esercizio salvato: comincia da qui accanto 👉</p>
+      {% endif %}
+    </div>
+    <div class="rp-box rp-nuovo">
+      <h2>♻️ COMINCIA UN ESERCIZIO NUOVO</h2>
+      <form method="post" action="{{ url_for('riprendi.nuovo') }}" id="rp-form">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <label for="rp-es">Quale esercizio?</label>
+        <select id="rp-es" name="esercizio">
+          {% for k, t in esercizi %}<option value="{{ k }}"{% if k == predefinito %} selected{% endif %}>{{ t }}</option>{% endfor %}
+        </select>
+        {% if lavoro %}
+          <label class="rp-conf"><input type="checkbox" name="conferma" value="si" id="rp-ok"> Sì, cancella l’azienda di adesso e ricomincia da zero. (Il docente ne conserva una copia.)</label>
+        {% else %}
+          <input type="hidden" name="conferma" value="si">
+        {% endif %}
+        <button class="rp-btn rosso" type="submit" id="rp-via"{% if lavoro %} disabled{% endif %}>♻️ {% if lavoro %}RICOMINCIA DA ZERO{% else %}COMINCIA{% endif %}</button>
+      </form>
+      <p class="rp-nota">Si apre «Avvio del sistema» con la guida dell’esercizio scelto, pronta al primo passo.</p>
+    </div>
+  </div>
+  <p style="margin-top:20px;font-size:16px">📂 <a href="{{ url_for('allievo.area') }}">La mia area</a>: consegne, tempi e risposte del docente.</p>
+</div>
+<script>
+(function () {
+  var ok = document.getElementById('rp-ok'), via = document.getElementById('rp-via'), f = document.getElementById('rp-form');
+  if (ok) ok.onchange = function () { via.disabled = !ok.checked; };
+  f.onsubmit = function (e) {
+    if (ok && !confirm('Sei sicura/o? L’azienda di adesso viene cancellata e ricominci da zero.\n\nOK = sì, ricomincia      Annulla = no, tengo il lavoro')) { e.preventDefault(); }
+  };
+})();
+</script>
+{% endblock %}

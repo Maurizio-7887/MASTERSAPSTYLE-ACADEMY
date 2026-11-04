@@ -62,7 +62,7 @@ a = entra("anna.verdi", pw)
 r = a.get("/vuoto/")
 ok(r.status_code == 302 and r.headers["Location"].endswith("/password"), "primo accesso → cambio password obbligatorio")
 r = a.post("/password", data={"csrf": tok(a, "/password"), "attuale": pw, "nuova": "annaverdi2026", "conferma": "annaverdi2026"})
-ok(r.status_code == 302 and r.headers["Location"].endswith("/area/"), "password cambiata → la mia area")
+ok(r.status_code == 302 and r.headers["Location"].endswith("/riprendi/"), "password cambiata → continua o ricomincia")
 ok(a.get("/vuoto/").status_code == 200, "dopo il cambio entra nel launchpad")
 ok(a.get("/docente/").status_code == 403, "l'allievo non entra nel pannello docente")
 

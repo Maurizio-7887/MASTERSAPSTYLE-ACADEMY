@@ -29,7 +29,7 @@ def _casa(u):
     from ...db import Iscrizione
     if Iscrizione.query.filter_by(utente_id=u.id).first():     # iscritto online a un corso per privati
         return url_for("privati.area_generale")
-    return url_for("allievo.area")
+    return url_for("riprendi.scelta")   # appena entra: continua l'esercizio dall'ultima volta o ne comincia uno nuovo
 
 
 @bp.route("/accesso", methods=["GET", "POST"])

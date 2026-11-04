@@ -1,6 +1,7 @@
 """MASTERSAPSTYLE ACADEMY — applicazione Flask a blueprint, una cartella per attività."""
 import os
 import secrets
+import time
 from datetime import timedelta
 
 from flask import Flask
@@ -40,11 +41,12 @@ from .blueprints.privati import bp as privati
 from .blueprints.produzione import bp as produzione
 from .blueprints.reportistica import bp as reportistica
 from .blueprints.ripetitiva import bp as ripetitiva
+from .blueprints.riprendi import bp as riprendi
 from .blueprints.sincronia import bp as sincronia
 from .blueprints.vendite_acquisti import bp as vendite_acquisti
 from .db import inizializza, ora_italiana
 
-BLUEPRINT = [portale, privati, accessi, sincronia, guida, allievo, docente,
+BLUEPRINT = [portale, privati, accessi, sincronia, guida, allievo, docente, riprendi,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
              erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_controllo, erp_costi, erp_bpc, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_valute, erp_paghe, erp_copa, erp_fi, erp_cespiti, erp_chiusura]
@@ -92,6 +94,14 @@ def create_app():
             return x if x not in (None, "") else "—"
         s = f"{abs(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         return ("−" if v < 0 else "") + s
+
+    # ogni pubblicazione cambia l'indirizzo dei file .js/.css: il browser degli allievi non tiene la versione vecchia
+    versione_file = (os.environ.get("RAILWAY_GIT_COMMIT_SHA") or os.environ.get("RAILWAY_DEPLOYMENT_ID") or "")[:10] or str(int(time.time()))
+
+    @app.url_defaults
+    def versione_statici(endpoint, values):
+        if endpoint and (endpoint == "static" or endpoint.endswith(".static")) and "filename" in values:
+            values.setdefault("v", versione_file)
 
     @app.after_request
     def intestazioni(resp):
