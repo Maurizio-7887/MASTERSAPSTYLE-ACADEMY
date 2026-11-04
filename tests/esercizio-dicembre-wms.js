@@ -226,9 +226,19 @@ p = apri('erp_innovazione','ondate'); bene(p.fai('on',{data:'2026-12-14'}),'ONDA
 ok(p.w.WM4.aperti().length===7,'7 compiti di prelievo dall’ondata');
 rfTutti('2026-12-14','PICK',7); fino('preleva i 7');
 const cb = p.S().consegne[0].numero, cd = p.S().consegne[1].numero;
+{ p = apri('erp_spedizione','imballi'); const regs = p.S().registrazioni.length;
+  bene(p.fai('ib',{imballo:'EUR',lung:'120',larg:'80',alt:'15',tara:'25',portata:'1000',impilabile:'si',sopra:'700'}),'misure EUR');
+  bene(p.fai('rc',{materiale:'TR-STD',imballo:'EUR',pezzi:'50',alt:'125'}),'regola TR-STD'); fino('Misure del pallet EUR');
+  ok(p.S().registrazioni.length===regs,'misure e regole senza scritture'); }
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cb,imballo:'EUR',perCollo:'50',data:'2026-12-14'}),'imballo Beta'); fino('Beta in 4 colli');
 p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cd,imballo:'EUR',perCollo:'40',data:'2026-12-14'}),'imballo Delta'); fino('Delta in 3 colli');
 p = apri('erp_spedizione','trasporti'); bene(p.fai('vt',{consegne:cb+', '+cd,vettore:'V10',targa:'AA000AA',autista:'Mario Esempio',porto:'franco',data:'2026-12-15'}),'trasporto'); fino('Crea un trasporto');
+{ p = apri('erp_spedizione','piano'); const t = p.S().sped.trasporti[0].numero, SPx = p.w.SP4;
+  const f = SPx.calcolaPiano({trasporto:t,veicolo:'FURGONE',criterio:'fermate'}), m = SPx.calcolaPiano({trasporto:t,veicolo:'MOTRICE',criterio:'fermate'});
+  ok(f.kpi.caricati===2 && f.scarti.some(x=>/portata/.test(x.motivo)),'furgone: 2 colli su 7');
+  ok(m.kpi.caricati===7 && m.kpi.posti===4 && m.kpi.pile===3 && m.kpi.peso===3775,'motrice: 7 colli in 4 posti, 3 pile, 3.775 kg');
+  ok(m.posti[0].consegne[0]===p.S().sped.trasporti[0].consegne[1],'per fermate: Delta vicino alla cabina');
+  bene(p.fai('ps',{trasporto:t,veicolo:'MOTRICE',criterio:'fermate'}),'piano di carico'); fino('Piano di carico e camion 3D'); }
 const tr = p.S().sped.trasporti[0].numero;
 p = apri('erp_magazzino','rf'); p.lab.querySelector('#rf-data').value='2026-12-15';
 for (const x of p.S().sped.colli.filter(c=>c.consegna===cb)) { scheda(p,'carico'); p.lab.querySelector('#rf-data').value='2026-12-15'; invio(p,'rf-sscc',x.sscc); memoria = p.w.localStorage.getItem(CHIAVE); }
