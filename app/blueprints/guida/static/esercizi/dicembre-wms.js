@@ -62,7 +62,15 @@
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
   var saldo = function(h,c,alla,partner) { return Math.round(regs(h).reduce(function(s,r){if(alla && r.data>alla)return s;if(r.chiusura==='stato patrimoniale'||r.chiusura==='epilogo'||r.chiusura==='riapertura')return s;return s+(r.righe || []).filter(function(x){return x.conto===c && (!partner || x.partner===partner);}).reduce(function(t,x){return t+(x.dareAvere==='DARE'?x.importo:-x.importo);},0);},0)*100)/100; };
   var cesp = function(h,d) { return (h.S.cespiti || []).find(function(c){return c.descrizione===d;}); };
-  var ordine = function(h,rif) { return (h.S.ordini || []).find(function(o){return o.rif===rif;}); };
+  // l'ordine si riconosce dal riferimento cliente (senza badare a maiuscole, spazi e trattini) oppure, se l'allievo lo ha scritto diverso o vuoto,
+  // da cliente + materiale + quantità: un riferimento scritto a modo suo non deve fermare l'esercizio
+  var ORDINI_ATTESI = {'BETA-180': ['C100', 'TR-STD', 180], 'DELTA-120': ['C200', 'TR-STD', 120]};
+  var norm = function(t) { return String(t == null ? '' : t).toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+  var ordine = function(h,rif) {
+    var lista = h.S.ordini || [], a = ORDINI_ATTESI[rif];
+    return lista.find(function(o){return norm(o.rif)===norm(rif);}) ||
+      (a && lista.find(function(o){return o.cliente===a[0] && o.materiale===a[1] && Number(o.qta)===a[2];}));
+  };
   var consegna = function(h,rif) { var o=ordine(h,rif); return o && (h.S.consegne || []).find(function(c){return c.ordine===o.numero && c.wm;}); };
   var fattura = function(h,rif) { var c=consegna(h,rif); return c && (h.S.fatture || []).find(function(f){return f.tipo==='F2' && f.consegna===c.numero;}); };
   var prod = function(h,mat) { return (h.S.produzione || []).find(function(o){return o.materiale===mat && o.data.slice(0,7)==='2026-12';}); };
