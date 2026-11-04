@@ -28,7 +28,7 @@ w.HTMLAnchorElement.prototype.click=function(){};
 lab.querySelector('#backup-azienda').click();ok(!lab.querySelector('#azzera').disabled,'backup abilita conferma, non cancella');
 w.prompt=()=> 'NO';lab.querySelector('#azzera').click();ok(w.MSA_STATO_CORRENTE().registrazioni.length===2,'conferma diversa non cancella');
 w.prompt=()=> 'NUOVA AZIENDA';lab.querySelector('#azzera').click();
-ok(w.MSA_STATO_CORRENTE().registrazioni.length===0&&!w.MSA_STATO_CORRENTE().avviato,'conferma esplicita riparte vuota');
+{ const st=JSON.parse(w.localStorage.getItem(key)); ok(st.registrazioni.length===0&&!st.avviato&&!st.costituzione,'conferma esplicita riparte vuota'); }
 ok(w.localStorage.getItem('account-test-da-preservare')==='credenziali-fittizie','dati esterni slot non cancellati');
 ok(w.localStorage.getItem('altro-laboratorio')==='documenti-fittizi','altro laboratorio invariato');
 console.log(`OK: ${n} controlli avvio, backup e ripartenza esplicita`);w.close();
