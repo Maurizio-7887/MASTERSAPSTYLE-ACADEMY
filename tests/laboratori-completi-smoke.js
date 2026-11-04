@@ -32,7 +32,7 @@ function scenarios() {
   p=apri('erp_acquisti','entrate');
   good(p,'mi',{ordine:acq,qta:'400',ddt:'LAB-CO-DDT1',lotto:'LAB-CO-01',danneggiati:'0',data:'2027-03-04'});
   good(p,'mi',{ordine:acq,qta:'',ddt:'LAB-CO-DDT2',lotto:'LAB-CO-02',danneggiati:'0',data:'2027-03-05'});
-  p=apri('erp_acquisti','fatture'); good(p,'mr',{ordine:acq,rif:'LAB-CO-AP1',qta:'1000',prezzo:'1,12',data:'2027-03-06'});
+  p=apri('erp_acquisti','fatture'); good(p,'mr',{ordine:acq,rif:'LAB-CO-AP1',qta:'1000',prezzo:'1,12',accetta:true,data:'2027-03-06'});
   eq(p.S().fattureFornitore[0].totale,1366.4,'CO supplier total');
   p=apri('erp_costi','scheda'); good(p,'sk',{sovrMat:'5',sovrProd:'10',tariffa:'28',lotto:'100'});
   p=apri('erp_costi','calcolo'); good(p,'ck',{materiale:'TR-STD',data:'2027-03-01'});

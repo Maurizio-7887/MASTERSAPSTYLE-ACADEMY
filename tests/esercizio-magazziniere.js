@@ -31,7 +31,7 @@ function apri(bp, pagina) {
       Object.entries(valori).forEach(([k, v]) => {
         const el = lab.querySelector('#' + pref + '-' + k); if (!el) throw Error('campo ' + pref + '-' + k + ' assente in ' + pagina);
         if (el.tagName === 'SELECT' && typeof v === 'function') v = [...el.options].map(o => o.value).find(v);
-        el.value = v;
+        if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
       });
       const b = lab.querySelector('[data-prefisso="' + pref + '"] [data-azione="' + (azione || pref) + '"]'); if (!b) throw Error('pulsante ' + pref + ' assente');
       b.click();
@@ -140,7 +140,7 @@ p = apri('erp_magazzino','allocare'); { const x = p.w.WM4.daAllocare('2027-01-07
 rfTutti('2027-01-07','PUTAWAY',3); fino('3 fasci buoni');
 p = apri('erp_magazzino','bloccato'); const qz = p.w.WM4.bloccati()[0]; ok(qz && qz.qta===150,'150 kg in quarantena');
 bene(p.fai('dq',{udc:qz.udc,motivo:'fasci piegati, non recuperabili',data:'2027-01-07'},'ro'),'rottamazione'); fino('rottama i 150 kg'); vicinoC('69',142.5,'rottamazione ferro');
-p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa,rif:'FR-2027-014',prezzo:'1,02',data:'2027-01-08'}),'MIRO'); fino('fattura arriva a 1,02');
+p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa,rif:'FR-2027-014',prezzo:'1,02',accetta:true,data:'2027-01-08'}),'MIRO'); fino('fattura arriva a 1,02');
 vicinoC('22',0,'ponte merci/fatture chiuso'); vicinoC('63',210,'differenze prezzo totali'); vicinoC('20',-3733.2,'debito fornitore');
 // ── produzione ──
 p = apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:'TR-STD',qta:'300',data:'2027-01-08',fine:'2027-01-13'}),'CO01'); fino('ordine di produzione per 300');

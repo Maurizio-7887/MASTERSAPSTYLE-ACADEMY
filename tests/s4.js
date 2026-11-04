@@ -81,7 +81,7 @@ function apri(bp, pagina) {
       Object.entries(valori).forEach(([k, v]) => {
         const el = lab.querySelector('#' + pref + '-' + k); if (!el) throw Error('campo ' + pref + '-' + k + ' assente in ' + pagina);
         if (el.tagName === 'SELECT' && typeof v === 'function') v = [...el.options].map(o => o.value).find(v);
-        el.value = v;
+        if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
       });
       const b = lab.querySelector('[data-prefisso="' + pref + '"] [data-azione="' + (azione || pref) + '"]'); if (!b) throw Error('pulsante ' + pref + ' assente');
       b.click();

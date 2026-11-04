@@ -98,7 +98,7 @@
      nota: 'In alternativa si poteva rendere al fornitore o sbloccare (343) se il controllo fosse stato positivo: la decisione la prende la qualità, il magazziniere la esegue.',
      fatto: function (h) { return nReg(h, 'ROTTAMAZIONE', function (r) { return /FERRO/.test(r.descrizione); }) > 0; }},
     {g: 'UF 8 · 2 · Acquisto e ricevimento', data: '08/01/2027', titolo: 'MIRO: la fattura arriva a 1,02 €/kg', contabile: true, dove: {ep: A + 'fatture'}, percorso: 'MM → Fatture fornitore',
-     campi: [['Ordine', '4500000001'], ['Numero fattura', 'FR-2027-014'], ['Quantità', 'vuoto = quella ricevuta'], ['Prezzo', '1,02 (il fornitore applica un adeguamento)'], ['Data', '08/01/2027']],
+     campi: [['Ordine', '4500000001'], ['Numero fattura', 'FR-2027-014'], ['Quantità', 'vuoto = quella ricevuta'], ['Prezzo', '1,02 (il fornitore applica un adeguamento)'], ['Accetto la differenza di prezzo', 'SPUNTA la casella: è proprio la differenza di 0,02 €/kg che stai studiando'], ['Data', '08/01/2027']],
      attesa: 'D 22 Fatture da ricevere 3.000 + D 63 Differenze prezzo 60 + D 14 IVA a credito 673,20 / A 20 Acciaierie Umbre 3.733,20. Il conto 22 torna a zero; la nuova differenza (0,02 × 3.000 = 60) si somma ai 150 della MIGO: 210 € pagati sopra lo standard.',
      nota: 'Controllo a tre vie (three-way match): ordine, entrata merci, fattura. Quantità e prezzo devono tornare; se non tornano, la differenza si vede e si spiega.',
      fatto: function (h) { return nReg(h, 'FATTURA_FORNITORE') > 0; }},

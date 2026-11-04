@@ -53,7 +53,9 @@
   var fineMese = function (p) { var y = +p.slice(0, 4), m = +p.slice(5, 7); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); };
   var dataOk = function (d) { if (!/^\d{4}-\d{2}-\d{2}$/.test(String(d || ''))) throw Error('Data non valida: usa il calendario (gg/mm/aaaa).'); return d; };
   var num = function (x, nome, min) {
-    var v = typeof x === 'number' ? x : parseFloat(String(x == null ? '' : x).replace(/\./g, '').replace(',', '.'));
+    var t = typeof x === 'number' ? x : String(x == null ? '' : x).trim().replace(/\s/g, '');
+    // «1,05» e «3.000,50» come in italiano; «3.000» = tremila (punto delle migliaia); «1.05» o «0.98» = decimali (prima il punto veniva cancellato: 1.05 diventava 105)
+    var v = typeof t === 'number' ? t : parseFloat(t.indexOf(',') >= 0 ? t.replace(/\./g, '').replace(',', '.') : /^\d{1,3}(\.\d{3})+$/.test(t) ? t.replace(/\./g, '') : t);
     if (!isFinite(v)) throw Error((nome || 'Valore') + ': scrivi un numero.');
     if (min !== undefined && v < min) throw Error((nome || 'Valore') + ': deve essere almeno ' + min + '.');
     return v;

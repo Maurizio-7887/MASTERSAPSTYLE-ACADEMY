@@ -101,6 +101,10 @@ window.MM4 = (function () {
     var q = L.num(i.qta == null || i.qta === '' ? o.entrato - o.fatturato : i.qta, 'Quantità fatturata', 0.001), p = L.num(i.prezzo == null || i.prezzo === '' ? o.prezzo : i.prezzo, 'Prezzo fatturato', 0.0001);
     if (q > o.entrato - o.fatturato + 1e-9) throw Error('Si fattura solo la merce già entrata: restano ' + L.n0(o.entrato - o.fatturato) + '.');
     var imponibile = r2(q * p), wer = r2(q * o.prezzo), diff = r2(imponibile - wer), iva = r2(imponibile * IVA / 100);
+    // una differenza di prezzo in fattura è un caso speciale: la scrittura passa da 3 a 4 righe (D 63). Si registra solo se confermata espressamente.
+    if (Math.abs(diff) > 0.004 && !(i.accetta === true || i.accetta === 'true' || i.accetta === 'on' || i.accetta === 'si'))
+      throw Error('Il prezzo in fattura (' + L.eur(p) + ' €/pz) è diverso da quello d\'ordine (' + L.eur(o.prezzo) + ' €/pz): la differenza di ' + L.eur(diff) + ' € andrebbe al conto 63. ' +
+        'Se stai seguendo l\'esercizio lascia VUOTO il campo «Prezzo fatturato»: la fattura è al prezzo dell\'ordine. Se il fornitore ha davvero fatturato un prezzo diverso, spunta «Accetto la differenza di prezzo» e registra di nuovo.');
     var numero = n.numero('fatturaFornitore'), rif = String(i.rif || '').trim();
     var r = n.post({data: data, tipo: 'FATTURA_FORNITORE', rif: numero, descrizione: 'MIRO ' + numero + ' — fattura ' + (rif || 's.n.') + ' di ' + n.fornitore(o.fornitore).nome + ' su ordine ' + o.numero,
       righe: [{conto: '22', dareAvere: 'DARE', importo: wer, partner: o.fornitore}, {conto: '63', dareAvere: 'DARE', importo: diff, testo: 'differenza prezzo fattura'},

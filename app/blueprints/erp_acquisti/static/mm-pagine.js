@@ -97,7 +97,7 @@
     fatture: function () {
       var daF = S().acquisti.filter(function (o) { return o.entrato > o.fatturato; });
       radice.innerHTML = U.avviso(S()) + L.scheda('🧾', 'Fattura fornitore', 'MIRO', L.modulo('mr', [['ordine', 'Con riferimento all\'ordine', 'select', '', U.lista(daF, etich, '— nessuna entrata da fatturare —')],
-        ['rif', 'Numero fattura del fornitore', 'text'], ['qta', 'Quantità (vuoto = tutto l\'entrato)', 'num'], ['prezzo', 'Prezzo fatturato (vuoto = prezzo d\'ordine)', 'num'], ['data', 'Data', 'date']], [['mr', 'Registra fattura']]) +
+        ['rif', 'Numero fattura del fornitore', 'text'], ['qta', 'Quantità (vuoto = tutto l\'entrato)', 'num'], ['prezzo', 'Prezzo fatturato (vuoto = prezzo d\'ordine)', 'num'], ['accetta', 'Accetto la differenza di prezzo (solo se il fornitore ha davvero fatturato un prezzo diverso)', 'check'], ['data', 'Data', 'date']], [['mr', 'Registra fattura']]) +
         '<p class="lab-nota">D 22 WE/RE · D 14 IVA a credito / A 20 Fornitore. Se il prezzo fatturato è diverso da quello d\'ordine, la differenza va al conto 63 (e al Material Ledger).</p>') +
         L.scheda('📚', 'Fatture fornitore registrate', '', L.tabella(['Documento', 'Fattura', 'Data', 'Ordine', 'Fornitore', 'Imponibile›', 'IVA›', 'Totale›'], S().fattureFornitore.map(function (f) {
           return [f.numero, e(f.rif), fd(f.data), f.ordine, e(S().fornitori[f.fornitore].nome), eur(f.imponibile), eur(f.iva), eur(f.totale)]; }), 'Nessuna fattura.'));
