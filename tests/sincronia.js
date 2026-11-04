@@ -3,7 +3,7 @@ const {JSDOM} = require('jsdom');
 const fs = require('fs');
 const JS = fs.readFileSync(__dirname + '/../app/blueprints/sincronia/static/sincronia.js', 'utf8');
 const K = 'ferro-transenne-fi-2026-vuoto-civilistico';
-let errori = 0, store = {}, revServer = 3;
+let errori = 0, store = {}, revServer = 3, stato409 = null;
 const ok = (c, m) => { if (!c) { errori++; console.log('✗', m); } };
 const attesa = ms => new Promise(r => setTimeout(r, ms));
 
@@ -13,7 +13,7 @@ function pagina(sync, rispostaStato = 200) {
   const w = dom.window;
   Object.entries(store).forEach(([k, v]) => w.localStorage.setItem(k, v));
   w.fetch = (url, o) => { inviati.push({url, corpo: JSON.parse(o.body), csrf: o.headers['X-CSRF']}); if (url.includes('/api/stato')) revServer++;
-    return Promise.resolve({ok: rispostaStato === 200, status: rispostaStato, json: () => Promise.resolve({rev: revServer})}); };
+    return Promise.resolve({ok: rispostaStato === 200, status: rispostaStato, json: () => Promise.resolve(rispostaStato === 409 ? {rev: revServer, stato: stato409} : {rev: revServer})}); };
   w.MSA_SYNC = Object.assign({versione: 'vuoto', chiave: K, utente: 7, csrf: 'T', rev: 0, stato: null, urlStato: '/api/stato/vuoto', urlBattito: '/api/battito', battito: true}, sync);
   w.eval(JS);
   const salva = () => { store = {}; for (let i = 0; i < w.localStorage.length; i++) { const k = w.localStorage.key(i); store[k] = w.localStorage.getItem(k); } };
@@ -59,6 +59,40 @@ function pagina(sync, rispostaStato = 200) {
   await attesa(50);
   ok(p.inviati.some(x => x.url === '/api/stato/vuoto' && x.corpo.stato === '{"n":9}'), 'area allievo: lavoro in sospeso caricato');
   ok(p.w.localStorage.getItem('msa-sporco-vuoto') === null, 'area allievo: segnale tolto dopo la conferma');
+  p.chiudi();
+  // 7. PROTEZIONE: un lavoro locale vuoto o incompleto (stesso browser, memoria svuotata, altra scheda) non sostituisce quello del server
+  const pieno = JSON.stringify({lab: 'erp', registrazioni: [{n: 1}, {n: 2}, {n: 3}]});
+  const vuotoErp = JSON.stringify({lab: 'erp', registrazioni: []});
+  store = {[K]: vuotoErp, 'msa-sporco-vuoto': '1', 'msa-utente': '7', 'msa-rev-vuoto': String(revServer)};
+  p = pagina({stato: pieno, rev: revServer});
+  ok(p.w.localStorage.getItem(K) === pieno, 'protezione: il lavoro del server vince su uno stato locale più povero');
+  ok(p.w.localStorage.getItem('msa-copia-vuoto') === vuotoErp, 'protezione: lo stato locale scartato resta in una copia');
+  await attesa(1700);
+  ok(!p.inviati.some(x => x.url === '/api/stato/vuoto'), 'protezione: lo stato povero non viene inviato al server');
+  p.chiudi();
+  // 8. «Azzera» esplicito: il lavoro vuoto vince e il server è avvisato
+  store = {[K]: vuotoErp, 'msa-sporco-vuoto': '1', 'msa-azzera-vuoto': '1', 'msa-utente': '7', 'msa-rev-vuoto': String(revServer)};
+  p = pagina({stato: pieno, rev: revServer});
+  await attesa(1700);
+  const az = p.inviati.filter(x => x.url === '/api/stato/vuoto');
+  ok(az.length === 1 && az[0].corpo.azzera === true && az[0].corpo.stato === vuotoErp, 'azzeramento esplicito inviato con il segnale');
+  ok(p.w.localStorage.getItem('msa-azzera-vuoto') === null, 'segnale di azzeramento tolto dopo la conferma');
+  p.chiudi();
+  // 9. stato locale incompleto (solo pannello): non sostituisce il server
+  store = {[K]: '{"msaGuida":{"x":{"a":1}}}', 'msa-sporco-vuoto': '1', 'msa-utente': '7', 'msa-rev-vuoto': String(revServer)};
+  p = pagina({stato: pieno, rev: revServer});
+  ok(p.w.localStorage.getItem(K) === pieno, 'protezione: stato incompleto non sostituisce il server');
+  p.chiudi();
+  // 10. il server rifiuta (409) e rimanda il lavoro protetto: il browser si riallinea e tiene la copia
+  stato409 = pieno;
+  store = {[K]: '{"n":1}', 'msa-utente': '7', 'msa-rev-vuoto': String(revServer)};
+  p = pagina({stato: '{"n":1}', rev: revServer}, 409);
+  p.w.localStorage.setItem(K, vuotoErp);
+  await attesa(1700);
+  ok(p.w.localStorage.getItem(K) === pieno, '409: il browser riprende il lavoro protetto dal server');
+  ok(p.w.localStorage.getItem('msa-copia-vuoto') === vuotoErp, '409: copia dello stato rifiutato');
+  ok(p.w.localStorage.getItem('msa-sporco-vuoto') === null, '409: nessun nuovo tentativo di invio');
+  ok(p.w.document.body.textContent.includes('ripristinato'), '409: avviso all\'allievo');
   p.chiudi();
   // 6. senza fetch (vecchi browser, test jsdom del simulatore) non si rompe nulla
   const dom = new JSDOM('<!doctype html><body></body>', {runScripts: 'outside-only', url: 'https://sim.local/'});

@@ -310,9 +310,15 @@ def passa():
                 return redirect(url_for("docente.passa", versione=versione))
     mio = _riassunto(StatoLavoro.query.filter_by(utente_id=io.id, versione=versione).first())
     righe = [{"u": u, "lavoro": _riassunto(StatoLavoro.query.filter_by(utente_id=u.id, versione=versione).first())} for u in allievi]
-    archivio = ArchivioLavoro.query.order_by(ArchivioLavoro.creato.desc()).limit(20).all()
+    uid_archivio = request.args.get("allievo", type=int)
+    if uid_archivio:      # tutte le copie di un allievo, comprese quelle automatiche
+        archivio = ArchivioLavoro.query.filter_by(utente_id=uid_archivio).order_by(ArchivioLavoro.creato.desc(), ArchivioLavoro.id.desc()).limit(60).all()
+    else:                 # le copie automatiche non affollano l'elenco generale
+        archivio = (ArchivioLavoro.query.filter(~ArchivioLavoro.motivo.like("copia automatica%"))
+                    .order_by(ArchivioLavoro.creato.desc(), ArchivioLavoro.id.desc()).limit(20).all())
     nomi = {u.id: u.nome for u in Utente.query.all()}
-    return render_template("docente/passa.html", versione=versione, versioni=LAVORI, mio=mio, righe=righe, archivio=archivio, nomi=nomi)
+    return render_template("docente/passa.html", versione=versione, versioni=LAVORI, mio=mio, righe=righe, archivio=archivio, nomi=nomi,
+                           allievi=allievi, uid_archivio=uid_archivio)
 
 
 @bp.route("/archivio/<int:aid>/ripristina", methods=["POST"])

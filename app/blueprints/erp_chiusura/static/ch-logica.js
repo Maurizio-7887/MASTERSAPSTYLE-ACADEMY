@@ -46,12 +46,19 @@ window.CH4 = (function () {
     if (X().iva.some(function (x) { return x.periodo === c.periodo || (x.dal <= c.al && x.al >= c.dal); })) throw Error('Periodo ' + c.periodo + ' già liquidato (o sovrapposto a una liquidazione già fatta).');
     if (data < c.al) throw Error('La liquidazione si registra a fine periodo (' + L.fd(c.al) + ') o dopo.');
     if (Math.abs(c.debito) < 0.005 && Math.abs(c.credito) < 0.005) throw Error('Nel periodo ' + c.periodo + ' non c\'è IVA da liquidare.');
+    // un periodo precedente dello stesso anno con IVA non ancora liquidata falserebbe il riporto del credito: va liquidato prima
+    var ultima = X().iva.filter(function (x) { return x.al < c.dal; }).map(function (x) { return x.al; }).sort().pop() || '', inizioAnno = c.dal.slice(0, 4) + '-01-01', da = ultima > inizioAnno ? addGiorni(ultima, 1) : inizioAnno;
+    var scoperti = {};
+    S().registrazioni.forEach(function (r) { if (!noLiq(r) || r.data < da || r.data >= c.dal) return;
+      if (r.righe.some(function (x) { return x.conto === '21' || x.conto === '14'; })) scoperti[r.data.slice(0, 7)] = 1; });
+    var primo = Object.keys(scoperti).sort()[0];
+    if (primo) throw Error('Prima di ' + c.periodo + ' liquida il periodo ' + primo + ': ha IVA non ancora liquidata, e il suo credito o debito va riportato in ordine.');
     // chiude debito e credito del periodo (più il credito riportato, già sul 14) contro l'Erario
     var usaCredito = r2(Math.min(c.credito + c.riporto, c.debito));
     var righe = [{conto: '21', dareAvere: 'DARE', importo: c.debito, testo: 'IVA a debito ' + c.periodo}, {conto: '14', dareAvere: 'AVERE', importo: c.saldo > 0 ? r2(c.credito + c.riporto) : usaCredito, testo: 'IVA a credito ' + c.periodo + (c.riporto ? ' + credito riportato' : '')}];
     if (c.saldo > 0) righe.push({conto: '25', dareAvere: 'AVERE', importo: c.saldo, testo: 'IVA da versare entro il ' + L.fd(c.scadenza)});
     var r = n.post({data: data, tipo: 'LIQUIDAZIONE_IVA', rif: 'IVA ' + c.periodo, descrizione: 'Liquidazione IVA ' + c.periodo + ': a debito ' + L.eur(c.debito) + ', a credito ' + L.eur(c.credito) + (c.riporto ? ', credito riportato ' + L.eur(c.riporto) : '') + ' → ' + (c.saldo > 0 ? 'da versare ' + L.eur(c.saldo) + (c.interessi ? ' + interessi 1% ' + L.eur(c.interessi) : '') + ' entro il ' + L.fd(c.scadenza) : 'credito da riportare ' + L.eur(c.creditoRiportato)), righe: righe});
-    c.contabile = r.numero; c.data = data; c.versato = null; X().iva.push(c); n.salva(); return r;
+    c.contabile = r ? r.numero : null; c.data = data; c.versato = null; X().iva.push(c); n.salva(); return r;
   }
   function versaIva(i) {
     var n = N(), data = n.data(i.data), x = X().iva.find(function (y) { return y.periodo === String(i.periodo || '').trim(); });

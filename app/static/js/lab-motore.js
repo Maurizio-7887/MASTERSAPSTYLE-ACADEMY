@@ -74,7 +74,7 @@
       MATERIALI: MATERIALI, FINITI: FINITI, TARIFFA: TARIFFA, costoStd: costoStd, ciclo: ciclo, esplodi: esplodi,
       r2: r2, num: num, dataOk: dataOk, fineMese: fineMese,
       salva: function () { try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { throw Error('Impossibile salvare: memoria del browser piena.'); } },
-      azzera: function () { S = statoVuoto(opz.tipo); if (opz.nuovo) opz.nuovo(S); M.salva(); return S; },
+      azzera: function () { S = statoVuoto(opz.tipo); if (opz.nuovo) opz.nuovo(S); try { localStorage.setItem('msa-azzera-' + ((window.MSA_SYNC || {}).versione || ''), '1'); } catch (e) { /* ok */ } M.salva(); return S; },
       id: function (pref) { return pref + String(S.cnt++).padStart(4, '0'); },
       chiuso: function (data) { return S.periodi.some(function (p) { return data <= p.fine && !p.annullato; }); },
       controllaData: function (data) {

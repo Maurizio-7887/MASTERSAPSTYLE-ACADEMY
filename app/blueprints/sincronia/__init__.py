@@ -8,12 +8,78 @@ import json
 from flask import Blueprint, jsonify, request
 
 from ...accesso import csrf_valido, utente_corrente
-from ...db import Sessione, StatoLavoro, adesso, db
+from datetime import timedelta
+
+from ...db import ArchivioLavoro, Sessione, StatoLavoro, adesso, db
 from ...pagine import LAB_SLOTS, VERSIONI
 
 SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS)   # versioni del simulatore e laboratori
 
 bp = Blueprint("sincronia", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sincronia")
+
+# ── protezione del lavoro ─────────────────────────────────────────────────────────────────────
+# Il salvataggio sostituisce l'intero stato: se arriva uno stato vuoto o incompleto (altra scheda, memoria del browser
+# svuotata, pannello che scrive prima del simulatore) il lavoro sarebbe perso senza possibilità di recupero.
+# 1. uno stato di tipo diverso o senza `lab` non sostituisce mai un lavoro popolato (risposta 409, il browser si riallinea)
+# 2. prima di ogni sostituzione che riduce le scritture, e comunque ogni AUTO_OGNI minuti, il lavoro precedente va in archivio
+AUTO_PREFISSO = "copia automatica"
+AUTO_OGNI = timedelta(minutes=30)
+AUTO_TENUTE = 8          # copie a tempo conservate per allievo e lavoro
+RIDUZIONI_TENUTE = 8     # copie «prima di una riduzione» conservate per allievo e lavoro
+
+
+def riassunto(dati):
+    """(tipo, scritture) di uno stato salvato; (None, None) se non è un oggetto JSON leggibile."""
+    try:
+        o = json.loads(dati)
+    except (TypeError, ValueError):
+        return None, None
+    if not isinstance(o, dict):
+        return None, None
+    regs = o.get("registrazioni")
+    return o.get("lab"), (len(regs) if isinstance(regs, list) else 0)
+
+
+def sostituzione_ammessa(vecchio, nuovo):
+    """False se `nuovo` cancellerebbe un lavoro popolato con uno stato di altro tipo o incompleto."""
+    lab_v, n_v = riassunto(vecchio)
+    lab_n, n_n = riassunto(nuovo)
+    if lab_n is None and n_n is None:
+        return False
+    if (n_v or 0) > 0 and lab_v != lab_n:
+        return False
+    return True
+
+
+def archivia_prima(u, s, motivo, categoria, tieni):
+    db.session.add(ArchivioLavoro(utente_id=u.id, versione=s.versione, dati=s.dati, motivo=motivo))
+    db.session.flush()
+    vecchie = (ArchivioLavoro.query.filter(ArchivioLavoro.utente_id == u.id, ArchivioLavoro.versione == s.versione,
+                                           ArchivioLavoro.motivo.like(categoria + "%"))
+               .order_by(ArchivioLavoro.creato.desc(), ArchivioLavoro.id.desc()).all())
+    for x in vecchie[tieni:]:
+        db.session.delete(x)
+
+
+def proteggi_e_sostituisci(u, s, dati, esplicito=False):
+    """Sostituisce il lavoro salvato mettendo prima al sicuro quello che c'era. Ritorna False se la sostituzione è rifiutata."""
+    if not esplicito and not sostituzione_ammessa(s.dati, dati):
+        return False
+    ora = adesso()
+    _, n_v = riassunto(s.dati)
+    _, n_n = riassunto(dati)
+    etichetta = ora.strftime("%d/%m/%Y %H:%M")
+    if n_v and n_n < n_v:
+        archivia_prima(u, s, f"{AUTO_PREFISSO} prima di una riduzione ({n_v}→{n_n} scritture) · {etichetta}", f"{AUTO_PREFISSO} prima di una riduzione", RIDUZIONI_TENUTE)
+    else:
+        ultima = (ArchivioLavoro.query.filter(ArchivioLavoro.utente_id == u.id, ArchivioLavoro.versione == s.versione,
+                                              ArchivioLavoro.motivo.like(AUTO_PREFISSO + " a tempo%"))
+                  .order_by(ArchivioLavoro.creato.desc()).first())
+        if n_v and (ultima is None or ora - ultima.creato >= AUTO_OGNI):
+            archivia_prima(u, s, f"{AUTO_PREFISSO} a tempo ({n_v} scritture) · {etichetta}", f"{AUTO_PREFISSO} a tempo", AUTO_TENUTE)
+    s.dati, s.rev, s.aggiornato = dati, s.rev + 1, ora
+    return True
+
 
 PAUSA_MAX = 300      # oltre 5 minuti senza battito si apre una nuova sessione
 BATTITO_MAX = 120    # un battito non conta mai più di 2 minuti
@@ -80,7 +146,9 @@ def stato(versione):
         s = StatoLavoro(utente_id=u.id, versione=versione, dati=dati, rev=1)
         db.session.add(s)
     elif s.dati != dati:
-        s.dati, s.rev, s.aggiornato = dati, s.rev + 1, adesso()
+        if not proteggi_e_sostituisci(u, s, dati, esplicito=corpo.get("azzera") is True):
+            db.session.rollback()
+            return jsonify(errore="stato incompleto: il lavoro salvato è stato protetto", rev=s.rev, stato=s.dati), 409
     db.session.commit()
     return jsonify(rev=s.rev)
 

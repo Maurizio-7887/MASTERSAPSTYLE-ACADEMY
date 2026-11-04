@@ -40,8 +40,14 @@
   <p style="font-size:12px;color:var(--f-attenuato);margin-bottom:0">Utile per proiettare alla classe il lavoro di un'allieva e continuare da lì.</p>
 </form>
 
+<form method="get" class="msa-card" style="margin:12px 0">
+  <label>Copie di sicurezza di un allievo (comprese quelle automatiche)
+    <select name="allievo" onchange="this.form.submit()"><option value="">— elenco generale —</option>
+      {% for u in allievi %}<option value="{{ u.id }}" {% if uid_archivio == u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select></label>
+  <input type="hidden" name="versione" value="{{ versione }}">
+</form>
 {% if archivio %}
-<h2>Archivio (ultime 20 copie di sicurezza)</h2>
+<h2>Archivio ({% if uid_archivio %}tutte le copie dell'allievo, fino a 60{% else %}ultime 20 copie di sicurezza fatte da persone{% endif %})</h2>
 <div class="msa-scroll"><table class="msa-tab">
   <tr><th>Salvato</th><th>Di</th><th>Versione</th><th>Motivo</th><th></th></tr>
   {% for a in archivio %}

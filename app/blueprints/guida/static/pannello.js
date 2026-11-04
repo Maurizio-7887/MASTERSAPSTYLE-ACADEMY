@@ -11,10 +11,14 @@
   var guidata = E.pannelloAutomatico === true;
   var chiave = C.chiave;
   var quiz = window.MSA_RAGIONERIA;
+  // il pannello non crea mai lo stato del simulatore dal nulla: se nel browser non c'è ancora, scriverlo qui lo sostituirebbe con un oggetto incompleto
+  function scriviSeEsiste(S) {
+    try { if (localStorage.getItem(chiave) == null) return; localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
+  }
   function inQuiz() { return quiz && quiz.pendente(stato()); }
   function salvaQuiz() {
     if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') window.MSA_SALVA_STATO_CORRENTE();
-    else localStorage.setItem(chiave, JSON.stringify(stato()));
+    else scriviSeEsiste(stato());
   }
   var POS = 'msa-guida-pos-' + E.codice, APERTA = 'msa-guida-aperta';
   var ss = function (k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { return null; } };
@@ -54,7 +58,7 @@
     var m = S.msaGuida[E.codice] = S.msaGuida[E.codice] || {};
     if (valore) m[p.titolo] = 1; else delete m[p.titolo];
     if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); return; } catch (e) { /* ripiego */ } }
-    try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
+    scriviSeEsiste(S);
   }
 
   // ── interfaccia ──
@@ -280,7 +284,7 @@
     clearTimeout(timerAppunti);
     timerAppunti = setTimeout(function () {
       if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); return; } catch (e) { /* ripiego */ } }
-      try { localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
+      scriviSeEsiste(S);
     }, 700);
   }
   function strumenti(inQuizOra) {

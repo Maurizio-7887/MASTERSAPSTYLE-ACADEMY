@@ -122,7 +122,12 @@
   function crea(chiave) {
     var S = null;
     try { S = JSON.parse(localStorage.getItem(chiave) || 'null'); } catch (e) { S = null; }
-    if (!S || S.lab !== 'erp') S = statoNuovo(); else completa(S);
+    if (!S || S.lab !== 'erp') {
+      // niente stato valido nel browser: prima di ripartire da zero si prova con il lavoro salvato sul server
+      var srv = null;
+      try { srv = window.MSA_SYNC && window.MSA_SYNC.stato ? JSON.parse(window.MSA_SYNC.stato) : null; } catch (e) { srv = null; }
+      if (srv && srv.lab === 'erp') { S = srv; completa(S); } else S = statoNuovo();
+    } else completa(S);
     baseRagioneria(S);
     var N = {
       get S() { return S; },
@@ -148,7 +153,7 @@
         catch (e) { S.msaRagioneria = prima; throw Error('Memoria del browser piena.'); }
         if (aggiunti) window.dispatchEvent(new CustomEvent('msa:registrazioni-salvate'));
       },
-      azzera: function () { S = statoNuovo(); baseRagioneria(S); N.salva(); return S; },
+      azzera: function () { S = statoNuovo(); baseRagioneria(S); try { localStorage.setItem('msa-azzera-' + ((window.MSA_SYNC || {}).versione || ''), '1'); } catch (e) { /* ok */ } N.salva(); return S; },
       fornitore: function (f) { var x = S.fornitori[f]; if (!x) throw Error('Fornitore ' + f + ' inesistente.'); return x; },
       numero: function (tipo) { return String(++S.numeri[tipo]); },
       data: function (d) { L.dataOk(d); if (!S.avviato) throw Error('Prima avvia il sistema (Dati di base → Avvia).'); if (d < S.avviato) throw Error('Data anteriore all\'avvio del sistema (' + L.fd(S.avviato) + ').'); return d; },

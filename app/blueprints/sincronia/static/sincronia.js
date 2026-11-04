@@ -29,13 +29,28 @@
     }
     set(CHI, String(C.utente));
 
-    var locale = get(C.chiave), REV = 'msa-rev-' + C.versione;
+    var locale = get(C.chiave), REV = 'msa-rev-' + C.versione, AZZ = 'msa-azzera-' + C.versione, COPIA = 'msa-copia-' + C.versione;
+    // protezione: un lavoro locale vuoto, incompleto o più povero di quello sul server non lo sostituisce, a meno che l'allievo
+    // non abbia premuto «Azzera» (segnale AZZ). Il lavoro locale scartato resta in COPIA: niente si perde in silenzio.
+    var leggi = function (t) { try { var o = JSON.parse(t); return o && typeof o === 'object' ? o : null; } catch (e) { return null; } };
+    var scritture = function (o) { return o && Array.isArray(o.registrazioni) ? o.registrazioni.length : 0; };
+    var locSicuro = function () {
+      if (!C.stato || get(AZZ) === '1') return true;
+      var a = leggi(locale), b = leggi(C.stato);
+      if (!a) return false;
+      if (!b) return true;
+      return (a.lab || null) === (b.lab || null) && scritture(a) >= scritture(b);
+    };
     var revVista = parseInt(get(REV) || '0', 10) || 0;
     var daCaricare = false;
     // il lavoro sul server è cambiato altrove (es. il docente ha passato il suo lavoro all'allievo): vince il server
     var cambiatoAltrove = C.stato && C.rev > revVista && revVista > 0;
-    if (get(SPORCO) && locale && !cambiatoAltrove) daCaricare = true;   // modifiche locali non ancora salvate: vincono
-    else if (C.stato) { if (locale !== C.stato) set(C.chiave, C.stato); rem(SPORCO); set(REV, String(C.rev)); }
+    if (get(SPORCO) && locale && !cambiatoAltrove && locSicuro()) daCaricare = true;   // modifiche locali non ancora salvate: vincono
+    else if (C.stato) {
+      if (locale && locale !== C.stato && get(SPORCO)) set(COPIA, locale);       // lavoro locale scartato: lo teniamo da parte
+      if (locale !== C.stato) set(C.chiave, C.stato);
+      rem(SPORCO); rem(AZZ); set(REV, String(C.rev));
+    }
     else if (locale) daCaricare = true;                       // primo accesso con lavoro già nel browser: lo adottiamo
 
     var timer = null, inVolo = false, ancora = false;
@@ -44,11 +59,20 @@
       if (!rete || dati == null) return Promise.resolve();
       if (inVolo && !keep) { ancora = true; return Promise.resolve(); }
       inVolo = true;
-      var corpo = JSON.stringify({csrf: C.csrf, stato: dati});
+      var azz = get(AZZ) === '1';
+      var corpo = JSON.stringify({csrf: C.csrf, stato: dati, azzera: azz});
       return fetch(C.urlStato, {method: 'POST', credentials: 'same-origin', keepalive: !!keep && corpo.length < 60000,
                                 headers: {'Content-Type': 'text/plain;charset=UTF-8', 'X-CSRF': C.csrf}, body: corpo})
         .then(function (r) {
-          if (r.ok) { if (get(C.chiave) === dati) rem(SPORCO); return r.json().then(function (j) { if (j && j.rev) set(REV, String(j.rev)); }, function () {}); }
+          if (r.ok) { if (get(C.chiave) === dati) { rem(SPORCO); if (azz) rem(AZZ); } return r.json().then(function (j) { if (j && j.rev) set(REV, String(j.rev)); }, function () {}); }
+          if (r.status === 409) {        // il server ha protetto un lavoro più completo: ci riallineiamo senza perdere la copia locale
+            return r.json().then(function (j) {
+              if (j && typeof j.stato === 'string') {
+                set(COPIA, dati); set(C.chiave, j.stato); rem(SPORCO); rem(AZZ); if (j.rev) set(REV, String(j.rev));
+                avviso('Il tuo lavoro salvato era più completo di questa pagina: è stato ripristinato. Ricarica la pagina.');
+              }
+            }, function () {});
+          }
           if (r.status === 401) avviso('Accesso scaduto: il lavoro resta in questo browser. Rientra per salvarlo sul server.');
         })
         .catch(function () {})
