@@ -226,7 +226,7 @@
   // ── saldi dei conti e appunti: per il bilancio e la chiusura non serve ricordare i valori a memoria ──
   var T = {aperto: ss('msa-g-tools') === '1', cerca: ss('msa-g-tools-cerca') || '', data: ss('msa-g-tools-data') || '', senzaChiusura: ss('msa-g-tools-sc') === '1'};
   var ultimoCampo = null;                       // ultima casella del laboratorio toccata: {riga, tipo}
-  var GRUPPI = [['ATTIVO', 'Attività', 1], ['PASSIVO', 'Passività e patrimonio netto', -1], ['COSTO', 'Costi', 1], ['RICAVO', 'Ricavi', -1], ['CHIUSURA', 'Conti di chiusura', 1], ['ALTRO', 'Altri conti', 1]];
+  var GRUPPI = [['ATTIVO', 'Attività', 1], ['PASSIVO', 'Passività e patrimonio netto', -1], ['COSTO', 'Costi', 1], ['RICAVO', 'Ricavi', -1], ['RETTIFICA', 'Rettifiche di ricavi (sconti, resi, abbuoni): si sottraggono ai ricavi', -1], ['CHIUSURA', 'Conti di chiusura', 1], ['ALTRO', 'Altri conti', 1]];
   var euroIt = function (n) { return Number(n).toLocaleString('it-IT', {minimumFractionDigits: 2, maximumFractionDigits: 2}); };
   function registrazioniVisibili(S) {
     var regs = quiz && quiz.visibili ? quiz.visibili(S) : (S.registrazioni || []);
@@ -250,7 +250,8 @@
     });
     return Object.keys(out).filter(function (k) { return out[k] !== 0; }).map(function (k) {
       var c = piano[k] || {};
-      return {codice: k, nome: c.nome || c.descrizione || 'Conto ' + k, tipo: c.tipo || 'ALTRO', saldo: out[k] / 100};
+      var rett = (c.tipo === 'RICAVO') && (k === '47' || k === '49');   // sconti, resi e abbuoni su vendite non sono ricavi: li riducono
+      return {codice: k, nome: c.nome || c.descrizione || 'Conto ' + k, tipo: rett ? 'RETTIFICA' : (c.tipo || 'ALTRO'), saldo: out[k] / 100};
     }).sort(function (a, b) { return a.codice.localeCompare(b.codice, 'it', {numeric: true}); });
   }
   function tabellaSaldi(inQuizOra) {
@@ -269,7 +270,7 @@
           '<td>' + esc(c.nome) + '</td><td class="n"><button type="button" class="msa-g-ins-imp" data-v="' + euroIt(Math.abs(c.saldo)) + '" title="Inserisci l’importo nella casella del laboratorio (o copia)">' + euroIt(Math.abs(c.saldo)) + '</button> <small>' + lato + '</small></td></tr>';
       });
     });
-    var costi = tot.COSTO || 0, ricavi = -(tot.RICAVO || 0);
+    var costi = tot.COSTO || 0, ricavi = -((tot.RICAVO || 0) + (tot.RETTIFICA || 0));
     var dare = elenco.reduce(function (s, c) { return s + (c.saldo > 0 ? c.saldo : 0); }, 0), avere = elenco.reduce(function (s, c) { return s + (c.saldo < 0 ? -c.saldo : 0); }, 0);
     var riepilogo = '<div class="msa-g-riep">Costi <b>' + euroIt(costi) + '</b> · Ricavi <b>' + euroIt(ricavi) + '</b> · ' + (ricavi - costi >= 0 ? 'Utile' : 'Perdita') + ' <b>' + euroIt(Math.abs(ricavi - costi)) + '</b><br>' +
       'Totale saldi Dare <b>' + euroIt(dare) + '</b> · Avere <b>' + euroIt(avere) + '</b>' + (Math.abs(dare - avere) < 0.005 ? ' ✓ quadra' : ' ⚠️ non quadra') + '</div>';
