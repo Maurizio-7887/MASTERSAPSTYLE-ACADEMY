@@ -24,6 +24,7 @@
   <textarea id="risposta" name="risposta" style="min-height:200px" placeholder="Cosa va bene, cosa correggere, quali scritture rivedere…">{{ c.risposta or '' }}</textarea>
   <div class="riga"><div><label for="voto">Valutazione (facoltativa)</label><input id="voto" name="voto" value="{{ c.voto or '' }}" placeholder="es. 8/10, ottimo, da rifare"></div></div>
   {% if c.stato == 'corretta' %}<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="rinvia" value="1" style="width:auto"> segnala all'allievo come nuova risposta</label>{% endif %}
+  <p style="margin:0 0 8px"><button class="msa-btn sec" type="submit" name="azione" value="genera" title="Confronta il lavoro con i numeri attesi e prepara la correzione: la rivedi tu prima di inviarla">🤖 Genera la correzione automatica (bozza)</button> <small style="color:var(--f-attenuato)">il correttore digitale prepara testo e voto dai numeri esatti; tu rivedi, aggiungi il commento e invii</small></p>
   <button class="msa-btn" type="submit" name="azione" value="invia">📨 {{ 'Aggiorna la correzione' if c.stato == 'corretta' else "Invia la correzione all'allievo" }}</button>
   <button class="msa-btn sec" type="submit" name="azione" value="bozza">Salva bozza</button>
   {% if mailto and c.stato == 'corretta' %}<a class="msa-btn sec" href="{{ mailto }}">✉️ Invia anche per email</a>{% elif not c.utente.email %}<span style="font-size:12px;color:var(--f-attenuato)">Per inviarla anche per email aggiungi l'indirizzo nella scheda dell'allievo.</span>{% endif %}

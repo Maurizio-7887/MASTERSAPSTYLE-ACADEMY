@@ -252,7 +252,7 @@ class Lavoro:
                 "rc_ricavi_servizi": -sc("44"),
                 "rc_oneri_factoring": sc("55"),
                 "rc_iva_t1_versata": round((iva.get("2027-T1") or {}).get("saldo") or 0, 2) if (iva.get("2027-T1") or {}).get("versato") else 0,
-                "rc_credito_iva": sc("14"),
+                "rc_credito_iva": sc("14") + max(sc("25"), 0),
                 "rc_ires": -sc("23"), "rc_irap": -sc("35"), "rc_anticipate": sc("17"),
                 "rc_utile": round(chiuso.get("utile") or 0, 2),
                 "rc_chiuso": "sì" if chiuso.get("risultato") and chiuso.get("chiusuraSP") else "no",
@@ -385,3 +385,55 @@ def report(dati, esercizio="libero"):
     return {"indicatori": ind, "anno": w.anno, "confronto": confronto, "esatti": sum(1 for r in confronto if r["ok"]),
             "controlli": w.controlli_formali(), "verifica": w.bilancio_verifica(fino=f"{w.anno}-12-31"),
             "giornale": w.giornale(), "esercizio": ESERCIZI.get(esercizio, ESERCIZI["libero"])["titolo"]}
+
+
+def _fmt(v, come=None):
+    """Numeri all'italiana (1.234,50). Se il valore atteso (come) è un importo con decimali, anche l'altro si scrive con i decimali."""
+    if isinstance(v, bool) or v is None:
+        return "—" if v is None else ("sì" if v else "no")
+    if isinstance(v, (int, float)):
+        if not isinstance(come, float) and not isinstance(v, float):
+            return str(int(v))
+        return f"{v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return str(v)
+
+
+def esito_automatico(r, nome=""):
+    """Correttore digitale: dal report di una consegna ricava un testo di correzione e una proposta di voto.
+    Il testo è una BOZZA per il docente: non invia niente e non decide da solo. Il voto parte dai numeri esatti e si
+    abbassa di un punto se le scritture non quadrano."""
+    conf = r.get("confronto") or []
+    tot, ok = len(conf), int(r.get("esatti") or 0)
+    ctr = r.get("controlli") or {}
+    non_quadrate = ctr.get("non_quadrate") or []
+    quadra = bool(ctr.get("quadra", True)) and not non_quadrate
+    righe = ["CORREZIONE AUTOMATICA — " + (r.get("esercizio") or "esercizio"), ""]
+    if tot:
+        righe.append(f"Numeri esatti: {ok} su {tot} ({round(100 * ok / tot)}%).")
+    else:
+        righe.append("Questo esercizio è libero: non ci sono numeri di controllo da confrontare.")
+    righe.append("Scritture in partita doppia: " + ("tutte quadrate (Dare = Avere)." if quadra else
+                 "ATTENZIONE, ci sono scritture che non quadrano" + (f" (documenti {', '.join(str(x) for x in non_quadrate)})" if non_quadrate else "") + "."))
+    if ctr.get("storni"):
+        righe.append(f"Storni effettuati: {ctr['storni']}.")
+    giusti = [x for x in conf if x["ok"]]
+    sbagliati = [x for x in conf if not x["ok"]]
+    if giusti:
+        righe += ["", "✓ GIUSTO"] + [f"  • {x['etichetta']}: {_fmt(x['reale'])}" for x in giusti]
+    if sbagliati:
+        righe += ["", "✗ DA RIVEDERE"]
+        for x in sbagliati:
+            riga = f"  • {x['etichetta']}: atteso {_fmt(x['atteso'])}, nel tuo lavoro {_fmt(x['reale'], x['atteso'])}"
+            if x.get("numero") and x.get("diff") is not None:
+                riga += f" (differenza {_fmt(x['diff'], x['atteso'])})"
+            righe.append(riga)
+        righe += ["", "Come rivedere: apri il mastrino del conto interessato, controlla il Dare/Avere dell'ultima scrittura e, se hai registrato male, "
+                      "stornala da «Storni e annullamenti» (non si cancella) e rifai l'operazione."]
+    voto = ""
+    if tot:
+        v = 10 * ok / tot - (0 if quadra else 1)
+        v = max(0.0, min(10.0, round(v * 2) / 2))
+        voto = (f"{v:g}".replace(".", ",")) + "/10"
+        righe += ["", f"Valutazione proposta: {voto} (numeri esatti" + ("" if quadra else ", meno 1 punto per le scritture non quadrate") + ")."]
+    righe += ["", "— Correzione generata dal correttore digitale e rivista dal docente. Commento del docente:", ""]
+    return "\n".join(righe), voto

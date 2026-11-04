@@ -15,7 +15,7 @@ from ...pagine import LAB_SLOTS, VERSIONI
 LAVORI = {'erp-ft': 'Sistema integrato', **{v: 'Archivio storico · ' + v for v in VERSIONI}, **{k: 'Archivio laboratorio · ' + v for k, v in LAB_SLOTS.items() if k != 'erp-ft'}}
 from ...report import report as report_lavoro
 from ...esercizi import ESERCIZI
-from ...report import report
+from ...report import esito_automatico, report
 
 bp = Blueprint("docente", __name__, url_prefix="/docente", template_folder="templates")
 bp.before_request(solo_docente(lambda: None))
@@ -189,6 +189,19 @@ def consegna(cid):
     if request.method == "POST":
         c.risposta = (request.form.get("risposta") or "").strip()[:20000]
         c.voto = (request.form.get("voto") or "").strip()[:30]
+        if request.form.get("azione") == "genera":
+            # correttore digitale: bozza di correzione dai numeri di controllo; non invia nulla all'allievo
+            testo, voto = esito_automatico(report(c.dati, c.esercizio), c.utente.nome)
+            if c.risposta and "CORREZIONE AUTOMATICA" not in c.risposta:
+                testo += "\n" + c.risposta
+            elif c.risposta:
+                testo = c.risposta   # già generata: non la duplico, resta quella (con le modifiche del docente)
+            c.risposta = testo[:20000]
+            if voto and not c.voto:
+                c.voto = voto
+            db.session.commit()
+            flash("Correzione automatica generata come BOZZA: leggila, scrivi il tuo commento in fondo e premi «Invia la correzione». L'allievo non la vede ancora.", "ok")
+            return redirect(url_for("docente.consegna", cid=cid))
         if request.form.get("azione") == "invia":
             if c.stato != "corretta" or request.form.get("rinvia"):
                 c.letta = False
