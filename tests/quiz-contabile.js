@@ -91,5 +91,22 @@ const storico=JSON.parse(p.save());delete storico.msaRagioneria;
 const h=pagina(JSON.stringify(storico));h.N.salva();ok(!h.S().msaRagioneria.coda.length,'vecchi dati senza quiz adottati senza domande retroattive');
 h.N.azzera();ok(!h.S().msaRagioneria.coda.length&&!h.S().msaRagioneria.esiti.length,'reset didattico esplicito azzera anche quiz');
 post(h.N,'dopo reset');h.N.salva();ok(h.S().msaRagioneria.coda.length===1,'cattura funziona dopo reset');
+
+// Uscita di sicurezza: se la scrittura non è ricostruibile (conto assente dal piano dei conti dell'allievo) dopo 3 tentativi non acquisiti si può vedere la soluzione e proseguire
+{
+ const u=pagina();u.w.MSA_GUIDA_API.vaiA(1,true);
+ u.N.avvia({data:'2027-01-02'});
+ u.S().pianoDeiConti=u.S().pianoDeiConti.filter(c=>String(c.codice)!==String(u.S().msaRagioneria.coda[0].documento.righe[0].conto));
+ const dis=()=>u.w.MSA_GUIDA_API.vaiA(1,true);dis();
+ for(let i=0;i<3;i++){compila(u);u.click('.msa-q-verifica');}
+ ok(u.S().msaRagioneria.coda[0].rifiuti>=3,'tentativi non acquisiti contati');
+ ok(u.body().querySelector('.msa-q-aiuto'),'dopo 3 rifiuti compare la soluzione con aiuto');
+ u.click('.msa-q-aiuto');
+ ok(u.body().querySelector('.msa-q-continua'),'dopo la soluzione si può proseguire');
+ u.click('.msa-q-continua');
+ ok(!u.S().msaRagioneria.coda.length && u.S().msaRagioneria.esiti[0].conAiuto,'quiz chiuso con aiuto e registrato');
+ ok(!u.w.document.querySelector('.msa-g-av').disabled,'la guida riparte');
+ u.w.close();
+}
 [p,h].forEach(p=>p.w.close());
 console.log('OK: '+n+' verifiche quiz contabile, persistenza, importi e nessun doppio movimento');

@@ -91,8 +91,12 @@
         (q.versioneTentativo !== 2 || (!!a.conto && (!S || (S.pianoDeiConti || []).some(function (c) { return String(c.codice) === String(a.conto); }))));
     });
   }
+  // Uscita di sicurezza: dopo 3 tentativi non acquisiti l'allievo può vedere la soluzione e proseguire (registrata «con aiuto»).
+  // Serve se la scrittura non è ricostruibile (conto assente dal suo piano dei conti, stato salvato da una versione precedente…).
+  var RIFIUTI_MAX = 3;
   function tentativoValido(q) {
     if (!q) return false;
+    if (q.aiuto && q.sbloccoRifiuti) return true;
     if (q.tentato === true && (q.cronologiaTentativi || []).some(function (t) { return compilato(q, t.risposte); })) return true;
     return q.versioneTentativo !== 2 && q.tentativi > 0 && compilato(q, q.risposte);
   }
@@ -147,7 +151,7 @@
       h += '</tbody></table>';
     }
     h += '<p class="msa-q-messaggio" role="status">'+esc(q.messaggio || '')+'</p>';
-    if (!concluso) h += '<button type="button" class="msa-q-verifica">Verifica la mia scrittura</button>' + (valutato ? '<button type="button" class="msa-q-aiuto">Mostra soluzione (con aiuto)</button>' : '');
+    if (!concluso) h += '<button type="button" class="msa-q-verifica">Verifica la mia scrittura</button>' + (valutato || (q.rifiuti || 0) >= RIFIUTI_MAX ? '<button type="button" class="msa-q-aiuto">Mostra soluzione (con aiuto)</button>' : '');
     else h += '<button type="button" class="msa-q-continua">'+(coda>1?'Prossima scrittura ➜':'Prosegui con l’esercizio ➜')+'</button>';
     return h+'<p class="msa-q-info">Prima compila conti, sezioni e importi di tutte le righe e invia un tentativo valutabile: solo allora puoi confrontarlo con giornale, mastri e soluzione, anche se è errato. I suggerimenti mostrano l’intero piano dei conti, non la risposta attesa. Il controllo confronta il documento del simulatore e non certifica il modello SAP.</p></section>';
   }
@@ -174,7 +178,7 @@
     var verifica=t.classList.contains('msa-q-verifica'), aiuto=t.classList.contains('msa-q-aiuto'), avanti=t.classList.contains('msa-q-continua');
     if (!verifica && !aiuto && !avanti) return false;
     if (avanti && (!tentativoValido(q) || (!q.corretto && !q.aiuto))) return false;
-    if (aiuto && !tentativoValido(q)) return false;
+    if (aiuto && !tentativoValido(q) && (q.rifiuti || 0) < RIFIUTI_MAX) return false;
     var ok=persisti(S,salva,function(){
       if (verifica && (!tentativoValido(q) || (!q.corretto && !q.aiuto))) {
         // Migrazione non distruttiva del primo tentativo storico completo.
@@ -184,7 +188,9 @@
         if (!compilato(q,q.risposte,S)) {
           var poche = piene(q.risposte).length < Object.keys(gruppiAttesi(q)).length;
           q.errori=q.risposte.map(function(a) { return vuota(a) ? (poche ? 'Riga vuota: servono altre righe.' : '') : (!a.conto || !(S.pianoDeiConti || []).some(function(c) { return String(c.codice) === String(a.conto); }) || (a.sezione!=='DARE' && a.sezione!=='AVERE') || importo(a.importo)===null ? 'Scegli un conto valido e completa sezione e importo positivo (massimo due decimali).' : ''); });
-          q.messaggio='Tentativo non acquisito: ogni riga usata va completata e serve almeno una riga per ogni conto e sezione del documento. La consultazione resta bloccata.';
+          q.rifiuti=(q.rifiuti || 0)+1;
+          q.messaggio='Tentativo non acquisito: ogni riga usata va completata e serve almeno una riga per ogni conto e sezione del documento. La consultazione resta bloccata.' +
+            (q.rifiuti >= RIFIUTI_MAX ? ' Se non riesci a completarlo, premi «Mostra soluzione (con aiuto)»: poi potrai proseguire.' : '');
           return;
         }
         q.tentativi=(q.tentativi || 0)+1;
@@ -198,7 +204,7 @@
         q.messaggio=q.corretto?'Ottimo: ora puoi proseguire.':(esame.mancanti && q.errori.every(function(e){return !e;}) ?
           'Le righe scritte sono giuste ma ne manca almeno una: controlla che ci siano tutti i conti (o tutte le righe del documento).' :
           'Riprova: anche una scrittura in pareggio può usare sezioni o importi sbagliati.');
-      } else if(aiuto) { q.aiuto=true; q.messaggio='Confronta la soluzione con il tuo tentativo e spiega il motivo delle sezioni.'; }
+      } else if(aiuto) { if (!tentativoValido(q)) q.sbloccoRifiuti=true; q.aiuto=true; q.messaggio='Confronta la soluzione con il tuo tentativo e spiega il motivo delle sezioni.'; }
       else if(avanti) {
         S.msaRagioneria.esiti.push({chiave:q.chiave,documento:q.documento.numero || q.documento.id,data:q.documento.data,tipo:q.documento.tipo,
           tentativi:q.tentativi,tentato:tentativoValido(q),corretto:!!q.corretto,conAiuto:!!q.aiuto,risposte:q.risposte,cronologiaTentativi:q.cronologiaTentativi || [],completatoIl:new Date().toISOString()});
