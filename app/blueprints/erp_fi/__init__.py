@@ -13,6 +13,11 @@ def giornale():
     return render_lab("erp_fi", "giornale")
 
 
+@bp.route("/prima-nota")
+def prima_nota():
+    return render_lab("erp_fi", "prima_nota")
+
+
 @bp.route("/bilancio")
 def bilancio():
     return render_lab("erp_fi", "bilancio")
