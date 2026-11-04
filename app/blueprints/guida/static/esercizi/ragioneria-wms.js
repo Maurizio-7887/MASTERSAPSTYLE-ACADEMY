@@ -2,6 +2,23 @@
    Date e numeri appartengono all'azienda didattica; non è una migrazione del classico. */
 (function () {
   'use strict';
+  // guida punto per punto del passo «ordina il ferro» + conferma d'ordine del fornitore (vedi pannello.js: p.punti)
+  function PME(data, qta, prezzo, trova) {
+    var ord = function (h) { try { return trova(h); } catch (e) { return null; } }, conf = function (h) { var o = ord(h); return !!o && !!o.conferma && o.conferma.stato !== 'revocata'; }, esiste = function (h) { return !!ord(h); };
+    var c = function (sel, nome, valore, serve, x) { return Object.assign({t: 'campo', sel: sel, nome: nome, valore: valore, serve: serve, fatto: esiste}, x || {}); };
+    return [
+      {t: 'scelta', sel: '#me-fornitore', nome: 'Fornitore', valore: 'F100', serve: 'F100 Acciaierie Umbre è il fornitore del ferro: l’ordine è un impegno verso di lui.', fatto: esiste, controlla: true},
+      {t: 'scelta', sel: '#me-materiale', nome: 'Materiale', valore: 'FERRO', serve: 'Cosa stai comprando: il ferro è la materia prima di transenne e kit.', fatto: esiste, controlla: true},
+      c('#me-qta', 'Quantità', String(qta), 'Quanti kg ordini. È una quantità d’ordine: la merce non è ancora arrivata e non scrivi nulla in contabilità.'),
+      c('#me-prezzo', 'Prezzo netto €/unità', prezzo, 'Il prezzo pattuito al kg. Il ferro ha controllo prezzo standard: la differenza col prezzo standard andrà al conto 63, non al magazzino.'),
+      c('#me-data', 'Data', data, 'La data dell’ordine: serve alla competenza e per stabilire gli eventi successivi (consegna, fattura).'),
+      {t: 'pulsante', sel: '[data-prefisso="me"] [data-azione="me"]', nome: 'Salva ordine', serve: 'Crea l’ordine d’acquisto e gli dà il numero 4500000001.', fatto: esiste},
+      {t: 'scelta', sel: '#cf-ordine', nome: 'Ordine inviato', valore: '4500000001', serve: 'Ora simula la risposta del fornitore: scegli l’ordine di cui ti è tornata la conferma.', fatto: conf},
+      {t: 'campo', sel: '#cf-rif', nome: 'Riferimento della conferma', valore: 'CONF-001', serve: 'Il numero (o la data) del documento con cui il fornitore ti conferma che accetta ordine, prezzo e quantità.', fatto: conf},
+      {t: 'pulsante', sel: '[data-prefisso="cf"] [data-azione="cf"]', nome: 'Registra la conferma tornata', serve: 'Da questo momento l’ordine non è più «⏳ in attesa»: il fornitore lo ha accettato. Se prezzo o quantità confermati fossero diversi, il programma te lo segnalerebbe prima che arrivi la merce.', fatto: conf, finale: true}
+    ];
+  }
+
   var D='erp_dati.', M='erp_magazzino.', A='erp_acquisti.', P='erp_produzione.', C='erp_costi.', V='erp_vendite.', X='erp_spedizione.', T='erp_tesoreria.', F='erp_fi.', K='erp_cespiti.', H='erp_chiusura.';
   var acquisto = function(h) { return (h.S.acquisti || []).find(function(o){return o.data==='2027-02-04' && o.materiale==='FERRO' && o.qta===3000;}); };
   var produzione = function(h) { return (h.S.produzione || []).find(function(o){return o.data==='2027-02-07' && o.materiale==='TR-STD' && o.qta===100;}); };
@@ -63,7 +80,7 @@
      attesa:'500 pezzi iniziali × (35,08 − 31,40) = rivalutazione 1.840: D 13 / A 64. Quantità e ubicazioni non cambiano.',
      nota:'È febbraio perché il programma non consente un nuovo standard dopo movimenti dello stesso mese: l’apertura è a gennaio. Non cambiare le date per aggirare il controllo.',
      fatto:function(h){return ((h.S.costing || {}).rilasci || []).some(function(r){return r.materiale==='TR-STD' && r.data==='2027-02-03';});}},
-    {g:'3 · Acquisto e ricevimento',data:'04/02/2027',titolo:'ME21N: compra 3.000 kg di ferro',dove:{ep:A+'ordini'},percorso:'MM → Ordini d’acquisto e rilascio',campi:[['Fornitore','F100 Acciaierie Umbre'],['Materiale','FERRO'],['Quantità','3000'],['Prezzo unitario','1,00'],['Data','04/02/2027']],attesa:'Ordine 4500000001 per 3.000 euro. Nessuna scrittura e nessuna merce a scaffale.',fatto:function(h){return !!acquisto(h);}},
+    {g:'3 · Acquisto e ricevimento',data:'04/02/2027',titolo:'ME21N: compra 3.000 kg di ferro',dove:{ep:A+'ordini'},percorso:'MM → Ordini d’acquisto e rilascio',campi:[['Fornitore','F100 Acciaierie Umbre'],['Materiale','FERRO'],['Quantità','3000'],['Prezzo unitario','1,00'],['Data','04/02/2027']],attesa:'Ordine 4500000001 per 3.000 euro. Nessuna scrittura e nessuna merce a scaffale. Poi, nella stessa pagina, riquadro «Conferma d’ordine del fornitore»: il fornitore deve rispedirti la sua conferma. Scegli l’ordine, scrivi il riferimento (es. CONF-001) e premi «Registra la conferma tornata»: finché non torna, l’ordine resta «⏳ in attesa». Non cambia la contabilità, ma ti dice che il fornitore ha accettato prezzo e quantità.',punti:PME('2027-02-04',3000,'1,00',function(h){return acquisto(h);}),fatto:function(h){return !!acquisto(h);}},
     {g:'3 · Acquisto e ricevimento',data:'05/02/2027',titolo:'MIGO 101: ricevi il ferro in GR-ZONE',contabile:true,dove:{ep:A+'entrate'},percorso:'MM → Entrata merci (anche accessibile da WMS)',campi:[['Ordine','4500000001'],['Quantità','vuoto = tutto il residuo'],['Danni / quantità bloccata','0; lascia gli altri parametri predefiniti'],['Data','05/02/2027']],
      attesa:'D 12 Ferro 2.850 + D 63 Differenza prezzo 150 / A 22 WE/RE 3.000. In WMS: 3 fasci da 1.000 kg in GR-ZONE e 3 compiti PUTAWAY. Il ferro non è ancora nella catasta.',fatto:function(h){var o=acquisto(h);return !!o && o.entrato===3000 && compiti(h,'PUTAWAY').filter(function(t){return t.mat==='FERRO';}).length===3;}},
     {g:'3 · Acquisto e ricevimento',data:'05/02/2027',titolo:'RF: metti a dimora i 3 fasci di ferro',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',campi:[['Data di lavoro','05/02/2027'],['Risorsa','MAG01 Marco'],['Compiti','Tutti e 3 i PUTAWAY del ferro']],attesa:'Ferro in catasta: F-01 ospita due fasci, F-02 uno. GR-ZONE vuota. Giacenza 3.000 kg invariata, nessuna seconda scrittura.',nota:rf,

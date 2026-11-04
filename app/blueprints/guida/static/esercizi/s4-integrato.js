@@ -141,7 +141,7 @@
        attesa: 'Rivalutazione del magazzino: TR-STD 70 × 3,07 = 214,90 · TR-ALTA 50 × 3,44 = 172 · TR-PED 100 × 2,84 = 284 → D 13 / A 64 670,90',
        fatto: function (h) { return ((h.S.costing || {}).rilasci || []).filter(function (r) { return r.data >= '2027-02-01'; }).length >= 3; }},
       {g: 'Febbraio — acquisti', data: '02/02/2027', titolo: 'ME21N: ordine d\'acquisto di 9.000 kg di ferro', dove: {ep: A + 'ordini'}, percorso: 'S/4 → Acquisti → Ordini d\'acquisto (ME21N)',
-       campi: [['Fornitore', 'F100 Acciaierie Umbre'], ['Materiale', 'FERRO'], ['Quantità', '9000'], ['Prezzo', '1,00'], ['Data', '02/02/2027']], attesa: 'Nessuna scrittura. Lo standard del ferro è 0,95: si paga 5 centesimi in più al kg.',
+       campi: [['Fornitore', 'F100 Acciaierie Umbre'], ['Materiale', 'FERRO'], ['Quantità', '9000'], ['Prezzo', '1,00'], ['Data', '02/02/2027']], attesa: 'Nessuna scrittura. Lo standard del ferro è 0,95: si paga 5 centesimi in più al kg. Poi, nella stessa pagina, riquadro «Conferma d’ordine del fornitore»: il fornitore deve rispedirti la sua conferma. Scegli l’ordine, scrivi il riferimento (es. CONF-001) e premi «Registra la conferma tornata»: finché non torna, l’ordine resta «⏳ in attesa». Non cambia la contabilità, ma ti dice che il fornitore ha accettato prezzo e quantità.',
        fatto: function (h) { return (h.S.acquisti || []).length > 0; }},
       {g: 'Febbraio — acquisti', data: '03/02/2027', titolo: 'MIGO 101: entrata del ferro', dove: {ep: A + 'entrate'}, percorso: 'Acquisti → Entrata merci (MIGO 101)',
        campi: [['Ordine', 'quello del ferro'], ['Quantità', 'vuoto (tutto)'], ['Data', '03/02/2027']], attesa: 'D 12 Magazzino 8.550 (a standard) · D 63 Differenza prezzo 450 / A 22 WE/RE 9.000',
