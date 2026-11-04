@@ -126,6 +126,8 @@ MODULI = [
         ("contabilita.moduli", None, "Panoramica FI", "🏛️", "FI · CO · HR", "registrazioni"),
         ("contabilita.fi_gl", None, "Contabilità generale", "📒", "FB50 · F.01 · AJAB", "risultato"),
         ("contabilita.registrazione", None, "Scrittura libera", "✍️", "FB50", "registrazioni"),
+        ("erp_fi.prima_nota", None, "Prima Nota libera", "📝", "Post General Journal Entries · F0718", "registrazioni"),
+        ("erp_fi.giornale", None, "Libro giornale (Manage Journal Entries F0717A)", "📚", "F0717A", "registrazioni"),
         ("contabilita.fi_aa", None, "Cespiti", "🏭", "AS01 · F-90 · AFAB", "cespiti"),
         ("contabilita.fi_ar", None, "Clienti", "👥", "FBL5N · F-28", "clienti"),
         ("contabilita.fi_ap", None, "Fornitori", "🧾", "FBL1N · F-53", "fornitori"),

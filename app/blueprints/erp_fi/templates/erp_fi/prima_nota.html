@@ -1,0 +1,10 @@
+{% extends "laboratori/base.html" %}
+{% block intro %}<link rel="stylesheet" href="{{ url_for('erp_fi.static', filename='fi-didattica.css') }}"><style>
+.fi-fiori{background:#fff;border:1px solid #d8e0e8;border-radius:9px;padding:1.2rem;margin-top:1rem;color:#243746}
+.fi-fiori-head{border-bottom:1px solid #d8e0e8;margin-bottom:1rem}.fi-fiori-head small{color:#52718d}.fi-fiori-head h2{font-size:1.5rem;margin:.5rem 0}.fi-fiori-head h2 span{font-size:.75rem;background:#eaf3fb;padding:.25rem .5rem;border-radius:4px}
+.fi-fiori fieldset{border:1px solid #d8e0e8;border-radius:5px;margin:1rem 0;padding:1rem}.fi-fiori legend{font-weight:700}
+.fi-fiori-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem}.fi-fiori-fields label{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem}.fi-fiori-fields input,.fi-fiori-fields select,.fi-fiori td input,.fi-fiori td select{width:100%;box-sizing:border-box;padding:.45rem;border:1px solid #b9c9d6;border-radius:4px;background:white;color:#243746}
+.fi-fiori .fi-wide{grid-column:span 2}.fi-free-summary{padding:.7rem;background:#eef6fb;border-radius:4px;font-weight:600;margin-bottom:.8rem}.fi-fiori .fi-remove{cursor:pointer;background:transparent;border:0;color:#8d2631;font-size:1.2rem}
+@media(max-width:640px){.fi-fiori .fi-wide{grid-column:auto}}
+</style>Prima Nota libera in stile SAP Fiori Post General Journal Entries (F0718). Usa il medesimo libro giornale dell'esercitazione guidata, senza creare un archivio parallelo.{% endblock %}
+{% block nota %}AMBIENTE DIDATTICO — non è un prodotto SAP. Le scritture libere vengono registrate nel giornale integrato; una volta contabilizzate non possono essere modificate qui. Per correggerle utilizzare gli storni.{% endblock %}
