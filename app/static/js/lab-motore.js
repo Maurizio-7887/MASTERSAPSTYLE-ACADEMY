@@ -168,6 +168,9 @@
   }
   function esito(el, ok, html) { el.className = 'lab-esito ' + (ok ? 'ok' : 'ko'); el.innerHTML = html; }
   // collega i pulsanti data-azione di un contenitore a funzioni: azioni[nome](valori) → html di risposta
+  // dopo ogni rifiuto: dove si è, cosa non è successo e come uscirne (l'allievo può non ricordarsi come si fa)
+  var AIUTO_BLOCCO = '<small class="lab-nota" style="display:block;margin-top:6px">🛟 <b>Sei bloccato?</b> L\'operazione è stata <b>rifiutata e non ha registrato nulla</b>: non devi annullare niente. Leggi il motivo qui sopra, correggi il dato (data, quantità, periodo, documento) e riprova. ' +
+    'Se invece hai <b>già registrato</b> qualcosa di sbagliato, non si cancella: si <b>storna</b> da <i>FI → Storni e annullamenti</i> (si parte dall\'ultimo documento registrato). Dubbi sul passo da fare? Apri il pannello «Esercizio passo passo».</small>';
   function collega(radice, prefisso, azioni, dopo) {
     radice.querySelectorAll('[data-prefisso="' + prefisso + '"] [data-azione]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -178,7 +181,7 @@
           var html = info ? res : '✓ Registrato.' + (typeof res === 'string' ? res : righeScrittura(res));
           if (dopo && !info) { dopo(); out = radice.querySelector('#' + prefisso + '-esito') || out; }   // la pagina si ridisegna: il messaggio resta
           esito(out, true, html);
-        } catch (e) { esito(out, false, '⛔ ' + esc(e.message)); }
+        } catch (e) { esito(out, false, '⛔ ' + esc(e.message) + AIUTO_BLOCCO); }
       });
     });
   }

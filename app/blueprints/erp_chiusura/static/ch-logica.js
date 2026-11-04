@@ -77,7 +77,7 @@ window.CH4 = (function () {
       r.righe.forEach(function (x) { var t = tipo(x.conto); if (t !== 'COSTO' && t !== 'RICAVO') return; if (senzaImposte && IMPOSTE[x.conto]) return;
         voci[x.conto] = r2((voci[x.conto] || 0) + (x.dareAvere === 'DARE' ? x.importo : -x.importo)); }); });
     var ricavi = 0, costi = 0, righe = [];
-    Object.keys(voci).sort(function (a, b) { return a.localeCompare(b, 'it', {numeric: true}); }).forEach(function (c) { if (Math.abs(voci[c]) < 0.005) return; righe.push({conto: c, nome: nome(c), tipo: tipo(c), saldo: voci[c]}); if (voci[c] < 0) ricavi -= voci[c]; else costi += voci[c]; });
+    Object.keys(voci).sort(function (a, b) { return a.localeCompare(b, 'it', {numeric: true}); }).forEach(function (c) { if (Math.abs(voci[c]) < 0.005) return; righe.push({conto: c, nome: nome(c), tipo: tipo(c), saldo: voci[c]}); if (tipo(c) === 'RICAVO') ricavi -= voci[c]; else if (tipo(c) === 'COSTO') costi += voci[c]; else if (voci[c] < 0) ricavi -= voci[c]; else costi += voci[c]; });   // sconti, resi e abbuoni (conti 47 e 49) riducono i ricavi: non sono un costo
     return {righe: righe, ricavi: r2(ricavi), costi: r2(costi), risultato: r2(ricavi - costi)};
   }
   // ── imposte dell'esercizio: IRES e IRAP correnti, imposte anticipate sulle differenze temporanee ──
