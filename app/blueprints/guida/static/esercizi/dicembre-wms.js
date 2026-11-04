@@ -6,6 +6,30 @@
    Date e numeri appartengono all'azienda didattica. */
 (function () {
   'use strict';
+  // guida punto per punto: MIGO 101 (entrata del ferro) e F-53 (pagamento al fornitore). Vedi pannello.js: p.punti
+  function PMIGO(riga, fatto) {
+    var f = function (x) { return Object.assign({fatto: fatto}, x); };
+    return [
+      f({t: 'scelta', sel: '#mi-ordine', nome: 'Ordine d’acquisto', valore: '4500000001', serve: 'La merce si riceve sempre «contro un ordine»: scegli quello del ferro. Così il programma sa fornitore, prezzo e quantità attesi.'}),
+      f({t: 'leggi', sel: '#mi-qta', nome: 'Quantità contata', serve: 'Lasciala VUOTA se è arrivato tutto come da DDT: il programma carica l’intero residuo. Scrivi un numero solo se il magazziniere ha contato di meno.'}),
+      f({t: 'campo', sel: '#mi-ddt', nome: 'Numero DDT del fornitore', valore: riga.ddt, serve: 'Il documento di trasporto che accompagna la merce: è la prova di che cosa è arrivato e da chi. Serve per ritrovare il carico se c’è un reclamo.'}),
+      f({t: 'campo', sel: '#mi-lotto', nome: 'Lotto (colata)', valore: riga.lotto, serve: 'Il numero di colata del certificato del fornitore: tiene la tracciabilità del materiale (da quale colata viene ogni pezzo).'}),
+      f({t: 'campo', sel: '#mi-danneggiati', nome: 'Di cui danneggiati', valore: riga.dann, serve: 'Quanti kg sono arrivati rovinati. Sono DENTRO i 3.000 ricevuti, non in più. Entrano in stock bloccato (quarantena) e non si useranno finché non c’è il reclamo.'}),
+      f({t: 'campo', sel: '#mi-danno', nome: 'Descrizione del danno', valore: riga.danno, serve: 'Che cosa è successo: resta scritto e servirà per il reclamo al fornitore.'}),
+      f({t: 'campo', sel: '#mi-data', nome: 'Data di registrazione', valore: riga.data, serve: 'Il giorno in cui la merce è arrivata davvero: da qui decide la competenza del magazzino.'}),
+      f({t: 'pulsante', sel: '[data-prefisso="mi"] [data-azione="mi"]', nome: 'Registra entrata', serve: 'Registra il carico: il magazzino sale e nasce il debito presunto verso il fornitore (conto 22 «fatture da ricevere»).', finale: true})
+    ];
+  }
+  function PPAGA(forn, nome, doc, data, fatto, nota) {
+    var f = function (x) { return Object.assign({fatto: fatto}, x); }, p = [
+      f({t: 'scelta', sel: '#pg-fornitore', nome: 'Fornitore', valore: forn, serve: 'Scegli ' + forn + ' ' + nome + '. ATTENZIONE: il modulo propone da solo il primo fornitore con debiti aperti, che spesso NON è quello giusto. Se sbagli fornitore, paghi un debito che non è quello della fattura.'})];
+    if (doc) p.push(f({t: 'campo', sel: '#pg-documento', nome: 'Fattura da pagare', valore: doc, serve: 'Il numero della fattura che stai pagando: chiude proprio quella voce nel debito del fornitore. Deve essere una fattura di ' + nome + '.'}));
+    p.push(f({t: 'leggi', sel: '#pg-importo', nome: 'Importo', serve: nota || 'Lascialo vuoto: il programma paga tutto il debito aperto verso questo fornitore.'}),
+      f({t: 'campo', sel: '#pg-data', nome: 'Data del bonifico', valore: data, serve: 'Il giorno in cui la banca addebita: la banca scende da quella data.'}),
+      f({t: 'pulsante', sel: '[data-prefisso="pg"] [data-azione="pg"]', nome: 'Registra il pagamento', serve: 'Registra: D 20 Debiti verso fornitori / A 10 Banca. Controlla poi che il debito del fornitore scenda a zero.', finale: true}));
+    return p;
+  }
+
   // guida punto per punto del passo «ordina il ferro» + conferma d'ordine del fornitore (vedi pannello.js: p.punti)
   function PME(data, qta, prezzo, trova) {
     var ord = function (h) { try { return trova(h); } catch (e) { return null; } }, conf = function (h) { var o = ord(h); return !!o && !!o.conferma && o.conferma.stato !== 'revocata'; }, esiste = function (h) { return !!ord(h); };
@@ -102,7 +126,7 @@
      attesa:'D 83 Assicurazioni / A 20 Fornitore 1.200, senza IVA. Il premio copre 12 mesi, ma solo dicembre è del 2026: lo sistemeremo a fine anno con il risconto.',
      fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return f.rif==='POL-2026-118';});}},
     {g:'3 · Assicurazione',data:'02/12/2026',titolo:'F-53: paga la polizza',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
-     campi:[['Fornitore','F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],attesa:'D 20 / A 10 Banca 1.200. Banca 78.800.',fatto:function(h){return paga(h,'F400','2026-12-02');}},
+     campi:[['Fornitore','F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],punti:PPAGA('F400','Assicurazioni Omega','POL-2026-118','2026-12-02',function(h){return paga(h,'F400','2026-12-02');}),attesa:'D 20 / A 10 Banca 1.200. Banca 78.800.',fatto:function(h){return paga(h,'F400','2026-12-02');}},
     // ── 4 · ordini cliente ──
     {id:'dicembre-inizio-ciclo-operativo',g:'4 · CICLO OPERATIVO: ordini dei clienti',data:'02/12/2026',titolo:'VA01: Beta ordina 180 TR-STD',dove:{ep:V+'ordini'},percorso:'SD → Ordini cliente',
      campi:[['Committente','C100 Beta Costruzioni'],['Materiale','TR-STD'],['Quantità','180'],['Riferimento cliente','BETA-180'],['Data','02/12/2026'],['Data di consegna richiesta','14/12/2026']],
@@ -121,7 +145,7 @@
      attesa:'Ordine 4500000001 da 3.000 €. Ne servono 2.560 kg (300 transenne × 8 + 20 kit autonomi × 8): il resto è scorta. Nessuna scrittura. Poi, nella stessa pagina, riquadro «Conferma d’ordine del fornitore»: il fornitore deve rispedirti la sua conferma. Scegli l’ordine, scrivi il riferimento (es. CONF-001) e premi «Registra la conferma tornata»: finché non torna, l’ordine resta «⏳ in attesa». Non cambia la contabilità, ma ti dice che il fornitore ha accettato prezzo e quantità.',punti:PME('2026-12-03',3000,'1,00',function(h){return acquisto(h);}),fatto:function(h){return !!acquisto(h);}},
     {g:'5 · Acquisto del ferro',data:'04/12/2026',titolo:'MIGO 101: ricevi il ferro, 200 kg sono schiacciati',contabile:true,dove:{ep:A+'entrate'},percorso:'MM → Entrata merci (anche da WMS)',
      campi:[['Ordine','4500000001'],['Quantità contata','vuoto = 3.000 come sul DDT'],['Numero DDT','DDT-AU-5512'],['Lotto (colata dal certificato)','COL-1204'],['Di cui danneggiati','200'],['Descrizione del danno','tubi schiacciati nel trasporto'],['Data','04/12/2026']],
-     attesa:'D 12 Ferro 2.850 (a standard 0,95) + D 63 Differenza prezzo 150 / A 22 Fatture da ricevere 3.000: la merce è arrivata tutta ed è nostra. WMS: 2.800 kg buoni in 3 fasci (1.000 + 1.000 + 800) in GR-ZONE con 3 compiti di messa a posto; i 200 kg danneggiati vanno in stock BLOCCATO nella quarantena Q-ZONE.',
+     punti:PMIGO({ddt:'DDT-AU-5512',lotto:'COL-1204',dann:'200',danno:'tubi schiacciati nel trasporto',data:'2026-12-04'},function(h){var o=acquisto(h);return !!o && o.entrato===3000;}),attesa:'D 12 Ferro 2.850 (a standard 0,95) + D 63 Differenza prezzo 150 / A 22 Fatture da ricevere 3.000: la merce è arrivata tutta ed è nostra. WMS: 2.800 kg buoni in 3 fasci (1.000 + 1.000 + 800) in GR-ZONE con 3 compiti di messa a posto; i 200 kg danneggiati vanno in stock BLOCCATO nella quarantena Q-ZONE.',
      nota:'Al ricevimento il magazziniere conta, confronta con il DDT e controlla lo stato della merce prima di firmare.',fatto:function(h){var o=acquisto(h);return !!o && o.entrato===3000 && ((h.S.wm || {}).blocchi || []).length>0;}},
     {g:'5 · Acquisto del ferro',data:'04/12/2026',titolo:'Merce da mettere a posto: che cosa aspetta in ricevimento?',dove:{ep:M+'allocare'},percorso:'WMS → Merce da mettere a posto',
      campi:[['Data di oggi','04/12/2026'],['Leggi','articolo, quantità, UdC, «Da dove arriva» e «Va in (proposta)» di ogni riga'],['Pulsante','«▶ Metti a posto» sulla prima riga: si apre la pistola RF con quel compito (continua nel passo dopo)']],
@@ -258,9 +282,9 @@
      attesa:'Anticipo 10.329,98: D 10 Banca 10.299,98 + D 58 Commissione 30 / A 38 Banca c/anticipi su fatture 10.329,98. Il credito verso Beta resta aperto: la fattura è la garanzia del prestito.',
      fatto:function(h){return (((h.S.tes || {}).anticipi) || []).some(function(x){return x.data==='2026-12-16';});}},
     {g:'10 · Fatture e anticipo',data:'17/12/2026',titolo:'F-53: paga il ferro',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Fatture passive e pagamenti → Pagamento a un fornitore',campi:[['Fornitore','F100 Acciaierie Umbre'],['Importo','vuoto = 4.318,80 (le due fatture del ferro)'],['Data','17/12/2026']],
-     attesa:'D 20 / A 10 4.318,80 (3.660 + 658,80). Si paga prima della scadenza (60 giorni) grazie all’anticipo.',fatto:function(h){return paga(h,'F100','2026-12-17');}},
+     punti:PPAGA('F100','Acciaierie Umbre','','2026-12-17',function(h){return paga(h,'F100','2026-12-17');},'Lascialo vuoto: paga le due fatture del ferro, 4.318,80 in tutto.'),attesa:'D 20 / A 10 4.318,80 (3.660 + 658,80). Si paga prima della scadenza (60 giorni) grazie all’anticipo.',fatto:function(h){return paga(h,'F100','2026-12-17');}},
     {g:'10 · Fatture e anticipo',data:'18/12/2026',titolo:'F-53: paga i macchinari',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Fatture passive e pagamenti → Pagamento a un fornitore',campi:[['Fornitore','F300 Macchine Alfa'],['Importo','vuoto = 52.460'],['Data','18/12/2026']],
-     attesa:'D 20 / A 10 52.460. Debiti verso fornitori a zero; banca 32.321,18.',fatto:function(h){return paga(h,'F300','2026-12-18');}},
+     punti:PPAGA('F300','Macchine Alfa','','2026-12-18',function(h){return paga(h,'F300','2026-12-18');},'Lascialo vuoto: paga tutto il debito verso Macchine Alfa, 52.460.'),attesa:'D 20 / A 10 52.460. Debiti verso fornitori a zero; banca 32.321,18.',fatto:function(h){return paga(h,'F300','2026-12-18');}},
     // ── 11 · sopravvenienza ──
     {g:'11 · Sopravvenienza',data:'21/12/2026',titolo:'L’assicurazione riconosce un indennizzo',contabile:true,dove:{ep:F+'sopravvenienze'},percorso:'FI → Sopravvenienze attive',
      campi:[['Compagnia','F400 Assicurazioni Omega'],['Riferimento','LIQ-4471'],['Evento','indennizzo per il sinistro del 10/12'],['Importo','500'],['Data','21/12/2026']],

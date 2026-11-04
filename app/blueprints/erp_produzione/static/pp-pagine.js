@@ -42,6 +42,33 @@
       L.collega(radice, 'pr', {pr: PP.prelievo}, rendi); L.collega(radice, 'cf', {cf: PP.conferma}, rendi); L.collega(radice, 'en', {en: PP.entrata}, rendi); L.collega(radice, 'tc', {tc: PP.teco}, rendi);
     },
   };
-  function rendi() { (PAGINE[C.pagina] || PAGINE.ordini)(); }
+  // Tutor «Sono bloccato?» sotto CO01: spiega l'errore «manca un costo standard rilasciato» e dice, per il materiale scelto, a che punto è CK11N/CK24.
+  // Non modifica niente: legge soltanto lo stato. I valori scritti in CO01 si ritrovano tornando dalla pagina dei costi.
+  function tutorCO01() {
+    if (C.pagina !== 'ordini') return;
+    var mod = radice.querySelector('[data-prefisso="co"]'); if (!mod || radice.querySelector('#tutor-co01')) return;
+    var campi = ['materiale', 'qta', 'data', 'fine'], chiave = 'msa-tutor-co01-' + String(C.chiave || ''), el = function (k) { return radice.querySelector('#co-' + k); };
+    try { var salvati = JSON.parse(sessionStorage.getItem(chiave) || 'null'); if (salvati) { campi.forEach(function (k) { if (el(k) && salvati[k] != null) el(k).value = salvati[k]; }); sessionStorage.removeItem(chiave); } } catch (e) { /* niente memoria */ }
+    var memorizza = function () { try { var o = {}; campi.forEach(function (k) { if (el(k)) o[k] = el(k).value; }); sessionStorage.setItem(chiave, JSON.stringify(o)); } catch (e) { /* niente memoria */ } };
+    var host = document.createElement('div'); host.id = 'tutor-co01'; host.className = 'lab-nota';
+    host.style.cssText = 'margin:10px 0;padding:12px;border:1px solid #b6d1e6;border-left:4px solid #1875b8;border-radius:7px;background:#f5faff';
+    var pagCosti = window.location.pathname.replace(/\/produzione\/?[^/]*$/, '/costi/calcolo');
+    host.innerHTML = '<button type="button" class="lab-btn" id="tutor-co01-ap">🛟 Sono bloccato? Aiutami</button><div id="tutor-co01-c" hidden style="margin-top:10px">' +
+      '<b>Perché non riesco a rilasciare l’ordine?</b><p>Se vedi «manca un costo standard rilasciato», non hai sbagliato quantità o date: l’ordine ha bisogno del costo obiettivo del prodotto, e quello nasce in due mosse nei costi.</p>' +
+      '<ol><li>Apri <b>CO → Costi del prodotto</b> (pulsante qui sotto).</li><li><b>CK11N</b>: scegli lo stesso materiale dell’ordine e premi <b>Calcola</b> (nasce la stima, stato KA).</li>' +
+      '<li><b>CK24</b>: prima <b>Marca</b> la stima calcolata, poi <b>Rilascia</b> con una data nel periodo dell’esercizio (rilascio possibile una sola volta per periodo).</li>' +
+      '<li>Torna qui, premi <b>Mostra costi pianificati</b> e poi <b>Rilascia ordine</b>.</li></ol>' +
+      '<p id="tutor-co01-st" role="status"><b></b></p><a class="lab-btn sec" id="tutor-co01-go" href="' + pagCosti + '">Vai a CK11N / CK24 →</a> <small>(i dati scritti qui si ritrovano al ritorno)</small></div>';
+    mod.insertAdjacentElement('afterend', host);
+    var pan = host.querySelector('#tutor-co01-c'), st = host.querySelector('#tutor-co01-st');
+    function stato() {
+      var m = el('materiale') ? el('materiale').value : '', c = (S().costing || {}), x = (c.stime || {})[m];
+      st.innerHTML = !m ? 'Scegli prima il materiale.' : !x ? '❌ <b>' + m + '</b>: nessuna stima. Parti da CK11N.' : x.stato === 'FR' ? '✅ <b>' + m + '</b>: costo standard rilasciato. Qui sei a posto: premi «Mostra costi pianificati» e «Rilascia ordine».' : '⏳ <b>' + m + '</b>: la stima c’è ma non è rilasciata. Vai in CK24: Marca, poi Rilascia.';
+    }
+    host.querySelector('#tutor-co01-ap').addEventListener('click', function () { pan.hidden = !pan.hidden; if (!pan.hidden) stato(); });
+    radice.addEventListener('change', function (ev) { if (ev.target && ev.target.id === 'co-materiale' && !pan.hidden) stato(); });
+    host.querySelector('#tutor-co01-go').addEventListener('click', memorizza);
+  }
+  function rendi() { (PAGINE[C.pagina] || PAGINE.ordini)(); tutorCO01(); }
   rendi();
 })();
