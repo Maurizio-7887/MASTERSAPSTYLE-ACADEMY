@@ -148,3 +148,8 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 #msa-guida .msa-g-ora-elenco ol{margin:4px 0 0;padding-left:20px}
 #msa-guida .msa-g-ora-elenco li.fatto{color:#2e7d4f}
 #msa-guida .msa-g-ora-elenco li.adesso{font-weight:700;color:#7a4b00}
+
+.msa-g-sugg-off{float:right;border:0;background:transparent;color:#5b6b7b;font:11px "Segoe UI",Arial,sans-serif;cursor:pointer;text-decoration:underline;padding:0 0 0 8px}
+.msa-g-sugg-off:hover{color:#1d3557}
+.msa-g-ora.spento{background:transparent;border:1px dashed #b9c4d0;padding:8px}
+.msa-g-ora.spento small{display:block;margin-top:5px;color:#5b6b7b;font-size:11px}

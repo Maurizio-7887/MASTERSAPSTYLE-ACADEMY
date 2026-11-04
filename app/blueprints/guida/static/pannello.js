@@ -440,6 +440,12 @@
   //   nome:'come si chiama il campo', serve:'a cosa serve', fatto:function(h,el){…} (facoltativo, legge lo stato), ctx:function(){…} (il campo vale solo se…)}.
   // Il PRIMO punto non ancora fatto fa «brillare» il bordo del campo reale, con un fumetto («Scrivi 36000 — serve a…») e il riquadro «Ora tocca a te» nel pannello.
   var firmaPunti = '', ultimoPunto = '', bolla = document.createElement('div');
+  // Suggeritore giallo: acceso di default; chi non ne ha bisogno lo spegne (resta spento finché non lo riaccende).
+  var SUGG = 'msa-g-suggeritore', suggSpento = function () { return ls(SUGG) === 'no'; };
+  // la nuvoletta sparisce appena l'allievo scrive nel punto indicato (o preme Invio/Tab/il pulsante) e non ricompare per quel punto;
+  // quella del punto successivo arriva dopo un attimo, per non coprire subito gli altri campi
+  var soppressa = '', mostraDopo = 0, chiaveCorrente = '';
+  function nascondiBolla() { soppressa = chiaveCorrente; bolla.hidden = true; }
   bolla.id = 'msa-g-bolla'; bolla.hidden = true; (document.body || document.documentElement).appendChild(bolla);
   var salta = {}, clic = {};
   function chiaveP(p, k) { return E.codice + '|' + (p.id || p.titolo) + '|' + k; }
@@ -488,6 +494,11 @@
     if (!bolla) return;   // il motore parte dopo il primo disegno: il primo giro lo fa il timer
     var p = PASSI[pos], c = corpo.querySelector('.msa-g-ora-c');
     if (!p || !p.punti || !c || pannello.hidden || inQuiz()) { if (!p || !p.punti || pannello.hidden || inQuiz()) spegniPunti(); return; }
+    if (suggSpento()) {
+      spegniPunti(); firmaPunti = 'spento';
+      if (!c.querySelector('.msa-g-sugg-on')) c.innerHTML = '<div class="msa-g-ora spento"><button type="button" class="msa-g-sugg-on lab-btn sec">💡 Riaccendi il suggeritore giallo</button><small>Il suggeritore è spento: restano il testo del passo e «Cosa devi vedere».</small></div>';
+      tickPunti.el = null; tickPunti.k = -1; return;
+    }
     var h = aiutanti(stato()), elenco = p.punti.map(function (d, k) {
       var el = d.sel ? trovaP(d.sel) : null, ok = fattoP(p, d, k, el, h), key = chiaveP(p, k);
       if (ok && !memP('ok')[key]) segnaP('ok', key);   // un punto fatto resta fatto, anche se poi la casella cambia (per esempio cambiando centro)
@@ -503,6 +514,7 @@
         '<div class="msa-g-ora-barra"><span style="width:' + Math.round(fatti / elenco.length * 100) + '%"></span></div>';
       if (ora) {
         var d = ora.d;
+        h2 += '<button type="button" class="msa-g-sugg-off" title="Per chi non ne ha bisogno: lo puoi riaccendere quando vuoi">🙈 Spegni il suggeritore</button>';
         h2 += '<div class="msa-g-ora-azione">' + tipoLabel(d) + (d.nome ? ' · <b>' + esc(d.nome) + '</b>' : '') + '</div>';
         if (d.valore !== undefined && d.t !== 'pulsante') h2 += '<div class="msa-g-ora-val"><button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(vis(d)) + '</button><small>' + (d.t === 'campo' ? (d.controlla ? 'controlla la casella che brilla: se non c’è già, scrivilo tu' : 'scrivilo tu nella casella che brilla (clic per copiarlo)') : 'scegli questa voce nell’elenco che brilla') + '</small></div>';
         if (d.t === 'pulsante') h2 += '<div class="msa-g-ora-val"><small>Premi il pulsante che brilla' + (d.nome ? ': «' + esc(d.nome) + '»' : '') + '.</small></div>';
@@ -518,23 +530,26 @@
     }
     // evidenziazione sulla pagina
     var chiave = pos + '|' + (ora ? ora.k : 'fine');
+    if (chiave !== chiaveCorrente) { chiaveCorrente = chiave; mostraDopo = Date.now() + 900; }
     var vecchi = document.querySelectorAll('.msa-g-brilla');
     for (var j = 0; j < vecchi.length; j++) if (!ora || vecchi[j] !== ora.el) vecchi[j].classList.remove('msa-g-brilla');
     if (ora && ora.el) {
       ora.el.classList.add('msa-g-brilla');
       var d2 = ora.d, breve = d2.breve || (function (t) { var f = t.split(/(?<=[.!?])\s/)[0]; return f.length > 130 ? f.slice(0, 127).replace(/\s+\S*$/, '') + '…' : f; })(d2.serve || '');
       bolla.innerHTML = '<b>' + tipoLabel(d2) + (d2.valore !== undefined && d2.t !== 'pulsante' ? ' <code>' + esc(vis(d2)) + '</code>' : (d2.nome ? ' «' + esc(d2.nome) + '»' : '')) + '</b><span>' + esc(breve) + '</span>';
-      bolla.hidden = false;
+      bolla.hidden = soppressa === chiave || Date.now() < mostraDopo;
       if (chiave !== ultimoPunto || forza) {
         ultimoPunto = chiave;
         try { ora.el.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch (e) { /* vecchio browser */ }
         if ((d2.t === 'campo') && (!document.activeElement || document.activeElement === document.body)) { try { ora.el.focus({preventScroll: true}); } catch (e) { /* niente fuoco */ } }
       }
-      posizionaBolla(ora.el);
+      if (!bolla.hidden) posizionaBolla(ora.el);
     } else { bolla.hidden = true; ultimoPunto = chiave; }
     tickPunti.el = ora && ora.el; tickPunti.k = ora ? ora.k : -1;
   }
   corpo.addEventListener('click', function (e) {
+    var sg = e.target.closest ? e.target.closest('.msa-g-sugg-off,.msa-g-sugg-on') : null;
+    if (sg) { ls(SUGG, sg.classList.contains('msa-g-sugg-off') ? 'no' : 'si'); firmaPunti = ''; ultimoPunto = ''; soppressa = ''; if (sg.classList.contains('msa-g-sugg-off')) spegniPunti(); var cc = corpo.querySelector('.msa-g-ora-c'); if (cc) cc.innerHTML = ''; tickPunti(true); return; }
     var t = e.target.closest ? e.target.closest('.msa-g-letto,.msa-g-salta') : null; if (!t) return;
     var p = PASSI[pos], k = parseInt(t.getAttribute('data-k'), 10);
     segnaP(t.classList.contains('msa-g-letto') ? 'letto' : 'salta', chiaveP(p, k)); firmaPunti = ''; tickPunti(true);
@@ -552,7 +567,16 @@
       }, 250);
     });
   }, true);
-  ['input', 'change'].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(function () { tickPunti(); }, 0); }, true); });
+  ['input', 'change'].forEach(function (ev) { document.addEventListener(ev, function (e) {
+    if (tickPunti.el && e.target === tickPunti.el && !radice.contains(e.target)) nascondiBolla();   // ha iniziato a scrivere/scegliere: la nuvoletta toglie il disturbo
+    setTimeout(function () { tickPunti(); }, 0);
+  }, true); });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === 'Tab') && tickPunti.el && !radice.contains(e.target)) { nascondiBolla(); setTimeout(function () { tickPunti(); }, 0); }
+  }, true);
+  document.addEventListener('mousedown', function (e) {
+    if (tickPunti.el && !radice.contains(e.target) && tickPunti.el.contains && tickPunti.el.contains(e.target)) nascondiBolla();   // clic sul punto che brilla (pulsante o campo)
+  }, true);
   window.addEventListener('scroll', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); }, true);
   window.addEventListener('resize', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); });
   setInterval(function () { tickPunti(); }, 450);

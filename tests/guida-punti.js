@@ -24,9 +24,10 @@ const passo = w.MSA_CPM_FORMAS.passiPreparazione.find(p => p.id === 'cpm-budget'
 w.MSA_ESERCIZIO = {codice: 't', titolo: 'prova', passi: [passo], pannelloAutomatico: true};
 w.MSA_GUIDA = {esercizio: 't', versione: 'vuoto', chiave: key, url: {'erp_controllo.kp06': '/vuoto/s4/controllo/kp06/'}};
 w.eval(read('app/blueprints/guida/static/pannello.js'));
-const giro = () => tick.forEach(t => t());
+let orologio = Date.now() + 5000; w.Date.now = () => orologio;
+const giro = () => { orologio += 1000; tick.forEach(t => t()); };
 const brilla = () => [...w.document.querySelectorAll('.msa-g-brilla')];
-giro();
+giro(); giro();
 let b = brilla(); ok(b.length === 1, 'un solo punto brilla (' + b.length + ')'); ok(b[0].id === 'kp06-k80', 'brilla la casella 80 del centro 4210, non ' + (b[0] && b[0].id));
 
 let card = w.document.querySelector('.msa-g-ora'); ok(card && /ORA TOCCA A TE/.test(card.textContent) && /36000/.test(card.textContent) && /A cosa serve/.test(card.textContent), 'riquadro con cosa scrivere e a cosa serve');
@@ -50,6 +51,26 @@ f('kp06-k86').value = '1200'; f('kp06-k86').dispatchEvent(new w.Event('input', {
 ok(brilla()[0].id === 'kp06-k86', 'valore sbagliato: la casella continua a brillare');
 f('kp06-k86').value = '12.000,00'; f('kp06-k86').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
 ok(brilla()[0].id === 'kp06-k50', 'formato italiano 12.000,00 riconosciuto: brilla la classe 50');
+// la nuvoletta sparisce subito quando si scrive nel punto, e quella del punto successivo non compare all'istante
+{
+  const bl = w.document.getElementById('msa-g-bolla');
+  ok(!bl.hidden && /2900/.test(bl.textContent), 'nuvoletta del punto 50 visibile');
+  f('kp06-k50').value = '29'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true}));
+  ok(bl.hidden, 'appena scrivo nel punto la nuvoletta sparisce (anche se il valore non è ancora giusto)');
+  giro(); ok(bl.hidden && brilla()[0].id === 'kp06-k50', 'resta nascosta per quel punto, il bordo continua a brillare');
+  f('kp06-k50').value = '2900'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true}));
+  ok(bl.hidden, 'valore giusto: la nuvoletta non ricompare e il punto successivo parte con ritardo (' + (brilla()[0] && brilla()[0].id) + ')');
+  f('kp06-k54').value = ''; giro();
+  ok(!bl.hidden && /3100/.test(bl.textContent), 'dopo un attimo compare la nuvoletta del punto 54');
+  f('kp06-k54').dispatchEvent(new w.KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+  ok(bl.hidden, 'Invio: la nuvoletta sparisce subito');
+  // suggeritore spento dal pulsante: niente bordo, niente nuvoletta, e si riaccende
+  w.document.querySelector('.msa-g-sugg-off').click(); giro();
+  ok(brilla().length === 0 && bl.hidden && w.localStorage.getItem('msa-g-suggeritore') === 'no' && w.document.querySelector('.msa-g-sugg-on'), 'suggeritore spento: nessun bordo né nuvoletta, pulsante per riaccenderlo');
+  giro(); ok(brilla().length === 0 && bl.hidden, 'resta spento ai giri successivi');
+  w.document.querySelector('.msa-g-sugg-on').click(); giro();
+  ok(brilla().length === 1 && !bl.hidden && !w.document.querySelector('.msa-g-sugg-on'), 'riacceso: il bordo torna a brillare');
+}
 f('kp06-k50').value = '2900'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
 f('kp06-k54').value = '3100'; f('kp06-k54').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
 b = brilla(); ok(b.length === 1 && b[0].getAttribute('data-azione') === 'kp06', 'compilate le tre classi brilla «Salva»');
