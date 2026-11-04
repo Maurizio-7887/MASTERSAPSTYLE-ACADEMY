@@ -118,6 +118,9 @@ window.CH4 = (function () {
   function registraIres(i) {
     var n = N(), c = calcolaImposte(i), data = n.data(i.data || c.anno + '-12-31');
     if (X().imposte.some(function (x) { return x.anno === c.anno; })) throw Error('Imposte ' + c.anno + ' già registrate.');
+    // l'imposta si calcola sull'utile DOPO le scritture di fine anno: ammortamenti non registrati gonfierebbero utile, IRES e IRAP
+    var al31 = c.anno + '-12-31', ceMancanti = (S().cespiti || []).filter(function (x) { return !x.cessione && x.inFunzione <= al31 && !(x.ammortamenti || []).some(function (a) { return a.anno === +c.anno && a.data >= al31; }) && window.CE4 && window.CE4.quota(x, al31).importo > 0.004; });
+    if (ceMancanti.length) throw Error('Prima delle imposte registra gli ammortamenti ' + c.anno + ' (Cespiti → Ammortamenti, AFAB al 31/12) di ' + ceMancanti.map(function (x) { return x.codice; }).join(', ') + ': senza ammortamento l\'utile è troppo alto e IRES e IRAP escono sbagliate. Poi calcola le imposte.');
     var righe = [];
     if (c.ires) righe.push({conto: '56', dareAvere: 'DARE', importo: c.ires, testo: 'IRES corrente ' + c.aliquota + '%'}, {conto: '23', dareAvere: 'AVERE', importo: c.ires, testo: 'debito IRES (saldo entro il 30/06)'});
     if (c.irap) righe.push({conto: '52', dareAvere: 'DARE', importo: c.irap, testo: 'IRAP corrente ' + c.aliquotaIrap + '%'}, {conto: '35', dareAvere: 'AVERE', importo: c.irap, testo: 'debito IRAP (saldo entro il 30/06)'});

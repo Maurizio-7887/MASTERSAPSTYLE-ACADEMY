@@ -54,6 +54,11 @@ window.FS4 = (function () {
         throw Error('La fattura ' + fp.rif + ' è di ' + g.nome + ' (' + fp.fornitore + '), non di ' + f.nome + ' (' + i.fornitore + '): scegli il fornitore ' + fp.fornitore + '.');
       }
     }
+    if (doc) {   // controllo anche sul giornale: la fattura (di qualunque ciclo) con questo riferimento non può appartenere a un altro fornitore
+      var altro = (S().registrazioni || []).filter(function (g) { return g.tipo !== 'PAGAMENTO_FORNITORE' && String(g.rif || '').toUpperCase() === doc.toUpperCase(); })
+        .map(function (g) { return (g.righe || []).filter(function (x) { return x.conto === '20' && x.dareAvere === 'AVERE' && x.partner; })[0]; }).filter(Boolean)[0];
+      if (altro && altro.partner !== i.fornitore) throw Error('La fattura ' + doc + ' è del fornitore ' + altro.partner + ', non di ' + f.nome + ' (' + i.fornitore + '): scegli il fornitore ' + altro.partner + '. Così non resta aperto il debito verso ' + altro.partner + ' e non si riduce per errore quello verso ' + f.nome + '.');
+    }
     var riga = {conto: '20', dareAvere: 'DARE', importo: imp, partner: i.fornitore, testo: 'pagamento ' + (doc || 'debiti aperti')}; if (doc) riga.pareggio = doc;
     var r = n.post({data: data, tipo: 'PAGAMENTO_FORNITORE', rif: String(i.rif || '').trim() || 'F-53 ' + i.fornitore, descrizione: 'F-53 bonifico a ' + f.nome + (doc ? ' per la fattura ' + doc : '') + ': ' + L.eur(imp) + ' €',
       righe: [riga, {conto: banca, dareAvere: 'AVERE', importo: imp, testo: 'bonifico ' + f.nome}]});
