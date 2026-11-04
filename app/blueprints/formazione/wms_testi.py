@@ -26,6 +26,8 @@ GLOSSARIO = [
     ("Movimenti", "Monitor del magazzino", "/SCWM/MON", "La vista d'insieme: compiti aperti, risorse, ubicazioni piene e vuote."),
     ("Movimenti", "Scorta minima (punto di riordino)", "MD04 · pianificazione VB", "La quantità sotto la quale un materiale va riordinato: se libera + in arrivo scende sotto il minimo il sistema propone quanto ordinare (fino alla scorta massima)."),
     ("Movimenti", "Arretrato", "VL10 · ME2M", "Quello che doveva essere fatto e non lo è ancora: consegne, arrivi, produzione o compiti oltre la data promessa (rosso), in scadenza (arancio/giallo)."),
+    ("Uscita", "Piano di carico", "pianificazione del carico", "Dove va ogni collo sul camion: pile, file dalla cabina alle porte, peso e altezza; si guarda dall'alto o in 3D prima di caricare."),
+    ("Uscita", "Saturazione", "piano di carico", "Quanto del camion si usa: % del pianale occupato e % della portata in kg. Un camion pieno a metà costa come uno pieno."),
     ("Movimenti", "Trasferimento tra depositi", "UB · 351 · 101", "Spostare merce dal magazzino principale a un deposito esterno (o indietro): prelievo, uscita 351 sul camion, entrata 101 all'arrivo. Cambia il posto, non il proprietario: nessuna scrittura."),
     ("Movimenti", "Merce in viaggio (stock in transito)", "MB5T", "La merce sul camion tra due depositi: non è né qua né là, ma è nostra e a bilancio. Non si può vendere né prelevare finché non arriva."),
     ("Movimenti", "Quadratura IM–WMS", "LX23", "Contabilità di magazzino (IM) e magazzino a ubicazioni (WMS) devono avere le stesse quantità."),

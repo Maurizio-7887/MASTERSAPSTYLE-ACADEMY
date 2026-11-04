@@ -210,6 +210,8 @@
     {g: 'UF 10 · 6 · Spedizione a ondate', data: '15/01/2027', titolo: 'Piano di carico: quale camion per Beta e Delta?', dove: {ep: X + 'piano'}, percorso: 'WMS → Spedizione → Piano di carico del camion',
      campi: [['Trasporto', 'quello appena creato (consegne Beta e Delta)'], ['Prova il furgone', 'Veicolo «Furgone 3,5 t»: ci sta 1 collo su 10, porta solo 1.200 kg'],
        ['Scegli la motrice', 'Veicolo «Motrice 10 t», criterio «per fermate»'], ['Guarda il disegno', 'Delta (scende per ultima) vicino alla CABINA nei posti 1-3, Beta verso le PORTE con 3 pile da due'],
+       ['Camion in 3D', 'premi «🧊 Camion in 3D»: gira il camion con il mouse, prova «dalle porte» e passa sopra un collo per leggere posto, articolo e peso'],
+       ['Prova di nuovo il furgone in 3D', 'i colli che non ci stanno compaiono rossi dietro al camion con la scritta NON ALLOCATI; poi rimetti la motrice'],
        ['Pulsante', 'Salva il piano sul trasporto']],
      attesa: '10 colli su 10 in 7 posti a terra (3 pile da due colli di TR-STD), 6.700 kg = 84% della portata. Le TR-ALTA non si impilano: 775 kg pesano più dei 700 che il pallet regge sopra. Nessuna scrittura.',
      nota: 'Si carica dal posto 1 (cabina) verso le porte: chi scende per primo deve essere vicino alle porte. Con la pistola RF → Carico ogni collo ti dice il suo posto.',
