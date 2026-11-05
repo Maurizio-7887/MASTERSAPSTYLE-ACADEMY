@@ -21,7 +21,7 @@ from ...db import Attestato, Iscrizione, StatoLavoro, TentativoEsame, Utente, ad
 bp = Blueprint("privati", __name__, url_prefix="/corsi", template_folder="templates", static_folder="static",
                static_url_path="/static/privati")
 
-PUBBLICHE = {"privati.corso_pubblico", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
+PUBBLICHE = {"privati.corso_pubblico", "privati.prova", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
              "privati.static"}
 VERSIONE_LAVORO = "erp-ft"          # il sistema integrato dove si svolgono gli esercizi
 EMAIL = "info@mauriziogustinicchiconsulting.it"
@@ -77,6 +77,25 @@ def controlla_prova(u):
 def corso_pubblico(slug):
     c = _corso_o_404(slug)
     return render_template("privati/corso.html", **_ctx(slug, c, u=utente_corrente()))
+
+
+@bp.route("/<slug>/prova")
+def prova(slug):
+    """Blocco pilota pubblico: il primo ordine cliente con controllo del credito e della disponibilità. Non salva nulla."""
+    from ... import prova_ordine as pr
+    c = _corso_o_404(slug)
+    if slug != "erp":
+        abort(404)
+    clienti, articoli = pr.vista()
+    ris = errore = None
+    scelta = {"cliente": request.args.get("cliente", "C100"), "art": request.args.get("art", "TR-STD"), "qta": request.args.get("qta", "50")}
+    if request.args.get("cliente"):
+        try:
+            ris = pr.controlla(scelta["cliente"], scelta["art"], float(scelta["qta"].replace(",", ".")))
+        except (pr.ErroreProva, ValueError) as e:
+            errore = str(e) if isinstance(e, pr.ErroreProva) else "Scrivi una quantità valida."
+    return render_template("privati/prova.html", **_ctx(slug, c, u=utente_corrente(), clienti=clienti, articoli=articoli, casi=pr.CASI,
+                                                          ris=ris, errore=errore, scelta=scelta))
 
 
 @bp.route("/<slug>/iscriviti", methods=["GET", "POST"])

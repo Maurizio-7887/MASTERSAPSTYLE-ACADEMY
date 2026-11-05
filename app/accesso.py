@@ -9,7 +9,7 @@ from .db import Utente, db
 # pagine visibili senza accesso
 PUBBLICHE = {"accessi.accesso", "portale.home", "portale.health", "portale.materiale", "static",
              # corsi online per privati: programma, iscrizione, acquisto e verifica degli attestati
-             "privati.corso_pubblico", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
+             "privati.corso_pubblico", "privati.prova", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
              "privati.static"}
 
 

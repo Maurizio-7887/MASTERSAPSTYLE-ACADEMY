@@ -1,0 +1,61 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Prova: il tuo primo ordine cliente{% endblock %}
+{% block contenuto %}
+{% macro eur(c) %}{{ '{:,.2f}'.format(c / 100).replace(',', 'X').replace('.', ',').replace('X', '.') }} €{% endmacro %}
+<div class="msa-card" style="text-align:left;max-width:860px">
+  <p style="margin:0;opacity:.75">Prova gratuita · senza registrazione · non salviamo nulla</p>
+  <h1 style="margin-top:4px">Il tuo primo ordine cliente</h1>
+  <p>Sei all'ufficio vendite di <b>Ferro &amp; Transenne</b>. Un cliente ordina delle transenne. Prima di accettare l'ordine, un ERP controlla <b>due cose</b>: il <b>credito</b> (il cliente è già esposto oltre il suo fido?) e la <b>disponibilità</b> (la merce è davvero libera, o è già promessa ad altri?). Prova tu.</p>
+
+  <h2>1. Guarda la situazione</h2>
+  <table class="msa-tab">
+    <tr><th>Cliente</th><th>Fido</th><th>Fatture aperte</th><th>Credito ancora libero</th></tr>
+    {% for k in clienti %}<tr><td>{{ k.nome }}</td><td>{{ eur(k.fido) }}</td><td>{{ eur(k.aperte) }}</td><td><b>{{ eur(k.libero) }}</b></td></tr>{% endfor %}
+  </table>
+  <table class="msa-tab" style="margin-top:12px">
+    <tr><th>Articolo</th><th>Prezzo</th><th>A magazzino</th><th>Già promesse ad altri ordini</th><th>Libere</th></tr>
+    {% for a in articoli %}<tr><td>{{ a.nome }}</td><td>{{ eur(a.prezzo) }} (+ IVA 22%)</td><td>{{ a.giacenza }}</td><td>{{ a.impegnato }}</td><td><b>{{ a.disponibile }} pz</b></td></tr>{% endfor %}
+  </table>
+  <p style="font-size:13px;opacity:.8">Sconto per quantità: 2% da 100 pezzi, 4% da 300.</p>
+
+  <h2>2. Prova tre casi</h2>
+  <p>
+    {% for k, t, cl, a, q, d in casi %}<a class="msa-btn" style="margin:0 6px 6px 0" href="{{ url_for('privati.prova', slug=slug, cliente=cl, art=a, qta=q) }}">{{ t }}</a>{% endfor %}
+  </p>
+  <p style="opacity:.8">Oppure scrivi tu l'ordine:</p>
+  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+    <label>Cliente<br><select name="cliente">{% for k in clienti %}<option value="{{ k.codice }}" {{ 'selected' if k.codice == scelta.cliente }}>{{ k.nome }}</option>{% endfor %}</select></label>
+    <label>Articolo<br><select name="art">{% for a in articoli %}<option value="{{ a.codice }}" {{ 'selected' if a.codice == scelta.art }}>{{ a.nome }}</option>{% endfor %}</select></label>
+    <label>Quantità<br><input name="qta" value="{{ scelta.qta }}" size="6" inputmode="numeric"></label>
+    <button class="msa-btn" type="submit">Controlla e conferma</button>
+  </form>
+  {% if errore %}<div class="msa-msg errore" style="margin-top:14px">{{ errore }}</div>{% endif %}
+
+  {% if ris %}
+  <h2>3. Il risultato</h2>
+  <p>Ordine: <b>{{ ris.qta }} pz · {{ ris.articolo }}</b> per <b>{{ ris.cliente }}</b>.
+     Listino {{ eur(ris.lordo) }}{% if ris.sconto %}, sconto {{ ris.sconto }}%{% endif %}, imponibile {{ eur(ris.netto) }}, totale con IVA <b>{{ eur(ris.totale) }}</b>.</p>
+  <div class="msa-msg {{ 'ok' if ris.cred_ok else 'errore' }}">
+    <b>Controllo del credito: {{ 'superato' if ris.cred_ok else 'NON superato' }}.</b>
+    Fatture aperte {{ eur(ris.aperte) }} + questo ordine {{ eur(ris.totale) }} = {{ eur(ris.dopo) }}, contro un fido di {{ eur(ris.fido) }}.
+    {% if not ris.cred_ok %}L'ordine nasce <b>bloccato</b>: il responsabile crediti deve decidere se rilasciarlo, aumentare il fido o rifiutarlo.{% endif %}
+    <span class="sap">· SAP: VKM1 · FD32</span>
+  </div>
+  <div class="msa-msg {{ 'ok' if ris.mag_ok else 'errore' }}" style="margin-top:10px">
+    <b>Controllo della disponibilità: {{ 'superato' if ris.mag_ok else 'NON superato' }}.</b>
+    Richieste {{ ris.qta }} pz, libere {{ ris.disponibile }}.
+    {% if not ris.mag_ok %}Il sistema conferma solo <b>{{ ris.confermabile }} pz</b>: le altre {{ ris.qta - ris.confermabile }} si confermano quando entra nuova produzione.{% endif %}
+    <span class="sap">· SAP: ATP · VA02</span>
+  </div>
+  {% if ris.registrato %}
+  <div class="msa-msg ok" style="margin-top:10px"><b>Ordine confermato.</b> Il prossimo passo è il prelievo e la spedizione, poi la fattura (con le scritture contabili e il costo del venduto) e infine l'incasso.</div>
+  {% else %}
+  <p style="margin-top:10px">Ordine non confermato in pieno: finché i controlli non sono superati, l'ordine non si chiude. Prova gli altri casi qui sopra.</p>
+  {% endif %}
+  {% endif %}
+
+  <hr style="margin:24px 0;opacity:.2">
+  <p>Questo è solo il primo passo. Nel corso <b>{{ c.breve }}</b> porti Ferro &amp; Transenne dal ciclo attivo alla produzione, fino ai conti.</p>
+  <p><a class="msa-btn" href="{{ url_for('privati.iscriviti', slug=slug) }}">Prova gratis le prime lezioni</a> <a href="{{ url_for('privati.corso_pubblico', slug=slug) }}">← Torna al corso</a></p>
+</div>
+{% endblock %}
