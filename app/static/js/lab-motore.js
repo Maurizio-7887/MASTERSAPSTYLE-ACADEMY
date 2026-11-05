@@ -134,6 +134,9 @@
       (righe.length ? righe.map(function (r) { return '<tr' + (r.cls ? ' class="' + r.cls + '"' : '') + '>' + (r.celle || r).map(function (c, i) { return '<td' + (dx[i] ? ' class="n"' : '') + '>' + (c == null ? '' : c) + '</td>'; }).join('') + '</tr>'; }).join('')
         : '<tr><td colspan="' + testa.length + '" class="lab-vuoto">' + (vuoto || 'Nessun dato.') + '</td></tr>') + '</table></div>';
   }
+  // Codici SAP: nascosti di default, li mostra il pulsante «Scopri i codici SAP». Un sottotitolo fatto solo di codici (XD03, MM03 · MMBE, F-28…) è un codice SAP.
+  function eCodiceSap(t) { return String(t).split(/\s*[·+]\s*/).every(function (x) { return /^[A-Z][A-Z0-9\/_-]{2,}$/.test(x.trim()); }); }
+  function sap(codice) { return '<span class="sap"> (' + esc(codice) + ')</span>'; }
   function scheda(icona, titolo, tcode, corpo, id) {
     return '<section class="lab-card"' + (id ? ' id="' + id + '"' : '') + '><header><span class="ic">' + icona + '</span><h2>' + titolo + '</h2>' + (tcode ? '<span class="tc">' + tcode + '</span>' : '') + '</header><div class="cb">' + corpo + '</div></section>';
   }
@@ -202,7 +205,8 @@
     return tabella(['Conto', 'Descrizione', 'Dare›', 'Avere›'], righe);
   }
 
+
   window.LabMotore = {crea: crea, MATERIALI: MATERIALI, FINITI: FINITI, TARIFFA: TARIFFA, costoStd: costoStd, ciclo: ciclo, esplodi: esplodi,
-    r2: r2, eur: eur, n0: n0, fd: fd, fmtQ: fmtQ, esc: esc, tabella: tabella, scheda: scheda, modulo: modulo, collega: collega,
+    r2: r2, eur: eur, n0: n0, fd: fd, fmtQ: fmtQ, esc: esc, tabella: tabella, scheda: scheda, sap: sap, modulo: modulo, collega: collega,
     righeScrittura: righeScrittura, giornale: giornale, bilancio: bilancio, fineMese: fineMese, statoVuoto: statoVuoto, num: num, dataOk: dataOk};
 })();

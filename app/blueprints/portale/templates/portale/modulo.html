@@ -11,7 +11,7 @@
 {% include "simulatore/_shell.html" %}
 <main class="msa-lp">
   <div class="msa-lp-intro msa-intro-modulo g-{{ modulo_attivo.colore }}">
-    <span class="sigla">{{ modulo_attivo.sigla }}</span>
+    <span class="sigla sap">{{ modulo_attivo.sigla }}</span>
     <div><h1>{{ modulo_attivo.titolo }}</h1><p>{{ modulo_attivo.descrizione }}</p></div>
     <a class="msa-indietro" href="{{ url_for('portale.ingresso', versione=versione) }}">‹ Tutti i moduli</a>
   </div>
@@ -48,5 +48,6 @@
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
 {% set guida = config_guida_modulo(versione, modulo_attivo.codice) %}
 {% include "guida/_pannello.html" %}
+<script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
 </html>

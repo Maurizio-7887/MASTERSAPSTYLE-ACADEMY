@@ -182,3 +182,6 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 
 .msa-tiles-gruppo{font-size:14px;font-weight:600;color:var(--f-attenuato,#556B82);margin:18px 0 6px;letter-spacing:.2px}
 .msa-tiles-gruppo:first-of-type{margin-top:4px}
+
+/* codici SAP: nascosti finche non si preme «Scopri i codici SAP» */
+.sap{display:none}body.msa-sap .sap{display:inline}

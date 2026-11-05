@@ -20,5 +20,6 @@
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
 {% if utente_corrente() %}{% include "sincronia/_battito.html" %}{% endif %}
+<script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
 </html>

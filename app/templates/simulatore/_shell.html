@@ -26,7 +26,7 @@
     {% if moduli is defined %}
     <a href="{{ url_for('portale.ingresso', versione=versione) }}" class="{{ 'attivo' if not modulo_attivo }}" title="Tutti i moduli">⊞ Moduli</a>
     {% for m in moduli %}
-      <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}" class="{{ 'attivo' if modulo_attivo and modulo_attivo.codice == m.codice }}"><b class="msa-sigla">{{ m.sigla }}</b> {{ m.breve }}</a>
+      <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}" class="{{ 'attivo' if modulo_attivo and modulo_attivo.codice == m.codice }}"><b class="msa-sigla sap">{{ m.sigla }}</b> {{ m.breve }}</a>
     {% endfor %}
     {% else %}
     {% for a in attivita_tutte %}

@@ -12,7 +12,7 @@
 {% include "simulatore/_shell.html" %}
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
-    › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
+    › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla sap">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
     {% if lab.area %}› {{ lab.area }} {% endif %}› <b>{{ pagina.titolo }}</b></span>
   <nav class="msa-pagine" aria-label="Pagine del laboratorio">
     {% for p in lab.nav %}<a href="{{ url_for(p.ep) }}" class="{{ 'attivo' if p.ep == pagina.ep }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
@@ -34,5 +34,6 @@
 {% for s in js %}<script src="{{ s }}"></script>{% endfor %}
 {% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
 {% include "guida/_pannello.html" %}
+<script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
 </html>

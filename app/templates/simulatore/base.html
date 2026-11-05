@@ -14,7 +14,7 @@
 {% include "simulatore/_shell.html" %}
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=config.versione) }}">Launchpad</a>
-    {% if modulo_attivo %} › <a href="{{ url_for('portale.modulo_lp', versione=config.versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>{% endif %}
+    {% if modulo_attivo %} › <a href="{{ url_for('portale.modulo_lp', versione=config.versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla sap">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>{% endif %}
     › <b>{{ app_attiva or pagina.titolo }}</b></span>
   {% if modulo_attivo %}<a class="msa-torna" href="{{ url_for('portale.modulo_lp', versione=config.versione, codice=modulo_attivo.codice) }}">‹ App di {{ modulo_attivo.sigla }}</a>{% endif %}
 </div></div>
@@ -34,5 +34,6 @@
 {% endfor %}
 <script src="{{ url_for('static', filename='js/ponte-pagine.js') }}"></script>
 {% include "guida/_pannello.html" %}
+<script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
 </html>
