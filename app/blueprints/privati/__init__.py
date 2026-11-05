@@ -27,6 +27,37 @@ VERSIONE_LAVORO = "erp-ft"          # il sistema integrato dove si svolgono gli 
 EMAIL = "info@mauriziogustinicchiconsulting.it"
 
 
+CRM_WEBHOOK_URL = os.environ.get("CRM_WEBHOOK_URL", "").strip()
+CRM_API_KEY = os.environ.get("CRM_API_KEY", "").strip()
+
+
+def _payload_crm(corso_slug, nome, email, quando):
+    """Contatto della prova gratuita per la lista «Privati» del CRM, con il consenso alla pubblicità registrato."""
+    c = CORSI[corso_slug]
+    return {"nome": nome, "email": email, "messaggio": f"Prova gratuita di {c['breve']}",
+            "fonte": f"Academy - prova gratuita {c['breve']}", "event_id": f"prova-{corso_slug}-{email}"[:120],
+            "tipo_anagrafica": "Lead", "categoria_crm": "Privato", "consenso_newsletter": True,
+            "consenso_dettaglio": f"Consenso privacy e pubblicità dato alla registrazione il {quando:%d/%m/%Y %H:%M}",
+            "qualifica_ai": {"categoria": "prova", "motivo": "prova gratuita"}}
+
+
+def _invia_crm(payload):
+    """Invio al CRM in un thread: se il CRM non risponde, la registrazione non si ferma (l'utente resta nel database dell'Academy)."""
+    if not CRM_WEBHOOK_URL:
+        return
+
+    def _post():
+        import urllib.request
+        req = urllib.request.Request(CRM_WEBHOOK_URL, data=json.dumps(payload).encode(), method="POST",
+                                     headers={"Content-Type": "application/json", **({"X-API-Key": CRM_API_KEY} if CRM_API_KEY else {})})
+        try:
+            urllib.request.urlopen(req, timeout=10).read()
+        except Exception:
+            pass
+    import threading
+    threading.Thread(target=_post, daemon=True).start()
+
+
 def _corso_o_404(slug):
     c = corso(slug)
     if c is None:
@@ -86,6 +117,9 @@ def prova(slug):
     c = _corso_o_404(slug)
     if slug != "erp":
         abort(404)
+    if utente_corrente() is None:
+        flash("Per fare la prova crea il tuo account gratuito: serve l'email e il consenso a ricevere le nostre comunicazioni.", "ok")
+        return redirect(url_for(".iscriviti", slug=slug, da="prova"))
     clienti, articoli = pr.vista()
     ris = errore = None
     scelta = {"cliente": request.args.get("cliente", "C100"), "art": request.args.get("art", "TR-STD"), "qta": request.args.get("qta", "50")}
@@ -121,6 +155,8 @@ def iscriviti(slug):
             errore = "La password deve avere almeno 8 caratteri."
         elif f.get("privacy") != "1":
             errore = "Per iscriverti devi accettare l'informativa privacy e le condizioni."
+        elif f.get("pubblicita") != "1":
+            errore = "Per la prova gratuita serve il consenso a ricevere email informative e promozionali."
         elif Utente.query.filter_by(username=email).first():
             errore = "Esiste già un account con questa email: accedi con email e password."
         if errore:
@@ -133,9 +169,12 @@ def iscriviti(slug):
         db.session.add(Iscrizione(utente_id=nuovo.id, corso=slug))
         db.session.commit()
         apri_sessione(nuovo)
+        _invia_crm(_payload_crm(slug, nome, email, adesso()))
         flash("Account creato: il programma e le prime lezioni sono aperti in prova gratuita.", "ok")
+        if f.get("da") == "prova" and slug == "erp":
+            return redirect(url_for(".prova", slug=slug))
         return redirect(url_for(".area", slug=slug))
-    return render_template("privati/iscriviti.html", **_ctx(slug, c, dati={}))
+    return render_template("privati/iscriviti.html", **_ctx(slug, c, dati={"da": request.args.get("da", "")}))
 
 
 @bp.route("/<slug>/acquista")

@@ -31,7 +31,7 @@ assert pub.get("/corsi/inesistente").status_code == 404
 c = app.test_client()
 t = csrf(c.get("/corsi/erp/iscriviti").get_data(as_text=True))
 r = c.post("/corsi/erp/iscriviti", data={"csrf": t, "nome": "Lia", "cognome": "Rossi", "email": "lia@test.it",
-                                         "password": "password1", "privacy": "1"})
+                                         "password": "password1", "privacy": "1", "pubblicita": "1"})
 assert r.status_code == 302 and "/corsi/erp/area" in r.headers["Location"]
 h = c.get("/corsi/erp/area").get_data(as_text=True)
 assert "Prova gratuita" in h and "🔒" in h
@@ -42,7 +42,7 @@ for path in ("/vuoto/formazione/varianze", "/vuoto/", "/vuoto/m/wms", "/area/con
 # doppia iscrizione con la stessa email
 t = csrf(pub.get("/corsi/magazzino/iscriviti").get_data(as_text=True))
 assert pub.post("/corsi/magazzino/iscriviti", data={"csrf": t, "nome": "X", "cognome": "Y", "email": "lia@test.it",
-                                                     "password": "password1", "privacy": "1"}).status_code == 400
+                                                     "password": "password1", "privacy": "1", "pubblicita": "1"}).status_code == 400
 
 # il docente attiva dopo il pagamento
 d = docente()

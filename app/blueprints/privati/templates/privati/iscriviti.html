@@ -13,6 +13,9 @@
     <label for="password">Password (almeno 8 caratteri)</label><input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
     <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" name="privacy" value="1" required style="width:auto">
       <span>Ho letto l'informativa privacy e accetto le condizioni del corso (i dati servono solo a gestire il corso e l'attestato).</span></label>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400"><input type="checkbox" name="pubblicita" value="1" required style="width:auto">
+      <span>Acconsento a ricevere email informative e promozionali (novità, corsi, offerte) da Maurizio Gustinicchi Consulting. Posso revocare il consenso in ogni momento scrivendo a {{ email }}.</span></label>
+    <input type="hidden" name="da" value="{{ dati.get('da', '') }}">
     <button class="msa-btn" type="submit">Crea l'account</button>
   </form>
   <p style="font-size:12px;color:var(--f-attenuato)">Nome e cognome compariranno sull'attestato. Hai già un account? <a href="{{ url_for('accessi.accesso') }}">Accedi</a>.</p>
