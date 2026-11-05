@@ -285,15 +285,46 @@ ESERCIZI["dicembre-wms"]["attesi_per_modello"] = {
 }
 
 
+# Dicembre con la finanza (dal 5/11/2026): mutuo, parcella con ritenuta, noleggio pagato con una tratta scontata,
+# leasing del carrello, rateo sugli interessi, risconto del maxicanone, svalutazione crediti. I lavori senza mutuo
+# restano corretti con i numeri di prima; quelli con il mutuo hanno questi.
+_DICEMBRE_FIN_ATTESI = {
+    "dc_risconto": ("Risconti attivi (assicurazione 1.098,08 + maxicanone 1.785,22)", 2883.30),
+    "dc_rateo": ("Ratei passivi (fitto 1.033,33 + interessi del mutuo 54,19)", 1087.52),
+    "dc_credito_iva": ("Credito IVA riportato al 2027", 3836.80),
+    "dc_ires": ("IRES 2026", 507.68),
+    "dc_irap": ("IRAP 2026 (interessi e svalutazione non deducibili)", 87.55),
+    "dc_utile": ("Utile d'esercizio 2026", 1520.09),
+}
+_DICEMBRE_FIN_NUOVI = [
+    ("dc_mutuo", "Debito per mutuo al 31/12", 30000.00, 0.005),
+    ("dc_interessi_mutuo", "Rateo di interessi sul mutuo", 54.19, 0.005),
+    ("dc_ritenuta", "Ritenuta d'acconto da versare (1040)", 200.00, 0.005),
+    ("dc_bollo", "Bollo sulla tratta (12‰)", 14.64, 0.005),
+    ("dc_leasing", "Canoni di leasing di competenza 2026", 14.78, 0.005),
+    ("dc_svalutazione", "Svalutazione crediti (0,5%)", 64.56, 0.005),
+]
+_DICEMBRE_FIN_BANCA = 27726.73   # mutuo 30.000 − spese 200 − bollo − maxicanone − assegno + sconto
+
+
+def _dicembre_con_finanza(stato):
+    return any(abs((m or {}).get("importo") or 0) > 0 for m in (((stato or {}).get("fin") or {}).get("mutui") or []))
+
+
 def attesi_esercizio(codice, stato=None):
     """Numeri di controllo secondo il modello salvato, senza migrare l'archivio."""
     esercizio = ESERCIZI.get(codice) or ESERCIZI["libero"]
     modello = (stato or {}).get("produzioneModello")
     attesi = esercizio.get("attesi_per_modello", {}).get(modello, esercizio["attesi"])
+    finanza = codice == "dicembre-wms" and stato is not None and _dicembre_con_finanza(stato)
     if codice == "dicembre-wms" and stato is not None and not _addizionali_trattenute_a_dicembre(stato):
         # paghe come nella realtà: a dicembre 2026 nessuna rata di addizionali (si trattengono a rate nel 2027),
         # quindi in busta e in banca escono 96 € in più rispetto ai lavori salvati prima della correzione
         attesi = [(k, label, 51790.42 if k == "dc_banca_31_12" else v, tol) for k, label, v, tol in attesi]
+    if finanza:
+        attesi = [(k, *_DICEMBRE_FIN_ATTESI[k], tol) if k in _DICEMBRE_FIN_ATTESI
+                  else (k, label, round(v + _DICEMBRE_FIN_BANCA, 2), tol) if k == "dc_banca_31_12"
+                  else (k, label, v, tol) for k, label, v, tol in attesi] + _DICEMBRE_FIN_NUOVI
     return attesi
 
 

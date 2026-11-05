@@ -36,7 +36,7 @@ window.RB4 = (function () {
     if (x.stato !== 'presentata') throw Error('La Ri.Ba. ' + x.numero + ' ha già un esito (' + x.stato + ').');
     if (data < x.scadenza) throw Error('L\'esito arriva alla scadenza (' + L.fd(x.scadenza) + ') o dopo.');
     var r;
-    if (i.esito === 'insoluta') {
+    if ((i.risultato || i.esito) === 'insoluta') {   // «risultato» dal modulo: un campo che si chiama «esito» si confonde con il riquadro dei messaggi
       var sp = i.spese == null || i.spese === '' ? 0 : L.num(i.spese, 'Spese di insoluto €', 0), righe = [];
       if (x.anticipo) righe.push({conto: '36', dareAvere: 'DARE', importo: x.anticipo, testo: 'restituzione anticipo ' + x.numero}, {conto: '10', dareAvere: 'AVERE', importo: x.anticipo, testo: 'restituzione anticipo ' + x.numero});
       if (sp) righe.push({conto: '58', dareAvere: 'DARE', importo: sp, testo: 'spese insoluto'}, {conto: '10', dareAvere: 'AVERE', importo: sp, testo: 'spese insoluto'});

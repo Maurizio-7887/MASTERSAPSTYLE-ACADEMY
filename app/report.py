@@ -278,6 +278,9 @@ class Lavoro:
                 "dc_chiuso": "sì" if ch26.get("risultato") and ch26.get("chiusuraSP") else "no",
                 "dc_riaperto": "sì" if ch26.get("riapertura") else "no",
                 "dc_banca_31_12": s26("10"),
+                # finanza (mutuo, ritenuta, cambiale, leasing, svalutazione crediti)
+                "dc_mutuo": -s26("37.10"), "dc_interessi_mutuo": s26("74"), "dc_ritenuta": -s26("29.10"),
+                "dc_bollo": s26("87"), "dc_leasing": s26("88"), "dc_svalutazione": s26("89"),
             })
             # «Magazziniere 5.0: un mese di magazzino» (percorso logistico, gennaio 2027)
             def sg(conto):

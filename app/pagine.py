@@ -309,7 +309,7 @@ _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("erp_bpc.static", "bpc-logica.js"), ("erp_controllo.static", "co-percorso.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
                ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"),
-               ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
+               ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_finanza.static", "fin-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
@@ -318,7 +318,7 @@ _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_a
                "erp_bpc": "Pianificazione e budget (SAP BPC)", "erp_magazzino": "Magazzino a ubicazioni (WMS)",
                "erp_inventario": "Inventari fisici e contabili", "erp_spedizione": "Spedizione (prelievo, imballo, trasporto, DDT)",
                "erp_innovazione": "Innovazione logistica (KPI, slotting, ondate, RFID)",
-               "erp_tesoreria": "Tesoreria (cassa, pagamenti, estratti conto)", "erp_valute": "Valute estere", "erp_paghe": "Paghe e costo del personale",
+               "erp_tesoreria": "Tesoreria (cassa, pagamenti, estratti conto)", "erp_finanza": "Finanza e adempimenti (cambiali, assegni, mutui, leasing, ritenute, bolli)", "erp_valute": "Valute estere", "erp_paghe": "Paghe e costo del personale",
                "erp_copa": "Redditività (CO-PA)", "erp_fi": "Contabilità (FI)", "erp_cespiti": "Cespiti (FI-AA)",
                "erp_chiusura": "IVA, imposte, chiusura e riapertura"}
 _ERP_PAGINE = {
@@ -391,6 +391,14 @@ _ERP_PAGINE = {
                       {"endpoint": "riba", "titolo": "Ri.Ba. salvo buon fine", "icona": "🧾", "tcode": "distinta Ri.Ba. · SBF · insoluti"},
                       {"endpoint": "factoring", "titolo": "Factoring", "icona": "🤝", "tcode": "pro soluto · pro solvendo"},
                       {"endpoint": "anticipi", "titolo": "Anticipo su fatture", "icona": "⏩", "tcode": "anticipo fatture · conto 38"}],
+    "erp_finanza": [{"endpoint": "cambiali", "titolo": "Cambiali e bolli", "icona": "📜", "tcode": "pagherò · tratta · sconto · protesto"},
+                    {"endpoint": "assegni", "titolo": "Assegni", "icona": "🖋️", "tcode": "bancario · circolare · versamento"},
+                    {"endpoint": "mutui", "titolo": "Mutui e rate", "icona": "🏠", "tcode": "piano francese · quota capitale e interessi"},
+                    {"endpoint": "leasing", "titolo": "Leasing e canoni", "icona": "🚜", "tcode": "maxicanone · risconto · riscatto"},
+                    {"endpoint": "ritenute", "titolo": "Ritenute d'acconto", "icona": "🧑‍💼", "tcode": "parcella · F24 1040"},
+                    {"endpoint": "bolli", "titolo": "Imposta di bollo", "icona": "🔖", "tcode": "bollo virtuale · F24 2521-2524"},
+                    {"endpoint": "crediti", "titolo": "Crediti dubbi e perdite", "icona": "⚠️", "tcode": "fondo svalutazione · art. 106 TUIR"},
+                    {"endpoint": "intra", "titolo": "Scambi UE (intracomunitari)", "icona": "🇪🇺", "tcode": "TD18 · art. 41 · Intrastat"}],
     "erp_valute": [{"endpoint": "tassi", "titolo": "Tassi di cambio", "icona": "💱", "tcode": "OB08"},
                    {"endpoint": "documenti", "titolo": "Fatture in valuta", "icona": "🧾", "tcode": "FB70 · FB60"},
                    {"endpoint": "regolazioni", "titolo": "Incassi e pagamenti in valuta", "icona": "🏦", "tcode": "F-28 · F-53"},
@@ -421,7 +429,7 @@ _ERP_PAGINE = {
 _ERP_JS = {"erp_controllo": "co-pagine.js", "erp_bpc": "bpc-pagine.js", "erp_dati": "dati-pagine.js", "erp_vendite": "sd-pagine.js", "erp_copa": "copa-pagine.js", "erp_fi": "fi-pagine.js",
            "erp_acquisti": "mm-pagine.js", "erp_produzione": "pp-pagine.js", "erp_costi": "copc-pagine.js",
            "erp_magazzino": "wm-pagine.js", "erp_inventario": "inv-pagine.js", "erp_spedizione": "sp-pagine.js", "erp_innovazione": "in-pagine.js",
-           "erp_tesoreria": "tes-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js",
+           "erp_tesoreria": "tes-pagine.js", "erp_finanza": "fin-pagine.js", "erp_valute": "val-pagine.js", "erp_paghe": "py-pagine.js",
            "erp_cespiti": "ce-pagine.js", "erp_chiusura": "ch-pagine.js"}
 _WMS = {"erp_magazzino", "erp_inventario", "erp_spedizione", "erp_innovazione"}   # pagine che stanno «di casa» nel modulo WMS
 for _bp, _pp in _ERP_PAGINE.items():
@@ -510,7 +518,7 @@ MODULI = [
     _integrato("fi", "FI", "Contabilità", "🏛️", "contabilita", ["erp_fi", "erp_cespiti", "erp_chiusura"]),
     _integrato("co", "CO", "Controllo di gestione", "📊", "controllo", ["erp_controllo", "erp_costi", "erp_copa"]),
     _integrato("bpc", "BPC", "Pianificazione e budget", "📈", "pianificazione", ["erp_bpc"]),
-    _integrato("tes", "TES", "Tesoreria", "🏦", "contabilita", ["erp_tesoreria"]),
+    _integrato("tes", "TES", "Tesoreria e finanza", "🏦", "contabilita", ["erp_tesoreria", "erp_finanza"]),
     _integrato("val", "FX", "Valute estere", "💱", "contabilita", ["erp_valute"]),
     _integrato("hr", "HR", "Paghe e personale", "👤", "personale", ["erp_paghe"]),
     {**_casi, "app": [a for a in _casi["app"] if a[0].split(".")[-1] not in _casi_esclusi]},
@@ -519,5 +527,5 @@ for _bp, _lab in LABORATORI.items():
     if _lab["slot"] == "erp-ft":
         _lab["codice"] = ({"erp_dati": "img", "erp_vendite": "sd", "erp_acquisti": "mm",
                            "erp_produzione": "pp", "erp_costi": "co", "erp_controllo": "co", "erp_bpc": "bpc", "erp_copa": "co",
-                           "erp_fi": "fi", "erp_tesoreria": "tes", "erp_valute": "val",
+                           "erp_fi": "fi", "erp_tesoreria": "tes", "erp_finanza": "tes", "erp_valute": "val",
                            "erp_paghe": "hr", "erp_cespiti": "fi", "erp_chiusura": "fi"}).get(_bp, "wms")

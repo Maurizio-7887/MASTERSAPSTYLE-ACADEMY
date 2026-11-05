@@ -44,6 +44,11 @@
     ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
     ['05', 'Ratei attivi', 'ATTIVO'], ['06', 'Risconti attivi', 'ATTIVO'], ['39', 'Ratei passivi', 'PASSIVO'], ['34', 'Risconti passivi', 'PASSIVO'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
+    // finanza: cambiali, assegni, mutui, leasing, ritenute d'acconto, bolli, crediti dubbi
+    ['11.10', 'Cambiali attive (effetti in portafoglio)', 'ATTIVO'], ['11.20', 'Crediti insoluti (cambiali protestate)', 'ATTIVO'], ['11.30', 'Assegni ricevuti da versare', 'ATTIVO'],
+    ['11.90', 'Fondo svalutazione crediti', 'ATTIVO'], ['18.10', 'Assegni emessi in circolazione', 'ATTIVO'], ['20.10', 'Cambiali passive', 'PASSIVO'],
+    ['29.10', 'Erario c/ritenute lavoro autonomo (cod. 1040)', 'PASSIVO'], ['37.10', 'Mutui passivi (debiti verso banche)', 'PASSIVO'],
+    ['62', 'Perdite su crediti', 'COSTO'], ['74', 'Interessi passivi su mutui', 'COSTO'], ['87', 'Imposta di bollo', 'COSTO'], ['88', 'Canoni di leasing', 'COSTO'], ['89', 'Svalutazione crediti', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
@@ -59,7 +64,11 @@
                    'F600': {nome: 'Ferro Lombardo Srl', regione: 'Lombardia', pagamento: '90 gg', iban: 'IT71M0503411701000000044556', ferro: true},
                    'F700': {nome: 'Acciai del Tevere Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT05P0200803284000000077889', ferro: true},
                    'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'},
-                   'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'}};
+                   'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'},
+                   // finanza: professionista con ritenuta d'acconto, società di leasing, fornitore di un altro Paese UE
+                   'F800': {nome: 'Studio Rossi Commercialisti Associati', regione: 'Umbria', pagamento: 'a vista', iban: 'IT33B0306903010100000012345', professionista: true},
+                   'F810': {nome: 'Leasing Umbria Spa', regione: 'Umbria', pagamento: 'SDD', iban: 'IT91C0538703000000000099887'},
+                   'F900': {nome: 'Stahl Handel GmbH', regione: 'Germania', paese: 'DE', ue: true, partitaIvaUe: 'DE811234567', pagamento: '30 gg', iban: 'DE89370400440532013000'}};
   // azienda nuova: i tre stadi della transenna standard diventano materiali veri, con scorta e ordine propri (taglio → piega → saldatura)
   var SEMILAVORATI = {
     'SL-TAGLIO': {nome: 'Tubi tagliati (kit per una TR-STD)', tipo: 'HALB', um: 'pz', std: 14.60, peso: 8, comp: {mat: 'FERRO', q: 8}, ore: {Taglio: 0.25}, attrezzaggio: 0},
@@ -71,12 +80,14 @@
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg', fido: 15000, rischio: 'C'},
     'C600': {nome: 'Usato Epsilon Srl', regione: 'Toscana', canale: '50 Cessioni di beni strumentali', gruppo: 'Diversi', pagamento: '15 gg', fido: 20000, rischio: 'B'},
     'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: '', fido: 50000, rischio: 'B'},
+    'C700': {nome: 'Barrières Lyon SARL', regione: 'Francia', paese: 'FR', ue: true, partitaIvaUe: 'FR40303265045', canale: '40 Export', gruppo: 'Estero', pagamento: '60 gg', fido: 30000, rischio: 'B'},
   };
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
     compito: 100000, udc: 1000000, inventario: 0, sscc: 0, trasporto: 1000, ddt: 0,
-    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, rfq: 6000000000, seriale: 0, cespite: 0, riba: 0, factoring: 0, fatturaServizi: 0};
+    estratto: 0, pagamento: 0, cedolino: 0, rda: 10000000, rfq: 6000000000, seriale: 0, cespite: 0, riba: 0, factoring: 0, fatturaServizi: 0,
+    cambiale: 0, assegno: 0, mutuo: 0, leasing: 0};
 
   function statoNuovo() {
     return {lab: 'erp', versioneErp: 1, societa: '1000 Ferro & Transenne S.r.l.', areaVendite: '1000 / 10 / 00',

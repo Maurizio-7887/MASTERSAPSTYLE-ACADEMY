@@ -118,7 +118,7 @@ for(const o of S.produzione){
 const tr=S.produzione.find(o=>o.materiale==='TR-STD'),halb=S.produzione.find(o=>o.materiale==='SL-TAGLIO');
 check(tr.eventi.filter(e=>e.tipo==='CO11N').map(e=>e.fase).join('/')==='Taglio/Piegatura/Saldatura','Tre conferme nominali TR sullo stesso ordine');
 check(tr.piano.totale===9420&&halb.piano.totale===292,'Piani PP ai medesimi valori economici');
-check(S.chiusure['2026'].utile===1814.98&&S.chiusure['2026'].riapertura,'Chiusura e riapertura completate con utile invariato');
+check(S.chiusure['2026'].utile===1520.09&&S.chiusure['2026'].riapertura,'Chiusura e riapertura completate con utile invariato (1.520,09 con la finanza di dicembre)');
 
 // Reload separato della fotografia finale: una revisione del budget corrente non
 // deve riscrivere i costi o le tariffe degli ordini già completati.
@@ -147,7 +147,7 @@ check(JSON.stringify(n.S.registrazioni)===prima,'Revisione budget analitica non 
 
 // Report applicativo sullo stato finale CPM, senza salvare la fotografia sul disco.
 const python=spawnSync(process.env.PYTHON||'python3',['-c',
- "import json,sys; from app.report import Lavoro; s=json.load(sys.stdin); r=Lavoro(s).confronto('dicembre-wms'); assert len(r)==23 and all(x['ok'] for x in r),r; print('OK: report CPM finale23/23 controlli economici')"],{cwd:root,input:JSON.stringify(S),encoding:'utf8'});
+ "import json,sys; from app.report import Lavoro; s=json.load(sys.stdin); r=Lavoro(s).confronto('dicembre-wms'); assert len(r)==29 and all(x['ok'] for x in r),r; print('OK: report CPM finale 29/29 controlli economici (con la finanza)')"],{cwd:root,input:JSON.stringify(S),encoding:'utf8'});
 check(python.status===0,'Report applicativo finale CPM: '+python.stdout+python.stderr);
 process.stdout.write(python.stdout);
 console.log('OK: CPM completo fino a chiusura/riapertura/gennaio: '+controlli+' controlli E2E originali + '+extra+' controlli CPM/snapshot/report. Nessun JSON condiviso sovrascritto.');

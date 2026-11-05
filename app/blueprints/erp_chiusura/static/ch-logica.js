@@ -91,7 +91,7 @@ window.CH4 = (function () {
   // personale dipendente a tempo indeterminato sono deducibili (art. 11 c. 4-octies). Ammortamenti nei limiti fiscali come IRES.
   // L'IRAP non è deducibile dall'IRES (la deduzione forfetaria del 10% e quella sul costo del personale sono per cassa: nel primo anno
   // senza versamenti IRAP non spettano). Imposte anticipate (OIC 25): differenze temporanee × (aliquota IRES + IRAP).
-  var FINANZIARI = {'60': 'interessi passivi bancari', '53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
+  var FINANZIARI = {'60': 'interessi passivi bancari', '74': 'interessi passivi su mutui', '53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
   var IMPOSTE = {'56': 1, '52': 1, '51': 1};
   function calcolaImposte(i) {
     var anno = String(i.anno || '').trim(); if (!/^\d{4}$/.test(anno)) throw Error('Anno non valido.');
@@ -102,12 +102,13 @@ window.CH4 = (function () {
     var fis = window.CE4 ? window.CE4.fiscale(anno) : {righe: [], totali: {aumento: 0, diminuzione: 0, recuperoCessione: 0, eccedenzaFine: 0, eccedenzaInizio: 0}}, ft = fis.totali;
     var aum = L.num(i.aumenti || 0, 'Altre variazioni in aumento', 0), dim = L.num(i.diminuzioni || 0, 'Altre variazioni in diminuzione', 0);
     var aIres = L.num(i.aliquota || i.aliquotaIres || 24, 'Aliquota IRES %', 0), aIrap = L.num(i.aliquotaIrap == null || i.aliquotaIrap === '' ? 3.9 : i.aliquotaIrap, 'Aliquota IRAP %', 0);
+    var fv = window.FIN4 ? window.FIN4.variazioniFiscali(anno) : {ires: [], irap: []};   // svalutazione crediti oltre lo 0,5%; IRAP: svalutazioni e perdite su crediti
     var varIres = [['Ammortamenti oltre il limite fiscale (art. 102 TUIR, primo anno a metà)', ft.aumento], ['Recupero di ammortamenti non dedotti negli anni prima', -ft.diminuzione],
-      ['Cessioni: maggior valore fiscale residuo (minusvalenza fiscale più alta)', -ft.recuperoCessione], ['Altre variazioni in aumento', aum], ['Altre variazioni in diminuzione', -dim]];
+      ['Cessioni: maggior valore fiscale residuo (minusvalenza fiscale più alta)', -ft.recuperoCessione]].concat(fv.ires, [['Altre variazioni in aumento', aum], ['Altre variazioni in diminuzione', -dim]]);
     var baseIres = r2(Math.max(0, ante + varIres.reduce(function (t, v) { return t + v[1]; }, 0))), ires = r2(baseIres * aIres / 100);
     var fin = Object.keys(FINANZIARI).filter(function (c) { return Math.abs(voci[c] || 0) > 0.004; }).map(function (c) { return [c + ' ' + FINANZIARI[c], voci[c]]; });
     var vp = r2(ante + fin.reduce(function (t, v) { return t + v[1]; }, 0));   // si tolgono gli oneri (si aggiungono) e i proventi (si sottraggono) finanziari
-    var varIrap = [['Ammortamenti oltre il limite fiscale', ft.aumento], ['Recupero di ammortamenti non dedotti', -ft.diminuzione], ['Cessioni: maggior valore fiscale residuo', -ft.recuperoCessione]];
+    var varIrap = [['Ammortamenti oltre il limite fiscale', ft.aumento], ['Recupero di ammortamenti non dedotti', -ft.diminuzione], ['Cessioni: maggior valore fiscale residuo', -ft.recuperoCessione]].concat(fv.irap);
     var baseIrap = r2(Math.max(0, vp + varIrap.reduce(function (t, v) { return t + v[1]; }, 0))), irap = r2(baseIrap * aIrap / 100);
     var tempFine = ft.eccedenzaFine, tempInizio = ft.eccedenzaInizio, anticipate = r2((tempFine - tempInizio) * (aIres + aIrap) / 100);
     return {anno: anno, risultato: ante, voci: voci, fiscale: fis, variazioniIres: varIres, aumenti: aum, diminuzioni: dim, base: baseIres, aliquota: aIres, ires: ires,
