@@ -193,10 +193,24 @@ def inizializza(app):
 
 def crea_docente_iniziale(app):
     """Il primo accesso docente nasce dalle variabili DOCENTE_USERNAME / DOCENTE_PASSWORD (solo se non esiste nessun docente)."""
-    if Utente.query.filter_by(ruolo="docente").first():
-        return
     username = os.environ.get("DOCENTE_USERNAME", "docente").strip().lower()
     password = os.environ.get("DOCENTE_PASSWORD", "")
+    if os.environ.get("DOCENTE_RESET_PASSWORD", "") == "1" and password:
+        # Recupero accesso: con DOCENTE_RESET_PASSWORD=1 la password del docente
+        # diventa quella di DOCENTE_PASSWORD (l'utente viene creato se manca).
+        u = Utente.query.filter_by(username=username).first()
+        if u is None:
+            u = Utente(username=username, nome=os.environ.get("DOCENTE_NOME", "Docente"), ruolo="docente")
+            db.session.add(u)
+        u.ruolo = "docente"
+        u.imposta_password(password)
+        u.deve_cambiare_password = False
+        if not db.session.get(Impostazione, "costo_orario"):
+            db.session.add(Impostazione(chiave="costo_orario", valore=os.environ.get("COSTO_ORARIO", "0")))
+        db.session.commit()
+        return
+    if Utente.query.filter_by(ruolo="docente").first():
+        return
     obbligo = os.environ.get("DOCENTE_CAMBIO_PASSWORD", "") == "1"   # al primo accesso si sceglie la propria password
     if not password:
         password = secrets.token_urlsafe(9)
