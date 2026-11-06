@@ -12,7 +12,7 @@ window.MM4 = (function () {
   var rdaDi = function (n) { var r = P().rda.find(function (x) { return x.numero === String(n); }); if (!r) throw Error('Richiesta d\'acquisto ' + n + ' inesistente.'); return r; };
   // ME51N richiesta d'acquisto: chi ha bisogno del materiale lo chiede, non lo compra
   function richiesta(i) {
-    var n = N(), data = n.data(i.data), mat = i.materiale || 'FERRO', m = n.materiale(mat); if (m.tipo !== 'ROH') throw Error('Si richiedono solo materie prime (ROH).');
+    var n = N(), data = n.data(i.data), mat = i.materiale || 'FERRO', m = n.materiale(mat); if (m.tipo !== 'ROH' && m.tipo !== 'HAWA') throw Error('Si richiedono solo materie prime (ROH) o merci (HAWA).');
     var q = L.num(i.qta, 'Quantità', 1), pz = i.prezzo == null || i.prezzo === '' ? m.std : L.num(i.prezzo, 'Prezzo stimato', 0.0001);
     var r = {numero: String(n.numero('rda')), data: data, materiale: mat, qta: q, prezzo: pz, valore: r2(q * pz), consegna: i.consegna ? n.data(i.consegna) : data, richiedente: String(i.richiedente || 'Produzione').trim(), motivo: String(i.motivo || '').trim(), stato: 'da approvare'};
     P().rda.push(r); n.salva();
@@ -30,7 +30,7 @@ window.MM4 = (function () {
     var n = N(), data = n.data(i.data), r = i.rda ? rdaDi(i.rda) : null;
     if (r) { if (r.stato !== 'approvata') throw Error('La richiesta ' + r.numero + ' è «' + r.stato + '»: si ordina solo una richiesta approvata (ME54N).'); if (data < r.decisione.data) throw Error('L\'ordine non può precedere l\'approvazione.'); }
     var f = i.fornitore || 'F100'; n.fornitore(f);
-    var mat = r ? r.materiale : (i.materiale || 'FERRO'), m = n.materiale(mat); if (m.tipo !== 'ROH') throw Error('Si acquistano solo materie prime (ROH): ' + mat + ' si produce.');
+    var mat = r ? r.materiale : (i.materiale || 'FERRO'), m = n.materiale(mat); if (m.tipo !== 'ROH' && m.tipo !== 'HAWA') throw Error('Si acquistano solo materie prime (ROH) o merci da rivendere (HAWA): ' + mat + ' si produce.');
     var q = L.num(i.qta == null || i.qta === '' ? (r ? r.qta : i.qta) : i.qta, 'Quantità', 1), p = L.num(i.prezzo, 'Prezzo netto', 0.0001);
     var o = {numero: n.numero('acquisto'), fornitore: f, materiale: mat, qta: q, prezzo: p, data: data, entrato: 0, fatturato: 0, valoreEntrato: 0};
     if (r) { o.rda = r.numero; r.stato = 'ordinata'; r.ordine = o.numero; }
@@ -91,7 +91,7 @@ window.MM4 = (function () {
     o.entrato = r2(o.entrato + q); o.valoreEntrato = r2(o.valoreEntrato + ord);
     (o.entrate = o.entrate || []).push({doc: doc, qta: q, data: data, valoreStd: std, valoreOrdine: ord, pd: pd, lotto: mv.lotti[0].lotto, ddt: ddt, danneggiati: dann});
     var r = n.post({data: data, tipo: 'ENTRATA_ACQUISTO', rif: doc, descrizione: 'MIGO 101 doc. ' + doc + ' — entrata ' + L.n0(q) + ' ' + m.um + ' ' + o.materiale + ' lotto ' + mv.lotti[0].lotto + ' da ordine ' + o.numero,
-      righe: [{conto: '12', dareAvere: 'DARE', importo: std, testo: 'a standard ' + L.eur(m.std)}, {conto: '63', dareAvere: 'DARE', importo: pd, testo: 'differenza prezzo ' + o.materiale},
+      righe: [{conto: n.contoMag(o.materiale), dareAvere: 'DARE', importo: std, testo: 'a standard ' + L.eur(m.std)}, {conto: '63', dareAvere: 'DARE', importo: pd, testo: 'differenza prezzo ' + o.materiale},
               {conto: '22', dareAvere: 'AVERE', importo: ord, partner: o.fornitore, testo: 'WE/RE al prezzo d\'ordine'}]});
     if (Math.abs(pd) > 0.004) S().mlPD.push({data: data, mat: o.materiale, pd: pd, tipo: 'acquisto', rif: doc, qta: q});
     n.salva(); return r;
@@ -122,7 +122,7 @@ window.MM4 = (function () {
   function rfq(i) {
     var n = N(), data = n.data(i.data), r0 = i.rda ? rdaDi(i.rda) : null;
     if (r0 && r0.stato !== 'approvata') throw Error('La richiesta d\'acquisto ' + r0.numero + ' è «' + r0.stato + '»: si chiede l\'offerta solo per una richiesta approvata.');
-    var mat = r0 ? r0.materiale : (i.materiale || 'FERRO'), m = n.materiale(mat); if (m.tipo !== 'ROH') throw Error('Le offerte si chiedono per le materie prime (ROH).');
+    var mat = r0 ? r0.materiale : (i.materiale || 'FERRO'), m = n.materiale(mat); if (m.tipo !== 'ROH' && m.tipo !== 'HAWA') throw Error('Le offerte si chiedono per le materie prime (ROH) o le merci (HAWA).');
     var q = r0 && (i.qta == null || i.qta === '') ? r0.qta : L.num(i.qta, 'Quantità', 1);
     var cons = i.consegna ? n.data(i.consegna) : (r0 ? r0.consegna : piuGiorni(data, 15)); if (cons < data) throw Error('La consegna richiesta non può precedere la richiesta di offerta.');
     var scelti = Object.keys(S().fornitori).filter(function (f) { return vero(i['f_' + f]); });

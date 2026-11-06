@@ -1,0 +1,5235 @@
+{
+  "lab": "erp",
+  "versioneErp": 1,
+  "societa": "1000 Pixel & Bit S.r.l.",
+  "areaVendite": "1000 / 10 / 00",
+  "pianoDeiConti": [
+    {
+      "codice": "10",
+      "nome": "Banca c/c",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "10.02",
+      "nome": "Banca c/c secondaria (simulata)",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "11",
+      "nome": "Crediti verso clienti",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "13",
+      "nome": "Magazzino merci",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "19",
+      "nome": "Acconti da clienti (CoGe speciale A)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "21",
+      "nome": "IVA a debito",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "26",
+      "nome": "Debiti verso agenti (provvigioni maturate)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "30",
+      "nome": "Capitale e riserve",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "40",
+      "nome": "Ricavi di vendita merci",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "47",
+      "nome": "Sconti su vendite (K007, ZSCA)",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "48",
+      "nome": "Ricavi per trasporti addebitati (KF00)",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "49",
+      "nome": "Resi e abbuoni su vendite",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "41",
+      "nome": "Costo del venduto (merci vendute)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "57",
+      "nome": "Provvigioni passive",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "12",
+      "nome": "Magazzino ferro (materie prime)",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "14",
+      "nome": "IVA a credito",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "20",
+      "nome": "Debiti verso fornitori",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "22",
+      "nome": "Fatture da ricevere (conto WE/RE)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "42",
+      "nome": "Differenze di prezzo sul venduto (Material Ledger)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "61",
+      "nome": "Varianze di produzione (liquidazione ordini)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "63",
+      "nome": "Differenze prezzo materiali (PRD)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "64",
+      "nome": "Rivalutazione magazzino per nuovo costo standard",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "70",
+      "nome": "Consumi di materie prime",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "72",
+      "nome": "Attività addebitate agli ordini (costi secondari)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "78",
+      "nome": "Sovraccosti addebitati agli ordini",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "73",
+      "nome": "Output di produzione (accredito ordini)",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "75",
+      "nome": "Attività accreditate dai centri di costo",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "76",
+      "nome": "Sovraccosti accreditati ai centri di costo",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "65",
+      "nome": "Differenze inventariali di magazzino",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "18",
+      "nome": "Banca c/transito pagamenti (F110)",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "16",
+      "nome": "Rettifiche di valutazione su partite in valuta",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "24",
+      "nome": "Debiti verso INAIL",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "27",
+      "nome": "Debiti verso dipendenti (retribuzioni nette)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "28",
+      "nome": "Debiti verso INPS",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "29",
+      "nome": "Erario c/ritenute (IRPEF e addizionali)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "31",
+      "nome": "Fondo TFR",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "44",
+      "nome": "Ricavi per servizi",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "54",
+      "nome": "Consulenze e servizi",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "58",
+      "nome": "Commissioni e spese bancarie",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "59",
+      "nome": "Interessi attivi bancari",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "66",
+      "nome": "Utili su cambi",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "67",
+      "nome": "Perdite su cambi",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "68",
+      "nome": "Differenze cambio da valutazione",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "01",
+      "nome": "Impianti e macchinari",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "02",
+      "nome": "Fondo ammortamento impianti e macchinari",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "03",
+      "nome": "Mezzi di movimentazione interna",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "04",
+      "nome": "Fondo ammortamento mezzi di movimentazione",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "15",
+      "nome": "Crediti verso factor",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "23",
+      "nome": "Erario c/IRES",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "25",
+      "nome": "Erario c/IVA",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "32",
+      "nome": "Utile (perdita) d'esercizio",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "17",
+      "nome": "Crediti per imposte anticipate",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "35",
+      "nome": "Erario c/IRAP",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "52",
+      "nome": "IRAP corrente",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "51",
+      "nome": "Imposte anticipate (−) e differite (+)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "33",
+      "nome": "Riserva legale",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "36",
+      "nome": "Banca c/anticipi salvo buon fine (RiBa)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "37",
+      "nome": "Debiti verso factor (pro solvendo)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "45",
+      "nome": "Plusvalenze da cessione cespiti",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "46",
+      "nome": "Minusvalenze da cessione cespiti",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "50",
+      "nome": "Ammortamenti",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "53",
+      "nome": "Interessi su IVA trimestrale",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "55",
+      "nome": "Oneri su cessione crediti (factoring)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "56",
+      "nome": "IRES corrente",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "90",
+      "nome": "Conto economico (epilogo)",
+      "tipo": "CHIUSURA"
+    },
+    {
+      "codice": "91",
+      "nome": "Stato patrimoniale finale",
+      "tipo": "CHIUSURA"
+    },
+    {
+      "codice": "92",
+      "nome": "Stato patrimoniale iniziale",
+      "tipo": "CHIUSURA"
+    },
+    {
+      "codice": "08",
+      "nome": "Crediti verso soci per versamenti ancora dovuti",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "07",
+      "nome": "Magazzino semilavorati",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "71",
+      "nome": "Consumi di semilavorati",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "38",
+      "nome": "Banca c/anticipi su fatture",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "60",
+      "nome": "Interessi passivi bancari",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "83",
+      "nome": "Assicurazioni",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "86",
+      "nome": "Fitti passivi",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "09",
+      "nome": "Crediti verso compagnie di assicurazione",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "84",
+      "nome": "Sopravvenienze attive",
+      "tipo": "RICAVO"
+    },
+    {
+      "codice": "05",
+      "nome": "Ratei attivi",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "06",
+      "nome": "Risconti attivi",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "39",
+      "nome": "Ratei passivi",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "34",
+      "nome": "Risconti passivi",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "69",
+      "nome": "Rottamazioni e merce danneggiata",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "80",
+      "nome": "Salari e stipendi",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "81",
+      "nome": "Oneri sociali",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "82",
+      "nome": "Trattamento di fine rapporto",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "11.10",
+      "nome": "Cambiali attive (effetti in portafoglio)",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "11.20",
+      "nome": "Crediti insoluti (cambiali protestate)",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "11.30",
+      "nome": "Assegni ricevuti da versare",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "11.90",
+      "nome": "Fondo svalutazione crediti",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "18.10",
+      "nome": "Assegni emessi in circolazione",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "20.10",
+      "nome": "Cambiali passive",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "29.10",
+      "nome": "Erario c/ritenute lavoro autonomo (cod. 1040)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "37.10",
+      "nome": "Mutui passivi (debiti verso banche)",
+      "tipo": "PASSIVO"
+    },
+    {
+      "codice": "62",
+      "nome": "Perdite su crediti",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "74",
+      "nome": "Interessi passivi su mutui",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "87",
+      "nome": "Imposta di bollo",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "88",
+      "nome": "Canoni di leasing",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "89",
+      "nome": "Svalutazione crediti",
+      "tipo": "COSTO"
+    }
+  ],
+  "registrazioni": [
+    {
+      "id": 1,
+      "numero": "100000001",
+      "data": "2026-09-01",
+      "tipo": "COSTITUZIONE",
+      "descrizione": "Costituzione di 1000 Pixel & Bit S.r.l.: i soci sottoscrivono il capitale sociale di 20.000,00 €",
+      "righe": [
+        {
+          "conto": "08",
+          "dareAvere": "DARE",
+          "importo": 20000,
+          "partner": "",
+          "testo": "capitale sottoscritto e non ancora versato"
+        },
+        {
+          "conto": "30",
+          "dareAvere": "AVERE",
+          "importo": 20000,
+          "partner": "",
+          "testo": "capitale sociale"
+        }
+      ],
+      "rif": "COSTITUZIONE"
+    },
+    {
+      "id": 2,
+      "numero": "100000002",
+      "data": "2026-09-01",
+      "tipo": "VERSAMENTO_SOCI",
+      "descrizione": "Versamento dei soci sul conto corrente della società: 20.000,00 € del capitale sottoscritto",
+      "righe": [
+        {
+          "conto": "10",
+          "dareAvere": "DARE",
+          "importo": 20000,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "08",
+          "dareAvere": "AVERE",
+          "importo": 20000,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "VERSAMENTO CAPITALE"
+    },
+    {
+      "id": 3,
+      "numero": "100000003",
+      "data": "2026-09-04",
+      "tipo": "ENTRATA_ACQUISTO",
+      "descrizione": "MIGO 101 doc. 5000000001 — entrata 10 pz PC-UFF lotto L4500000001 da ordine 4500000001",
+      "righe": [
+        {
+          "conto": "13",
+          "dareAvere": "DARE",
+          "importo": 4500,
+          "partner": "",
+          "testo": "a standard 450,00"
+        },
+        {
+          "conto": "22",
+          "dareAvere": "AVERE",
+          "importo": 4500,
+          "partner": "F100",
+          "testo": "WE/RE al prezzo d'ordine"
+        }
+      ],
+      "rif": "5000000001"
+    },
+    {
+      "id": 4,
+      "numero": "100000004",
+      "data": "2026-09-04",
+      "tipo": "ENTRATA_ACQUISTO",
+      "descrizione": "MIGO 101 doc. 5000000002 — entrata 6 pz STAMP-LAS lotto L4500000002 da ordine 4500000002",
+      "righe": [
+        {
+          "conto": "13",
+          "dareAvere": "DARE",
+          "importo": 720,
+          "partner": "",
+          "testo": "a standard 120,00"
+        },
+        {
+          "conto": "22",
+          "dareAvere": "AVERE",
+          "importo": 720,
+          "partner": "F200",
+          "testo": "WE/RE al prezzo d'ordine"
+        }
+      ],
+      "rif": "5000000002"
+    },
+    {
+      "id": 5,
+      "numero": "100000005",
+      "data": "2026-09-04",
+      "tipo": "ENTRATA_ACQUISTO",
+      "descrizione": "MIGO 101 doc. 5000000003 — entrata 10 pz MON-24 lotto L4500000003 da ordine 4500000003",
+      "righe": [
+        {
+          "conto": "13",
+          "dareAvere": "DARE",
+          "importo": 950,
+          "partner": "",
+          "testo": "a standard 95,00"
+        },
+        {
+          "conto": "22",
+          "dareAvere": "AVERE",
+          "importo": 950,
+          "partner": "F300",
+          "testo": "WE/RE al prezzo d'ordine"
+        }
+      ],
+      "rif": "5000000003"
+    },
+    {
+      "id": 6,
+      "numero": "100000006",
+      "data": "2026-09-04",
+      "tipo": "ENTRATA_ACQUISTO",
+      "descrizione": "MIGO 101 doc. 5000000004 — entrata 30 pz MOUSE lotto L4500000004 da ordine 4500000004",
+      "righe": [
+        {
+          "conto": "13",
+          "dareAvere": "DARE",
+          "importo": 180,
+          "partner": "",
+          "testo": "a standard 6,00"
+        },
+        {
+          "conto": "22",
+          "dareAvere": "AVERE",
+          "importo": 180,
+          "partner": "F400",
+          "testo": "WE/RE al prezzo d'ordine"
+        }
+      ],
+      "rif": "5000000004"
+    },
+    {
+      "id": 7,
+      "numero": "100000007",
+      "data": "2026-09-04",
+      "tipo": "ENTRATA_ACQUISTO",
+      "descrizione": "MIGO 101 doc. 5000000005 — entrata 40 pz CAVO-HDMI lotto L4500000005 da ordine 4500000005",
+      "righe": [
+        {
+          "conto": "13",
+          "dareAvere": "DARE",
+          "importo": 120,
+          "partner": "",
+          "testo": "a standard 3,00"
+        },
+        {
+          "conto": "22",
+          "dareAvere": "AVERE",
+          "importo": 120,
+          "partner": "F400",
+          "testo": "WE/RE al prezzo d'ordine"
+        }
+      ],
+      "rif": "5000000005"
+    },
+    {
+      "id": 8,
+      "numero": "100000008",
+      "data": "2026-09-07",
+      "tipo": "FATTURA_FORNITORE",
+      "descrizione": "MIRO 5105600001 — fattura DPC-2026-1520 di Distribuzione PC Italia Spa su ordine 4500000001",
+      "righe": [
+        {
+          "conto": "22",
+          "dareAvere": "DARE",
+          "importo": 4500,
+          "partner": "F100",
+          "testo": ""
+        },
+        {
+          "conto": "14",
+          "dareAvere": "DARE",
+          "importo": 990,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "20",
+          "dareAvere": "AVERE",
+          "importo": 5490,
+          "partner": "F100",
+          "testo": ""
+        }
+      ],
+      "rif": "5105600001"
+    },
+    {
+      "id": 9,
+      "numero": "100000009",
+      "data": "2026-09-07",
+      "tipo": "FATTURA_FORNITORE",
+      "descrizione": "MIRO 5105600002 — fattura SF-0931 di Stampa Facile Srl su ordine 4500000002",
+      "righe": [
+        {
+          "conto": "22",
+          "dareAvere": "DARE",
+          "importo": 720,
+          "partner": "F200",
+          "testo": ""
+        },
+        {
+          "conto": "14",
+          "dareAvere": "DARE",
+          "importo": 158.4,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "20",
+          "dareAvere": "AVERE",
+          "importo": 878.4,
+          "partner": "F200",
+          "testo": ""
+        }
+      ],
+      "rif": "5105600002"
+    },
+    {
+      "id": 10,
+      "numero": "100000010",
+      "data": "2026-09-07",
+      "tipo": "FATTURA_FORNITORE",
+      "descrizione": "MIRO 5105600003 — fattura VS-4410 di Video Schermi Srl su ordine 4500000003",
+      "righe": [
+        {
+          "conto": "22",
+          "dareAvere": "DARE",
+          "importo": 950,
+          "partner": "F300",
+          "testo": ""
+        },
+        {
+          "conto": "14",
+          "dareAvere": "DARE",
+          "importo": 209,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "20",
+          "dareAvere": "AVERE",
+          "importo": 1159,
+          "partner": "F300",
+          "testo": ""
+        }
+      ],
+      "rif": "5105600003"
+    },
+    {
+      "id": 11,
+      "numero": "100000011",
+      "data": "2026-09-07",
+      "tipo": "FATTURA_FORNITORE",
+      "descrizione": "MIRO 5105600004 — fattura AD-301 di Accessori Digitali Srl su ordine 4500000004",
+      "righe": [
+        {
+          "conto": "22",
+          "dareAvere": "DARE",
+          "importo": 180,
+          "partner": "F400",
+          "testo": ""
+        },
+        {
+          "conto": "14",
+          "dareAvere": "DARE",
+          "importo": 39.6,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "20",
+          "dareAvere": "AVERE",
+          "importo": 219.6,
+          "partner": "F400",
+          "testo": ""
+        }
+      ],
+      "rif": "5105600004"
+    },
+    {
+      "id": 12,
+      "numero": "100000012",
+      "data": "2026-09-07",
+      "tipo": "FATTURA_FORNITORE",
+      "descrizione": "MIRO 5105600005 — fattura AD-302 di Accessori Digitali Srl su ordine 4500000005",
+      "righe": [
+        {
+          "conto": "22",
+          "dareAvere": "DARE",
+          "importo": 120,
+          "partner": "F400",
+          "testo": ""
+        },
+        {
+          "conto": "14",
+          "dareAvere": "DARE",
+          "importo": 26.4,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "20",
+          "dareAvere": "AVERE",
+          "importo": 146.4,
+          "partner": "F400",
+          "testo": ""
+        }
+      ],
+      "rif": "5105600005"
+    },
+    {
+      "id": 13,
+      "numero": "100000013",
+      "data": "2026-09-14",
+      "tipo": "USCITA_MERCI",
+      "descrizione": "Consegna 80000001 — uscita merci 601 4 pz PC-UFF dalla zona di spedizione (ordine 10000001)",
+      "righe": [
+        {
+          "conto": "41",
+          "dareAvere": "DARE",
+          "importo": 1800,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "13",
+          "dareAvere": "AVERE",
+          "importo": 1800,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "80000001"
+    },
+    {
+      "id": 14,
+      "numero": "100000014",
+      "data": "2026-09-14",
+      "tipo": "USCITA_MERCI",
+      "descrizione": "Consegna 80000002 — uscita merci 601 4 pz MON-24 dalla zona di spedizione (ordine 10000002)",
+      "righe": [
+        {
+          "conto": "41",
+          "dareAvere": "DARE",
+          "importo": 380,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "13",
+          "dareAvere": "AVERE",
+          "importo": 380,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "80000002"
+    },
+    {
+      "id": 15,
+      "numero": "100000015",
+      "data": "2026-09-14",
+      "tipo": "USCITA_MERCI",
+      "descrizione": "Consegna 80000003 — uscita merci 601 4 pz MOUSE dalla zona di spedizione (ordine 10000003)",
+      "righe": [
+        {
+          "conto": "41",
+          "dareAvere": "DARE",
+          "importo": 24,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "13",
+          "dareAvere": "AVERE",
+          "importo": 24,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "80000003"
+    },
+    {
+      "id": 16,
+      "numero": "100000016",
+      "data": "2026-09-14",
+      "tipo": "USCITA_MERCI",
+      "descrizione": "Consegna 80000004 — uscita merci 601 3 pz STAMP-LAS dalla zona di spedizione (ordine 10000004)",
+      "righe": [
+        {
+          "conto": "41",
+          "dareAvere": "DARE",
+          "importo": 360,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "13",
+          "dareAvere": "AVERE",
+          "importo": 360,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "80000004"
+    },
+    {
+      "id": 17,
+      "numero": "100000017",
+      "data": "2026-09-14",
+      "tipo": "USCITA_MERCI",
+      "descrizione": "Consegna 80000005 — uscita merci 601 15 pz CAVO-HDMI dalla zona di spedizione (ordine 10000005)",
+      "righe": [
+        {
+          "conto": "41",
+          "dareAvere": "DARE",
+          "importo": 45,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "13",
+          "dareAvere": "AVERE",
+          "importo": 45,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "80000005"
+    },
+    {
+      "id": 18,
+      "numero": "100000018",
+      "data": "2026-09-15",
+      "tipo": "FATTURA",
+      "descrizione": "Fattura 90000001 (F2) — Studio Commerciale Aurora — 4 pz PC-UFF",
+      "righe": [
+        {
+          "conto": "11",
+          "dareAvere": "DARE",
+          "importo": 3367.2,
+          "partner": "C100",
+          "testo": ""
+        },
+        {
+          "conto": "40",
+          "dareAvere": "AVERE",
+          "importo": 2760,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "21",
+          "dareAvere": "AVERE",
+          "importo": 607.2,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "90000001"
+    },
+    {
+      "id": 19,
+      "numero": "100000019",
+      "data": "2026-09-15",
+      "tipo": "FATTURA",
+      "descrizione": "Fattura 90000002 (F2) — Studio Commerciale Aurora — 4 pz MON-24",
+      "righe": [
+        {
+          "conto": "11",
+          "dareAvere": "DARE",
+          "importo": 727.12,
+          "partner": "C100",
+          "testo": ""
+        },
+        {
+          "conto": "40",
+          "dareAvere": "AVERE",
+          "importo": 596,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "21",
+          "dareAvere": "AVERE",
+          "importo": 131.12,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "90000002"
+    },
+    {
+      "id": 20,
+      "numero": "100000020",
+      "data": "2026-09-15",
+      "tipo": "FATTURA",
+      "descrizione": "Fattura 90000003 (F2) — Studio Commerciale Aurora — 4 pz MOUSE",
+      "righe": [
+        {
+          "conto": "11",
+          "dareAvere": "DARE",
+          "importo": 68.32,
+          "partner": "C100",
+          "testo": ""
+        },
+        {
+          "conto": "40",
+          "dareAvere": "AVERE",
+          "importo": 56,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "21",
+          "dareAvere": "AVERE",
+          "importo": 12.32,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "90000003"
+    },
+    {
+      "id": 21,
+      "numero": "100000021",
+      "data": "2026-09-15",
+      "tipo": "FATTURA",
+      "descrizione": "Fattura 90000004 (F2) — Agenzia Viaggi Girasole Srl — 3 pz STAMP-LAS",
+      "righe": [
+        {
+          "conto": "11",
+          "dareAvere": "DARE",
+          "importo": 691.74,
+          "partner": "C200",
+          "testo": ""
+        },
+        {
+          "conto": "40",
+          "dareAvere": "AVERE",
+          "importo": 567,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "21",
+          "dareAvere": "AVERE",
+          "importo": 124.74,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "90000004"
+    },
+    {
+      "id": 22,
+      "numero": "100000022",
+      "data": "2026-09-15",
+      "tipo": "FATTURA",
+      "descrizione": "Fattura 90000005 (F2) — Agenzia Viaggi Girasole Srl — 15 pz CAVO-HDMI",
+      "righe": [
+        {
+          "conto": "11",
+          "dareAvere": "DARE",
+          "importo": 164.7,
+          "partner": "C200",
+          "testo": ""
+        },
+        {
+          "conto": "40",
+          "dareAvere": "AVERE",
+          "importo": 135,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "21",
+          "dareAvere": "AVERE",
+          "importo": 29.7,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "90000005"
+    },
+    {
+      "id": 23,
+      "numero": "100000023",
+      "data": "2026-09-30",
+      "tipo": "PAGHE",
+      "descrizione": "PC00_M99_CIPE: paga di 2026-09 — 1 dipendenti",
+      "righe": [
+        {
+          "conto": "80",
+          "dareAvere": "DARE",
+          "importo": 1800,
+          "partner": "",
+          "testo": "Chiara Fontana · CdC 4300",
+          "cdc": "4300"
+        },
+        {
+          "conto": "81",
+          "dareAvere": "DARE",
+          "importo": 559.44,
+          "partner": "",
+          "testo": "INPS ditta + INAIL · CdC 4300",
+          "cdc": "4300"
+        },
+        {
+          "conto": "82",
+          "dareAvere": "DARE",
+          "importo": 133.33,
+          "partner": "",
+          "testo": "TFR · CdC 4300",
+          "cdc": "4300"
+        },
+        {
+          "conto": "27",
+          "dareAvere": "AVERE",
+          "importo": 1552.62,
+          "partner": "",
+          "testo": "netti in busta"
+        },
+        {
+          "conto": "28",
+          "dareAvere": "AVERE",
+          "importo": 706.86,
+          "partner": "",
+          "testo": "INPS dipendente + ditta + 0,50%"
+        },
+        {
+          "conto": "24",
+          "dareAvere": "AVERE",
+          "importo": 27,
+          "partner": "",
+          "testo": "INAIL (autoliquidazione)"
+        },
+        {
+          "conto": "29",
+          "dareAvere": "AVERE",
+          "importo": 81.96,
+          "partner": "",
+          "testo": "IRPEF e addizionali trattenute"
+        },
+        {
+          "conto": "31",
+          "dareAvere": "AVERE",
+          "importo": 124.33,
+          "partner": "",
+          "testo": "quota TFR dell'anno"
+        }
+      ],
+      "rif": "PAGHE 2026-09"
+    },
+    {
+      "id": 24,
+      "numero": "100000024",
+      "data": "2026-09-30",
+      "tipo": "PAGAMENTO_STIPENDI",
+      "descrizione": "Bonifici degli stipendi di 2026-09 (1 dipendenti)",
+      "righe": [
+        {
+          "conto": "27",
+          "dareAvere": "DARE",
+          "importo": 1552.62,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 1552.62,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "STIPENDI 2026-09"
+    },
+    {
+      "id": 25,
+      "numero": "100000025",
+      "data": "2026-09-30",
+      "tipo": "PAGAMENTO_FORNITORE",
+      "descrizione": "F-53 bonifico a Distribuzione PC Italia Spa: 5490,00 €",
+      "righe": [
+        {
+          "conto": "20",
+          "dareAvere": "DARE",
+          "importo": 5490,
+          "partner": "F100",
+          "testo": "pagamento debiti aperti"
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 5490,
+          "partner": "",
+          "testo": "bonifico Distribuzione PC Italia Spa"
+        }
+      ],
+      "rif": "F-53 F100"
+    },
+    {
+      "id": 26,
+      "numero": "100000026",
+      "data": "2026-09-30",
+      "tipo": "PAGAMENTO_FORNITORE",
+      "descrizione": "F-53 bonifico a Stampa Facile Srl: 878,40 €",
+      "righe": [
+        {
+          "conto": "20",
+          "dareAvere": "DARE",
+          "importo": 878.4,
+          "partner": "F200",
+          "testo": "pagamento debiti aperti"
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 878.4,
+          "partner": "",
+          "testo": "bonifico Stampa Facile Srl"
+        }
+      ],
+      "rif": "F-53 F200"
+    },
+    {
+      "id": 27,
+      "numero": "100000027",
+      "data": "2026-09-30",
+      "tipo": "PAGAMENTO_FORNITORE",
+      "descrizione": "F-53 bonifico a Video Schermi Srl: 1159,00 €",
+      "righe": [
+        {
+          "conto": "20",
+          "dareAvere": "DARE",
+          "importo": 1159,
+          "partner": "F300",
+          "testo": "pagamento debiti aperti"
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 1159,
+          "partner": "",
+          "testo": "bonifico Video Schermi Srl"
+        }
+      ],
+      "rif": "F-53 F300"
+    },
+    {
+      "id": 28,
+      "numero": "100000028",
+      "data": "2026-09-30",
+      "tipo": "PAGAMENTO_FORNITORE",
+      "descrizione": "F-53 bonifico a Accessori Digitali Srl: 366,00 €",
+      "righe": [
+        {
+          "conto": "20",
+          "dareAvere": "DARE",
+          "importo": 366,
+          "partner": "F400",
+          "testo": "pagamento debiti aperti"
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 366,
+          "partner": "",
+          "testo": "bonifico Accessori Digitali Srl"
+        }
+      ],
+      "rif": "F-53 F400"
+    },
+    {
+      "id": 29,
+      "numero": "100000029",
+      "data": "2026-09-30",
+      "tipo": "INCASSO",
+      "descrizione": "Incasso (F-28) Studio Commerciale Aurora — SALDO FATTURE AURORA",
+      "righe": [
+        {
+          "conto": "10",
+          "dareAvere": "DARE",
+          "importo": 4162.64,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "11",
+          "dareAvere": "AVERE",
+          "importo": 4162.64,
+          "partner": "C100",
+          "testo": ""
+        }
+      ],
+      "rif": "SALDO FATTURE AURORA"
+    },
+    {
+      "id": 30,
+      "numero": "100000030",
+      "data": "2026-09-30",
+      "tipo": "INCASSO",
+      "descrizione": "Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO FATTURE GIRASOLE",
+      "righe": [
+        {
+          "conto": "10",
+          "dareAvere": "DARE",
+          "importo": 856.44,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "11",
+          "dareAvere": "AVERE",
+          "importo": 856.44,
+          "partner": "C200",
+          "testo": ""
+        }
+      ],
+      "rif": "SALDO FATTURE GIRASOLE"
+    },
+    {
+      "id": 31,
+      "numero": "100000031",
+      "data": "2026-09-30",
+      "tipo": "LIQUIDAZIONE_IVA",
+      "descrizione": "Liquidazione IVA 2026-09: a debito 905,08, a credito 1423,40 → credito da riportare 518,32",
+      "righe": [
+        {
+          "conto": "21",
+          "dareAvere": "DARE",
+          "importo": 905.08,
+          "partner": "",
+          "testo": "IVA a debito 2026-09"
+        },
+        {
+          "conto": "14",
+          "dareAvere": "AVERE",
+          "importo": 1423.4,
+          "partner": "",
+          "testo": "IVA a credito 2026-09"
+        },
+        {
+          "conto": "25",
+          "dareAvere": "DARE",
+          "importo": 518.32,
+          "partner": "",
+          "testo": "Erario c/IVA: IVA a credito del periodo, da riportare"
+        }
+      ],
+      "rif": "IVA 2026-09"
+    },
+    {
+      "id": 32,
+      "numero": "100000032",
+      "data": "2026-10-16",
+      "tipo": "F24",
+      "descrizione": "F24 del 16/10/2026 per le paghe di 2026-09: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86",
+      "righe": [
+        {
+          "conto": "29",
+          "dareAvere": "DARE",
+          "importo": 81.96,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "28",
+          "dareAvere": "DARE",
+          "importo": 706.86,
+          "partner": "",
+          "testo": ""
+        },
+        {
+          "conto": "10",
+          "dareAvere": "AVERE",
+          "importo": 788.82,
+          "partner": "",
+          "testo": ""
+        }
+      ],
+      "rif": "F24 2026-09"
+    }
+  ],
+  "prossimoIdRegistrazione": 33,
+  "numeri": {
+    "ordine": 10000005,
+    "consegna": 80000005,
+    "fattura": 90000005,
+    "contabile": 100000032,
+    "reso": 60000000,
+    "richiesta": 70000000,
+    "acquisto": 4500000005,
+    "materiale": 5000000005,
+    "fatturaFornitore": 5105600005,
+    "produzione": 1000000,
+    "compito": 100010,
+    "udc": 1000005,
+    "inventario": 0,
+    "sscc": 0,
+    "trasporto": 1000,
+    "ddt": 0,
+    "estratto": 0,
+    "pagamento": 0,
+    "cedolino": 1,
+    "rda": 10000000,
+    "rfq": 6000000000,
+    "seriale": 0,
+    "cespite": 0,
+    "riba": 0,
+    "factoring": 0,
+    "fatturaServizi": 0,
+    "cambiale": 0,
+    "assegno": 0,
+    "mutuo": 0,
+    "leasing": 0
+  },
+  "materiali": {
+    "PC-UFF": {
+      "nome": "PC desktop da ufficio",
+      "tipo": "HAWA",
+      "um": "pz",
+      "std": 450,
+      "peso": 9,
+      "prezzo": 690
+    },
+    "STAMP-LAS": {
+      "nome": "Stampante laser",
+      "tipo": "HAWA",
+      "um": "pz",
+      "std": 120,
+      "peso": 7,
+      "prezzo": 189
+    },
+    "MON-24": {
+      "nome": "Monitor 24 pollici",
+      "tipo": "HAWA",
+      "um": "pz",
+      "std": 95,
+      "peso": 5,
+      "prezzo": 149
+    },
+    "MOUSE": {
+      "nome": "Mouse ottico USB",
+      "tipo": "HAWA",
+      "um": "pz",
+      "std": 6,
+      "peso": 0.1,
+      "prezzo": 14
+    },
+    "CAVO-HDMI": {
+      "nome": "Cavo HDMI 2 m",
+      "tipo": "HAWA",
+      "um": "pz",
+      "std": 3,
+      "peso": 0.1,
+      "prezzo": 9
+    }
+  },
+  "clienti": {
+    "C100": {
+      "nome": "Studio Commerciale Aurora",
+      "regione": "Umbria",
+      "canale": "10 Studi professionali",
+      "gruppo": "Professionisti",
+      "pagamento": "30 gg",
+      "fido": 15000,
+      "rischio": "A"
+    },
+    "C200": {
+      "nome": "Agenzia Viaggi Girasole Srl",
+      "regione": "Umbria",
+      "canale": "20 Piccole imprese",
+      "gruppo": "Imprese",
+      "pagamento": "30 gg",
+      "fido": 10000,
+      "rischio": "B"
+    }
+  },
+  "giacenze": {
+    "PC-UFF": 6,
+    "STAMP-LAS": 3,
+    "MON-24": 6,
+    "MOUSE": 26,
+    "CAVO-HDMI": 25
+  },
+  "movimenti": [
+    {
+      "data": "2026-09-04",
+      "mat": "PC-UFF",
+      "qta": 10,
+      "tipo": "101",
+      "rif": "4500000001",
+      "lotti": [
+        {
+          "lotto": "L4500000001",
+          "qta": 10
+        }
+      ]
+    },
+    {
+      "data": "2026-09-04",
+      "mat": "STAMP-LAS",
+      "qta": 6,
+      "tipo": "101",
+      "rif": "4500000002",
+      "lotti": [
+        {
+          "lotto": "L4500000002",
+          "qta": 6
+        }
+      ]
+    },
+    {
+      "data": "2026-09-04",
+      "mat": "MON-24",
+      "qta": 10,
+      "tipo": "101",
+      "rif": "4500000003",
+      "lotti": [
+        {
+          "lotto": "L4500000003",
+          "qta": 10
+        }
+      ]
+    },
+    {
+      "data": "2026-09-04",
+      "mat": "MOUSE",
+      "qta": 30,
+      "tipo": "101",
+      "rif": "4500000004",
+      "lotti": [
+        {
+          "lotto": "L4500000004",
+          "qta": 30
+        }
+      ]
+    },
+    {
+      "data": "2026-09-04",
+      "mat": "CAVO-HDMI",
+      "qta": 40,
+      "tipo": "101",
+      "rif": "4500000005",
+      "lotti": [
+        {
+          "lotto": "L4500000005",
+          "qta": 40
+        }
+      ]
+    },
+    {
+      "data": "2026-09-14",
+      "mat": "PC-UFF",
+      "qta": -4,
+      "tipo": "601",
+      "rif": "10000001",
+      "lotti": [
+        {
+          "lotto": "L4500000001",
+          "qta": 4
+        }
+      ]
+    },
+    {
+      "data": "2026-09-14",
+      "mat": "MON-24",
+      "qta": -4,
+      "tipo": "601",
+      "rif": "10000002",
+      "lotti": [
+        {
+          "lotto": "L4500000003",
+          "qta": 4
+        }
+      ]
+    },
+    {
+      "data": "2026-09-14",
+      "mat": "MOUSE",
+      "qta": -4,
+      "tipo": "601",
+      "rif": "10000003",
+      "lotti": [
+        {
+          "lotto": "L4500000004",
+          "qta": 4
+        }
+      ]
+    },
+    {
+      "data": "2026-09-14",
+      "mat": "STAMP-LAS",
+      "qta": -3,
+      "tipo": "601",
+      "rif": "10000004",
+      "lotti": [
+        {
+          "lotto": "L4500000002",
+          "qta": 3
+        }
+      ]
+    },
+    {
+      "data": "2026-09-14",
+      "mat": "CAVO-HDMI",
+      "qta": -15,
+      "tipo": "601",
+      "rif": "10000005",
+      "lotti": [
+        {
+          "lotto": "L4500000005",
+          "qta": 15
+        }
+      ]
+    }
+  ],
+  "condizioni": [
+    {
+      "tipo": "PR00",
+      "chiave": "materiale",
+      "materiale": "PC-UFF",
+      "valore": 690,
+      "origine": "listino"
+    },
+    {
+      "tipo": "PR00",
+      "chiave": "materiale",
+      "materiale": "STAMP-LAS",
+      "valore": 189,
+      "origine": "listino"
+    },
+    {
+      "tipo": "PR00",
+      "chiave": "materiale",
+      "materiale": "MON-24",
+      "valore": 149,
+      "origine": "listino"
+    },
+    {
+      "tipo": "PR00",
+      "chiave": "materiale",
+      "materiale": "MOUSE",
+      "valore": 14,
+      "origine": "listino"
+    },
+    {
+      "tipo": "PR00",
+      "chiave": "materiale",
+      "materiale": "CAVO-HDMI",
+      "valore": 9,
+      "origine": "listino"
+    }
+  ],
+  "ordini": [
+    {
+      "numero": "10000001",
+      "tipo": "OR",
+      "data": "2026-09-10",
+      "cliente": "C100",
+      "materiale": "PC-UFF",
+      "qta": 4,
+      "rif": "AURORA-PC",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 690,
+        "prezzoDa": "materiale",
+        "lordo": 2760,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 2760,
+        "ivaPerc": 22,
+        "iva": 607.2,
+        "totale": 3367.2,
+        "costo": 1800,
+        "margine": 960,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 690,00"
+          }
+        ]
+      },
+      "consegnato": 4,
+      "fatturato": 4,
+      "consegnaRichiesta": "2026-09-15",
+      "confermata": 4,
+      "atp": {
+        "giacenza": 10,
+        "inConsegna": 0,
+        "riservato": 0,
+        "disponibile": 10
+      },
+      "credito": {
+        "stato": "A",
+        "esposizione": 3367.2,
+        "fido": 15000
+      }
+    },
+    {
+      "numero": "10000002",
+      "tipo": "OR",
+      "data": "2026-09-10",
+      "cliente": "C100",
+      "materiale": "MON-24",
+      "qta": 4,
+      "rif": "AURORA-MON",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 149,
+        "prezzoDa": "materiale",
+        "lordo": 596,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 596,
+        "ivaPerc": 22,
+        "iva": 131.12,
+        "totale": 727.12,
+        "costo": 380,
+        "margine": 216,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 149,00"
+          }
+        ]
+      },
+      "consegnato": 4,
+      "fatturato": 4,
+      "consegnaRichiesta": "2026-09-15",
+      "confermata": 4,
+      "atp": {
+        "giacenza": 10,
+        "inConsegna": 0,
+        "riservato": 0,
+        "disponibile": 10
+      },
+      "credito": {
+        "stato": "A",
+        "esposizione": 4094.32,
+        "fido": 15000
+      }
+    },
+    {
+      "numero": "10000003",
+      "tipo": "OR",
+      "data": "2026-09-10",
+      "cliente": "C100",
+      "materiale": "MOUSE",
+      "qta": 4,
+      "rif": "AURORA-MOUSE",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 14,
+        "prezzoDa": "materiale",
+        "lordo": 56,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 56,
+        "ivaPerc": 22,
+        "iva": 12.32,
+        "totale": 68.32,
+        "costo": 24,
+        "margine": 32,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 14,00"
+          }
+        ]
+      },
+      "consegnato": 4,
+      "fatturato": 4,
+      "consegnaRichiesta": "2026-09-15",
+      "confermata": 4,
+      "atp": {
+        "giacenza": 30,
+        "inConsegna": 0,
+        "riservato": 0,
+        "disponibile": 30
+      },
+      "credito": {
+        "stato": "A",
+        "esposizione": 4162.64,
+        "fido": 15000
+      }
+    },
+    {
+      "numero": "10000004",
+      "tipo": "OR",
+      "data": "2026-09-10",
+      "cliente": "C200",
+      "materiale": "STAMP-LAS",
+      "qta": 3,
+      "rif": "GIRASOLE-STAMP",
+      "prezzi": {
+        "qta": 3,
+        "prezzo": 189,
+        "prezzoDa": "materiale",
+        "lordo": 567,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 567,
+        "ivaPerc": 22,
+        "iva": 124.74,
+        "totale": 691.74,
+        "costo": 360,
+        "margine": 207,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 189,00"
+          }
+        ]
+      },
+      "consegnato": 3,
+      "fatturato": 3,
+      "consegnaRichiesta": "2026-09-15",
+      "confermata": 3,
+      "atp": {
+        "giacenza": 6,
+        "inConsegna": 0,
+        "riservato": 0,
+        "disponibile": 6
+      },
+      "credito": {
+        "stato": "A",
+        "esposizione": 691.74,
+        "fido": 10000
+      }
+    },
+    {
+      "numero": "10000005",
+      "tipo": "OR",
+      "data": "2026-09-10",
+      "cliente": "C200",
+      "materiale": "CAVO-HDMI",
+      "qta": 15,
+      "rif": "GIRASOLE-CAVI",
+      "prezzi": {
+        "qta": 15,
+        "prezzo": 9,
+        "prezzoDa": "materiale",
+        "lordo": 135,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 135,
+        "ivaPerc": 22,
+        "iva": 29.7,
+        "totale": 164.7,
+        "costo": 45,
+        "margine": 90,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 9,00"
+          }
+        ]
+      },
+      "consegnato": 15,
+      "fatturato": 15,
+      "consegnaRichiesta": "2026-09-15",
+      "confermata": 15,
+      "atp": {
+        "giacenza": 40,
+        "inConsegna": 0,
+        "riservato": 0,
+        "disponibile": 40
+      },
+      "credito": {
+        "stato": "A",
+        "esposizione": 856.44,
+        "fido": 10000
+      }
+    }
+  ],
+  "consegne": [
+    {
+      "numero": "80000001",
+      "tipo": "LF",
+      "ordine": "10000001",
+      "cliente": "C100",
+      "materiale": "PC-UFF",
+      "qta": 4,
+      "data": "2026-09-14",
+      "fatturata": true,
+      "pgi": "2026-09-14",
+      "wm": true,
+      "valore": 1800,
+      "lotti": [
+        {
+          "lotto": "L4500000001",
+          "qta": 4
+        }
+      ],
+      "seriali": null
+    },
+    {
+      "numero": "80000002",
+      "tipo": "LF",
+      "ordine": "10000002",
+      "cliente": "C100",
+      "materiale": "MON-24",
+      "qta": 4,
+      "data": "2026-09-14",
+      "fatturata": true,
+      "pgi": "2026-09-14",
+      "wm": true,
+      "valore": 380,
+      "lotti": [
+        {
+          "lotto": "L4500000003",
+          "qta": 4
+        }
+      ],
+      "seriali": null
+    },
+    {
+      "numero": "80000003",
+      "tipo": "LF",
+      "ordine": "10000003",
+      "cliente": "C100",
+      "materiale": "MOUSE",
+      "qta": 4,
+      "data": "2026-09-14",
+      "fatturata": true,
+      "pgi": "2026-09-14",
+      "wm": true,
+      "valore": 24,
+      "lotti": [
+        {
+          "lotto": "L4500000004",
+          "qta": 4
+        }
+      ],
+      "seriali": null
+    },
+    {
+      "numero": "80000004",
+      "tipo": "LF",
+      "ordine": "10000004",
+      "cliente": "C200",
+      "materiale": "STAMP-LAS",
+      "qta": 3,
+      "data": "2026-09-14",
+      "fatturata": true,
+      "pgi": "2026-09-14",
+      "wm": true,
+      "valore": 360,
+      "lotti": [
+        {
+          "lotto": "L4500000002",
+          "qta": 3
+        }
+      ],
+      "seriali": null
+    },
+    {
+      "numero": "80000005",
+      "tipo": "LF",
+      "ordine": "10000005",
+      "cliente": "C200",
+      "materiale": "CAVO-HDMI",
+      "qta": 15,
+      "data": "2026-09-14",
+      "fatturata": true,
+      "pgi": "2026-09-14",
+      "wm": true,
+      "valore": 45,
+      "lotti": [
+        {
+          "lotto": "L4500000005",
+          "qta": 15
+        }
+      ],
+      "seriali": null
+    }
+  ],
+  "fatture": [
+    {
+      "numero": "90000001",
+      "tipo": "F2",
+      "consegna": "80000001",
+      "ordine": "10000001",
+      "cliente": "C100",
+      "materiale": "PC-UFF",
+      "qta": 4,
+      "data": "2026-09-15",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 690,
+        "prezzoDa": "materiale",
+        "lordo": 2760,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 2760,
+        "ivaPerc": 22,
+        "iva": 607.2,
+        "totale": 3367.2,
+        "costo": 1800,
+        "margine": 960,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 690,00"
+          }
+        ]
+      },
+      "accontoDedotto": 0,
+      "iva": 607.2,
+      "totale": 3367.2,
+      "aperto": 3367.2,
+      "resi": 0,
+      "contabile": "100000018",
+      "sdi": {
+        "data": "2026-09-15",
+        "id": "2364196789",
+        "stato": "consegnata",
+        "tipo": "TD01 fattura"
+      }
+    },
+    {
+      "numero": "90000002",
+      "tipo": "F2",
+      "consegna": "80000002",
+      "ordine": "10000002",
+      "cliente": "C100",
+      "materiale": "MON-24",
+      "qta": 4,
+      "data": "2026-09-15",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 149,
+        "prezzoDa": "materiale",
+        "lordo": 596,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 596,
+        "ivaPerc": 22,
+        "iva": 131.12,
+        "totale": 727.12,
+        "costo": 380,
+        "margine": 216,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 149,00"
+          }
+        ]
+      },
+      "accontoDedotto": 0,
+      "iva": 131.12,
+      "totale": 727.12,
+      "aperto": 727.12,
+      "resi": 0,
+      "contabile": "100000019",
+      "sdi": {
+        "data": "2026-09-15",
+        "id": "1432754570",
+        "stato": "consegnata",
+        "tipo": "TD01 fattura"
+      }
+    },
+    {
+      "numero": "90000003",
+      "tipo": "F2",
+      "consegna": "80000003",
+      "ordine": "10000003",
+      "cliente": "C100",
+      "materiale": "MOUSE",
+      "qta": 4,
+      "data": "2026-09-15",
+      "prezzi": {
+        "qta": 4,
+        "prezzo": 14,
+        "prezzoDa": "materiale",
+        "lordo": 56,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 56,
+        "ivaPerc": 22,
+        "iva": 12.32,
+        "totale": 68.32,
+        "costo": 24,
+        "margine": 32,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 14,00"
+          }
+        ]
+      },
+      "accontoDedotto": 0,
+      "iva": 12.32,
+      "totale": 68.32,
+      "aperto": 68.32,
+      "resi": 0,
+      "contabile": "100000020",
+      "sdi": {
+        "data": "2026-09-15",
+        "id": "3065261367",
+        "stato": "consegnata",
+        "tipo": "TD01 fattura"
+      }
+    },
+    {
+      "numero": "90000004",
+      "tipo": "F2",
+      "consegna": "80000004",
+      "ordine": "10000004",
+      "cliente": "C200",
+      "materiale": "STAMP-LAS",
+      "qta": 3,
+      "data": "2026-09-15",
+      "prezzi": {
+        "qta": 3,
+        "prezzo": 189,
+        "prezzoDa": "materiale",
+        "lordo": 567,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 567,
+        "ivaPerc": 22,
+        "iva": 124.74,
+        "totale": 691.74,
+        "costo": 360,
+        "margine": 207,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 189,00"
+          }
+        ]
+      },
+      "accontoDedotto": 0,
+      "iva": 124.74,
+      "totale": 691.74,
+      "aperto": 691.74,
+      "resi": 0,
+      "contabile": "100000021",
+      "sdi": {
+        "data": "2026-09-15",
+        "id": "1268310008",
+        "stato": "consegnata",
+        "tipo": "TD01 fattura"
+      }
+    },
+    {
+      "numero": "90000005",
+      "tipo": "F2",
+      "consegna": "80000005",
+      "ordine": "10000005",
+      "cliente": "C200",
+      "materiale": "CAVO-HDMI",
+      "qta": 15,
+      "data": "2026-09-15",
+      "prezzi": {
+        "qta": 15,
+        "prezzo": 9,
+        "prezzoDa": "materiale",
+        "lordo": 135,
+        "scontoQPerc": 0,
+        "scontoQ": 0,
+        "scontoCPerc": 0,
+        "scontoC": 0,
+        "trasportoUnit": 0,
+        "trasporto": 0,
+        "netto": 135,
+        "ivaPerc": 22,
+        "iva": 29.7,
+        "totale": 164.7,
+        "costo": 45,
+        "margine": 90,
+        "provvPerc": 0,
+        "provvigione": 0,
+        "traccia": [
+          {
+            "tipo": "PR00",
+            "accesso": "1 cliente/materiale",
+            "esito": "non trovato"
+          },
+          {
+            "tipo": "PR00",
+            "accesso": "2 materiale",
+            "esito": "trovato 9,00"
+          }
+        ]
+      },
+      "accontoDedotto": 0,
+      "iva": 29.7,
+      "totale": 164.7,
+      "aperto": 164.7,
+      "resi": 0,
+      "contabile": "100000022",
+      "sdi": {
+        "data": "2026-09-15",
+        "id": "2528641351",
+        "stato": "consegnata",
+        "tipo": "TD01 fattura"
+      }
+    }
+  ],
+  "acconti": [],
+  "copa": [
+    {
+      "doc": "90000001",
+      "data": "2026-09-15",
+      "tipo": "F2",
+      "cliente": "C100",
+      "materiale": "PC-UFF",
+      "regione": "Umbria",
+      "canale": "10 Studi professionali",
+      "gruppo": "Professionisti",
+      "qta": 4,
+      "ricaviLordi": 2760,
+      "scontiQuantita": 0,
+      "scontiCliente": 0,
+      "trasporti": 0,
+      "abbuoni": 0,
+      "costoVenduto": 1800,
+      "provvigioni": 0
+    },
+    {
+      "doc": "90000002",
+      "data": "2026-09-15",
+      "tipo": "F2",
+      "cliente": "C100",
+      "materiale": "MON-24",
+      "regione": "Umbria",
+      "canale": "10 Studi professionali",
+      "gruppo": "Professionisti",
+      "qta": 4,
+      "ricaviLordi": 596,
+      "scontiQuantita": 0,
+      "scontiCliente": 0,
+      "trasporti": 0,
+      "abbuoni": 0,
+      "costoVenduto": 380,
+      "provvigioni": 0
+    },
+    {
+      "doc": "90000003",
+      "data": "2026-09-15",
+      "tipo": "F2",
+      "cliente": "C100",
+      "materiale": "MOUSE",
+      "regione": "Umbria",
+      "canale": "10 Studi professionali",
+      "gruppo": "Professionisti",
+      "qta": 4,
+      "ricaviLordi": 56,
+      "scontiQuantita": 0,
+      "scontiCliente": 0,
+      "trasporti": 0,
+      "abbuoni": 0,
+      "costoVenduto": 24,
+      "provvigioni": 0
+    },
+    {
+      "doc": "90000004",
+      "data": "2026-09-15",
+      "tipo": "F2",
+      "cliente": "C200",
+      "materiale": "STAMP-LAS",
+      "regione": "Umbria",
+      "canale": "20 Piccole imprese",
+      "gruppo": "Imprese",
+      "qta": 3,
+      "ricaviLordi": 567,
+      "scontiQuantita": 0,
+      "scontiCliente": 0,
+      "trasporti": 0,
+      "abbuoni": 0,
+      "costoVenduto": 360,
+      "provvigioni": 0
+    },
+    {
+      "doc": "90000005",
+      "data": "2026-09-15",
+      "tipo": "F2",
+      "cliente": "C200",
+      "materiale": "CAVO-HDMI",
+      "regione": "Umbria",
+      "canale": "20 Piccole imprese",
+      "gruppo": "Imprese",
+      "qta": 15,
+      "ricaviLordi": 135,
+      "scontiQuantita": 0,
+      "scontiCliente": 0,
+      "trasporti": 0,
+      "abbuoni": 0,
+      "costoVenduto": 45,
+      "provvigioni": 0
+    }
+  ],
+  "partite": [],
+  "avviato": "2026-09-01",
+  "fornitori": {
+    "F100": {
+      "nome": "Distribuzione PC Italia Spa",
+      "regione": "Lombardia",
+      "pagamento": "30 gg",
+      "iban": "IT48D0306901600100000061001",
+      "merce": "PC desktop"
+    },
+    "F200": {
+      "nome": "Stampa Facile Srl",
+      "regione": "Emilia-Romagna",
+      "pagamento": "30 gg",
+      "iban": "IT73F0538712900000000062002",
+      "merce": "stampanti"
+    },
+    "F300": {
+      "nome": "Video Schermi Srl",
+      "regione": "Veneto",
+      "pagamento": "30 gg",
+      "iban": "IT09G0200811770000000063003",
+      "merce": "monitor"
+    },
+    "F400": {
+      "nome": "Accessori Digitali Srl",
+      "regione": "Umbria",
+      "pagamento": "30 gg",
+      "iban": "IT64H0306903020100000064004",
+      "merce": "mouse e cavi"
+    }
+  },
+  "acquisti": [
+    {
+      "numero": "4500000001",
+      "fornitore": "F100",
+      "materiale": "PC-UFF",
+      "qta": 10,
+      "prezzo": 450,
+      "data": "2026-09-02",
+      "entrato": 10,
+      "fatturato": 10,
+      "valoreEntrato": 4500,
+      "entrate": [
+        {
+          "doc": "5000000001",
+          "qta": 10,
+          "data": "2026-09-04",
+          "valoreStd": 4500,
+          "valoreOrdine": 4500,
+          "pd": 0,
+          "lotto": "L4500000001",
+          "ddt": "DDT-DPC-0412",
+          "danneggiati": 0
+        }
+      ]
+    },
+    {
+      "numero": "4500000002",
+      "fornitore": "F200",
+      "materiale": "STAMP-LAS",
+      "qta": 6,
+      "prezzo": 120,
+      "data": "2026-09-02",
+      "entrato": 6,
+      "fatturato": 6,
+      "valoreEntrato": 720,
+      "entrate": [
+        {
+          "doc": "5000000002",
+          "qta": 6,
+          "data": "2026-09-04",
+          "valoreStd": 720,
+          "valoreOrdine": 720,
+          "pd": 0,
+          "lotto": "L4500000002",
+          "ddt": "DDT-SF-118",
+          "danneggiati": 0
+        }
+      ]
+    },
+    {
+      "numero": "4500000003",
+      "fornitore": "F300",
+      "materiale": "MON-24",
+      "qta": 10,
+      "prezzo": 95,
+      "data": "2026-09-02",
+      "entrato": 10,
+      "fatturato": 10,
+      "valoreEntrato": 950,
+      "entrate": [
+        {
+          "doc": "5000000003",
+          "qta": 10,
+          "data": "2026-09-04",
+          "valoreStd": 950,
+          "valoreOrdine": 950,
+          "pd": 0,
+          "lotto": "L4500000003",
+          "ddt": "DDT-VS-2290",
+          "danneggiati": 0
+        }
+      ]
+    },
+    {
+      "numero": "4500000004",
+      "fornitore": "F400",
+      "materiale": "MOUSE",
+      "qta": 30,
+      "prezzo": 6,
+      "data": "2026-09-02",
+      "entrato": 30,
+      "fatturato": 30,
+      "valoreEntrato": 180,
+      "entrate": [
+        {
+          "doc": "5000000004",
+          "qta": 30,
+          "data": "2026-09-04",
+          "valoreStd": 180,
+          "valoreOrdine": 180,
+          "pd": 0,
+          "lotto": "L4500000004",
+          "ddt": "DDT-AD-077",
+          "danneggiati": 0
+        }
+      ]
+    },
+    {
+      "numero": "4500000005",
+      "fornitore": "F400",
+      "materiale": "CAVO-HDMI",
+      "qta": 40,
+      "prezzo": 3,
+      "data": "2026-09-02",
+      "entrato": 40,
+      "fatturato": 40,
+      "valoreEntrato": 120,
+      "entrate": [
+        {
+          "doc": "5000000005",
+          "qta": 40,
+          "data": "2026-09-04",
+          "valoreStd": 120,
+          "valoreOrdine": 120,
+          "pd": 0,
+          "lotto": "L4500000005",
+          "ddt": "DDT-AD-078",
+          "danneggiati": 0
+        }
+      ]
+    }
+  ],
+  "fattureFornitore": [
+    {
+      "numero": "5105600001",
+      "rif": "DPC-2026-1520",
+      "ordine": "4500000001",
+      "fornitore": "F100",
+      "data": "2026-09-07",
+      "qta": 10,
+      "prezzo": 450,
+      "imponibile": 4500,
+      "iva": 990,
+      "totale": 5490,
+      "contabile": "100000008"
+    },
+    {
+      "numero": "5105600002",
+      "rif": "SF-0931",
+      "ordine": "4500000002",
+      "fornitore": "F200",
+      "data": "2026-09-07",
+      "qta": 6,
+      "prezzo": 120,
+      "imponibile": 720,
+      "iva": 158.4,
+      "totale": 878.4,
+      "contabile": "100000009"
+    },
+    {
+      "numero": "5105600003",
+      "rif": "VS-4410",
+      "ordine": "4500000003",
+      "fornitore": "F300",
+      "data": "2026-09-07",
+      "qta": 10,
+      "prezzo": 95,
+      "imponibile": 950,
+      "iva": 209,
+      "totale": 1159,
+      "contabile": "100000010"
+    },
+    {
+      "numero": "5105600004",
+      "rif": "AD-301",
+      "ordine": "4500000004",
+      "fornitore": "F400",
+      "data": "2026-09-07",
+      "qta": 30,
+      "prezzo": 6,
+      "imponibile": 180,
+      "iva": 39.6,
+      "totale": 219.6,
+      "contabile": "100000011"
+    },
+    {
+      "numero": "5105600005",
+      "rif": "AD-302",
+      "ordine": "4500000005",
+      "fornitore": "F400",
+      "data": "2026-09-07",
+      "qta": 40,
+      "prezzo": 3,
+      "imponibile": 120,
+      "iva": 26.4,
+      "totale": 146.4,
+      "contabile": "100000012"
+    }
+  ],
+  "produzione": [],
+  "mlPD": [],
+  "costing": {
+    "scheda": {
+      "sovrMat": 5,
+      "sovrProd": 10,
+      "tariffa": 28,
+      "lotto": 300,
+      "confermata": false
+    },
+    "stime": {},
+    "rilasci": [],
+    "ml": []
+  },
+  "msaRagioneria": {
+    "versione": 1,
+    "visti": [
+      "[1,\"100000001\",\"2026-09-01\",\"COSTITUZIONE\",\"Costituzione di 1000 Pixel & Bit S.r.l.: i soci sottoscrivono il capitale sociale di 20.000,00 €\",[[\"08\",\"DARE\",20000,\"\"],[\"30\",\"AVERE\",20000,\"\"]]]",
+      "[2,\"100000002\",\"2026-09-01\",\"VERSAMENTO_SOCI\",\"Versamento dei soci sul conto corrente della società: 20.000,00 € del capitale sottoscritto\",[[\"10\",\"DARE\",20000,\"\"],[\"08\",\"AVERE\",20000,\"\"]]]",
+      "[3,\"100000003\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000001 — entrata 10 pz PC-UFF lotto L4500000001 da ordine 4500000001\",[[\"13\",\"DARE\",4500,\"\"],[\"22\",\"AVERE\",4500,\"F100\"]]]",
+      "[4,\"100000004\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000002 — entrata 6 pz STAMP-LAS lotto L4500000002 da ordine 4500000002\",[[\"13\",\"DARE\",720,\"\"],[\"22\",\"AVERE\",720,\"F200\"]]]",
+      "[5,\"100000005\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000003 — entrata 10 pz MON-24 lotto L4500000003 da ordine 4500000003\",[[\"13\",\"DARE\",950,\"\"],[\"22\",\"AVERE\",950,\"F300\"]]]",
+      "[6,\"100000006\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000004 — entrata 30 pz MOUSE lotto L4500000004 da ordine 4500000004\",[[\"13\",\"DARE\",180,\"\"],[\"22\",\"AVERE\",180,\"F400\"]]]",
+      "[7,\"100000007\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000005 — entrata 40 pz CAVO-HDMI lotto L4500000005 da ordine 4500000005\",[[\"13\",\"DARE\",120,\"\"],[\"22\",\"AVERE\",120,\"F400\"]]]",
+      "[8,\"100000008\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600001 — fattura DPC-2026-1520 di Distribuzione PC Italia Spa su ordine 4500000001\",[[\"22\",\"DARE\",4500,\"F100\"],[\"14\",\"DARE\",990,\"\"],[\"20\",\"AVERE\",5490,\"F100\"]]]",
+      "[9,\"100000009\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600002 — fattura SF-0931 di Stampa Facile Srl su ordine 4500000002\",[[\"22\",\"DARE\",720,\"F200\"],[\"14\",\"DARE\",158.4,\"\"],[\"20\",\"AVERE\",878.4,\"F200\"]]]",
+      "[10,\"100000010\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600003 — fattura VS-4410 di Video Schermi Srl su ordine 4500000003\",[[\"22\",\"DARE\",950,\"F300\"],[\"14\",\"DARE\",209,\"\"],[\"20\",\"AVERE\",1159,\"F300\"]]]",
+      "[11,\"100000011\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600004 — fattura AD-301 di Accessori Digitali Srl su ordine 4500000004\",[[\"22\",\"DARE\",180,\"F400\"],[\"14\",\"DARE\",39.6,\"\"],[\"20\",\"AVERE\",219.6,\"F400\"]]]",
+      "[12,\"100000012\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600005 — fattura AD-302 di Accessori Digitali Srl su ordine 4500000005\",[[\"22\",\"DARE\",120,\"F400\"],[\"14\",\"DARE\",26.4,\"\"],[\"20\",\"AVERE\",146.4,\"F400\"]]]",
+      "[13,\"100000013\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000001 — uscita merci 601 4 pz PC-UFF dalla zona di spedizione (ordine 10000001)\",[[\"41\",\"DARE\",1800,\"\"],[\"13\",\"AVERE\",1800,\"\"]]]",
+      "[14,\"100000014\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000002 — uscita merci 601 4 pz MON-24 dalla zona di spedizione (ordine 10000002)\",[[\"41\",\"DARE\",380,\"\"],[\"13\",\"AVERE\",380,\"\"]]]",
+      "[15,\"100000015\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000003 — uscita merci 601 4 pz MOUSE dalla zona di spedizione (ordine 10000003)\",[[\"41\",\"DARE\",24,\"\"],[\"13\",\"AVERE\",24,\"\"]]]",
+      "[16,\"100000016\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000004 — uscita merci 601 3 pz STAMP-LAS dalla zona di spedizione (ordine 10000004)\",[[\"41\",\"DARE\",360,\"\"],[\"13\",\"AVERE\",360,\"\"]]]",
+      "[17,\"100000017\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000005 — uscita merci 601 15 pz CAVO-HDMI dalla zona di spedizione (ordine 10000005)\",[[\"41\",\"DARE\",45,\"\"],[\"13\",\"AVERE\",45,\"\"]]]",
+      "[18,\"100000018\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000001 (F2) — Studio Commerciale Aurora — 4 pz PC-UFF\",[[\"11\",\"DARE\",3367.2,\"C100\"],[\"40\",\"AVERE\",2760,\"\"],[\"21\",\"AVERE\",607.2,\"\"]]]",
+      "[19,\"100000019\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000002 (F2) — Studio Commerciale Aurora — 4 pz MON-24\",[[\"11\",\"DARE\",727.12,\"C100\"],[\"40\",\"AVERE\",596,\"\"],[\"21\",\"AVERE\",131.12,\"\"]]]",
+      "[20,\"100000020\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000003 (F2) — Studio Commerciale Aurora — 4 pz MOUSE\",[[\"11\",\"DARE\",68.32,\"C100\"],[\"40\",\"AVERE\",56,\"\"],[\"21\",\"AVERE\",12.32,\"\"]]]",
+      "[21,\"100000021\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000004 (F2) — Agenzia Viaggi Girasole Srl — 3 pz STAMP-LAS\",[[\"11\",\"DARE\",691.74,\"C200\"],[\"40\",\"AVERE\",567,\"\"],[\"21\",\"AVERE\",124.74,\"\"]]]",
+      "[22,\"100000022\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000005 (F2) — Agenzia Viaggi Girasole Srl — 15 pz CAVO-HDMI\",[[\"11\",\"DARE\",164.7,\"C200\"],[\"40\",\"AVERE\",135,\"\"],[\"21\",\"AVERE\",29.7,\"\"]]]",
+      "[23,\"100000023\",\"2026-09-30\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-09 — 1 dipendenti\",[[\"80\",\"DARE\",1800,\"\"],[\"81\",\"DARE\",559.44,\"\"],[\"82\",\"DARE\",133.33,\"\"],[\"27\",\"AVERE\",1552.62,\"\"],[\"28\",\"AVERE\",706.86,\"\"],[\"24\",\"AVERE\",27,\"\"],[\"29\",\"AVERE\",81.96,\"\"],[\"31\",\"AVERE\",124.33,\"\"]]]",
+      "[24,\"100000024\",\"2026-09-30\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-09 (1 dipendenti)\",[[\"27\",\"DARE\",1552.62,\"\"],[\"10\",\"AVERE\",1552.62,\"\"]]]",
+      "[25,\"100000025\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 5490,00 €\",[[\"20\",\"DARE\",5490,\"F100\"],[\"10\",\"AVERE\",5490,\"\"]]]",
+      "[26,\"100000026\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Stampa Facile Srl: 878,40 €\",[[\"20\",\"DARE\",878.4,\"F200\"],[\"10\",\"AVERE\",878.4,\"\"]]]",
+      "[27,\"100000027\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Video Schermi Srl: 1159,00 €\",[[\"20\",\"DARE\",1159,\"F300\"],[\"10\",\"AVERE\",1159,\"\"]]]",
+      "[28,\"100000028\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Accessori Digitali Srl: 366,00 €\",[[\"20\",\"DARE\",366,\"F400\"],[\"10\",\"AVERE\",366,\"\"]]]",
+      "[29,\"100000029\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO FATTURE AURORA\",[[\"10\",\"DARE\",4162.64,\"\"],[\"11\",\"AVERE\",4162.64,\"C100\"]]]",
+      "[30,\"100000030\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO FATTURE GIRASOLE\",[[\"10\",\"DARE\",856.44,\"\"],[\"11\",\"AVERE\",856.44,\"C200\"]]]",
+      "[31,\"100000031\",\"2026-09-30\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-09: a debito 905,08, a credito 1423,40 → credito da riportare 518,32\",[[\"21\",\"DARE\",905.08,\"\"],[\"14\",\"AVERE\",1423.4,\"\"],[\"25\",\"DARE\",518.32,\"\"]]]",
+      "[32,\"100000032\",\"2026-10-16\",\"F24\",\"F24 del 16/10/2026 per le paghe di 2026-09: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86\",[[\"29\",\"DARE\",81.96,\"\"],[\"28\",\"DARE\",706.86,\"\"],[\"10\",\"AVERE\",788.82,\"\"]]]"
+    ],
+    "coda": [],
+    "esiti": [
+      {
+        "chiave": "[1,\"100000001\",\"2026-09-01\",\"COSTITUZIONE\",\"Costituzione di 1000 Pixel & Bit S.r.l.: i soci sottoscrivono il capitale sociale di 20.000,00 €\",[[\"08\",\"DARE\",20000,\"\"],[\"30\",\"AVERE\",20000,\"\"]]]",
+        "documento": "100000001",
+        "data": "2026-09-01",
+        "tipo": "COSTITUZIONE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "08",
+            "sezione": "DARE",
+            "importo": "20.000,00"
+          },
+          {
+            "conto": "30",
+            "sezione": "AVERE",
+            "importo": "20.000,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "08",
+                "sezione": "DARE",
+                "importo": "20.000,00"
+              },
+              {
+                "conto": "30",
+                "sezione": "AVERE",
+                "importo": "20.000,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 2000000,
+              "avere": 2000000
+            },
+            "inviatoIl": "2026-11-06T08:03:42.474Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:42.498Z"
+      },
+      {
+        "chiave": "[2,\"100000002\",\"2026-09-01\",\"VERSAMENTO_SOCI\",\"Versamento dei soci sul conto corrente della società: 20.000,00 € del capitale sottoscritto\",[[\"10\",\"DARE\",20000,\"\"],[\"08\",\"AVERE\",20000,\"\"]]]",
+        "documento": "100000002",
+        "data": "2026-09-01",
+        "tipo": "VERSAMENTO_SOCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "08",
+            "sezione": "AVERE",
+            "importo": "20.000,00"
+          },
+          {
+            "conto": "10",
+            "sezione": "DARE",
+            "importo": "20.000,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "08",
+                "sezione": "AVERE",
+                "importo": "20.000,00"
+              },
+              {
+                "conto": "10",
+                "sezione": "DARE",
+                "importo": "20.000,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 2000000,
+              "avere": 2000000
+            },
+            "inviatoIl": "2026-11-06T08:03:42.637Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:42.658Z"
+      },
+      {
+        "chiave": "[3,\"100000003\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000001 — entrata 10 pz PC-UFF lotto L4500000001 da ordine 4500000001\",[[\"13\",\"DARE\",4500,\"\"],[\"22\",\"AVERE\",4500,\"F100\"]]]",
+        "documento": "100000003",
+        "data": "2026-09-04",
+        "tipo": "ENTRATA_ACQUISTO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "DARE",
+            "importo": "4500,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "AVERE",
+            "importo": "4500,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "DARE",
+                "importo": "4500,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "AVERE",
+                "importo": "4500,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 450000,
+              "avere": 450000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.235Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:43.259Z"
+      },
+      {
+        "chiave": "[4,\"100000004\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000002 — entrata 6 pz STAMP-LAS lotto L4500000002 da ordine 4500000002\",[[\"13\",\"DARE\",720,\"\"],[\"22\",\"AVERE\",720,\"F200\"]]]",
+        "documento": "100000004",
+        "data": "2026-09-04",
+        "tipo": "ENTRATA_ACQUISTO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "DARE",
+            "importo": "720,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "AVERE",
+            "importo": "720,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "DARE",
+                "importo": "720,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "AVERE",
+                "importo": "720,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 72000,
+              "avere": 72000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.362Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:43.379Z"
+      },
+      {
+        "chiave": "[5,\"100000005\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000003 — entrata 10 pz MON-24 lotto L4500000003 da ordine 4500000003\",[[\"13\",\"DARE\",950,\"\"],[\"22\",\"AVERE\",950,\"F300\"]]]",
+        "documento": "100000005",
+        "data": "2026-09-04",
+        "tipo": "ENTRATA_ACQUISTO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "DARE",
+            "importo": "950,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "AVERE",
+            "importo": "950,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "DARE",
+                "importo": "950,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "AVERE",
+                "importo": "950,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 95000,
+              "avere": 95000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.498Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:43.528Z"
+      },
+      {
+        "chiave": "[6,\"100000006\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000004 — entrata 30 pz MOUSE lotto L4500000004 da ordine 4500000004\",[[\"13\",\"DARE\",180,\"\"],[\"22\",\"AVERE\",180,\"F400\"]]]",
+        "documento": "100000006",
+        "data": "2026-09-04",
+        "tipo": "ENTRATA_ACQUISTO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "DARE",
+            "importo": "180,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "AVERE",
+            "importo": "180,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "DARE",
+                "importo": "180,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "AVERE",
+                "importo": "180,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 18000,
+              "avere": 18000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.635Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:43.665Z"
+      },
+      {
+        "chiave": "[7,\"100000007\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000005 — entrata 40 pz CAVO-HDMI lotto L4500000005 da ordine 4500000005\",[[\"13\",\"DARE\",120,\"\"],[\"22\",\"AVERE\",120,\"F400\"]]]",
+        "documento": "100000007",
+        "data": "2026-09-04",
+        "tipo": "ENTRATA_ACQUISTO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "DARE",
+            "importo": "120,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "AVERE",
+            "importo": "120,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "DARE",
+                "importo": "120,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "AVERE",
+                "importo": "120,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 12000,
+              "avere": 12000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.763Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:43.780Z"
+      },
+      {
+        "chiave": "[8,\"100000008\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600001 — fattura DPC-2026-1520 di Distribuzione PC Italia Spa su ordine 4500000001\",[[\"22\",\"DARE\",4500,\"F100\"],[\"14\",\"DARE\",990,\"\"],[\"20\",\"AVERE\",5490,\"F100\"]]]",
+        "documento": "100000008",
+        "data": "2026-09-07",
+        "tipo": "FATTURA_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "DARE",
+            "importo": "990,00"
+          },
+          {
+            "conto": "20",
+            "sezione": "AVERE",
+            "importo": "5490,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "DARE",
+            "importo": "4500,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "DARE",
+                "importo": "990,00"
+              },
+              {
+                "conto": "20",
+                "sezione": "AVERE",
+                "importo": "5490,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "DARE",
+                "importo": "4500,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 549000,
+              "avere": 549000
+            },
+            "inviatoIl": "2026-11-06T08:03:43.980Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:44.012Z"
+      },
+      {
+        "chiave": "[9,\"100000009\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600002 — fattura SF-0931 di Stampa Facile Srl su ordine 4500000002\",[[\"22\",\"DARE\",720,\"F200\"],[\"14\",\"DARE\",158.4,\"\"],[\"20\",\"AVERE\",878.4,\"F200\"]]]",
+        "documento": "100000009",
+        "data": "2026-09-07",
+        "tipo": "FATTURA_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "DARE",
+            "importo": "158,40"
+          },
+          {
+            "conto": "20",
+            "sezione": "AVERE",
+            "importo": "878,40"
+          },
+          {
+            "conto": "22",
+            "sezione": "DARE",
+            "importo": "720,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "DARE",
+                "importo": "158,40"
+              },
+              {
+                "conto": "20",
+                "sezione": "AVERE",
+                "importo": "878,40"
+              },
+              {
+                "conto": "22",
+                "sezione": "DARE",
+                "importo": "720,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 87840,
+              "avere": 87840
+            },
+            "inviatoIl": "2026-11-06T08:03:44.114Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:44.146Z"
+      },
+      {
+        "chiave": "[10,\"100000010\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600003 — fattura VS-4410 di Video Schermi Srl su ordine 4500000003\",[[\"22\",\"DARE\",950,\"F300\"],[\"14\",\"DARE\",209,\"\"],[\"20\",\"AVERE\",1159,\"F300\"]]]",
+        "documento": "100000010",
+        "data": "2026-09-07",
+        "tipo": "FATTURA_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "DARE",
+            "importo": "209,00"
+          },
+          {
+            "conto": "20",
+            "sezione": "AVERE",
+            "importo": "1159,00"
+          },
+          {
+            "conto": "22",
+            "sezione": "DARE",
+            "importo": "950,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "DARE",
+                "importo": "209,00"
+              },
+              {
+                "conto": "20",
+                "sezione": "AVERE",
+                "importo": "1159,00"
+              },
+              {
+                "conto": "22",
+                "sezione": "DARE",
+                "importo": "950,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 115900,
+              "avere": 115900
+            },
+            "inviatoIl": "2026-11-06T08:03:44.250Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:44.273Z"
+      },
+      {
+        "chiave": "[11,\"100000011\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600004 — fattura AD-301 di Accessori Digitali Srl su ordine 4500000004\",[[\"22\",\"DARE\",180,\"F400\"],[\"14\",\"DARE\",39.6,\"\"],[\"20\",\"AVERE\",219.6,\"F400\"]]]",
+        "documento": "100000011",
+        "data": "2026-09-07",
+        "tipo": "FATTURA_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "DARE",
+            "importo": "39,60"
+          },
+          {
+            "conto": "20",
+            "sezione": "AVERE",
+            "importo": "219,60"
+          },
+          {
+            "conto": "22",
+            "sezione": "DARE",
+            "importo": "180,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "DARE",
+                "importo": "39,60"
+              },
+              {
+                "conto": "20",
+                "sezione": "AVERE",
+                "importo": "219,60"
+              },
+              {
+                "conto": "22",
+                "sezione": "DARE",
+                "importo": "180,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 21960,
+              "avere": 21960
+            },
+            "inviatoIl": "2026-11-06T08:03:44.374Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:44.404Z"
+      },
+      {
+        "chiave": "[12,\"100000012\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600005 — fattura AD-302 di Accessori Digitali Srl su ordine 4500000005\",[[\"22\",\"DARE\",120,\"F400\"],[\"14\",\"DARE\",26.4,\"\"],[\"20\",\"AVERE\",146.4,\"F400\"]]]",
+        "documento": "100000012",
+        "data": "2026-09-07",
+        "tipo": "FATTURA_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "DARE",
+            "importo": "26,40"
+          },
+          {
+            "conto": "20",
+            "sezione": "AVERE",
+            "importo": "146,40"
+          },
+          {
+            "conto": "22",
+            "sezione": "DARE",
+            "importo": "120,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "DARE",
+                "importo": "26,40"
+              },
+              {
+                "conto": "20",
+                "sezione": "AVERE",
+                "importo": "146,40"
+              },
+              {
+                "conto": "22",
+                "sezione": "DARE",
+                "importo": "120,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 14640,
+              "avere": 14640
+            },
+            "inviatoIl": "2026-11-06T08:03:44.511Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:44.536Z"
+      },
+      {
+        "chiave": "[13,\"100000013\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000001 — uscita merci 601 4 pz PC-UFF dalla zona di spedizione (ordine 10000001)\",[[\"41\",\"DARE\",1800,\"\"],[\"13\",\"AVERE\",1800,\"\"]]]",
+        "documento": "100000013",
+        "data": "2026-09-14",
+        "tipo": "USCITA_MERCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "AVERE",
+            "importo": "1800,00"
+          },
+          {
+            "conto": "41",
+            "sezione": "DARE",
+            "importo": "1800,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "AVERE",
+                "importo": "1800,00"
+              },
+              {
+                "conto": "41",
+                "sezione": "DARE",
+                "importo": "1800,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 180000,
+              "avere": 180000
+            },
+            "inviatoIl": "2026-11-06T08:03:45.130Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.152Z"
+      },
+      {
+        "chiave": "[14,\"100000014\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000002 — uscita merci 601 4 pz MON-24 dalla zona di spedizione (ordine 10000002)\",[[\"41\",\"DARE\",380,\"\"],[\"13\",\"AVERE\",380,\"\"]]]",
+        "documento": "100000014",
+        "data": "2026-09-14",
+        "tipo": "USCITA_MERCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "AVERE",
+            "importo": "380,00"
+          },
+          {
+            "conto": "41",
+            "sezione": "DARE",
+            "importo": "380,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "AVERE",
+                "importo": "380,00"
+              },
+              {
+                "conto": "41",
+                "sezione": "DARE",
+                "importo": "380,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 38000,
+              "avere": 38000
+            },
+            "inviatoIl": "2026-11-06T08:03:45.274Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.328Z"
+      },
+      {
+        "chiave": "[15,\"100000015\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000003 — uscita merci 601 4 pz MOUSE dalla zona di spedizione (ordine 10000003)\",[[\"41\",\"DARE\",24,\"\"],[\"13\",\"AVERE\",24,\"\"]]]",
+        "documento": "100000015",
+        "data": "2026-09-14",
+        "tipo": "USCITA_MERCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "AVERE",
+            "importo": "24,00"
+          },
+          {
+            "conto": "41",
+            "sezione": "DARE",
+            "importo": "24,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "AVERE",
+                "importo": "24,00"
+              },
+              {
+                "conto": "41",
+                "sezione": "DARE",
+                "importo": "24,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 2400,
+              "avere": 2400
+            },
+            "inviatoIl": "2026-11-06T08:03:45.477Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.503Z"
+      },
+      {
+        "chiave": "[16,\"100000016\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000004 — uscita merci 601 3 pz STAMP-LAS dalla zona di spedizione (ordine 10000004)\",[[\"41\",\"DARE\",360,\"\"],[\"13\",\"AVERE\",360,\"\"]]]",
+        "documento": "100000016",
+        "data": "2026-09-14",
+        "tipo": "USCITA_MERCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "AVERE",
+            "importo": "360,00"
+          },
+          {
+            "conto": "41",
+            "sezione": "DARE",
+            "importo": "360,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "AVERE",
+                "importo": "360,00"
+              },
+              {
+                "conto": "41",
+                "sezione": "DARE",
+                "importo": "360,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 36000,
+              "avere": 36000
+            },
+            "inviatoIl": "2026-11-06T08:03:45.595Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.618Z"
+      },
+      {
+        "chiave": "[17,\"100000017\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000005 — uscita merci 601 15 pz CAVO-HDMI dalla zona di spedizione (ordine 10000005)\",[[\"41\",\"DARE\",45,\"\"],[\"13\",\"AVERE\",45,\"\"]]]",
+        "documento": "100000017",
+        "data": "2026-09-14",
+        "tipo": "USCITA_MERCI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "13",
+            "sezione": "AVERE",
+            "importo": "45,00"
+          },
+          {
+            "conto": "41",
+            "sezione": "DARE",
+            "importo": "45,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "13",
+                "sezione": "AVERE",
+                "importo": "45,00"
+              },
+              {
+                "conto": "41",
+                "sezione": "DARE",
+                "importo": "45,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 4500,
+              "avere": 4500
+            },
+            "inviatoIl": "2026-11-06T08:03:45.717Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.733Z"
+      },
+      {
+        "chiave": "[18,\"100000018\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000001 (F2) — Studio Commerciale Aurora — 4 pz PC-UFF\",[[\"11\",\"DARE\",3367.2,\"C100\"],[\"40\",\"AVERE\",2760,\"\"],[\"21\",\"AVERE\",607.2,\"\"]]]",
+        "documento": "100000018",
+        "data": "2026-09-15",
+        "tipo": "FATTURA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "11",
+            "sezione": "DARE",
+            "importo": "3367,20"
+          },
+          {
+            "conto": "21",
+            "sezione": "AVERE",
+            "importo": "607,20"
+          },
+          {
+            "conto": "40",
+            "sezione": "AVERE",
+            "importo": "2760,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "11",
+                "sezione": "DARE",
+                "importo": "3367,20"
+              },
+              {
+                "conto": "21",
+                "sezione": "AVERE",
+                "importo": "607,20"
+              },
+              {
+                "conto": "40",
+                "sezione": "AVERE",
+                "importo": "2760,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 336720,
+              "avere": 336720
+            },
+            "inviatoIl": "2026-11-06T08:03:45.825Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.852Z"
+      },
+      {
+        "chiave": "[19,\"100000019\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000002 (F2) — Studio Commerciale Aurora — 4 pz MON-24\",[[\"11\",\"DARE\",727.12,\"C100\"],[\"40\",\"AVERE\",596,\"\"],[\"21\",\"AVERE\",131.12,\"\"]]]",
+        "documento": "100000019",
+        "data": "2026-09-15",
+        "tipo": "FATTURA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "11",
+            "sezione": "DARE",
+            "importo": "727,12"
+          },
+          {
+            "conto": "21",
+            "sezione": "AVERE",
+            "importo": "131,12"
+          },
+          {
+            "conto": "40",
+            "sezione": "AVERE",
+            "importo": "596,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "11",
+                "sezione": "DARE",
+                "importo": "727,12"
+              },
+              {
+                "conto": "21",
+                "sezione": "AVERE",
+                "importo": "131,12"
+              },
+              {
+                "conto": "40",
+                "sezione": "AVERE",
+                "importo": "596,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 72712,
+              "avere": 72712
+            },
+            "inviatoIl": "2026-11-06T08:03:45.940Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:45.968Z"
+      },
+      {
+        "chiave": "[20,\"100000020\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000003 (F2) — Studio Commerciale Aurora — 4 pz MOUSE\",[[\"11\",\"DARE\",68.32,\"C100\"],[\"40\",\"AVERE\",56,\"\"],[\"21\",\"AVERE\",12.32,\"\"]]]",
+        "documento": "100000020",
+        "data": "2026-09-15",
+        "tipo": "FATTURA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "11",
+            "sezione": "DARE",
+            "importo": "68,32"
+          },
+          {
+            "conto": "21",
+            "sezione": "AVERE",
+            "importo": "12,32"
+          },
+          {
+            "conto": "40",
+            "sezione": "AVERE",
+            "importo": "56,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "11",
+                "sezione": "DARE",
+                "importo": "68,32"
+              },
+              {
+                "conto": "21",
+                "sezione": "AVERE",
+                "importo": "12,32"
+              },
+              {
+                "conto": "40",
+                "sezione": "AVERE",
+                "importo": "56,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 6832,
+              "avere": 6832
+            },
+            "inviatoIl": "2026-11-06T08:03:46.059Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.088Z"
+      },
+      {
+        "chiave": "[21,\"100000021\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000004 (F2) — Agenzia Viaggi Girasole Srl — 3 pz STAMP-LAS\",[[\"11\",\"DARE\",691.74,\"C200\"],[\"40\",\"AVERE\",567,\"\"],[\"21\",\"AVERE\",124.74,\"\"]]]",
+        "documento": "100000021",
+        "data": "2026-09-15",
+        "tipo": "FATTURA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "11",
+            "sezione": "DARE",
+            "importo": "691,74"
+          },
+          {
+            "conto": "21",
+            "sezione": "AVERE",
+            "importo": "124,74"
+          },
+          {
+            "conto": "40",
+            "sezione": "AVERE",
+            "importo": "567,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "11",
+                "sezione": "DARE",
+                "importo": "691,74"
+              },
+              {
+                "conto": "21",
+                "sezione": "AVERE",
+                "importo": "124,74"
+              },
+              {
+                "conto": "40",
+                "sezione": "AVERE",
+                "importo": "567,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 69174,
+              "avere": 69174
+            },
+            "inviatoIl": "2026-11-06T08:03:46.181Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.211Z"
+      },
+      {
+        "chiave": "[22,\"100000022\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000005 (F2) — Agenzia Viaggi Girasole Srl — 15 pz CAVO-HDMI\",[[\"11\",\"DARE\",164.7,\"C200\"],[\"40\",\"AVERE\",135,\"\"],[\"21\",\"AVERE\",29.7,\"\"]]]",
+        "documento": "100000022",
+        "data": "2026-09-15",
+        "tipo": "FATTURA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "11",
+            "sezione": "DARE",
+            "importo": "164,70"
+          },
+          {
+            "conto": "21",
+            "sezione": "AVERE",
+            "importo": "29,70"
+          },
+          {
+            "conto": "40",
+            "sezione": "AVERE",
+            "importo": "135,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "11",
+                "sezione": "DARE",
+                "importo": "164,70"
+              },
+              {
+                "conto": "21",
+                "sezione": "AVERE",
+                "importo": "29,70"
+              },
+              {
+                "conto": "40",
+                "sezione": "AVERE",
+                "importo": "135,00"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 16470,
+              "avere": 16470
+            },
+            "inviatoIl": "2026-11-06T08:03:46.308Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.336Z"
+      },
+      {
+        "chiave": "[23,\"100000023\",\"2026-09-30\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-09 — 1 dipendenti\",[[\"80\",\"DARE\",1800,\"\"],[\"81\",\"DARE\",559.44,\"\"],[\"82\",\"DARE\",133.33,\"\"],[\"27\",\"AVERE\",1552.62,\"\"],[\"28\",\"AVERE\",706.86,\"\"],[\"24\",\"AVERE\",27,\"\"],[\"29\",\"AVERE\",81.96,\"\"],[\"31\",\"AVERE\",124.33,\"\"]]]",
+        "documento": "100000023",
+        "data": "2026-09-30",
+        "tipo": "PAGHE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "24",
+            "sezione": "AVERE",
+            "importo": "27,00"
+          },
+          {
+            "conto": "27",
+            "sezione": "AVERE",
+            "importo": "1552,62"
+          },
+          {
+            "conto": "28",
+            "sezione": "AVERE",
+            "importo": "706,86"
+          },
+          {
+            "conto": "29",
+            "sezione": "AVERE",
+            "importo": "81,96"
+          },
+          {
+            "conto": "31",
+            "sezione": "AVERE",
+            "importo": "124,33"
+          },
+          {
+            "conto": "80",
+            "sezione": "DARE",
+            "importo": "1800,00"
+          },
+          {
+            "conto": "81",
+            "sezione": "DARE",
+            "importo": "559,44"
+          },
+          {
+            "conto": "82",
+            "sezione": "DARE",
+            "importo": "133,33"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "24",
+                "sezione": "AVERE",
+                "importo": "27,00"
+              },
+              {
+                "conto": "27",
+                "sezione": "AVERE",
+                "importo": "1552,62"
+              },
+              {
+                "conto": "28",
+                "sezione": "AVERE",
+                "importo": "706,86"
+              },
+              {
+                "conto": "29",
+                "sezione": "AVERE",
+                "importo": "81,96"
+              },
+              {
+                "conto": "31",
+                "sezione": "AVERE",
+                "importo": "124,33"
+              },
+              {
+                "conto": "80",
+                "sezione": "DARE",
+                "importo": "1800,00"
+              },
+              {
+                "conto": "81",
+                "sezione": "DARE",
+                "importo": "559,44"
+              },
+              {
+                "conto": "82",
+                "sezione": "DARE",
+                "importo": "133,33"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 249277,
+              "avere": 249277
+            },
+            "inviatoIl": "2026-11-06T08:03:46.701Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.763Z"
+      },
+      {
+        "chiave": "[24,\"100000024\",\"2026-09-30\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-09 (1 dipendenti)\",[[\"27\",\"DARE\",1552.62,\"\"],[\"10\",\"AVERE\",1552.62,\"\"]]]",
+        "documento": "100000024",
+        "data": "2026-09-30",
+        "tipo": "PAGAMENTO_STIPENDI",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "1552,62"
+          },
+          {
+            "conto": "27",
+            "sezione": "DARE",
+            "importo": "1552,62"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "1552,62"
+              },
+              {
+                "conto": "27",
+                "sezione": "DARE",
+                "importo": "1552,62"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 155262,
+              "avere": 155262
+            },
+            "inviatoIl": "2026-11-06T08:03:46.852Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.869Z"
+      },
+      {
+        "chiave": "[25,\"100000025\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 5490,00 €\",[[\"20\",\"DARE\",5490,\"F100\"],[\"10\",\"AVERE\",5490,\"\"]]]",
+        "documento": "100000025",
+        "data": "2026-09-30",
+        "tipo": "PAGAMENTO_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "5490,00"
+          },
+          {
+            "conto": "20",
+            "sezione": "DARE",
+            "importo": "5490,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "5490,00"
+              },
+              {
+                "conto": "20",
+                "sezione": "DARE",
+                "importo": "5490,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 549000,
+              "avere": 549000
+            },
+            "inviatoIl": "2026-11-06T08:03:46.951Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:46.972Z"
+      },
+      {
+        "chiave": "[26,\"100000026\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Stampa Facile Srl: 878,40 €\",[[\"20\",\"DARE\",878.4,\"F200\"],[\"10\",\"AVERE\",878.4,\"\"]]]",
+        "documento": "100000026",
+        "data": "2026-09-30",
+        "tipo": "PAGAMENTO_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "878,40"
+          },
+          {
+            "conto": "20",
+            "sezione": "DARE",
+            "importo": "878,40"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "878,40"
+              },
+              {
+                "conto": "20",
+                "sezione": "DARE",
+                "importo": "878,40"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 87840,
+              "avere": 87840
+            },
+            "inviatoIl": "2026-11-06T08:03:47.054Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.075Z"
+      },
+      {
+        "chiave": "[27,\"100000027\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Video Schermi Srl: 1159,00 €\",[[\"20\",\"DARE\",1159,\"F300\"],[\"10\",\"AVERE\",1159,\"\"]]]",
+        "documento": "100000027",
+        "data": "2026-09-30",
+        "tipo": "PAGAMENTO_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "1159,00"
+          },
+          {
+            "conto": "20",
+            "sezione": "DARE",
+            "importo": "1159,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "1159,00"
+              },
+              {
+                "conto": "20",
+                "sezione": "DARE",
+                "importo": "1159,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 115900,
+              "avere": 115900
+            },
+            "inviatoIl": "2026-11-06T08:03:47.157Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.177Z"
+      },
+      {
+        "chiave": "[28,\"100000028\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Accessori Digitali Srl: 366,00 €\",[[\"20\",\"DARE\",366,\"F400\"],[\"10\",\"AVERE\",366,\"\"]]]",
+        "documento": "100000028",
+        "data": "2026-09-30",
+        "tipo": "PAGAMENTO_FORNITORE",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "366,00"
+          },
+          {
+            "conto": "20",
+            "sezione": "DARE",
+            "importo": "366,00"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "366,00"
+              },
+              {
+                "conto": "20",
+                "sezione": "DARE",
+                "importo": "366,00"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 36600,
+              "avere": 36600
+            },
+            "inviatoIl": "2026-11-06T08:03:47.260Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.281Z"
+      },
+      {
+        "chiave": "[29,\"100000029\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO FATTURE AURORA\",[[\"10\",\"DARE\",4162.64,\"\"],[\"11\",\"AVERE\",4162.64,\"C100\"]]]",
+        "documento": "100000029",
+        "data": "2026-09-30",
+        "tipo": "INCASSO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "DARE",
+            "importo": "4162,64"
+          },
+          {
+            "conto": "11",
+            "sezione": "AVERE",
+            "importo": "4162,64"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "DARE",
+                "importo": "4162,64"
+              },
+              {
+                "conto": "11",
+                "sezione": "AVERE",
+                "importo": "4162,64"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 416264,
+              "avere": 416264
+            },
+            "inviatoIl": "2026-11-06T08:03:47.370Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.388Z"
+      },
+      {
+        "chiave": "[30,\"100000030\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO FATTURE GIRASOLE\",[[\"10\",\"DARE\",856.44,\"\"],[\"11\",\"AVERE\",856.44,\"C200\"]]]",
+        "documento": "100000030",
+        "data": "2026-09-30",
+        "tipo": "INCASSO",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "DARE",
+            "importo": "856,44"
+          },
+          {
+            "conto": "11",
+            "sezione": "AVERE",
+            "importo": "856,44"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "DARE",
+                "importo": "856,44"
+              },
+              {
+                "conto": "11",
+                "sezione": "AVERE",
+                "importo": "856,44"
+              }
+            ],
+            "errori": [
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 85644,
+              "avere": 85644
+            },
+            "inviatoIl": "2026-11-06T08:03:47.498Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.524Z"
+      },
+      {
+        "chiave": "[31,\"100000031\",\"2026-09-30\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-09: a debito 905,08, a credito 1423,40 → credito da riportare 518,32\",[[\"21\",\"DARE\",905.08,\"\"],[\"14\",\"AVERE\",1423.4,\"\"],[\"25\",\"DARE\",518.32,\"\"]]]",
+        "documento": "100000031",
+        "data": "2026-09-30",
+        "tipo": "LIQUIDAZIONE_IVA",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "14",
+            "sezione": "AVERE",
+            "importo": "1423,40"
+          },
+          {
+            "conto": "21",
+            "sezione": "DARE",
+            "importo": "905,08"
+          },
+          {
+            "conto": "25",
+            "sezione": "DARE",
+            "importo": "518,32"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "14",
+                "sezione": "AVERE",
+                "importo": "1423,40"
+              },
+              {
+                "conto": "21",
+                "sezione": "DARE",
+                "importo": "905,08"
+              },
+              {
+                "conto": "25",
+                "sezione": "DARE",
+                "importo": "518,32"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 142340,
+              "avere": 142340
+            },
+            "inviatoIl": "2026-11-06T08:03:47.643Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.672Z"
+      },
+      {
+        "chiave": "[32,\"100000032\",\"2026-10-16\",\"F24\",\"F24 del 16/10/2026 per le paghe di 2026-09: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86\",[[\"29\",\"DARE\",81.96,\"\"],[\"28\",\"DARE\",706.86,\"\"],[\"10\",\"AVERE\",788.82,\"\"]]]",
+        "documento": "100000032",
+        "data": "2026-10-16",
+        "tipo": "F24",
+        "tentativi": 1,
+        "tentato": true,
+        "corretto": true,
+        "conAiuto": false,
+        "risposte": [
+          {
+            "conto": "10",
+            "sezione": "AVERE",
+            "importo": "788,82"
+          },
+          {
+            "conto": "28",
+            "sezione": "DARE",
+            "importo": "706,86"
+          },
+          {
+            "conto": "29",
+            "sezione": "DARE",
+            "importo": "81,96"
+          }
+        ],
+        "cronologiaTentativi": [
+          {
+            "risposte": [
+              {
+                "conto": "10",
+                "sezione": "AVERE",
+                "importo": "788,82"
+              },
+              {
+                "conto": "28",
+                "sezione": "DARE",
+                "importo": "706,86"
+              },
+              {
+                "conto": "29",
+                "sezione": "DARE",
+                "importo": "81,96"
+              }
+            ],
+            "errori": [
+              "",
+              "",
+              ""
+            ],
+            "corretto": true,
+            "totali": {
+              "dare": 78882,
+              "avere": 78882
+            },
+            "inviatoIl": "2026-11-06T08:03:47.768Z"
+          }
+        ],
+        "completatoIl": "2026-11-06T08:03:47.798Z"
+      }
+    ]
+  },
+  "negozio": true,
+  "costituzione": {
+    "data": "2026-09-01",
+    "capitale": 20000
+  },
+  "hr": {
+    "parametri": {
+      "inpsDip": 9.19,
+      "inpsDitta": 29.58,
+      "inail": 1.5,
+      "tfrDivisore": 13.5,
+      "tfrContributo": 0.5,
+      "mensilita": 13,
+      "oreMese": 173,
+      "maggStraord": 25,
+      "ferieAnno": 26,
+      "rolAnno": 72,
+      "scaglioni": [
+        [
+          28000,
+          23
+        ],
+        [
+          50000,
+          33
+        ],
+        [
+          1000000000000,
+          43
+        ]
+      ],
+      "regione": "Toscana",
+      "addRegionale": [
+        [
+          15000,
+          1.42
+        ],
+        [
+          28000,
+          1.43
+        ],
+        [
+          50000,
+          3.32
+        ],
+        [
+          1000000000000,
+          3.33
+        ]
+      ],
+      "comune": "Firenze",
+      "addComunale": 0.2,
+      "esenzioneComunale": 25000,
+      "accontoComunale": 30
+    },
+    "dipendenti": [
+      {
+        "matricola": "00001",
+        "nome": "Chiara Fontana",
+        "mansione": "Addetta alle vendite e al magazzino",
+        "livello": "4° livello (CCNL commercio, didattico)",
+        "cdc": "4300",
+        "cdcNome": "Negozio e amministrazione",
+        "lordo": 1800,
+        "addizionali": 0,
+        "tempo": "indeterminato",
+        "assunzione": "2026-09-01",
+        "ferieAP": 0,
+        "rolAP": 0
+      }
+    ],
+    "presenze": {},
+    "cedolini": [
+      {
+        "periodo": "2026-09",
+        "matricola": "00001",
+        "nome": "Chiara Fontana",
+        "cdc": "4300",
+        "cdcNome": "Negozio e amministrazione",
+        "base": 1800,
+        "oreStraord": 0,
+        "straordinari": 0,
+        "assenze": 0,
+        "tredicesima": 0,
+        "lordo": 1800,
+        "inpsDip": 165.42,
+        "imponibile": 1634.58,
+        "sommaEsente": 0,
+        "imponibileFiscale": 1634.58,
+        "irpefLorda": 375.95,
+        "detrazioni": 210.66,
+        "ulterioreDetrazione": 83.33,
+        "irpefOrdinaria": 81.96,
+        "irpef13": 0,
+        "conguaglio": 0,
+        "irpef": 81.96,
+        "addizionali": 0,
+        "addizionaliRate": {
+          "regionale": 0,
+          "comunale": 0,
+          "acconto": 0,
+          "storico": 0,
+          "totale": 0,
+          "anno": 2025
+        },
+        "redditoAnnuoPresunto": 21249.54,
+        "progressivi": {
+          "mesi": 1,
+          "storico": 0,
+          "imponibileInps": 1800,
+          "imponibileFiscale": 1634.58,
+          "irpef": 81.96,
+          "inpsDip": 165.42,
+          "tfr": 133.33
+        },
+        "ratei": {
+          "mesi": 1,
+          "tredicesima": 150,
+          "tredicesimaPagata": 0,
+          "ferieMaturate": 2.17,
+          "ferieGodute": 0,
+          "ferieMese": 0,
+          "ferieAP": 0,
+          "ferieResidue": 2.17,
+          "rolMaturati": 6,
+          "rolGoduti": 0,
+          "rolMese": 0,
+          "rolAP": 0,
+          "rolResidui": 6
+        },
+        "netto": 1552.62,
+        "inpsDitta": 532.44,
+        "inail": 27,
+        "tfrLordo": 133.33,
+        "tfrContributo": 9,
+        "tfrNetto": 124.33,
+        "costo": 2492.77,
+        "numero": "1"
+      }
+    ],
+    "registrati": [
+      {
+        "periodo": "2026-09",
+        "data": "2026-09-30",
+        "contabile": "100000023",
+        "netti": 1552.62,
+        "f24Importo": 788.82,
+        "scadenzaNetti": "2026-09-30",
+        "scadenzaF24": "2026-10-16",
+        "pagato": "2026-09-30",
+        "f24": "2026-10-16",
+        "f24Dettaglio": {
+          "erario": 81.96,
+          "inps": 706.86
+        }
+      }
+    ]
+  },
+  "seriali": {},
+  "lotti": {
+    "PC-UFF": {
+      "L4500000001": {
+        "qta": 6,
+        "data": "2026-09-04",
+        "tipo": "101",
+        "rif": "4500000001",
+        "fornitore": "F100",
+        "colata": ""
+      }
+    },
+    "STAMP-LAS": {
+      "L4500000002": {
+        "qta": 3,
+        "data": "2026-09-04",
+        "tipo": "101",
+        "rif": "4500000002",
+        "fornitore": "F200",
+        "colata": ""
+      }
+    },
+    "MON-24": {
+      "L4500000003": {
+        "qta": 6,
+        "data": "2026-09-04",
+        "tipo": "101",
+        "rif": "4500000003",
+        "fornitore": "F300",
+        "colata": ""
+      }
+    },
+    "MOUSE": {
+      "L4500000004": {
+        "qta": 26,
+        "data": "2026-09-04",
+        "tipo": "101",
+        "rif": "4500000004",
+        "fornitore": "F400",
+        "colata": ""
+      }
+    },
+    "CAVO-HDMI": {
+      "L4500000005": {
+        "qta": 25,
+        "data": "2026-09-04",
+        "tipo": "101",
+        "rif": "4500000005",
+        "fornitore": "F400",
+        "colata": ""
+      }
+    }
+  },
+  "auth": {
+    "attivo": false,
+    "ruolo": "ADMIN",
+    "su53": []
+  },
+  "wm": {
+    "attivo": "2026-09-01",
+    "magazzino": "W100",
+    "ubicazioni": {
+      "GR-ZONE": {
+        "tipo": "902",
+        "cap": 0,
+        "blocco": ""
+      },
+      "PSA-L1": {
+        "tipo": "100",
+        "cap": 0,
+        "blocco": ""
+      },
+      "GI-ZONE": {
+        "tipo": "916",
+        "cap": 0,
+        "blocco": ""
+      },
+      "DIFF": {
+        "tipo": "999",
+        "cap": 0,
+        "blocco": ""
+      },
+      "Q-ZONE": {
+        "tipo": "980",
+        "cap": 0,
+        "blocco": ""
+      },
+      "01-01-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-01-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-02-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-02-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-03-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-03-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-04-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-04-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-05-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "01-05-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "01",
+        "blocco": ""
+      },
+      "02-01-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-01-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-02-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-02-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-03-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-03-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-04-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-04-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-05-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "02-05-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "02",
+        "blocco": ""
+      },
+      "03-01-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-01-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-02-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-02-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-03-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-03-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-04-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-04-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-05-1": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "03-05-2": {
+        "tipo": "001",
+        "cap": 1,
+        "corsia": "03",
+        "blocco": ""
+      },
+      "F-01": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      },
+      "F-02": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      },
+      "F-03": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      },
+      "F-04": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      },
+      "F-05": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      },
+      "F-06": {
+        "tipo": "002",
+        "cap": 2,
+        "corsia": "F",
+        "blocco": ""
+      }
+    },
+    "quant": [
+      {
+        "id": "Q1",
+        "ubic": "01-01-1",
+        "mat": "PC-UFF",
+        "qta": 6,
+        "udc": "1000001",
+        "data": "2026-09-04",
+        "rif": "5000000001"
+      },
+      {
+        "id": "Q2",
+        "ubic": "01-01-2",
+        "mat": "STAMP-LAS",
+        "qta": 3,
+        "udc": "1000002",
+        "data": "2026-09-04",
+        "rif": "5000000002"
+      },
+      {
+        "id": "Q3",
+        "ubic": "01-02-1",
+        "mat": "MON-24",
+        "qta": 6,
+        "udc": "1000003",
+        "data": "2026-09-04",
+        "rif": "5000000003"
+      },
+      {
+        "id": "Q4",
+        "ubic": "01-02-2",
+        "mat": "MOUSE",
+        "qta": 26,
+        "udc": "1000004",
+        "data": "2026-09-04",
+        "rif": "5000000004"
+      },
+      {
+        "id": "Q5",
+        "ubic": "01-03-1",
+        "mat": "CAVO-HDMI",
+        "qta": 25,
+        "udc": "1000005",
+        "data": "2026-09-04",
+        "rif": "5000000005"
+      },
+      {
+        "id": "Q6",
+        "ubic": "GI-ZONE",
+        "mat": "PC-UFF",
+        "qta": 0,
+        "udc": "",
+        "data": "2026-09-04",
+        "rif": "80000001"
+      },
+      {
+        "id": "Q7",
+        "ubic": "GI-ZONE",
+        "mat": "MON-24",
+        "qta": 0,
+        "udc": "",
+        "data": "2026-09-04",
+        "rif": "80000002"
+      },
+      {
+        "id": "Q8",
+        "ubic": "GI-ZONE",
+        "mat": "MOUSE",
+        "qta": 0,
+        "udc": "",
+        "data": "2026-09-04",
+        "rif": "80000003"
+      },
+      {
+        "id": "Q9",
+        "ubic": "GI-ZONE",
+        "mat": "STAMP-LAS",
+        "qta": 0,
+        "udc": "",
+        "data": "2026-09-04",
+        "rif": "80000004"
+      },
+      {
+        "id": "Q10",
+        "ubic": "GI-ZONE",
+        "mat": "CAVO-HDMI",
+        "qta": 0,
+        "udc": "",
+        "data": "2026-09-04",
+        "rif": "80000005"
+      }
+    ],
+    "compiti": [
+      {
+        "numero": "100001",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-04",
+        "qtaEff": 10,
+        "diff": 0,
+        "tipo": "PUTAWAY",
+        "mat": "PC-UFF",
+        "qta": 10,
+        "quant": "Q1",
+        "udc": "1000001",
+        "da": "GR-ZONE",
+        "a": "01-01-1",
+        "creato": "2026-09-04",
+        "rif": "5000000001",
+        "motivo": "101 acquisto"
+      },
+      {
+        "numero": "100002",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-04",
+        "qtaEff": 6,
+        "diff": 0,
+        "tipo": "PUTAWAY",
+        "mat": "STAMP-LAS",
+        "qta": 6,
+        "quant": "Q2",
+        "udc": "1000002",
+        "da": "GR-ZONE",
+        "a": "01-01-2",
+        "creato": "2026-09-04",
+        "rif": "5000000002",
+        "motivo": "101 acquisto"
+      },
+      {
+        "numero": "100003",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-04",
+        "qtaEff": 10,
+        "diff": 0,
+        "tipo": "PUTAWAY",
+        "mat": "MON-24",
+        "qta": 10,
+        "quant": "Q3",
+        "udc": "1000003",
+        "da": "GR-ZONE",
+        "a": "01-02-1",
+        "creato": "2026-09-04",
+        "rif": "5000000003",
+        "motivo": "101 acquisto"
+      },
+      {
+        "numero": "100004",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-04",
+        "qtaEff": 30,
+        "diff": 0,
+        "tipo": "PUTAWAY",
+        "mat": "MOUSE",
+        "qta": 30,
+        "quant": "Q4",
+        "udc": "1000004",
+        "da": "GR-ZONE",
+        "a": "01-02-2",
+        "creato": "2026-09-04",
+        "rif": "5000000004",
+        "motivo": "101 acquisto"
+      },
+      {
+        "numero": "100005",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-04",
+        "qtaEff": 40,
+        "diff": 0,
+        "tipo": "PUTAWAY",
+        "mat": "CAVO-HDMI",
+        "qta": 40,
+        "quant": "Q5",
+        "udc": "1000005",
+        "da": "GR-ZONE",
+        "a": "01-03-1",
+        "creato": "2026-09-04",
+        "rif": "5000000005",
+        "motivo": "101 acquisto"
+      },
+      {
+        "numero": "100006",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-14",
+        "qtaEff": 4,
+        "diff": 0,
+        "tipo": "PICK",
+        "mat": "PC-UFF",
+        "qta": 4,
+        "quant": "Q1",
+        "udc": "1000001",
+        "da": "01-01-1",
+        "a": "GI-ZONE",
+        "creato": "2026-09-14",
+        "rif": "80000001",
+        "consegna": "80000001",
+        "ondata": ""
+      },
+      {
+        "numero": "100007",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-14",
+        "qtaEff": 4,
+        "diff": 0,
+        "tipo": "PICK",
+        "mat": "MON-24",
+        "qta": 4,
+        "quant": "Q3",
+        "udc": "1000003",
+        "da": "01-02-1",
+        "a": "GI-ZONE",
+        "creato": "2026-09-14",
+        "rif": "80000002",
+        "consegna": "80000002",
+        "ondata": ""
+      },
+      {
+        "numero": "100008",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-14",
+        "qtaEff": 4,
+        "diff": 0,
+        "tipo": "PICK",
+        "mat": "MOUSE",
+        "qta": 4,
+        "quant": "Q4",
+        "udc": "1000004",
+        "da": "01-02-2",
+        "a": "GI-ZONE",
+        "creato": "2026-09-14",
+        "rif": "80000003",
+        "consegna": "80000003",
+        "ondata": ""
+      },
+      {
+        "numero": "100009",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-14",
+        "qtaEff": 3,
+        "diff": 0,
+        "tipo": "PICK",
+        "mat": "STAMP-LAS",
+        "qta": 3,
+        "quant": "Q2",
+        "udc": "1000002",
+        "da": "01-01-2",
+        "a": "GI-ZONE",
+        "creato": "2026-09-14",
+        "rif": "80000004",
+        "consegna": "80000004",
+        "ondata": ""
+      },
+      {
+        "numero": "100010",
+        "stato": "confermato",
+        "risorsa": "MAG01 Marco",
+        "confermato": "2026-09-14",
+        "qtaEff": 15,
+        "diff": 0,
+        "tipo": "PICK",
+        "mat": "CAVO-HDMI",
+        "qta": 15,
+        "quant": "Q5",
+        "udc": "1000005",
+        "da": "01-03-1",
+        "a": "GI-ZONE",
+        "creato": "2026-09-14",
+        "rif": "80000005",
+        "consegna": "80000005",
+        "ondata": ""
+      }
+    ],
+    "inventari": [],
+    "prossimoQuant": 10,
+    "carico": [],
+    "tolleranza": 20,
+    "risorse": [
+      "MAG01 Marco",
+      "MAG02 Sara",
+      "MAG03 Luca",
+      "MAG04 Giulia"
+    ],
+    "registrazioni": []
+  },
+  "rda": [],
+  "acqParam": {
+    "soglia": 10000
+  },
+  "fatturePassive": [],
+  "chiusura": {
+    "iva": [
+      {
+        "periodo": "2026-09",
+        "dal": "2026-09-01",
+        "al": "2026-09-30",
+        "trimestrale": false,
+        "scadenza": "2026-10-16",
+        "debito": 905.08,
+        "credito": 1423.4,
+        "riporto": 0,
+        "saldo": -518.32,
+        "daVersare": 0,
+        "interessi": 0,
+        "creditoRiportato": 518.32,
+        "contabile": "100000031",
+        "su25": true,
+        "data": "2026-09-30",
+        "versato": null
+      }
+    ],
+    "imposte": []
+  },
+  "chiusure": {}
+}

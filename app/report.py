@@ -297,6 +297,24 @@ class Lavoro:
                 "mg_ondate": len(wm.get("ondateRilasciate") or []),
                 "mg_inventari_chiusi": sum(1 for d in wm.get("inventari") or [] if d.get("stato") == "chiuso"),
             })
+            # «Executive Assistant»: il negozio di informatica Pixel & Bit (settembre 2026, F24 il 16 ottobre)
+            def se(conto):
+                return sc(conto, fino="2026-10-31")
+            base.update({
+                "ea_negozio": "sì" if s.get("negozio") else "no",
+                "ea_costituzione": (s.get("costituzione") or {}).get("data") or "",
+                "ea_capitale_versato": round(-se("30") - se("08"), 2),
+                "ea_scorte": "/".join(str(round(g.get(m, 0))) for m in ("PC-UFF", "STAMP-LAS", "MON-24", "MOUSE", "CAVO-HDMI")),
+                "ea_magazzino": se("13"),
+                "ea_ricavi": -se("40"),
+                "ea_costo_venduto": se("41"),
+                "ea_fatture_sdi": sum(1 for f in s.get("fatture") or [] if f.get("sdi")),
+                "ea_credito_iva": round(se("14") + max(se("25"), 0), 2),
+                "ea_costo_personale": round(se("80") + se("81") + se("82"), 2),
+                "ea_risultato": round(-(se("40") + se("41") + se("80") + se("81") + se("82")), 2),
+                "ea_clienti": se("11"), "ea_fornitori": se("20"),
+                "ea_banca": se("10"),
+            })
         return base
 
     def indicatori(self):

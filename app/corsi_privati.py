@@ -65,6 +65,31 @@ MODULI_MAG = [
      [], []),
 ]
 
+# Executive Assistant: corso breve per segreteria e assistenti di direzione, senza produzione (niente PP)
+MODULI_EA = [
+    ("Avvio del negozio, anagrafiche e listino", 3,
+     "La società nasce dal notaio e i soci versano il capitale; clienti, fornitori, merci e listino di vendita; la scheda della dipendente; il magazzino a ubicazioni.",
+     ["ciclo-completo", "chi-fa-cosa"], [("erp_dati.avvio", "Avvio dell'azienda"), ("erp_dati.anagrafiche", "Anagrafiche"), ("erp_dati.condizioni", "Listino")]),
+    ("Acquisti e fatture dei fornitori (MM)", 4,
+     "Ordini ai fornitori, controllo degli ordini aperti, entrata merci con il DDT (MIGO) e fattura del fornitore (MIRO) con il controllo a tre vie.",
+     ["valorizzazione"], [("erp_acquisti.ordini", "Ordini d'acquisto"), ("erp_acquisti.entrate", "Entrate merci"), ("erp_acquisti.fatture", "Fatture d'acquisto")]),
+    ("Magazzino con la pistola RF (WMS)", 3,
+     "Merce da mettere a posto, messa a scaffale e prelievo con la pistola RF, «Dove si trova?», quadratura tra magazzino e contabilità.",
+     ["dove-merce", "processo-spedizione"], [("erp_magazzino.allocare", "Merce da mettere a posto"), ("erp_magazzino.rf", "Pistola RF"), ("erp_magazzino.mappa", "Mappa del magazzino")]),
+    ("Vendite, fatture e fattura elettronica (SD · FI)", 5,
+     "Ordine del cliente e semaforo di disponibilità, consegna e uscita merci, fattura, trasmissione allo SdI e lettura del file XML.",
+     ["prezzi-sconti", "fattura-sbagliata"], [("erp_vendite.ordini", "Ordini cliente"), ("erp_vendite.consegne", "Consegne"), ("erp_vendite.fatture", "Fatture di vendita"), ("erp_fi.sdi", "Fattura elettronica")]),
+    ("Stipendio, pagamenti e incassi", 3,
+     "Cedolino, registrazione delle paghe e bonifico del netto; pagamento dei fornitori (F-53) e incasso dai clienti (F-28).",
+     ["costo-personale", "previsione-cassa"], [("erp_paghe.cedolino", "Cedolino"), ("erp_fi.passive", "Pagamenti"), ("erp_vendite.incassi", "Incassi")]),
+    ("IVA, F24 e controlli di fine mese", 2,
+     "Liquidazione IVA mensile, F24 di ritenute e contributi, libro giornale e bilancio di verifica.",
+     [], [("erp_chiusura.iva", "Liquidazione IVA"), ("erp_fi.giornale", "Libro giornale"), ("erp_fi.bilancio", "Bilancio di verifica")]),
+    ("Esercizio guidato e consegna", 4,
+     "«Executive Assistant: il primo mese di un negozio di informatica»: oltre 50 passi con controllo automatico e la ricostruzione delle scritture, poi la consegna.",
+     [], [("erp_dati.avvio", "Apri l'esercizio passo passo")]),
+]
+
 CORSI = {
     "erp": {
         "titolo": "Master ERP Enterprise: dal ciclo attivo alla produzione", "breve": "Master ERP Enterprise", "prefisso": "ERP",
@@ -72,6 +97,13 @@ CORSI = {
         "gratis": ["ciclo-completo", "chi-fa-cosa", "prezzi-sconti"],
         "sottotitolo": "Un ERP didattico integrato con un solo libro giornale: costituisci Ferro & Transenne e la porti fino alla riapertura "
                        "dei conti lavorando in vendite (SD), acquisti e magazzino (MM), produzione (PP), WMS, contabilità (FI) e controllo (CO).",
+    },
+    "executive": {
+        "titolo": "Executive Assistant: l'ufficio amministrativo in un ERP", "breve": "Corso Executive Assistant", "prefisso": "EA",
+        "prezzo": 197, "prezzo_pieno": 247, "moduli": MODULI_EA, "esercizio": "executive-assistant",
+        "gratis": ["ciclo-completo", "chi-fa-cosa", "prezzi-sconti"],
+        "sottotitolo": "Il primo mese del negozio di informatica Pixel & Bit in un ERP didattico integrato: ordini ai fornitori, entrate merci, "
+                       "magazzino con la pistola RF, ordini dei clienti, fatture e SdI, stipendio, pagamenti, incassi, IVA e F24. Senza produzione.",
     },
     "magazzino": {
         "titolo": "Magazzino e Magazziniere 5.0: WMS, inventari e spedizioni", "breve": "Corso Magazziniere 5.0", "prefisso": "MAG",
@@ -139,7 +171,17 @@ DOMANDE_MAG = [(d[1], d[2], d[3], d[4]) for d in VERIFICA] + [
     ("Una differenza inventariale negativa a costo standard si registra come…", ["Ricavo", "Costo per differenze inventariali", "Capitale", "IVA"], 1, "Rettifica del magazzino."),
 ]
 
-DOMANDE = {"erp": DOMANDE_ERP, "magazzino": DOMANDE_MAG}
+# Executive Assistant: le domande dell'ERP senza quelle di produzione e controllo, più quelle del negozio
+_SOLO_PRODUZIONE = ("distinta", "ciclo di lavoro", "ordine di produzione", "101 da ordine", "WIP", "varianze", "centro di costo", "sovraccosti", "CO-PA", "dollari", "Ri.Ba")
+DOMANDE_EA = [d for d in DOMANDE_ERP if not any(k.lower() in d[0].lower() for k in _SOLO_PRODUZIONE)] + [
+    ("Il conto «Fatture da ricevere» si usa quando…", ["La merce è arrivata ma la fattura del fornitore non ancora", "Il cliente non ha pagato", "Si paga lo stipendio", "Si liquida l'IVA"], 0, "Si chiude con la MIRO."),
+    ("Se l'IVA a credito del mese è più alta dell'IVA a debito…", ["Si versa la differenza", "Nasce un credito IVA che passa al mese dopo", "Si perde", "La paga il cliente"], 1, "Tipico dei primi mesi: si compra più di quanto si vende."),
+    ("Il netto in busta della dipendente è…", ["Il lordo", "Il lordo meno contributi a suo carico e IRPEF", "Il costo per l'azienda", "Il TFR"], 1, "Il costo aziendale è più alto del lordo."),
+    ("L'F24 del 16 del mese serve a versare…", ["Le fatture dei fornitori", "Ritenute IRPEF e contributi INPS del mese prima", "Gli stipendi", "Il capitale sociale"], 1, "Scadenza da tenere in agenda."),
+    ("Le merci HAWA sono…", ["Prodotti fabbricati in azienda", "Merci comprate per essere rivendute così come sono", "Materie prime", "Cespiti"], 1, "Commercio, non produzione."),
+]
+
+DOMANDE = {"erp": DOMANDE_ERP, "magazzino": DOMANDE_MAG, "executive": DOMANDE_EA}
 
 
 def corso(slug):
