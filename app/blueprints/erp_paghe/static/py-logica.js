@@ -26,6 +26,11 @@ window.PY4 = (function () {
     h.dipendenti.forEach(function (d) { var x = DIPENDENTI.find(function (y) { return y.matricola === d.matricola; }) || {}; if (d.ferieAP == null) { d.ferieAP = x.ferieAP || 0; d.rolAP = x.rolAP || 0; } }); return h; }; })();
   // azienda nuova: i tre dipendenti sono assunti il giorno della costituzione (niente mesi precedenti, niente ferie arretrate)
   window.S4.dopoAvvio.push(function (n, i) {
+    if (i && i.modo === 'negozio') {   // un solo dipendente, assunto all'apertura del negozio
+      H().dipendenti = [{matricola: '00001', nome: 'Chiara Fontana', mansione: 'Addetta alle vendite e al magazzino', livello: '4° livello (CCNL commercio, didattico)', cdc: '4300', cdcNome: 'Negozio e amministrazione',
+        lordo: 1800.00, addizionali: 0, tempo: 'indeterminato', assunzione: n.S.avviato, ferieAP: 0, rolAP: 0}];
+      return;
+    }
     if (!i || (i.modo !== 'costituzione' && i.modo !== 'logistica')) return;
     H().dipendenti.forEach(function (d) { d.assunzione = n.S.avviato; d.ferieAP = 0; d.rolAP = 0; d.addizionali = 0; });
   });

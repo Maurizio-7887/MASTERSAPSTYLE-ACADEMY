@@ -1,3 +1,18 @@
+# Executive Assistant — corso breve per segreteria (novembre 2026)
+
+Nuovo esercizio guidato **«Executive Assistant: il primo mese di un negozio di informatica»** e corso per privati `/corsi/executive` (24 ore, senza produzione).
+
+- Launchpad → **🖥️ Executive Assistant**. In un account vuoto: Avvio → «Parti da zero» → scheda **Executive Assistant · negozio di informatica**
+  (`modo: 'negozio'`): nasce **Pixel & Bit S.r.l.** il 01/09/2026 con 20.000 € di capitale. Merci da rivendere (HAWA: PC-UFF, STAMP-LAS, MON-24, MOUSE,
+  CAVO-HDMI) al prezzo d'acquisto, listino PR00 senza sconti né provvigioni, 4 fornitori (F100–F400), 2 clienti (C100, C200), una dipendente.
+  I dati di Ferro & Transenne non vengono caricati né ricaricati in quell'account.
+- Settembre: 5 ordini d'acquisto, 5 MIGO (conto 13 Magazzino merci / 22) con messa a scaffale RF, 5 MIRO, 5 ordini dei clienti, consegne con prelievo RF,
+  uscita merci, fatture e SdI, cedolino, F-53, F-28, liquidazione IVA (credito 518,32); F24 il 16/10. 16 numeri di controllo nella consegna
+  (risultato −987,77, banca 14.784,24). Il PP non si usa.
+- Test: `npm run test:executive`. Le aziende e gli esercizi esistenti non cambiano (la modalità negozio è nuova e separata).
+
+---
+
 # Corsi online per privati (ottobre 2026)
 
 ERP in stile SAP (80 ore) e Magazzino e Magazziniere 5.0 (60 ore) si vendono ai privati come le altre Academy:

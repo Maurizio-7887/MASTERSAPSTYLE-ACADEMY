@@ -19,6 +19,10 @@ window.SD4 = (function () {
   // condizioni predefinite create all'avvio (listino, scaglioni, trasporto Lazio, provvigione)
   window.S4.dopoAvvio.push(function (n) {
     var c = n.S.condizioni;
+    if (n.S.negozio) {   // negozio: solo il prezzo di listino delle merci, niente scaglioni, trasporti o provvigioni
+      Object.keys(n.S.materiali).forEach(function (m) { if (n.S.materiali[m].prezzo) c.push({tipo: 'PR00', chiave: 'materiale', materiale: m, valore: n.S.materiali[m].prezzo, origine: 'listino'}); });
+      return;
+    }
     [['TR-STD', 60], ['TR-ALTA', 72], ['TR-PED', 55]].forEach(function (x) { c.push({tipo: 'PR00', chiave: 'materiale', materiale: x[0], valore: x[1], origine: 'listino'}); });
     ['TR-STD', 'TR-ALTA', 'TR-PED'].forEach(function (m) { c.push({tipo: 'ZSCA', chiave: 'materiale', materiale: m, scaglioni: [[100, 2], [300, 4]], origine: 'listino'}); });
     c.push({tipo: 'KF00', chiave: 'regione', regione: 'Lazio', valore: 1.50, origine: 'listino'});

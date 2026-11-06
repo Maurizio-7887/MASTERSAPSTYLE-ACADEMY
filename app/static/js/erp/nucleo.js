@@ -82,6 +82,25 @@
     'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: '', fido: 50000, rischio: 'B'},
     'C700': {nome: 'Barrières Lyon SARL', regione: 'Francia', paese: 'FR', ue: true, partitaIvaUe: 'FR40303265045', canale: '40 Export', gruppo: 'Estero', pagamento: '60 gg', fido: 30000, rischio: 'B'},
   };
+  // «Executive Assistant»: negozio di informatica che apre il 01/09/2026 — compra e rivende merci (HAWA), niente produzione.
+  // Prezzo d'acquisto = valore a magazzino (std): l'entrata merci non crea differenze prezzo. Nomi di fantasia.
+  var NEGOZIO = {
+    societa: '1000 Pixel & Bit S.r.l.',
+    materiali: {
+      'PC-UFF': {nome: 'PC desktop da ufficio', tipo: 'HAWA', um: 'pz', std: 450, peso: 9, prezzo: 690},
+      'STAMP-LAS': {nome: 'Stampante laser', tipo: 'HAWA', um: 'pz', std: 120, peso: 7, prezzo: 189},
+      'MON-24': {nome: 'Monitor 24 pollici', tipo: 'HAWA', um: 'pz', std: 95, peso: 5, prezzo: 149},
+      'MOUSE': {nome: 'Mouse ottico USB', tipo: 'HAWA', um: 'pz', std: 6, peso: 0.1, prezzo: 14},
+      'CAVO-HDMI': {nome: 'Cavo HDMI 2 m', tipo: 'HAWA', um: 'pz', std: 3, peso: 0.1, prezzo: 9}},
+    fornitori: {
+      'F100': {nome: 'Distribuzione PC Italia Spa', regione: 'Lombardia', pagamento: '30 gg', iban: 'IT48D0306901600100000061001', merce: 'PC desktop'},
+      'F200': {nome: 'Stampa Facile Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT73F0538712900000000062002', merce: 'stampanti'},
+      'F300': {nome: 'Video Schermi Srl', regione: 'Veneto', pagamento: '30 gg', iban: 'IT09G0200811770000000063003', merce: 'monitor'},
+      'F400': {nome: 'Accessori Digitali Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT64H0306903020100000064004', merce: 'mouse e cavi'}},
+    clienti: {
+      'C100': {nome: 'Studio Commerciale Aurora', regione: 'Umbria', canale: '10 Studi professionali', gruppo: 'Professionisti', pagamento: '30 gg', fido: 15000, rischio: 'A'},
+      'C200': {nome: 'Agenzia Viaggi Girasole Srl', regione: 'Umbria', canale: '20 Piccole imprese', gruppo: 'Imprese', pagamento: '30 gg', fido: 10000, rischio: 'B'}},
+    conti: {'13': 'Magazzino merci', '40': 'Ricavi di vendita merci', '41': 'Costo del venduto (merci vendute)'}};
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
@@ -104,7 +123,7 @@
     var n = statoNuovo();
     CONTI.forEach(function (c) { if (!S.pianoDeiConti.some(function (x) { return x.codice === c[0]; })) S.pianoDeiConti.push({codice: c[0], nome: c[1], tipo: c[2]}); });
     Object.keys(n.numeri).forEach(function (k) { if (S.numeri[k] == null) S.numeri[k] = n.numeri[k]; });
-    Object.keys(MATERIALI).forEach(function (m) {
+    if (!S.negozio) Object.keys(MATERIALI).forEach(function (m) {
       if (!S.materiali[m]) S.materiali[m] = JSON.parse(JSON.stringify(MATERIALI[m]));
       ['tipo', 'um', 'ferro', 'ore', 'attrezzaggio', 'peso', 'seriale'].forEach(function (k) { if (S.materiali[m][k] == null && MATERIALI[m][k] != null) S.materiali[m][k] = JSON.parse(JSON.stringify(MATERIALI[m][k])); });
       if (S.giacenze[m] == null) S.giacenze[m] = 0;
@@ -113,8 +132,8 @@
     if (!S.seriali) { S.seriali = {}; Object.keys(S.materiali).filter(function (m) { return S.materiali[m].seriale; }).forEach(function (m) {   // numeri di serie attivati su uno stato esistente
       S.seriali[m] = {}; Object.keys((S.lotti || {})[m] || {}).forEach(function (l) { for (var i = 0; i < Math.round(S.lotti[m][l].qta); i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); S.seriali[m][sn] = {stato: 'magazzino', lotto: l, cliente: '', storia: [{data: S.avviato || '', tipo: '561', rif: 'seriali attivati su uno stato esistente'}]}; } }); }); }
     if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }
-    Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; else if (S.clienti[k].fido == null) { S.clienti[k].fido = n.clienti[k].fido; S.clienti[k].rischio = n.clienti[k].rischio; } });
-    Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else { if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; if (n.fornitori[k].ferro && S.fornitori[k].ferro == null) S.fornitori[k].ferro = true; } });
+    if (!S.negozio) Object.keys(n.clienti).forEach(function (k) { if (!S.clienti[k]) S.clienti[k] = n.clienti[k]; else if (S.clienti[k].fido == null) { S.clienti[k].fido = n.clienti[k].fido; S.clienti[k].rischio = n.clienti[k].rischio; } });
+    if (!S.negozio) Object.keys(n.fornitori).forEach(function (k) { if (!S.fornitori[k]) S.fornitori[k] = n.fornitori[k]; else { if (!S.fornitori[k].iban) S.fornitori[k].iban = n.fornitori[k].iban; if (n.fornitori[k].ferro && S.fornitori[k].ferro == null) S.fornitori[k].ferro = true; } });
     return S;
   }
 
@@ -243,7 +262,7 @@
         return r2(S.registrazioni.reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === conto && (!partner || x.partner === partner); })
           .reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0));
       },
-      // conto di magazzino del materiale: materie prime 12, semilavorati 07, prodotti finiti 13
+      // conto di magazzino del materiale: materie prime 12, semilavorati 07, prodotti finiti 13 (nel negozio: merci HAWA, sempre 13 «Magazzino merci»)
       contoMag: function (mat) { var t = (S.materiali[mat] || {}).tipo; return t === 'ROH' ? '12' : t === 'HALB' ? '07' : '13'; },
       // versamento del capitale sottoscritto alla costituzione: D 10 Banca / A 08 Crediti verso soci
       versaCapitale: function (i) {
@@ -283,6 +302,19 @@
             righe: [{conto: '10', dareAvere: 'DARE', importo: 50000}, {conto: '13', dareAvere: 'DARE', importo: valore}, {conto: '30', dareAvere: 'AVERE', importo: 50000 + valore}]});
           N.salva(); return ra;
         }
+        if (i.modo === 'negozio') {
+          // Executive Assistant: società nuova che compra e rivende (niente produzione), un dipendente, quattro fornitori e due clienti
+          var capN = L.num(i.capitale == null || i.capitale === '' ? 20000 : i.capitale, 'Capitale sociale', 1);
+          S.negozio = true; S.societa = NEGOZIO.societa;
+          S.materiali = JSON.parse(JSON.stringify(NEGOZIO.materiali)); S.giacenze = {}; Object.keys(S.materiali).forEach(function (m) { S.giacenze[m] = 0; });
+          S.fornitori = JSON.parse(JSON.stringify(NEGOZIO.fornitori)); S.clienti = JSON.parse(JSON.stringify(NEGOZIO.clienti));
+          S.pianoDeiConti.forEach(function (c) { if (NEGOZIO.conti[c.codice]) c.nome = NEGOZIO.conti[c.codice]; });
+          S.avviato = data; S.costituzione = {data: data, capitale: capN};
+          var rn = N.post({data: data, tipo: 'COSTITUZIONE', rif: 'COSTITUZIONE', descrizione: 'Costituzione di ' + S.societa + ': i soci sottoscrivono il capitale sociale di ' + L.eur(capN) + ' €',
+            righe: [{conto: '08', dareAvere: 'DARE', importo: capN, testo: 'capitale sottoscritto e non ancora versato'}, {conto: '30', dareAvere: 'AVERE', importo: capN, testo: 'capitale sociale'}]});
+          if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
+          N.salva(); return rn;
+        }
         if (i.modo === 'costituzione') {
           var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
           S.avviato = data; S.costituzione = {data: data, capitale: cap};
@@ -310,4 +342,5 @@
   window.S4.dopoAvvio = window.S4.dopoAvvio || [];
   window.S4.crea = crea;
   window.S4.statoNuovo = statoNuovo;
+  window.S4.NEGOZIO = NEGOZIO;
 })();

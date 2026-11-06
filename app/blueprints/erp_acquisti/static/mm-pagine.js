@@ -5,7 +5,7 @@
   var N = SD.avvia(C.chiave), radice = document.getElementById('lab');
   if (!radice) return;
   var e = L.esc, eur = L.eur, n0 = L.n0, fd = L.fd, S = function () { return N.S; };
-  var roh = function () { return Object.keys(S().materiali).filter(function (k) { return S().materiali[k].tipo === 'ROH'; }).map(function (k) { return [k, k + ' — ' + S().materiali[k].nome + ' (standard ' + eur(S().materiali[k].std) + ' €/' + S().materiali[k].um + ')']; }); };
+  var roh = function () { return Object.keys(S().materiali).filter(function (k) { return S().materiali[k].tipo === 'ROH' || S().materiali[k].tipo === 'HAWA'; }).map(function (k) { return [k, k + ' — ' + S().materiali[k].nome + ' (standard ' + eur(S().materiali[k].std) + ' €/' + S().materiali[k].um + ')']; }); };
   var etich = function (o) { return o.numero + ' · ' + e(S().fornitori[o.fornitore].nome) + ' · ' + n0(o.qta) + ' ' + o.materiale + ' a ' + eur(o.prezzo) + (window.MM4 && !window.MM4.confermato(o) ? ' · ⏳ senza conferma del fornitore' : ''); };
   var elenco = function () {
     return L.scheda('📋', 'Ordini d\'acquisto', 'ME2N', L.tabella(['Ordine', 'Data', 'Richiesta / RFQ', 'Fornitore', 'Materiale', 'Q.tà›', 'Prezzo›', 'Valore›', 'Rilascio', 'Conferma fornitore', 'Entrato›', 'Fatturato›'], S().acquisti.map(function (o) {

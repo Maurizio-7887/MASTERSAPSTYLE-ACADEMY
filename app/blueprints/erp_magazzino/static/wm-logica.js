@@ -14,7 +14,7 @@ window.WM4 = (function () {
     '916': {nome: 'Zona di spedizione (interim)', interim: true}, '999': {nome: 'Differenze (interim)', interim: true},
     '980': {nome: 'Merce bloccata (quarantena)', interim: true},
     '930': {nome: 'Merce in viaggio tra depositi (sul camion)', interim: true}, '940': {nome: 'Deposito esterno D200 (filiale)', interim: true}};
-  var UDC = {FERT: 50, ROH: 1000, HALB: 100};   // pezzi per pallet · kg per fascio · kit di semilavorati per cassone metallico
+  var UDC = {FERT: 50, ROH: 1000, HALB: 100, HAWA: 50};   // pezzi per pallet · kg per fascio · kit di semilavorati per cassone metallico
   var RISORSE = ['MAG01 Marco', 'MAG02 Sara', 'MAG03 Luca', 'MAG04 Giulia'];
   var TIPI_COMPITO = {PUTAWAY: 'Messa a posto', PICK: 'Prelievo per consegna', STAGING: 'Approvvigionamento produzione', TRASF: 'Trasferimento tra ubicazioni', BLOCCO: 'Porta in quarantena', DEPOSITO: 'Prelievo per il deposito esterno'};
 
