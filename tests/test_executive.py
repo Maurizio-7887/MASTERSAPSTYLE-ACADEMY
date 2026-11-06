@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from tests._client import app, docente, entra, csrf
 from app.report import Lavoro
 from app.esercizi import ESERCIZI, attesi_esercizio
-from app.corsi_privati import CORSI, DOMANDE, DOMANDE_ESAME
+from app.corsi_privati import CORSI
 from app.db import db, Utente, Consegna
 
 
@@ -58,12 +58,7 @@ with app.app_context():
     x = Consegna.query.filter_by(utente_id=uid).one()
     assert x.esercizio == 'executive-assistant' and x.dati == stato
 
-# corso per privati: programma pubblico, senza produzione, con domande d'esame sufficienti
-ex = CORSI['executive']
-assert ex['esercizio'] == 'executive-assistant' and ex['ore'] == 32
-assert not any('produzione' in m[0].lower() or 'erp_produzione' in str(m[4]) for m in ex['moduli'])
-assert len(DOMANDE['executive']) >= DOMANDE_ESAME
-assert not any('distinta' in d[0].lower() or 'WIP' in d[0] for d in DOMANDE['executive'])
-pub = app.test_client().get('/corsi/executive')
-assert pub.status_code == 200 and 'Executive Assistant' in pub.get_data(as_text=True), pub.status_code
-print(f'OK executive assistant: {len(endpoints)} pagine della guida, {len(ESERCIZI["executive-assistant"]["attesi"])} indicatori, consegna allievo e corso /corsi/executive')
+# la vendita online passa da MasterExecutive Academy: in MASTERSAPSTYLE l'esercizio resta per l'aula, senza corso a pagamento
+assert 'executive' not in CORSI
+assert app.test_client().get('/corsi/executive').status_code == 404
+print(f'OK executive assistant: {len(endpoints)} pagine della guida, {len(ESERCIZI["executive-assistant"]["attesi"])} indicatori e consegna allievo')

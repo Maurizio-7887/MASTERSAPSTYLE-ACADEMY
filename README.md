@@ -1,6 +1,7 @@
 # Executive Assistant — corso per segreteria (novembre 2026)
 
-Esercizio guidato **«Executive Assistant: quattro mesi di un negozio di informatica»** (110 passi) e corso per privati `/corsi/executive` (32 ore, senza produzione).
+Esercizio guidato **«Executive Assistant: quattro mesi di un negozio di informatica»** (110 passi, senza produzione) per l'aula. La vendita online passa da
+**MasterExecutive Academy** (repo MASTEREXECUTIVE-ASSISTANT, Blocco 12 con i numeri di controllo): qui non c'è un corso a pagamento.
 
 - Launchpad → **🖥️ Executive Assistant**. In un account vuoto: Avvio → «Parti da zero» → scheda **Executive Assistant · negozio di informatica**
   (`modo: 'negozio'`): nasce **Pixel & Bit S.r.l.** il 01/09/2026 con 30.000 € di capitale. Merci da rivendere (HAWA: PC-UFF, STAMP-LAS, MON-24, MOUSE,
