@@ -13,6 +13,7 @@ from .blueprints.alta_varieta import bp as alta_varieta
 from .blueprints.contabilita import bp as contabilita
 from .blueprints.controllo import bp as controllo
 from .blueprints.docente import bp as docente
+from .blueprints.executive_api import bp as executive_api
 from .blueprints.erp_acquisti import bp as erp_acquisti
 from .blueprints.erp_copa import bp as erp_copa
 from .blueprints.erp_bpc import bp as erp_bpc
@@ -47,7 +48,7 @@ from .blueprints.sincronia import bp as sincronia
 from .blueprints.vendite_acquisti import bp as vendite_acquisti
 from .db import inizializza, ora_italiana
 
-BLUEPRINT = [portale, privati, accessi, sincronia, guida, allievo, docente, riprendi,
+BLUEPRINT = [executive_api, portale, privati, accessi, sincronia, guida, allievo, docente, riprendi,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
              erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_controllo, erp_costi, erp_bpc, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_finanza, erp_valute, erp_paghe, erp_copa, erp_fi, erp_cespiti, erp_chiusura]
