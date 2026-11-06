@@ -87,7 +87,7 @@
   var NEGOZIO = {
     societa: '1000 Pixel & Bit S.r.l.',
     materiali: {
-      'PC-UFF': {nome: 'PC desktop da ufficio', tipo: 'HAWA', um: 'pz', std: 450, peso: 9, prezzo: 690},
+      'PC-UFF': {nome: 'PC desktop da ufficio', tipo: 'HAWA', um: 'pz', std: 450, peso: 9, prezzo: 750},
       'STAMP-LAS': {nome: 'Stampante laser', tipo: 'HAWA', um: 'pz', std: 120, peso: 7, prezzo: 189},
       'MON-24': {nome: 'Monitor 24 pollici', tipo: 'HAWA', um: 'pz', std: 95, peso: 5, prezzo: 149},
       'MOUSE': {nome: 'Mouse ottico USB', tipo: 'HAWA', um: 'pz', std: 6, peso: 0.1, prezzo: 14},
@@ -96,11 +96,16 @@
       'F100': {nome: 'Distribuzione PC Italia Spa', regione: 'Lombardia', pagamento: '30 gg', iban: 'IT48D0306901600100000061001', merce: 'PC desktop'},
       'F200': {nome: 'Stampa Facile Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT73F0538712900000000062002', merce: 'stampanti'},
       'F300': {nome: 'Video Schermi Srl', regione: 'Veneto', pagamento: '30 gg', iban: 'IT09G0200811770000000063003', merce: 'monitor'},
-      'F400': {nome: 'Accessori Digitali Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT64H0306903020100000064004', merce: 'mouse e cavi'}},
+      'F400': {nome: 'Accessori Digitali Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT64H0306903020100000064004', merce: 'mouse e cavi'},
+      // fornitori di servizi e di beni strumentali (non di merce): proprietario del locale, assicurazione, arredamento
+      'F500': {nome: 'Immobiliare Corso Srl', regione: 'Umbria', pagamento: 'trimestre posticipato', iban: 'IT21J0538738480000000065005', merce: 'affitto del negozio'},
+      'F600': {nome: 'Assicurazioni Delfino Spa', regione: 'Toscana', pagamento: 'anticipato', iban: 'IT36K0306902117100000066006', merce: 'polizza del negozio'},
+      'F700': {nome: 'Arredo Negozi Srl', regione: 'Marche', pagamento: '30 gg', iban: 'IT52L0200802435000000067007', merce: 'banco, scaffali e vetrine'}},
     clienti: {
-      'C100': {nome: 'Studio Commerciale Aurora', regione: 'Umbria', canale: '10 Studi professionali', gruppo: 'Professionisti', pagamento: '30 gg', fido: 15000, rischio: 'A'},
-      'C200': {nome: 'Agenzia Viaggi Girasole Srl', regione: 'Umbria', canale: '20 Piccole imprese', gruppo: 'Imprese', pagamento: '30 gg', fido: 10000, rischio: 'B'}},
-    conti: {'13': 'Magazzino merci', '40': 'Ricavi di vendita merci', '41': 'Costo del venduto (merci vendute)'}};
+      'C100': {nome: 'Studio Commerciale Aurora', regione: 'Umbria', canale: '10 Studi professionali', gruppo: 'Professionisti', pagamento: 'fine mese', fido: 30000, rischio: 'A'},
+      'C200': {nome: 'Agenzia Viaggi Girasole Srl', regione: 'Umbria', canale: '20 Piccole imprese', gruppo: 'Imprese', pagamento: 'fine mese', fido: 30000, rischio: 'B'}},
+    conti: {'13': 'Magazzino merci', '40': 'Ricavi di vendita merci', '41': 'Costo del venduto (merci vendute)', '01': 'Mobili e arredi del negozio', '02': 'Fondo ammortamento mobili e arredi',
+      '03': 'Macchine d’ufficio elettroniche', '04': 'Fondo ammortamento macchine d’ufficio elettroniche'}};
   // intervalli di numerazione come in SAP
   var NUMERI = {ordine: 10000000, consegna: 80000000, fattura: 90000000, contabile: 100000000, reso: 60000000, richiesta: 70000000,
     acquisto: 4500000000, materiale: 5000000000, fatturaFornitore: 5105600000, produzione: 1000000,
@@ -304,7 +309,7 @@
         }
         if (i.modo === 'negozio') {
           // Executive Assistant: società nuova che compra e rivende (niente produzione), un dipendente, quattro fornitori e due clienti
-          var capN = L.num(i.capitale == null || i.capitale === '' ? 20000 : i.capitale, 'Capitale sociale', 1);
+          var capN = L.num(i.capitale == null || i.capitale === '' ? 30000 : i.capitale, 'Capitale sociale', 1);
           S.negozio = true; S.societa = NEGOZIO.societa;
           S.materiali = JSON.parse(JSON.stringify(NEGOZIO.materiali)); S.giacenze = {}; Object.keys(S.materiali).forEach(function (m) { S.giacenze[m] = 0; });
           S.fornitori = JSON.parse(JSON.stringify(NEGOZIO.fornitori)); S.clienti = JSON.parse(JSON.stringify(NEGOZIO.clienti));

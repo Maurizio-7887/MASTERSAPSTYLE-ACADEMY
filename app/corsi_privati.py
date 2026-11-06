@@ -68,7 +68,7 @@ MODULI_MAG = [
 # Executive Assistant: corso breve per segreteria e assistenti di direzione, senza produzione (niente PP)
 MODULI_EA = [
     ("Avvio del negozio, anagrafiche e listino", 3,
-     "La società nasce dal notaio e i soci versano il capitale; clienti, fornitori, merci e listino di vendita; la scheda della dipendente; il magazzino a ubicazioni.",
+     "La società nasce dal notaio e i soci versano il capitale; arredi e registratore di cassa come cespiti; clienti, fornitori, merci e listino; la scheda della dipendente; il magazzino a ubicazioni.",
      ["ciclo-completo", "chi-fa-cosa"], [("erp_dati.avvio", "Avvio dell'azienda"), ("erp_dati.anagrafiche", "Anagrafiche"), ("erp_dati.condizioni", "Listino")]),
     ("Acquisti e fatture dei fornitori (MM)", 4,
      "Ordini ai fornitori, controllo degli ordini aperti, entrata merci con il DDT (MIGO) e fattura del fornitore (MIRO) con il controllo a tre vie.",
@@ -83,10 +83,13 @@ MODULI_EA = [
      "Cedolino, registrazione delle paghe e bonifico del netto; pagamento dei fornitori (F-53) e incasso dai clienti (F-28).",
      ["costo-personale", "previsione-cassa"], [("erp_paghe.cedolino", "Cedolino"), ("erp_fi.passive", "Pagamenti"), ("erp_vendite.incassi", "Incassi")]),
     ("IVA, F24 e controlli di fine mese", 2,
-     "Liquidazione IVA mensile, F24 di ritenute e contributi, libro giornale e bilancio di verifica.",
+     "Liquidazione IVA mensile, F24 di ritenute, contributi e IVA, libro giornale e bilancio di verifica.",
      [], [("erp_chiusura.iva", "Liquidazione IVA"), ("erp_fi.giornale", "Libro giornale"), ("erp_fi.bilancio", "Bilancio di verifica")]),
-    ("Esercizio guidato e consegna", 4,
-     "«Executive Assistant: il primo mese di un negozio di informatica»: oltre 50 passi con controllo automatico e la ricostruzione delle scritture, poi la consegna.",
+    ("Fine anno: assestamento, imposte, chiusura e riapertura", 4,
+     "Risconto della polizza, rateo dell'affitto, ammortamenti di arredi e registratore di cassa, IRES e IRAP, chiusura dei conti al 31/12, riapertura e storno al 1° gennaio.",
+     [], [("erp_chiusura.assestamenti", "Ratei e risconti"), ("erp_cespiti.ammortamenti", "Ammortamenti"), ("erp_chiusura.imposte", "Imposte"), ("erp_chiusura.chiusura", "Chiusura"), ("erp_chiusura.riapertura", "Riapertura")]),
+    ("Esercizio guidato e consegna", 8,
+     "«Executive Assistant: quattro mesi di un negozio di informatica»: oltre 100 passi da settembre a gennaio con controllo automatico e la ricostruzione delle scritture, poi la consegna.",
      [], [("erp_dati.avvio", "Apri l'esercizio passo passo")]),
 ]
 
@@ -102,8 +105,9 @@ CORSI = {
         "titolo": "Executive Assistant: l'ufficio amministrativo in un ERP", "breve": "Corso Executive Assistant", "prefisso": "EA",
         "prezzo": 197, "prezzo_pieno": 247, "moduli": MODULI_EA, "esercizio": "executive-assistant",
         "gratis": ["ciclo-completo", "chi-fa-cosa", "prezzi-sconti"],
-        "sottotitolo": "Il primo mese del negozio di informatica Pixel & Bit in un ERP didattico integrato: ordini ai fornitori, entrate merci, "
-                       "magazzino con la pistola RF, ordini dei clienti, fatture e SdI, stipendio, pagamenti, incassi, IVA e F24. Senza produzione.",
+        "sottotitolo": "Quattro mesi del negozio di informatica Pixel & Bit in un ERP didattico integrato: ordini ai fornitori, entrate merci, "
+                       "magazzino con la pistola RF, ordini dei clienti, fatture e SdI, stipendi, pagamenti, incassi, IVA e F24; a fine anno ratei, risconti, "
+                       "ammortamenti, imposte, chiusura e riapertura. Senza produzione.",
     },
     "magazzino": {
         "titolo": "Magazzino e Magazziniere 5.0: WMS, inventari e spedizioni", "breve": "Corso Magazziniere 5.0", "prefisso": "MAG",

@@ -51,7 +51,7 @@
     },
     acquisto: function () {
       radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
-        L.scheda('🆕', 'Nuovo cespite con la fattura del fornitore', 'AS01 + F-90', L.modulo('ac', [['descrizione', 'Descrizione del bene', 'text'], ['classe', 'Classe', 'select', 'IMP', Object.keys(CE.CLASSI).map(function (k) { return [k, CE.CLASSI[k].nome + ' (' + CE.CLASSI[k].aliquota + '%)']; })],
+        L.scheda('🆕', 'Nuovo cespite con la fattura del fornitore', 'AS01 + F-90', L.modulo('ac', [['descrizione', 'Descrizione del bene', 'text'], ['classe', 'Classe', 'select', S().negozio ? 'ARR' : 'IMP', Object.keys(CE.CLASSI).filter(function (k) { return !!CE.CLASSI[k].negozio === !!S().negozio; }).map(function (k) { return [k, CE.CLASSI[k].nome + ' (' + CE.CLASSI[k].aliquota + '%)']; })],
           ['fornitore', 'Fornitore', 'select', 'F300', U.fornitori(S())], ['rif', 'Numero fattura del fornitore', 'text'], ['importo', 'Costo (imponibile) €', 'num'], ['iva', 'IVA %', 'num', 22],
           ['aliquota', 'Aliquota civilistica annua % (vuoto = classe; massimo 100)', 'num'], ['inFunzione', 'Entrata in funzione', 'date'], ['data', 'Data della fattura', 'date']].concat(campiMacchina()), [['ac', 'Registra il cespite e la fattura']]) +
           '<p class="lab-nota">D 01 / 03 bene al costo (con gli oneri accessori) · D 14 IVA a credito / A 20 fornitore. L\'ammortamento parte dal mese di entrata in funzione, non dalla data della fattura.</p>') +

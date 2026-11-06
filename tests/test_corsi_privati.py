@@ -22,7 +22,7 @@ for slug, c in CORSI.items():
 pub = app.test_client()
 for slug in CORSI:
     h = pub.get(f"/corsi/{slug}").get_data(as_text=True)
-    assert "Prova gratis le prime lezioni" in h and "Il programma" in h and "€ 297,00" in h, slug
+    assert "Prova gratis le prime lezioni" in h and "Il programma" in h and f"€ {CORSI[slug]['prezzo']},00" in h, slug
     a = pub.get(f"/corsi/{slug}/acquista").get_data(as_text=True)
     assert "bonifico" in a and "PayPal" in a
 assert pub.get("/corsi/inesistente").status_code == 404
