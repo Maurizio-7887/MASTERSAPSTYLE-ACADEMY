@@ -12,6 +12,9 @@ Esercizio guidato **«Executive Assistant: quattro mesi di un negozio di informa
   uscita merci, fatture, SdI, stipendio con la tredicesima a dicembre, F-53, F-28, IVA mensile, F24 paghe e IVA). Al 31/12 risconto della polizza
   (718,03), rateo dell'affitto (930), ammortamenti (400), IRES 2.548,56 e IRAP 414,14, chiusura (utile 7.656,32); il 01/01/2027 riapertura e storno;
   il 18/01/2027 gli F24 di dicembre (banca 28.905,76). 21 numeri di controllo nella consegna. Il PP non si usa.
+- **Iscritte online**: MasterExecutive chiede l'account con `POST /api/iscrizioni/executive` (intestazione `X-Api-Key` = variabile
+  `EXECUTIVE_API_KEY`, la stessa in tutti e due i progetti). L'account nasce con password provvisoria e finisce nel gruppo
+  **«Executive Assistant (online)»** del pannello docente (filtro «Mostra»), separato dall'aula. Lavoro, tempi e consegne si correggono qui.
 - Test: `npm run test:executive`. Le aziende e gli esercizi esistenti non cambiano (la modalità negozio è nuova e separata).
 
 ---

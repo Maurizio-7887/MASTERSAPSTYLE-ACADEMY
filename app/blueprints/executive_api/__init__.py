@@ -8,7 +8,7 @@ import secrets
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
-from ...db import Utente, db
+from ...db import GruppoAllievo, Utente, db
 
 bp = Blueprint("executive_api", __name__)
 
@@ -18,6 +18,12 @@ def _username(email):
     local=re.sub(r"[^a-z0-9.-]", "-",local).strip(".-")
     local=local[:34] or "allievo"
     return "exa-" + local
+
+
+def _nel_gruppo(utente):
+    """Le iscritte di MasterExecutive finiscono nel gruppo «Executive Assistant (online)» del pannello docente."""
+    if utente.ruolo=="allievo" and db.session.get(GruppoAllievo, utente.id) is None:
+        db.session.add(GruppoAllievo(utente_id=utente.id, gruppo="executive", origine="MasterExecutive Academy"))
 
 
 @bp.post("/api/iscrizioni/executive")
@@ -38,6 +44,8 @@ def iscrivi_executive():
     existing=Utente.query.filter_by(email=email).first()
     if existing:
         # Idempotenza: non reimpostiamo mai la password di un account esistente.
+        _nel_gruppo(existing)
+        db.session.commit()
         return jsonify(username=existing.username,password="",gia_presente=True), 200
 
     base=_username(email)
@@ -56,6 +64,8 @@ def iscrivi_executive():
     nuovo.imposta_password(pw)
     db.session.add(nuovo)
     try:
+        db.session.flush()
+        _nel_gruppo(nuovo)
         db.session.commit()
     except IntegrityError:
         db.session.rollback()

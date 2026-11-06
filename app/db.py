@@ -62,6 +62,23 @@ class Utente(db.Model):
         return float(self.costo_orario) if self.costo_orario is not None else costo_orario_generale()
 
 
+class GruppoAllievo(db.Model):
+    """Gruppo dell'allievo nel pannello docente: «aula» (creato dal docente) oppure «executive» (iscritto online a MasterExecutive Academy).
+    Tabella a parte: si crea da sola senza toccare quella degli utenti."""
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id", ondelete="CASCADE"), primary_key=True)
+    gruppo = db.Column(db.String(40), nullable=False, default="aula", index=True)
+    origine = db.Column(db.String(160), default="")
+    creato = db.Column(db.DateTime, default=adesso, nullable=False)
+
+
+GRUPPI = {"aula": "Aula", "executive": "Executive Assistant (online)"}
+
+
+def gruppo_di(uid):
+    g = db.session.get(GruppoAllievo, uid)
+    return g.gruppo if g else "aula"
+
+
 class Impostazione(db.Model):
     chiave = db.Column(db.String(60), primary_key=True)
     valore = db.Column(db.String(500), nullable=False)

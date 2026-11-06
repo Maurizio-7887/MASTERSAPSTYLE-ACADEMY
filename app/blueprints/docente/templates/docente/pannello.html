@@ -24,13 +24,15 @@
 {% else %}<p>Nessuna consegna in attesa. 👍</p>{% endif %}
 
 <h2>Allievi</h2>
+<p style="font-size:14px">Mostra: <a href="{{ url_for('docente.pannello') }}" style="{{ 'font-weight:700' if not gruppo }}">tutti</a>
+{% for k, v in gruppi.items() %} · <a href="{{ url_for('docente.pannello', gruppo=k) }}" style="{{ 'font-weight:700' if gruppo == k }}">{{ v }}</a>{% endfor %}</p>
 {% if righe %}
 <div class="msa-scroll"><table class="msa-tab">
-  <tr><th>Allievo</th><th>Nome utente</th><th>Ultimo accesso</th><th class="n">Sessioni</th><th class="n">Tempo collegato</th><th class="n">€/ora</th><th class="n">Costo €</th><th class="n">Da correggere</th></tr>
+  <tr><th>Allievo</th><th>Gruppo</th><th>Nome utente</th><th>Ultimo accesso</th><th class="n">Sessioni</th><th class="n">Tempo collegato</th><th class="n">€/ora</th><th class="n">Costo €</th><th class="n">Da correggere</th></tr>
   {% for r in righe %}
   <tr style="{{ '' if r.u.attivo else 'opacity:.55' }}">
     <td><a href="{{ url_for('docente.allievo', uid=r.u.id) }}">{{ r.u.nome }}</a>{% if not r.u.attivo %} (disattivato){% endif %}</td>
-    <td>{{ r.u.username }}</td><td>{{ ora_italiana(r.u.ultimo_accesso) }}</td><td class="n">{{ r.sessioni }}</td>
+    <td>{{ gruppi.get(r.gruppo, r.gruppo) }}</td><td>{{ r.u.username }}</td><td>{{ ora_italiana(r.u.ultimo_accesso) }}</td><td class="n">{{ r.sessioni }}</td>
     <td class="n">{{ durata(r.secondi) }}</td><td class="n">{{ r.tariffa | euro }}</td><td class="n">{{ r.costo | euro }}</td><td class="n">{{ r.da_correggere or '' }}</td>
   </tr>
   {% endfor %}
