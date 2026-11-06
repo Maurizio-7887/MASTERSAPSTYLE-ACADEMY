@@ -9,7 +9,7 @@ from urllib.parse import quote
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 
 from ...accesso import solo_docente, utente_corrente
-from ...db import ROMA, ArchivioLavoro, Consegna, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
+from ...db import GRUPPI, ROMA, ArchivioLavoro, Consegna, GruppoAllievo, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
 from ...pagine import LAB_SLOTS, VERSIONI
 
 LAVORI = {'erp-ft': 'Sistema integrato', **{v: 'Archivio storico · ' + v for v in VERSIONI}, **{k: 'Archivio laboratorio · ' + v for k, v in LAB_SLOTS.items() if k != 'erp-ft'}}
@@ -49,8 +49,9 @@ def tempi(dal=None, al=None):
     return {uid: {"secondi": int(s or 0), "sessioni": n, "ultimo": ult} for uid, s, n, ult in q.group_by(Sessione.utente_id).all()}
 
 
-def righe_allievi(dal=None, al=None, anche_disattivi=True):
+def righe_allievi(dal=None, al=None, anche_disattivi=True, gruppo=None):
     t = tempi(dal, al)
+    gruppi = dict(db.session.query(GruppoAllievo.utente_id, GruppoAllievo.gruppo).all())
     da_corr = dict(db.session.query(Consegna.utente_id, db.func.count(Consegna.id)).filter(Consegna.stato == "da_correggere")
                    .group_by(Consegna.utente_id).all())
     q = Utente.query.filter_by(ruolo="allievo")
@@ -58,24 +59,31 @@ def righe_allievi(dal=None, al=None, anche_disattivi=True):
         q = q.filter_by(attivo=True)
     out = []
     for u in q.order_by(Utente.nome).all():
+        gr = gruppi.get(u.id, "aula")
+        if gruppo and gr != gruppo:
+            continue
         x = t.get(u.id, {"secondi": 0, "sessioni": 0, "ultimo": None})
         tar = u.tariffa()
         out.append({"u": u, "secondi": x["secondi"], "sessioni": x["sessioni"], "tariffa": tar,
-                    "costo": costo(x["secondi"], tar), "da_correggere": da_corr.get(u.id, 0)})
+                    "costo": costo(x["secondi"], tar), "da_correggere": da_corr.get(u.id, 0), "gruppo": gr})
     return out
 
 
 @bp.route("/")
 def pannello():
-    righe = righe_allievi()
+    gruppo = request.args.get("gruppo") if request.args.get("gruppo") in GRUPPI else None
+    righe = righe_allievi(gruppo=gruppo)
     consegne = Consegna.query.filter_by(stato="da_correggere").order_by(Consegna.consegnata).all()
+    if gruppo:
+        ids = {r["u"].id for r in righe}
+        consegne = [c for c in consegne if c.utente_id in ids]
     recenti = Consegna.query.filter_by(stato="corretta").order_by(Consegna.corretta_il.desc()).limit(10).all()
     oggi = _data(datetime.now(ROMA).strftime("%Y-%m-%d"))
     collegati = Utente.query.filter(Utente.ruolo == "allievo", Utente.ultimo_accesso >= adesso() - timedelta(minutes=5)).count()
     return render_template("docente/pannello.html", righe=righe, consegne=consegne, recenti=recenti, esercizi=ESERCIZI,
                            tot_secondi=sum(r["secondi"] for r in righe), tot_costo=round(sum(r["costo"] for r in righe), 2),
                            oggi=sum(x["secondi"] for x in tempi(oggi).values()), collegati=collegati,
-                           tariffa=costo_orario_generale())
+                           tariffa=costo_orario_generale(), gruppo=gruppo, gruppi=GRUPPI)
 
 
 def _password_temporanea():

@@ -7,7 +7,7 @@ from flask import abort, g, jsonify, redirect, request, session, url_for
 from .db import Utente, db
 
 # pagine visibili senza accesso
-PUBBLICHE = {"accessi.accesso", "portale.home", "portale.health", "portale.materiale", "static",
+PUBBLICHE = {"accessi.accesso", "integrazioni.iscrizione_executive", "portale.home", "portale.health", "portale.materiale", "static",
              # corsi online per privati: programma, iscrizione, acquisto e verifica degli attestati
              "privati.corso_pubblico", "privati.prova", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
              "privati.static"}
