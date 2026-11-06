@@ -6,7 +6,9 @@ window.CE4 = (function () {
   'use strict';
   var L = window.LabMotore, r2 = L.r2;
   var N = function () { return window.SD4.N; }, S = function () { return N().S; };
-  var CLASSI = {IMP: {nome: 'Impianti e macchinari', conto: '01', fondo: '02', aliquota: 10}, MEZ: {nome: 'Mezzi di movimentazione interna (carrelli)', conto: '03', fondo: '04', aliquota: 20}};
+  var CLASSI = {IMP: {nome: 'Impianti e macchinari', conto: '01', fondo: '02', aliquota: 10}, MEZ: {nome: 'Mezzi di movimentazione interna (carrelli)', conto: '03', fondo: '04', aliquota: 20},
+    // negozio (Executive Assistant): coefficienti ministeriali del commercio; stessi conti 01-04, che nel negozio hanno questi nomi
+    ARR: {nome: 'Mobili e arredi del negozio', conto: '01', fondo: '02', aliquota: 15, negozio: true}, EDP: {nome: 'Macchine d’ufficio elettroniche (computer, registratore di cassa)', conto: '03', fondo: '04', aliquota: 20, negozio: true}};
   var C = function () { var s = S(); s.cespiti = s.cespiti || []; return s.cespiti; };
   var mese = function (d) { return +d.slice(0, 4) * 12 + (+d.slice(5, 7)) - 1; };
   var trova = function (cod) { var c = C().find(function (x) { return x.codice === String(cod); }); if (!c) throw Error('Cespite ' + cod + ' inesistente.'); return c; };

@@ -1,17 +1,20 @@
-# Executive Assistant — corso breve per segreteria (novembre 2026)
+# Executive Assistant — corso per segreteria (novembre 2026)
 
-Nuovo esercizio guidato **«Executive Assistant: il primo mese di un negozio di informatica»** e corso per privati `/corsi/executive` (24 ore, senza produzione).
+Esercizio guidato **«Executive Assistant: quattro mesi di un negozio di informatica»** (110 passi) e corso per privati `/corsi/executive` (32 ore, senza produzione).
 
 - Launchpad → **🖥️ Executive Assistant**. In un account vuoto: Avvio → «Parti da zero» → scheda **Executive Assistant · negozio di informatica**
-  (`modo: 'negozio'`): nasce **Pixel & Bit S.r.l.** il 01/09/2026 con 20.000 € di capitale. Merci da rivendere (HAWA: PC-UFF, STAMP-LAS, MON-24, MOUSE,
-  CAVO-HDMI) al prezzo d'acquisto, listino PR00 senza sconti né provvigioni, 4 fornitori (F100–F400), 2 clienti (C100, C200), una dipendente.
+  (`modo: 'negozio'`): nasce **Pixel & Bit S.r.l.** il 01/09/2026 con 30.000 € di capitale. Merci da rivendere (HAWA: PC-UFF, STAMP-LAS, MON-24, MOUSE,
+  CAVO-HDMI) al prezzo d'acquisto, listino PR00 senza sconti né provvigioni, 4 fornitori di merce (F100–F400) più affitto (F500), assicurazione (F600)
+  e arredatore (F700), 2 clienti (C100, C200), una dipendente. Classi di cespite del negozio ARR 15% e EDP 20% (conti 01–04 con i nomi del negozio).
   I dati di Ferro & Transenne non vengono caricati né ricaricati in quell'account.
-- Settembre: 5 ordini d'acquisto, 5 MIGO (conto 13 Magazzino merci / 22) con messa a scaffale RF, 5 MIRO, 5 ordini dei clienti, consegne con prelievo RF,
-  uscita merci, fatture e SdI, cedolino, F-53, F-28, liquidazione IVA (credito 518,32); F24 il 16/10. 16 numeri di controllo nella consegna
-  (risultato −987,77, banca 14.784,24). Il PP non si usa.
+- Settembre passo per passo; ottobre, novembre e dicembre con lo stesso ciclo (ordini, ME29N sopra soglia, MIGO + RF, MIRO, VA01, consegne + RF,
+  uscita merci, fatture, SdI, stipendio con la tredicesima a dicembre, F-53, F-28, IVA mensile, F24 paghe e IVA). Al 31/12 risconto della polizza
+  (718,03), rateo dell'affitto (930), ammortamenti (400), IRES 2.548,56 e IRAP 414,14, chiusura (utile 7.656,32); il 01/01/2027 riapertura e storno;
+  il 18/01/2027 gli F24 di dicembre (banca 28.905,76). 21 numeri di controllo nella consegna. Il PP non si usa.
 - Test: `npm run test:executive`. Le aziende e gli esercizi esistenti non cambiano (la modalità negozio è nuova e separata).
 
 ---
+
 
 # Corsi online per privati (ottobre 2026)
 

@@ -297,9 +297,10 @@ class Lavoro:
                 "mg_ondate": len(wm.get("ondateRilasciate") or []),
                 "mg_inventari_chiusi": sum(1 for d in wm.get("inventari") or [] if d.get("stato") == "chiuso"),
             })
-            # «Executive Assistant»: il negozio di informatica Pixel & Bit (settembre 2026, F24 il 16 ottobre)
+            # «Executive Assistant»: il negozio di informatica Pixel & Bit, settembre-dicembre 2026 con chiusura e riapertura
             def se(conto):
-                return sc(conto, fino="2026-10-31")
+                return sc(conto, fino="2026-12-31")
+            ch26 = (s.get("chiusure") or {}).get("2026") or {}
             base.update({
                 "ea_negozio": "sì" if s.get("negozio") else "no",
                 "ea_costituzione": (s.get("costituzione") or {}).get("data") or "",
@@ -309,11 +310,16 @@ class Lavoro:
                 "ea_ricavi": -se("40"),
                 "ea_costo_venduto": se("41"),
                 "ea_fatture_sdi": sum(1 for f in s.get("fatture") or [] if f.get("sdi")),
-                "ea_credito_iva": round(se("14") + max(se("25"), 0), 2),
+                "ea_iva_liquidazioni": sum(1 for x in (s.get("chiusura") or {}).get("iva") or [] if str(x.get("periodo", "")).startswith("2026-")),
                 "ea_costo_personale": round(se("80") + se("81") + se("82"), 2),
-                "ea_risultato": round(-(se("40") + se("41") + se("80") + se("81") + se("82")), 2),
-                "ea_clienti": se("11"), "ea_fornitori": se("20"),
-                "ea_banca": se("10"),
+                "ea_ammortamenti": se("50"),
+                "ea_risconto": se("06"),
+                "ea_rateo": -se("39"),
+                "ea_ires": -se("23"), "ea_irap": -se("35"),
+                "ea_utile": round(ch26.get("utile") or 0, 2),
+                "ea_banca_31_12": se("10"),
+                "ea_riapertura": "sì" if ch26.get("riapertura") else "no",
+                "ea_banca_finale": sc("10"),
             })
         return base
 

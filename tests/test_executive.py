@@ -18,7 +18,7 @@ def config(html):
 
 c = docente()
 h = c.get('/vuoto/').get_data(as_text=True)
-assert 'Executive Assistant: il primo mese di un negozio' in h and 'esercizio_guida=executive-assistant' in h
+assert 'Executive Assistant: quattro mesi di un negozio' in h and 'esercizio_guida=executive-assistant' in h
 assert c.get('/static/guida/esercizi/executive-assistant.js').status_code == 200
 assert config(c.get('/vuoto/s4/dati/?esercizio_guida=executive-assistant').get_data(as_text=True))['esercizio'] == 'executive-assistant'
 g = config(c.get('/vuoto/m/wms').get_data(as_text=True))
@@ -60,7 +60,7 @@ with app.app_context():
 
 # corso per privati: programma pubblico, senza produzione, con domande d'esame sufficienti
 ex = CORSI['executive']
-assert ex['esercizio'] == 'executive-assistant' and ex['ore'] == 24
+assert ex['esercizio'] == 'executive-assistant' and ex['ore'] == 32
 assert not any('produzione' in m[0].lower() or 'erp_produzione' in str(m[4]) for m in ex['moduli'])
 assert len(DOMANDE['executive']) >= DOMANDE_ESAME
 assert not any('distinta' in d[0].lower() or 'WIP' in d[0] for d in DOMANDE['executive'])
