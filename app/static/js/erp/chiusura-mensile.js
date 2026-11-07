@@ -81,10 +81,11 @@ window.MONTH_CLOSE = (function () {
     if(hasDifferences&&!mlClosed)blockers.push('Differenze prezzo o varianze: eseguire CKMLCP / Material Ledger per il mese.');
     if(mov.some(function(x){return inside(x.data,per)&&((S.materiali||{})[x.mat]||{}).tipo==='HALB'}))
       warnings.push('Sono presenti movimenti HALB: la valorizzazione multilivello del Material Ledger del simulatore NON copre integralmente i semilavorati. Conservare differenze 61/63 e segnalarle nella riconciliazione.');
-    if(!doc.length)warnings.push('Non ci sono scritture FI nel mese selezionato: verifica che siano state registrate paghe, fornitori, fatture e assestamenti pertinenti.');
+    if(!doc.length&&!mov.length)blockers.push('Periodo senza scritture né movimenti: registra le attività o documenta il mese senza operazioni prima di chiudere.');
+    else if(!doc.length)warnings.push('Non ci sono scritture FI nel mese selezionato: verifica paghe, fornitori, fatture e assestamenti pertinenti.');
     var payroll=(S.hr||{}).dipendenti||[];
     if(payroll.length&&!doc.some(function(r){return r.tipo==='PAGHE'}))
-      warnings.push('Non risulta una contabilizzazione PAGHE nel mese: verifica cedolini, competenza ed eventuali motivi dell’assenza.');
+      blockers.push('Sono presenti dipendenti nel caso, ma manca la contabilizzazione PAGHE del mese. Registra le paghe prima della chiusura.');
     if(!Object.keys(byCentre).length)warnings.push('Nessun centro esplicito presente nelle righe del mese: per i costi indiretti può operare OKB9; controlla il report CO.');
     var centreRighe=[];
     try {
