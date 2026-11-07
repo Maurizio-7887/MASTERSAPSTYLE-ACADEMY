@@ -33,6 +33,11 @@
 <script src="{{ url_for('static', filename='js/erp/presidio-didattico.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
 {% for s in js %}<script src="{{ s }}"></script>{% endfor %}
+{% if blueprint == 'erp_costi' and config.pagina == 'mensile' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chiusura-mensile.css') }}">
+<script src="{{ url_for('static', filename='js/erp/chiusura-mensile.js') }}"></script>
+<script src="{{ url_for('erp_costi.static', filename='mensile-pagine.js') }}"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='js/erp/tutor-laterale.js') }}"></script>
 {% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
 {% include "guida/_pannello.html" %}

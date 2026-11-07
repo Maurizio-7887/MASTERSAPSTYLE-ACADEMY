@@ -1,0 +1,35 @@
+name: ERP Monthly Close FI CO PP MM
+on:
+  pull_request:
+    paths:
+      - 'app/static/js/erp/nucleo.js'
+      - 'app/static/js/erp/chiusura-mensile.js'
+      - 'app/static/css/chiusura-mensile.css'
+      - 'app/templates/laboratori/base.html'
+      - 'app/pagine.py'
+      - 'app/blueprints/erp_costi/**'
+      - 'tests/chiusura-mensile-erp.js'
+      - '.github/workflows/erp-monthly-close.yml'
+  workflow_dispatch:
+jobs:
+  monthly-close:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install test dependencies
+        run: npm ci
+      - name: Monthly close and production/accounting regression
+        run: |
+          node tests/chiusura-mensile-erp.js
+          node tests/tutor-laterale-erp.js
+          node tests/budget-guida-campi.js
+          node tests/cpm-centri.js
+          node tests/wip-fasi.js
+          node tests/tutor-co01.js
+          node tests/esercizio-ragioneria-wms.js
+          node tests/esercizio-ragioneria-chiusura.js

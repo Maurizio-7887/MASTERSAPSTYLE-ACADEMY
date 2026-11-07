@@ -60,7 +60,7 @@
     },
     chiusura: function () {
       var ordini = S().produzione;
-      radice.innerHTML = U.avviso(S()) + '<div class="lab-griglia">' +
+      radice.innerHTML = U.avviso(S()) + '<p class="lab-nota"><b>Chiusura mensile completa:</b> dopo KGI2 e KO88 verifica anche FI, CO, magazzino e differenze nel <a href="' + location.pathname.replace('/chiusura', '/mensile') + '">cockpit mensile guidato →</a>.</p><div class="lab-griglia">' +
         L.scheda('➕', '1 · Sovraccosti sugli ordini', 'KGI2', L.modulo('kg', [['data', 'Data (fine mese)', 'date']], [['kg', 'Calcola e addebita']]) + '<p class="lab-nota">Percentuali della scheda sui costi <b>effettivi</b>: D 78 / A 76.</p>') +
         L.scheda('⚖️', '2 · Varianze e liquidazione', 'KKS2 · KO88', L.modulo('ko', [['data', 'Data (fine mese)', 'date']], [['ko', 'Calcola varianze e liquida']]) + '<p class="lab-nota">Ordini DLV o TECO: la varianza va al materiale (D 61 / A 73) e diventa una differenza prezzo nel Material Ledger.</p>') +
         '</div>' + (ordini.length ? ordini.map(function (o) {
