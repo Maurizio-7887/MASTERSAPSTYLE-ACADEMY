@@ -27,4 +27,5 @@ jobs:
           node tests/cpm-centri.js
           node tests/tutor-co01.js
           node tests/wip-fasi.js
+          node tests/esercizio-ragioneria-wms.js
           node tests/esercizio-ragioneria-chiusura.js
