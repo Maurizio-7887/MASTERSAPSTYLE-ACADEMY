@@ -26,3 +26,8 @@ def chiusura():
 @bp.route("/material-ledger")
 def ml():
     return render_lab("erp_costi", "ml")
+
+
+@bp.route("/mensile")
+def mensile():
+    return render_lab("erp_costi", "mensile")
