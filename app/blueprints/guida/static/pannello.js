@@ -47,6 +47,7 @@
   function esiti() {
     var S = stato(), h = aiutanti(S), m = manuali(S);
     return PASSI.map(function (p) {
+      if (p.cpmVerificato) { try { return p.fatto && p.fatto(h) ? 'auto' : ''; } catch (e) { return ''; } }
       if (m[p.titolo] && !(guidata && p.fatto)) return 'mano';
       if (!p.fatto) return '';
       try { return p.fatto(h) ? 'auto' : ''; } catch (e) { return ''; }
@@ -149,7 +150,7 @@
     var pendente = inQuiz();
     sel.disabled = !!pendente;
     radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
-    radice.querySelector('.msa-g-av').disabled = !!pendente;
+    radice.querySelector('.msa-g-av').disabled = !!pendente || !!(p.cpmVerificato && !st);
     if (pendente) {
       corpo.innerHTML = '<button type="button" class="msa-g-vai-saldi">📒 Non ricordi un saldo? Apri i saldi dei conti e i tuoi appunti ↓</button>' + quiz.html(stato(), esc) + strumenti(true);
       ripristinaFuoco();
@@ -205,6 +206,11 @@
     corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
+    radice.querySelector('.msa-g-av').disabled = !!(p.cpmVerificato && !st);
+    if(p.cpmVerificato && !st) {
+      var esito = corpo.querySelector('.msa-g-esito');
+      if(esito) esito.innerHTML = '🔍 Il tutor sta verificando i dati del CPM realmente salvati. Completa il comando evidenziato: «Avanti» si sblocca solo quando i controlli coincidono.';
+    }
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
     firmaPunti = ''; tickPunti(true);
@@ -464,10 +470,13 @@
   }
   function fattoP(p, d, k, el, h) {
     var key = chiaveP(p, k);
-    if (memP('salta')[key]) return true;
+    if (!p.cpmVerificato && memP('salta')[key]) return true;
     if (d.finale && stati[pos]) return true;
     if (d.fatto) { try { if (d.fatto(h, el)) return true; } catch (e) { /* stato non pronto */ } }
-    if (d.solo === 'stato') return false;
+    // Per il CPM un pulsante NON equivale a un salvataggio. Il suo esito
+    // deve essere verificato sul modello di calcolo persistito.
+    if (p.cpmVerificato && d.t === 'pulsante') return false;
+    if (d.solo === 'stato' || (p.cpmVerificato && d.richiedeSalvataggio)) return false;
     if (d.t === 'leggi' || d.controlla) return !!memP('letto')[key];   // controlla: la casella può contenere già il valore giusto, lo conferma l'allievo
     if (!el) return false;
     if (d.ctx) { try { if (!d.ctx()) return false; } catch (e) { return false; } }
@@ -501,8 +510,10 @@
     }
     var h = aiutanti(stato()), elenco = p.punti.map(function (d, k) {
       var el = d.sel ? trovaP(d.sel) : null, ok = fattoP(p, d, k, el, h), key = chiaveP(p, k);
-      if (ok && !memP('ok')[key]) segnaP('ok', key);   // un punto fatto resta fatto, anche se poi la casella cambia (per esempio cambiando centro)
-      return {d: d, k: k, el: el, fatto: ok || !!memP('ok')[key]};
+      if (ok && !memP('ok')[key] && !p.cpmVerificato) segnaP('ok', key);
+      // I controlli CPM con esito di stato non si possono scavalcare con
+      // un vecchio flag di sessione: se il dato cambia tornano da correggere.
+      return {d:d,k:k,el:el,fatto: p.cpmVerificato ? ok : (ok || !!memP('ok')[key])};
     });
     var primo = -1; for (var i = 0; i < elenco.length; i++) if (!elenco[i].fatto) { primo = i; break; }
     var ora = primo < 0 ? null : elenco[primo];
@@ -520,8 +531,11 @@
         if (d.t === 'pulsante') h2 += '<div class="msa-g-ora-val"><small>Premi il pulsante che brilla' + (d.nome ? ': «' + esc(d.nome) + '»' : '') + '.</small></div>';
         h2 += '<div class="msa-g-ora-serve"><b>💡 A cosa serve</b>' + esc(d.serve || '') + '</div>';
         if (!ora.el && d.t !== 'leggi') h2 += '<div class="msa-g-ora-dove">📍 Non vedo ancora questa schermata: premi <b>«Apri ➜»</b> qui sopra, poi la casella comincerà a brillare.</div>';
-        if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ La casella contiene ' + esc(vis(d)) + ', vai avanti' : '✓ Ho letto, vai avanti') + '</button>';
-        h2 += '<button type="button" class="msa-g-salta" data-k="' + ora.k + '">già fatto / salta questo punto</button>';
+        if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ Ho verificato la casella' : '✓ Ho letto, vai avanti') + '</button>';
+        if (!p.cpmVerificato) h2 += '<button type="button" class="msa-g-salta" data-k="' + ora.k + '">già fatto / salta questo punto</button>';
+        if (p.cpmVerificato && d.t === 'pulsante') h2 += '<div class="msa-g-ora-dove">🔍 Dopo il clic controllo il modello salvato. Se non coincide, correggi i campi indicati e ripeti il salvataggio; la spunta non può sostituire questo controllo.</div>';
+        if (p.cpmVerificato && (d.t === 'campo' || d.t === 'scelta') && ora.el && d.valore !== undefined && !ugualeP(ora.el.value,d.valore))
+          h2 += '<div class="msa-g-ora-correzione">⚠️ Valore trovato: <b>'+esc(ora.el.value)+'</b>. Valore richiesto: <b>'+esc(vis(d))+'</b>. Correggi nel campo evidenziato e salva con il pulsante previsto.</div>';
       } else h2 += '<div class="msa-g-ora-serve">Ora controlla qui sotto «Cosa devi vedere» e passa al passo successivo.</div>';
       h2 += '<details class="msa-g-ora-elenco"><summary>Tutti i punti di questo passo</summary><ol>' + elenco.map(function (x) {
         return '<li class="' + (x.fatto ? 'fatto' : x === ora ? 'adesso' : '') + '">' + (x.fatto ? '✓ ' : '') + tipoLabel(x.d) + ' ' + esc(x.d.nome || '') + (x.d.valore !== undefined && x.d.t !== 'pulsante' ? ' → <code>' + esc(vis(x.d)) + '</code>' : '') + '</li>';
@@ -552,6 +566,11 @@
     if (sg) { ls(SUGG, sg.classList.contains('msa-g-sugg-off') ? 'no' : 'si'); firmaPunti = ''; ultimoPunto = ''; soppressa = ''; if (sg.classList.contains('msa-g-sugg-off')) spegniPunti(); var cc = corpo.querySelector('.msa-g-ora-c'); if (cc) cc.innerHTML = ''; tickPunti(true); return; }
     var t = e.target.closest ? e.target.closest('.msa-g-letto,.msa-g-salta') : null; if (!t) return;
     var p = PASSI[pos], k = parseInt(t.getAttribute('data-k'), 10);
+    if (p.cpmVerificato && t.classList.contains('msa-g-salta')) return;
+    if (p.cpmVerificato && t.classList.contains('msa-g-letto') && p.punti[k] && p.punti[k].controlla && p.punti[k].valore !== undefined) {
+      var el=p.punti[k].sel ? trovaP(p.punti[k].sel) : null;
+      if(!el || !ugualeP(el.value,p.punti[k].valore)) { firmaPunti='';tickPunti(true);return; }
+    }
     segnaP(t.classList.contains('msa-g-letto') ? 'letto' : 'salta', chiaveP(p, k)); firmaPunti = ''; tickPunti(true);
   });
   // clic sui pulsanti della pagina: il punto si segna fatto solo se l'operazione non è stata rifiutata (messaggio rosso)
@@ -562,8 +581,9 @@
       var el = trovaP(d.sel); if (!el || !el.contains(e.target)) return;
       setTimeout(function () {
         var m = el.closest ? el.closest('[data-prefisso]') : null, es = m ? document.getElementById(m.getAttribute('data-prefisso') + '-esito') : null;
-        if (es && /\bko\b/.test(es.className)) return;
-        segnaP('clic', chiaveP(p, k)); tickPunti();
+        if (es && /\bko\b/.test(es.className)) { firmaPunti=''; tickPunti(true); return; }
+        if (!p.cpmVerificato) segnaP('clic', chiaveP(p, k));
+        firmaPunti=''; tickPunti(true); aggiorna();
       }, 250);
     });
   }, true);
