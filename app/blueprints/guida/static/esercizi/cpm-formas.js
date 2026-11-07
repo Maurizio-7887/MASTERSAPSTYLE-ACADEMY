@@ -417,6 +417,12 @@
   ['passiPreparazione', 'passiConsuntivo', 'passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (GUIDA[p.id]) p.punti = GUIDA[p.id]; });
   });
+  GUIDA['cpm-centri-ricavi'] = [
+    G.scelta('[data-pc-materiale="TR-STD"]','Linea transenne → PC-TR','PC-TR','Attribuisci le vendite della transenna alla responsabilità economica PC-TR: non al centro produttivo Taglio.'),
+    G.scelta('[data-pc-materiale="SL-TAGLIO"]','Semilavorati → PC-SL','PC-SL','Assegna la linea semilavorati al proprio centro di profitto: serve per tenere distinto il margine della linea.'),
+    G.scelta('#dim','Analizza per','profitCenter','Il report CO-PA confronta i ricavi netti e i costi del venduto per centro di profitto, senza creare ricavi aggiuntivi.'),
+    G.leggi(null,'Margine di contribuzione per centro','Controlla in KE30 ricavi, rettifiche, costo del venduto, differenze ML e provvigioni; i costi amministrativi di periodo restano separati.')
+  ];
   // Convalida didattica CPM: lo stato salvato, non il clic, decide il completamento.
   // La verifica usa le stesse fonti CO/BPC/CO-PC da cui leggono i report del simulatore.
   var validatori = {
@@ -434,7 +440,8 @@
     'cpm-kspi': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
     'cpm-tariffe': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
     'cpm-calcolo': function(h){var m=modello(h),tr=stima(h,'TR-STD'),sl=stima(h,'SL-TAGLIO');return !!tr&&!!sl&&circa(tr.unitario,31.4)&&circa(sl.unitario,14.6)&&[tr,sl].every(function(x){var snap=x.elementi&&x.elementi.par&&x.elementi.par.snapshot;return !!snap&&!!m&&snap.revisione===m.revisione;});},
-    'cpm-rilascio': function(h){var m=modello(h);return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c),snap=x&&x.elementi&&x.elementi.par&&x.elementi.par.snapshot;return !!x&&x.stato==='FR'&&!!snap&&!!m&&snap.revisione===m.revisione;});}
+    'cpm-rilascio': function(h){var m=modello(h);return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c),snap=x&&x.elementi&&x.elementi.par&&x.elementi.par.snapshot;return !!x&&x.stato==='FR'&&!!snap&&!!m&&snap.revisione===m.revisione;});},
+    'cpm-centri-ricavi': function(h){var pc=h.S.copaProfit&&h.S.copaProfit.materiale;return !!pc&&pc['TR-STD']==='PC-TR'&&pc['SL-TAGLIO']==='PC-SL';}
   };
   var verificaPulsanti = {
     'cpm-attivazione': [validatori['cpm-attivazione']],
