@@ -1,0 +1,19 @@
+/* Tutor laterale — resta visibile mentre l'allievo usa gli strumenti. */
+#msa-step-assistant{position:fixed;right:12px;top:95px;width:min(350px,calc(100vw - 24px));max-height:calc(100vh - 116px);overflow:auto;z-index:900;background:#fff;border:2px solid #0a6ed1;box-shadow:0 8px 28px rgba(15,45,70,.22);border-radius:13px;padding:16px;box-sizing:border-box;color:#153a54;font:inherit}
+#msa-step-assistant[hidden],#msa-step-reopen[hidden]{display:none!important}
+#msa-step-assistant h3{font-size:1.1rem;margin:14px 0 9px;color:#0b4873}
+#msa-step-assistant p{line-height:1.5;font-size:.92rem}
+.msa-step-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#msa-step-hide{border:0;background:#e7edf4;border-radius:6px;font-size:25px;padding:0 9px;cursor:pointer}
+.msa-step-mode{color:#536b7b;font-size:.8rem}
+.msa-step-controls{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}
+.msa-step-controls button,#msa-step-toggle{border:1px solid #0e6895;background:#0c5e91;color:white;border-radius:6px;padding:10px;cursor:pointer;font:inherit;font-size:.83rem}
+.msa-step-controls button[disabled]{opacity:.4;cursor:default}
+#msa-step-toggle{width:100%;background:#e5f0f5;color:#104666;font-weight:bold}
+#msa-step-assistant .msa-step-caption{color:#596e7d;font-size:.77rem}
+.msa-step-target{outline:4px solid #e5a319!important;outline-offset:4px!important;box-shadow:0 0 0 8px rgba(245,187,51,.22)!important;position:relative}
+.msa-step-autonomous{border-color:#98aab9!important}
+#msa-step-reopen{position:fixed;right:12px;bottom:16px;z-index:901;border:2px solid #0a6ed1;background:#fff;border-radius:30px;padding:10px 16px;font:inherit;cursor:pointer}
+@media(min-width:1220px){body:has(#msa-step-assistant:not([hidden])) .msa-lp{padding-right:365px}}
+@media(max-width:1219px){#msa-step-assistant{top:auto;bottom:14px;max-height:min(58vh,510px)}}
+@media print{#msa-step-assistant,#msa-step-reopen{display:none!important}}

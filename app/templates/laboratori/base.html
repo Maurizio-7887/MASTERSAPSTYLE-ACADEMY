@@ -7,6 +7,7 @@
 <title>{{ pagina.titolo }} · {{ lab.sigla }} · MASTERSAPSTYLE Academy</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/laboratori.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tutor-laterale.css') }}">
 </head>
 <body class="msa-launchpad msa-lab">
 {% include "simulatore/_shell.html" %}
@@ -32,6 +33,7 @@
 <script src="{{ url_for('static', filename='js/erp/presidio-didattico.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>
 {% for s in js %}<script src="{{ s }}"></script>{% endfor %}
+<script src="{{ url_for('static', filename='js/erp/tutor-laterale.js') }}"></script>
 {% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
 {% include "guida/_pannello.html" %}
 <script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>

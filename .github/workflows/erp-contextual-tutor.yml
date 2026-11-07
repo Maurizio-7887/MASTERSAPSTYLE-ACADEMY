@@ -1,0 +1,31 @@
+name: ERP Contextual Tutor and Existing Budget Tests
+on:
+  pull_request:
+    paths:
+      - 'app/static/js/erp/tutor-laterale.js'
+      - 'app/static/css/tutor-laterale.css'
+      - 'app/templates/laboratori/base.html'
+      - 'tests/tutor-laterale-erp.js'
+      - '.github/workflows/erp-contextual-tutor.yml'
+  workflow_dispatch:
+jobs:
+  tutor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify contextual side tutor, CO budgeting, production and closing
+        run: |
+          node tests/tutor-laterale-erp.js
+          node tests/budget-guida-campi.js
+          node tests/cpm-centri.js
+          node tests/tutor-co01.js
+          node tests/wip-fasi.js
+          node tests/esercizio-ragioneria-wms.js
+          node tests/esercizio-ragioneria-chiusura.js
