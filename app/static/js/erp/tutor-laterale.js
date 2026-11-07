@@ -66,6 +66,16 @@
       step('Imposte','ir','Verifica le imposte','Riconcilia i valori fiscali e le variazioni prima di registrare: IRES/IRAP non sono un semplice pulsante di chiusura mensile.')],
     'chiusura:chiusura': [
       step('Chiusura dell','ch','Verifica i prerequisiti prima di chiudere','La pagina CH4 effettua chiusura dell’ESERCIZIO (31 dicembre), non necessariamente close mensile CO. Prima: tutte le scritture, assestamenti, analisi ordini e verifiche di quadratura. Poi premi il pulsante di chiusura solo se i controlli sono superati.')],
+    'costi:mensile': [
+      step('Passo 1','mc-period','Seleziona il periodo contabile','Nel campo Periodo scegli AAAA-MM. Il tutor non chiude automaticamente il mese: analizza i movimenti effettivamente registrati.'),
+      step('Passo 1','mc-kpis','Confronta Dare e Avere FI','Le scritture devono quadrare. Controlla che stipendi, contributi, TFR, servizi e costi fissi siano registrati per competenza e attribuiti ai centri.'),
+      step('Passo 2','mc-box','Verifica prelievi, lavorazioni e magazzino','Per ogni ordine confronta 261 (materiali), CO11N (ore) e 101 (versamento HALB/FERT). Il saldo ordine resta WIP se è ancora aperto.'),
+      step('Passo 3','mc-box','Confronta KGI2, KO88 e Material Ledger','I sovraccosti seguono i costi effettivi, le varianze degli ordini chiusi si liquidano con KO88 e le differenze prezzo con CKMLCP. Non duplicare le paghe.'),
+      step('Passo 4','mc-box','Risolvi tutti i blocchi prima di procedere','Le anomalie rosse impediscono la chiusura. Le avvertenze richiedono un controllo del docente o dell’allievo e rimangono nel verbale.'),
+      step('Passo 5','mc-confirm','Scrivi la conferma esatta','Nel campo di conferma digita CHIUDI seguito dal periodo, per esempio CHIUDI 2027-03. Questo impedisce di sigillare per errore un mese diverso.'),
+      step('Passo 5','mc-reason','Motiva la chiusura','Descrivi quali controlli hai completato: FI, centri, ordini, magazzino, varianze e WIP.'),
+      step('Passo 5','mc-close','Premi il pulsante finale','Registra il verbale di chiusura. Da qui le nuove registrazioni del mese vengono bloccate, salvo riapertura motivata.','Conferma chiusura del mese')
+    ],
     'costi:chiusura': [
       step('Sovraccosti','kg','Rileva sovraccosti per ordine','I costi già originati da personale e fissi sui centri vengono assorbiti mediante tariffe o sovraccosti previsti. Evita il doppio caricamento sulla commessa.'),
       step('Varianze','ko','Liquida solo ordini idonei','Prima esamina WIP, differenze standard/effettivo e stato dell’ordine. La liquidazione KO88 trasferisce le varianze, non ripete il costo lavoro.')],
