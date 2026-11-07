@@ -1,0 +1,40 @@
+// Verifica reale del tutor laterale in JSDOM; non dipende dalla rete o dal database.
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const {JSDOM}=require('jsdom');
+const code=fs.readFileSync(path.join(__dirname,'../app/static/js/erp/tutor-laterale.js'),'utf8');
+let checks=0;
+function test(area,page,formSelector,expected){
+  const html='<!doctype html><html><body><main class="msa-lp"><div id="lab">'+formSelector+'</div></main></body></html>';
+  const dom=new JSDOM(html,{url:'https://academy.example/vuoto/s4/'+area+'/'+(page==='ordini'?'':page),runScripts:'outside-only',pretendToBeVisual:true});
+  const w=dom.window;
+  w.LAB_PAGINA={pagina:page,chiave:'test'};
+  w.eval(code);
+  w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+  let root=w.document.querySelector('#msa-step-assistant');
+  assert(root,'il pannello si apre su '+area+':'+page);checks++;
+  assert(root.textContent.includes(expected),'testo didattico '+expected);checks++;
+  const next=w.document.querySelector('#msa-step-next');
+  next.click();assert(root.textContent.includes('Passaggio 2'),'il passo cambia');checks++;
+  const target=w.document.querySelector('.msa-step-target');assert(target,'widget illuminato');checks++;
+  const toggle=w.document.querySelector('#msa-step-toggle');
+  toggle.click();
+  assert.equal(w.localStorage.getItem('msa-erp-guida-autonoma'),'1');checks++;
+  assert.equal(w.document.querySelector('.msa-step-target'),null,'illuminazione rimossa');checks++;
+  toggle.click();
+  assert.equal(w.localStorage.getItem('msa-erp-guida-autonoma'),'0');checks++;
+  w.document.querySelector('#msa-step-hide').click();
+  assert(root.hidden&&w.document.querySelector('#msa-step-reopen').hidden===false,'tutor richiudibile');checks++;
+  w.document.querySelector('#msa-step-reopen').click();
+  assert(!root.hidden,'tutor riapribile');checks++;
+  dom.window.close();
+}
+const mock=(prefix,fields)=>'<div class="lab-card"><h3>Modello didattico</h3><div data-prefisso="'+prefix+'">'+fields.map(f=>'<label><input id="'+prefix+'-'+f+'"></label>').join('')+'<button data-azione="'+prefix+'">Conferma</button></div></div>';
+test('produzione','avanzamento',mock('pr',['ordine','kg','data'])+mock('cf',['fase','ore'])+mock('en',['ordine','qta']),'prelievo');
+test('produzione','ordini',mock('co',['materiale','qta','data']),'HALB');
+test('controllo','kp06',mock('kp06',['c4200'])+mock('pcp',['conferma']),'versione');
+test('bpc','processo',mock('bpf',['cdc','azione'])+mock('retract',['conferma']),'controller');
+test('chiusura','iva',mock('lq',['periodo'])+mock('vs',['periodo']),'IVA');
+test('chiusura','chiusura',mock('ch',['anno']),'chiusura');
+console.log('Tutor laterale ERP: '+checks+' verifiche superate.');
