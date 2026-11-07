@@ -9,7 +9,30 @@
 window.COPA = (function () {
   'use strict';
   var r2 = window.LabMotore.r2;
-  var DIMENSIONI = {cliente: 'Cliente', materiale: 'Materiale', regione: 'Regione', canale: 'Canale di distribuzione', gruppo: 'Gruppo clienti'};
+  var DIMENSIONI = {cliente: 'Cliente', materiale: 'Materiale', regione: 'Regione', canale: 'Canale di distribuzione', gruppo: 'Gruppo clienti', profitCenter: 'Centro di profitto'};
+  var PROFIT_DEFAULT = [
+    {codice:'PC-TR',nome:'Business transenne',responsabile:'Direzione commerciale transenne'},
+    {codice:'PC-SL',nome:'Semilavorati e componenti',responsabile:'Responsabile linea componenti'}
+  ];
+  function impianto(S) {
+    if (!S.copaProfit) S.copaProfit = {centri: PROFIT_DEFAULT.map(function(x){return Object.assign({},x);}), materiale:{}};
+    if (!S.copaProfit.centri) S.copaProfit.centri = PROFIT_DEFAULT.map(function(x){return Object.assign({},x);});
+    if (!S.copaProfit.materiale) S.copaProfit.materiale = {};
+    return S.copaProfit;
+  }
+  function profitCenter(S,r) {
+    var cfg=impianto(S), m=String(r.materiale || '');
+    var codice=cfg.materiale[m];
+    // Non attribuire automaticamente ricavi a reparti o centri di costo.
+    return codice && cfg.centri.some(function(c){return c.codice === codice;}) ? codice : 'NON-ASSEGNATO';
+  }
+  function salvaAssegnazione(S,materiale,centro) {
+    var cfg=impianto(S), m=String(materiale || '').trim(), c=String(centro || '').trim();
+    if (!(S.materiali || {})[m]) throw Error('Materiale sconosciuto: '+m);
+    if (c && !cfg.centri.some(function(x){return x.codice===c;})) throw Error('Centro di profitto non valido: '+c);
+    if (!c) delete cfg.materiale[m]; else cfg.materiale[m]=c;
+    return c;
+  }
   var CAMPI = ['qta', 'ricaviLordi', 'scontiQuantita', 'scontiCliente', 'trasporti', 'abbuoni', 'costoVenduto', 'diffPrezzo', 'provvigioni'];
   function margini(x) {
     x.ricaviNetti = r2(x.ricaviLordi - x.scontiQuantita - x.scontiCliente + x.trasporti);
@@ -26,7 +49,7 @@ window.COPA = (function () {
     var gruppi = {};
     (S.copa || []).filter(function (r) { return (!filtro.dal || r.data >= filtro.dal) && (!filtro.al || r.data <= filtro.al) && Object.keys(filtro.car || {}).every(function (k) { return !filtro.car[k] || r[k] === filtro.car[k]; }); })
       .forEach(function (r) {
-        var k = r[dim] || '—';
+        var k = (dim === 'profitCenter' ? profitCenter(S,r) : r[dim]) || '—';
         var g = gruppi[k] = gruppi[k] || {chiave: k};
         CAMPI.forEach(function (c) { g[c] = r2((g[c] || 0) + (r[c] || 0)); });
       });
@@ -34,5 +57,5 @@ window.COPA = (function () {
     var tot = {chiave: 'Totale'}; CAMPI.forEach(function (c) { tot[c] = r2(righe.reduce(function (t, x) { return t + x[c]; }, 0)); });
     return {righe: righe, totale: margini(tot)};
   }
-  return {DIMENSIONI: DIMENSIONI, CAMPI: CAMPI, report: report, margini: margini};
+  return {DIMENSIONI: DIMENSIONI, CAMPI: CAMPI, report: report, margini: margini, impianto: impianto, profitCenter: profitCenter, salvaAssegnazione: salvaAssegnazione};
 })();
