@@ -75,6 +75,11 @@
   if (!items || !items.length) return;
   function findControl(s) {
     if (!s) return null;
+    var buttonPrefix=(s.field||'').match(/^[a-z0-9]+/i);
+    if (s.click && buttonPrefix) {
+      var action=document.querySelector('[data-prefisso="'+buttonPrefix[0]+'"] button[data-azione]');
+      if (action) return action;
+    }
     var targetId=document.getElementById(s.field);
     if (targetId && document.getElementById('lab').contains(targetId)) return targetId;
     var keyId=s.field;
@@ -94,7 +99,8 @@
   function highlight(){
     document.querySelectorAll('.msa-step-target').forEach(function(x){x.classList.remove('msa-step-target')});
     if (!guided || !items[index]) return;
-    var obj=findControl(items[index]);
+    var current=items[index];
+    var obj=findControl(current);
     if (obj) {
       obj.classList.add('msa-step-target');
       if (document.activeElement===document.body) {
