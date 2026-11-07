@@ -99,4 +99,20 @@ function journal(n,day){
  w.PP4.effettivi=orig;w.PP4.stato=ost;
  w.close();
 }
+{
+ const {w,n,S,M}=boot();
+ S.avviato='2027-01-01';
+ journal(n,'2027-01-15');n.salva();
+ w.LAB_PAGINA={pagina:'mensile',chiave:'close-month-test'};
+ w.eval(read('app/blueprints/erp_costi/static/mensile-pagine.js'));
+ ok(w.document.getElementById('mc-period')!==null,'cockpit visibile e periodo selezionabile');
+ ok(w.document.querySelectorAll('.mc-box').length===5,'cinque fasi didattiche renderizzate');
+ ok(w.document.body.textContent.includes('HALB/FERT'),'spiegazione semilavorati e finiti');
+ w.document.getElementById('mc-confirm').value='CHIUDI 2027-01';
+ w.document.getElementById('mc-reason').value='Controllati conti FI, costi per centro e ordini di gennaio.';
+ w.document.getElementById('mc-close').click();
+ ok(M.overview('2027-01').closed!==null,'il bottone pagina registra chiusura');
+ ok(w.document.getElementById('mc-reopen')!==null,'pulsante riapertura compare dopo close');
+ w.close();
+}
 console.log('Chiusura mensile FI/CO/PP/MM: '+checks+' controlli superati.');
