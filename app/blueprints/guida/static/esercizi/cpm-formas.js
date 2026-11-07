@@ -417,4 +417,61 @@
   ['passiPreparazione', 'passiConsuntivo', 'passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (GUIDA[p.id]) p.punti = GUIDA[p.id]; });
   });
+  // Convalida didattica CPM: lo stato salvato, non il clic, decide il completamento.
+  // La verifica usa le stesse fonti CO/BPC/CO-PC da cui leggono i report del simulatore.
+  var validatori = {
+    'cpm-attivazione': function(h){return attivo(h);},
+    'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
+      circa((piano0(h,'4200')||{})['86']||0,12000) && circa((piano0(h,'4200')||{})['50']||0,2900) && circa((piano0(h,'4200')||{})['54']||0,3100);},
+    'cpm-paghe': function(h){var m=modello(h);return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80']>0);},
+    'cpm-kp26': function(h){var m=modello(h);return !!m && ['Taglio','Piegatura','Saldatura'].every(function(c){return m.centri[c] && circa(m.centri[c].capacita,1500) && circa(m.centri[c].orePiano,1500);}) && circa(m.volumi['TR-STD'],1200) && !!(m.fatti && m.fatti.kp26 && m.fatti.ltp);},
+    'cpm-ciclo': function(h){var m=modello(h);return !!(m && m.fatti && m.fatti.ksu && m.generale.driver==='ore');},
+    'cpm-standard-tr': function(h){var m=modello(h),a=m && m.standard && m.standard['TR-STD'];return !!a && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura,0.2) && circa(a.ore.Saldatura,0.4) && circa(a.attrezzaggio,0);},
+    'cpm-standard-halb': function(h){var m=modello(h),a=m && m.standard && m.standard['SL-TAGLIO'];return !!a && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura||0,0) && circa(a.ore.Saldatura||0,0) && circa(a.attrezzaggio,0);},
+    'bpc-modello': function(h){var b=bpc(h);return !!(b && b.modello==='COSTI_CENTRI' && b.dati);},
+    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'];return !!a && STAGIONE.every(function(v,i){return circa(a[i],v);});},
+    'bpc-processo': function(h){var b=bpc(h);return !!b && CDC6.every(function(c){return ((b.stato||{})['BUDGET|V1|'+c]||{}).stato==='approvato';}) && (b.retract||[]).length>0;},
+    'cpm-kspi': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
+    'cpm-tariffe': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
+    'cpm-calcolo': function(h){var tr=stima(h,'TR-STD'),sl=stima(h,'SL-TAGLIO');return !!tr&&!!sl&&circa(tr.unitario,31.4)&&circa(sl.unitario,14.6);},
+    'cpm-rilascio': function(h){return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c);return !!x&&x.stato==='FR';});}
+  };
+  var verificaPulsanti = {
+    'cpm-attivazione': [validatori['cpm-attivazione']],
+    'cpm-paghe': [validatori['cpm-paghe']],
+    'cpm-kp26': [function(h){var m=modello(h);return !!(m&&m.fatti&&m.fatti.kp26);},function(h){var m=modello(h);return !!(m&&m.fatti&&m.fatti.ltp)&&circa(m.volumi['TR-STD'],1200);}],
+    'cpm-ciclo': [validatori['cpm-ciclo']],
+    'cpm-standard-tr': [validatori['cpm-standard-tr']],
+    'cpm-standard-halb': [validatori['cpm-standard-halb']],
+    'bpc-modello': [validatori['bpc-modello']],
+    'bpc-input': [validatori['bpc-input']],
+    'bpc-processo': Array.from({length:13},function(_,i){if(i===12)return validatori['bpc-processo'];var c=CDC6[i%6],approva=i>=6;return function(h){var st=STAT_B(h,c);return approva?st==='approvato':st==='inviato'||st==='approvato';};}),
+    'cpm-kspi': [validatori['cpm-kspi']],
+    'cpm-calcolo': [function(h){var x=stima(h,'TR-STD');return !!x&&circa(x.unitario,31.4);},function(h){var x=stima(h,'SL-TAGLIO');return !!x&&circa(x.unitario,14.6);}],
+    'cpm-rilascio': [function(h){return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c);return !!x&&(x.stato==='VO'||x.stato==='FR');});},validatori['cpm-rilascio']]
+  };
+  // Il budget salva più volte lo stesso modulo: ogni salvataggio è attribuito a un centro preciso.
+  verificaPulsanti['cpm-budget']=['4210','4220','4230','4200'].map(function(c){return function(h){
+    if(c==='4200')return circa((piano0(h,c)||{})['86']||0,12000)&&circa((piano0(h,c)||{})['50']||0,2900)&&circa((piano0(h,c)||{})['54']||0,3100);
+    return circa((piano0(h,c)||{})['80']||0,36000);
+  };});
+  ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function(k){
+    (window.MSA_CPM_FORMAS[k]||[]).forEach(function(p){
+      if(!validatori[p.id] || !GUIDA[p.id])return;
+      p.cpmVerificato=true;
+      p.fatto=validatori[p.id];
+      var idx=0, checks=verificaPulsanti[p.id]||[];
+      p.punti=GUIDA[p.id].map(function(d){
+        var x=Object.assign({},d);
+        if(x.t==='pulsante') {
+          var verifica=checks[idx++];
+          if(verifica){x.fatto=verifica;x.richiedeSalvataggio=true;}
+        }
+        return x;
+      });
+    });
+  });
+  // I passi di sola lettura sono confermati esplicitamente dall'allievo;
+  // non vengono falsamente presentati come registrazioni automaticamente verificate.
+
 })();
