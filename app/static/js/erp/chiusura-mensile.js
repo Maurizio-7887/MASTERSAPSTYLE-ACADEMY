@@ -16,7 +16,8 @@ window.MONTH_CLOSE = (function () {
     return JSON.stringify({
       docs:(S.registrazioni||[]).filter(function(x){return inside(x.data,per)}).map(function(x){return [x.id,x.data,x.tipo,x.rif,x.righe]}),
       mov:(S.movimenti||[]).filter(function(x){return inside(x.data,per)}).map(function(x){return [x.data,x.mat,x.qta,x.tipo,x.rif]}),
-      ops:(S.produzione||[]).map(function(o){return [o.numero,o.teco,o.liquidazione,
+      ops:(S.produzione||[]).map(function(o){return [o.numero,inside(o.teco,per)?o.teco:null,
+          o.liquidazione&&inside(o.liquidazione.data,per)?o.liquidazione:null,
           (o.eventi||[]).filter(function(x){return inside(x.data,per)}).map(function(x){return [x.tipo,x.data,x.kg,x.qta,x.ore,x.attrezzaggio,x.valore,x.stornato]})]}),
     });
   }
