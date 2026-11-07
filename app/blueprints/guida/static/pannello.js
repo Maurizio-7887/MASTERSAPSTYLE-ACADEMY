@@ -517,7 +517,13 @@
     });
     var primo = -1; for (var i = 0; i < elenco.length; i++) if (!elenco[i].fatto) { primo = i; break; }
     var ora = primo < 0 ? null : elenco[primo];
-    var firma = pos + '|' + (ora ? ora.k + (ora.el ? 'e' : 'x') : 'fine') + '|' + elenco.map(function (x) { return x.fatto ? 1 : 0; }).join('');
+    var esitoErrore = '';
+    if (p.cpmVerificato && ora && ora.d.t==='pulsante' && ora.el) {
+      var mod=ora.el.closest && ora.el.closest('[data-prefisso]');
+      var esito=mod && document.getElementById(mod.getAttribute('data-prefisso')+'-esito');
+      if(esito && /\\bko\\b/.test(esito.className)) esitoErrore=(esito.textContent||'').trim();
+    }
+    var firma = pos + '|' + (ora ? ora.k + (ora.el ? 'e' : 'x') : 'fine') + '|' + elenco.map(function (x) { return x.fatto ? 1 : 0; }).join('') + '|' + esitoErrore;
     if (firma !== firmaPunti || forza) {
       firmaPunti = firma;
       var fatti = elenco.filter(function (x) { return x.fatto; }).length;
@@ -534,6 +540,7 @@
         if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ Ho verificato la casella' : '✓ Ho letto, vai avanti') + '</button>';
         if (!p.cpmVerificato) h2 += '<button type="button" class="msa-g-salta" data-k="' + ora.k + '">già fatto / salta questo punto</button>';
         if (p.cpmVerificato && d.t === 'pulsante') h2 += '<div class="msa-g-ora-dove">🔍 Dopo il clic controllo il modello salvato. Se non coincide, correggi i campi indicati e ripeti il salvataggio; la spunta non può sostituire questo controllo.</div>';
+        if (esitoErrore) h2 += '<div class="msa-g-ora-correzione"><b>⛔ Il salvataggio è stato rifiutato.</b> '+esc(esitoErrore)+'<div>Correggi i dati del riquadro evidenziato e premi di nuovo il pulsante. Non si passa al comando successivo finché il modello non è salvato.</div></div>';
         if (p.cpmVerificato && (d.t === 'campo' || d.t === 'scelta') && ora.el && d.valore !== undefined && !ugualeP(ora.el.value,d.valore))
           h2 += '<div class="msa-g-ora-correzione">⚠️ Valore trovato: <b>'+esc(ora.el.value)+'</b>. Valore richiesto: <b>'+esc(vis(d))+'</b>. Correggi nel campo evidenziato e salva con il pulsante previsto.</div>';
       } else h2 += '<div class="msa-g-ora-serve">Ora controlla qui sotto «Cosa devi vedere» e passa al passo successivo.</div>';
