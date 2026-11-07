@@ -12,6 +12,7 @@
     righe.push({cls: 'tot', celle: ['Totale attivo', eur(sp.totaleAttivo), 'Totale passivo e netto', eur(sp.totalePassivo)]});
     return L.tabella(['Attività', '›', 'Passività e patrimonio netto', '›'], righe); };
   var PAGINE = {
+    mensile: function () { window.MENSILE4.render(radice, N); },
     iva: function () {
       var p = radice.dataset.p || (anno() + '-T1'), cal = null; try { cal = CH.calcolaIva(p); } catch (x) { cal = null; }
       var liq = CH.X().iva;
