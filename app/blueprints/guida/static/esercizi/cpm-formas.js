@@ -421,15 +421,15 @@
   // La verifica usa le stesse fonti CO/BPC/CO-PC da cui leggono i report del simulatore.
   var validatori = {
     'cpm-attivazione': function(h){return attivo(h);},
-    'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
+    'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230','4200'].every(function(c){return !!(m.fattiPerCentro&&m.fattiPerCentro[c]);}) && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
       circa((piano0(h,'4200')||{})['86']||0,12000) && circa((piano0(h,'4200')||{})['50']||0,2900) && circa((piano0(h,'4200')||{})['54']||0,3100);},
     'cpm-paghe': function(h){var m=modello(h);return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80']>0);},
     'cpm-kp26': function(h){var m=modello(h);return !!m && ['Taglio','Piegatura','Saldatura'].every(function(c){return m.centri[c] && circa(m.centri[c].capacita,1500) && circa(m.centri[c].orePiano,1500);}) && circa(m.volumi['TR-STD'],1200) && !!(m.fatti && m.fatti.kp26 && m.fatti.ltp);},
     'cpm-ciclo': function(h){var m=modello(h);return !!(m && m.fatti && m.fatti.ksu && m.generale.driver==='ore');},
-    'cpm-standard-tr': function(h){var m=modello(h),a=m && m.standard && m.standard['TR-STD'];return !!a && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura,0.2) && circa(a.ore.Saldatura,0.4) && circa(a.attrezzaggio,0);},
-    'cpm-standard-halb': function(h){var m=modello(h),a=m && m.standard && m.standard['SL-TAGLIO'];return !!a && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura||0,0) && circa(a.ore.Saldatura||0,0) && circa(a.attrezzaggio,0);},
+    'cpm-standard-tr': function(h){var m=modello(h),a=m && m.standard && m.standard['TR-STD'];return !!a && !!(m.fattiStandard&&m.fattiStandard['TR-STD']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura,0.2) && circa(a.ore.Saldatura,0.4) && circa(a.attrezzaggio,0);},
+    'cpm-standard-halb': function(h){var m=modello(h),a=m && m.standard && m.standard['SL-TAGLIO'];return !!a && !!(m.fattiStandard&&m.fattiStandard['SL-TAGLIO']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura||0,0) && circa(a.ore.Saldatura||0,0) && circa(a.attrezzaggio,0);},
     'bpc-modello': function(h){var b=bpc(h);return !!(b && b.modello==='COSTI_CENTRI' && b.dati);},
-    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'];return !!a && STAGIONE.every(function(v,i){return circa(a[i],v);});},
+    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'];return !!a && !!(b.inputSalvati&&b.inputSalvati['BUDGET|V1|4200']) && STAGIONE.every(function(v,i){return circa(a[i],v);});},
     'bpc-processo': function(h){var b=bpc(h);return !!b && CDC6.every(function(c){return ((b.stato||{})['BUDGET|V1|'+c]||{}).stato==='approvato';}) && (b.retract||[]).length>0;},
     'cpm-kspi': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
     'cpm-tariffe': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
@@ -452,6 +452,7 @@
   };
   // Il budget salva più volte lo stesso modulo: ogni salvataggio è attribuito a un centro preciso.
   verificaPulsanti['cpm-budget']=['4210','4220','4230','4200'].map(function(c){return function(h){
+    if(!(modello(h)&&modello(h).fattiPerCentro&&modello(h).fattiPerCentro[c]))return false;
     if(c==='4200')return circa((piano0(h,c)||{})['86']||0,12000)&&circa((piano0(h,c)||{})['50']||0,2900)&&circa((piano0(h,c)||{})['54']||0,3100);
     return circa((piano0(h,c)||{})['80']||0,36000);
   };});
