@@ -55,6 +55,7 @@ window.BPC4 = (function () {
       for (var k = 1; k <= 12; k++) a.push(r2(num(i['m' + c[0] + '_' + k], c[0] + ' ' + MESI[k - 1])));
       if (a.some(function (x) { return x; })) m.dati[chiave(cat, ver, cdc, c[0])] = a; else delete m.dati[chiave(cat, ver, cdc, c[0])];
     });
+    m.inputSalvati = m.inputSalvati || {}; m.inputSalvati[cat + '|' + ver + '|' + cdc] = true;
     log('Input ' + cat + ' ' + ver + ' centro ' + cdc); N().salva();
     return '<p class="lab-nota">Dati salvati nel modello: ' + cat + ' ' + ver + ' · centro ' + cdc + '. Totale annuo ' + L.eur(cp().CLASSI.reduce(function (t, c) { return t + totaleRiga(riga(cat, ver, cdc, c[0])); }, 0)) + ' €.</p>';
   }

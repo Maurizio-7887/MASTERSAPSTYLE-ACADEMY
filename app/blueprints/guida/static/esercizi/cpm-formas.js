@@ -20,15 +20,16 @@
         ['Leggi prima','Il riquadro «Passo 1 · Apri il piano CO 2026»: che cosa crea (sei centri con i codici delle paghe, tipo attività ORE, ciclo TR-STD) e che cosa NON fa (nessuna scrittura FI, nessun ordine)'],
         ['Per confermare scrivi ATTIVA','ATTIVA'],['Pulsante','Apri il piano CO'],
         ['Poi leggi','Gerarchia H-FT: 4100 Magazzino e 4200 Produzione (centri di servizio), 4210 Taglio, 4220 Piegatura, 4230 Saldatura (produttivi), 4300 Amministrazione · tipi di attività ORE-TAG/ORE-PIE/ORE-SAL · classi di costo primarie 80, 81, 82, 50, 54, 83, 86 e secondarie 943000/944000 · tabella OKB9'],
-        ['Barra in alto','Il ciclo di pianificazione: 1 anagrafiche → 2 KP06 → 3 KP26 → 4 ribaltamento → 5 KSPI → 6 CK11N/CK24 → 7 consuntivo. Il pallino giallo è la prossima cosa da fare']
+        ['Barra in alto','Il ciclo di pianificazione: 1 anagrafiche → 2 KP06 → 3 KP26 → 4 ribaltamento → 5 KSPI → 6 CK11N/CK24 → 7 consuntivo. Il pallino giallo è la prossima cosa da fare'],
+        ['Regola contabile fondamentale','Centro di costo = responsabilità di consumo delle risorse; ordine produttivo/commessa = oggetto che riceve il costo industriale; centro di ricavo = responsabilità commerciale gestionale, NON automaticamente uno dei sei centri di costo. I centri di profitto collegano ricavi e costi di competenza per misurare il risultato. Nel simulatore il ricavo si analizza tramite cliente, materiale, regione e canale in CO-PA: non inventare un campo centro di ricavo che non esiste.']
       ],{attesa:'Piano CO 2026 aperto (versione 0, revisione 1). Nessuna scrittura FI, nessun ordine cliente o PP creato; gli ordini esistenti non cambiano.',nota:'I codici dei centri sono gli stessi delle paghe (PA30): i costi del personale registrati con le paghe arriveranno da soli sul loro centro.',fatto:attivo}),
       passo('cpm-budget','KP06: pianifica i costi annui dei centri (versione 0)',[
         ['Versione','0 · Piano/consuntivo (operativa)'],
         ['Centro 4210 Taglio','80 Salari e stipendi 36000; tutte le altre classi 0 → Salva il piano del centro'],
         ['Centro 4220 Piegatura','80 Salari e stipendi 36000 → Salva il piano del centro'],
         ['Centro 4230 Saldatura','80 Salari e stipendi 36000 → Salva il piano del centro'],
-        ['Centro 4200 Produzione','86 Fitti passivi 12000 (capannone: 3.000 a trimestre) · 50 Ammortamenti 2900 (taglierina 1.500 + piegatubi 800 + saldatrice 600, quota annua a regime) · 54 Consulenze e servizi 3100 (energia e manutenzioni); 80, 81, 82, 83 a 0 → Salva il piano del centro'],
-        ['Centri 4100 Magazzino e 4300 Amministrazione','Lasciali a 0 nella versione 0: in questo caso il loro costo non entra nel prodotto'],
+        ['Centro 4200 Produzione','86 Fitti passivi 12000 (capannone: 3.000 a trimestre) · 50 Ammortamenti 2900 (taglierina 1.500 + piegatubi 800 + saldatrice 600, quota annua a regime) · 54 Consulenze e servizi 3100 (energia e manutenzioni); 80, 81, 82, 83 a 0 → Salva il piano del centro: sono costi previsti del centro comune, non costi da aggiungere direttamente alle commesse'],
+        ['Centri 4100 Magazzino e 4300 Amministrazione','Lasciali a 0 nella versione di piano 0 per mantenere i valori didattici del caso. NON significa che siano centri senza costi reali: le paghe di Marco e Giulia saranno imputate ai rispettivi centri nel consuntivo. In una pianificazione aziendale completa vanno stimati anche questi costi e definito se sono industriali, logistici o di periodo.'],
         ['Controlla la tabella','Piano versione 0: 4210, 4220, 4230 36.000 ciascuno; 4200 18.000; totale 126.000']
       ],{dove:{ep:'erp_controllo.kp06'},percorso:'CO → Controllo di gestione → 2 · Pianificazione costi per centro',attesa:'Piano 126.000 € = 108.000 di personale dei reparti + 18.000 di costi comuni di stabilimento. È un piano annuo, non il costo di dicembre, e non registra niente in contabilità.',nota:'Ogni centro si salva da solo: scegli il centro in alto, scrivi gli importi annui, premi «Salva il piano del centro». Ogni salvataggio crea una nuova revisione del piano.',
         fatto:function(h){var m=modello(h);return attivo(h) && m.anno===2026 && centri.every(function(k){var c=m.centri[k];return c && circa(c.personale,36000) && circa(c.indiretti,0);}) && circa(piano0(h,'4200')['86'],12000) && circa(piano0(h,'4200')['50'],2900) && circa(piano0(h,'4200')['54'],3100) && circa(m.generale.produttivi,18000) && circa(m.generale.amministrativi,0);}}),
@@ -111,10 +112,19 @@
       {id:'cpm-fonti-fine-mese',g:'14 · Controllo costi di fine mese',data:'31/12/2026',titolo:'KSB1: leggi i costi effettivi dei centri prima di interpretare i residui',dove:{ep:'erp_controllo.ksb1'},percorso:'CO → Controllo di gestione → Consuntivo dei centri (KSB1); poi 2 · Pianificazione costi per centro → Tabella di controllo; poi Piano/consuntivo e scostamenti',
        campi:[['Consuntivo automatico','Scegli il centro 4200: trovi la paga di Sara Bianchi (80, 81, 82 con origine «riga FI»), il fitto del rateo (86) e gli ammortamenti (50) con origine «OKB9». Nessun costo va riportato a mano'],
          ['Tabella di controllo del personale (KP06)','La colonna «Consuntivo registro paghe» ora contiene la paga di dicembre di ogni dipendente sul suo centro; Consumo % = consuntivo / piano'],
-         ['Riattribuzione facoltativa (KB11N)','Se Sara Bianchi lavora tutta in saldatura puoi spostare il suo costo dal 4200 al 4230: data 31/12/2026, classe 80, importo della sua retribuzione → Registra la riattribuzione. Solo CO: il giornale non cambia'],
+         ['Riattribuzione KB11N — solo con evidenza','NON spostare la paga di Sara dal 4200 al 4230 per far tornare il budget o riempire artificialmente il centro Saldatura. Usa KB11N solo quando hai una rettifica documentata della destinazione effettiva del lavoro: causale, periodo, ore o percentuale giustificate, centro cedente/ricevente e importo della SOLA quota attribuibile. Nel caso base limitati a leggere il consuntivo, senza eseguire KB11N.'],
          ['Lettura del report','Residuo = consuntivo − assorbito = scostamento di spesa + scostamento di assorbimento. Efficienza confronta ore effettive e ore standard dei pezzi confermati. Report cumulativo dell’anno, non del solo mese'],
-         ['Attenzione','Il piano è annuo e l’azienda ha lavorato solo dicembre: piano/12 è un confronto indicativo solo se dichiari che non c’è stagionalità']],
+         ['Attenzione','Il piano è annuo e l’azienda ha lavorato solo dicembre: piano/12 è un confronto indicativo solo se dichiari che non c’è stagionalità. OKB9 assegna i costi privi di centro in base a una regola, ma non sostituisce la verifica della loro competenza e destinazione. I ricavi non vanno imputati automaticamente a 4200/4210/4220/4230.']],
        attesa:'Il consuntivo dei centri coincide con le scritture FI dell’anno: paghe sul centro del dipendente, gli altri costi con la tabella OKB9. Nessuna scrittura aggiuntiva, il risultato FI del caso non cambia.',nota:'In S/4HANA FI e CO stanno nello stesso libro giornale (ACDOCA): per questo il consuntivo non si ricopia. Non concludere «inefficienza» dal solo residuo e non generare scritture FI di WIP.'}
+      ,{id:'cpm-centri-ricavi',g:'14 · Controllo costi di fine mese',data:'31/12/2026',titolo:'Controllo di gestione: separa centri di costo, responsabilità di ricavo e margini',dove:{ep:'erp_copa.ke30'},percorso:'CO → Redditività (CO-PA) → Redditività per segmento (KE30); confronta con KSB1, ordini PP e contabilità FI',
+       campi:[['1 · Mappa dei costi','Costi primari: conto FI + centro di costo effettivo (paghe 80/81/82 sul centro dipendente, fitti 86, ammortamenti 50, servizi 54 con regola OKB9 verificata). 4200 è un centro comune, 4210/4220/4230 sono produttivi, 4100 è logistico, 4300 amministrativo.'],
+         ['2 · Attribuzione alle commesse','I costi indiretti vengono ribaltati secondo un driver motivato; le ore dei reparti sono valorizzate con KSPI e addebitate agli ordini tramite CO11N. Il materiale è addebitato tramite 261. Nessun costo primario viene registrato una seconda volta quando è assorbito da un ordine.'],
+         ['3 · Responsabilità di ricavo','Nel modulo CO-PA → KE30 apri la configurazione centri di profitto e assegna TR-STD a PC-TR e SL-TAGLIO a PC-SL; seleziona poi Analizza per Centro di profitto. Non registrare ricavi delle vendite su 4210 Taglio, 4220 Piegatura o 4230 Saldatura: sono centri di costo. I ricavi vengono contabilizzati in FI/SD alla fatturazione e letti in CO-PA con cliente, materiale, regione, canale e gruppo cliente. Un centro di ricavo commerciale è una responsabilità distinta; i centri di profitto PC-TR/PC-SL sono ora configurabili per materiale in CO-PA, ma non sostituiscono una contabilità FI per profit center.'],
+         ['4 · Centro di profitto e commessa','Un centro di profitto misura ricavi e costi attribuibili alla medesima responsabilità; una commessa/ordine raccoglie i costi della produzione specifica. Non confondere ordine produttivo con ordine cliente e non attribuire due volte il costo del prodotto al passaggio 101 → vendita. L’esercizio non dispone di una contabilità completa per centro di profitto: la vista KE30 è per segmenti commerciali, non una prova di profit center registrato.'],
+         ['5 · Controllo margine','Apri KE30: scegli Cliente e poi Materiale; leggi ricavi lordi, sconti, trasporti, resi e abbuoni, costo del venduto standard, eventuali differenze Material Ledger e provvigioni. Ricavi netti rettificati − costo del venduto − differenze di prezzo = MdC I; meno provvigioni = MdC II. Non chiamare il MdC II utile netto: restano da considerare costi amministrativi, commerciali, finanziari e altri costi di periodo.'],
+         ['6 · Riconciliazione finale','Controlla che: vendite FI/SD ↔ ricavi CO-PA; consumi 261 + ore CO11N + ribaltamenti ↔ costi ordini; KO88/Material Ledger ↔ varianze; costo del venduto in CO-PA ↔ prodotti effettivamente venduti. Evidenzia separatamente scostamento di spesa, saturazione, efficienza e margine commerciale; non forzare i saldi.']],
+       attesa:'L’allievo sa distinguere dove nasce il costo, chi ne è responsabile, su quale ordine è assorbito e quale mercato/cliente genera il ricavo; sa leggere margine di contribuzione senza duplicazioni e senza attribuire ricavi ai centri di costo.',
+       nota:'Attività di lettura e riconciliazione: nessuna registrazione FI, nessuna rettifica KB11N obbligatoria, nessun nuovo centro di ricavo o di profitto creato dal simulatore.'}
       ,{id:'bpc-consuntivo',g:'14 · Controllo costi di fine mese',data:'31/12/2026',titolo:'BPC · carica il consuntivo di dicembre e crea il forecast 11+1',dove:{ep:'erp_bpc.modello'},percorso:'BPC → Pianificazione e budget → 1 · Modello e Data Manager; poi 4 · Budget, forecast e consuntivo',
        campi:[['Carica il consuntivo da S/4','Fino al mese 12 → Carica il consuntivo'],['Crea un forecast','Nome della versione F1 · Mesi a consuntivo 11 → Crea il forecast'],
          ['Leggi il report (fino a Dic, forecast F1)','Per ogni centro: budget dell’anno, consuntivo, forecast. Il forecast F1 = gennaio–novembre a consuntivo (zero: la società non esisteva) + dicembre a budget'],
@@ -188,9 +198,13 @@
       vedi:['1 · Attività: 260 ore × 28 = 7.280 € (con ✓: uguale al conto 72)','2 · Costi effettivi: solo 4300 Amministrazione 1.200 € (le paghe di dicembre non sono ancora registrate)','3 · Residuo: Taglio −2.240 · Piegatura −1.680 · Saldatura −3.360 (a metà mese è normale)','4 · Ordini e WIP: transenne 9.420 + kit 292 = 9.712 a magazzino, WIP 0'],
       perche:'Le tre domande del report: 1) quanto hanno lavorato i reparti (ore × 28 €)? 2) quanto sono costati davvero (dalla contabilità)? 3) la differenza: residuo = costi veri − ore valorizzate. Le 7.280 di ore sono costo spostato sugli ordini, non un secondo costo: non si sommano ai costi effettivi. Ore: Taglio 300 × 0,25 = 75 + 20 kit × 0,25 = 5; Piegatura 300 × 0,20 = 60; Saldatura 300 × 0,40 = 120.'},
     'cpm-fonti-fine-mese': {idea:'A fine mese guarda i costi veri di ogni centro: arrivano da soli dalla contabilità.',
-      fai:['Scegli il centro 4200','Leggi le righe: paga di Sara Bianchi (80, 81, 82), fitto (86), ammortamenti (50)','Facoltativo: con KB11N sposta la paga di Sara dal 4200 al 4230 Saldatura','Premi «✓ Fatto» qui sotto'],
+      fai:['Scegli il centro 4200','Leggi le righe: paga di Sara Bianchi (80, 81, 82), fitto (86), ammortamenti (50)','Non usare KB11N per spostare la paga senza ore o documenti comprovanti la destinazione effettiva','Premi «✓ Fatto» qui sotto'],
       vedi:['Ogni costo ha l’origine «riga FI» o «OKB9»: nessun importo scritto a mano','Nel report il residuo ora tiene conto delle paghe'],
-      perche:'Contabilità e controllo di gestione leggono lo stesso libro giornale: per questo i costi non si ricopiano. Un residuo non vuol dire automaticamente inefficienza.'},
+      perche:'Contabilità e controllo di gestione leggono lo stesso libro giornale: per questo i costi non si ricopiano. Un residuo non vuol dire automaticamente inefficienza. Le paghe si imputano al centro del dipendente; l’eventuale rettifica richiede prove. I ricavi sono analizzati per segmento commerciale in CO-PA, non caricati sui reparti produttivi.'},
+    'cpm-centri-ricavi': {idea:'Non confondere CHI consuma le risorse (centro di costo), QUALE prodotto assorbe il costo (ordine PP) e CHI genera il ricavo (cliente, prodotto e canale commerciale).',
+      fai:['Apri KE30 — Redditività per segmento','Scegli prima Cliente e poi Materiale: confronta ricavi, sconti, resi, costo del venduto e provvigioni','Confronta i costi con KSB1 e con gli ordini di produzione','Non caricare ricavi sui centri produttivi e non spostare costi fra centri senza evidenza','Premi «✓ Fatto»'],
+      vedi:['Ricavi e margini classificati per segmento commerciale, non per reparto di produzione','Costo industriale e costo del venduto distinti; costi di periodo non confusi con il MdC'],
+      perche:'Il centro di costo misura la spesa del reparto; il centro di ricavo, quando configurato, la responsabilità commerciale; il centro di profitto unisce ricavi e costi attribuibili. Nel programma i ricavi si leggono in CO-PA per cliente/materiale/regione/canale: non c’è un campo centro di ricavo separato.'},
     'bpc-consuntivo': {idea:'Porta i costi veri di dicembre nel BPC e crea la previsione dell’anno (forecast).',
       fai:['Fino al mese 12 → «Carica il consuntivo»',['Nome della versione','F1'],['Mesi a consuntivo','11'],'Premi «Crea il forecast»','Leggi il report fino a dicembre con il forecast F1'],
       vedi:['4200: forecast 1.641,63 · consuntivo 4.867,30','4100 consuntivo 3.150,60 · 4300 consuntivo 4.002,65 (forecast 0)','Taglio, Piegatura, Saldatura: forecast 3.000 · consuntivo 0'],
@@ -210,7 +224,7 @@
     {nome:'Budget mese per mese e approvazione (BPC)', serve:'Lo stesso budget annuo diviso nei 12 mesi (l’energia costa di più d’inverno), inviato dai centri e approvato dal controller, poi rimandato al gestionale.', porta:'Un budget ufficiale e approvato: solo ora ha senso calcolare il costo orario.', passi:['bpc-modello','bpc-input','bpc-processo']},
     {nome:'Costo orario dei reparti', serve:'42.000 € (36.000 + 6.000) ÷ 1.500 ore = 28 € per ogni ora di Taglio, Piegatura e Saldatura.', porta:'Il prezzo interno di un’ora, da usare nelle ricette.', passi:['cpm-kspi','cpm-tariffe']},
     {nome:'Costo standard dei prodotti', serve:'Ricetta × costo orario + ferro: transenna 31,40 €, kit 14,60 €. Lo rendi ufficiale prima di comprare il ferro.', porta:'Il valore con cui il magazzino e la produzione registrano ogni pezzo.', passi:['cpm-calcolo','cpm-rilascio']},
-    {nome:'Controllo: budget contro realtà', serve:'Durante e a fine mese confronti ore lavorate, costi veri e budget: residui, scostamenti e forecast.', porta:'Le decisioni del controller: dove si spende più del previsto e perché.', passi:['cpm-attivita','cpm-fonti-fine-mese','bpc-consuntivo']}
+    {nome:'Controllo: budget contro realtà', serve:'Durante e a fine mese confronti ore lavorate, costi veri e budget: residui, scostamenti e forecast.', porta:'Le decisioni del controller: dove si spende più del previsto e perché.', passi:['cpm-attivita','cpm-fonti-fine-mese','cpm-centri-ricavi','bpc-consuntivo']}
   ];
   var MAPPA = {};
   TAPPE.forEach(function (t, i) { t.passi.forEach(function (id) { MAPPA[id] = i; }); });
@@ -218,7 +232,7 @@
     campi:[['Domanda di fondo','Quanto costa davvero una transenna?'],['Costo orario','(36.000 + 6.000) € ÷ 1.500 h = 28 €/h'],['Costo standard TR-STD','0,85 h × 28 + 7,60 di ferro = 31,40 €'],['In contabilità','nessuna registrazione: è il piano']],
     idea:'Prima di cominciare leggi la mappa: tutto il budget serve a rispondere a una sola domanda, «quanto costa davvero una transenna?».',
     fai:['Leggi la catena qui sotto, dall’alto in basso','Apri «Perché?» per l’esempio con i numeri','Premi «✓ Fatto» qui sotto'],
-    vedi:TAPPE.slice(0, 7).map(function (t, i) { return (i + 1) + ' · ' + t.nome + ': ' + t.serve; }).concat(['Dopo, durante il mese: 8 · ' + TAPPE[7].nome + '.']),
+    vedi:TAPPE.slice(0, 7).map(function (t, i) { return (i + 1) + ' · ' + t.nome + ': ' + t.serve; }).concat(['Dopo, durante il mese: 8 · ' + TAPPE[7].nome + '. Il ricavo si attribuisce a segmenti commerciali in CO-PA, non ai centri produttivi.']),
     perche:'La catena in una riga: budget in euro (tappa 2) ÷ ore dei reparti (tappa 3) = costo orario 28 €/h (tappa 6); ricetta (tappa 4) × costo orario + ferro = costo standard 31,40 € (tappa 7). Esempio: Taglio 0,25 h + Piegatura 0,20 h + Saldatura 0,40 h = 0,85 h × 28 = 23,80 € di lavoro + 8 kg × 0,95 = 7,60 € di ferro = 31,40 €. Il BPC (tappa 5) non cambia i totali: li distribuisce nei mesi e li fa approvare; per questo dopo l’approvazione il costo orario va ricalcolato. Nessuna di queste tappe registra niente in contabilità: sono il piano. La contabilità arriva con gli acquisti, la produzione e le paghe, e alla tappa 8 confronti il piano con la realtà.'};
   window.MSA_CPM_FORMAS.passiPreparazione.unshift(introduzione);
   window.MSA_CPM_FORMAS.tappe = TAPPE;
@@ -272,7 +286,8 @@
     'cpm-calcolo': [R('Qui nel pannello','Premi «Apri ➜»'),R('Riquadro «Calcola il costo standard», menu «Materiale»','Scegli','TR-STD'),R('Casella «Data di calcolo»','Scrivi','01/12/2026'),R('Sotto','Premi «Calcola»'),R('Menu «Materiale»','Scegli','SL-TAGLIO'),R('Casella «Data di calcolo»','Scrivi','01/12/2026'),R('Sotto','Premi «Calcola»'),R('Tabella «Stime dei costi»','Controlla: TR-STD 31,40 · SL-TAGLIO 14,60')],
     'cpm-rilascio': [R('Stessa pagina, riquadro «Marca e rilascia», casella «Data di rilascio»','Scrivi','01/12/2026'),R('Casella «Solo primo CPM su azienda vuota…»','Scrivi (solo la prima volta)','SOSTITUISCI'),R('Sotto','Premi «Marca tutte le stime calcolate»'),R('Sotto','Premi «Rilascia»'),R('Tabella «Stime dei costi»','Controlla: stato FR per tutti e due')],
     'cpm-attivita': [R('Qui nel pannello','Premi «Apri ➜»'),R('In alto, menu «Periodo»','Lascia dicembre'),R('Riquadro «1 · Attività»','Leggi il totale: 7.280 € con la spunta ✓'),R('Riquadro «2 · Costi effettivi dei centri»','Leggi: c’è solo 4300 Amministrazione 1.200'),R('Riquadro «3 · Centri produttivi: residuo»','Leggi: −2.240 · −1.680 · −3.360'),R('Riquadro «4 · Ordini e WIP»','Leggi: WIP 0'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
-    'cpm-fonti-fine-mese': [R('Qui nel pannello','Premi «Apri ➜»'),R('In alto, menu «Centro di costo»','Scegli «4200 Produzione»'),R('Riquadro «Partite singole effettive: costi primari»','Leggi le righe: paga di Sara Bianchi, fitto, ammortamenti'),R('Facoltativo, riquadro «Riattribuisci un costo fra centri»','Sposta la paga di Sara da 4200 a 4230'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
+    'cpm-fonti-fine-mese': [R('Qui nel pannello','Premi «Apri ➜»'),R('In alto, menu «Centro di costo»','Scegli «4200 Produzione»'),R('Riquadro «Partite singole effettive: costi primari»','Leggi le righe: paga di Sara Bianchi, fitto, ammortamenti'),R('Riquadro «Riattribuisci un costo fra centri»','NON spostare la paga di Sara senza evidenza della destinazione del lavoro: la rettifica è facoltativa e documentata'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
+    'cpm-centri-ricavi': [R('Qui nel pannello','Premi «Apri ➜»'),R('Pagina CO-PA, sezione «Configurazione centri di profitto»','Associa TR-STD al centro PC-TR e SL-TAGLIO a PC-SL'),R('Menu «Analizza per»','Scegli «Centro di profitto»'),R('Tabella KE30','Leggi ricavi, costo del venduto, differenze ML e margine per centro; verifica l’eventuale colonna NON-ASSEGNATO'),R('Poi torna a KSB1','Confronta i costi primari per CDC con i margini del CO-PA, senza sommarli una seconda volta'),R('Qui nel pannello','Premi «✓ Fatto»')],
     'bpc-consuntivo': [R('Qui nel pannello','Premi «Apri ➜»'),R('Riquadro «Data Manager · carica il consuntivo da S/4», casella «Fino al mese (1–12)»','Scrivi','12'),R('Sotto','Premi «Carica il consuntivo»'),R('Riquadro «Data Manager · crea un forecast», casella «Nome della versione»','Scrivi','F1'),R('Casella «Mesi a consuntivo»','Scrivi','11'),R('Sotto','Premi «Crea il forecast»'),R('Pagina «4 · Budget, forecast e consuntivo», tabella dei centri','Leggi: 4200 forecast 1.641,63 e consuntivo 4.867,30')]
   };
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function (k) {
@@ -402,4 +417,69 @@
   ['passiPreparazione', 'passiConsuntivo', 'passiRiconciliazione'].forEach(function (k) {
     (window.MSA_CPM_FORMAS[k] || []).forEach(function (p) { if (GUIDA[p.id]) p.punti = GUIDA[p.id]; });
   });
+  GUIDA['cpm-centri-ricavi'] = [
+    G.scelta('[data-pc-materiale="TR-STD"]','Linea transenne → PC-TR','PC-TR','Attribuisci le vendite della transenna alla responsabilità economica PC-TR: non al centro produttivo Taglio.'),
+    G.scelta('[data-pc-materiale="SL-TAGLIO"]','Semilavorati → PC-SL','PC-SL','Assegna la linea semilavorati al proprio centro di profitto: serve per tenere distinto il margine della linea.'),
+    G.scelta('#dim','Analizza per','profitCenter','Il report CO-PA confronta i ricavi netti e i costi del venduto per centro di profitto, senza creare ricavi aggiuntivi.'),
+    G.leggi(null,'Margine di contribuzione per centro','Controlla in KE30 ricavi, rettifiche, costo del venduto, differenze ML e provvigioni; i costi amministrativi di periodo restano separati.')
+  ];
+  // Convalida didattica CPM: lo stato salvato, non il clic, decide il completamento.
+  // La verifica usa le stesse fonti CO/BPC/CO-PC da cui leggono i report del simulatore.
+  var validatori = {
+    'cpm-attivazione': function(h){return attivo(h);},
+    'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230','4200'].every(function(c){return !!(m.fattiPerCentro&&m.fattiPerCentro[c]);}) && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
+      circa((piano0(h,'4200')||{})['86']||0,12000) && circa((piano0(h,'4200')||{})['50']||0,2900) && circa((piano0(h,'4200')||{})['54']||0,3100);},
+    'cpm-paghe': function(h){var m=modello(h);return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80']>0);},
+    'cpm-kp26': function(h){var m=modello(h);return !!m && ['Taglio','Piegatura','Saldatura'].every(function(c){return m.centri[c] && circa(m.centri[c].capacita,1500) && circa(m.centri[c].orePiano,1500);}) && circa(m.volumi['TR-STD'],1200) && !!(m.fatti && m.fatti.kp26 && m.fatti.ltp);},
+    'cpm-ciclo': function(h){var m=modello(h);return !!(m && m.fatti && m.fatti.ksu && m.generale.driver==='ore' && circa(m.generale.produttivi,18000) && centri.every(function(c){return circa(m.centri[c].orePiano,1500);}));},
+    'cpm-standard-tr': function(h){var m=modello(h),a=m && m.standard && m.standard['TR-STD'];return !!a && !!(m.fattiStandard&&m.fattiStandard['TR-STD']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura,0.2) && circa(a.ore.Saldatura,0.4) && circa(a.attrezzaggio,0);},
+    'cpm-standard-halb': function(h){var m=modello(h),a=m && m.standard && m.standard['SL-TAGLIO'];return !!a && !!(m.fattiStandard&&m.fattiStandard['SL-TAGLIO']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura||0,0) && circa(a.ore.Saldatura||0,0) && circa(a.attrezzaggio,0);},
+    'bpc-modello': function(h){var b=bpc(h);return !!(b && b.modello==='COSTI_CENTRI' && b.dati);},
+    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'];return !!a && !!(b.inputSalvati&&b.inputSalvati['BUDGET|V1|4200']) && STAGIONE.every(function(v,i){return circa(a[i],v);});},
+    'bpc-processo': function(h){var b=bpc(h);return !!b && CDC6.every(function(c){return ((b.stato||{})['BUDGET|V1|'+c]||{}).stato==='approvato';}) && (b.retract||[]).length>0;},
+    'cpm-kspi': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
+    'cpm-tariffe': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
+    'cpm-calcolo': function(h){var m=modello(h),tr=stima(h,'TR-STD'),sl=stima(h,'SL-TAGLIO');return !!tr&&!!sl&&circa(tr.unitario,31.4)&&circa(sl.unitario,14.6)&&[tr,sl].every(function(x){var snap=x.elementi&&x.elementi.par&&x.elementi.par.snapshot;return !!snap&&!!m&&snap.revisione===m.revisione;});},
+    'cpm-rilascio': function(h){var m=modello(h);return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c),snap=x&&x.elementi&&x.elementi.par&&x.elementi.par.snapshot;return !!x&&x.stato==='FR'&&!!snap&&!!m&&snap.revisione===m.revisione;});},
+    'cpm-centri-ricavi': function(h){var pc=h.S.copaProfit&&h.S.copaProfit.materiale;return !!pc&&pc['TR-STD']==='PC-TR'&&pc['SL-TAGLIO']==='PC-SL';}
+  };
+  var verificaPulsanti = {
+    'cpm-attivazione': [validatori['cpm-attivazione']],
+    'cpm-paghe': [validatori['cpm-paghe']],
+    'cpm-kp26': [function(h){var m=modello(h);return !!(m&&m.fatti&&m.fatti.kp26);},function(h){var m=modello(h);return !!(m&&m.fatti&&m.fatti.ltp)&&circa(m.volumi['TR-STD'],1200);}],
+    'cpm-ciclo': [validatori['cpm-ciclo']],
+    'cpm-standard-tr': [validatori['cpm-standard-tr']],
+    'cpm-standard-halb': [validatori['cpm-standard-halb']],
+    'bpc-modello': [validatori['bpc-modello']],
+    'bpc-input': [validatori['bpc-input']],
+    'bpc-processo': Array.from({length:13},function(_,i){if(i===12)return validatori['bpc-processo'];var c=CDC6[i%6],approva=i>=6;return function(h){var st=STAT_B(h,c);return approva?st==='approvato':st==='inviato'||st==='approvato';};}),
+    'cpm-kspi': [validatori['cpm-kspi']],
+    'cpm-calcolo': [function(h){var x=stima(h,'TR-STD');return !!x&&circa(x.unitario,31.4)&&!!(x.elementi&&x.elementi.par&&x.elementi.par.snapshot)&&x.elementi.par.snapshot.revisione===modello(h).revisione;},function(h){var x=stima(h,'SL-TAGLIO');return !!x&&circa(x.unitario,14.6)&&!!(x.elementi&&x.elementi.par&&x.elementi.par.snapshot)&&x.elementi.par.snapshot.revisione===modello(h).revisione;}],
+    'cpm-rilascio': [function(h){return ['TR-STD','SL-TAGLIO'].every(function(c){var x=stima(h,c);return !!x&&(x.stato==='VO'||x.stato==='FR');});},validatori['cpm-rilascio']]
+  };
+  // Il budget salva più volte lo stesso modulo: ogni salvataggio è attribuito a un centro preciso.
+  verificaPulsanti['cpm-budget']=['4210','4220','4230','4200'].map(function(c){return function(h){
+    if(!(modello(h)&&modello(h).fattiPerCentro&&modello(h).fattiPerCentro[c]))return false;
+    if(c==='4200')return circa((piano0(h,c)||{})['86']||0,12000)&&circa((piano0(h,c)||{})['50']||0,2900)&&circa((piano0(h,c)||{})['54']||0,3100);
+    return circa((piano0(h,c)||{})['80']||0,36000);
+  };});
+  ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function(k){
+    (window.MSA_CPM_FORMAS[k]||[]).forEach(function(p){
+      if(!validatori[p.id] || !GUIDA[p.id])return;
+      p.cpmVerificato=true;
+      p.fatto=validatori[p.id];
+      var idx=0, checks=verificaPulsanti[p.id]||[];
+      p.punti=GUIDA[p.id].map(function(d){
+        var x=Object.assign({},d);
+        if(x.t==='pulsante') {
+          var verifica=checks[idx++];
+          if(verifica){x.fatto=verifica;x.richiedeSalvataggio=true;}
+        }
+        return x;
+      });
+    });
+  });
+  // I passi di sola lettura sono confermati esplicitamente dall'allievo;
+  // non vengono falsamente presentati come registrazioni automaticamente verificate.
+
 })();

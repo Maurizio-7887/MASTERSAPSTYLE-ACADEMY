@@ -327,7 +327,7 @@ window.PC4 = (function () {
     function salvaStandard(i) {
       var m = richiesto(), all = copia(m.standard), s = {componente: {mat: i.componente, q: i.quantita}, ore: copia(i.ore || {}), attrezzaggio: i.attrezzaggio, centroSet: i.centroSet};
       all[i.materiale] = s; validaStandard(i.materiale, s, all);
-      m.standard = all; m.revisione++; N().salva(); return '<p class="lab-nota">Distinta/ciclo CPM salvati, revisione ' + m.revisione + '. Ricalcola e rilascia lo standard. Nessun ordine storico rivalutato.</p>';
+      m.standard = all; m.fattiStandard = m.fattiStandard || {}; m.fattiStandard[i.materiale] = true; m.revisione++; N().salva(); return '<p class="lab-nota">Distinta/ciclo CPM salvati, revisione ' + m.revisione + '. Ricalcola e rilascia lo standard. Nessun ordine storico rivalutato.</p>';
     }
     function tariffe() {
       var m = richiesto(), base = CENTRI.reduce(function (t, k) { return t + m.centri[k].orePiano; }, 0), fatto = 0, out = {};
@@ -482,6 +482,7 @@ window.PC4 = (function () {
       var riga = {};
       CLASSI.forEach(function (c) { var v = i['k' + c[0]]; if (v === undefined || v === '') v = 0; var n = numero(v, 'Classe ' + c[0] + ' ' + c[1]); if (n) riga[c[0]] = n; });
       migra(b); b.piano[ver][cdc] = riga;
+      if (ver === '0') { b.fattiPerCentro = b.fattiPerCentro || {}; b.fattiPerCentro[cdc] = true; }
       if (ver !== '0') { C().cpm = b; N().salva(); return '<p class="lab-nota">Versione ' + ver + ' del centro ' + cdc + ' salvata: è un piano di confronto, non cambia tariffe né costi standard.</p>'; }
       deriva(b);
       return nuovaRevisione(b, 'Piano dei costi del centro ' + cdc + ' ' + cdcDi(cdc).nome + ' salvato: totale ' + L.eur(totale(riga)) + ' €.', 'kp06');

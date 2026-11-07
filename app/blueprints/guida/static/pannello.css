@@ -153,3 +153,9 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 .msa-g-sugg-off:hover{color:#1d3557}
 .msa-g-ora.spento{background:transparent;border:1px dashed #b9c4d0;padding:8px}
 .msa-g-ora.spento small{display:block;margin-top:5px;color:#5b6b7b;font-size:11px}
+
+/* Assistente CPM: errore e recupero passo-passo, senza saltare la verifica del dato. */
+#msa-guida .msa-g-ora-correzione{margin:8px 0;padding:9px 11px;border:2px solid #c83c32;border-radius:6px;background:#fff0ed;color:#79221e;font-size:13px;line-height:1.45}
+#msa-guida .msa-g-ora-correzione b{font-weight:750}
+#msa-guida .msa-g-ora-correzione div{margin-top:4px}
+#msa-guida .msa-g-av:disabled{opacity:.48;cursor:not-allowed}

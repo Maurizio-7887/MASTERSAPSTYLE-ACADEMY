@@ -1,0 +1,30 @@
+name: CPM Operational Tutor Verification
+on:
+  pull_request:
+    paths:
+      - 'app/blueprints/guida/static/pannello.js'
+      - 'app/blueprints/guida/static/esercizi/cpm-formas.js'
+      - 'app/blueprints/erp_costi/static/copc-logica.js'
+      - 'app/blueprints/erp_bpc/static/bpc-logica.js'
+      - 'tests/cpm-tutor-verifica.js'
+      - 'tests/guida-punti.js'
+      - '.github/workflows/cpm-tutor-verifica.yml'
+  workflow_dispatch:
+jobs:
+  cpm-tutor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Regressioni del tutor CPM su dati salvati
+        run: |
+          node tests/cpm-tutor-verifica.js
+          node tests/guida-punti.js
+          node tests/budget-guida-campi.js
+          node tests/cpm-centri.js
+          node tests/percorso-cpm-completo.js
