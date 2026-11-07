@@ -28,6 +28,7 @@ let orologio = Date.now() + 5000; w.Date.now = () => orologio;
 const giro = () => { orologio += 1000; tick.forEach(t => t()); };
 const brilla = () => [...w.document.querySelectorAll('.msa-g-brilla')];
 giro(); giro();
+ok(w.document.querySelector('.msa-g-av').disabled, 'CPM: il tasto Avanti è disabilitato prima delle registrazioni effettive');
 let b = brilla(); ok(b.length === 1, 'un solo punto brilla (' + b.length + ')'); ok(b[0].id === 'kp06-k80', 'brilla la casella 80 del centro 4210, non ' + (b[0] && b[0].id));
 
 let card = w.document.querySelector('.msa-g-ora'); ok(card && /ORA TOCCA A TE/.test(card.textContent) && /36000/.test(card.textContent) && /A cosa serve/.test(card.textContent), 'riquadro con cosa scrivere e a cosa serve');
@@ -79,6 +80,7 @@ ok(cp.modello().piano['0']['4200']['86'] === 12000 && cp.modello().piano['0']['4
 ok(/TUTTI|Tabella del piano/.test(w.document.querySelector('.msa-g-ora').textContent), 'ultimo punto: leggere la tabella di controllo');
 w.document.querySelector('.msa-g-letto').click(); giro();
 ok(/TUTTI I PUNTI FATTI/.test(w.document.querySelector('.msa-g-ora').textContent) && brilla().length === 0, 'tutti i punti fatti: nessun bordo che brilla');
+ok(passo.fatto({S:n.S}) && !w.document.querySelector('.msa-g-av').disabled, 'CPM: salvataggi verificati, avanzamento consentito');
 // ogni passo del budget ha i punti e i selettori dei campi esistono nelle pagine
 ['cpm-attivazione', 'cpm-budget', 'cpm-paghe', 'cpm-kp26', 'cpm-ciclo', 'cpm-standard-tr', 'cpm-standard-halb', 'bpc-modello', 'bpc-input', 'bpc-processo', 'cpm-kspi', 'cpm-tariffe', 'cpm-calcolo', 'cpm-rilascio'].forEach(id => {
   const q = w.MSA_CPM_FORMAS.passiPreparazione.find(p => p.id === id); ok(q && q.punti && q.punti.length, 'punti guidati nel passo ' + id);
