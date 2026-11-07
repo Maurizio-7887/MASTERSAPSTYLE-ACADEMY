@@ -167,11 +167,17 @@
       azzera: function () { S = statoNuovo(); baseRagioneria(S); try { localStorage.setItem('msa-azzera-' + ((window.MSA_SYNC || {}).versione || ''), '1'); } catch (e) { /* ok */ } N.salva(); return S; },
       fornitore: function (f) { var x = S.fornitori[f]; if (!x) throw Error('Fornitore ' + f + ' inesistente.'); return x; },
       numero: function (tipo) { return String(++S.numeri[tipo]); },
-      data: function (d) { L.dataOk(d); if (!S.avviato) throw Error('Prima avvia il sistema (Dati di base → Avvia).'); if (d < S.avviato) throw Error('Data anteriore all\'avvio del sistema (' + L.fd(S.avviato) + ').'); return d; },
+      data: function (d) { L.dataOk(d); N.verificaPeriodoAperto(d); if (!S.avviato) throw Error('Prima avvia il sistema (Dati di base → Avvia).'); if (d < S.avviato) throw Error('Data anteriore all\'avvio del sistema (' + L.fd(S.avviato) + ').'); return d; },
       cliente: function (c) { var x = S.clienti[c]; if (!x) throw Error('Cliente ' + c + ' inesistente.'); return x; },
       materiale: function (m) { var x = S.materiali[m]; if (!x) throw Error('Materiale ' + m + ' inesistente.'); return x; },
+      // Chiusura mensile: blocco documenti FI e movimenti di magazzino.
+      verificaPeriodoAperto: function (d) {
+        var p = String(d || '').slice(0, 7), c = S.chiusureMensili && S.chiusureMensili[p];
+        if (c) throw Error('Periodo ' + p + ' chiuso il ' + c.data + ': registrazioni retrodatate non consentite.');
+      },
       // registrazione contabile (FB03): righe Dare/Avere, quadratura obbligatoria
       post: function (reg) {
+        N.verificaPeriodoAperto(reg.data);
         var d = 0, a = 0;
         var righe = reg.righe.filter(function (x) { return Math.abs(x.importo) >= 0.005; }).map(function (x) {
           var imp = r2(x.importo), segno = x.dareAvere;
@@ -193,6 +199,7 @@
       // movimento di magazzino, con la gestione dei lotti: in entrata nasce (o si ricarica) un lotto, in uscita si consumano i lotti FIFO
       // (o quelli indicati in opz.lotti, per esempio negli storni). Restituisce il movimento, con i lotti toccati.
       movimento: function (mat, qta, data, tipo, rif, opz) {
+        N.verificaPeriodoAperto(data);
         opz = opz || {};
         if ((S.giacenze[mat] || 0) + qta < -1e-9) throw Error('Giacenza insufficiente di ' + mat + ': disponibili ' + L.n0(S.giacenze[mat]) + ' pz.');
         S.giacenze[mat] = r2((S.giacenze[mat] || 0) + qta);
