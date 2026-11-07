@@ -309,7 +309,7 @@ _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("erp_bpc.static", "bpc-logica.js"), ("erp_controllo.static", "co-percorso.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
                ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"),
-               ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_finanza.static", "fin-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
+               ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_finanza.static", "fin-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("erp_chiusura.static", "ch-mensile.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
 _ERP_GRUPPI = {"erp_dati": "Dati di base", "erp_vendite": "Vendite (SD)", "erp_acquisti": "Acquisti (MM)", "erp_produzione": "Produzione (PP)",
@@ -412,7 +412,8 @@ _ERP_PAGINE = {
                     {"endpoint": "acquisto", "titolo": "Acquisto di un cespite", "icona": "🆕", "tcode": "AS01 · F-90"},
                     {"endpoint": "ammortamenti", "titolo": "Ammortamenti", "icona": "🧮", "tcode": "AFAB"},
                     {"endpoint": "cessione", "titolo": "Cessione di un cespite", "icona": "🔁", "tcode": "ABAVN · F-92"}],
-    "erp_chiusura": [{"endpoint": "iva", "titolo": "Liquidazione IVA e F24", "icona": "🧮", "tcode": "registro IVA · liquidazione · F24"},
+    "erp_chiusura": [{"endpoint": "mensile", "titolo": "Chiusura mensile FI · CO · PP · MM", "icona": "🗓️", "tcode": "period close · riconciliazioni"},
+                     {"endpoint": "iva", "titolo": "Liquidazione IVA e F24", "icona": "🧮", "tcode": "registro IVA · liquidazione · F24"},
                      {"endpoint": "imposte", "titolo": "Imposte (IRES, IRAP, anticipate)", "icona": "🧾", "tcode": "IRES · IRAP · OIC 25"},
                      {"endpoint": "assestamenti", "titolo": "Ratei e risconti", "icona": "📐", "tcode": "assestamento · storno al 1° gennaio"},
                      {"endpoint": "chiusura", "titolo": "Chiusura dell'esercizio", "icona": "🔒", "tcode": "epilogo · FAGLGVTR"},
