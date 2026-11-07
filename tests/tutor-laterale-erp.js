@@ -16,7 +16,8 @@ function test(area,page,formSelector,expected){
   assert(root,'il pannello si apre su '+area+':'+page);checks++;
   assert(root.textContent.includes(expected),'testo didattico '+expected);checks++;
   const next=w.document.querySelector('#msa-step-next');
-  next.click();assert(root.textContent.includes(next.disabled ? 'Passaggio 1' : 'Passaggio 2'),'il passo cambia o resta all’ultimo');checks++;
+  const alreadyLast=next.disabled;
+  next.click();assert(root.textContent.includes(alreadyLast ? 'Passaggio 1' : 'Passaggio 2'),'il passo cambia o resta all’ultimo');checks++;
   const target=w.document.querySelector('.msa-step-target');assert(target,'widget illuminato');checks++;
   const toggle=w.document.querySelector('#msa-step-toggle');
   toggle.click();
