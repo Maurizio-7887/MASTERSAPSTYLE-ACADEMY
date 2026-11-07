@@ -18,6 +18,11 @@ def imposte():
     return render_lab("erp_chiusura", "imposte")
 
 
+@bp.route("/mensile")
+def mensile():
+    return render_lab("erp_chiusura", "mensile")
+
+
 @bp.route("/chiusura")
 def chiusura():
     return render_lab("erp_chiusura", "chiusura")
