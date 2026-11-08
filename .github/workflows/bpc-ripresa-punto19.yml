@@ -1,0 +1,29 @@
+name: BPC Ripresa Punto 19
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/guida/static/esercizi/cpm-formas.js'
+      - 'app/blueprints/erp_bpc/static/bpc-pagine.js'
+      - 'tests/cpm-tutor-verifica.js'
+      - '.github/workflows/bpc-ripresa-punto19.yml'
+  pull_request:
+    paths:
+      - 'app/blueprints/guida/static/esercizi/cpm-formas.js'
+      - 'app/blueprints/erp_bpc/static/bpc-pagine.js'
+      - 'tests/cpm-tutor-verifica.js'
+      - '.github/workflows/bpc-ripresa-punto19.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Regression BPC approved, reopening and course resume
+        run: node tests/cpm-tutor-verifica.js
