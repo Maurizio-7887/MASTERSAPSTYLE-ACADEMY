@@ -55,5 +55,25 @@ check('cpm-kspi',false,'nuova revisione invalida la vecchia tariffa');
 for(const id of ['cpm-budget','cpm-kp26','cpm-ciclo','cpm-standard-tr','bpc-input','cpm-kspi','cpm-calcolo','cpm-rilascio']){
   assert.strictEqual(passo(id).cpmVerificato,true,id+' abilitato alla convalida su stato');
 }
-console.log('✓ Tutor CPM: salvataggi espliciti, quattro CdC, distinte HALB/FERT, revisione KSPI, '+8+' verifiche dei passi.');
+// Regressione: ripresa punto 19 con centro 4200 già approvato.
+const B=w.BPC4;
+B.crea({conferma:'CREA'});
+check('bpc-input',false,'prima della distribuzione stagionale nessun falso positivo');
+const stag=[400,350,300,200,150,150,200,100,200,300,350,400];
+const dati={categoria:'BUDGET',versione:'V1',cdc:'4200'};
+cp.CLASSI.forEach(c=>B.riga('BUDGET','V1','4200',c[0]).forEach((val,k)=>{dati['m'+c[0]+'_'+(k+1)]=c[0]==='54'?stag[k]:val;}));
+B.salvaInput(dati);
+check('bpc-input',true,'budget stagionale già salvato riconosciuto');
+B.azione({cdc:'4200',azione:'invia'});
+B.azione({cdc:'4200',azione:'approva',nota:'test'});
+assert.match(B.bloccato('BUDGET','V1','4200'),/bloccato/,'centro approvato rimane protetto');
+check('bpc-input',true,'ripresa del corso: centro approvato con dati giusti deve superare il passo 19');
+B.M().dati['BUDGET|V1|4200|54'][0]=350;
+check('bpc-input',false,'centro approvato con dati sbagliati non deve superare il passo 19');
+B.azione({cdc:'4200',azione:'respingi',nota:'Correggere ripartizione energia'});
+assert.equal(B.bloccato('BUDGET','V1','4200'),'','il controller può riaprire senza cancellare il modello');
+B.salvaInput(dati);
+check('bpc-input',true,'correzione del budget dopo sblocco');
+console.log('✓ Tutor CPM: salvataggi espliciti, revisione KSPI, ripresa punto 19 e work status.');
+
 w.close();
