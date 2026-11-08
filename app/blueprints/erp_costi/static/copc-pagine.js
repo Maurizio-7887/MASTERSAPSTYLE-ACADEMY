@@ -58,9 +58,86 @@
       L.collega(radice, 'ck', {ck: PC.calcola}, rendi);
       L.collega(radice, 'cr', {marca: PC.marca, cr: PC.rilascia}, rendi);
     },
+    commessa: function () {
+      var ordini = S().produzione || [];
+      if (!ordini.length) {
+        radice.innerHTML = U.avviso(S()) + L.scheda('📊','Scheda economica di commessa','KKBC · ordini di produzione',
+          '<p class="lab-nota">Non ci sono ancora ordini. Prima crea e rilascia un ordine CO01; registra i movimenti 261, le ore CO11N e l’entrata 101. Questa scheda leggerà i dati già salvati, senza crearne altri.</p>'+
+          '<p>'+link('produzione/ordini','Vai agli ordini CO01')+'</p>');
+        return;
+      }
+      var numero = radice.dataset.ordine || ordini[0].numero;
+      var ordine = ordini.find(function(o){return String(o.numero) === String(numero);}) || ordini[0];
+      numero = String(ordine.numero);
+      var x = PP.effettivi(ordine), v = PC.varianze(ordine), piano = ordine.piano || {};
+      var fine = x.entrati >= ordine.qta || !!ordine.teco;
+      var stato = PP.stato(ordine), delta = L.r2(x.totale - x.accredito);
+      var periodo = String(ordine.data || '').slice(0,4);
+      var analisi = window.COPA && window.COPA.report ? window.COPA.report(S(),'materiale',{
+        dal: periodo+'-01-01', al:periodo+'-12-31'
+      }) : null;
+      var vendite = analisi && analisi.righe.find(function(z){return z.chiave === ordine.materiale;});
+      var righe = [
+        ['Materie prime e componenti',piano.mat || 0,x.mat],
+        ['Lavorazioni dei centri (CO11N)',piano.lav || 0,x.lav],
+        ['Attrezzaggio',piano.set || 0,x.set],
+        ['Sovraccosti materiale',piano.sovrMat || 0,x.sovrMat],
+        ['Sovraccosti produzione',piano.sovrProd || 0,x.sovrProd]
+      ];
+      var tab = righe.map(function(a){return [e(a[0]),eur(a[1]),eur(a[2]),eur(L.r2(a[2]-a[1]))];});
+      tab.push({cls:'tot',celle:['Totale costi',eur(piano.totale || 0),eur(x.totale),eur(L.r2(x.totale-(piano.totale||0)))]});
+      var colore = delta > 0.005 ? 'ko' : 'ok';
+      var messaggio = !fine
+        ? 'Ordine ancora in corso: il saldo residuo è WIP analitico, NON una perdita e NON un margine definitivo.'
+        : delta > 0.005
+          ? 'Costo imputato superiore all’accredito a standard: varianza sfavorevole. Analizza le categorie KKS2.'
+          : delta < -0.005
+            ? 'Accredito a standard superiore al costo imputato: varianza favorevole. Controlla le categorie KKS2.'
+            : 'Costi imputati e accredito a standard coincidono: nessuna varianza dell’ordine.';
+      var dettagli = (v.categorie || []).map(function(c){return [e(c.cat),e(c.piano || ''),e(c.eff || ''),eur(c.v)];});
+      var testata = '<div class="lab-filtro"><label><b>Ordine da analizzare (CO01)</b> '+
+        '<select id="co-commessa-ordine">'+ordini.map(function(o){return '<option value="'+e(o.numero)+'"'+(String(o.numero)===numero?' selected':'')+'>'+e(o.numero)+' · '+e(o.materiale)+' · '+n0(o.qta)+' pz</option>';}).join('')+'</select></label></div>';
+      var kpis = '<div id="co-commessa-kpi-costi" class="lab-card" style="padding:14px">'+
+        '<b>Ordine '+e(numero)+' · '+e(ordine.materiale)+' · '+e(stato)+'</b>'+
+        '<div class="lab-griglia" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin-top:10px">'+
+        '<div><small>Previsto lotto</small><p><b>'+eur(piano.totale||0)+' €</b></p></div>'+
+        '<div><small>Effettivo accumulato</small><p><b>'+eur(x.totale)+' €</b></p></div>'+
+        '<div><small>Entrato a magazzino (101)</small><p><b>'+n0(x.entrati)+' / '+n0(ordine.qta)+' pz</b></p></div>'+
+        '<div><small>Accredito 101 standard</small><p><b>'+eur(x.accredito)+' €</b></p></div>'+
+        '<div><small>'+(fine?'Varianza ordine':'Saldo/WIP analitico')+'</small><p><b>'+eur(delta)+' €</b></p></div>'+
+        '</div><div class="lab-esito '+colore+'" style="margin-top:9px">'+e(messaggio)+'</div></div>';
+      radice.innerHTML = U.avviso(S()) + testata + kpis +
+        L.scheda('🧮','1 · Dove sono andati i costi?','CO01 · 261 · CO11N · KGI2',
+          '<p class="lab-nota">Le paghe e i costi di stabilimento nascono sui centri; la tariffa KSPI valorizza le ore trasferite con CO11N. Non sommare di nuovo il costo del personale alle ore.</p>'+
+          L.tabella(['Componente','Budget lotto €›','Effettivo €›','Scostamento €›'],tab)+
+          '<p>'+link('controllo/ksb1','Verifica i costi dei centri KSB1')+' · '+link('produzione/avanzamento','Controlla 261/CO11N/101')+'</p>')+
+        L.scheda('📉','2 · Perché il costo è cambiato?','KKS2 · scostamenti per categoria',
+          '<div id="co-commessa-varianze">'+L.tabella(['Causa','Piano / obiettivo','Effettivo','Differenza €›'],dettagli)+
+          '<p><b>Varianza complessiva:</b> '+eur(v.totale)+' €. Segno positivo = sfavorevole; negativo = favorevole.</p>'+
+          (ordine.liquidazione ? '<p class="lab-esito ok">Liquidazione KO88 registrata il '+fd(ordine.liquidazione.data)+'.</p>' :
+            '<p class="lab-esito '+(fine?'attenzione':'')+'">'+(fine?'Ordine terminato: verifica KGI2 e KO88 nella pagina di chiusura.':'Ordine ancora in lavorazione: non liquidare una varianza parziale.')+'</p>')+
+          '</div><p>'+link('costi/chiusura','Apri KGI2 / KKS2 / KO88')+'</p>')+
+        L.scheda('💶','3 · La produzione ha generato un margine?','CO-PA · KE30 · dato commerciale separato',
+          '<div id="co-commessa-copa"><p class="lab-nota"><b>ATTENZIONE:</b> questa è una produzione <b>per magazzino</b>. I ricavi delle fatture non sono attribuiti univocamente all’ordine CO01. Perciò <b>non è corretto</b> sottrarre i costi di questo ordine dai ricavi di Beta/Delta e dichiarare un utile di commessa.</p>'+
+          (vendite ?
+            '<p><b>Vendite del materiale '+e(ordine.materiale)+' nell’anno '+e(periodo)+' (tutte le vendite, non solo questo ordine):</b></p>'+
+            L.tabella(['Indicatore CO-PA','Valore €›'],[
+              ['Ricavi netti dopo rettifiche',eur(vendite.ricaviRettificati)],
+              ['Costo del venduto e differenze prezzo',eur((vendite.costoVenduto||0)+(vendite.diffPrezzo||0))],
+              ['Margine di contribuzione I',eur(vendite.mdc1)],
+              ['Provvigioni',eur(vendite.provvigioni)],
+              ['Margine di contribuzione II',eur(vendite.mdc2)]
+            ]) :
+            '<p class="lab-esito">Non risultano ancora dati CO-PA per questo materiale nell’anno '+e(periodo)+'. I costi dell’ordine restano comunque verificabili.</p>')+
+          '<p>Per la redditività dei clienti usa il report CO-PA KE30; per una redditività <b>per commessa</b> occorre prima registrare il legame verificabile tra ordine di vendita e lotto/ordine di produzione.</p>'+
+          '<p>'+link('copa/ke30','Apri CO-PA KE30')+'</p></div>')+
+        '<p class="lab-nota"><b>Fonte:</b> ordini PP, movimenti 261/CO11N/101, scheda costo, KKS2/KO88 e righe CO-PA salvate in questo account. Questa pagina è di sola lettura: non registra operazioni.</p>';
+      var select = radice.querySelector('#co-commessa-ordine');
+      if (select) select.onchange = function(){radice.dataset.ordine=this.value;rendi();};
+    },
     chiusura: function () {
       var ordini = S().produzione;
-      radice.innerHTML = U.avviso(S()) + '<p class="lab-nota"><b>Chiusura mensile completa:</b> dopo KGI2 e KO88 verifica anche FI, CO, magazzino e differenze nel <a href="' + location.pathname.replace('/chiusura', '/mensile') + '">cockpit mensile guidato →</a>.</p><div class="lab-griglia">' +
+      radice.innerHTML = U.avviso(S()) + '<p class="lab-nota"><b>Scheda economica di commessa:</b> '+link('costi/commessa','apri il cruscotto KKBC di costi, WIP e scostamenti per ordine')+'.</p>' + '<p class="lab-nota"><b>Chiusura mensile completa:</b> dopo KGI2 e KO88 verifica anche FI, CO, magazzino e differenze nel <a href="' + location.pathname.replace('/chiusura', '/mensile') + '">cockpit mensile guidato →</a>.</p><div class="lab-griglia">' +
         L.scheda('➕', '1 · Sovraccosti sugli ordini', 'KGI2', L.modulo('kg', [['data', 'Data (fine mese)', 'date']], [['kg', 'Calcola e addebita']]) + '<p class="lab-nota">Percentuali della scheda sui costi <b>effettivi</b>: D 78 / A 76.</p>') +
         L.scheda('⚖️', '2 · Varianze e liquidazione', 'KKS2 · KO88', L.modulo('ko', [['data', 'Data (fine mese)', 'date']], [['ko', 'Calcola varianze e liquida']]) + '<p class="lab-nota">Ordini DLV o TECO: la varianza va al materiale (D 61 / A 73) e diventa una differenza prezzo nel Material Ledger.</p>') +
         '</div>' + (ordini.length ? ordini.map(function (o) {
