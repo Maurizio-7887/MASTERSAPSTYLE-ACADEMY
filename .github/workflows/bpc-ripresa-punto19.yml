@@ -5,13 +5,13 @@ on:
     paths:
       - 'app/blueprints/guida/static/esercizi/cpm-formas.js'
       - 'app/blueprints/erp_bpc/static/bpc-pagine.js'
-      - 'tests/cpm-tutor-verifica.js'
+      - 'tests/bpc-ripresa-punto19.js'
       - '.github/workflows/bpc-ripresa-punto19.yml'
   pull_request:
     paths:
       - 'app/blueprints/guida/static/esercizi/cpm-formas.js'
       - 'app/blueprints/erp_bpc/static/bpc-pagine.js'
-      - 'tests/cpm-tutor-verifica.js'
+      - 'tests/bpc-ripresa-punto19.js'
       - '.github/workflows/bpc-ripresa-punto19.yml'
   workflow_dispatch:
 jobs:
@@ -26,4 +26,4 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Regression BPC approved, reopening and course resume
-        run: node tests/cpm-tutor-verifica.js
+        run: node tests/bpc-ripresa-punto19.js
