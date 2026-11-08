@@ -30,7 +30,7 @@ function render(){
  res+=box('Passo 2 · Prelievi, ore e HALB/FERT',
   '<p>Per ciascun ordine: <b>261</b> scarica ROH/HALB, <b>CO11N</b> rileva ore e lavorazioni, <b>101</b> versa HALB o FERT a magazzino. Se un ciclo lavora lo stesso FERT per operazioni successive, non creare falsi carichi intermedi. I costi accumulati meno accredito 101 mostrano il saldo analitico, <b>non una capitalizzazione FI automatica del WIP</b>.</p>'+
   rows(['Ordine','Materiale','Stato','Materiali €›','Attività €›','Costo €›','101 €›','WIP €›'],a.ordini.map(function(o){return [o.numero,esc(o.materiale||''),esc(o.stato||o.errore||''),eur(o.prelievo||0),eur(o.ore||0),eur(o.totale||0),eur(o.accredito||0),eur(o.wip||0)];}))+
-  '<p>'+link('produzione/avanzamento','Vai al 261 → CO11N → 101')+' · '+link('costi/chiusura','KGI2, KKS2 e KO88')+'</p>');
+  '<p>'+link('produzione/avanzamento','Vai al 261 → CO11N → 101')+' · '+link('costi/commessa','Scheda economica di commessa KKBC')+' · '+link('costi/chiusura','KGI2, KKS2 e KO88')+'</p>');
  res+=box('Passo 3 · Varianze e Material Ledger',
   '<p>Su ordini DLV/TECO controlla sovraccosti KGI2, varianze KKS2 e liquidazione KO88. Se ci sono differenze prezzo, occorre completare CKMLCP. I semilavorati HALB restano un limite dichiarato del Material Ledger didattico multilevel.</p>'+
   '<p><strong>Material Ledger per '+esc(period)+': </strong>'+(a.mlClosed?'✓ Registrato':'Non registrato')+(a.hasDifferences?' · Differenze da riconciliare':' · Nessuna differenza registrata nel periodo')+'</p>'+
