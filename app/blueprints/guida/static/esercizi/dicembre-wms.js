@@ -20,6 +20,20 @@
       f({t: 'pulsante', sel: '[data-prefisso="mi"] [data-azione="mi"]', nome: 'Registra entrata', serve: 'Registra il carico: il magazzino sale e nasce il debito presunto verso il fornitore (conto 22 «fatture da ricevere»).', finale: true})
     ];
   }
+  // VF01: stesso tutor contestuale usato dai pagamenti, senza rivelare la soluzione contabile.
+  // I selettori corrispondono ai campi reali di erp_vendite/static/sd-pagine.js.
+  function PVF(rif, numero, cliente) {
+    var completata = function(h) { return !!fattura(h, rif); };
+    return [
+      {t:'scelta',sel:'#vf-consegna',nome:'Consegna da fatturare',valore:numero,
+       serve:'Scegli la consegna '+numero+' di '+cliente+'. La fattura deve partire da questa consegna già uscita dal magazzino, non da una consegna dell’altro cliente.',fatto:completata},
+      {t:'campo',sel:'#vf-data',nome:'Data della fattura',valore:'2026-12-15',
+       serve:'Imposta il 15/12/2026. È la data contabile della fattura e deve essere coerente con la consegna e il periodo dell’esercizio.',fatto:completata},
+      {t:'pulsante',sel:'[data-prefisso="vf"] [data-azione="vf"]',nome:'Crea e contabilizza',
+       serve:'Premi una volta dopo aver verificato consegna e data. Il sistema genera la fattura e la registrazione contabile; poi ricostruisci personalmente Dare, Avere e importi nel laboratorio di ragioneria.',fatto:completata,finale:true}
+    ];
+  }
+
   function PPAGA(forn, nome, doc, data, fatto, nota) {
     var f = function (x) { return Object.assign({fatto: fatto}, x); }, p = [
       f({t: 'scelta', sel: '#pg-fornitore', nome: 'Fornitore', valore: forn, serve: 'Scegli ' + forn + ' ' + nome + '. ATTENZIONE: il modulo propone da solo il primo fornitore con debiti aperti, che spesso NON è quello giusto. Se sbagli fornitore, paghi un debito che non è quello della fattura.'})];
@@ -299,8 +313,10 @@
      nota:'Se la colata fosse difettosa, sapremmo subito quali clienti avvisare. La colata COL-1206 non è nelle transenne: è ancora in catasta. Spunta a mano.'},
     // ── 10 · fatture e banca ──
     {g:'10 · Fatture e anticipo',data:'15/12/2026',titolo:'VF01: fattura Beta',contabile:true,dove:{ep:V+'fatture'},percorso:'SD → Fatturazione',campi:[['Consegna','80000001'],['Data','15/12/2026']],
+      punti:PVF('BETA-180','80000001','Beta Costruzioni'),
      attesa:'D 11 Beta 12.912,48 + D 47 Sconti 216 / A 40 Ricavi 10.800 + A 21 IVA 2.328,48. Provvigione all’agente 3%: D 57 / A 26 317,52.',fatto:function(h){return !!fattura(h,'BETA-180');}},
     {g:'10 · Fatture e anticipo',data:'15/12/2026',titolo:'VF01: fattura Delta',contabile:true,dove:{ep:V+'fatture'},percorso:'SD → Fatturazione',campi:[['Consegna','80000002'],['Data','15/12/2026']],
+      punti:PVF('DELTA-120','80000002','Delta Noleggi'),
      attesa:'D 11 Delta 8.608,32 + D 47 144 / A 40 7.200 + A 21 1.552,32. Provvigione D 57 / A 26 211,68.',fatto:function(h){return !!fattura(h,'DELTA-120');}},
     {g:'10 · Fatture e anticipo',data:'15/12/2026',titolo:'Trasmetti le due fatture allo SdI',dove:{ep:F+'sdi'},percorso:'FI → Fattura elettronica (SdI)',campi:[['Documento','prima la fattura Beta, poi quella Delta'],['Data di invio','15/12/2026']],
      attesa:'Due ricevute di consegna. Da ora una fattura sbagliata non si storna più: serve la nota di credito.',fatto:function(h){var b=fattura(h,'BETA-180'),d=fattura(h,'DELTA-120');return !!b && !!d && !!b.sdi && !!d.sdi;}},
@@ -508,5 +524,21 @@
     var fineMese = passi.findIndex(function(p){return p.titolo==='KO88: chiudi i due ordini indipendenti';});
     passi.splice.apply(passi,[fineMese,0].concat(cpm.passiRiconciliazione));
   }
+  // Dalle fatture in poi, mostra sempre istruzioni operative anche per i
+  // passi privi di un tutor contestuale specifico. Non modificare la sequenza,
+  // gli ID, i controlli automatici né il lavoro già salvato dagli allievi.
+  var daFatture = passi.findIndex(function(p){return p.titolo==='VF01: fattura Beta';});
+  if (daFatture >= 0) passi.slice(daFatture).forEach(function(p){
+    if (p.fai && p.fai.length) return; // conserva le guide specialistiche esistenti
+    var azioni = ['Apri il modulo indicato nel percorso in alto, con «Apri ➜» se necessario.'];
+    (p.campi || []).forEach(function(c) {
+      azioni.push([c[0], String(c[1])]);
+    });
+    if (p.fatto) azioni.push('Controlla tutti i dati, esegui il comando previsto dal modulo e attendi la conferma effettiva del sistema. Il tutor passerà avanti solo quando l’operazione sarà registrata.');
+    else azioni.push('Leggi il risultato nella schermata, confrontalo con i valori richiesti e poi premi «✓ Fatto» nel tutor.');
+    p.fai = azioni;
+    if (!p.idea) p.idea = 'Esegui questo passaggio nel programma: le caselle e i valori da utilizzare sono elencati qui sotto, senza anticipare la soluzione dell’eventuale esercizio contabile.';
+    if (!p.vedi && p.attesa && !p.contabile) p.vedi = [p.attesa];
+  });
   window.MSA_ESERCIZIO = {codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
 })();
