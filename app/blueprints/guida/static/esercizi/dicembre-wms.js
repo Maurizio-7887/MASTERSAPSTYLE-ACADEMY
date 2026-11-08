@@ -319,8 +319,20 @@
       punti:PVF('DELTA-120','80000002','Delta Noleggi'),
      attesa:'D 11 Delta 8.608,32 + D 47 144 / A 40 7.200 + A 21 1.552,32. Provvigione D 57 / A 26 211,68.',fatto:function(h){return !!fattura(h,'DELTA-120');}},
     {g:'10 · Fatture e anticipo',data:'15/12/2026',titolo:'Trasmetti le due fatture allo SdI',dove:{ep:F+'sdi'},percorso:'FI → Fattura elettronica (SdI)',campi:[['Documento','prima la fattura Beta, poi quella Delta'],['Data di invio','15/12/2026']],
+      punti:[
+        {t:'leggi',sel:'#sd-fattura',nome:'Documento da trasmettere: Beta prima, Delta poi',serve:'Apri il menu «Documento di vendita» e scegli la fattura di Beta. Dopo la trasmissione, ripeti sulla fattura di Delta; i numeri documento sono quelli emessi realmente da VF01.'},
+        {t:'campo',sel:'#sd-data',nome:'Data di invio',valore:'2026-12-15',serve:'Imposta 15/12/2026 per la trasmissione di ciascuna delle due fatture.'},
+        {t:'pulsante',sel:'[data-prefisso="sd"] [data-azione="sd"]',nome:'Invia allo SdI',serve:'Controlla che il documento selezionato sia di Beta, premi «Invia allo SdI», poi seleziona Delta e ripeti. Il controllo finale richiede due ricevute, non soltanto un clic.',fatto:function(h){var b=fattura(h,'BETA-180'),d=fattura(h,'DELTA-120');return !!b&&!!d&&!!b.sdi&&!!d.sdi;},finale:true}
+      ],
      attesa:'Due ricevute di consegna. Da ora una fattura sbagliata non si storna più: serve la nota di credito.',fatto:function(h){var b=fattura(h,'BETA-180'),d=fattura(h,'DELTA-120');return !!b && !!d && !!b.sdi && !!d.sdi;}},
     {g:'10 · Fatture e anticipo',data:'16/12/2026',titolo:'Anticipo su fattura: la banca anticipa l’80% di Beta',contabile:true,dove:{ep:T+'anticipi'},percorso:'Tesoreria → Anticipo su fatture',campi:[['Fattura','quella di Beta (12.912,48, scade il 14/01/2027)'],['Percentuale','80'],['Commissione','30'],['Data','16/12/2026']],
+      punti:[
+        {t:'leggi',sel:'#an-fattura',nome:'Fattura del cliente Beta',serve:'Nel menu scegli la fattura di Beta emessa il 15/12, totale 12.912,48 €. Questo anticipo riguarda Beta, non Delta.'},
+        {t:'campo',sel:'#an-percentuale',nome:'Percentuale anticipata',valore:'80',serve:'L’80% della fattura diventa un finanziamento a breve termine; non è un incasso definitivo del cliente.'},
+        {t:'campo',sel:'#an-commissione',nome:'Commissione',valore:'30',serve:'La banca trattiene 30 € di commissione: l’accredito netto sarà inferiore all’anticipo lordo.'},
+        {t:'campo',sel:'#an-data',nome:'Data accredito',valore:'2026-12-16',serve:'Registra il finanziamento alla data effettiva del 16 dicembre 2026.'},
+        {t:'pulsante',sel:'[data-prefisso="an"] [data-azione="an"]',nome:'Registra l’anticipo',serve:'Verifica cliente, fattura, percentuale, commissione e data. Premi una sola volta; il tutor controlla che l’anticipo sia registrato.',fatto:function(h){return (((h.S.tes||{}).anticipi)||[]).some(function(x){return x.data==='2026-12-16';});},finale:true}
+      ],
      attesa:'Anticipo 10.329,98: D 10 Banca 10.299,98 + D 58 Commissione 30 / A 38 Banca c/anticipi su fatture 10.329,98. Il credito verso Beta resta aperto: la fattura è la garanzia del prestito.',
      fatto:function(h){return (((h.S.tes || {}).anticipi) || []).some(function(x){return x.data==='2026-12-16';});}},
     {g:'10 · Fatture e anticipo',data:'17/12/2026',titolo:'F-53: paga il ferro',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Fatture passive e pagamenti → Pagamento a un fornitore',campi:[['Fornitore','F100 Acciaierie Umbre'],['Importo','vuoto = 4.318,80 (le due fatture del ferro)'],['Data','17/12/2026']],
