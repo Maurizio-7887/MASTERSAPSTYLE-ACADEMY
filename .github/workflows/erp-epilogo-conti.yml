@@ -1,0 +1,26 @@
+name: ERP Epilogo Conti Aggregati
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/erp_chiusura/static/ch-logica.js'
+      - 'app/blueprints/erp_fi/static/fi-pagine.js'
+      - 'tests/epilogo-conti-aggregati.js'
+      - '.github/workflows/erp-epilogo-conti.yml'
+  pull_request:
+    paths:
+      - 'app/blueprints/erp_chiusura/static/ch-logica.js'
+      - 'app/blueprints/erp_fi/static/fi-pagine.js'
+      - 'tests/epilogo-conti-aggregati.js'
+  workflow_dispatch:
+jobs:
+  verifiche:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify economic account aggregation and historical journal safety
+        run: node tests/epilogo-conti-aggregati.js
