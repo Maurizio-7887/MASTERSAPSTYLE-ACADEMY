@@ -152,8 +152,21 @@ window.CH4 = (function () {
     if (s.chiusure[anno]) throw Error('Esercizio ' + anno + ' già chiuso il ' + L.fd(s.chiusure[anno].data) + '.');
     var c = controlli(anno); if (c.length && i.forza !== 'si') throw Error('Prima di chiudere: ' + c.join(' · '));
     // 1. epilogo dei conti economici nel conto 90
-    var sal = saldi(al), ce = [], sp = [];
-    Object.keys(sal).forEach(function (k) { var p = k.split('|'), t = tipo(p[0]); if (Math.abs(sal[k]) < 0.005) return; if (t === 'COSTO' || t === 'RICAVO') ce.push({conto: p[0], partner: p[1], saldo: sal[k]}); else if (t === 'ATTIVO' || t === 'PASSIVO') sp.push({conto: p[0], partner: p[1], saldo: sal[k]}); });
+    var sal = saldi(al), ce = [], sp = [], economici = {};
+    // Il conto economico è per CODICE CONTO, non per partner/centro: somma
+    // prima tutti i saldi analitici. I partner restano distinti nello SP,
+    // nei mastrini e nei documenti originari.
+    Object.keys(sal).forEach(function (k) {
+      var p = k.split('|'), codice = p[0], t = tipo(codice);
+      if (t === 'COSTO' || t === 'RICAVO') {
+        economici[codice] = r2((economici[codice] || 0) + sal[k]);
+      } else if ((t === 'ATTIVO' || t === 'PASSIVO') && Math.abs(sal[k]) >= 0.005) {
+        sp.push({conto: codice, partner: p[1], saldo: sal[k]});
+      }
+    });
+    Object.keys(economici).forEach(function (conto) {
+      if (Math.abs(economici[conto]) >= 0.005) ce.push({conto: conto, partner: '', saldo: economici[conto]});
+    });
     var ord = function (a, b) { return a.conto.localeCompare(b.conto, 'it', {numeric: true}) || a.partner.localeCompare(b.partner); };
     ce.sort(ord); sp.sort(ord);
     var righe = [], tot = 0;
