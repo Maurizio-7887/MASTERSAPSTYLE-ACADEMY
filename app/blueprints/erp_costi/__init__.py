@@ -18,6 +18,11 @@ def calcolo():
     return render_lab("erp_costi", "calcolo")
 
 
+@bp.route("/commessa")
+def commessa():
+    return render_lab("erp_costi", "commessa")
+
+
 @bp.route("/chiusura")
 def chiusura():
     return render_lab("erp_costi", "chiusura")
