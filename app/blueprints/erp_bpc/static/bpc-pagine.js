@@ -61,7 +61,14 @@
         '<label>Centro <select id="cdc">' + cp.CDC.map(function (c) { return '<option value="' + c.codice + '"' + (c.codice === cdc ? ' selected' : '') + '>' + c.codice + ' ' + e(c.nome) + '</option>'; }).join('') + '</select></label> ' +
         (cat === 'BUDGET' ? '<span class="lab-bd ' + BADGE[B.statoDi(cdc).stato] + '">' + e(B.STATI[B.statoDi(cdc).stato]) + '</span>' : '') + '</div>' +
         L.scheda('🧮', 'Modulo di inserimento · ' + cat + ' ' + (ver || '') + ' · centro ' + cdc, 'EPM add-in · input form IF_COSTI_CENTRO',
-          (blocco ? '<div class="lab-esito ko">🔒 ' + e(blocco) + '</div>' : '<p class="lab-nota">Scrivi gli importi mese per mese (virgola per i decimali). Per spalmare un totale annuo in 12 mesi usa il riquadro sotto.</p>') +
+          (blocco ? '<div class="lab-esito ko">🔒 ' + e(blocco) + '</div>' +
+            (cat === 'BUDGET' && ver === 'V1' && (B.statoDi(cdc).stato === 'inviato' || B.statoDi(cdc).stato === 'approvato')
+              ? '<div class="lab-nota" role="status"><b>Stai riprendendo un esercizio già lavorato.</b> Il pulsante «Salva nel modello» non è scomparso per errore: è nascosto perché il budget del centro ' + e(cdc) + ' è ' + e(B.statoDi(cdc).stato) + '. ' +
+                'Se la riga 54 contiene già i 12 valori richiesti (totale 3.100 €), il tutor riconosce il salvataggio esistente e permette di proseguire senza rifarlo. ' +
+                'Se i valori non coincidono, il controller deve prima <b>respingere il budget del centro</b> dalla pagina <a href="' + e(base() + 'bpc/processo') + '">BPC → Approvazione e ritrasferimento</a>, indicando il motivo. ' +
+                'Poi torna qui, correggi i mesi e premi «Salva nel modello», quindi invia e approva nuovamente. Non azzerare il corso.</div>'
+              : '')
+            : '<p class="lab-nota">Scrivi gli importi mese per mese (virgola per i decimali). Per spalmare un totale annuo in 12 mesi usa il riquadro sotto.</p>') +
           '<div style="overflow-x:auto"><table class="lab-tab" style="font-size:12px"><thead>' + testa + '</thead><tbody>' + corpo + '</tbody></table></div>' +
           (blocco ? '' : '<div class="lab-mod" data-prefisso="epm"><div class="lab-azioni"><button type="button" class="lab-btn" data-azione="salva">Salva nel modello</button></div><div class="lab-esito" id="epm-esito"></div></div>')) +
         (blocco ? '' : L.scheda('➗', 'Spalma un totale annuo', 'chiave di distribuzione 1 · 12 mesi uguali',
