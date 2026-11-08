@@ -1,0 +1,23 @@
+name: Tutor VF01 Beta Delta
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/guida/static/esercizi/dicembre-wms.js'
+      - 'tests/guida-fatture-beta-delta.js'
+      - '.github/workflows/tutor-fatture-beta-delta.yml'
+  pull_request:
+    paths:
+      - 'app/blueprints/guida/static/esercizi/dicembre-wms.js'
+      - 'tests/guida-fatture-beta-delta.js'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify December tutor after VF01
+        run: node tests/guida-fatture-beta-delta.js
