@@ -355,6 +355,7 @@ _ERP_PAGINE = {
     "erp_costi": [{"endpoint": "scheda", "titolo": "Distinta, ciclo e scheda di calcolo", "icona": "🔧", "tcode": "CS02 · CA02 · KZS2"},
                   {"endpoint": "calcolo", "titolo": "Calcolo del costo standard", "icona": "🏷️", "tcode": "CK11N · CK24 · CK13N"},
                   {"endpoint": "chiusura", "titolo": "Chiusura degli ordini e varianze", "icona": "⚖️", "tcode": "KGI2 · KKS2 · KO88"},
+                  {"endpoint": "commessa", "titolo": "Scheda economica di commessa", "icona": "📊", "tcode": "KKBC · KKS2 · CO-PA"},
                   {"endpoint": "ml", "titolo": "Material Ledger", "icona": "📒", "tcode": "CKM3 · CKMLCP"},
                   {"endpoint": "mensile", "titolo": "Chiusura mensile integrata", "icona": "📅", "tcode": "FI · CO · PP · MM"}],
     "erp_magazzino": [{"endpoint": "struttura", "titolo": "Struttura e attivazione", "icona": "🏬", "tcode": "W100 · tipi · ubicazioni · strategie"},
