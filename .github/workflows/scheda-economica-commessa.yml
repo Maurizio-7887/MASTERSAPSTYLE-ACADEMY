@@ -1,0 +1,30 @@
+name: Scheda Economica Commessa ERP
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/erp_costi/**'
+      - 'app/pagine.py'
+      - 'app/blueprints/guida/static/esercizi/dicembre-wms.js'
+      - 'tests/scheda-economica-commessa.js'
+      - '.github/workflows/scheda-economica-commessa.yml'
+  pull_request:
+    paths:
+      - 'app/blueprints/erp_costi/**'
+      - 'app/pagine.py'
+      - 'app/blueprints/guida/static/esercizi/dicembre-wms.js'
+      - 'tests/scheda-economica-commessa.js'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify new dashboard, variance and contextual tutor
+        run: node tests/scheda-economica-commessa.js
+      - name: Check Python routes and catalog syntax
+        run: python -m py_compile app/pagine.py app/blueprints/erp_costi/__init__.py
