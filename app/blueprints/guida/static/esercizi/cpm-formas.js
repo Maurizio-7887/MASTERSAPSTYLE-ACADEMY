@@ -353,7 +353,10 @@
     var mese = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'][k];
     epm.push(G.campo('#epm-m54_' + (k + 1), '54 Consulenze e servizi · ' + mese, String(v), k === 0 ? 'Energia e manutenzioni non costano uguale tutti i mesi: d’inverno si consuma di più. Compili la riga 54 mese per mese; il totale dell’anno deve restare 3.100 €.' : 'Stessa riga 54, mese di ' + mese.toLowerCase() + '. Il totale a destra deve arrivare a 3.100,00.', {fatto: function (h) { var b = bpc(h), r = b && b.dati && b.dati['BUDGET|V1|4200|54']; return !!r && circa(r[k], v); }}));
   });
-  epm.push(G.premi(G.btn('epm', 'salva'), 'Salva nel modello', 'Scrive nel modello BPC i dodici importi. Prima di salvare controlla che il totale riga 54 sia 3.100,00.', {finale: true}));
+  epm.push(G.premi(G.btn('epm', 'salva'), 'Salva nel modello', 'Scrive nel modello BPC i dodici importi. Se il centro 4200 è già approvato, il pulsante è nascosto correttamente: i dati già memorizzati si verificano automaticamente. Se sono diversi da quelli richiesti, vai in BPC → Approvazione e fai respingere il centro al controller prima di modificarlo.', {finale: true, fatto: function (h) {
+    var b = bpc(h), r = b && b.dati && b.dati['BUDGET|V1|4200|54'];
+    return !!r && STAGIONE.every(function (v, k) { return circa(r[k], v); });
+  }}));
 
   var ckOk = function (mat) { return function (h) { return !!stima(h, mat); }; };
   var GUIDA = {
