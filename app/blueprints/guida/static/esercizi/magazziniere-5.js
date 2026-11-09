@@ -341,5 +341,143 @@
      campi: [['Esercizio', 'Magazziniere 5.0: un mese di magazzino'], ['Nota', 'eventuali dubbi, errori corretti e la tua risposta sui KPI']],
      nota: 'Il docente vede tutti i documenti, i compiti RF e le scritture. Spunta a mano dopo la consegna.'}
   ];
+
+  // Guida didattica uniforme per tutti gli 82 passaggi.
+  // Distingue le azioni reali del gestionale dalle semplici conferme di lettura.
+  // La spunta finale di un'operazione rimane sempre legata a p.fatto(h),
+  // non al clic su "Ho letto" o alla pressione di un pulsante.
+  function leggi(nome, serve, sel) {
+    var p = {t:'leggi',nome:nome,serve:serve};
+    if(sel)p.sel=sel;
+    return p;
+  }
+  function istruzioni(p) {
+    var out=[leggi('Dove andare',
+      'Nel Launchpad scegli il modulo indicato, oppure premi «Apri ➜» qui sopra. '+
+      'Percorso da raggiungere: '+String(p.percorso||p.titolo)+'. '+
+      'Controlla il titolo della schermata prima di inserire dati.')];
+    (p.campi||[]).forEach(function(c,i) {
+      var nome=String(c[0]||'Campo '+(i+1)), valore=String(c[1] == null ? '' : c[1]);
+      out.push(leggi(String(i+1)+' · '+nome,
+        'Nella schermata «'+String(p.percorso||'')+'» cerca il campo, comando o prospetto «'+nome+
+        '». '+(nome.toLowerCase().indexOf('pulsante')>=0?'Premi il comando: ':'Inserisci, seleziona o verifica: ')+
+        valore+'. Se il programma propone codici reali di pallet, lotti, UdC, consegne o SSCC, usa i codici mostrati nel tuo account, non numeri inventati.'));
+    });
+    if(p.nota)out.push(leggi('Attenzione / perché lo fai',String(p.nota)));
+    if(p.attesa)out.push(leggi('Verifica il risultato',
+      'Dopo il salvataggio, confronta la schermata con questo risultato atteso: '+String(p.attesa)));
+    out.push(leggi(p.fatto?'Attendi la spunta automatica ✓':'Conferma la lettura ✓',
+      p.fatto?'Non basta confermare questo testo: il tutor deve leggere il movimento, il documento o il parametro realmente SALVATO. '+
+        'Se non compare ✓, torna nella schermata, verifica il messaggio di esito e NON ripetere automaticamente un movimento già contabilizzato. Chiedi al docente di controllare i dati.' :
+        'Questo è un controllo di lettura senza movimento contabile. Dopo averlo realmente svolto, premi «✓ Fatto» nel pannello. Solo allora il pulsante «Avanti» sarà disponibile.'));
+    return out;
+  }
+  function avvioDettagli() {
+    return [
+      leggi('1 · Apri l’ambiente giusto',
+        'Entra nel Sistema integrato → Avvio e dati di base → Avvio del sistema. '+
+        'Scegli la scheda «Percorso logistico · Magazziniere 5.0», NON «Crea nuova azienda vuota (costituzione)» e NON un altro esercizio. '+
+        'Se vedi già documenti o un’azienda avviata, NON azzerare: chiedi al docente un account libero.'),
+      {t:'campo',sel:'#lg-data',nome:'Data di avvio',valore:'2027-01-04',
+       serve:'Inserisci 04/01/2027: è la data dello SCENARIO SIMULATO, anche se il corso viene svolto in un altro giorno o anno.'},
+      {t:'scelta',sel:'#lg-quiz',nome:'Ricostruzione delle scritture',valore:'si',
+       serve:'Per il corso completo scegli «sì». Dopo i documenti contabili il tutor farà ricostruire Dare/Avere. Il docente può decidere prima della partenza una classe solo operativa (no).'},
+      {t:'pulsante',sel:'[data-prefisso="lg"] [data-azione="lg"]',
+       nome:'Avvia il percorso logistico',
+       serve:'Premi UNA volta «Avvia il percorso logistico». Attendi «Percorso logistico avviato». NON premere di nuovo e NON selezionare un secondo scenario.'},
+      leggi('2 · Controlla le giacenze iniziali',
+        'Devi trovare banca 50.000 €, 200 TR-STD, 200 TR-ALTA, 300 TR-PED (totale prodotti 22.785 €); ferro ZERO. '+
+        'Con la ricostruzione attiva, completa anche la partita doppia di apertura che compare nel tutor. '+
+        'La spunta arriva dai dati salvati: non la metti manualmente.')
+    ];
+  }
+  function attivazioneWms() {
+    return [
+      leggi('1 · Vai in WMS → Struttura e attivazione',
+        'Dal Launchpad apri Magazzino → Struttura e attivazione. Il WMS serve a conoscere DOVE si trova ogni unità di carico, '+
+        'non solo quanti pezzi ci sono in contabilità.'),
+      {t:'campo',sel:'#at-data',nome:'Data di attivazione',valore:'2027-01-04',
+       serve:'La data WMS deve coincidere con l’avvio: 04/01/2027.'},
+      {t:'pulsante',sel:'[data-prefisso="at"] [data-azione="at"]',
+       nome:'Attiva il magazzino W100',
+       serve:'Premi il pulsante UNA sola volta e attendi il messaggio verde. '+
+       'Il sistema crea le ubicazioni e distribuisce i pallet già presenti: non è un acquisto e non crea una seconda giacenza.'},
+      leggi('2 · Controlla il risultato',
+       'Il magazzino deve mostrare 41 ubicazioni e 14 UdC: 4 pallet TR-STD, 4 TR-ALTA e 6 TR-PED, da 50 pezzi ciascuno. '+
+       'Quantità contabili e fisiche devono coincidere. La spunta arriva automaticamente solo se W100 è attivo.')
+    ];
+  }
+  function introduzionePratica(p) {
+    if(p.titolo.indexOf('Leggi la mappa:')===0)return [
+      leggi('1 · Apri la mappa del WMS','Vai su Magazzino → Mappa delle ubicazioni. Osserva la legenda e le corsie 01, 02 e 03.'),
+      leggi('2 · Decifra 01-03-1','01 = corsia, 03 = campata, 1 = livello. Premi la relativa ubicazione nella mappa: leggi materiale, quantità e UdC.'),
+      leggi('3 · Conosci le aree di servizio','GR-ZONE = ricevimento, GI-ZONE = spedizione, Q-ZONE = quarantena, PSA-L1 = bordo linea, F-01/F-02 = cataste ferro.'),
+      leggi('4 · Completa il controllo','Confronta la mappa con il testo del tutor, poi premi il pulsante «✓ Fatto» della guida per abilitare il passo successivo.')
+    ];
+    if(p.titolo.indexOf('Dove si trova? Cerca')===0)return [
+      leggi('1 · Apri il campo Dove si trova?','In Magazzino → Mappa delle ubicazioni, nella parte superiore usa la ricerca «🔎 Dove si trova?».'),
+      {t:'scelta',sel:'#dove-mat',nome:'Articolo da cercare',valore:'TR-ALTA',
+       serve:'Scegli TR-ALTA dal menu. Le ubicazioni trovate si evidenziano sulla mappa.'},
+      leggi('2 · Leggi le quattro UdC','Nella tabella sotto la mappa devono apparire 4 pallet TR-ALTA da 50 pezzi, tutti liberi, totale 200 pezzi. Non confondere UdC e codice articolo.'),
+      leggi('3 · Ricordati gli identificativi','Per le esercitazioni RF userai i veri codici UdC esposti dal tuo account. Non copiarli da esempi di altri allievi. Premi «✓ Fatto» dopo la verifica.')
+    ];
+    if(p.titolo.indexOf('Stampa le etichette')===0)return [
+      leggi('1 · Apri Etichette barcode e QR','Vai su Magazzino → Etichette barcode e QR. Seleziona una ubicazione (es. 01-03-1) e una UdC effettivamente presente sulla mappa.'),
+      leggi('2 · Quale etichetta applicare?','L’etichetta UBICAZIONE va sullo scaffale; l’etichetta UdC va sul pallet. Il codice a barre è per la pistola, il QR per lo smartphone.'),
+      leggi('3 · Stampa o salva','Usa il pulsante di stampa o PDF della pagina; verifica che i due codici siano differenti. Spunta «✓ Fatto» dopo la prova.')
+    ];
+    if(p.titolo.indexOf('RF Interroga:')===0)return [
+      leggi('1 · Apri la pistola RF','Vai su Magazzino → Pistola RF, poi premi la scheda «🔎 Interroga». «📦 Compiti» è un’altra funzione, per movimentare merci.'),
+      {t:'leggi',sel:'#rf-q',nome:'Leggi un indirizzo',
+       serve:'Nella casella «Leggi un’ubicazione, un’unità di carico o un articolo» digita 01-03-1 e premi Invio. Leggi articolo, quantità e UdC; NON stai movimentando nulla.'},
+      {t:'leggi',sel:'#rf-q',nome:'Interroga una UdC',
+       serve:'Pulisci la casella, digita un codice UdC effettivamente letto dalla mappa, premi Invio e controlla dove si trova il pallet.'},
+      {t:'leggi',sel:'#rf-q',nome:'Interroga TR-PED',
+       serve:'Digita TR-PED e premi Invio: devono risultare sei pallet da 50. Poi premi «✓ Fatto» nel tutor: questa interrogazione non registra una scrittura.')
+    ];
+    return null;
+  }
+  function istruzioniSscc(p) {
+    var titolo=p.titolo||'';
+    var imballo=/^Imballa (Beta|Delta|Gamma)/.test(titolo);
+    var carico=/RF Carico/.test(titolo);
+    if(!imballo&&!carico)return null;
+    var beta=/Beta/.test(titolo),delta=/Delta/.test(titolo);
+    var d=beta?'80000001':delta?'80000002':null;
+    var count=beta?7:delta?3:3;
+    var help='SSCC = codice univoco a 18 cifre per UN collo/pallet. Il numero consegna non è l’SSCC; '+
+      'questi codici vengono generati dal software dopo il prelievo e l’imballo (prefisso GS1 fittizio).';
+    if(imballo)return [
+      leggi('1 · Da dove vengono i codici?','Vai su Sistema integrato → Spedizione → Imballo. '+help),
+      ...(d?[{t:'scelta',sel:'#im-consegna',nome:'Consegna da imballare',valore:d,
+        serve:'Seleziona la consegna '+d+'. Deve essere già prelevata e presente nella lista; altrimenti completa prima i compiti RF di prelievo.'}]:
+        [leggi('Seleziona Gamma','Seleziona la consegna Gamma già prelevata: leggi il numero ESATTO nella schermata delle consegne, non riusare il numero di Beta.')]),
+      {t:'scelta',sel:'#im-imballo',nome:'Tipo di pallet',valore:'EUR',
+       serve:'Scegli EUR: pallet europeo con regola di confezionamento da 50 transenne per collo.'},
+      {t:'campo',sel:'#im-perCollo',nome:'Pezzi per collo',valore:'50',
+       serve:'Scrivi 50 pezzi per pallet. Numero atteso di colli: '+count+'. Il totale deve quadrare con la consegna.'},
+      {t:'pulsante',sel:'[data-prefisso="im"] [data-azione="im"]',
+       nome:'Crea i colli (SSCC)',serve:'Inserisci la data di gennaio 2027 prevista nel passaggio, poi premi UNA sola volta. Il sistema genera '+count+' SSCC differenti.'},
+      leggi('2 · Dove si vedono gli SSCC?','Resta nella pagina Imballo; dopo il salvataggio scorri fino alla tabella «Colli della consegna», colonna SSCC: leggi '+count+' codici di 18 cifre.'),
+      leggi('3 · Stampa le etichette','Usa «Stampa le etichette»: ogni pallet ha il suo barcode GS1-128 (00). Le userai nel carico RF o nel trasporto. La spunta arriva solo quando risultano creati '+count+' colli.')
+    ];
+    return [
+      leggi('1 · Recupera i codici SSCC','Prima apri Spedizione → Imballo, scegli la consegna '+(d||'di Beta')+' e leggi gli SSCC REALI dei pallet nella colonna SSCC. '+help),
+      leggi('2 · Dove caricare','Vai in Magazzino → Pistola RF → scheda «🚛 Carico»; il trasporto deve essere già creato e deve contenere quella consegna.'),
+      {t:'leggi',sel:'#rf-sscc',nome:'Leggi un SSCC alla volta',
+       serve:'Nella casella «Leggi l’SSCC del collo da caricare» digita/scansiona il PRIMO codice reale di 18 cifre e premi Invio. Poi passa al secondo e continua. NON usare il codice ordine o consegna.'},
+      leggi('3 · Controlla la quantità','Sono attesi '+count+' pallet caricati. Lo stesso SSCC non deve essere usato due volte. Se il codice viene rifiutato, torna all’Imballo e controlla trasporto e numero.'),
+      leggi('4 · Verifica il risultato','La spunta avviene quando tutti i pallet previsti risultano caricati nel trasporto. Non registrare l’uscita merci se il carico è incompleto.')
+    ];
+  }
+  passi.forEach(function(p) {
+    p.punti = introduzionePratica(p) || istruzioniSscc(p) || istruzioni(p);
+    if(p.id==='mag5-avvio')p.punti=avvioDettagli();
+    if(p.id==='mag5-attiva')p.punti=attivazioneWms();
+    if(!p.grande)p.grande='COSA IMPARI: '+p.titolo+'. '+(p.fatto?
+      'Esegui un comando reale nel gestionale: il tutor conferma soltanto quando trova l’operazione salvata.':
+      'Osserva e interpreta la schermata, poi spunta «✓ Fatto» quando hai davvero completato la verifica.');
+  });
+
   window.MSA_ESERCIZIO = {codice: 'magazziniere-5', titolo: 'Magazziniere 5.0: un mese di magazzino (gennaio 2027)', versione: 'erp-ft', pannelloAutomatico: true, verificaRagioneria: true, passi: passi};
 })();
