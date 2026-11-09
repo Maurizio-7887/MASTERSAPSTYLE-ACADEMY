@@ -6,7 +6,7 @@ lo stato salvato viene tolto e la pagina di conferma pulisce anche la copia nel 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from ...accesso import utente_corrente
-from ...db import ArchivioLavoro, StatoLavoro, adesso, db
+from ...db import ArchivioLavoro, AvanzamentoGuida, StatoLavoro, adesso, db
 from ...esercizi import ESERCIZI
 from ...report import report as report_lavoro
 from ..sincronia import chiave_storage
@@ -57,6 +57,15 @@ def nuovo():
     if s is not None:
         db.session.add(ArchivioLavoro(utente_id=u.id, versione=SLOT, dati=s.dati, motivo=f"ricominciato da zero dall'allievo · {adesso():%d/%m/%Y %H:%M}"))
         db.session.delete(s)
+    # Solo dopo la conferma esplicita di "nuovo" si riporta il tutor a zero.
+    # La normale uscita/ripresa NON modifica mai i checkpoint.
+    for g in AvanzamentoGuida.query.filter_by(utente_id=u.id, versione=SLOT).all():
+        g.posizione = 0
+        g.posizione_massima = 0
+        g.passi = {}
+        g.totale = 0
+        g.osservazioni = {}
+        g.aggiornato = adesso()
     db.session.commit()
     vai = url_for("erp_dati.avvio", versione=VERSIONE_URL, esercizio_guida=codice)
     return render_template("riprendi/pulito.html", chiave=chiave_storage(SLOT), slot=SLOT, vai=vai)
