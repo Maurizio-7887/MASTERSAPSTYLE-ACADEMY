@@ -101,6 +101,8 @@ def config_guida(versione, esercizio=None, chiave=None):
             "progress_url": url_for("guida.registra_progresso", esercizio=esercizio),
             "progress_version": "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "firenze-30", "executive-assistant", "ragioneria-wms"} else versione,
             "progress_csrf": csrf_token(), "progress_notes": progresso.osservazioni if progresso else {},
+            # spunte già salvate sul server, per titolo: una lettura confermata non torna «da fare» se lo stato del browser si perde
+            "progress_steps": {str(v.get("titolo") or ""): v.get("stato") or "" for v in (progresso.passi or {}).values() if isinstance(v, dict)} if progresso else {},
             "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima,
                          "totale": progresso.totale,
                          "titolo": ((progresso.passi or {}).get(str(progresso.posizione)) or {}).get("titolo", ""),

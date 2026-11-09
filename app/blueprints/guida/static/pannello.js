@@ -45,8 +45,8 @@
   }
   function manuali(S) { return ((S.msaGuida || {})[E.codice] || {}); }
   function esiti() {
-    var S = stato(), h = aiutanti(S), m = manuali(S);
-    return PASSI.map(function (p, i) {
+    var S = stato(), h = aiutanti(S), m = manuali(S), salvati = C.progress_steps || {};
+    var res = PASSI.map(function (p, i) {
       // Il docente può confermare un'operazione già verificata sui documenti,
       // se il validatore automatico non riconosce un vecchio dato legittimo.
       // Questo NON modifica il libro giornale e non permette all'allievo
@@ -62,6 +62,16 @@
         return nota.giudizio === 'ok' ? 'docente' : '';
       }
       return nota.giudizio === 'ok' ? 'docente' : '';
+    });
+    // Letture e controlli (passi senza verifica automatica) già superati non bloccano chi riprende:
+    // valgono come confermati se la spunta è salvata sul server o se un'operazione verificata
+    // successiva è già stata registrata. Le operazioni ERP restano verificate sui dati reali.
+    var ultimoVerificato = -1;
+    res.forEach(function (s, i) { if (s === 'auto' || s === 'docente') ultimoVerificato = i; });
+    return res.map(function (s, i) {
+      var p = PASSI[i];
+      if (s || p.fatto || p.cpmVerificato) return s;
+      return (i < ultimoVerificato || salvati[p.titolo] === 'mano') ? 'mano' : s;
     });
   }
   function segnaAMano(p, valore) {
