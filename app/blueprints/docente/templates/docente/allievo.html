@@ -10,6 +10,7 @@
   <div class="msa-card"><div class="l">Ultimo accesso</div><div class="v" style="font-size:17px">{{ ora_italiana(u.ultimo_accesso) }}</div></div>
 </div>
 
+<div class="msa-card"><h2>Controllo delle attività in corso</h2><p>Visualizza dove è arrivato l’allievo senza aspettare che consegni l’esercitazione: passi completati, registrazioni reali, errori e note di correzione.</p><a class="msa-btn" href="{{ url_for('docente.monitoraggio', uid=u.id) }}">🔎 Monitora e correggi passo per passo</a></div>
 <h2>Consegne</h2>
 {% if consegne %}
 <div class="msa-scroll"><table class="msa-tab">
