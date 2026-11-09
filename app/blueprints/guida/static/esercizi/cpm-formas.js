@@ -8,6 +8,12 @@
   var stima = function(h,mat){return ((h.S.costing || {}).stime || {})[mat];};
   var snapshot = function(h,mat){var s=stima(h,mat);return s && s.elementi && s.elementi.par && s.elementi.par.snapshot;};
   var piano0 = function(h,cdc){var m=modello(h);return ((m && m.piano && m.piano['0']) || {})[cdc] || {};};
+  // 4200: va bene il dettaglio della guida (fitto 12.000 + ammortamenti 2.900 + servizi 3.100) oppure il valore proposto dal programma
+  // (18.000 su una sola classe): conta il totale dei costi comuni, senza personale.
+  var ok4200 = function(h){var p=piano0(h,'4200')||{},n=function(k){return Number(p[k])||0;};
+    if(circa(n('86'),12000)&&circa(n('50'),2900)&&circa(n('54'),3100))return true;
+    var tot=Object.keys(p).reduce(function(t,k){return t+(Number(p[k])||0);},0);
+    return circa(tot,18000)&&!n('80')&&!n('81')&&!n('82')&&!n('83');};
   var CO = function(ep,percorso){return {dove:{ep:'erp_controllo.'+ep},percorso:percorso};};
   var bpc = function(h){return (h.S.costing || {}).bpc;};
   var CDC6 = ['4100','4200','4210','4220','4230','4300'];
@@ -32,7 +38,7 @@
         ['Centri 4100 Magazzino e 4300 Amministrazione','Lasciali a 0 nella versione di piano 0 per mantenere i valori didattici del caso. NON significa che siano centri senza costi reali: le paghe di Marco e Giulia saranno imputate ai rispettivi centri nel consuntivo. In una pianificazione aziendale completa vanno stimati anche questi costi e definito se sono industriali, logistici o di periodo.'],
         ['Controlla la tabella','Piano versione 0: 4210, 4220, 4230 36.000 ciascuno; 4200 18.000; totale 126.000']
       ],{dove:{ep:'erp_controllo.kp06'},percorso:'CO → Controllo di gestione → 2 · Pianificazione costi per centro',attesa:'Piano 126.000 € = 108.000 di personale dei reparti + 18.000 di costi comuni di stabilimento. È un piano annuo, non il costo di dicembre, e non registra niente in contabilità.',nota:'Ogni centro si salva da solo: scegli il centro in alto, scrivi gli importi annui, premi «Salva il piano del centro». Ogni salvataggio crea una nuova revisione del piano.',
-        fatto:function(h){var m=modello(h);return attivo(h) && m.anno===2026 && centri.every(function(k){var c=m.centri[k];return c && circa(c.personale,36000) && circa(c.indiretti,0);}) && circa(piano0(h,'4200')['86'],12000) && circa(piano0(h,'4200')['50'],2900) && circa(piano0(h,'4200')['54'],3100) && circa(m.generale.produttivi,18000) && circa(m.generale.amministrativi,0);}}),
+        fatto:function(h){var m=modello(h);return attivo(h) && m.anno===2026 && centri.every(function(k){var c=m.centri[k];return c && circa(c.personale,36000) && circa(c.indiretti,0);}) && ok4200(h) && circa(m.generale.produttivi,18000) && circa(m.generale.amministrativi,0);}}),
       passo('cpm-paghe','Tabella di controllo del budget del personale: confronta il piano con le paghe',[
         ['Riquadro','Riprendi i costi del personale dalle paghe (PCP)'],['Versione di destinazione','1 · confronto (non toccare la versione 0)'],['Pulsante','Trasferisci dalle paghe'],
         ['Leggi la tabella di controllo','4100 Magazzino (Marco Rossi) 37.807,06 · 4200 Produzione (Sara Bianchi) 40.507,57 · 4300 Amministrazione (Giulia Verdi) 46.808,74 di paghe a regime'],
@@ -431,7 +437,7 @@
   var validatori = {
     'cpm-attivazione': function(h){return attivo(h);},
     'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230','4200'].every(function(c){return !!(m.fattiPerCentro&&m.fattiPerCentro[c]);}) && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
-      circa((piano0(h,'4200')||{})['86']||0,12000) && circa((piano0(h,'4200')||{})['50']||0,2900) && circa((piano0(h,'4200')||{})['54']||0,3100);},
+      ok4200(h);},
     'cpm-paghe': function(h){var m=modello(h);return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80']>0);},
     'cpm-kp26': function(h){var m=modello(h);return !!m && ['Taglio','Piegatura','Saldatura'].every(function(c){return m.centri[c] && circa(m.centri[c].capacita,1500) && circa(m.centri[c].orePiano,1500);}) && circa(m.volumi['TR-STD'],1200) && !!(m.fatti && m.fatti.kp26 && m.fatti.ltp);},
     'cpm-ciclo': function(h){var m=modello(h);return !!(m && m.fatti && m.fatti.ksu && m.generale.driver==='ore' && circa(m.generale.produttivi,18000) && centri.every(function(c){return circa(m.centri[c].orePiano,1500);}));},
@@ -463,7 +469,7 @@
   // Il budget salva più volte lo stesso modulo: ogni salvataggio è attribuito a un centro preciso.
   verificaPulsanti['cpm-budget']=['4210','4220','4230','4200'].map(function(c){return function(h){
     if(!(modello(h)&&modello(h).fattiPerCentro&&modello(h).fattiPerCentro[c]))return false;
-    if(c==='4200')return circa((piano0(h,c)||{})['86']||0,12000)&&circa((piano0(h,c)||{})['50']||0,2900)&&circa((piano0(h,c)||{})['54']||0,3100);
+    if(c==='4200')return ok4200(h);
     return circa((piano0(h,c)||{})['80']||0,36000);
   };});
   // Diagnosi punto per punto: che cosa manca per la spunta, letto dai dati salvati dell'allievo.
@@ -491,11 +497,8 @@
         var v=(piano0(h,x[0])||{})['80']||0;
         out.push([salvato(x[0])&&circa(v,36000),'Centro '+x[0]+' '+x[1]+': classe 80 Salari = 36.000'+(circa(v,36000)?'':' (ora c\u2019è '+eur(v)+')')+(salvato(x[0])?'':' → scegli il centro e premi «Salva il piano del centro»')]);
       });
-      var p42=piano0(h,'4200')||{};
-      [['86','Fitti passivi',12000],['50','Ammortamenti',2900],['54','Consulenze e servizi',3100]].forEach(function(x){
-        var v=p42[x[0]]||0;
-        out.push([circa(v,x[2]),'Centro 4200 Produzione: classe '+x[0]+' '+x[1]+' = '+eur(x[2])+(circa(v,x[2])?'':' (ora c\u2019è '+eur(v)+')')]);
-      });
+      var p42=piano0(h,'4200')||{},tot42=Object.keys(p42).reduce(function(t,k){return t+(Number(p42[k])||0);},0);
+      out.push([ok4200(h),'Centro 4200 Produzione: costi comuni 18.000 in tutto (fitto 12.000 + ammortamenti 2.900 + servizi 3.100)'+(ok4200(h)?'':' (ora in tutto '+eur(tot42)+')')]);
       out.push([salvato('4200'),'Centro 4200 Produzione salvato con «Salva il piano del centro»']);
       return out;
     }
