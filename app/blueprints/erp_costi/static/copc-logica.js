@@ -99,7 +99,16 @@ window.PC4 = (function () {
     var n = N(), data = n.data(i.data), per = mese(data);
     var mats = Object.keys(C().stime).filter(function (m) { return C().stime[m].stato === 'VO'; });
     if (!mats.length) throw Error('Nessuna stima marcata: prima «Marca» (CK24).');
-    var bootstrap = [];
+    var bootstrap = [], giaValidi = [];
+    // già rilasciato in questo mese con lo stesso budget e lo stesso costo: è a posto, non è un errore
+    mats = mats.filter(function (m) {
+      var st = C().stime[m], snap = st.elementi && st.elementi.par && st.elementi.par.snapshot;
+      var stesso = C().rilasci.some(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM &&
+        Math.abs((r.nuovo || 0) - st.unitario) < 0.005 && (!cpm.attivo() || (snap && r.cpm === snap.revisione)); });
+      if (stesso) { st.stato = 'FR'; st.rilascio = st.rilascio || data; giaValidi.push(m); return false; }
+      return true;
+    });
+    if (!mats.length) { n.salva(); return '<p class="lab-nota">' + giaValidi.join(' e ') + ': costo standard già rilasciato in questo mese con lo stesso budget. È tutto a posto (stato FR): puoi andare avanti.</p>'; }
     mats.forEach(function (m) {
       var conflitti = C().rilasci.filter(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM; });
       if (conflitti.length) {

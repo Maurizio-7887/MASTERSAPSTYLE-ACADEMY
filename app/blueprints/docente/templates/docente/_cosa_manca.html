@@ -1,0 +1,64 @@
+{# Per il docente: dove è ferma l'allieva/o, che cosa deve fare e che cosa manca davvero nei suoi dati salvati.
+   Usa gli stessi controlli del tutor (file degli esercizi) sullo stato ERP salvato sul server. #}
+{% set g0 = dettagli[0].item if dettagli else none %}
+{% if g0 and lavoro %}
+<section class="msa-card" id="cosa-manca" style="border:2px solid #E0B44A">
+  <h2>🔎 Dove è ferma e che cosa manca (sui dati salvati)</h2>
+  <div id="cm-corpo"><p>Sto leggendo i dati dell'allievo…</p></div>
+  <p style="font-size:12px;color:#666">Controllo fatto con gli stessi criteri del tutor sullo stato ERP salvato sul server
+  (ultimo salvataggio {{ ora_italiana(lavoro.aggiornato) }}). Se l'allievo ha lavorato dopo senza salvare, chiedigli «Salva il lavoro fino a qui» e ricarica.</p>
+</section>
+<script>window.CM_STATO = {{ lavoro.dati | tojson }}; window.CM_POS = {{ g0.posizione }}; window.CM_ES = {{ g0.esercizio | tojson }};</script>
+{% set es = g0.esercizio %}
+{% if es in ['dicembre-wms', 'completo-formas'] %}
+<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-legacy.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/cpm-formas.js') }}"></script>
+{% endif %}
+{% if es == 'completo-formas' %}
+<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/magazzino-formas.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/laboratori-completi.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/uso-programma.js') }}"></script>
+{% endif %}
+{% if es == 'firenze-30' %}<script src="{{ url_for('guida.static', filename='esercizi/magazziniere-5.js') }}"></script>{% endif %}
+<script src="{{ url_for('guida.static', filename='esercizi/' ~ es ~ '.js') }}"></script>
+{% if es == 'dicembre-wms' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
+<script>
+(function () {
+  var box = document.getElementById('cm-corpo'), E = window.MSA_ESERCIZIO, S = window.CM_STATO || {};
+  if (typeof S === 'string') { try { S = JSON.parse(S); } catch (e) { S = {}; } }
+  if (!E || !E.passi) { box.innerHTML = '<p>Esercizio non riconosciuto: usa la tabella qui sotto.</p>'; return; }
+  var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var regs = S.registrazioni || [], low = function (x) { return String(x || '').toLowerCase(); }, eventi = ((S.fiQuattro || {}).events || []);
+  var h = {S: S,
+    k: function (p) { p = low(p); return regs.some(function (r) { return low(r.fi && r.fi.key).indexOf(p) === 0; }); },
+    t: function (tipo, n) { return regs.filter(function (r) { return r.tipo === tipo; }).length >= (n || 1); },
+    d: function (txt, tipo, n) { return regs.filter(function (r) { return (!tipo || r.tipo === tipo) && String(r.descrizione || '').indexOf(txt) >= 0; }).length >= (n || 1); },
+    ev: function (ref) { ref = low(ref); return eventi.some(function (e) { return low((e.input || {}).ref) === ref; }) || regs.some(function (r) { return low(r.fi && r.fi.key) === 'quattro:' + ref; }); }};
+  var P = E.passi, manuali = ((S.msaGuida || {})[E.codice] || {});
+  var fatto = function (p) { if (!p.fatto) return manuali[p.titolo] ? true : null; try { return !!p.fatto(h); } catch (e) { return false; } };
+  var pos = Math.max(0, Math.min(P.length - 1, window.CM_POS || 0));
+  var primo = -1; for (var i = 0; i < pos; i++) { if (P[i].fatto && fatto(P[i]) === false) { primo = i; break; } }
+  function scheda(i, titolo) {
+    var p = P[i], f = fatto(p), out = '<h3>' + titolo + ' · passo ' + (i + 1) + ': ' + esc(p.titolo) + '</h3>';
+    out += '<p>📍 <b>Dove:</b> ' + esc(p.percorso || '') + '</p>';
+    out += '<p><b>Controllo sui dati dell’allievo:</b> ' + (f === null ? 'passo di lettura, si spunta a mano' : f ? '<span style="color:#107E3E">✅ superato</span>' : '<span style="color:#B42318">❌ non superato</span>') + '</p>';
+    if (typeof p.diagnosi === 'function') {
+      var d = []; try { d = p.diagnosi(h) || []; } catch (e) { d = []; }
+      if (d.length) out += '<ul style="list-style:none;padding-left:0">' + d.map(function (x) { return '<li style="margin:3px 0;' + (x[0] ? 'color:#107E3E' : 'color:#B42318;font-weight:600') + '">' + (x[0] ? '✅ ' : '❌ ') + esc(x[1]) + '</li>'; }).join('') + '</ul>';
+    }
+    var fai = p.fai || [];
+    if (fai.length) out += '<p><b>Che cosa deve fare, una cosa alla volta:</b></p><ol>' + fai.map(function (x) {
+      if (x && x.fai) return '<li><small>' + esc(x.dove || '') + '</small><br><b>' + esc(x.fai) + '</b>' + (x.valore ? ' → <code>' + esc(x.valore) + '</code>' : '') + '</li>';
+      return '<li>' + esc(Array.isArray(x) ? x.join(': ') : x) + '</li>'; }).join('') + '</ol>';
+    else if (p.campi && p.campi.length) out += '<p><b>Dati del passo:</b></p><ul>' + p.campi.map(function (c) { return '<li>' + esc(c[0]) + ': <b>' + esc(c[1]) + '</b></li>'; }).join('') + '</ul>';
+    if (p.attesa) out += '<p><b>Risultato atteso:</b> ' + esc(p.attesa) + '</p>';
+    return out;
+  }
+  var html = '';
+  if (primo >= 0) html += '<div style="background:#FDECEA;border-radius:8px;padding:8px 12px;margin-bottom:10px">⛔ Il tutor la blocca su un passo precedente rimasto senza spunta.</div>' + scheda(primo, 'Passo che la blocca');
+  html += scheda(pos, primo >= 0 ? 'Dove si trova' : 'Dove è ferma');
+  box.innerHTML = html;
+})();
+</script>
+{% endif %}
