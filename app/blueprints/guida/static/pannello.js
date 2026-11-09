@@ -58,8 +58,10 @@
     S.msaGuida = S.msaGuida || {};
     var m = S.msaGuida[E.codice] = S.msaGuida[E.codice] || {};
     if (valore) m[p.titolo] = 1; else delete m[p.titolo];
-    if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); return; } catch (e) { /* ripiego */ } }
-    scriviSeEsiste(S);
+    if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') { try { window.MSA_SALVA_STATO_CORRENTE(); } catch (e) { scriviSeEsiste(S); } }
+    else scriviSeEsiste(S);
+    stati = esiti();
+    programmaProgresso();
   }
 
   // ── interfaccia ──
@@ -98,10 +100,51 @@
     for (i = 0; i < N; i++) if (!stati[i]) return i;
     return N - 1;
   };
-  var pos = parseInt(ss(POS), 10);
+  // Il server vince sulle vecchie sessioni: un progresso salvato su PostgreSQL
+  // non deve tornare al punto 5 quando la scheda viene chiusa.
+  var serverPos = C.progress && Number(C.progress.posizione);
+  var pos = (C.progress && Number.isInteger(serverPos) && serverPos >= 0 && serverPos < N)
+    ? serverPos : parseInt(ss(POS), 10);
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
   // Ripresa dopo un salvataggio seguito subito da un cambio di pagina.
   if (guidata && stati[pos]) { while (pos < N - 1 && stati[pos]) pos++; ss(POS, String(pos)); }
+  // Checkpoint didattico separato dalle registrazioni del simulatore.
+  // Non inseriamo il cursore nel JSON contabile: cambiare pagina non cancella mai il lavoro.
+  var progressTimer = null, lastSignature = '', sendingProgress = false, pendingProgress = false;
+  function progressBody() {
+    return JSON.stringify({
+      csrf: C.progress_csrf, versione: C.progress_version || C.versione,
+      posizione: pos, totale: N,
+      passi: PASSI.map(function (p, i) {
+        return {titolo: p.titolo || '', gruppo: p.g || '', stato: stati[i] || ''};
+      })
+    });
+  }
+  function trasmettiProgresso(keep) {
+    if (!C.progress_url || !C.progress_csrf || !window.fetch) return;
+    if (sendingProgress) { pendingProgress = true; return; }
+    var body = progressBody();
+    if (body === lastSignature) return;
+    sendingProgress = true;
+    fetch(C.progress_url, {method: 'POST', credentials: 'same-origin',
+      headers: {'Content-Type': 'application/json', 'X-CSRF': C.progress_csrf},
+      body: body, keepalive: !!keep}).then(function (r) {
+      if (r.ok) lastSignature = body;
+    }).catch(function () { /* Il checkpoint locale rimane fino al prossimo invio. */ })
+    .then(function () {
+      sendingProgress = false;
+      if (pendingProgress) { pendingProgress = false; programmaProgresso(); }
+    });
+  }
+  function programmaProgresso() {
+    clearTimeout(progressTimer);
+    progressTimer = setTimeout(function () { trasmettiProgresso(false); }, 250);
+  }
+  window.addEventListener('pagehide', function () {
+    clearTimeout(progressTimer);
+    trasmettiProgresso(true);
+  });
+  ss(POS, String(pos));
   // arrivo da una lezione «Che situazione hai?»: ?passo=<inizio del titolo> apre la finestra su quel passo
   var richiesto = null;
   try { richiesto = new URLSearchParams(location.search).get('passo'); } catch (e) { richiesto = null; }
@@ -341,7 +384,7 @@
     else if (t.classList.contains('msa-g-appunti')) salvaAppunti(t.value);
   });
 
-  function vaiA(i, manuale) { pos = Math.max(0, Math.min(N - 1, i)); if (manuale) ss(POS, String(pos)); disegna(); corpo.scrollTop = 0; }
+  function vaiA(i, manuale) { pos = Math.max(0, Math.min(N - 1, i)); ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0; }
 
   function apri(si) {
     pannello.hidden = !si;
@@ -398,6 +441,7 @@
       while (pos < N - 1 && stati[pos]) pos++;
       ss(POS, String(pos));
     }
+    programmaProgresso();
     disegna();
   }
   window.addEventListener('msa:registrazioni-salvate', function () {
@@ -412,11 +456,12 @@
   function aggiorna() {
     if (document.visibilityState === 'hidden') return;
     if (inQuiz()) { if (pannello.hidden) apri(true); return; }
-    if (pannello.hidden) return;
     var prima = stati[pos], nuovi = esiti();
     var cambiato = nuovi.some(function (x, i) { return x !== stati[i]; });
     stati = nuovi;
     if (!cambiato) return;
+    programmaProgresso();
+    if (pannello.hidden) return;
     disegna();
     if (guidata && !prima && stati[pos] && pos < N - 1) {
       var prossimo = pos + 1;
@@ -439,6 +484,8 @@
 
   apri(inQuiz() ? true : guidata ? ls(APERTA + '-' + E.codice) !== '0' : ls(APERTA) === '1');
   progB.textContent = stati.filter(Boolean).length + '/' + N;
+  // Salva anche la posizione ritrovata dalla vecchia sessionStorage al primo accesso.
+  programmaProgresso();
 
   // ══ GUIDA PUNTO PER PUNTO ══
   // Un passo può avere p.punti: elenco ordinato dei punti in cui l'allievo deve scrivere, scegliere o premere.
