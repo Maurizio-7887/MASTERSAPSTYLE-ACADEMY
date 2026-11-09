@@ -27,9 +27,9 @@
   <details><summary>Apri i controlli di confronto</summary>
   <div class="msa-scroll"><table class="msa-tab"><tr><th>Controllo</th><th>Atteso</th><th>Rilevato</th><th>Esito</th></tr>
   {% for c in verifica.confronto %}
-    <tr><td>{{ c.nome or c.voce or c.chiave or 'Controllo ' ~ loop.index }}</td>
+    <tr><td>{{ c.etichetta or c.nome or c.voce or c.chiave or 'Controllo ' ~ loop.index }}</td>
     <td>{{ c.atteso if c.atteso is defined else '—' }}</td>
-    <td>{{ c.effettivo if c.effettivo is defined else (c.reale if c.reale is defined else '—') }}</td>
+    <td>{{ c.reale if c.reale is defined else '—' }}</td>
     <td>{{ '✓' if c.ok else 'Da verificare' }}</td></tr>
   {% endfor %}
   </table></div></details>
@@ -38,7 +38,12 @@
   <div class="msa-scroll"><table class="msa-tab"><tr><th>Data</th><th>Operazione</th><th>Tipo</th><th>Righe</th></tr>
   {% for reg in verifica.giornale %}
     <tr><td>{{ reg.data or '—' }}</td><td>{{ reg.descrizione or '—' }}</td>
-    <td>{{ reg.tipo or '—' }}</td><td>{{ reg.righe|length if reg.righe is defined else '—' }}</td></tr>
+    <td>{{ reg.tipo or '—' }}</td><td>
+      {% if reg.id in verifica.controlli.non_quadrate %}<b style="color:#a22">⚠ Non quadra</b><br>{% endif %}
+      {% for line in reg.righe %}
+        {{ line.conto }} {{ line.nome }} · {{ line.segno }} {{ line.importo | euro }} €{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
+    </td></tr>
   {% endfor %}
   </table></div></details>
 </div>
