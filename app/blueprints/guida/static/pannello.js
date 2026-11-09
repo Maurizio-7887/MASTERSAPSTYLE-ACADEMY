@@ -338,6 +338,11 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    if (p.regole && p.regole.length) {
+      var reg = '<div class="msa-g-regole-t">⚠️ PASSO DEL BUDGET · SEGUI ESATTAMENTE QUESTE REGOLE</div><ol class="msa-g-regole">' + p.regole.map(function (r) {
+        return '<li><span class="ic">' + esc(r[0]) + '</span><div><b>' + esc(r[1]) + '</b><small>PERCHÉ: ' + esc(r[2]) + '</small></div></li>'; }).join('') + '</ol>';
+      h += st ? '<details class="msa-g-regole-box"><summary>⚠️ Regole di questo passo (già fatto)</summary>' + reg + '</details>' : '<div class="msa-g-regole-box">' + reg + '</div>';
+    }
     var aMano = !st && !p.fatto && !p.cpmVerificato && !pendente;
     if (aMano) h += '<div class="msa-g-spunta-qui">✋ <b>Questo passo lo spunti tu.</b> Quando hai letto o controllato, premi il pulsante verde: <button type="button" class="msa-g-mano msa-g-mano-grande">✓ Fatto</button><small>oppure «✓ Fatto, avanti ▶» in fondo al riquadro</small></div>';
     if (!st && typeof p.diagnosi === 'function') {

@@ -12,7 +12,7 @@ const esiti = js.slice(start, end);
 function run(passi, fatti, salvati) {
   return new Function('passi', 'fatti', 'salvati', `
     var PASSI = passi.map(function (p, i) { return p === 'L' ? {titolo: 'p' + i} : {titolo: 'p' + i, fatto: function () { return fatti.indexOf(i) >= 0; }}; });
-    var C = {progress_notes: {}, progress_steps: salvati}, guidata = true;
+    var C = {progress_notes: {}, progress_steps: salvati}, guidata = true, E = {codice: 'dicembre-wms'};
     function stato() { return {}; } function aiutanti() { return {}; } function manuali() { return {}; }
     ${esiti}
     return esiti();
