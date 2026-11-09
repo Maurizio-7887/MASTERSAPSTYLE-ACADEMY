@@ -32,6 +32,18 @@ for ep in endpoints:
     if ep != 'allievo.consegna':
         assert config(r.get_data(as_text=True))['esercizio'] == 'magazziniere-5', ep
 
+# Il nuovo corso Firenze usa la stessa azienda operativa ma una GUIDA separata.
+assert 'firenze-30' in ESERCIZI
+assert set(k for k, *_ in ESERCIZI['firenze-30']['attesi']) == {
+    'mg_percorso', 'mg_scorte', 'mg_colli', 'mg_ondate',
+    'mg_inventari_chiusi', 'rw_compiti_aperti', 'quadratura_im_wm'
+}
+fc = config(c.get('/vuoto/s4/dati/?esercizio_guida=firenze-30').get_data(as_text=True))
+assert fc['esercizio'] == 'firenze-30'
+assert fc['progress_version'] == 'erp-ft'
+assert c.get('/static/guida/esercizi/firenze-30.js').status_code == 200
+assert config(c.get('/vuoto/m/wms').get_data(as_text=True))['esercizio'] == 'firenze-30'
+
 stato = (Path(__file__).parent / 'magazziniere-finale.json').read_text()
 ind = Lavoro(json.loads(stato)).indicatori()
 for k, label, att, tol in attesi_esercizio('magazziniere-5', json.loads(stato)):
@@ -55,4 +67,14 @@ assert r.status_code == 302
 with app.app_context():
     x = Consegna.query.filter_by(utente_id=uid).one()
     assert x.esercizio == 'magazziniere-5' and x.dati == stato
+# Il form di consegna deve proporre esplicitamente Firenze, non Pistoia.
+fh = a.get('/area/consegna?esercizio=firenze-30').get_data(as_text=True)
+assert 'value="firenze-30" selected' in fh
+fr = a.post('/area/consegna', data={
+    'csrf': csrf(fh), 'versione': 'erp-ft', 'esercizio': 'firenze-30'
+})
+assert fr.status_code == 302
+with app.app_context():
+    assert Consegna.query.filter_by(utente_id=uid, esercizio='firenze-30').count() == 1
+
 print(f'OK magazziniere: {len(endpoints)} pagine della guida, {len(ESERCIZI["magazziniere-5"]["attesi"])} indicatori e consegna allievo')
