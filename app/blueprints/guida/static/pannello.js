@@ -45,8 +45,8 @@
   }
   function manuali(S) { return ((S.msaGuida || {})[E.codice] || {}); }
   function esiti() {
-    var S = stato(), h = aiutanti(S), m = manuali(S);
-    return PASSI.map(function (p, i) {
+    var S = stato(), h = aiutanti(S), m = manuali(S), salvati = C.progress_steps || {};
+    var res = PASSI.map(function (p, i) {
       // Il docente può confermare un'operazione già verificata sui documenti,
       // se il validatore automatico non riconosce un vecchio dato legittimo.
       // Questo NON modifica il libro giornale e non permette all'allievo
@@ -62,6 +62,16 @@
         return nota.giudizio === 'ok' ? 'docente' : '';
       }
       return nota.giudizio === 'ok' ? 'docente' : '';
+    });
+    // Letture e controlli (passi senza verifica automatica) già superati non bloccano chi riprende:
+    // valgono come confermati se la spunta è salvata sul server o se un'operazione verificata
+    // successiva è già stata registrata. Le operazioni ERP restano verificate sui dati reali.
+    var ultimoVerificato = -1;
+    res.forEach(function (s, i) { if (s === 'auto' || s === 'docente') ultimoVerificato = i; });
+    return res.map(function (s, i) {
+      var p = PASSI[i];
+      if (s || p.fatto || p.cpmVerificato) return s;
+      return (i < ultimoVerificato || salvati[p.titolo] === 'mano') ? 'mano' : s;
     });
   }
   function segnaAMano(p, valore) {
@@ -250,6 +260,39 @@
       corpo.insertBefore(es, corpo.firstChild);
     }
     es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
+    if (indice < pos) es.appendChild(bottoneMancante(indice));
+  }
+  // ── Sistemare un passo rimasto indietro e poi tornare dove si era ──
+  // «Vai al passo X» porta al passo senza spunta e ricorda il punto di partenza;
+  // quando tutti i passi prima di quel punto hanno la ✓ si torna lì da soli (o con «Torna al passo»).
+  var RIT = 'msa-guida-ritorno-' + E.codice;
+  function ritornoAttivo() {
+    var r = parseInt(ls(RIT), 10);
+    return (r >= 0 && r < N && r > pos) ? r : -1;
+  }
+  function bottoneMancante(i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'msa-g-vai-mancante'; b.setAttribute('data-i', String(i));
+    b.textContent = '➜ Vai al passo ' + (i + 1) + ' e sistemalo (poi torni qui)';
+    b.style.cssText = 'display:block;margin-top:8px;background:#1f3a5f;color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600';
+    return b;
+  }
+  function vaiAlMancante(i) {
+    i = Math.max(0, Math.min(N - 1, Number(i) || 0));
+    if (i >= pos) return;
+    ls(RIT, String(Math.max(pos, ritornoAttivo())));
+    pos = i;
+    ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0;
+  }
+  function tornaAlRitorno() {
+    var r = ritornoAttivo();
+    if (r < 0) return false;
+    var m = primoBlocco(r);
+    if (m >= 0 && m !== pos) { pos = m; ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0; return true; }
+    if (m >= 0) return false;
+    ls(RIT, '-1');
+    pos = r; ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0;
+    return true;
   }
   function disegnaElenco() {
     var html = '', gruppo = null, primaMancante = -1;
@@ -348,7 +391,19 @@
       warning.setAttribute('role', 'status');
       warning.textContent = '⛔ Manca la spunta al passo ' + (mancaPrima + 1) + ' («' +
         PASSI[mancaPrima].titolo + '»). Devi completarlo o farlo verificare al docente prima di proseguire.';
+      if (mancaPrima < pos) warning.appendChild(bottoneMancante(mancaPrima));
       corpo.insertBefore(warning, corpo.firstChild);
+    }
+    var rit = ritornoAttivo();
+    if (rit >= 0) {
+      var box = document.createElement('div');
+      box.className = 'msa-g-esito msa-g-ritorno';
+      box.setAttribute('role', 'status');
+      box.style.cssText = 'background:#fff6e0;border:1px solid #e0c27a';
+      box.innerHTML = '🔧 <b>Stai sistemando un passo rimasto senza spunta.</b> Rifai o completa questo passo: appena ha la ✓ ti riporto al passo ' +
+        (rit + 1) + ', dove eri arrivata/o.<br><button type="button" class="msa-g-torna" style="margin-top:8px;background:#b8892b;color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer;font-weight:600">↩ Torna al passo ' +
+        (rit + 1) + '</button>';
+      corpo.insertBefore(box, corpo.firstChild);
     }
     if(!st && p.fatto) {
       var esito = corpo.querySelector('.msa-g-esito');
@@ -558,6 +613,11 @@
   });
   corpo.addEventListener('click', function (e) {
     var t = e.target;
+    if (t.classList.contains('msa-g-vai-mancante')) { vaiAlMancante(t.getAttribute('data-i')); return; }
+    if (t.classList.contains('msa-g-torna')) {
+      if (!tornaAlRitorno()) avvisoBlocco(pos);
+      return;
+    }
     if (t.classList.contains('msa-g-vai-saldi')) {
       var d = corpo.querySelector('details.msa-g-tools');
       if (d) { d.open = true; T.aperto = true; ss('msa-g-tools', '1'); apriStrumenti(d); if (d.scrollIntoView) d.scrollIntoView({behavior: 'smooth', block: 'start'}); }
@@ -626,6 +686,7 @@
     programmaProgresso();
     if (pannello.hidden) return;
     disegna();
+    if (!prima && stati[pos] && ritornoAttivo() >= 0) { tornaAlRitorno(); return; }
     if (guidata && !prima && stati[pos] && pos < N - 1) {
       var prossimo = pos + 1;
       while (prossimo < N - 1 && stati[prossimo]) prossimo++;
