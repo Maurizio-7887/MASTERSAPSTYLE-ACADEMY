@@ -49,6 +49,11 @@
   // La prima lezione DEVE partire con quiz=no, prima di toccare Avvia.
   var avvio = E.passi.find(function(p){return p.id === 'mag5-avvio';});
   if (avvio) {
+    // Un account già avviato per Pistoia, anche con lo stesso scenario,
+    // NON è un avvio Firenze valido se i quiz contabili sono attivi.
+    avvio.fatto = function(h) {
+      return h.S.percorso === 'logistica' && h.S.quizContabile === false;
+    };
     avvio.titolo = 'Firenze: avvia il percorso logistico SENZA ragioneria';
     avvio.campi = [
       ['Scenario', 'Percorso logistico · Magazziniere 5.0'],
@@ -56,7 +61,7 @@
       ['Ricostruzione delle scritture', 'NO — il corso Firenze non prevede partita doppia'],
       ['Comando', 'Avvia il percorso logistico']
     ];
-    avvio.nota = 'Attenzione: usa un account di prova vuoto dedicato a Firenze. Se il sistema è già avviato, NON premere Azzera e non selezionare Pistoia nello stesso account.';
+    avvio.nota = 'Attenzione: usa un account di prova vuoto dedicato a Firenze. Se il sistema è già avviato, NON premere Azzera e non selezionare Pistoia nello stesso account. Per la spunta iniziale deve risultare «Ricostruzione delle scritture disattivata»; altrimenti usa un nuovo account Firenze dedicato.';
     avvio.punti = [
       {t:'leggi',nome:'Apri Avvio del sistema',
         serve:'Dal Launchpad scegli «Innovazione Magazzino · Firenze 30h», poi «Avvio e dati di base». Cerca la scheda «Percorso logistico · Magazziniere 5.0». Non selezionare la costituzione aziendale.'},

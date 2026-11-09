@@ -1,0 +1,33 @@
+name: Firenze 30h and Pistoia WMS Full Regression
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/guida/**'
+      - 'app/blueprints/erp_dati/**'
+      - 'app/blueprints/portale/templates/portale/launchpad.html'
+      - 'tests/firenze-30.js'
+      - 'tests/guida_blocco_avanzamento.js'
+      - 'tests/esercizio-magazziniere.js'
+      - 'package.json'
+      - '.github/workflows/firenze-magazzino-qa.yml'
+  workflow_dispatch:
+jobs:
+  warehouse-course:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install runtime for local tests
+        run: |
+          npm ci
+          python -m pip install -r requirements.txt
+      - name: Test Firenze clone, Pistoia original, complete 82-step simulated scenario and Flask routes
+        run: npm run test:magazziniere
