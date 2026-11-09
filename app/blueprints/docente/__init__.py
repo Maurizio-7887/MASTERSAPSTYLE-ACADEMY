@@ -9,7 +9,7 @@ from urllib.parse import quote
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 
 from ...accesso import solo_docente, utente_corrente
-from ...db import GRUPPI, ROMA, ArchivioLavoro, Consegna, GruppoAllievo, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
+from ...db import GRUPPI, ROMA, AvanzamentoGuida, ArchivioLavoro, Consegna, GruppoAllievo, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
 from ...pagine import LAB_SLOTS, VERSIONI
 
 LAVORI = {'erp-ft': 'Sistema integrato', **{v: 'Archivio storico · ' + v for v in VERSIONI}, **{k: 'Archivio laboratorio · ' + v for k, v in LAB_SLOTS.items() if k != 'erp-ft'}}
@@ -139,6 +139,80 @@ def _allievo(uid):
     if u is None or u.ruolo != "allievo":
         abort(404)
     return u
+
+
+
+@bp.route("/allievo/<int:uid>/monitoraggio")
+def monitoraggio(uid):
+    """Legge il lavoro incompleto: passi raggiunti e contabilità vera già salvata."""
+    u = _allievo(uid)
+    guide = AvanzamentoGuida.query.filter_by(utente_id=uid).order_by(
+        AvanzamentoGuida.aggiornato.desc()).all()
+    lavoro = StatoLavoro.query.filter_by(utente_id=uid, versione="erp-ft").first()
+    verifica = None
+    if lavoro:
+        try:
+            codice = guide[0].esercizio if guide and guide[0].esercizio in ESERCIZI else "libero"
+            verifica = report(lavoro.dati, codice)
+        except (ValueError, KeyError, TypeError, AttributeError):
+            verifica = None
+    dettagli = []
+    for item in guide:
+        passi = item.passi or {}
+        note = item.osservazioni or {}
+        righe = []
+        for k in range(item.totale or 0):
+            v, n = passi.get(str(k)) or {}, note.get(str(k)) or {}
+            righe.append(dict(numero=k+1, posizione=k,
+                              titolo=v.get("titolo") or f"Passo {k+1}",
+                              gruppo=v.get("gruppo") or "",
+                              stato=v.get("stato") or "",
+                              giudizio=n.get("giudizio") or "",
+                              nota=n.get("nota") or "",
+                              corrente=k == item.posizione))
+        dettagli.append(dict(item=item, righe=righe,
+                             automatici=sum(x["stato"] == "auto" for x in righe),
+                             manuali=sum(x["stato"] == "mano" for x in righe),
+                             da_fare=sum(not x["stato"] for x in righe)))
+    return render_template("docente/monitoraggio.html", u=u, dettagli=dettagli,
+                           lavoro=lavoro, verifica=verifica)
+
+
+@bp.route("/allievo/<int:uid>/monitoraggio/<int:gid>/nota", methods=["POST"])
+def annota_passo(uid, gid):
+    """La nota docente non modifica le scritture e non sposta l'allievo."""
+    u = _allievo(uid)
+    g = db.session.get(AvanzamentoGuida, gid)
+    if g is None or g.utente_id != u.id:
+        abort(404)
+    numero = request.form.get("passo", type=int)
+    if numero is None or not 0 <= numero < g.totale:
+        abort(400)
+    giudizio = request.form.get("giudizio") or ""
+    if giudizio not in ("", "ok", "da_correggere"):
+        abort(400)
+    nota = (request.form.get("nota") or "").strip()[:2000]
+    nuovo = dict(g.osservazioni or {})
+    if giudizio or nota:
+        nuovo[str(numero)] = {"giudizio": giudizio, "nota": nota,
+                              "aggiornato": adesso().isoformat()}
+    else:
+        nuovo.pop(str(numero), None)
+    g.osservazioni = nuovo
+    db.session.commit()
+    flash("Osservazione salvata. L'allievo la vedrà nella guida al prossimo accesso.", "ok")
+    return redirect(url_for("docente.monitoraggio", uid=uid) + f"#passo-{gid}-{numero}")
+
+
+@bp.route("/allievo/<int:uid>/monitoraggio/backup.json")
+def monitoraggio_backup(uid):
+    u = _allievo(uid)
+    st = StatoLavoro.query.filter_by(utente_id=u.id, versione="erp-ft").first()
+    if st is None:
+        abort(404)
+    return Response(st.dati, mimetype="application/json",
+                    headers={"Content-Disposition": f"attachment; filename=allievo-{uid}-erp-ft.json",
+                             "Cache-Control": "no-store"})
 
 
 @bp.route("/allievo/<int:uid>", methods=["GET", "POST"])
