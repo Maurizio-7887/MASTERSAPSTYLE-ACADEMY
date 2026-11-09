@@ -452,6 +452,9 @@
       var remoto = JSON.parse(data.stato), locale = stato();
       var nRemoto = (remoto.registrazioni || []).length, nLocale = (locale.registrazioni || []).length;
       if (nRemoto < nLocale) throw Error('Salvataggio in attesa: ' + nRemoto + '/' + nLocale + ' scritture sul server.');
+      if (JSON.stringify(remoto) !== JSON.stringify(locale)) {
+        throw Error('Il server contiene una versione differente del lavoro. Riprova il salvataggio prima di uscire.');
+      }
       label.textContent = '✓ Lavoro verificato sul server (' + nRemoto + ' scritture). Puoi uscire.';
     }).catch(function (e) {
       label.textContent = '⚠ ' + e.message + ' Non chiudere senza verificare.';
