@@ -48,6 +48,7 @@
   </table></div></details>
 </div>
 {% endif %}
+{% include "docente/_cosa_manca.html" %}
 {% for gruppo in dettagli %}
 <section class="msa-card">
   <h2>{{ gruppo.item.esercizio }} — punto attuale {{ gruppo.item.posizione + 1 }} di {{ gruppo.item.totale }}</h2>

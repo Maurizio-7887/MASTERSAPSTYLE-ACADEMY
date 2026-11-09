@@ -59,3 +59,8 @@ with app.app_context():
     assert StatoLavoro.query.filter_by(utente_id=uid, versione="erp-ft").one().rev == 10
 assert d.get(f"/docente/allievo/{uid}/monitoraggio/backup.json").status_code == 200
 print("OK checkpoint guida PostgreSQL e monitoraggio docente")
+
+# Il docente vede dove è ferma l'allieva e che cosa manca, con gli stessi controlli del tutor
+assert 'id="cosa-manca"' in html and "Dove è ferma e che cosa manca" in html
+assert "esercizi/dicembre-wms.js" in html and "esercizi/cpm-formas.js" in html
+print("OK: monitoraggio con il riquadro «Dove è ferma e che cosa manca»")

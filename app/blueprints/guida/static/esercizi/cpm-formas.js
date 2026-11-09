@@ -477,7 +477,7 @@
     return circa((piano0(h,c)||{})['80']||0,36000);
   };});
   // Diagnosi punto per punto: che cosa manca per la spunta, letto dai dati salvati dell'allievo.
-  var eur=function(v){return Number(v||0).toLocaleString('it-IT');};
+  var eur=function(v){v=Number(v||0);return v.toLocaleString('it-IT',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2});};
   var diagnosiStandard=function(h,soloCalcolo){
     var m=modello(h),out=[];
     var t=(m&&m.kspi&&m.kspi.tariffe)||{},tOk=centri.every(function(c){return circa(t[c],28);});

@@ -114,7 +114,10 @@ near(pc.elementi('TR-STD',300).totale,10020,'costing per centro');
 cp.eseguiKSPI({data:'2026-12-01'});
 ['TR-STD','SL-TAGLIO'].forEach(materiale=>pc.calcola({materiale,data:'2026-12-01'}));pc.marca({});pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
 pc.calcola({materiale:'TR-STD',data:'2026-12-01'});pc.marca({materiale:'TR-STD'});
-reject(()=>pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'}), /già rilasciato/, 'deroga bootstrap non ripetibile');
+{ const nRil = s.costing.rilasci.length, nReg = s.registrazioni.length;
+  const esito = pc.rilascia({data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
+  ok(/già rilasciato/.test(String(esito)) && s.costing.rilasci.length === nRil && s.registrazioni.length === nReg && s.costing.stime['TR-STD'].stato === 'FR',
+     'stesso standard già rilasciato nel mese: nessun secondo rilascio né scrittura, solo conferma (caso Svetlana)'); }
 // Ripristina FR per proseguire senza tentare un secondo rilascio.
 s.costing.stime['TR-STD'].stato='FR';
 n.movimento('FERRO',3000,'2026-12-02','561','TEST');pp.ordine({materiale:'TR-STD',qta:300,data:'2026-12-03'});
