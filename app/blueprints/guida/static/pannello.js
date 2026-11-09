@@ -94,7 +94,16 @@
   var stati = esiti();
   // il primo passo da fare DOPO l'ultimo già fatto (i passi introduttivi a mano non bloccano chi riprende a metà)
   var primoDaFare = function () {
-    if (guidata) { for (var f = 0; f < N; f++) if (!stati[f]) return f; return N - 1; }
+    if (guidata) {
+      // Recupero progressi storici: alcuni primi passaggi non hanno spunte
+      // verificabili, ma i successivi risultano realmente completati.
+      // Ripartire dal primo non spuntato avrebbe riportato l'allievo al punto 5.
+      var ultimo = -1;
+      for (var f = 0; f < N; f++) if (stati[f]) ultimo = f;
+      if (ultimo >= 0) return Math.min(N - 1, ultimo + 1);
+      for (f = 0; f < N; f++) if (!stati[f]) return f;
+      return N - 1;
+    }
     var ult = -1; for (var j = 0; j < N; j++) if (stati[j]) ult = j;
     for (var i = ult + 1; i < N; i++) if (!stati[i]) return i;
     for (i = 0; i < N; i++) if (!stati[i]) return i;
@@ -246,6 +255,14 @@
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';
     else if (p.fatto) h += '<div class="msa-g-esito">○ Non ancora registrato: quando confermi, il passo si spunta da solo.' + (guidata ? ' Il pannello mostrerà automaticamente il passaggio successivo.' : ' <button type="button" class="msa-g-mano">segna fatto a mano</button>') + '</div>';
     else h += '<div class="msa-g-esito">○ Questo passo si spunta a mano. <button type="button" class="msa-g-mano">✓ Fatto</button></div>';
+    var notaDocente = (C.progress_notes || {})[String(pos)] || {};
+    if (notaDocente.nota || notaDocente.giudizio) {
+      var didascalia = notaDocente.giudizio === 'da_correggere' ? '⚠️ Correzione del docente' :
+        notaDocente.giudizio === 'ok' ? '✅ Verificato dal docente' : '📝 Nota del docente';
+      h += '<div class="msa-g-esito' + (notaDocente.giudizio === 'ok' ? ' ok' : '') +
+        '" role="status"><b>' + didascalia + '</b><p>' +
+        esc(notaDocente.nota || 'Controlla questo passaggio.') + '</p></div>';
+    }
     corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
