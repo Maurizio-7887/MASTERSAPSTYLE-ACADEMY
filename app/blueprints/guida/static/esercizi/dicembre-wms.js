@@ -76,6 +76,23 @@
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
   var saldo = function(h,c,alla,partner) { return Math.round(regs(h).reduce(function(s,r){if(alla && r.data>alla)return s;if(r.chiusura==='stato patrimoniale'||r.chiusura==='epilogo'||r.chiusura==='riapertura')return s;return s+(r.righe || []).filter(function(x){return x.conto===c && (!partner || x.partner===partner);}).reduce(function(t,x){return t+(x.dareAvere==='DARE'?x.importo:-x.importo);},0);},0)*100)/100; };
   var cesp = function(h,d) { return (h.S.cespiti || []).find(function(c){return c.descrizione===d;}); };
+  // F-90: la spunta deve seguire il documento e il cespite REALMENTE salvati,
+  // non un'etichetta digitata con identici accenti/spazi rispetto alla guida.
+  // Mai convalidare soltanto il costo: potrebbe essere un altro bene.
+  var normalizzaCespite = function(x) {return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');};
+  var cespiteAcquistato = function(h,rif,descrizione,costo,classe) {
+    var items = h.S.cespiti || [], scritture = h.S.registrazioni || [], ref = normalizzaCespite(rif);
+    return items.some(function(c) {
+      if (Math.abs(Number(c.costo)-costo)>0.011 || c.classe!==classe || c.acquisto!=='2026-12-01') return false;
+      var stessaFattura = normalizzaCespite(c.fattura)===ref;
+      var stessoBene = normalizzaCespite(c.descrizione)===normalizzaCespite(descrizione);
+      if (!stessaFattura && !stessoBene) return false;
+      return scritture.some(function(r) {
+        return r.tipo==='FATTURA_CESPITE' && (String(r.numero)===String(c.contabile) ||
+          (normalizzaCespite(r.rif)===normalizzaCespite(c.fattura) && r.data===c.acquisto));
+      });
+    });
+  };
   // l'ordine si riconosce dal riferimento cliente (senza badare a maiuscole, spazi e trattini) oppure, se l'allievo lo ha scritto diverso o vuoto,
   // da cliente + materiale + quantità: un riferimento scritto a modo suo non deve fermare l'esercizio
   var ORDINI_ATTESI = {'BETA-180': ['C100', 'TR-STD', 180], 'DELTA-120': ['C200', 'TR-STD', 120]};
@@ -137,20 +154,20 @@
     // ── 2 · macchinari ──
     {g:'2 · Macchinari',data:'01/12/2026',titolo:'F-90: compra la taglierina a nastro',contabile:true,dove:{ep:K+'acquisto'},percorso:'FI → Cespiti → Acquisto di un cespite',
      campi:[['Descrizione','Taglierina a nastro'],['Classe','IMP Impianti e macchinari (10%)'],['Fornitore','F300 Macchine Alfa'],['Imponibile','15000'],['IVA %','22'],['Numero fattura','MA-101'],['Entrata in funzione','01/12/2026'],['Data','01/12/2026']],
-     attesa:'Cespite CE-0001. D 01 Impianti e macchinari 15.000 + D 14 IVA a credito 3.300 / A 20 Fornitore 18.300.',fatto:function(h){return !!cesp(h,'Taglierina a nastro');}},
+     attesa:'Cespite CE-0001. D 01 Impianti e macchinari 15.000 + D 14 IVA a credito 3.300 / A 20 Fornitore 18.300.',fatto:function(h){return cespiteAcquistato(h,'MA-101','Taglierina a nastro',15000,'IMP');}},
     {g:'2 · Macchinari',data:'01/12/2026',titolo:'F-90: compra la piegatubi idraulica',contabile:true,dove:{ep:K+'acquisto'},percorso:'FI → Cespiti → Acquisto di un cespite',
      campi:[['Descrizione','Piegatubi idraulica'],['Classe','IMP'],['Fornitore','F300'],['Imponibile','8000'],['IVA %','22'],['Numero fattura','MA-102'],['Entrata in funzione','01/12/2026'],['Data','01/12/2026']],
-     attesa:'CE-0002. D 01 8.000 + D 14 1.760 / A 20 9.760.',fatto:function(h){return !!cesp(h,'Piegatubi idraulica');}},
+     attesa:'CE-0002. D 01 8.000 + D 14 1.760 / A 20 9.760.',fatto:function(h){return cespiteAcquistato(h,'MA-102','Piegatubi idraulica',8000,'IMP');}},
     {g:'2 · Macchinari',data:'01/12/2026',titolo:'F-90: compra la saldatrice a filo',contabile:true,dove:{ep:K+'acquisto'},percorso:'FI → Cespiti → Acquisto di un cespite',
      campi:[['Descrizione','Saldatrice a filo'],['Classe','IMP'],['Fornitore','F300'],['Imponibile','6000'],['IVA %','22'],['Numero fattura','MA-103'],['Entrata in funzione','01/12/2026'],['Data','01/12/2026']],
-     attesa:'CE-0003. D 01 6.000 + D 14 1.320 / A 20 7.320. Le tre fasi hanno le proprie macchine: gli acquisti precedono il loro uso produttivo.',fatto:function(h){return !!cesp(h,'Saldatrice a filo');}},
+     attesa:'CE-0003. D 01 6.000 + D 14 1.320 / A 20 7.320. Le tre fasi hanno le proprie macchine: gli acquisti precedono il loro uso produttivo.',fatto:function(h){return cespiteAcquistato(h,'MA-103','Saldatrice a filo',6000,'IMP');}},
     {g:'2 · Macchinari',data:'01/12/2026',titolo:'F-90: compra il carrello elevatore del magazzino',contabile:true,dove:{ep:K+'acquisto'},percorso:'FI → Cespiti → Acquisto di un cespite',
      campi:[['Descrizione','Carrello elevatore elettrico'],['Classe','MEZ Mezzi di movimentazione interna (20%)'],['Fornitore','F300'],['Imponibile','12000'],['IVA %','22'],['Numero fattura','MA-104'],['Entrata in funzione','01/12/2026'],['Data','01/12/2026']],
-     attesa:'CE-0004. D 03 Mezzi di movimentazione 12.000 + D 14 2.640 / A 20 14.640.',fatto:function(h){return !!cesp(h,'Carrello elevatore elettrico');}},
+     attesa:'CE-0004. D 03 Mezzi di movimentazione 12.000 + D 14 2.640 / A 20 14.640.',fatto:function(h){return cespiteAcquistato(h,'MA-104','Carrello elevatore elettrico',12000,'MEZ');}},
     {g:'2 · Macchinari',data:'01/12/2026',titolo:'F-90: compra una sega circolare d’occasione',contabile:true,dove:{ep:K+'acquisto'},percorso:'FI → Cespiti → Acquisto di un cespite',
      campi:[['Descrizione','Sega circolare'],['Classe','IMP'],['Fornitore','F300'],['Imponibile','2000'],['IVA %','22'],['Numero fattura','MA-105'],['Entrata in funzione','01/12/2026'],['Data','01/12/2026']],
      attesa:'CE-0005. D 01 2.000 + D 14 440 / A 20 2.440. Debito verso Macchine Alfa: 52.460.',
-     nota:'Tutti e cinque gli acquisti F-90 registrano direttamente fattura e cespite: non creare anche un ordine MM per gli stessi beni. La data di entrata in funzione è 01/12/2026; uso, ammortamento e cessione sono successivi. La sega sarà rivenduta con plusvalenza; il carrello con minusvalenza.',fatto:function(h){return !!cesp(h,'Sega circolare');}},
+     nota:'Tutti e cinque gli acquisti F-90 registrano direttamente fattura e cespite: non creare anche un ordine MM per gli stessi beni. La data di entrata in funzione è 01/12/2026; uso, ammortamento e cessione sono successivi. La sega sarà rivenduta con plusvalenza; il carrello con minusvalenza.',fatto:function(h){return cespiteAcquistato(h,'MA-105','Sega circolare',2000,'IMP');}},
     // ── 3 · assicurazione ──
     {g:'3 · Assicurazione',data:'01/12/2026',titolo:'FB60: registra la polizza annuale',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F400 Assicurazioni Omega'],['Numero','POL-2026-118'],['Conto di costo','83 Assicurazioni'],['Descrizione','premio annuo polizza incendio e furto'],['Imponibile','1200'],['IVA %','0 (assicurazioni esenti)'],['Competenza','dal 01/12/2026 al 30/11/2027'],['Scadenza','02/12/2026'],['Data','01/12/2026']],
