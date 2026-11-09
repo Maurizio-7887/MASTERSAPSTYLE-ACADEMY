@@ -26,6 +26,11 @@ for tipo, programma in PERCORSI.items():
         assert "Esempio concreto" in html and "Domande per controllare" in html
         assert "Approfondimento Pistoia" in html if tipo == "pistoia" else "Approfondimento Pistoia" not in html
         assert 'esercizio_guida=' + programma["esercizio"] in html
+        assert 'msa-pratica-fissa' in html
+        assert 'target="_blank"' in html and 'rel="noopener"' in html
+        assert 'ESERCITAZIONE — SEMPRE DISPONIBILE' in html
+        assert 'semilavorati in corso (WIP)' in html and 'Ordini clienti (SD)' in html
+        assert '<div class="msa-sim">' not in html
 assert c.get("/vuoto/lezioni-magazzino/inesistente").status_code == 404
 assert c.get("/vuoto/lezioni-magazzino/firenze?lezione=qualita").status_code == 404
 print("OK: 7 lezioni Firenze, 11 lezioni Pistoia, ogni pagina collegata al rispettivo tutor")
