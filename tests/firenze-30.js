@@ -35,6 +35,16 @@ assert(first.fatto({S:{percorso:'logistica', quizContabile:false}}));
 assert(!first.fatto({S:{percorso:'logistica'}}),'Reject accounting-enabled logistics account');
 assert(!first.fatto({S:{percorso:'negozio', quizContabile:false}}));
 assert(!e.passi.some(p=>p.punti.some(d=>/ricostruzione contabile|ricostruisci Dare|libro giornale|scrittura di apertura/i.test(d.serve||''))));
+const finalStep=e.passi.find(p=>p.titolo.startsWith('Consegna l’esercitazione'));
+assert.equal(finalStep.dove.esercizio,'firenze-30','Final submission opens Firenze assignment');
+const exercises=fs.readFileSync(path.join(__dirname,'../app/esercizi.py'),'utf8');
+assert(exercises.includes('ESERCIZI["firenze-30"]'),'Firenze is a distinct deliverable');
+assert(exercises.includes('"mg_colli"')&&exercises.includes('"quadratura_im_wm"'),'Operational assessment included');
+const submission=fs.readFileSync(path.join(__dirname,'../app/blueprints/allievo/templates/allievo/consegna.html'),'utf8');
+assert(submission.includes("request.args.get('esercizio') == k"),'Exercise auto-selected in submission form');
+const panel=fs.readFileSync(path.join(__dirname,'../app/blueprints/guida/static/pannello.js'),'utf8');
+assert(panel.includes("if (E.codice === 'firenze-30') return s;"),'No implicit checkmarks for Firenze');
+
 assert.equal(pistoia.window.MSA_ESERCIZIO.passi.length,82,'Original unaffected by Firenze import');
 const cfg=fs.readFileSync(path.join(__dirname,'../app/blueprints/guida/__init__.py'),'utf8');
 assert(cfg.includes('"firenze-30"'));
