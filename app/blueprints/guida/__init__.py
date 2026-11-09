@@ -6,7 +6,7 @@
 """
 from flask import Blueprint, url_for, request, session, jsonify
 
-from ...accesso import utente_corrente, csrf_valido
+from ...accesso import utente_corrente, csrf_valido, csrf_token
 from ...pagine import LABORATORI, tutte_le_pagine
 from ...db import AvanzamentoGuida, adesso, db
 
@@ -95,7 +95,7 @@ def config_guida(versione, esercizio=None, chiave=None):
     return {"esercizio": esercizio, "versione": versione, "chiave": chiave or f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url,
             "progress_url": url_for("guida.registra_progresso", esercizio=esercizio),
             "progress_version": "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "executive-assistant", "ragioneria-wms"} else versione,
-            "progress_csrf": session.get("csrf") or "", "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima} if progresso else None}
+            "progress_csrf": csrf_token(), "progress_notes": progresso.osservazioni if progresso else {}, "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima} if progresso else None}
 
 
 @bp.app_template_global()
