@@ -100,20 +100,46 @@ LEZIONI = {
     "quiz": "Un reso rientrato è subito disponibile?|Non necessariamente: prima va verificata la sua condizione e lo stato autorizzato."
   }
 }
+
+LEZIONI["flussi"] = {
+    "id": "flussi",
+    "uf": "Innovazione · interfacce SD/MM/PP",
+    "titolo": "Come il magazzino digitale dialoga con vendite, acquisti e produzione",
+    "teoria": (
+        "Il WMS non lavora da solo. L'ordine del cliente (SD/VA01) dice quali transenne servono, "
+        "ma non ne toglie una dal deposito; il controllo ATP confronta domanda e disponibilità. "
+        "Se manca ferro, l'ufficio acquisti crea l'ordine al fornitore (MM/ME21N): la merce "
+        "esiste nel sistema come prevista, non ancora ricevuta. Quando arriva, MIGO registra "
+        "il carico e la pistola RF conferma in quale ubicazione viene messa. "
+        "Quando la produzione richiede materiale, PP/CO01 crea l'ordine: il magazziniere "
+        "prepara lo staging, poi il consumo 261 riduce il ferro disponibile. "
+        "Le fasi di lavorazione e il versamento del finito fanno tornare le transenne "
+        "nel deposito. La digitalizzazione permette di vedere tutta questa catena di eventi "
+        "senza ricopiare dati su fogli separati. Il magazziniere non deve gestire i mutui "
+        "o la partita doppia dell'azienda, ma deve capire come ogni documento cambia "
+        "il lavoro sullo scaffale. Una scansione o un carico registrato due volte "
+        "può compromettere tutte le informazioni successive."
+    ),
+    "esempio": "Beta ordina 350 TR-STD ma in deposito ce ne sono 200. Per produrne altre occorre ferro, "
+              "che il fornitore consegna dopo un ordine; solo MIGO carica il ferro. "
+              "Dopo staging, consumo e lavorazione, il prodotto finito può essere prelevato e spedito.",
+    "operativo": "Apri SD → Ordini cliente e osserva ATP; apri MM → Ordini fornitori e controlla la richiesta; "
+                "verifica il ricevimento MIGO; apri PP → Ordini produzione e osserva il consumo dei materiali; "
+                "controlla che la quantità WMS e la quantità di magazzino siano coerenti.",
+    "quiz": "Quale evento fa aumentare le giacenze: ME21N o MIGO?|MIGO registra l'entrata; ME21N registra soltanto l'ordine."
+}
+
 PERCORSI = {
   "firenze": {
     "titolo": "Firenze · Innovazione digitale del magazzino · 30 ore",
-    "descrizione": "Percorso sintetico e operativo, centrato sulla digitalizzazione; FIFO/LIFO solo a livello di valorizzazione di magazzino, niente partita doppia.",
+    "descrizione": "Sette lezioni introduttive compatte, concentrate su digitalizzazione, mappa, RF, interoperabilità SD/MM/PP, spedizioni smart, valorizzazione essenziale e innovazione. Nessun quiz Dare/Avere.",
     "esercizio": "firenze-30",
     "ordine": [
       "fondamenti",
       "mappa",
       "rf",
-      "ordini",
-      "acquisti",
-      "produzione",
+      "flussi",
       "spedizioni",
-      "inventario",
       "valori",
       "innovazione"
     ]
