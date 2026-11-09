@@ -484,12 +484,10 @@
       // in una sessione precedente né di un tasto "Avanti" disabilitato via DOM.
       var mancante = primoBlocco(i);
       if (mancante >= 0 || inQuiz()) {
-        if (mancante >= 0 && mancante !== pos && mancante < pos) {
-          // Un avanzamento storico già salvato non viene cancellato;
-          // il docente può far ripassare i passi non verificati.
-          avvisoBlocco(mancante);
-        } else avvisoBlocco(pos);
-        disegna(); return false;
+        // Ridisegna PRIMA di inserire l'avviso: non farlo sparire.
+        disegna();
+        avvisoBlocco(mancante >= 0 ? mancante : pos);
+        return false;
       }
     }
     pos = i;
