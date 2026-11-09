@@ -1,7 +1,7 @@
 """Blueprint «Portale» — pagina iniziale, materiali e pagina unica di verifica."""
 import json
 
-from flask import Blueprint, abort, g, redirect, render_template, send_from_directory, url_for
+from flask import Blueprint, abort, g, redirect, render_template, request, send_from_directory, url_for
 
 from ...pagine import ATTIVITA, MODULI, VERSIONI, app_modulo, modulo
 from ...simulatore import STATIC, mappa_url, meta
@@ -68,11 +68,11 @@ def lezioni_magazzino(versione, percorso):
     """Lezioni vere, distinte per Firenze e Pistoia; nessun movimento ERP qui."""
     if versione not in VERSIONI:
         abort(404)
-    from .lezioni_magazzino_contenuti import LEZIONI, PERCORSI
+    from .lezioni_magazzino_contenuti import LEZIONI, PERCORSI, PISTOIA_APPROFONDIMENTI
     programma = PERCORSI.get(percorso)
     if programma is None:
         abort(404)
-    slug = __import__("flask", fromlist=["request"]).request.args.get("lezione", "")
+    slug = request.args.get("lezione", "")
     if slug and slug not in programma["ordine"]:
         abort(404)
     if not slug:
@@ -81,6 +81,7 @@ def lezioni_magazzino(versione, percorso):
     return render_template("portale/lezioni_magazzino.html",
                            versione=versione, percorso=percorso, programma=programma,
                            lezioni=LEZIONI, ordine=programma["ordine"], lezione=LEZIONI[slug],
+                           approfondimenti=PISTOIA_APPROFONDIMENTI.get(slug, []) if percorso == "pistoia" else [],
                            indice=idx, totale=len(programma["ordine"]))
 
 
