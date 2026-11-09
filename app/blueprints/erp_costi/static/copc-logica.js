@@ -103,12 +103,14 @@ window.PC4 = (function () {
     // già rilasciato in questo mese con lo stesso budget e lo stesso costo: è a posto, non è un errore
     mats = mats.filter(function (m) {
       var st = C().stime[m], snap = st.elementi && st.elementi.par && st.elementi.par.snapshot;
-      var stesso = C().rilasci.some(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM &&
-        Math.abs((r.nuovo || 0) - st.unitario) < 0.005 && (!cpm.attivo() || (snap && r.cpm === snap.revisione)); });
+      var stesso = C().rilasci.some(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM && !r.costituzione &&
+        Math.abs((r.nuovo || 0) - st.unitario) < 0.005; });
+      // stesso prezzo già rilasciato nel mese (anche se nel frattempo il budget è stato risalvato): nessuna rivalutazione,
+      // nessun secondo rilascio; la stima ricalcolata diventa quella valida (FR) e il passo 24 si sblocca
       if (stesso) { st.stato = 'FR'; st.rilascio = st.rilascio || data; giaValidi.push(m); return false; }
       return true;
     });
-    if (!mats.length) { n.salva(); return '<p class="lab-nota">' + giaValidi.join(' e ') + ': costo standard già rilasciato in questo mese con lo stesso budget. È tutto a posto (stato FR): puoi andare avanti.</p>'; }
+    if (!mats.length) { n.salva(); return '<p class="lab-nota">' + giaValidi.join(' e ') + ': costo standard già rilasciato in questo mese allo stesso prezzo. È tutto a posto (stato FR): puoi andare avanti.</p>'; }
     mats.forEach(function (m) {
       var conflitti = C().rilasci.filter(function (r) { return r.materiale === m && mese(r.data) === per && !r.sostituitoCPM; });
       if (conflitti.length) {

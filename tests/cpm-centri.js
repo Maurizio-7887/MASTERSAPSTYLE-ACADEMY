@@ -121,6 +121,18 @@ pc.calcola({materiale:'TR-STD',data:'2026-12-01'});pc.marca({materiale:'TR-STD'}
 // Ripristina FR per proseguire senza tentare un secondo rilascio.
 s.costing.stime['TR-STD'].stato='FR';
 n.movimento('FERRO',3000,'2026-12-02','561','TEST');pp.ordine({materiale:'TR-STD',qta:300,data:'2026-12-03'});
+{ // Caso Svetlana: budget risalvato (nuova revisione) dopo il rilascio e dopo i primi movimenti; stesso prezzo → Rilascia conferma, niente vicolo cieco
+  const r = s.costing.cpm.piano['0']['4200'] || {};
+  const tot = Object.values(r).reduce((a,b)=>a+b,0);
+  cp.salvaKP06(Object.assign({versione:'0',cdc:'4200'}, Object.fromEntries(Object.entries(r).map(([k,v])=>['k'+k, v]))));
+  const prima = s.costing.stime['TR-STD'] && s.costing.stime['TR-STD'].unitario;
+  pc.calcola({materiale:'TR-STD',data:'2026-12-01'});
+  if (Math.abs(s.costing.stime['TR-STD'].unitario - (s.materiali['TR-STD'].std)) < 0.005) {
+    pc.marca({materiale:'TR-STD'});
+    const esito = pc.rilascia({data:'2026-12-01'});
+    ok(s.costing.stime['TR-STD'].stato === 'FR', 'stesso prezzo già rilasciato nel mese: la stima ricalcolata torna FR senza errore');
+  } else { throw Error('il caso deve avere lo stesso prezzo'); }
+}
 const distinto=s.produzione[0];pp.prelievo({ordine:distinto.numero,kg:2400,data:'2026-12-03'});
 for(const [fase,ore] of [['Taglio',75],['Piegatura',60],['Saldatura',120]]) pp.conferma({ordine:distinto.numero,fase,ore,data:'2026-12-04'});
 near(distinto.eventi.find(e=>e.fase==='Piegatura').valore,2280,'conferma centro 60×38');
