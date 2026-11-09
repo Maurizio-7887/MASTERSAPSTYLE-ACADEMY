@@ -46,11 +46,22 @@
   function manuali(S) { return ((S.msaGuida || {})[E.codice] || {}); }
   function esiti() {
     var S = stato(), h = aiutanti(S), m = manuali(S);
-    return PASSI.map(function (p) {
-      if (p.cpmVerificato) { try { return p.fatto && p.fatto(h) ? 'auto' : ''; } catch (e) { return ''; } }
+    return PASSI.map(function (p, i) {
+      // Il docente può confermare un'operazione già verificata sui documenti,
+      // se il validatore automatico non riconosce un vecchio dato legittimo.
+      // Questo NON modifica il libro giornale e non permette all'allievo
+      // di autoattribuirsi una spunta "docente".
+      var nota = ((C.progress_notes || {})[String(i)] || {});
+      if (p.cpmVerificato) {
+        try { if (p.fatto && p.fatto(h)) return 'auto'; } catch (e) { /* dato storico */ }
+        return nota.giudizio === 'ok' ? 'docente' : '';
+      }
       if (m[p.titolo] && !(guidata && p.fatto)) return 'mano';
-      if (!p.fatto) return '';
-      try { return p.fatto(h) ? 'auto' : ''; } catch (e) { return ''; }
+      if (p.fatto) {
+        try { if (p.fatto(h)) return 'auto'; } catch (e) { /* dato storico */ }
+        return nota.giudizio === 'ok' ? 'docente' : '';
+      }
+      return nota.giudizio === 'ok' ? 'docente' : '';
     });
   }
   function segnaAMano(p, valore) {
@@ -210,8 +221,8 @@
     stati = esiti();
     return stati;
   }
-  function primoBlocco(fino) {
-    var lista = statoAggiornato();
+  function primoBlocco(fino, lista) {
+    lista = lista || statoAggiornato();
     for (var i = 0; i < fino; i++) if (!lista[i]) return i;
     return -1;
   }
@@ -234,16 +245,17 @@
     es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
   }
   function disegnaElenco() {
-    var html = '', gruppo = null;
+    var html = '', gruppo = null, primaMancante = -1;
+    var attuali = statoAggiornato(), quizAperto = !!inQuiz();
     PASSI.forEach(function (p, i) {
       if (p.g !== gruppo) { if (gruppo !== null) html += '</optgroup>'; gruppo = p.g; html += '<optgroup label="' + esc(p.g) + '">'; }
-      // Il menu consente ripasso e punto corrente, ma non può saltare
-      // un'attività precedente ancora priva di spunta.
-      var blocco = primoBlocco(i);
-      var accessibile = i <= pos || (blocco < 0 && !inQuiz());
+      // I passi completati in passato restano consultabili; quelli futuri
+      // sono disponibili solo quando tutti i precedenti hanno la spunta.
+      var accessibile = i <= pos || (primaMancante < 0 && !quizAperto);
       html += '<option value="' + i + '"' + (!accessibile ? ' disabled' : '') + '>' +
         (stati[i] ? '✓ ' : '○ ') + (i + 1) + '. ' + esc(p.titolo) +
         (!accessibile ? ' · BLOCCATO' : '') + '</option>';
+      if (!attuali[i] && primaMancante < 0) primaMancante = i;
     });
     sel.innerHTML = html + '</optgroup>';
     sel.value = String(pos);
@@ -256,7 +268,7 @@
     var pendente = inQuiz();
     sel.disabled = !!pendente;
     radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
-    radice.querySelector('.msa-g-av').disabled = !!pendente || !st || pos === N - 1;
+    radice.querySelector('.msa-g-av').disabled = !!pendente || !st || pos === N - 1 || primoBlocco(pos, stati) >= 0;
     if (pendente) {
       corpo.innerHTML = '<button type="button" class="msa-g-vai-saldi">📒 Non ricordi un saldo? Apri i saldi dei conti e i tuoi appunti ↓</button>' + quiz.html(stato(), esc) + strumenti(true);
       ripristinaFuoco();
@@ -306,6 +318,7 @@
     if (nascosto) h += '<div class="msa-g-esito">✍️ Registra l’operazione nel programma: poi qui a destra ricostruirai tu la scrittura in partita doppia (conto, Dare/Avere, importo). La soluzione compare solo dopo il tuo tentativo.</div>';
     if (p.nota && !p.fai) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
     if (st === 'auto') h += '<div class="msa-g-esito ok">✓ Fatto: il programma lo ha già registrato.</div>';
+    else if (st === 'docente') h += '<div class="msa-g-esito ok">✓ Verificato dal docente sui documenti dell’allievo. Nessuna seconda registrazione necessaria.</div>';
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';
     else if (p.fatto) h += '<div class="msa-g-esito">○ Non ancora registrato: quando confermi, il passo si spunta da solo.' + (guidata ? ' Il pannello mostrerà automaticamente il passaggio successivo.' : ' <button type="button" class="msa-g-mano">segna fatto a mano</button>') + '</div>';
     else h += '<div class="msa-g-esito">○ Questo passo si spunta a mano. <button type="button" class="msa-g-mano">✓ Fatto</button></div>';
@@ -320,7 +333,16 @@
     corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
-    radice.querySelector('.msa-g-av').disabled = !st || pos === N - 1;
+    var mancaPrima = primoBlocco(pos, stati);
+    radice.querySelector('.msa-g-av').disabled = !st || pos === N - 1 || mancaPrima >= 0;
+    if(mancaPrima >= 0) {
+      var warning = document.createElement('div');
+      warning.className = 'msa-g-esito';
+      warning.setAttribute('role', 'status');
+      warning.textContent = '⛔ Manca la spunta al passo ' + (mancaPrima + 1) + ' («' +
+        PASSI[mancaPrima].titolo + '»). Devi completarlo o farlo verificare al docente prima di proseguire.';
+      corpo.insertBefore(warning, corpo.firstChild);
+    }
     if(!st && p.fatto) {
       var esito = corpo.querySelector('.msa-g-esito');
       if(esito) esito.textContent = '🔍 Il tutor verifica l’operazione realmente registrata. «Avanti» si sblocca soltanto quando il passo ha la spunta ✓. Se la registrazione esiste già, non ripeterla: chiedi al docente di controllare i dati.';
