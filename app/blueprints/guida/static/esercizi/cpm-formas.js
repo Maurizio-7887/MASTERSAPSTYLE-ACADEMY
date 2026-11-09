@@ -14,6 +14,10 @@
     if(circa(n('86'),12000)&&circa(n('50'),2900)&&circa(n('54'),3100))return true;
     var tot=Object.keys(p).reduce(function(t,k){return t+(Number(p[k])||0);},0);
     return circa(tot,18000)&&!n('80')&&!n('81')&&!n('82')&&!n('83');};
+  var valoriCentro = function(h,c){return c==='4200'?ok4200(h):circa((piano0(h,c)||{})['80']||0,36000);};
+  // Centro confermato: salvato in KP06, oppure numeri giusti e piano già usato per calcolare le tariffe (KSPI).
+  // Chi ha impostato il budget da un'altra pagina (o prima che esistesse il segno «salvato») non resta bloccato.
+  var centroConfermato = function(h,c){var m=modello(h);return !!m && valoriCentro(h,c) && (!!(m.fattiPerCentro&&m.fattiPerCentro[c]) || !!m.kspi);};
   var CO = function(ep,percorso){return {dove:{ep:'erp_controllo.'+ep},percorso:percorso};};
   var bpc = function(h){return (h.S.costing || {}).bpc;};
   var CDC6 = ['4100','4200','4210','4220','4230','4300'];
@@ -436,8 +440,7 @@
   // La verifica usa le stesse fonti CO/BPC/CO-PC da cui leggono i report del simulatore.
   var validatori = {
     'cpm-attivazione': function(h){return attivo(h);},
-    'cpm-budget': function(h){var m=modello(h);return !!m && ['4210','4220','4230','4200'].every(function(c){return !!(m.fattiPerCentro&&m.fattiPerCentro[c]);}) && ['4210','4220','4230'].every(function(c){return circa((piano0(h,c)||{})['80']||0,36000);}) &&
-      ok4200(h);},
+    'cpm-budget': function(h){return ['4210','4220','4230','4200'].every(function(c){return centroConfermato(h,c);});},
     'cpm-paghe': function(h){var m=modello(h);return !!(m && m.piano && m.piano['1'] && m.piano['1']['4100'] && m.piano['1']['4100']['80']>0);},
     'cpm-kp26': function(h){var m=modello(h);return !!m && ['Taglio','Piegatura','Saldatura'].every(function(c){return m.centri[c] && circa(m.centri[c].capacita,1500) && circa(m.centri[c].orePiano,1500);}) && circa(m.volumi['TR-STD'],1200) && !!(m.fatti && m.fatti.kp26 && m.fatti.ltp);},
     'cpm-ciclo': function(h){var m=modello(h);return !!(m && m.fatti && m.fatti.ksu && m.generale.driver==='ore' && circa(m.generale.produttivi,18000) && centri.every(function(c){return circa(m.centri[c].orePiano,1500);}));},
@@ -472,9 +475,7 @@
   };
   // Il budget salva più volte lo stesso modulo: ogni salvataggio è attribuito a un centro preciso.
   verificaPulsanti['cpm-budget']=['4210','4220','4230','4200'].map(function(c){return function(h){
-    if(!(modello(h)&&modello(h).fattiPerCentro&&modello(h).fattiPerCentro[c]))return false;
-    if(c==='4200')return ok4200(h);
-    return circa((piano0(h,c)||{})['80']||0,36000);
+    return centroConfermato(h,c);
   };});
   // Diagnosi punto per punto: che cosa manca per la spunta, letto dai dati salvati dell'allievo.
   var eur=function(v){v=Number(v||0);return v.toLocaleString('it-IT',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2});};
@@ -498,7 +499,7 @@
     'cpm-budget':function(h){
       var m=modello(h),out=[];
       out.push([attivo(h),'Piano CO 2026 aperto (passo precedente «apri il piano 2026»)']);
-      var salvato=function(c){return !!(m&&m.fattiPerCentro&&m.fattiPerCentro[c]);};
+      var salvato=function(c){return centroConfermato(h,c)||!!(m&&m.fattiPerCentro&&m.fattiPerCentro[c]);};
       [['4210','Taglio'],['4220','Piegatura'],['4230','Saldatura']].forEach(function(x){
         var v=(piano0(h,x[0])||{})['80']||0;
         out.push([salvato(x[0])&&circa(v,36000),'Centro '+x[0]+' '+x[1]+': classe 80 Salari = 36.000'+(circa(v,36000)?'':' (ora c\u2019è '+eur(v)+')')+(salvato(x[0])?'':' → scegli il centro e premi «Salva il piano del centro»')]);
