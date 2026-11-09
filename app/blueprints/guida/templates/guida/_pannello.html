@@ -13,6 +13,7 @@
 <script src="{{ url_for('guida.static', filename='esercizi/laboratori-completi.js') }}"></script>
 <script src="{{ url_for('guida.static', filename='esercizi/uso-programma.js') }}"></script>
 {% endif %}
+{% if guida.esercizio == 'firenze-30' %}<script src="{{ url_for('guida.static', filename='esercizi/magazziniere-5.js') }}"></script>{% endif %}
 <script src="{{ url_for('guida.static', filename='esercizi/' ~ guida.esercizio ~ '.js') }}"></script>
 {% if guida.esercizio == 'dicembre-wms' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
 <script src="{{ url_for('guida.static', filename='ragioneria.js') }}"></script>
