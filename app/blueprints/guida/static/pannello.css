@@ -159,3 +159,12 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 #msa-guida .msa-g-ora-correzione b{font-weight:750}
 #msa-guida .msa-g-ora-correzione div{margin-top:4px}
 #msa-guida .msa-g-av:disabled{opacity:.48;cursor:not-allowed}
+/* Spunta a mano ben visibile e diagnosi del passo */
+#msa-guida .msa-g-spunta-qui{background:#FFF8E1;border:2px solid #E0B44A;border-radius:8px;padding:9px 11px;margin:8px 0;font-size:13px;line-height:1.45}
+#msa-guida .msa-g-spunta-qui small{display:block;color:#6b5a2a;margin-top:4px}
+#msa-guida button.msa-g-mano,#msa-guida .msa-g-esito button.msa-g-mano{display:inline-block;background:#107E3E;color:#fff;border:0;border-radius:6px;padding:7px 14px;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;margin:4px 0 0 6px}
+#msa-guida button.msa-g-mano:hover{background:#0b5f2e}
+#msa-guida .msa-g-diagnosi{background:#F4F8FD;border:1px solid #B9CDE6;border-radius:8px;padding:8px 11px;margin:8px 0;font-size:12.5px}
+#msa-guida .msa-g-diagnosi ul{margin:6px 0 4px;padding-left:4px;list-style:none}
+#msa-guida .msa-g-diagnosi li{margin:3px 0}#msa-guida .msa-g-diagnosi li.no{color:#B42318;font-weight:600}#msa-guida .msa-g-diagnosi li.ok{color:#107E3E}
+#msa-guida .msa-g-diagnosi small{color:#5b6b80}
