@@ -13,8 +13,17 @@
   var quiz = window.MSA_RAGIONERIA;
   // il pannello non crea mai lo stato del simulatore dal nulla: se nel browser non c'è ancora, scriverlo qui lo sostituirebbe con un oggetto incompleto
   function scriviSeEsiste(S) {
-    try { if (localStorage.getItem(chiave) == null) return; localStorage.setItem(chiave, JSON.stringify(S)); } catch (e) { /* memoria piena */ }
+    try {
+      if (localStorage.getItem(chiave) == null) return;
+      var testo = JSON.stringify(S);
+      localStorage.setItem(chiave, testo);
+      if (copiaLocale && copiaLocale.S === S) copiaLocale.testo = testo;
+    } catch (e) { /* memoria piena */ }
   }
+  // Pagine senza simulatore (Launchpad, moduli): lo stato si legge dal browser. Va restituito SEMPRE lo stesso
+  // oggetto finché il browser non cambia, altrimenti le risposte del laboratorio di ragioneria finivano su una
+  // copia diversa da quella salvata: «Verifica la mia scrittura» non registrava nulla e ridisegnava le caselle vuote.
+  var copiaLocale = null;
   function inQuiz() { return quiz && quiz.pendente(stato()); }
   function salvaQuiz() {
     if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') window.MSA_SALVA_STATO_CORRENTE();
@@ -28,7 +37,11 @@
   function stato() {
     if (typeof window.MSA_STATO_CORRENTE === 'function') { try { var x = window.MSA_STATO_CORRENTE(); if (x) return x; } catch (e) { /* stato non pronto */ } }   // laboratori
     try { if (typeof STATO !== 'undefined' && STATO) return STATO; } catch (e) { /* pagina senza simulatore */ }
-    try { return JSON.parse(localStorage.getItem(chiave) || 'null') || {}; } catch (e) { return {}; }
+    try {
+      var testo = localStorage.getItem(chiave);
+      if (!copiaLocale || copiaLocale.testo !== testo) copiaLocale = {testo: testo, S: JSON.parse(testo || 'null') || {}};
+      return copiaLocale.S;
+    } catch (e) { return {}; }
   }
   function aiutanti(S) {
     var regs = S.registrazioni || [];
