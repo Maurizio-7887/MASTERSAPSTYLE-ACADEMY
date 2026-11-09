@@ -574,7 +574,14 @@
       return;
     }
     if (t.classList.contains('msa-g-vai')) vai(PASSI[pos]);
-    else if (t.classList.contains('msa-g-mano')) { segnaAMano(PASSI[pos], true); if (guidata) aggiorna(); else { stati = esiti(); disegna(); } }
+    else if (t.classList.contains('msa-g-mano')) {
+      segnaAMano(PASSI[pos], true);
+      // Prima aggiornavamo "stati" dentro segnaAMano e poi chiamavamo
+      // aggiorna(): non rilevava differenze e il pulsante Avanti restava
+      // disabilitato anche se la spunta era stata salvata.
+      stati = esiti();
+      disegna();
+    }
     else if (t.classList.contains('msa-g-togli')) { segnaAMano(PASSI[pos], false); stati = esiti(); disegna(); }
     else if (t.classList.contains('msa-g-val')) {
       var testo = t.textContent;
