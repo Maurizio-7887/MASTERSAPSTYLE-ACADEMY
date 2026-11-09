@@ -50,6 +50,11 @@ check('cpm-standard-halb',true,'ricetta HALB confermata');
 check('cpm-kspi',false,'tariffa non calcolata');
 cp.eseguiKSPI({data:'2026-12-01'});
 check('cpm-kspi',true,'KSPI valido sulla revisione corrente');
+// risalvare gli stessi numeri non cambia revisione (nessun vicolo cieco per l'allievo)
+salvaCentro('4200');
+check('cpm-kspi',true,'stessi numeri: la tariffa resta valida');
+// un numero diverso crea una revisione e invalida la tariffa
+plan['4200']=Object.assign({},plan['4200'],{'54':(plan['4200']['54']||0)+1});
 salvaCentro('4200');
 check('cpm-kspi',false,'nuova revisione invalida la vecchia tariffa');
 for(const id of ['cpm-budget','cpm-kp26','cpm-ciclo','cpm-standard-tr','bpc-input','cpm-kspi','cpm-calcolo','cpm-rilascio']){
