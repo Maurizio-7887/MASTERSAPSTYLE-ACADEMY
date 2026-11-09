@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ programma.titolo }} · Lezioni · MASTER SAP STYLE</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fiori.css') }}">
+<style>
+.msa-lessoni{max-width:1150px;margin:auto;padding:20px 14px 70px;color:var(--text,#172b43)}
+.msa-lessoni a{color:#145a9d}.msa-lessoni-head{background:#153654;color:white;border-radius:15px;padding:22px;margin-bottom:16px}.msa-lessoni-head h1{margin:8px 0;color:white}.msa-lessoni-head p{color:#e6eff9}
+.msa-lessoni-head a{color:#e5f2ff}.msa-lessoni-layout{display:grid;grid-template-columns:minmax(210px,260px) minmax(0,1fr);gap:18px}
+.msa-lessoni-nav{background:#f0f5fa;border:1px solid #d3e1ed;border-radius:12px;padding:16px;align-self:start}
+.msa-lessoni-nav a{display:block;padding:10px;border-bottom:1px solid #d6e1ed;text-decoration:none}
+.msa-lessoni-nav a[aria-current="page"]{background:#d5e9fd;font-weight:800;border-radius:8px}
+.msa-lezione{background:#fff;color:#162e47;border:1px solid #d4dfe9;border-radius:12px;padding:22px;line-height:1.65}
+.msa-lezione h2{color:#153654;margin:4px 0 16px}.msa-lezione h3{margin:24px 0 8px;color:#17486f}
+.msa-lezione p{margin:8px 0 14px}.msa-lezione ol li,.msa-lezione ul li{padding:5px 0}
+.msa-lezione .esempio{background:#f3f8ef;border-left:4px solid #397b36;padding:14px;border-radius:6px;margin:16px 0}
+.msa-lezione .verifica{background:#f4f8fd;padding:14px;border:1px solid #d5e5f8;border-radius:9px;margin:16px 0}
+.msa-lezione .verifica details{margin:10px 0;border-bottom:1px solid #ccdaeb;padding-bottom:8px}
+.msa-lezione .verifica summary{cursor:pointer;font-weight:700}
+.msa-lezione .operazioni{padding:14px;background:#fff8ed;border-radius:8px;border-left:4px solid #d18a1f}
+.msa-naviga{display:flex;gap:10px;flex-wrap:wrap;margin-top:25px}.msa-naviga a{padding:10px 14px;background:#17486f;color:white;text-decoration:none;border-radius:8px}
+.msa-lessoni small{color:#597080}.msa-lezione .tag{display:inline-block;background:#e9f3fd;color:#1c527f;padding:3px 8px;border-radius:12px;font-size:.85em}
+@media(max-width:760px){.msa-lessoni-layout{grid-template-columns:1fr}.msa-lessoni-nav{max-height:260px;overflow:auto}.msa-lezione{padding:15px}}
+@media print{.msa-lessoni-nav,.msa-naviga,.msa-lessoni-head a,.msa-sim{display:none!important}.msa-lessoni-layout{display:block}.msa-lezione{border:0;padding:0}}
+</style></head><body>
+{% include "simulatore/_shell.html" %}
+<main class="msa-lessoni">
+<div class="msa-lessoni-head">
+<a href="{{ url_for('portale.ingresso', versione=versione) }}">← Torna al Launchpad</a>
+<h1>📚 {{ programma.titolo }}</h1>
+<p>{{ programma.descrizione }}</p>
+<p>Prima leggi la spiegazione, poi svolgi l'operazione guidata. <b>È un simulatore didattico: non è SAP originale.</b></p>
+</div>
+<div class="msa-lessoni-layout">
+<nav class="msa-lessoni-nav" aria-label="Indice lezioni">
+<b>Indice delle lezioni</b>
+{% for key in ordine %}
+<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso=percorso, lezione=key) }}" {% if key == lezione.id %}aria-current="page"{% endif %}>{{ loop.index }}. {{ lezioni[key].titolo }} <small>({{ lezioni[key].uf }})</small></a>
+{% endfor %}
+</nav>
+<article class="msa-lezione">
+<span class="tag">{{ lezione.uf }}</span> <small>Lezione {{ indice+1 }} di {{ totale }}</small>
+<h2>{{ lezione.titolo }}</h2>
+<h3>1. Che cosa impareremo</h3>
+<ul>{% for goal in [
+    'Comprendere la funzione e il suo collegamento con il lavoro di magazzino',
+    'Conoscere i documenti e il risultato che ci si aspetta',
+    'Eseguire l’attività senza duplicare registrazioni'
+] %}<li>{{ goal }}</li>{% endfor %}</ul>
+<h3>2. Spiegazione per chi parte da zero</h3>
+{% for paragraph in lezione.teoria.split('\n\n') %}
+<p>{{ paragraph }}</p>
+{% endfor %}
+<div class="esempio"><h3>3. Esempio concreto: Ferro &amp; Transenne</h3><p>{{ lezione.esempio }}</p></div>
+<div class="operazioni">
+<h3>4. Poi facciamo la prova nel simulatore</h3>
+<ol>{% for step in lezione.operativo.split('; ') %}<li>{{ step }}</li>{% endfor %}</ol>
+<p><b>Regola:</b> il testo ti insegna che cosa fare; il tutor nell'esercizio ti indica il campo e il pulsante precisi. Non registrare due volte un movimento già salvato.</p>
+</div>
+<div class="verifica"><h3>5. Domande per controllare se hai capito</h3>
+{% for qa in lezione.quiz.split('\n') %}{% set parts=qa.split('|') %}
+{% if parts|length == 2 %}<details><summary>{{ loop.index }}. {{ parts[0] }}</summary><p><b>Risposta:</b> {{ parts[1] }}</p></details>{% endif %}
+{% endfor %}
+</div>
+<div class="msa-sim">
+<p><b>Quando hai capito la lezione, apri la pratica:</b></p>
+<a class="msa-naviga" style="display:inline-block;background:#17486f;color:white;border-radius:8px;padding:11px 16px;text-decoration:none" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida=programma.esercizio) }}">🎯 Vai all'esercizio guidato {{ 'Firenze' if percorso == 'firenze' else 'Pistoia' }}</a>
+<p><small>Se hai già avviato l'azienda simulata, riprendila senza azzerare. Il progresso della lezione e i documenti ERP sono due cose differenti.</small></p>
+</div>
+<div class="msa-naviga">
+{% if indice > 0 %}<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso=percorso, lezione=ordine[indice-1]) }}">← Lezione precedente</a>{% endif %}
+{% if indice+1 < totale %}<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso=percorso, lezione=ordine[indice+1]) }}">Prossima lezione →</a>{% endif %}
+</div>
+</article></div></main></body></html>
