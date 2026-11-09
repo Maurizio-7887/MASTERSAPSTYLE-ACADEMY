@@ -364,8 +364,12 @@
         valore+'. Se il programma propone codici reali di pallet, lotti, UdC, consegne o SSCC, usa i codici mostrati nel tuo account, non numeri inventati.'));
     });
     if(p.nota)out.push(leggi('Attenzione / perché lo fai',String(p.nota)));
-    if(p.attesa)out.push(leggi('Verifica il risultato',
+    // Non anticipare la soluzione della partita doppia: il tutor mostra
+    // Dare/Avere solo dopo la ricostruzione dell'allievo, come da regole Academy.
+    if(p.attesa && !p.contabile)out.push(leggi('Verifica il risultato',
       'Dopo il salvataggio, confronta la schermata con questo risultato atteso: '+String(p.attesa)));
+    else if(p.contabile)out.push(leggi('Dopo il documento: ricostruisci Dare e Avere',
+      'Attendi la schermata di ricostruzione contabile. Scegli i conti, Dare/Avere e gli importi PRIMA che il tutor mostri la soluzione; completa la verifica per sbloccare il passaggio.'));
     out.push(leggi(p.fatto?'Attendi la spunta automatica ✓':'Conferma la lettura ✓',
       p.fatto?'Non basta confermare questo testo: il tutor deve leggere il movimento, il documento o il parametro realmente SALVATO. '+
         'Se non compare ✓, torna nella schermata, verifica il messaggio di esito e NON ripetere automaticamente un movimento già contabilizzato. Chiedi al docente di controllare i dati.' :
