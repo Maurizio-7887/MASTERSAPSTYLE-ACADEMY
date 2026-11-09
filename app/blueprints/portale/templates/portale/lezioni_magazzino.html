@@ -50,6 +50,13 @@
 {% for paragraph in lezione.teoria.split('\n\n') %}
 <p>{{ paragraph }}</p>
 {% endfor %}
+{% if approfondimenti %}
+<section style="padding:14px;border-left:4px solid #1b5c93;background:#f1f6fc;border-radius:8px;margin:20px 0">
+<h3>Approfondimento Pistoia · UF 8–11</h3>
+<p>Questa parte è riservata al percorso lungo: il docente la può leggere con calma, sviluppando i calcoli, i documenti e i casi alla lavagna.</p>
+{% for testo in approfondimenti %}<p>{{ testo }}</p>{% endfor %}
+</section>
+{% endif %}
 <div class="esempio"><h3>3. Esempio concreto: Ferro &amp; Transenne</h3><p>{{ lezione.esempio }}</p></div>
 <div class="operazioni">
 <h3>4. Poi facciamo la prova nel simulatore</h3>
