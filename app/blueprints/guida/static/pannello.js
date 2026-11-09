@@ -169,7 +169,14 @@
   var richiesto = null;
   try { richiesto = new URLSearchParams(location.search).get('passo'); } catch (e) { richiesto = null; }
   if (richiesto) {
-    for (var q = 0; q < N; q++) if (PASSI[q].titolo.indexOf(richiesto) === 0) { pos = q; ss(POS, String(q)); ls(APERTA, '1'); break; }
+    for (var q = 0; q < N; q++) if (PASSI[q].titolo.indexOf(richiesto) === 0) {
+      // I deep-link didattici non scavalcano un passo mai completato.
+      var primoNonSpuntato = -1;
+      for (var z = 0; z < q; z++) if (!stati[z]) { primoNonSpuntato = z; break; }
+      if (q <= pos || primoNonSpuntato < 0) { pos = q; ss(POS, String(q)); }
+      ls(APERTA + '-' + E.codice, '1');
+      break;
+    }
   }
 
   function urlPasso(p) {
@@ -196,11 +203,47 @@
     location.href = u;
   }
 
+  // BLOCCO UNICO DI AVANZAMENTO: nessun passo successivo senza la spunta.
+  // Le operazioni ERP si spuntano dai dati effettivi; le sole letture richiedono
+  // conferma esplicita; la ricostruzione in partita doppia resta obbligatoria.
+  function statoAggiornato() {
+    stati = esiti();
+    return stati;
+  }
+  function primoBlocco(fino) {
+    var lista = statoAggiornato();
+    for (var i = 0; i < fino; i++) if (!lista[i]) return i;
+    return -1;
+  }
+  function puoAvanzareDa(i) {
+    return !!(statoAggiornato()[i] && !inQuiz());
+  }
+  function avvisoBlocco(indice) {
+    var p = PASSI[indice], esercizio = inQuiz();
+    var msg = esercizio ?
+      'Prima completa e verifica la scrittura in partita doppia. Non ripetere l’acquisto già registrato.' :
+      p.fatto ? 'Il sistema non ha ancora riconosciuto questa attività come completata. Controlla nel modulo il documento e il salvataggio effettivo; se è già presente, avvisa il docente senza rifare l’operazione.' :
+      'Questo passo è di lettura o controllo: completa la verifica e premi «✓ Fatto» prima di proseguire.';
+    var es = corpo.querySelector('.msa-g-blocco');
+    if (!es) {
+      es = document.createElement('div');
+      es.className = 'msa-g-esito msa-g-blocco';
+      es.setAttribute('role','alert');
+      corpo.insertBefore(es, corpo.firstChild);
+    }
+    es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
+  }
   function disegnaElenco() {
     var html = '', gruppo = null;
     PASSI.forEach(function (p, i) {
       if (p.g !== gruppo) { if (gruppo !== null) html += '</optgroup>'; gruppo = p.g; html += '<optgroup label="' + esc(p.g) + '">'; }
-      html += '<option value="' + i + '">' + (stati[i] ? '✓ ' : '○ ') + (i + 1) + '. ' + esc(p.titolo) + '</option>';
+      // Il menu consente ripasso e punto corrente, ma non può saltare
+      // un'attività precedente ancora priva di spunta.
+      var blocco = primoBlocco(i);
+      var accessibile = i <= pos || (blocco < 0 && !inQuiz());
+      html += '<option value="' + i + '"' + (!accessibile ? ' disabled' : '') + '>' +
+        (stati[i] ? '✓ ' : '○ ') + (i + 1) + '. ' + esc(p.titolo) +
+        (!accessibile ? ' · BLOCCATO' : '') + '</option>';
     });
     sel.innerHTML = html + '</optgroup>';
     sel.value = String(pos);
@@ -213,7 +256,7 @@
     var pendente = inQuiz();
     sel.disabled = !!pendente;
     radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
-    radice.querySelector('.msa-g-av').disabled = !!pendente || !!(p.cpmVerificato && !st);
+    radice.querySelector('.msa-g-av').disabled = !!pendente || !st || pos === N - 1;
     if (pendente) {
       corpo.innerHTML = '<button type="button" class="msa-g-vai-saldi">📒 Non ricordi un saldo? Apri i saldi dei conti e i tuoi appunti ↓</button>' + quiz.html(stato(), esc) + strumenti(true);
       ripristinaFuoco();
@@ -277,10 +320,10 @@
     corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
-    radice.querySelector('.msa-g-av').disabled = !!(p.cpmVerificato && !st);
-    if(p.cpmVerificato && !st) {
+    radice.querySelector('.msa-g-av').disabled = !st || pos === N - 1;
+    if(!st && p.fatto) {
       var esito = corpo.querySelector('.msa-g-esito');
-      if(esito) esito.innerHTML = '🔍 Il tutor sta verificando i dati del CPM realmente salvati. Completa il comando evidenziato: «Avanti» si sblocca solo quando i controlli coincidono.';
+      if(esito) esito.textContent = '🔍 Il tutor verifica l’operazione realmente registrata. «Avanti» si sblocca soltanto quando il passo ha la spunta ✓. Se la registrazione esiste già, non ripeterla: chiedi al docente di controllare i dati.';
     }
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
     disegnaElenco();
@@ -412,7 +455,25 @@
     else if (t.classList.contains('msa-g-appunti')) salvaAppunti(t.value);
   });
 
-  function vaiA(i, manuale) { pos = Math.max(0, Math.min(N - 1, i)); ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0; }
+  function vaiA(i, manuale) {
+    i = Math.max(0, Math.min(N - 1, Number(i) || 0));
+    if (i > pos) {
+      // La verifica viene rifatta ORA, non ci fidiamo della spunta mostrata
+      // in una sessione precedente né di un tasto "Avanti" disabilitato via DOM.
+      var mancante = primoBlocco(i);
+      if (mancante >= 0 || inQuiz()) {
+        if (mancante >= 0 && mancante !== pos && mancante < pos) {
+          // Un avanzamento storico già salvato non viene cancellato;
+          // il docente può far ripassare i passi non verificati.
+          avvisoBlocco(mancante);
+        } else avvisoBlocco(pos);
+        disegna(); return false;
+      }
+    }
+    pos = i;
+    ss(POS, String(pos)); programmaProgresso(); disegna(); corpo.scrollTop = 0;
+    return true;
+  }
 
   function apri(si) {
     pannello.hidden = !si;
@@ -464,7 +525,10 @@
   radice.querySelector('.msa-g-chiudi').addEventListener('click', function () { apri(false); });
   radice.querySelector('.msa-g-ind').addEventListener('click', function () { vaiA(pos - 1, true); });
   radice.querySelector('.msa-g-av').addEventListener('click', function () { vaiA(pos + 1, true); });
-  sel.addEventListener('change', function () { vaiA(parseInt(sel.value, 10), true); });
+  sel.addEventListener('change', function () {
+    var precedente = pos, scelto = parseInt(sel.value, 10);
+    if (!vaiA(scelto, true)) sel.value = String(precedente);
+  });
   corpo.addEventListener('click', function (e) {
     var t = e.target;
     if (t.classList.contains('msa-g-vai-saldi')) {
@@ -650,7 +714,8 @@
         h2 += '<div class="msa-g-ora-serve"><b>💡 A cosa serve</b>' + esc(d.serve || '') + '</div>';
         if (!ora.el && d.t !== 'leggi') h2 += '<div class="msa-g-ora-dove">📍 Non vedo ancora questa schermata: premi <b>«Apri ➜»</b> qui sopra, poi la casella comincerà a brillare.</div>';
         if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ Ho verificato la casella' : '✓ Ho letto, vai avanti') + '</button>';
-        if (!p.cpmVerificato) h2 += '<button type="button" class="msa-g-salta" data-k="' + ora.k + '">già fatto / salta questo punto</button>';
+        // Nessun pulsante "salta" nel percorso obbligatorio: i dettagli
+        // di lettura si confermano, le operazioni si verificano nel gestionale.
         if (p.cpmVerificato && d.t === 'pulsante') h2 += '<div class="msa-g-ora-dove">🔍 Dopo il clic controllo il modello salvato. Se non coincide, correggi i campi indicati e ripeti il salvataggio; la spunta non può sostituire questo controllo.</div>';
         if (esitoErrore) h2 += '<div class="msa-g-ora-correzione"><b>⛔ Il salvataggio è stato rifiutato.</b> '+esc(esitoErrore)+'<div>Correggi i dati del riquadro evidenziato e premi di nuovo il pulsante. Non si passa al comando successivo finché il modello non è salvato.</div></div>';
         if (p.cpmVerificato && (d.t === 'campo' || d.t === 'scelta') && ora.el && d.valore !== undefined && !ugualeP(ora.el.value,d.valore))
@@ -685,7 +750,7 @@
     if (sg) { ls(SUGG, sg.classList.contains('msa-g-sugg-off') ? 'no' : 'si'); firmaPunti = ''; ultimoPunto = ''; soppressa = ''; if (sg.classList.contains('msa-g-sugg-off')) spegniPunti(); var cc = corpo.querySelector('.msa-g-ora-c'); if (cc) cc.innerHTML = ''; tickPunti(true); return; }
     var t = e.target.closest ? e.target.closest('.msa-g-letto,.msa-g-salta') : null; if (!t) return;
     var p = PASSI[pos], k = parseInt(t.getAttribute('data-k'), 10);
-    if (p.cpmVerificato && t.classList.contains('msa-g-salta')) return;
+    if (t.classList.contains('msa-g-salta')) return;
     if (p.cpmVerificato && t.classList.contains('msa-g-letto') && p.punti[k] && p.punti[k].controlla && p.punti[k].valore !== undefined) {
       var el=p.punti[k].sel ? trovaP(p.punti[k].sel) : null;
       if(!el || !ugualeP(el.value,p.punti[k].valore)) { firmaPunti='';tickPunti(true);return; }
