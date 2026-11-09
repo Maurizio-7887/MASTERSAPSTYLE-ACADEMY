@@ -82,7 +82,7 @@ def registra_progresso(esercizio):
 def config_guida(versione, esercizio=None, chiave=None):
     esercizio = esercizio or ESERCIZIO_PER_VERSIONE.get(versione)
     if esercizio == "s4-integrato":
-        scelte = {"ragioneria-wms", "dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "executive-assistant"}
+        scelte = {"ragioneria-wms", "dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "firenze-30", "executive-assistant"}
         scelta = request.args.get("esercizio_guida")
         if scelta in scelte:
             session["guida_integrata"] = scelta
@@ -96,10 +96,10 @@ def config_guida(versione, esercizio=None, chiave=None):
         for p in lab["pagine"]:
             url[f"{bp_lab}.{p['endpoint']}"] = url_for(f"{bp_lab}.{p['endpoint']}", versione=versione)
     url["allievo.consegna"] = url_for("allievo.consegna")
-    progresso = _avanzamento(utente_corrente(), esercizio, "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "executive-assistant", "ragioneria-wms"} else versione)
+    progresso = _avanzamento(utente_corrente(), esercizio, "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "firenze-30", "executive-assistant", "ragioneria-wms"} else versione)
     return {"esercizio": esercizio, "versione": versione, "chiave": chiave or f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url,
             "progress_url": url_for("guida.registra_progresso", esercizio=esercizio),
-            "progress_version": "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "executive-assistant", "ragioneria-wms"} else versione,
+            "progress_version": "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "firenze-30", "executive-assistant", "ragioneria-wms"} else versione,
             "progress_csrf": csrf_token(), "progress_notes": progresso.osservazioni if progresso else {},
             "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima,
                          "totale": progresso.totale,
