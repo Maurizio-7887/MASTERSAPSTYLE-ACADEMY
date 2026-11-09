@@ -131,4 +131,12 @@ rep=cp.report();rep.centri.forEach(r=>near(r.varianzaEfficienza,0,'efficienza pe
 b=budget();b.produttivi=0;for(const k of cp.centri){b.centri[k].personale=0;b.centri[k].indiretti=0;}cp.salvaBudget(b);
 cp.salvaStandard({materiale:'TR-STD',componente:'FERRO',quantita:8,ore:{Taglio:.25,Piegatura:.2,Saldatura:.4},attrezzaggio:3,centroSet:'Taglio'});
 near(pc.elementi('TR-STD',100).set,0,'setup a tariffa zero');
+// Caso Svetlana: budget risalvato dopo il rilascio di dicembre, prima di usare i materiali.
+// Gli stessi numeri non creano una nuova revisione; numeri diversi sì, e lo standard del mese si può sostituire.
+{
+  const rev = cp.modello().revisione;
+  const riga = s.costing.cpm.piano['0']['4210'];
+  cp.salvaKP06(Object.assign({versione: '0', cdc: '4210'}, Object.fromEntries(Object.entries(riga).map(([k, v]) => ['k' + k, v]))));
+  ok(cp.modello().revisione === rev, 'risalvare gli stessi numeri non invalida tariffe e standard');
+}
 w.close(); console.log('✓ CPM centri, budget, costing, snapshot, conferme, report e legacy: '+checks+' controlli');

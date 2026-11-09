@@ -284,7 +284,7 @@
     'cpm-kspi': [R('Qui nel pannello','Premi «Apri ➜»'),R('Riquadro «Calcolo delle tariffe di piano», casella «Data di esecuzione»','Scrivi','01/12/2026'),R('Sotto','Premi «Esegui il calcolo delle tariffe»'),R('Tabella delle tariffe','Controlla: 28 €/h per Taglio, Piegatura e Saldatura')],
     'cpm-tariffe': [R('Stessa pagina, tabella delle tariffe','Controlla per ogni reparto: 42.000 € e 1.500 ore'),R('Con la calcolatrice','42.000 ÷ 1.500 = 28'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
     'cpm-calcolo': [R('Qui nel pannello','Premi «Apri ➜»'),R('Riquadro «Calcola il costo standard», menu «Materiale»','Scegli','TR-STD'),R('Casella «Data di calcolo»','Scrivi','01/12/2026'),R('Sotto','Premi «Calcola»'),R('Menu «Materiale»','Scegli','SL-TAGLIO'),R('Casella «Data di calcolo»','Scrivi','01/12/2026'),R('Sotto','Premi «Calcola»'),R('Tabella «Stime dei costi»','Controlla: TR-STD 31,40 · SL-TAGLIO 14,60')],
-    'cpm-rilascio': [R('Stessa pagina, riquadro «Marca e rilascia», casella «Data di rilascio»','Scrivi','01/12/2026'),R('Casella «Solo primo CPM su azienda vuota…»','Scrivi (solo la prima volta)','SOSTITUISCI'),R('Sotto','Premi «Marca tutte le stime calcolate»'),R('Sotto','Premi «Rilascia»'),R('Tabella «Stime dei costi»','Controlla: stato FR per tutti e due')],
+    'cpm-rilascio': [R('Nel pannello, riquadro azzurro «🔎 Che cosa manca»','Leggi le righe con ❌: ti dicono che cosa fare, dall’alto in basso'),R('Se c’è scritto «va ricalcolato»','Riquadro a SINISTRA «Calcola il costo standard»: scegli il materiale, data 01/12/2026, premi «Calcola». Fallo per TR-STD e poi per SL-TAGLIO'),R('Riquadro a DESTRA «Marca e rilascia», casella «Data di rilascio»','Scrivi','01/12/2026'),R('Casella a destra, sotto la scritta «Solo primo CPM…»','Scrivi (non fa danni anche se non serve)','SOSTITUISCI'),R('Pulsante BIANCO','Premi «Marca tutte le stime calcolate»'),R('Pulsante BLU','Premi «Rilascia»'),R('Tabella «Stime dei costi» in fondo alla pagina','Controlla: tutti e due in stato FR (31,40 e 14,60). La spunta arriva da sola')],
     'cpm-attivita': [R('Qui nel pannello','Premi «Apri ➜»'),R('In alto, menu «Periodo»','Lascia dicembre'),R('Riquadro «1 · Attività»','Leggi il totale: 7.280 € con la spunta ✓'),R('Riquadro «2 · Costi effettivi dei centri»','Leggi: c’è solo 4300 Amministrazione 1.200'),R('Riquadro «3 · Centri produttivi: residuo»','Leggi: −2.240 · −1.680 · −3.360'),R('Riquadro «4 · Ordini e WIP»','Leggi: WIP 0'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
     'cpm-fonti-fine-mese': [R('Qui nel pannello','Premi «Apri ➜»'),R('In alto, menu «Centro di costo»','Scegli «4200 Produzione»'),R('Riquadro «Partite singole effettive: costi primari»','Leggi le righe: paga di Sara Bianchi, fitto, ammortamenti'),R('Riquadro «Riattribuisci un costo fra centri»','NON spostare la paga di Sara senza evidenza della destinazione del lavoro: la rettifica è facoltativa e documentata'),R('Qui nel pannello, in basso','Premi «✓ Fatto»')],
     'cpm-centri-ricavi': [R('Qui nel pannello','Premi «Apri ➜»'),R('Pagina CO-PA, sezione «Configurazione centri di profitto»','Associa TR-STD al centro PC-TR e SL-TAGLIO a PC-SL'),R('Menu «Analizza per»','Scegli «Centro di profitto»'),R('Tabella KE30','Leggi ricavi, costo del venduto, differenze ML e margine per centro; verifica l’eventuale colonna NON-ASSEGNATO'),R('Poi torna a KSB1','Confronta i costi primari per CDC con i margini del CO-PA, senza sommarli una seconda volta'),R('Qui nel pannello','Premi «✓ Fatto»')],
@@ -468,7 +468,21 @@
   };});
   // Diagnosi punto per punto: che cosa manca per la spunta, letto dai dati salvati dell'allievo.
   var eur=function(v){return Number(v||0).toLocaleString('it-IT');};
+  var diagnosiStandard=function(h,soloCalcolo){
+    var m=modello(h),out=[];
+    [['TR-STD','Transenna',31.4],['SL-TAGLIO','Kit tagliato',14.6]].forEach(function(x){
+      var s=stima(h,x[0]),snap=snapshot(h,x[0]),aggiornato=!!(s&&snap&&m&&snap.revisione===m.revisione);
+      out.push([aggiornato&&circa(s.unitario,x[2]), x[0]+' ('+x[1]+'): calcolato con il budget di adesso = '+eur(x[2])+' €'+(aggiornato?'':' → va ricalcolato: riquadro a sinistra, Materiale «'+x[0]+'», data 01/12/2026, premi «Calcola»')]);
+      if(soloCalcolo)return;
+      var st=s&&s.stato;
+      out.push([st==='VO'||st==='FR', x[0]+': marcato'+(st==='VO'||st==='FR'?'':' → riquadro a destra, premi il pulsante bianco «Marca tutte le stime calcolate»')]);
+      out.push([st==='FR'&&aggiornato, x[0]+': rilasciato (stato FR)'+(st==='FR'&&aggiornato?'':' → data 01/12/2026, scrivi SOSTITUISCI, premi il pulsante blu «Rilascia»')]);
+    });
+    return out;
+  };
   var diagnosi={
+    'cpm-calcolo':function(h){return diagnosiStandard(h,true);},
+    'cpm-rilascio':function(h){return diagnosiStandard(h,false);},
     'cpm-budget':function(h){
       var m=modello(h),out=[];
       out.push([attivo(h),'Piano CO 2026 aperto (passo precedente «apri il piano 2026»)']);
