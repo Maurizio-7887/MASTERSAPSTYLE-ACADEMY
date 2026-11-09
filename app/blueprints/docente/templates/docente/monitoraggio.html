@@ -1,0 +1,86 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Monitoraggio {{ u.nome }}{% endblock %}
+{% block contenuto %}
+<h1>Monitoraggio attività — {{ u.nome }}</h1>
+{% include "docente/_menu.html" %}
+<p><a href="{{ url_for('docente.allievo', uid=u.id) }}">← Scheda allievo</a></p>
+<div class="msa-card">
+  <p>Questa è una <b>fotografia del lavoro ancora in corso</b>: non occorre attendere la consegna.
+  Le spunte <b>automatiche</b> indicano controlli del tutor soddisfatti; quelle <b>manuali</b> vanno
+  verificate dal docente. Un passo non completato non è automaticamente un errore.
+  Le tue annotazioni non modificano il libro giornale dell'allievo.</p>
+  {% if lavoro %}
+    <p>Stato ERP salvato: <b>revisione {{ lavoro.rev }}</b>, aggiornato {{ ora_italiana(lavoro.aggiornato) }}.
+    <a href="{{ url_for('docente.monitoraggio_backup', uid=u.id) }}">⬇ Scarica fotografia JSON</a></p>
+  {% else %}<p>Nessuno stato contabile ERP ancora salvato.</p>{% endif %}
+</div>
+{% if verifica %}
+<div class="msa-card">
+  <h2>Verifica dei dati realmente registrati</h2>
+  <p>Libro Giornale: <b>{{ verifica.indicatori.scritture }}</b> registrazioni.
+  Controlli dell'esercizio: <b>{{ verifica.esatti }} / {{ verifica.confronto|length }}</b>.
+  Quadratura: <b>{{ 'OK' if verifica.controlli.quadra else 'Da controllare' }}</b>.</p>
+  {% if verifica.controlli.non_quadrate %}
+    <p style="color:#a22">Attenzione: {{ verifica.controlli.non_quadrate|length }} scritture non quadrate.</p>
+  {% endif %}
+  {% if verifica.confronto %}
+  <details><summary>Apri i controlli di confronto</summary>
+  <div class="msa-scroll"><table class="msa-tab"><tr><th>Controllo</th><th>Atteso</th><th>Rilevato</th><th>Esito</th></tr>
+  {% for c in verifica.confronto %}
+    <tr><td>{{ c.nome or c.voce or c.chiave or 'Controllo ' ~ loop.index }}</td>
+    <td>{{ c.atteso if c.atteso is defined else '—' }}</td>
+    <td>{{ c.effettivo if c.effettivo is defined else (c.reale if c.reale is defined else '—') }}</td>
+    <td>{{ '✓' if c.ok else 'Da verificare' }}</td></tr>
+  {% endfor %}
+  </table></div></details>
+  {% endif %}
+  <details><summary>Libro Giornale corrente, scrittura per scrittura ({{ verifica.giornale|length }})</summary>
+  <div class="msa-scroll"><table class="msa-tab"><tr><th>Data</th><th>Operazione</th><th>Tipo</th><th>Righe</th></tr>
+  {% for reg in verifica.giornale %}
+    <tr><td>{{ reg.data or '—' }}</td><td>{{ reg.descrizione or '—' }}</td>
+    <td>{{ reg.tipo or '—' }}</td><td>{{ reg.righe|length if reg.righe is defined else '—' }}</td></tr>
+  {% endfor %}
+  </table></div></details>
+</div>
+{% endif %}
+{% for gruppo in dettagli %}
+<section class="msa-card">
+  <h2>{{ gruppo.item.esercizio }} — punto attuale {{ gruppo.item.posizione + 1 }} di {{ gruppo.item.totale }}</h2>
+  <p>Massimo punto raggiunto: <b>{{ gruppo.item.posizione_massima + 1 }}</b>.
+  Ultima sincronizzazione: {{ ora_italiana(gruppo.item.aggiornato) }}.</p>
+  <p>Spunte automatiche: <b>{{ gruppo.automatici }}</b> ·
+  Manuali: <b>{{ gruppo.manuali }}</b> ·
+  Da completare/verificare: <b>{{ gruppo.da_fare }}</b>.</p>
+  <div class="msa-scroll"><table class="msa-tab">
+  <tr><th>Passo</th><th>Attività</th><th>Verifica tutor</th><th>Correzione del docente</th></tr>
+  {% for p in gruppo.righe %}
+  <tr id="passo-{{ gruppo.item.id }}-{{ p.posizione }}" style="{{ 'background:#fff6db' if p.corrente else '' }}">
+    <td><b>{{ p.numero }}</b>{% if p.corrente %}<br><small>QUI ORA</small>{% endif %}</td>
+    <td><b>{{ p.titolo }}</b><div style="font-size:12px;color:#555">{{ p.gruppo }}</div></td>
+    <td>
+      {% if p.stato == 'auto' %}<span class="msa-stato corretta">✓ Verificato dal tutor</span>
+      {% elif p.stato == 'mano' %}<span class="msa-stato">✓ Spuntato manualmente</span>
+      {% else %}<span class="msa-stato da_correggere">Non ancora verificato</span>{% endif %}
+    </td>
+    <td style="min-width:240px">
+      <form method="post" action="{{ url_for('docente.annota_passo', uid=u.id, gid=gruppo.item.id) }}">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="passo" value="{{ p.posizione }}">
+        <select name="giudizio" style="max-width:220px">
+          <option value="" {{ 'selected' if not p.giudizio }}>Da osservare</option>
+          <option value="ok" {{ 'selected' if p.giudizio == 'ok' }}>Corretto</option>
+          <option value="da_correggere" {{ 'selected' if p.giudizio == 'da_correggere' }}>Da correggere</option>
+        </select>
+        <textarea name="nota" maxlength="2000" rows="2" placeholder="Spiega cosa correggere">{{ p.nota }}</textarea>
+        <button class="msa-btn" type="submit">Salva nota</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+  </table></div>
+</section>
+{% else %}
+<div class="msa-card"><p>Il cursore per-step non è ancora stato sincronizzato da una guida aggiornata.
+Il lavoro contabile, se presente, è già visibile sopra. La prima apertura della guida dopo il deploy creerà il registro passi senza azzerare i dati.</p></div>
+{% endfor %}
+{% endblock %}
