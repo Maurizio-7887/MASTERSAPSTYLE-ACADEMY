@@ -234,21 +234,29 @@
   // Ora ogni centro/campo e ogni tasto ha un passaggio dedicato.
   function budgetPunti() {
     var out=[
-      leggi('Apri Controllo di gestione → KP06','Premi «Apri ➜» nel pannello e apri CO → Controllo di gestione → 2 · Pianificazione costi per centro.'),
-      {t:'scelta',sel:'#kp06-versione',nome:'Versione di piano',valore:'0',
-       serve:'Usa la versione 0 (piano operativo) per tutto il budget: la versione 1 è per il confronto con le paghe.'}
+      leggi('Apri Controllo di gestione → KP06',
+        'Premi «Apri ➜» e apri CO → Controllo di gestione → 2 · Pianificazione costi per centro.'),
+      {t:'scelta',sel:'#ver',nome:'Versione di piano',valore:'0',
+       serve:'Scegli la versione 0 (piano operativo). La versione 1 serve soltanto per confrontare le paghe reali.'}
     ];
-    ['4210','4220','4230'].forEach(function(c){
-      out.push(leggi('Seleziona il centro '+c,'Nel menu «Centro di costo» scegli '+c+
-        ' ('+({'4210':'Taglio','4220':'Piegatura','4230':'Saldatura'}[c])+'). Questo budget è un anno intero, non un mese.'));
-      out.push(leggi('Salari e stipendi del centro '+c,'Nella riga 80 «Salari e stipendi €/anno» scrivi 36000. Le altre classi restano a zero.'));
-      out.push(leggi('Salva il piano di '+c,'Premi «Salva il piano del centro». Aspetta la conferma prima di scegliere il reparto seguente.'));
+    [['4210','Taglio'],['4220','Piegatura'],['4230','Saldatura']].forEach(function(c){
+      out.push({t:'scelta',sel:'#cdc',nome:'Centro di costo '+c[0]+' '+c[1],valore:c[0],
+        serve:'Seleziona il reparto '+c[1]+'. Il costo pianificato è ANNUO, non mensile: ogni reparto prevede 36.000 € di stipendi.'});
+      out.push({t:'campo',sel:'#kp06-k80',nome:'80 Salari e stipendi di '+c[1],valore:'36000',
+        serve:'Inserisci 36000 €/anno nella classe 80. Lascia a 0 le altre classi. Non cambiare centro prima di salvare.'});
+      out.push({t:'pulsante',sel:'[data-prefisso="kp06"] [data-azione="kp06"]',nome:'Salva il piano del centro '+c[1],
+        serve:'Premi «Salva il piano del centro». Attendi il messaggio positivo e controlla il valore nella tabella KP06, poi passa al reparto successivo.'});
     });
-    out.push(leggi('Seleziona 4200 Produzione','Nel menu centro scegli 4200 Produzione, il centro dei servizi generali.'));
-    out.push(leggi('86 Fitti passivi','Nella casella «86 Fitti passivi €/anno» scrivi 12000.'));
-    out.push(leggi('54 Consulenze e servizi','Nella casella «54 Consulenze e servizi €/anno» scrivi 6000 (energia e manutenzioni): non 3100, che appartiene a un diverso esercizio.'));
-    out.push(leggi('Salva il centro Produzione','Premi «Salva il piano del centro» anche per 4200. Non basta lasciare i numeri visibili nei campi.'));
-    out.push(leggi('Controlla il totale 126.000','Leggi la tabella della versione 0: 4210/4220/4230 da 36.000 ciascuno e 4200 da 18.000. Totale 126.000. Solo dopo passa al punto successivo.'));
+    out.push({t:'scelta',sel:'#cdc',nome:'Centro di costo 4200 Produzione',valore:'4200',
+      serve:'Il centro 4200 raccoglie le spese comuni dello stabilimento: 12.000 € di affitto e 6.000 € di servizi.'});
+    out.push({t:'campo',sel:'#kp06-k86',nome:'86 Fitti passivi €/anno',valore:'12000',
+      serve:'Inserisci 12000 € di affitto annuale nello stabilimento.'});
+    out.push({t:'campo',sel:'#kp06-k54',nome:'54 Consulenze e servizi €/anno',valore:'6000',
+      serve:'Inserisci 6000 € di energia e manutenzioni. Attenzione: NON 3100 €, che appartiene a un altro esercizio.'});
+    out.push({t:'pulsante',sel:'[data-prefisso="kp06"] [data-azione="kp06"]',nome:'Salva il piano del centro 4200',
+      serve:'Premi «Salva il piano del centro»: i numeri visibili nei campi NON sono ancora salvati finché non confermi.'});
+    out.push(leggi('Controlla il totale 126.000',
+      'Leggi la tabella della versione 0: tre reparti da 36.000 € e produzione 4200 da 18.000 €. Totale 126.000 €. Solo dopo prosegui.'));
     return out;
   }
   var ssccIntro='SSCC significa Serial Shipping Container Code: è un codice di 18 cifre che identifica UN COLLO/PALLET. '+
