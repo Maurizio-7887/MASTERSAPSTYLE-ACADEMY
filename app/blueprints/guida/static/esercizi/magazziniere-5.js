@@ -433,7 +433,7 @@
       {t:'leggi',sel:'#rf-q',nome:'Interroga una UdC',
        serve:'Pulisci la casella, digita un codice UdC effettivamente letto dalla mappa, premi Invio e controlla dove si trova il pallet.'},
       {t:'leggi',sel:'#rf-q',nome:'Interroga TR-PED',
-       serve:'Digita TR-PED e premi Invio: devono risultare sei pallet da 50. Poi premi «✓ Fatto» nel tutor: questa interrogazione non registra una scrittura.')
+       serve:'Digita TR-PED e premi Invio: devono risultare sei pallet da 50. Poi premi «✓ Fatto» nel tutor: questa interrogazione non registra una scrittura.'}
     ];
     return null;
   }
