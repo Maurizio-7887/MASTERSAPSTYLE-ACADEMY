@@ -329,7 +329,10 @@ window.PC4 = (function () {
       if (i.driver === 'percentuali' && Math.abs(CENTRI.reduce(function (t, k) { return t + b.centri[k].percentuale; }, 0) - 100) > .001) throw Error('Le quote devono sommare a 100%.');
       var vol = {}; Object.keys(i.volumi || {}).forEach(function (mat) { if (!b.standard[mat]) throw Error('Prodotto non valido: ' + mat); vol[mat] = numero(i.volumi[mat], 'Volume annuo ' + mat); });
       if (!Object.keys(vol).length) throw Error('Inserisci almeno un volume annuale.');
-      b.volumi = vol; b.piano = b.piano || {}; b.piano['0'] = pianoDaCampi(b); b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">Budget annuale aggiornato, revisione ' + b.revisione + '. Nessuna scrittura FI. Nuovi standard da calcolare/rilasciare; ordini esistenti invariati.</p>';
+      b.volumi = vol; b.piano = b.piano || {}; b.piano['0'] = pianoDaCampi(b);
+      avvisoBudget = '';
+      var invariato = salvaPiano(b, 'Budget annuale salvato.', null); if (invariato) return invariato;
+      b.revisione++; C().cpm = b; N().salva(); return avvisoBudget + '<p class="lab-nota">Budget annuale aggiornato, revisione ' + b.revisione + '. Nessuna scrittura FI. Nuovi standard da calcolare/rilasciare; ordini esistenti invariati.</p>';
     }
     function validaStandard(mat, s, tutti) {
       if (!S().materiali[mat] || ['FERT', 'HALB'].indexOf(S().materiali[mat].tipo) < 0 || !tutti[mat]) throw Error('Materiale prodotto non valido.');
@@ -348,7 +351,10 @@ window.PC4 = (function () {
     function salvaStandard(i) {
       var m = richiesto(), all = copia(m.standard), s = {componente: {mat: i.componente, q: i.quantita}, ore: copia(i.ore || {}), attrezzaggio: i.attrezzaggio, centroSet: i.centroSet};
       all[i.materiale] = s; validaStandard(i.materiale, s, all);
-      m.standard = all; m.fattiStandard = m.fattiStandard || {}; m.fattiStandard[i.materiale] = true; m.revisione++; N().salva(); return '<p class="lab-nota">Distinta/ciclo CPM salvati, revisione ' + m.revisione + '. Ricalcola e rilascia lo standard. Nessun ordine storico rivalutato.</p>';
+      var prova = copia(m); prova.standard = all;
+      if (improntaCosti(prova) === improntaCosti(m)) { m.fattiStandard = m.fattiStandard || {}; m.fattiStandard[i.materiale] = true; N().salva(); return '<p class="lab-nota">Distinta/ciclo di ' + i.materiale + ' confermati: sono uguali a prima, i costi standard già calcolati restano validi.</p>'; }
+      var avvisoStd = standardInUso() ? '<p class="lab-nota" style="background:#FDECEA;border-left:4px solid #B42318;padding:8px 10px">⚠️ ' + MSG_BUDGET_BLOCCATO + '</p>' : '';
+      m.standard = all; m.fattiStandard = m.fattiStandard || {}; m.fattiStandard[i.materiale] = true; m.revisione++; N().salva(); return avvisoStd + '<p class="lab-nota">Distinta/ciclo CPM salvati, revisione ' + m.revisione + '. Ricalcola e rilascia lo standard. Nessun ordine storico rivalutato.</p>';
     }
     function tariffe() {
       var m = richiesto(), base = CENTRI.reduce(function (t, k) { return t + m.centri[k].orePiano; }, 0), fatto = 0, out = {};
@@ -494,7 +500,41 @@ window.PC4 = (function () {
       b.generale.produttivi = r2(totale(p['4100']) + totale(p['4200']));
       b.generale.amministrativi = r2(totale(p['4300']));
     }
-    function nuovaRevisione(b, testo, passo) { if (passo) { b.fatti = b.fatti || {}; b.fatti[passo] = true; } b.revisione++; C().cpm = b; N().salva(); return '<p class="lab-nota">' + testo + ' Revisione del piano ' + b.revisione + ': esegui di nuovo il calcolo delle tariffe (KSPI), poi CK11N e CK24 prima dei nuovi ordini. Nessuna scrittura FI; gli ordini già avviati conservano il loro snapshot.</p>'; }
+    // Ciò che decide il costo standard: tariffa oraria di ogni reparto e ricette (distinta/ciclo).
+    function improntaCosti(m) {
+      try {
+        var base = CENTRI.reduce(function (t, k) { return t + m.centri[k].orePiano; }, 0), fatto = 0, t = {};
+        CENTRI.forEach(function (k, idx) {
+          var c = m.centri[k], quota = m.generale.driver === 'ore' ? c.orePiano / base : c.percentuale / 100;
+          var rib = idx === CENTRI.length - 1 ? r2(m.generale.produttivi - fatto) : r2(m.generale.produttivi * quota); fatto = r2(fatto + rib);
+          t[k] = Math.round((c.personale + c.indiretti + rib) / c.orePiano * 10000) / 10000;
+        });
+        return JSON.stringify({t: t, s: m.standard});
+      } catch (e) { return String(Math.random()); }
+    }
+    // Il costo standard CPM è rilasciato e il materiale è già usato (ordini di produzione o movimenti)
+    function standardInUso() {
+      return Object.keys(C().stime || {}).some(function (mat) {
+        var st = C().stime[mat];
+        return st && st.stato === 'FR' && (S().produzione.some(function (o) { return o.materiale === mat; }) || S().movimenti.some(function (x) { return x.mat === mat; }));
+      });
+    }
+    var avvisoBudget = '';
+    var MSG_BUDGET_BLOCCATO = 'ATTENZIONE: hai cambiato numeri che modificano il costo delle transenne, ma il costo standard è già rilasciato e usato negli ordini o nel magazzino. Nell’esercizio questo ferma il passo 24 e tutto ciò che viene dopo: rimetti i numeri del caso e salva di nuovo (il passo 24 si sblocca da solo ricalcolando allo stesso prezzo). Per l’esercizio il budget resta: 4210, 4220, 4230 = 36.000 di salari ciascuno; 4200 = 18.000 di costi comuni; 1.500 ore per reparto; ribaltamento a ore. Se non sai quale numero hai cambiato, guarda il riquadro «Che cosa manca» del passo 12 o chiedi al docente.';
+    // Salvataggio di piano: nuova revisione solo se cambiano tariffe o ricette; se il materiale è già in uso, il cambio è rifiutato.
+    function salvaPiano(b, testo, passo) {
+      var vecchio = modello();
+      if (vecchio && improntaCosti(vecchio) === improntaCosti(b)) {
+        if (passo) { b.fatti = b.fatti || {}; b.fatti[passo] = true; }
+        C().cpm = b; N().salva();
+        return '<p class="lab-nota">' + testo + ' Tariffe orarie e costi standard non cambiano: KSPI, CK11N e CK24 già fatti restano validi, non serve rifarli.</p>';
+      }
+      if (standardInUso()) avvisoBudget = '<p class="lab-nota" style="background:#FDECEA;border-left:4px solid #B42318;padding:8px 10px">⚠️ ' + MSG_BUDGET_BLOCCATO + '</p>';
+      return null;
+    }
+    function nuovaRevisione(b, testo, passo) {
+      avvisoBudget = '';
+      var x = salvaPiano(b, testo, passo); if (x) return x; if (passo) { b.fatti = b.fatti || {}; b.fatti[passo] = true; } b.revisione++; C().cpm = b; N().salva(); return avvisoBudget + '<p class="lab-nota">' + testo + ' Revisione del piano ' + b.revisione + ': esegui di nuovo il calcolo delle tariffe (KSPI), poi CK11N e CK24 prima dei nuovi ordini. Nessuna scrittura FI; gli ordini già avviati conservano il loro snapshot.</p>'; }
     // KP06: pianificazione costi primari per centro e classe di costo, in una versione
     function salvaKP06(i) {
       var b = copia(richiesto()), ver = String(i.versione == null ? '0' : i.versione), cdc = String(i.cdc || '');

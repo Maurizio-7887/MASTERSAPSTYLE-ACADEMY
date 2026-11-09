@@ -25,6 +25,7 @@ const budget = () => { const m = cp.modello(); return JSON.parse(JSON.stringify(
 let rep = cp.report();
 rep.centri.forEach(r => { near(r.tariffa, 28, r.centro + ' tariffa'); near(r.budget, 42000, 'budget'); near(r.ribaltato, 6000, 'Generale non duplicato'); });
 ok(cp.modello().volumi['TR-STD'] === 1200, 'volume annuale distinto ordine');
+{ const r0 = cp.modello().revisione; cp.salvaBudget(budget()); ok(cp.modello().revisione === r0, 'risalvare lo stesso budget non crea una revisione (tariffe e standard restano validi)'); }
 near(rep.centri[0].oreRichieste, 300, 'Taglio annuo'); near(rep.centri[1].oreRichieste, 240, 'Piega annua'); near(rep.centri[2].oreRichieste, 480, 'Saldatura annua');
 near(pc.elementi('TR-STD', 300).totale, 9420, 'costo 300×31,40');
 reject(() => pp.ordine({materiale:'TR-STD',qta:300,data:'2026-12-01'}), /ricalcola/, 'rilascio CPM necessario');
