@@ -79,7 +79,8 @@ def lezioni_magazzino(versione, percorso):
         slug = programma["ordine"][0]
     idx = programma["ordine"].index(slug)
     return render_template("portale/lezioni_magazzino.html",
-                           versione=versione, percorso=percorso, programma=programma,
+                           versione=versione, moduli=MODULI, modulo_attivo=None,
+                           percorso=percorso, programma=programma,
                            lezioni=LEZIONI, ordine=programma["ordine"], lezione=LEZIONI[slug],
                            approfondimenti=PISTOIA_APPROFONDIMENTI.get(slug, []) if percorso == "pistoia" else [],
                            indice=idx, totale=len(programma["ordine"]))
