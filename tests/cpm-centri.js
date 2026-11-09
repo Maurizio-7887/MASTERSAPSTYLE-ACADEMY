@@ -139,4 +139,10 @@ near(pc.elementi('TR-STD',100).set,0,'setup a tariffa zero');
   cp.salvaKP06(Object.assign({versione: '0', cdc: '4210'}, Object.fromEntries(Object.entries(riga).map(([k, v]) => ['k' + k, v]))));
   ok(cp.modello().revisione === rev, 'risalvare gli stessi numeri non invalida tariffe e standard');
 }
+{ // KSPI già fatto, poi budget cambiato: CK11N ricalcola da solo le tariffe (nessun vicolo cieco)
+  const r = s.costing.cpm.piano['0']['4200'] || {};
+  cp.salvaKP06(Object.assign({versione:'0',cdc:'4200'}, Object.fromEntries(Object.entries(r).map(([k,v])=>['k'+k, k==='54'? v+1 : v]))));
+  pc.calcola({materiale:'TR-STD',data:'2026-12-01'});
+  ok(cp.modello().kspi.revisione === cp.modello().revisione, 'CK11N riallinea le tariffe dopo un cambio di budget');
+}
 w.close(); console.log('✓ CPM centri, budget, costing, snapshot, conferme, report e legacy: '+checks+' controlli');
