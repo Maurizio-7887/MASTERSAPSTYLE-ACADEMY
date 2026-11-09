@@ -1,6 +1,7 @@
 """Smoke test route e programmi delle lezioni in MASTER SAP STYLE."""
 from tests._client import docente
 from app.blueprints.portale.lezioni_magazzino_contenuti import LEZIONI, PERCORSI, PISTOIA_APPROFONDIMENTI
+from app.blueprints.portale.lezioni_magazzino_professionali import TEORIA_PROFESSIONALE
 
 assert len(PERCORSI["firenze"]["ordine"]) == 7
 assert len(PERCORSI["pistoia"]["ordine"]) == 11
@@ -10,6 +11,10 @@ assert "flussi" in PERCORSI["firenze"]["ordine"]
 assert "valori" in PERCORSI["firenze"]["ordine"]
 assert "valori" in PERCORSI["pistoia"]["ordine"]
 assert set(PISTOIA_APPROFONDIMENTI) == set(PERCORSI["pistoia"]["ordine"])
+assert set(TEORIA_PROFESSIONALE) >= set(PERCORSI["firenze"]["ordine"]) | set(PERCORSI["pistoia"]["ordine"])
+assert all(len(TEORIA_PROFESSIONALE[k]["sections"]) >= 3 and
+           all(len(item[1]) >= 250 for item in TEORIA_PROFESSIONALE[k]["sections"])
+           for k in set(PERCORSI["firenze"]["ordine"]) | set(PERCORSI["pistoia"]["ordine"]))
 assert all(len(LEZIONI[k]["teoria"]) > 250 and LEZIONI[k]["esempio"] and LEZIONI[k]["quiz"]
            for p in PERCORSI.values() for k in p["ordine"])
 c = docente()
@@ -24,6 +29,11 @@ for tipo, programma in PERCORSI.items():
         html = page.get_data(as_text=True)
         assert LEZIONI[slug]["titolo"] in html
         assert "Esempio concreto" in html and "Domande per controllare" in html
+        assert 'Approfondimento professionale' in html and 'Competenza da acquisire' in html
+        assert TEORIA_PROFESSIONALE[slug]['sections'][0][0] in html
+        assert 'Indicatori per misurare il processo' in html and 'Errore da prevenire' in html
+        if tipo == 'pistoia':
+            assert TEORIA_PROFESSIONALE[slug]['sections'][-1][0] in html
         assert "Approfondimento Pistoia" in html if tipo == "pistoia" else "Approfondimento Pistoia" not in html
         assert 'esercizio_guida=' + programma["esercizio"] in html
         assert 'msa-pratica-fissa' in html
