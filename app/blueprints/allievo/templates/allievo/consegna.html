@@ -15,7 +15,7 @@
   <label for="esercizio">Esercizio</label>
   <select id="esercizio" name="esercizio">
     {% for v, lista in scelte.items() %}
-      <optgroup label="{{ versioni[v] }}">{% for k, t in lista %}<option value="{{ k }}">{{ t }}</option>{% endfor %}</optgroup>
+      <optgroup label="{{ versioni[v] }}">{% for k, t in lista %}<option value="{{ k }}"{% if request.args.get('esercizio') == k %} selected{% endif %}>{{ t }}</option>{% endfor %}</optgroup>
     {% endfor %}
   </select>
   <label for="nota">Messaggio per il docente (facoltativo)</label>
