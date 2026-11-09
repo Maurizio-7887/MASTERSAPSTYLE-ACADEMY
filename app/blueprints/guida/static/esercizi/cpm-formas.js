@@ -510,6 +510,70 @@
       return out;
     }
   };
+
+  // REGOLE A GRANDI LETTERE per i passi del budget: che cosa scrivere, che cosa NON fare e perché (altrimenti il passo 24 e i successivi si bloccano).
+  var STOP24='il costo della transenna non viene più 31,40 € e il passo 24 (e tutto quello che viene dopo) si blocca';
+  var REGOLE={
+    'cpm-attivazione':[
+      ['✍️','SCRIVI «ATTIVA» TUTTO MAIUSCOLO','È la conferma: senza, il piano CO non si apre.'],
+      ['⛔','PREMI «APRI IL PIANO CO» UNA SOLA VOLTA','Si apre una volta sola. Se compare «già attivo» va bene: vai avanti.']],
+    'cpm-budget':[
+      ['⛔','IN ALTO LASCIA «VERSIONE 0». MAI LA 1','La 0 è quella da cui il programma calcola le tariffe: i numeri scritti nella 1 non contano e il passo non si spunta.'],
+      ['✍️','4210 TAGLIO, 4220 PIEGATURA, 4230 SALDATURA: SCRIVI 36000 NELLA CASELLA «80 SALARI». NIENT’ALTRO','36.000 = 3.000 € al mese × 12 mesi. Un numero diverso cambia il costo di un’ora: '+STOP24+'.'],
+      ['💾','DOPO OGNI CENTRO PREMI «SALVA IL PIANO DEL CENTRO», POI CAMBI CENTRO','Se cambi centro senza salvare, il numero scritto si perde.'],
+      ['✍️','4200 PRODUZIONE: 86 FITTI 12000 · 50 AMMORTAMENTI 2900 · 54 CONSULENZE 3100 (TOTALE 18.000)','Sono i costi comuni dello stabilimento: devono fare 18.000, né uno di più né uno di meno, altrimenti '+STOP24+'.'],
+      ['⛔','NON SCRIVERE NULLA SU 4100 MAGAZZINO E 4300 AMMINISTRAZIONE, E NELLE CASELLE 81, 82, 83','Nel caso restano a 0: se le riempi cambiano le tariffe dei reparti e '+STOP24+'.'],
+      ['✅','IN FONDO ALLA PAGINA IL TOTALE DEVE ESSERE 126.000','4210 + 4220 + 4230 = 108.000 più 4200 = 18.000. Se non è 126.000 c’è un numero sbagliato: guarda «Che cosa manca».']],
+    'cpm-paghe':[
+      ['⛔','VERSIONE DI DESTINAZIONE: «1 · CONFRONTO». MAI LA 0','Con la 0 le paghe vere SOSTITUISCONO il budget del passo 12: il costo della transenna cambia e il passo 24 si blocca.'],
+      ['⛔','NON SCRIVERE «SOSTITUISCI» NELLA CASELLA ACCANTO','Serve solo per la versione 0, che qui NON si usa.'],
+      ['👀','LE DIFFERENZE TRA PIANO E PAGHE SONO NORMALI: NON CORREGGERE IL BUDGET','Il budget mette il personale sui reparti da assumere; le paghe vere sono su altri centri. La differenza si spiega, non si cancella.']],
+    'cpm-kp26':[
+      ['✍️','SCRIVI 1500 IN TUTTE E 6 LE CASELLE (CAPACITÀ E ORE DI TAGLIO, PIEGATURA, SALDATURA)','1.500 ore all’anno per reparto: 42.000 € ÷ 1.500 ore = 28 € l’ora. Con un altro numero la tariffa cambia e '+STOP24+'.'],
+      ['✍️','VOLUME TR-STD: 1200. TUTTI GLI ALTRI PRODOTTI: 0','Il volume serve a calcolare quanto lavorano i reparti; non cambia la tariffa.'],
+      ['💾','SONO DUE PULSANTI: «SALVA LE ATTIVITÀ PIANIFICATE» E «SALVA I VOLUMI»','Sono due salvataggi separati: se ne manca uno, il passo non si spunta.']],
+    'cpm-ciclo':[
+      ['👆','REGOLA DEL CICLO: SCEGLI «ORE PIANIFICATE DEI CENTRI RICEVITORI»','Così i 18.000 di costi comuni si dividono 6.000 per reparto. Con le percentuali sbagliate le tariffe non fanno 28.'],
+      ['⛔','NON TOCCARE LE CASELLE «QUOTA %»','Servono solo con l’altra regola: qui vengono ignorate.'],
+      ['💾','PREMI «SALVA IL CICLO» E CONTROLLA 6.000 · 6.000 · 6.000','Risalvarlo con la stessa regola non fa danni.']],
+    'cpm-standard-tr':[
+      ['👆','MATERIALE «TR-STD», COMPONENTE «FERRO»','Stai scrivendo la ricetta della transenna.'],
+      ['✍️','QUANTITÀ 8 · TAGLIO 0,25 · PIEGATURA 0,20 · SALDATURA 0,40 · SETUP 0 (CON LA VIRGOLA)','0,85 ore × 28 € + ferro 7,60 € = 31,40 €. Un numero diverso cambia il prezzo e '+STOP24+'.'],
+      ['💾','PREMI «SALVA DISTINTA/CICLO VERSIONATI»','Finché non salvi la ricetta non conta.']],
+    'cpm-standard-halb':[
+      ['👆','MATERIALE «SL-TAGLIO», COMPONENTE «FERRO»','Ora la ricetta dei kit tagliati.'],
+      ['✍️','QUANTITÀ 8 · TAGLIO 0,25 · PIEGATURA 0 · SALDATURA 0 · SETUP 0','I kit si TAGLIANO soltanto: se metti ore di piegatura o saldatura il kit costa più di 14,60 € e il passo 24 si blocca.'],
+      ['💾','PREMI «SALVA DISTINTA/CICLO VERSIONATI»','Finché non salvi la ricetta non conta.']],
+    'bpc-modello':[
+      ['✍️','SCRIVI «CREA» E PREMI «CREA IL MODELLO» UNA VOLTA','Il modello prende da solo il budget del passo 12 e lo divide in 12 mesi.'],
+      ['⛔','NON MODIFICARE NIENTE IN QUESTA PAGINA','Qui si crea soltanto il contenitore: i numeri li hai già scritti al passo 12.']],
+    'bpc-input':[
+      ['👆','IN ALTO: CATEGORIA «BUDGET», VERSIONE «V1», CENTRO «4200 PRODUZIONE»','Un’altra combinazione scrive nel posto sbagliato e il passo non si spunta.'],
+      ['✍️','RIGA 54, DA GENNAIO A DICEMBRE: 400 · 350 · 300 · 200 · 150 · 150 · 200 · 100 · 200 · 300 · 350 · 400','L’energia costa di più d’inverno. Il totale deve fare ESATTAMENTE 3.100, come al passo 12: con un totale diverso il budget non torna più.'],
+      ['⛔','NON TOCCARE LE RIGHE 50 E 86, E NON SCRIVERE IN ALTRI CENTRI','Sono già giuste (ammortamenti e fitto): cambiarle cambia il budget del 4200.'],
+      ['✅','SE IL CENTRO È GIÀ «APPROVATO» E LA RIGA 54 HA QUESTI NUMERI, È TUTTO A POSTO','Il pulsante Salva sparisce perché il centro è approvato: NON farlo respingere, vai avanti.']],
+    'bpc-processo':[
+      ['1️⃣','PRIMA «INVIA AL CONTROLLER» TUTTI E 6 I CENTRI (4100, 4200, 4210, 4220, 4230, 4300)','Un centro non inviato non si può approvare.'],
+      ['2️⃣','POI «APPROVA (CONTROLLER)» TUTTI E 6, CON NOTA «ok»','Solo quando sono tutti verdi si può ritrasferire.'],
+      ['3️⃣','SCRIVI «TRASFERISCI» E PREMI «RITRASFERISCI IN S/4»','Riporta il budget approvato nel gestionale.'],
+      ['⛔','NON RESPINGERE NESSUN CENTRO SE NON SERVE','Un centro respinto va corretto, reinviato e riapprovato: è tempo perso.']],
+    'cpm-kspi':[
+      ['✍️','DATA DI ESECUZIONE: 01/12/2026, POI «ESEGUI IL CALCOLO DELLE TARIFFE»','Con la casella vuota il calcolo non parte.'],
+      ['✅','DEVI LEGGERE 28 €/H PER TAGLIO, PIEGATURA E SALDATURA','Se esce un numero diverso da 28, NON andare avanti: c’è un numero sbagliato al passo 12, 14 o 15 (guarda «Che cosa manca» del passo 12).']],
+    'cpm-tariffe':[
+      ['👀','QUI SI LEGGE SOLTANTO: 42.000 € ÷ 1.500 ORE = 28 € L’ORA','Non scrivere niente: premi «✓ Fatto».']],
+    'cpm-calcolo':[
+      ['✍️','DATA DI CALCOLO: 01/12/2026. SEMPRE','Con la casella vuota (gg/mm/aaaa) il calcolo non parte.'],
+      ['👆','CALCOLA DUE VOLTE: PRIMA «TR-STD», POI «SL-TAGLIO»','Servono tutti e due: il passo 24 li rilascia insieme.'],
+      ['✅','DEVONO USCIRE 31,40 (TR-STD) E 14,60 (SL-TAGLIO)','Se esce un altro prezzo NON rilasciare: c’è un numero sbagliato nel budget o nelle ricette (passi 12-17).']],
+    'cpm-rilascio':[
+      ['1️⃣','RIQUADRO A SINISTRA: «CALCOLA» TR-STD E POI SL-TAGLIO, DATA 01/12/2026','Se lo hai già fatto e i prezzi sono 31,40 e 14,60, puoi saltare a 2.'],
+      ['2️⃣','RIQUADRO A DESTRA: DATA 01/12/2026 E SCRIVI «SOSTITUISCI»','SOSTITUISCI non fa danni anche quando non serve.'],
+      ['3️⃣','PULSANTE BIANCO «MARCA TUTTE LE STIME», POI PULSANTE BLU «RILASCIA»','In quest’ordine: senza Marca, Rilascia non trova niente da rilasciare.'],
+      ['✅','«GIÀ RILASCIATO ALLO STESSO PREZZO» VUOL DIRE CHE È TUTTO A POSTO','Il passo si spunta da solo quando tutti e due sono in stato FR.'],
+      ['⛔','DOPO QUESTO PASSO NON CAMBIARE PIÙ I NUMERI DEL BUDGET (PASSI 12-17)','Le transenne entrano in produzione con questo costo: cambiare il budget adesso blocca il passo 24 e tutto quello che viene dopo.']]
+  };
+  ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function(k){(window.MSA_CPM_FORMAS[k]||[]).forEach(function(p){if(REGOLE[p.id])p.regole=REGOLE[p.id];});});
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function(k){
     (window.MSA_CPM_FORMAS[k]||[]).forEach(function(p){
       if(!validatori[p.id] || !GUIDA[p.id])return;
