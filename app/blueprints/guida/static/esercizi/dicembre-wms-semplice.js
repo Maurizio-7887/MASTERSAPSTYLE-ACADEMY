@@ -295,12 +295,114 @@
       ['I KPI di dicembre']]
   };
 
+
+  // Tutte le attività mantengono il medesimo suggeritore giallo, non solo le
+  // prime quattro. I controlli CPM specifici (con verifica sullo stato) prevalgono.
+  // Le righe descrittive diventano micro-passaggi di lettura/conferma: NON
+  // vengono mai scambiate per registrazioni ERP validate automaticamente.
+  function microPassi(p) {
+    var righe = Array.isArray(p.fai) ? p.fai : [];
+    var out = [];
+    righe.forEach(function (f) {
+      if (f && typeof f === 'object' && !Array.isArray(f) && f.fai) {
+        out.push({t:'leggi',nome:String(f.dove || 'Attività da eseguire'),
+          serve:String(f.fai) + (f.valore ? ' — Valore: ' + f.valore : '') + '. Esegui questa azione nella pagina, poi premi «Ho letto, vai avanti».'});
+      } else if (Array.isArray(f)) {
+        out.push({t:'leggi',nome:String(f[0] || 'Verifica'),serve:'Nel campo «' + String(f[0] || '') +
+          '» usa o controlla questo valore: ' + String(f[1] || '') + '. Conferma dopo avere eseguito il controllo.'});
+      } else if (typeof f === 'string') {
+        out.push({t:'leggi',nome:f.slice(0,95),
+          serve:f + '. Quando hai eseguito questa istruzione, conferma per passare alla successiva.'});
+      }
+    });
+    if (!out.length) {
+      out.push({t:'leggi',nome:'Apri la schermata corretta',
+        serve:'Premi «Apri ➜» nel tutor per raggiungere: ' + (p.percorso || 'il modulo indicato') + '.'});
+      (p.campi || []).forEach(function(c) {
+        out.push({t:'leggi',nome:String(c[0] || 'Campo'),
+          serve:'Individua «' + String(c[0] || 'Campo') + '» nella pagina. ' +
+            'Inserisci, seleziona o verifica: ' + String(c[1] == null ? '' : c[1]) +
+            '. Conferma soltanto dopo aver eseguito il controllo.'});
+      });
+      if (p.fatto) out.push({t:'leggi',nome:'Conferma nel gestionale',
+        serve:'Esegui il comando di registrazione previsto in questa schermata. ' +
+          'Attendi la conferma reale del gestionale: la spunta del tutor da sola NON registra alcuna operazione.'});
+      else out.push({t:'leggi',nome:'Controllo finale del passaggio',
+        serve:'Confronta i dati e i documenti con «Cosa devi vedere». ' +
+          'Se è tutto corretto, marca manualmente il passo come svolto.'});
+    }
+    return out;
+  }
+
+  // SSCC = codice del COLLO, non numero dell'ordine e non numero del DDT.
+  // Gli SSCC sono generati dal pulsante «Crea i colli» soltanto DOPO il picking.
+  var spiegaSscc =
+    'Un SSCC (Serial Shipping Container Code) è il numero univoco di 18 cifre di ogni pallet/collo. ' +
+    'Non devi inventarlo né scriverlo tu: lo crea il programma quando imballi. ' +
+    'La stessa etichetta serve a caricare il collo sul camion e a rintracciarlo nel DDT. ' +
+    'Il prefisso GS1 di questa esercitazione è simulato.';
+  function puntiImballo(consegna, quantita, colli) {
+    return [
+      {t:'leggi',nome:'Dove andare: Spedizione → Imballo',
+        serve:'Apri dal menu Sistema integrato → Spedizione → Imballo. Qui ci sono il riquadro «Imballa la consegna» e la tabella dei colli. ' + spiegaSscc},
+      {t:'scelta',sel:'#im-consegna',nome:'Consegna prelevata',valore:consegna,
+        serve:'Scegli la consegna ' + consegna + '. Deve avere il prelievo completato con RF: una consegna non prelevata non può ancora essere imballata.'},
+      {t:'scelta',sel:'#im-imballo',nome:'Materiale d’imballo',valore:'EUR',
+        serve:'EUR è il pallet europeo. La regola di confezionamento stabilisce peso e capacità; non scegliere un collo incompatibile.'},
+      {t:'campo',sel:'#im-perCollo',nome:'Pezzi per collo',valore:String(quantita),
+        serve:'Indica ' + quantita + ' transenne per pallet. Le quantità rimaste vanno nell’ultimo collo; nessuna transenna va inventata o persa.'},
+      {t:'campo',sel:'#im-data',nome:'Data imballaggio',valore:'2026-12-14',
+        serve:'Usa 14/12/2026: il collo viene preparato prima del carico camion.'},
+      {t:'pulsante',sel:'[data-prefisso="im"] [data-azione="im"]',nome:'Crea i colli (SSCC)',
+        serve:'Premi UNA volta. Ora il programma genera ' + colli + ' colli con ' + colli +
+          ' numeri SSCC differenti. Non ripetere il comando se i colli risultano già generati.'},
+      {t:'leggi',nome:'Dove trovare i numeri SSCC',
+        serve:'Resta in Spedizione → Imballo. Scendi alla tabella «Colli della consegna ' + consegna +
+          '», colonna «SSCC»: copia o leggi i numeri reali di 18 cifre. NON usare il numero della consegna al loro posto.'},
+      {t:'leggi',nome:'Stampa e applica le etichette',
+        serve:'Nella stessa pagina, sopra le etichette della consegna, premi «Stampa le etichette». ' +
+          'Ogni pallet deve avere la propria etichetta GS1-128 con (00) e il suo SSCC. ' +
+          'Per proseguire serve conoscere tutti i ' + colli + ' codici, non un solo codice per tutta la consegna.'}
+    ];
+  }
+  function puntiCaricoBeta() {
+    return [
+      {t:'leggi',nome:'Recupera gli SSCC di Beta',
+        serve:'Apri Sistema integrato → Spedizione → Imballo, cerca la consegna 80000001. ' +
+          'Nella tabella «Colli della consegna» trovi i QUATTRO SSCC generati in precedenza. ' +
+          'Puoi tenere quella pagina aperta in un’altra scheda o usare le etichette stampate. ' + spiegaSscc},
+      {t:'leggi',nome:'Torna a Magazzino → Pistola RF → Carico',
+        serve:'Nella navigazione principale apri Magazzino → Pistola RF, poi la scheda «🚛 Carico». ' +
+          'Non confondere la scheda «📦 Compiti» (picking) con «🚛 Carico» (collo già imballato).'},
+      {t:'leggi',sel:'#rf-sscc',nome:'Scansiona il primo SSCC di Beta',
+        serve:'Nella casella «Leggi l’SSCC del collo da caricare» leggi con lo scanner o incolla il PRIMO codice SSCC di 18 cifre preso dalla tabella Imballo, poi premi Invio. Il codice non è 80000001: quello è il numero di consegna.'},
+      {t:'leggi',sel:'#rf-sscc',nome:'Scansiona gli altri tre SSCC',
+        serve:'Ripeti con ciascuno degli altri TRE codici, uno alla volta. Non ripetere il medesimo SSCC: la pistola rifiuta il doppio carico. Verifica che tutti e quattro i pallet Beta risultino caricati sul trasporto giusto.'},
+      {t:'leggi',nome:'Controlla il carico',
+        serve:'Apri Spedizione → Trasporti e carico e verifica che il trasporto includa Beta e che i colli caricati siano quattro. ' +
+          'Gli SSCC identificano i pallet; la spedizione è terminata soltanto quando saranno caricati anche i colli Delta e registrata l’uscita merci 601.'}
+    ];
+  }
+
   E.passi.forEach(function (p) {
     var x = P[p.titolo];
     if (x) {
       p.grande = x[0]; p.fai = x[1]; p.vedi = x[2];
       if (x[3]) p.perche = x[3];
     }
+    if (p.titolo === 'Imballa Beta in 4 colli SSCC') {
+      p.punti = puntiImballo('80000001', 50, 4);
+      p.grande = 'BETA: CREA 4 COLLI E I LORO 4 SSCC. Prima finisci il prelievo; poi vai in SPEDIZIONE → IMBALLO. ' + spiegaSscc;
+    } else if (p.titolo === 'Imballa Delta in 3 colli SSCC') {
+      p.punti = puntiImballo('80000002', 40, 3);
+      p.grande = 'DELTA: CREA 3 COLLI E I LORO 3 SSCC. Tutti i codici si generano in SPEDIZIONE → IMBALLO. ' + spiegaSscc;
+    } else if (p.titolo === 'RF Carico: carica i 4 colli di Beta con la pistola') {
+      p.punti = puntiCaricoBeta();
+      p.grande = 'I CODICI SSCC SI CREANO NELL’IMBALLO E SI LEGGONO NEL CARICO RF. Devi usare 4 codici diversi, uno per pallet.';
+    }
+    if (!p.punti || !p.punti.length) p.punti = microPassi(p);
+    if (!p.grande) p.grande = 'ESEGUI: ' + String(p.titolo || 'Passaggio') +
+      '. Apri la schermata indicata e completa UNA azione alla volta. La guida evidenzia cosa fare; soltanto il gestionale può confermare che l’operazione è realmente registrata.';
     if (TAPPA[p.g] != null && !p.mappa) p.mappa = {tappe: TAPPE, attuale: TAPPA[p.g]};
   });
   E.tappeMagazzino = TAPPE;
