@@ -2,8 +2,8 @@
 
 ## DUE CORSI DISTINTI, STESSO MOTORE OPERATIVO
 
-- **Firenze 30 ore**: esercizio «firenze-30», operazioni reali simulate di SD, MM, PP, WMS,
-  Spedizioni e Innovazione; **nessuna ricostruzione Dare/Avere**.
+- **Firenze 30 ore**: esercizio «firenze-30», 81 attività operative simulate di SD, MM, PP, WMS,
+  Spedizioni, Innovazione e valorizzazione FIFO/LIFO/costo medio/standard; **nessuna ricostruzione Dare/Avere**.
 - **Pistoia 60 ore**: esercizio originale «magazziniere-5», invariato, 82 attività e possibilità
   di ricostruire le scritture del libro giornale.
 
@@ -45,7 +45,7 @@ I passaggi di sola lettura richiedono «✓ Fatto».
 | 5. Spedizione intelligente | 5 | Consegne, packing, 10 SSCC Beta/Delta, piano di carico, RF, varco RFID, DDT |
 | 6. Inventario, KPI e deposito esterno | 5 | Resi, inventario RF, riconta, ABC, deposito D200, monitor IM/WMS, KPI |
 
-**Sequenza tecnica:** la guida operativa riutilizza l'ordine delle **80 attività** del
+**Sequenza tecnica:** la guida operativa riutilizza l'ordine delle **81 attività** del
 percorso logistico originale, per non rompere dipendenze tra documenti. La tabella
 sopra raggruppa gli argomenti delle 30 ore; non è un nuovo ordinamento dei comandi.
 
