@@ -340,6 +340,9 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    // Passi del budget: una cosa alla volta. In cima c'è solo l'azione da fare adesso; tutto il resto è a scomparsa.
+    var focus = !st && !pendente && p.regole && p.regole.length && p.punti && p.punti.length && ls('msa-g-suggeritore') !== 'no';
+    var inizioResto = h.length;
     if (p.regole && p.regole.length) {
       var reg = '<div class="msa-g-regole-t">⚠️ PASSO DEL BUDGET · SEGUI ESATTAMENTE QUESTE REGOLE</div><ol class="msa-g-regole">' + p.regole.map(function (r) {
         return '<li><span class="ic">' + esc(r[0]) + '</span><div><b>' + esc(r[1]) + '</b><small>PERCHÉ: ' + esc(r[2]) + '</small></div></li>'; }).join('') + '</ol>';
@@ -347,10 +350,11 @@
     }
     var aMano = !st && !p.fatto && !p.cpmVerificato && !pendente;
     if (aMano) h += '<div class="msa-g-spunta-qui">✋ <b>Questo passo lo spunti tu.</b> Quando hai letto o controllato, premi il pulsante verde: <button type="button" class="msa-g-mano msa-g-mano-grande">✓ Fatto</button><small>oppure «✓ Fatto, avanti ▶» in fondo al riquadro</small></div>';
+    var diagHtml = '';
     if (!st && typeof p.diagnosi === 'function') {
       var diag = [];
       try { diag = p.diagnosi(aiutanti(stato())) || []; } catch (e) { diag = []; }
-      if (diag.length) h += '<div class="msa-g-diagnosi"><b>🔎 Che cosa manca per la spunta (controllo sui tuoi dati)</b><ul>' + diag.map(function (d) {
+      if (diag.length) h += diagHtml = '<div class="msa-g-diagnosi"><b>🔎 Che cosa manca per la spunta (controllo sui tuoi dati)</b><ul>' + diag.map(function (d) {
         return '<li class="' + (d[0] ? 'ok' : 'no') + '">' + (d[0] ? '✅ ' : '❌ ') + esc(d[1]) + '</li>'; }).join('') + '</ul><small>Si aggiorna da solo appena salvi.</small></div>';
     }
     if (p.punti && p.punti.length) h += '<div class="msa-g-ora-c"></div>';
@@ -400,6 +404,12 @@
         '" role="status"><b>' + didascalia + '</b><p>' +
         esc(notaDocente.nota || 'Controlla questo passaggio.') + '</p></div>';
     }
+    if (focus) {
+      var testa = h.slice(0, inizioResto), resto = h.slice(inizioResto).replace('<div class="msa-g-ora-c"></div>', '').replace(diagHtml, '');
+      h = testa + '<div class="msa-g-ora-c"></div>' + diagHtml +
+        '<details class="msa-g-tutto"><summary>📘 Tutte le istruzioni e le regole di questo passo</summary>' + resto + '</details>';
+    }
+    corpo.classList.toggle('msa-g-focus', !!focus);
     corpo.innerHTML = h + strumenti(false);
     radice.querySelector('.msa-g-ind').disabled = pos === 0;
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
@@ -807,6 +817,21 @@
     }
     return elenco;
   }
+  // Che cosa NON fare in questa azione e perché (passi del budget): scritto chiaro, una riga
+  function attenzioneDi(d) {
+    if (d.attenzione) return d.attenzione;
+    var v = d.valore === undefined ? '' : String(vis(d));
+    if (d.t === 'campo') {
+      if (d.controlla) return 'Se nella casella c’è già ' + v + ' non toccarla. Se c’è un altro numero, scrivi ' + v + ': un numero diverso cambia il costo della transenna e poi il passo 24 ti blocca.';
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(v) || /^\d{4}-\d{2}-\d{2}$/.test(v)) return 'Usa esattamente questa data: con un’altra data il programma rifiuta l’operazione o la mette nel mese sbagliato.';
+      if (/^[A-ZÀ-Ú]{3,}$/.test(v)) return 'Scrivi esattamente «' + v + '», tutto maiuscolo: è la parola di conferma, con un’altra parola il pulsante non fa niente.';
+      if (/^-?[\d.,]+$/.test(v)) return 'Scrivi esattamente ' + v + ' e nient’altro: un numero diverso cambia il costo della transenna e poi il passo 24 ti blocca.';
+      return 'Scrivi esattamente quello che vedi qui sopra.';
+    }
+    if (d.t === 'scelta') return 'Scegli esattamente «' + v + '»: con un’altra voce scrivi nel posto sbagliato e il passo non si spunta.';
+    if (d.t === 'pulsante') return 'Premilo una volta sola, dopo aver controllato i valori: è lui che salva. Se cambi pagina, centro o versione prima di premerlo, quello che hai scritto si perde.';
+    return '';
+  }
   function tickPunti(forza) {
     if (!bolla) return;   // il motore parte dopo il primo disegno: il primo giro lo fa il timer
     var p = PASSI[pos], c = corpo.querySelector('.msa-g-ora-c');
@@ -843,10 +868,12 @@
       if (ora) {
         var d = ora.d;
         h2 += '<button type="button" class="msa-g-sugg-off" title="Per chi non ne ha bisogno: lo puoi riaccendere quando vuoi">🙈 Spegni il suggeritore</button>';
+        if (p.regole && p.regole.length) h2 += '<div class="msa-g-ora-num">AZIONE ' + Math.min(fatti + 1, elenco.length) + ' DI ' + elenco.length + '</div>';
         h2 += '<div class="msa-g-ora-azione">' + tipoLabel(d) + (d.nome ? ' · <b>' + esc(d.nome) + '</b>' : '') + '</div>';
         if (d.valore !== undefined && d.t !== 'pulsante') h2 += '<div class="msa-g-ora-val"><button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(vis(d)) + '</button><small>' + (d.t === 'campo' ? (d.controlla ? 'controlla la casella che brilla: se non c’è già, scrivilo tu' : 'scrivilo tu nella casella che brilla (clic per copiarlo)') : 'scegli questa voce nell’elenco che brilla') + '</small></div>';
         if (d.t === 'pulsante') h2 += '<div class="msa-g-ora-val"><small>Premi il pulsante che brilla' + (d.nome ? ': «' + esc(d.nome) + '»' : '') + '.</small></div>';
-        h2 += '<div class="msa-g-ora-serve"><b>💡 A cosa serve</b>' + esc(d.serve || '') + '</div>';
+        h2 += '<div class="msa-g-ora-serve"><b>💡 Perché lo fai</b>' + esc(d.serve || '') + '</div>';
+        if (p.regole && p.regole.length) { var att = attenzioneDi(d); if (att) h2 += '<div class="msa-g-ora-attenzione">⚠️ ' + esc(att) + '</div>'; }
         if (!ora.el && d.t !== 'leggi') h2 += '<div class="msa-g-ora-dove">📍 Non vedo ancora questa schermata: premi <b>«Apri ➜»</b> qui sopra, poi la casella comincerà a brillare.</div>';
         if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ Ho verificato la casella' : '✓ Ho letto, vai avanti') + '</button>';
         // Nessun pulsante "salta" nel percorso obbligatorio: i dettagli
@@ -882,7 +909,7 @@
   }
   corpo.addEventListener('click', function (e) {
     var sg = e.target.closest ? e.target.closest('.msa-g-sugg-off,.msa-g-sugg-on') : null;
-    if (sg) { ls(SUGG, sg.classList.contains('msa-g-sugg-off') ? 'no' : 'si'); firmaPunti = ''; ultimoPunto = ''; soppressa = ''; if (sg.classList.contains('msa-g-sugg-off')) spegniPunti(); var cc = corpo.querySelector('.msa-g-ora-c'); if (cc) cc.innerHTML = ''; tickPunti(true); return; }
+    if (sg) { ls(SUGG, sg.classList.contains('msa-g-sugg-off') ? 'no' : 'si'); firmaPunti = ''; ultimoPunto = ''; soppressa = ''; if (sg.classList.contains('msa-g-sugg-off')) spegniPunti(); disegna(); var cc = corpo.querySelector('.msa-g-ora-c'); if (cc) cc.innerHTML = ''; tickPunti(true); return; }
     var t = e.target.closest ? e.target.closest('.msa-g-letto,.msa-g-salta') : null; if (!t) return;
     var p = PASSI[pos], k = parseInt(t.getAttribute('data-k'), 10);
     if (t.classList.contains('msa-g-salta')) return;

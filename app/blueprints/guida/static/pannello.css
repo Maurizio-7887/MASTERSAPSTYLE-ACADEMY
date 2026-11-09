@@ -178,3 +178,12 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 #msa-guida ol.msa-g-regole .ic{font-size:20px;line-height:1.1}
 #msa-guida ol.msa-g-regole b{display:block;font-size:15px;line-height:1.3;color:#1d2433;text-transform:none}
 #msa-guida ol.msa-g-regole small{display:block;font-size:12.5px;color:#5a4a33;margin-top:2px}
+/* Passi del budget: una cosa alla volta */
+#msa-guida .msa-g-focus .msa-g-ora{border-width:3px;padding:12px 13px}
+#msa-guida .msa-g-focus .msa-g-ora-azione{font-size:17px;line-height:1.35}
+#msa-guida .msa-g-focus .msa-g-grosso{font-size:24px;padding:6px 14px}
+#msa-guida .msa-g-focus .msa-g-ora-serve{font-size:14px;line-height:1.45}
+#msa-guida .msa-g-ora-num{display:inline-block;background:#1f3a5f;color:#fff;font-weight:800;font-size:12px;letter-spacing:.08em;border-radius:4px;padding:3px 8px;margin:4px 0 6px}
+#msa-guida .msa-g-ora-attenzione{background:#FDECEA;border:2px solid #D64545;color:#7a1d1d;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:14px;font-weight:700;line-height:1.4}
+#msa-guida details.msa-g-tutto{margin-top:10px;border-top:1px solid #dfe5ee;padding-top:6px}
+#msa-guida details.msa-g-tutto>summary{cursor:pointer;color:#1f3a5f;font-weight:700;font-size:13px}
