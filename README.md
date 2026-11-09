@@ -249,3 +249,33 @@ Dal Launchpad scegliere **Esercitazione completa — azienda, magazzino e innova
 Corretto un difetto UI nella conta RF: la conta veniva invocata due volte e l'ultima mostrava un errore dopo il salvataggio riuscito. Una sola chiamata ora salva e aggiorna la pagina. Non cambia il motore inventariale.
 
 Non collaudati nell'app online: permessi e concorrenza server, stampa fisica, fotocamere, terminali o varchi reali. RFID, robot e altre tecnologie sono simulazioni o attività di valutazione, non integrazioni hardware. La prova cross-dock arriva al PICK confermato; la sua partenza specifica e il preset di fine febbraio richiedono riscontro manuale separato. Nessun account allievo online è stato modificato e nessun deploy è stato eseguito.
+
+
+## Ripresa affidabile, controllo in itinere e suggeritore budget (novembre 2026)
+
+Il cursore della guida non dipende più solo da `sessionStorage`: la tabella
+`avanzamento_guida` mantiene per allievo ed esercizio il passo corrente,
+il massimo raggiunto e le spunte dei singoli passaggi. In caso di nuove tappe
+CPM/WMS, la ripresa usa **il titolo del passo**, non il vecchio numero:
+una «Riapertura» che era al punto 65 non deve rimanere al 65 dopo
+l'inserimento di nuovi passi.
+
+- Nel pannello docente, accanto ad ogni allievo, «Guida in corso» e
+  «🔎 Avanzamento» aprono il monitoraggio anche senza consegna.
+- Il docente vede ciascun passo e l'esito (automatico, spunta manuale o
+  non verificato), il libro giornale già registrato e i confronti del
+  correttore. Può lasciare note **per singolo passo**, visibili nella
+  guida dell'allievo al prossimo caricamento. Le note non modificano la contabilità.
+- Nel pannello «📘 Esercizio passo passo» dell'allievo, in basso:
+  **💾 Salva il lavoro fino a qui** forza il salvataggio e interroga il
+  server. La sincronizzazione contabile continua anche automaticamente.
+- **💡 Riattiva suggeritore** riaccende la guida gialla se il browser
+  aveva conservato il vecchio comando «Spegni suggeritore».
+- Nessuna nuova variabile Railway: in produzione si continua a usare
+  la `DATABASE_URL` PostgreSQL esistente. `db.create_all()`
+  crea la nuova tabella in modo additivo, senza sostituire i lavori salvati.
+- Test di regressione: `tests/test_monitoraggio_guida.py`.
+
+**Nota:** il salvataggio della posizione entra in funzione alla prima
+apertura della guida aggiornata; le attività storiche antecedenti vengono
+ricostruite al meglio dai dati e dai controlli esistenti.
