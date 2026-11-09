@@ -13,11 +13,11 @@
   E.pannelloAutomatico = true;
   E.verificaRagioneria = false;
 
-  // Escludiamo SOLO due lezioni che trattano esplicitamente di contabilità.
-  // Manteniamo i documenti logistici MIGO/MIRO/601/711 perché alimentano
-  // scorte e flussi, ma non chiediamo mai Dare/Avere, conti o importi contabili.
+  // La valorizzazione FIFO, LIFO, costo medio e standard è CONTABILITÀ
+  // DI MAGAZZINO, quindi RESTA in entrambi i corsi. Solo il libro giornale
+  // generale e le domande Dare/Avere vengono esclusi a Firenze.
+  // MIGO/MIRO/601/711 rimangono movimenti/documenti operativi.
   var esclusi = {
-    'Valorizza la rimanenza di ferro: FIFO, LIFO, costo medio, standard': true,
     'Libro giornale: la storia contabile del magazzino': true
   };
   E.passi = E.passi.filter(function(p) { return !esclusi[p.titolo]; });
