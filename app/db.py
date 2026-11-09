@@ -106,6 +106,27 @@ class StatoLavoro(db.Model):
     __table_args__ = (db.UniqueConstraint("utente_id", "versione", name="uq_stato_utente_versione"),)
 
 
+
+class AvanzamentoGuida(db.Model):
+    """Cursore persistente e fotografia didattica della guida, indipendenti dallo stato contabile.
+
+    Non modifica mai il Libro Giornale. Consente ripresa fra browser e audit docente
+    prima della consegna definitiva.
+    """
+    __tablename__ = "avanzamento_guida"
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id", ondelete="CASCADE"), nullable=False, index=True)
+    esercizio = db.Column(db.String(80), nullable=False)
+    versione = db.Column(db.String(25), nullable=False, default="erp-ft")
+    posizione = db.Column(db.Integer, nullable=False, default=0)
+    posizione_massima = db.Column(db.Integer, nullable=False, default=0)
+    totale = db.Column(db.Integer, nullable=False, default=0)
+    passi = db.Column(db.JSON, nullable=False, default=dict)
+    osservazioni = db.Column(db.JSON, nullable=False, default=dict)
+    aggiornato = db.Column(db.DateTime, nullable=False, default=adesso)
+    __table_args__ = (db.UniqueConstraint("utente_id", "esercizio", "versione", name="uq_avanzamento_guida_allievo"),)
+
+
 class ArchivioLavoro(db.Model):
     """Copia di sicurezza del lavoro di un utente, salvata prima che il docente lo sostituisca."""
     id = db.Column(db.Integer, primary_key=True)
