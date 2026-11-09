@@ -64,6 +64,8 @@ def registra_progresso(esercizio):
     if row is None:
         row = AvanzamentoGuida(utente_id=u.id, esercizio=esercizio, versione=versione)
         db.session.add(row)
+    # L'identità del passo è il suo titolo, non il numero progressivo:
+    # i nuovi punti CPM/WMS possono spostare la riapertura da 65 a oltre 100.
     row.posizione = pos
     row.posizione_massima = max(row.posizione_massima or 0, pos)
     row.totale = totale
@@ -95,7 +97,11 @@ def config_guida(versione, esercizio=None, chiave=None):
     return {"esercizio": esercizio, "versione": versione, "chiave": chiave or f"ferro-transenne-fi-2026-{versione}-civilistico", "url": url,
             "progress_url": url_for("guida.registra_progresso", esercizio=esercizio),
             "progress_version": "erp-ft" if versione in ("vuoto", "completo") and esercizio in {"dicembre-wms", "s4-integrato", "completo-formas", "magazziniere-5", "executive-assistant", "ragioneria-wms"} else versione,
-            "progress_csrf": csrf_token(), "progress_notes": progresso.osservazioni if progresso else {}, "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima} if progresso else None}
+            "progress_csrf": csrf_token(), "progress_notes": progresso.osservazioni if progresso else {},
+            "progress": {"posizione": progresso.posizione, "massimo": progresso.posizione_massima,
+                         "totale": progresso.totale,
+                         "titolo": ((progresso.passi or {}).get(str(progresso.posizione)) or {}).get("titolo", ""),
+                         "gruppo": ((progresso.passi or {}).get(str(progresso.posizione)) or {}).get("gruppo", "")} if progresso else None}
 
 
 @bp.app_template_global()
