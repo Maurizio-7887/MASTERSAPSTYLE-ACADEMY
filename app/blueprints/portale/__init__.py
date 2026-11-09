@@ -69,6 +69,7 @@ def lezioni_magazzino(versione, percorso):
     if versione not in VERSIONI:
         abort(404)
     from .lezioni_magazzino_contenuti import LEZIONI, PERCORSI, PISTOIA_APPROFONDIMENTI
+    from .lezioni_magazzino_professionali import TEORIA_PROFESSIONALE
     programma = PERCORSI.get(percorso)
     if programma is None:
         abort(404)
@@ -83,6 +84,8 @@ def lezioni_magazzino(versione, percorso):
                            percorso=percorso, programma=programma,
                            lezioni=LEZIONI, ordine=programma["ordine"], lezione=LEZIONI[slug],
                            approfondimenti=PISTOIA_APPROFONDIMENTI.get(slug, []) if percorso == "pistoia" else [],
+                           professionale=TEORIA_PROFESSIONALE[slug],
+                           sezioni_professionali=TEORIA_PROFESSIONALE[slug]["sections"] if percorso == "pistoia" else TEORIA_PROFESSIONALE[slug]["sections"][:2],
                            indice=idx, totale=len(programma["ordine"]))
 
 
