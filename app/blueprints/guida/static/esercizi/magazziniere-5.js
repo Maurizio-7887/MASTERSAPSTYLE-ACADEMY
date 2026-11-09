@@ -358,10 +358,19 @@
       'Controlla il titolo della schermata prima di inserire dati.')];
     (p.campi||[]).forEach(function(c,i) {
       var nome=String(c[0]||'Campo '+(i+1)), valore=String(c[1] == null ? '' : c[1]);
-      out.push(leggi(String(i+1)+' · '+nome,
-        'Nella schermata «'+String(p.percorso||'')+'» cerca il campo, comando o prospetto «'+nome+
-        '». '+(nome.toLowerCase().indexOf('pulsante')>=0?'Premi il comando: ':'Inserisci, seleziona o verifica: ')+
-        valore+'. Se il programma propone codici reali di pallet, lotti, UdC, consegne o SSCC, usa i codici mostrati nel tuo account, non numeri inventati.'));
+      var comando=/^(pulsante|comando|azione|salva|conferma|stampa)$/i.test(nome);
+      var osserva=/^(leggi|guarda|controlla|verifica|risultato|copia|poi|infine)$/i.test(nome);
+      var modo=comando?'COMANDO DA PREMERE':osserva?'CONTROLLO DA FARE':'DATO DA INSERIRE O SELEZIONARE';
+      var come=comando?'Dopo avere verificato tutti i campi, trova il pulsante con il testo indicato e premilo UNA sola volta.':
+        osserva?'Cerca il riquadro o la tabella indicati e leggili con attenzione.':
+        'Trova l’etichetta esatta del campo nella pagina, clicca nella casella (oppure apri il menu a tendina) e inserisci il valore qui sotto.';
+      out.push(leggi((i+1)+' · '+nome,
+        modo+'. PERCORSO: '+String(p.percorso||p.titolo)+'. '+
+        'CERCA: «'+nome+'». VALORE / OPERAZIONE: '+valore+'. '+
+        'COME: '+come+' PERCHÉ: questo dato serve alla transazione «'+p.titolo+'»; le informazioni salvate saranno usate dal processo successivo. '+
+        'VERIFICA: assicurati che il dato inserito o la selezione corrispondano al valore richiesto, prima di confermare. '+
+        'Se il sistema propone codici di pallet, lotti, UdC, consegne o SSCC, COPIA quelli che compaiono nel tuo account, non inventarli. '+
+        'Se non trovi il comando, controlla la pagina aperta e usa «Apri ➜» nel tutor; NON azzerare nulla.'));
     });
     if(p.nota)out.push(leggi('Attenzione / perché lo fai',String(p.nota)));
     // Non anticipare la soluzione della partita doppia: il tutor mostra
@@ -475,6 +484,7 @@
     ];
   }
   passi.forEach(function(p) {
+    p.principiante = true; // tutor "prima volta": accesso, una sola azione, controllo, recupero
     p.punti = introduzionePratica(p) || istruzioniSscc(p) || istruzioni(p);
     if(p.id==='mag5-avvio')p.punti=avvioDettagli();
     if(p.id==='mag5-attiva')p.punti=attivazioneWms();
