@@ -102,7 +102,13 @@ window.PC4 = (function () {
         var snap = C().stime[m].elementi.par.snapshot;
         var primoCPM = cpm.attivo() && snap && snap.versione === 'cpm-centri-v1' && !C().rilasci.some(function (r) { return r.cpm; });
         var vuoto = !S().produzione.length && !S().ordini.length && !S().movimenti.length && Object.keys(S().giacenze).every(function (k) { return Math.abs(S().giacenze[k]) < 1e-9; });
+        var nonUsato = !S().movimenti.some(function (x) { return x.mat === m; }) &&
+          JSON.stringify(S().produzione || []).indexOf('"' + m + '"') < 0 && JSON.stringify(S().ordini || []).indexOf('"' + m + '"') < 0 &&
+          Math.abs(S().giacenze[m] || 0) < 1e-9;
+        var revNuova = cpm.attivo() && snap ? snap.revisione : null;
         if (i.sostituisciBootstrap === 'SOSTITUISCI' && primoCPM && vuoto && conflitti.every(function (r) { return r.costituzione === true; })) bootstrap = bootstrap.concat(conflitti);
+        // budget cambiato prima di usare il materiale: il nuovo standard sostituisce quello del mese, nessun documento ne dipende
+        else if (nonUsato && revNuova !== null && conflitti.every(function (r) { return r.cpm != null && !r.costituzione && r.cpm !== revNuova; })) bootstrap = bootstrap.concat(conflitti);
         else throw Error('Costo standard di ' + m + ' già rilasciato nel periodo ' + per + ': non serve rifarlo (e non si può, un solo rilascio per periodo). NESSUN ERRORE DA CORREGGERE: il costo è già valido, vai avanti con l\'operazione che stavi facendo (per esempio CO01 → Rilascia ordine). Se il costo rilasciato è sbagliato non ripetere CK24 in questo periodo: ricalcola in CK11N e rilascialo all\'inizio del periodo successivo. (Solo il primo CPM può sostituire il bootstrap di costituzione, con stock, movimenti e ordini vuoti: scrivi SOSTITUISCI.)');
       }
       if (cpm.attivo() && (!C().stime[m].elementi.par.snapshot || C().stime[m].elementi.par.snapshot.revisione !== cpm.modello().revisione)) throw Error('Stima non aggiornata alla revisione CPM: ricalcola prima del rilascio.');
@@ -481,8 +487,14 @@ window.PC4 = (function () {
       if (!cdcDi(cdc)) throw Error('Centro di costo inesistente: ' + cdc + '.');
       var riga = {};
       CLASSI.forEach(function (c) { var v = i['k' + c[0]]; if (v === undefined || v === '') v = 0; var n = numero(v, 'Classe ' + c[0] + ' ' + c[1]); if (n) riga[c[0]] = n; });
-      migra(b); b.piano[ver][cdc] = riga;
+      migra(b);
+      var uguale = JSON.stringify(b.piano[ver][cdc] || {}) === JSON.stringify(riga);
+      b.piano[ver][cdc] = riga;
       if (ver === '0') { b.fattiPerCentro = b.fattiPerCentro || {}; b.fattiPerCentro[cdc] = true; }
+      if (ver === '0' && uguale) {
+        b.fatti = b.fatti || {}; b.fatti.kp06 = true; C().cpm = b; N().salva();
+        return '<p class="lab-nota">Piano del centro ' + cdc + ' ' + cdcDi(cdc).nome + ' confermato: i numeri sono gli stessi di prima (totale ' + L.eur(totale(riga)) + ' €). Tariffe e costi standard restano validi: non serve rifare KSPI, CK11N e CK24.</p>';
+      }
       if (ver !== '0') { C().cpm = b; N().salva(); return '<p class="lab-nota">Versione ' + ver + ' del centro ' + cdc + ' salvata: è un piano di confronto, non cambia tariffe né costi standard.</p>'; }
       deriva(b);
       return nuovaRevisione(b, 'Piano dei costi del centro ' + cdc + ' ' + cdcDi(cdc).nome + ' salvato: totale ' + L.eur(totale(riga)) + ' €.', 'kp06');
