@@ -466,11 +466,32 @@
     if(c==='4200')return circa((piano0(h,c)||{})['86']||0,12000)&&circa((piano0(h,c)||{})['50']||0,2900)&&circa((piano0(h,c)||{})['54']||0,3100);
     return circa((piano0(h,c)||{})['80']||0,36000);
   };});
+  // Diagnosi punto per punto: che cosa manca per la spunta, letto dai dati salvati dell'allievo.
+  var eur=function(v){return Number(v||0).toLocaleString('it-IT');};
+  var diagnosi={
+    'cpm-budget':function(h){
+      var m=modello(h),out=[];
+      out.push([attivo(h),'Piano CO 2026 aperto (passo precedente «apri il piano 2026»)']);
+      var salvato=function(c){return !!(m&&m.fattiPerCentro&&m.fattiPerCentro[c]);};
+      [['4210','Taglio'],['4220','Piegatura'],['4230','Saldatura']].forEach(function(x){
+        var v=(piano0(h,x[0])||{})['80']||0;
+        out.push([salvato(x[0])&&circa(v,36000),'Centro '+x[0]+' '+x[1]+': classe 80 Salari = 36.000'+(circa(v,36000)?'':' (ora c\u2019è '+eur(v)+')')+(salvato(x[0])?'':' → scegli il centro e premi «Salva il piano del centro»')]);
+      });
+      var p42=piano0(h,'4200')||{};
+      [['86','Fitti passivi',12000],['50','Ammortamenti',2900],['54','Consulenze e servizi',3100]].forEach(function(x){
+        var v=p42[x[0]]||0;
+        out.push([circa(v,x[2]),'Centro 4200 Produzione: classe '+x[0]+' '+x[1]+' = '+eur(x[2])+(circa(v,x[2])?'':' (ora c\u2019è '+eur(v)+')')]);
+      });
+      out.push([salvato('4200'),'Centro 4200 Produzione salvato con «Salva il piano del centro»']);
+      return out;
+    }
+  };
   ['passiPreparazione','passiConsuntivo','passiRiconciliazione'].forEach(function(k){
     (window.MSA_CPM_FORMAS[k]||[]).forEach(function(p){
       if(!validatori[p.id] || !GUIDA[p.id])return;
       p.cpmVerificato=true;
       p.fatto=validatori[p.id];
+      if(diagnosi[p.id])p.diagnosi=diagnosi[p.id];
       var idx=0, checks=verificaPulsanti[p.id]||[];
       p.punti=GUIDA[p.id].map(function(d){
         var x=Object.assign({},d);

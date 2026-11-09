@@ -333,6 +333,14 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    var aMano = !st && !p.fatto && !p.cpmVerificato && !pendente;
+    if (aMano) h += '<div class="msa-g-spunta-qui">✋ <b>Questo passo lo spunti tu.</b> Quando hai letto o controllato, premi il pulsante verde: <button type="button" class="msa-g-mano msa-g-mano-grande">✓ Fatto</button><small>oppure «✓ Fatto, avanti ▶» in fondo al riquadro</small></div>';
+    if (!st && typeof p.diagnosi === 'function') {
+      var diag = [];
+      try { diag = p.diagnosi(aiutanti(stato())) || []; } catch (e) { diag = []; }
+      if (diag.length) h += '<div class="msa-g-diagnosi"><b>🔎 Che cosa manca per la spunta (controllo sui tuoi dati)</b><ul>' + diag.map(function (d) {
+        return '<li class="' + (d[0] ? 'ok' : 'no') + '">' + (d[0] ? '✅ ' : '❌ ') + esc(d[1]) + '</li>'; }).join('') + '</ul><small>Si aggiorna da solo appena salvi.</small></div>';
+    }
     if (p.punti && p.punti.length) h += '<div class="msa-g-ora-c"></div>';
     var tabellaCampi = (p.campi && p.campi.length) ? '<table class="msa-g-campi">' + p.campi.map(function (c) {
         return '<tr><th>' + esc(c[0]) + '</th><td><button type="button" class="msa-g-val" title="Clic per copiare">' + esc(c[1]) + '</button></td></tr>';
@@ -385,6 +393,11 @@
     radice.querySelector('.msa-g-av').textContent = pos === N - 1 ? 'Fine' : (st ? 'Prossimo ▶' : 'Avanti ▶');
     var mancaPrima = primoBlocco(pos, stati);
     radice.querySelector('.msa-g-av').disabled = !st || pos === N - 1 || mancaPrima >= 0;
+    var avBtn = radice.querySelector('.msa-g-av');
+    avBtn.removeAttribute('data-mano');
+    if (!st && !p.fatto && !p.cpmVerificato && pos < N - 1 && mancaPrima < 0) {
+      avBtn.textContent = '✓ Fatto, avanti ▶'; avBtn.disabled = false; avBtn.setAttribute('data-mano', '1');
+    }
     if(mancaPrima >= 0) {
       var warning = document.createElement('div');
       warning.className = 'msa-g-esito';
@@ -606,7 +619,10 @@
   bottone.addEventListener('click', function () { apri(true); });
   radice.querySelector('.msa-g-chiudi').addEventListener('click', function () { apri(false); });
   radice.querySelector('.msa-g-ind').addEventListener('click', function () { vaiA(pos - 1, true); });
-  radice.querySelector('.msa-g-av').addEventListener('click', function () { vaiA(pos + 1, true); });
+  radice.querySelector('.msa-g-av').addEventListener('click', function () {
+    if (this.getAttribute('data-mano') === '1' && !inQuiz()) { segnaAMano(PASSI[pos], true); stati = esiti(); }
+    vaiA(pos + 1, true);
+  });
   sel.addEventListener('change', function () {
     var precedente = pos, scelto = parseInt(sel.value, 10);
     if (!vaiA(scelto, true)) sel.value = String(precedente);
