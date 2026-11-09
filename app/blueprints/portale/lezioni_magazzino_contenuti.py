@@ -163,3 +163,51 @@ PERCORSI = {
     ]
   }
 }
+
+# Approfondimenti riservati a Pistoia: non compaiono nel corso breve Firenze.
+PISTOIA_APPROFONDIMENTI = {
+ "fondamenti": [
+  "Il docente disegni sulla lavagna tre colonne: SD, MM e PP; sotto, una quarta colonna WMS. Ogni volta che un ufficio genera un documento, chieda chi vedrà l'informazione dopo. La corrispondenza fra documenti non è un accessorio: evita che il commerciale prometta più merce di quella disponibile e permette alla produzione di ordinare i componenti in tempo.",
+  "Nel simulatore il magazzino contiene sia una quantità logica sia una quantità localizzata. La prima è visibile nelle giacenze ERP, la seconda nelle UdC e nelle ubicazioni WMS. Se mancano 50 pezzi in una posizione, non bisogna crearli con un carico fittizio: si ricerca se siano stati trasferiti, prelevati, bloccati oppure conteggiati male."
+ ],
+ "ordini": [
+  "Approfondimento SD: chiedere all'allievo di scrivere su due colonne domanda cliente e disponibilità immediata. L'ordine Beta da 350 TR-STD contro 200 disponibili genera un deficit iniziale di 150 pezzi. Questo non autorizza a spedire 350: occorre produrre o ripianificare. Confrontare anche gli ordini Gamma e Delta e spiegare che le conferme devono tener conto di tutti gli impegni, non solo del documento appena inserito.",
+  "Distinguere il numero assegnato dal sistema al documento dall'eventuale riferimento del cliente (per esempio BETA-350). Il primo permette di collegare i movimenti ERP; il secondo aiuta chi ha richiesto la merce a riconoscere l'ordine. Quando un allievo non vede l'ordine appena salvato, prima di reinserirlo deve cercarlo per numero, riferimento e cliente."
+ ],
+ "acquisti": [
+  "Approfondimento MM: un ordine fornitore, un documento di ricevimento e una fattura sono tre oggetti differenti che devono essere collegati. Il cosiddetto confronto a tre vie verifica quantità ordinata, ricevuta e fatturata. La fattura può riportare un prezzo diverso da quello di ordine; questa differenza influisce sulla valutazione dei materiali o sulle differenze prezzo, senza autorizzare l'operatore a modificare arbitrariamente la quantità ricevuta.",
+  "Per una ricezione danneggiata, illustrare tre saldi: merce ordinata, merce fisicamente arrivata e merce libera per l'uso. Non sempre coincidono. Un pallet in Q-ZONE deve rimanere rintracciabile, ma non essere proposto automaticamente per una richiesta della produzione. Il docente mostri come trovare il compito RF collegato alla UdC, evitando di muovere più volte la stessa merce."
+ ],
+ "produzione": [
+  "Approfondimento PP: l'ordine di produzione è il documento di coordinamento, non il risultato fisico. Per le transenne si richiedono ferro e lavorazioni successive. Il WIP indica il prodotto ancora in corso, che non può essere venduto come un finito. L'allievo distingua una giacenza a scaffale, il materiale a bordo linea e il materiale già consumato: sono tre condizioni che non vanno sommate indiscriminatamente.",
+  "Esercizio per il docente: su un foglio disegnare il flusso ricevimento ferro → ubicazione F-01/F-02 → staging PSA-L1 → consumo 261 → tre fasi → versamento TR-STD. Accanto a ogni freccia scrivere se cambia la quantità fisica complessiva, solo la posizione oppure lo stato di avanzamento della produzione."
+ ],
+ "mappa": [
+  "Approfondimento WMS: corsia, campata, livello e UdC sono attributi differenti. Un indirizzo di scaffale resta valido anche se si svuota; la UdC si può muovere da un indirizzo a un altro; il codice articolo rimane lo stesso. Il docente proponga tre ricerche distinte: dove si trova una UdC, quali UdC contengono un articolo, quale articolo occupa una certa ubicazione.",
+  "La quadratura IM/WMS significa che la somma delle quantità localizzate, tenendo conto degli stati previsti dal sistema, è coerente con la giacenza gestionale. Se un movimento di putaway porta merce da GR-ZONE a scaffale, la quantità totale non deve crescere. È un esempio semplice di controllo incrociato fra due sistemi."
+ ],
+ "rf": [
+  "Approfondimento RF: distinguere un'azione di interrogazione da una di conferma. La prima si può ripetere senza alterare saldi; la seconda può incidere sulla posizione o sullo stato della merce. Prima della conferma si leggono origine, destinazione, materiale, UdC e quantità. Una quantità maggiore della capacità o un pallet inesistente devono produrre una segnalazione da verificare.",
+  "Il docente proponga un errore volontario soltanto in un account di prova dedicato: digitare un'UdC inesistente, osservare il messaggio e interrompersi senza registrare movimenti sostitutivi. L'obiettivo è imparare a interpretare il rifiuto del sistema, non ad aggirarlo."
+ ],
+ "spedizioni": [
+  "Approfondimento spedizioni: il numero di colli dipende dalla quantità per pallet. Per 350 transenne a 50 per pallet servono 7 colli; per 150 ne servono 3. Ogni collo riceve un identificativo SSCC differente. Se il codice della consegna viene usato al posto di un SSCC il varco non deve considerare validamente identificato il singolo pallet.",
+  "La spedizione comporta diverse responsabilità: il magazzino conferma il prelievo, il reparto imballo crea i colli, chi carica scansiona i pallet, l'ufficio spedizioni verifica DDT e destinatario. Prima dell'uscita merci i numeri devono quadrare. In caso di errore evitare un secondo DDT o una seconda uscita finché non sia stato trovato il documento già generato."
+ ],
+ "inventario": [
+  "Approfondimento UF 9: il documento inventariale seleziona ciò che deve essere contato e delimita la procedura. La conta cieca separa la misura effettiva dal valore atteso. Una riconta non è un modo per forzare il numero del gestionale: serve a verificare l'osservazione iniziale e a identificare la causa dello scarto.",
+  "Svolgere alla lavagna un semplice esempio: 500 unità iniziali + 120 entrate - 200 uscite = 420 unità contabili. La conta fisica ne trova 418. La differenza è -2, ma prima della rettifica si cercano DDT non registrati, trasferimenti errati, scarti e unità di misura. Il valore economico della differenza dipenderà dal criterio di valorizzazione adottato."
+ ],
+ "valori": [
+  "Approfondimento UF 8 e 9: impostare una tabella con quantità, prezzo unitario, valore per ogni lotto. Nel caso 100 kg a 1,00 euro e 100 kg a 1,20 euro, il valore totale è 220 euro. Dopo l'uscita di 120 kg rimangono 80 kg: FIFO 96 euro, LIFO 80 euro e media ponderata 88 euro. La differenza non è un errore aritmetico: dipende dal criterio di imputazione dei costi.",
+  "Per costo standard, valorizzare 438 kg di ferro a 0,95 euro al kg significa 416,10 euro. Un prezzo d'acquisto superiore allo standard non obbliga il magazziniere a inventare un nuovo prezzo in giacenza; i movimenti e le differenze vanno letti secondo le regole del gestionale. Saper spiegare questi risultati è contabilità di magazzino. Non significa registrare mutui, stipendi o versamenti F24."
+ ],
+ "qualita": [
+  "Approfondimento qualità: per un reso si controllano il documento originario, la quantità rientrata, l'unità di carico e la causa. L'operatore deve verificare se la merce è rivendibile, richiede ricondizionamento oppure deve essere isolata. Uno stesso articolo può avere scorte libere e bloccate: solo le prime devono soddisfare automaticamente la domanda.",
+  "La tracciabilità è utile quando un difetto riguarda un lotto. Il docente chieda agli allievi di risalire dai colli spediti agli ordini, alla produzione, ai materiali e ai fornitori associati. Senza identificativi coerenti si rischia di richiamare troppa merce o di non individuare quella coinvolta."
+ ],
+ "innovazione": [
+  "Approfondimento UF 11: prima di acquistare un WMS, RFID o una soluzione di automazione bisogna descrivere il processo da migliorare e misurare il punto di partenza. Scegliere almeno tre KPI: tempo medio di prelievo, precisione delle righe preparate, scarti/differenze inventariali. Confrontare gli stessi indicatori dopo l'intervento, su attività comparabili.",
+  "Lo slotting non è soltanto scegliere lo scaffale più vicino: occorre considerare peso, frequenza, sicurezza, capacità e compatibilità delle merci. Le ondate organizzano la sequenza dei compiti; RFID verifica passaggi e identità dei colli. Il docente può concludere chiedendo agli allievi di spiegare quale tecnologia risolve un problema concreto e quale problema rimarrebbe irrisolto."
+ ]
+}
