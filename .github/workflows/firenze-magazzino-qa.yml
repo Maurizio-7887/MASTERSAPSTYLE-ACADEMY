@@ -5,8 +5,9 @@ on:
     paths:
       - 'app/blueprints/guida/**'
       - 'app/blueprints/erp_dati/**'
-      - 'app/blueprints/portale/templates/portale/launchpad.html'
+      - 'app/blueprints/portale/**'
       - 'tests/firenze-30.js'
+      - 'tests/test_magazzino_lezioni.py'
       - 'tests/guida_blocco_avanzamento.js'
       - 'tests/esercizio-magazziniere.js'
       - 'package.json'
