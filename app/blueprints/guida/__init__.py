@@ -48,19 +48,22 @@ def registra_progresso(esercizio):
     dati = payload.get("passi")
     if not isinstance(dati, list) or len(dati) != totale:
         return jsonify(errore="lista passi non valida"), 400
+    row = _avanzamento(u, esercizio, versione)
+    approvati = (row.osservazioni or {}) if row else {}
     cleaned = {}
     for i, step in enumerate(dati):
         if not isinstance(step, dict):
             return jsonify(errore="passo non valido"), 400
         status = step.get("stato") or ""
-        if status not in ("", "auto", "mano"):
+        if status not in ("", "auto", "mano", "docente"):
             return jsonify(errore="esito non valido"), 400
+        if status == "docente" and (approvati.get(str(i)) or {}).get("giudizio") != "ok":
+            return jsonify(errore="verifica docente non presente"), 403
         cleaned[str(i)] = {
             "titolo": str(step.get("titolo") or "")[:220],
             "gruppo": str(step.get("gruppo") or "")[:90],
             "stato": status
         }
-    row = _avanzamento(u, esercizio, versione)
     if row is None:
         row = AvanzamentoGuida(utente_id=u.id, esercizio=esercizio, versione=versione)
         db.session.add(row)
