@@ -276,3 +276,16 @@ TEORIA_PROFESSIONALE = {
     "error": "Comprare tecnologia senza baseline o ritenere RFID sufficiente anche se i codici logistici sono errati."
   }
 }
+
+# Lezione trasversale, esclusiva del percorso Firenze: i processi sono osservati
+# dal punto di vista dell'innovazione e della continuità digitale dei dati.
+TEORIA_PROFESSIONALE["flussi"] = {
+ "ob": "Riconoscere le interfacce informative fra vendite, acquisti, produzione e WMS e capire quando un evento modifica disponibilità, ubicazione o stato di lavorazione.",
+ "sections": [
+  ["Dal cliente alla disponibilità","Nel modello integrato la richiesta del cliente entra in SD e genera un fabbisogno da confrontare con la disponibilità. La promessa non significa che il materiale sia già stato prelevato. MM pianifica e registra gli approvvigionamenti: ME21N descrive la merce ordinata, MIGO quella effettivamente ricevuta. Il WMS localizza le unità di carico senza duplicarne il saldo. La continuità informativa si realizza quando ogni documento può essere collegato a un evento precedente e a uno successivo."],
+  ["Dalla materia prima ai prodotti finiti","PP collega i materiali all'ordine di produzione, prepara lo staging e riconosce il consumo effettivo. Taglio, Piegatura e Saldatura rappresentano le transizioni del lavoro in corso (WIP). Solo al versamento finale la merce entra nella disponibilità dei prodotti finiti. Il WMS assegna i pallet a ubicazioni, il picking li destina a una consegna e la scansione in uscita verifica l'identità dei colli. Nessuna di queste transizioni deve essere ricostruita con un nuovo carico fittizio."],
+  ["Che cosa rende digitale il ciclo","La tecnologia non è soltanto la presenza di un lettore RF: è la capacità di mantenere coerenti identità, quantità, tempo, luogo e stato lungo tutti i passaggi. Il docente mostri una singola transenna dalla domanda iniziale all'SSCC del pallet spedito e chieda quale dato permetta di ricostruire ogni collegamento. Le anomalie, come una UdC inesistente o un carico duplicato, rivelano perché la qualità del dato viene prima dell'automazione."]
+ ],
+ "kpi":"Coerenza documentale tra SD/MM/PP/WMS, tempo ciclo ordine-consegna, errori di movimentazione e tracciabilità.",
+ "error":"Trattare come eventi indipendenti i movimenti dello stesso prodotto oppure ripetere un carico perché non si ritrova un pallet."
+}
