@@ -138,7 +138,14 @@
       ? serverPos : parseInt(ss(POS), 10));
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
   // Ripresa dopo un salvataggio seguito subito da un cambio di pagina.
-  if (guidata && stati[pos]) { while (pos < N - 1 && stati[pos]) pos++; ss(POS, String(pos)); }
+  if (guidata && stati[pos]) {
+    // Riprendi un passo completato solo se TUTTI i precedenti sono validati.
+    // Non perdere comunque il checkpoint di un allievo con dati storici.
+    var precedenteMancante = -1;
+    for (var z = 0; z < pos; z++) if (!stati[z]) { precedenteMancante = z; break; }
+    if (precedenteMancante < 0) while (pos < N - 1 && stati[pos]) pos++;
+    ss(POS, String(pos));
+  }
   // Checkpoint didattico separato dalle registrazioni del simulatore.
   // Non inseriamo il cursore nel JSON contabile: cambiare pagina non cancella mai il lavoro.
   var progressTimer = null, lastSignature = '', sendingProgress = false, pendingProgress = false;
@@ -586,7 +593,7 @@
   });
   function riprendi() {
     stati = esiti();
-    if (guidata && stati[pos]) {
+    if (guidata && stati[pos] && primoBlocco(pos, stati) < 0) {
       while (pos < N - 1 && stati[pos]) pos++;
       ss(POS, String(pos));
     }
