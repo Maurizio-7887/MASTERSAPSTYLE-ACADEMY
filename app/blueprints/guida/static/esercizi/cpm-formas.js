@@ -444,7 +444,11 @@
     'cpm-standard-tr': function(h){var m=modello(h),a=m && m.standard && m.standard['TR-STD'];return !!a && !!(m.fattiStandard&&m.fattiStandard['TR-STD']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura,0.2) && circa(a.ore.Saldatura,0.4) && circa(a.attrezzaggio,0);},
     'cpm-standard-halb': function(h){var m=modello(h),a=m && m.standard && m.standard['SL-TAGLIO'];return !!a && !!(m.fattiStandard&&m.fattiStandard['SL-TAGLIO']) && a.componente.mat==='FERRO' && circa(a.componente.q,8) && circa(a.ore.Taglio,0.25) && circa(a.ore.Piegatura||0,0) && circa(a.ore.Saldatura||0,0) && circa(a.attrezzaggio,0);},
     'bpc-modello': function(h){var b=bpc(h);return !!(b && b.modello==='COSTI_CENTRI' && b.dati);},
-    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'];return !!a && !!(b.inputSalvati&&b.inputSalvati['BUDGET|V1|4200']) && STAGIONE.every(function(v,i){return circa(a[i],v);});},
+    // Salvato nel modello, oppure già inviato/approvato con i 12 importi stagionali giusti (che non sono quelli
+    // precompilati, piatti): in quel caso il pulsante «Salva» è nascosto e non si deve far respingere niente.
+    'bpc-input': function(h){var b=bpc(h),a=b&&b.dati&&b.dati['BUDGET|V1|4200|54'],st=((b&&b.stato)||{})['BUDGET|V1|4200']||{};
+      var registrato=!!(b&&b.inputSalvati&&b.inputSalvati['BUDGET|V1|4200'])||st.stato==='inviato'||st.stato==='approvato';
+      return !!a && registrato && STAGIONE.every(function(v,i){return circa(a[i],v);});},
     'bpc-processo': function(h){var b=bpc(h);return !!b && CDC6.every(function(c){return ((b.stato||{})['BUDGET|V1|'+c]||{}).stato==='approvato';}) && (b.retract||[]).length>0;},
     'cpm-kspi': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
     'cpm-tariffe': function(h){var m=modello(h);return !!(m&&m.kspi&&m.kspi.revisione===m.revisione) && centri.every(function(c){return circa(m.kspi.tariffe[c],28);});},
