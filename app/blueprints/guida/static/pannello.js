@@ -172,6 +172,7 @@
       })
     });
   }
+  window.MSA_PASSO_CORRENTE = function () { return (pos + 1) + '. ' + (PASSI[pos] ? PASSI[pos].titolo : ''); };
   function trasmettiProgresso(keep) {
     if (!C.progress_url || !C.progress_csrf || !window.fetch) return;
     if (sendingProgress) { pendingProgress = true; return; }
@@ -265,6 +266,7 @@
       corpo.insertBefore(es, corpo.firstChild);
     }
     es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
+    if (window.MSA_DIARIO) window.MSA_DIARIO('errore', 'Tutor blocca: passo ' + (indice + 1) + ' «' + (PASSI[indice] || {}).titolo + '» senza spunta');
     if (indice < pos) es.appendChild(bottoneMancante(indice));
   }
   // ── Sistemare un passo rimasto indietro e poi tornare dove si era ──

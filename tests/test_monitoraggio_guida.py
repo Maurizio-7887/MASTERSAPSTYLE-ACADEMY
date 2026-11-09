@@ -64,3 +64,23 @@ print("OK checkpoint guida PostgreSQL e monitoraggio docente")
 assert 'id="cosa-manca"' in html and "Dove è ferma e che cosa manca" in html
 assert "esercizi/dicembre-wms.js" in html and "esercizi/cpm-formas.js" in html
 print("OK: monitoraggio con il riquadro «Dove è ferma e che cosa manca»")
+
+# Diario delle azioni: l'allievo registra clic, errori e salvataggi; il docente li vede nel monitoraggio
+with client.session_transaction() as sess:
+    token = sess["csrf"]
+r = client.post("/api/diario", data=json.dumps({"csrf": token, "voci": [
+    {"tipo": "clic", "testo": "Rilascia · riquadro «Marca e rilascia»", "pagina": "/vuoto/s4/costi/calcolo", "passo": "24. CK24"},
+    {"tipo": "errore", "testo": "Costo standard di SL-TAGLIO già rilasciato nel periodo", "pagina": "/vuoto/s4/costi/calcolo", "passo": "24. CK24"},
+    {"tipo": "salvataggio", "testo": "RIFIUTATO dal server (409)", "pagina": "/vuoto/s4/costi/calcolo", "passo": "24. CK24"}]}),
+    headers={"X-CSRF": token, "Content-Type": "text/plain"})
+assert r.status_code == 200, r.data
+html = d.get(f"/docente/allievo/{uid}/monitoraggio").get_data(as_text=True)
+assert "Diario delle azioni" in html and "già rilasciato nel periodo" in html and "Salvataggi non riusciti: <b" in html
+print("OK: diario delle azioni visibile al docente")
+
+# Stato di tipo diverso ma non più povero: ora il salvataggio è accettato (prima 409 per sempre)
+from app.blueprints.sincronia import sostituzione_ammessa
+vecchio = json.dumps({"lab": None, "registrazioni": [1, 2]})
+assert sostituzione_ammessa(vecchio, json.dumps({"lab": "erp-ft", "registrazioni": [1, 2, 3]}))
+assert not sostituzione_ammessa(json.dumps({"lab": "erp-ft", "registrazioni": [1, 2, 3]}), json.dumps({"lab": "altro", "registrazioni": [1, 2, 3, 4]}))
+print("OK: salvataggi non più rifiutati per sempre")

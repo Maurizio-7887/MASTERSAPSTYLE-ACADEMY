@@ -10,7 +10,7 @@ from flask import Blueprint, jsonify, request
 from ...accesso import csrf_valido, utente_corrente
 from datetime import timedelta
 
-from ...db import ArchivioLavoro, Sessione, StatoLavoro, adesso, db
+from ...db import ArchivioLavoro, DiarioAzione, Sessione, StatoLavoro, adesso, db
 from ...pagine import LAB_SLOTS, VERSIONI
 
 SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS)   # versioni del simulatore e laboratori
@@ -47,7 +47,9 @@ def sostituzione_ammessa(vecchio, nuovo):
     if lab_n is None and n_n is None:
         return False
     if (n_v or 0) > 0 and lab_v != lab_n:
-        return False
+        # Lavoro salvato senza tipo (vecchio formato) e nuovo lavoro con tipo e non più povero: si accetta (il vecchio va in archivio).
+        # Prima veniva rifiutato per sempre e l'allievo ripartiva ogni volta dallo stesso punto.
+        return lab_v is None and lab_n is not None and (n_n or 0) >= (n_v or 0)
     return True
 
 
@@ -151,6 +153,39 @@ def stato(versione):
             return jsonify(errore="stato incompleto: il lavoro salvato è stato protetto", rev=s.rev, stato=s.dati), 409
     db.session.commit()
     return jsonify(rev=s.rev)
+
+
+DIARIO_TENUTE = 3000   # voci conservate per allievo
+
+
+@bp.route("/api/diario", methods=["POST"])
+def diario():
+    """Diario delle azioni: pulsanti premuti, messaggi di esito/errore, salvataggi riusciti o rifiutati."""
+    u = utente_corrente()
+    if u is None:
+        return jsonify(errore="non autenticato"), 401
+    corpo = _corpo()
+    if not _controlla(corpo):
+        return jsonify(errore="token non valido"), 403
+    if u.docente:
+        return jsonify(ok=True)
+    voci = corpo.get("voci")
+    if not isinstance(voci, list):
+        return jsonify(errore="voci mancanti"), 400
+    for v in voci[:60]:
+        if not isinstance(v, dict):
+            continue
+        db.session.add(DiarioAzione(utente_id=u.id, pagina=str(v.get("pagina") or "")[:200], tipo=str(v.get("tipo") or "")[:20],
+                                    testo=str(v.get("testo") or "")[:400], passo=str(v.get("passo") or "")[:160]))
+    db.session.flush()
+    n = DiarioAzione.query.filter_by(utente_id=u.id).count()
+    if n > DIARIO_TENUTE + 200:
+        vecchie = (DiarioAzione.query.filter_by(utente_id=u.id).order_by(DiarioAzione.quando.asc(), DiarioAzione.id.asc())
+                   .limit(n - DIARIO_TENUTE).all())
+        for x in vecchie:
+            db.session.delete(x)
+    db.session.commit()
+    return jsonify(ok=True)
 
 
 def registra_battito(u, pagina="", ora=None):

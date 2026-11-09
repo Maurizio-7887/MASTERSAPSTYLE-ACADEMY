@@ -95,6 +95,17 @@ class Sessione(db.Model):
     ultima_pagina = db.Column(db.String(200), default="")
 
 
+class DiarioAzione(db.Model):
+    """Diario delle azioni dell'allievo (pulsanti premuti, esiti, salvataggi): serve al docente per capire dove si blocca."""
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id", ondelete="CASCADE"), nullable=False, index=True)
+    quando = db.Column(db.DateTime, default=adesso, nullable=False, index=True)
+    pagina = db.Column(db.String(200), default="")
+    tipo = db.Column(db.String(20), default="")        # clic · esito · errore · salvataggio · passo
+    testo = db.Column(db.String(400), default="")
+    passo = db.Column(db.String(160), default="")
+
+
 class StatoLavoro(db.Model):
     """Il lavoro corrente dell'allievo: lo stesso contenuto del backup JSON del simulatore."""
     id = db.Column(db.Integer, primary_key=True)

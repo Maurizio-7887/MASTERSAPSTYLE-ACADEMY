@@ -50,8 +50,12 @@ window.IN4 = (function () {
     return out;
   }
   function applicaSlotting(i) {
-    WM().richiesto(); var p = propostaSlotting(); if (!p.length) throw Error('Nessun pallet da avvicinare: lo slotting è già buono.');
-    var data = N().data(i.data);
+    WM().richiesto(); var p = propostaSlotting(), data = N().data(i.data);
+    if (!p.length) {
+      // niente da spostare: è un esito valido dello slotting, non un errore (prima l'allievo restava bloccato al passo 73)
+      W().slottingVerificato = data; N().salva();
+      return '<p class="lab-nota">Nessun pallet da avvicinare: le transenne sono già nelle ubicazioni più vicine alla porta. Lo slotting è stato eseguito e non serve nessun trasferimento: puoi andare avanti.</p>';
+    }
     p.forEach(function (x) { WM().trasferisci({udc: x.udc, a: x.a, motivo: 'slotting classe ' + x.classe, data: data}); });
     N().salva();
     return '<p class="lab-nota">Creati ' + p.length + ' compiti di trasferimento (slotting): ' + p.map(function (x) { return x.mat + ' ' + x.da + ' → ' + x.a; }).join(' · ') + '. Confermali con la pistola RF.</p>';
