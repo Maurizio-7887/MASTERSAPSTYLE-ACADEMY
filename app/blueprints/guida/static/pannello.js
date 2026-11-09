@@ -77,6 +77,10 @@
       '<label class="msa-g-elenco"><span class="vis">Vai al passo</span><select></select></label>' +
       '<div class="msa-g-corpo" aria-live="polite"></div>' +
       '<footer><button type="button" class="msa-g-ind">◀</button><span class="msa-g-num"></span><button type="button" class="msa-g-av">Avanti ▶</button></footer>' +
+      '<div class="msa-g-salva-bar" style="padding:8px 12px;border-top:1px solid #ddd;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+      '<button type="button" class="msa-g-salva-ora" style="background:#176c4d;color:white;padding:8px 12px;border:0;border-radius:6px;cursor:pointer">💾 Salva il lavoro fino a qui</button>' +
+      '<button type="button" class="msa-g-riprendi-suggeritore" style="background:#fff3c8;color:#554000;padding:8px 12px;border:1px solid #b7a157;border-radius:6px;cursor:pointer">💡 Riattiva suggeritore</button>' +
+      '<small class="msa-g-salva-esito" role="status"></small></div>' +
     '</aside>';
   (document.body || document.documentElement).appendChild(radice);
   var bottone = radice.querySelector('.msa-g-apri'), pannello = radice.querySelector('.msa-g-pannello');
@@ -419,6 +423,40 @@
     if (si) disegna();
   }
 
+  radice.querySelector('.msa-g-riprendi-suggeritore').addEventListener('click', function () {
+    ls('msa-g-suggeritore', 'si');
+    firmaPunti = '';
+    ultimoPunto = '';
+    soppressa = '';
+    disegna();
+    tickPunti(true);
+    var label = radice.querySelector('.msa-g-salva-esito');
+    label.textContent = 'Suggeritore riattivato. Apri il passo del budget per i campi evidenziati.';
+  });
+  radice.querySelector('.msa-g-salva-ora').addEventListener('click', function () {
+    var button = this, label = radice.querySelector('.msa-g-salva-esito');
+    button.disabled = true;
+    label.textContent = 'Salvataggio in corso…';
+    ss(POS, String(pos));
+    var p = window.MSA_SALVA ? window.MSA_SALVA() : Promise.resolve();
+    Promise.resolve(p).then(function () {
+      trasmettiProgresso(false);
+      // Il salvataggio contabile è normalmente automatico sul server: verifichiamo lo stato GET.
+      if (!window.fetch || !C.progress_version) throw Error('Controlla la connessione e riprova.');
+      return fetch('/api/stato/' + encodeURIComponent(C.progress_version), {credentials:'same-origin',cache:'no-store'});
+    }).then(function (r) {
+      if (!r.ok) throw Error('Il server non ha confermato il salvataggio.');
+      return r.json();
+    }).then(function (data) {
+      if (!data || !data.stato) throw Error('Lavoro non ancora presente sul server.');
+      var remoto = JSON.parse(data.stato), locale = stato();
+      var nRemoto = (remoto.registrazioni || []).length, nLocale = (locale.registrazioni || []).length;
+      if (nRemoto < nLocale) throw Error('Salvataggio in attesa: ' + nRemoto + '/' + nLocale + ' scritture sul server.');
+      label.textContent = '✓ Lavoro verificato sul server (' + nRemoto + ' scritture). Puoi uscire.';
+    }).catch(function (e) {
+      label.textContent = '⚠ ' + e.message + ' Non chiudere senza verificare.';
+    }).then(function () { button.disabled = false; });
+  });
   bottone.addEventListener('click', function () { apri(true); });
   radice.querySelector('.msa-g-chiudi').addEventListener('click', function () { apri(false); });
   radice.querySelector('.msa-g-ind').addEventListener('click', function () { vaiA(pos - 1, true); });
