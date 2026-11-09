@@ -476,6 +476,8 @@
   var eur=function(v){return Number(v||0).toLocaleString('it-IT');};
   var diagnosiStandard=function(h,soloCalcolo){
     var m=modello(h),out=[];
+    var t=(m&&m.kspi&&m.kspi.tariffe)||{},tOk=centri.every(function(c){return circa(t[c],28);});
+    out.push([tOk,'Costo di un’ora dei reparti = 28 €/h'+(tOk?'':' (ora: '+centri.map(function(c){return c+' '+eur(t[c]);}).join(', ')+') → il budget del passo 12 non è quello del caso: torna al passo 12 e guarda il suo riquadro «Che cosa manca»')]);
     [['TR-STD','Transenna',31.4],['SL-TAGLIO','Kit tagliato',14.6]].forEach(function(x){
       var s=stima(h,x[0]),snap=snapshot(h,x[0]),aggiornato=!!(s&&snap&&m&&snap.revisione===m.revisione);
       out.push([aggiornato&&circa(s.unitario,x[2]), x[0]+' ('+x[1]+'): calcolato con il budget di adesso = '+eur(x[2])+' €'+(aggiornato?'':' → va ricalcolato: riquadro a sinistra, Materiale «'+x[0]+'», data 01/12/2026, premi «Calcola»')]);

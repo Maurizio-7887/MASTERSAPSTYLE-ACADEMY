@@ -68,11 +68,15 @@ window.PC4 = (function () {
   function calcola(i) {
     var data = N().data(i.data), mat = i.materiale, m = N().materiale(mat);
     if (m.tipo !== 'FERT' && m.tipo !== 'HALB') throw Error('Il calcolo del costo si fa sui prodotti finiti e sui semilavorati; il ferro ha un prezzo d\'acquisto.');
-    if (cpm.attivo()) cpm.richiediKSPI();
+    // budget cambiato dopo l'ultimo KSPI: le tariffe si ricalcolano da sole invece di bloccare l'allievo
+    var notaKSPI = '';
+    // la prima volta il KSPI va fatto dall'allievo (passo della guida); se era già stato fatto e poi il budget è
+    // cambiato, le tariffe si ricalcolano da sole invece di bloccare l'allievo in un vicolo cieco
+    if (cpm.attivo()) { try { cpm.richiediKSPI(); } catch (e) { if (!(cpm.modello() || {}).kspi) throw e; notaKSPI = cpm.eseguiKSPI({data: i.data}); } }
     var lotto = C().scheda.lotto, el = elementi(mat, lotto);
     var st = {materiale: mat, data: data, lotto: lotto, elementi: el, unitario: r2(el.totale / lotto), stato: 'KA', variante: 'PPC1'};
     C().stime[mat] = st; N().salva();
-    return '<p class="lab-nota">Stima dei costi salvata (stato KA): <b>' + mat + '</b> ' + L.eur(st.unitario) + ' €/pz (standard attuale ' + L.eur(m.std) + '). Ora marca e rilascia (CK24).</p>' + tabellaStima(st);
+    return notaKSPI + '<p class="lab-nota">Stima dei costi salvata (stato KA): <b>' + mat + '</b> ' + L.eur(st.unitario) + ' €/pz (standard attuale ' + L.eur(m.std) + '). Ora marca e rilascia (CK24).</p>' + tabellaStima(st);
   }
   function tabellaStima(st) {
     var el = st.elementi;
