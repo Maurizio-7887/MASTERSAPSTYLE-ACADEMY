@@ -236,7 +236,7 @@
     var nascosto = E.verificaRagioneria && p.contabile && !st;
     if (p.grande) h += '<div class="msa-g-grande"><span>A CHE COSA SERVE QUESTO PASSO</span>' + esc(p.grande) + '</div>';
     if (p.mappa) h += mappaHtml(p.mappa);
-    if (p.fai) {
+    if (p.fai && !(p.punti && p.punti.length)) {
       // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
       if (p.idea && !p.grande) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
       var spunte = spunteDi(p), nFatte = 0;
