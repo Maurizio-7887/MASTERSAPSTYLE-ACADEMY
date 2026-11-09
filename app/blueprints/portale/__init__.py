@@ -63,6 +63,27 @@ def modulo_lp(versione, codice):
                parametri_correnti={"codice": codice})
 
 
+@bp.route("/<versione>/lezioni-magazzino/<percorso>")
+def lezioni_magazzino(versione, percorso):
+    """Lezioni vere, distinte per Firenze e Pistoia; nessun movimento ERP qui."""
+    if versione not in VERSIONI:
+        abort(404)
+    from .lezioni_magazzino_contenuti import LEZIONI, PERCORSI
+    programma = PERCORSI.get(percorso)
+    if programma is None:
+        abort(404)
+    slug = __import__("flask", fromlist=["request"]).request.args.get("lezione", "")
+    if slug and slug not in programma["ordine"]:
+        abort(404)
+    if not slug:
+        slug = programma["ordine"][0]
+    idx = programma["ordine"].index(slug)
+    return render_template("portale/lezioni_magazzino.html",
+                           versione=versione, percorso=percorso, programma=programma,
+                           lezioni=LEZIONI, ordine=programma["ordine"], lezione=LEZIONI[slug],
+                           indice=idx, totale=len(programma["ordine"]))
+
+
 @bp.route("/<versione>/tutto")
 def tutto(versione):
     """Tutte le schede in una pagina, come il file originale: serve ai test e a chi preferisce le linguette."""
