@@ -43,6 +43,11 @@
   var evento = function(h,mat,tipo) { var o=prod(h,mat); return !!o && o.eventi.some(function(e){return e.tipo===tipo && !e.stornato;}); };
   var compiti = function(h,tipo,f) { return ((h.S.wm || {}).compiti || []).filter(function(t){return t.tipo===tipo && t.stato!=='annullato' && (!f || f(t));}); };
   var fatti = function(ts,n) { return ts.length>=n && ts.every(function(t){return t.stato==='confermato' && Math.abs(t.qtaEff-t.qta)<1e-6;}); };
+  // Staging: contano i compiti confermati per intero. Un compito in più creato per errore (per esempio sull'ordine
+  // sbagliato, più avanti nell'esercizio) non deve togliere la spunta ai passi già fatti.
+  var confermati = function(ts) { return ts.filter(function(t){return t.stato==='confermato' && Math.abs(t.qtaEff-t.qta)<1e-6;}); };
+  var stagingOk = function(h,mat,n) { var ts=compiti(h,'STAGING',diOrdine(h,mat)); return ts.length>=n || confermati(ts).length>=n; };
+  var stagingFatto = function(h,mat,n) { return confermati(compiti(h,'STAGING',diOrdine(h,mat))).length>=n; };
   var diOrdine = function(h,mat) { var o=prod(h,mat); return function(t){return !!o && t.ordine===o.numero;}; };
   var entrataDi = function(h,mat) { var o=prod(h,mat), docs=o?o.eventi.filter(function(e){return e.tipo==='101';}).map(function(e){return e.doc;}):[]; return function(t){return t.mat===mat && docs.indexOf(t.rif)>=0;}; };
   var acquisto = function(h) { return (h.S.acquisti || []).find(function(o){return o.materiale==='FERRO' && o.qta===3000 && o.data==='2026-12-03';}); };
@@ -166,9 +171,9 @@
     {g:'8 · Stadio 3: saldatura',data:'11/12/2026',titolo:'CO01: ordine di saldatura per 300 transenne',dove:{ep:P+'ordini'},percorso:'PP → Ordini di produzione',campi:[['Materiale','TR-STD'],['Quantità','300'],['Data','11/12/2026']],
      attesa:'Ordine 1000003: componente 300 SL-PIEGA; costo pianificato 9.420 (300 × 31,40). Nessuna scrittura.',fatto:function(h){var o=prod(h,'TR-STD');return !!o && o.qta===300;}},
     {g:'8 · Stadio 3: saldatura',data:'11/12/2026',titolo:'WMS: porta i telai alla linea di saldatura',dove:{ep:M+'compiti'},percorso:'WMS → Compiti di magazzino → Approvvigionamento della produzione',campi:[['Ordine','1000003 TR-STD'],['Quantità','vuoto = 300 pz'],['Data','11/12/2026']],
-     attesa:'3 compiti STAGING da 100 telai ciascuno.',fatto:function(h){return compiti(h,'STAGING',diOrdine(h,'TR-STD')).length===3;}},
+     attesa:'3 compiti STAGING da 100 telai ciascuno.',fatto:function(h){return stagingOk(h,'TR-STD',3);}},
     {g:'8 · Stadio 3: saldatura',data:'11/12/2026',titolo:'RF: conferma l’approvvigionamento dei telai',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',campi:[['Data di lavoro','11/12/2026'],['Compiti','i 3 STAGING']],attesa:'300 SL-PIEGA nella PSA-L1; 10 restano a scaffale.',nota:rf,
-     fatto:function(h){return fatti(compiti(h,'STAGING',diOrdine(h,'TR-STD')),3);}},
+     fatto:function(h){return stagingFatto(h,'TR-STD',3);}},
     {g:'8 · Stadio 3: saldatura',data:'11/12/2026',titolo:'261: consuma i 300 telai',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Prelievi, conferme, entrate → Prelievo per l’ordine',campi:[['Ordine','1000003'],['Quantità','300'],['Data','11/12/2026']],
      attesa:'D 71 / A 07 6.060 (300 × 20,20). Scorta SL-PIEGA: 10 pz.',fatto:function(h){return evento(h,'TR-STD','261');}},
     {g:'8 · Stadio 3: saldatura',data:'11/12/2026',titolo:'CO11N: conferma 120 ore di saldatura',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Prelievi, conferme, entrate → Conferma delle ore',campi:[['Ordine','1000003'],['Attrezzaggio','0'],['Ore di lavorazione','120 (300 × 0,40)'],['Data','11/12/2026']],
