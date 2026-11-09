@@ -31,6 +31,16 @@
 .msa-flusso p{margin:6px 0;font-size:14px}
 @media(max-width:760px){.msa-pratica-fissa{padding:10px}.msa-pratica-fissa .msa-pratica-btn{width:100%;text-align:center}}
 @media print{.msa-pratica-fissa{display:none!important}}
+
+.msa-professionale{margin:18px 0;padding:17px 18px;border:1px solid #c7d9e8;border-radius:10px;background:#fbfdff}
+.msa-professionale>h3{font-size:1.17rem;color:#124b79;margin:0 0 11px}
+.msa-obiettivo{border-left:4px solid #2581ba;padding:9px 13px;background:#eaf5fc;margin-bottom:13px}
+.msa-obiettivo p{margin:4px 0 0}
+.msa-prof-paragrafo{margin:0 0 14px}.msa-prof-paragrafo h4{font-size:1.03rem;color:#164465;margin:15px 0 6px}
+.msa-prof-paragrafo p{line-height:1.72;text-align:left}
+.msa-riscontri{border-top:1px solid #cfdeeb;padding-top:10px;margin-top:17px}
+.msa-riscontri strong{color:#144365}
+@media print{.msa-professionale{border:0;padding:0}.msa-pratica-fissa{display:none!important}}
 </style></head><body>
 {% include "simulatore/_shell.html" %}
 <main class="msa-lessoni">
@@ -70,6 +80,20 @@
 {% for paragraph in lezione.teoria.split('\n\n') %}
 <p>{{ paragraph }}</p>
 {% endfor %}
+<section class="msa-professionale" aria-label="Lezione professionale approfondita">
+  <h3>Approfondimento professionale: processi, documenti e controlli</h3>
+  <div class="msa-obiettivo"><strong>Competenza da acquisire</strong><p>{{ professionale.ob }}</p></div>
+  {% for sezione in sezioni_professionali %}
+  <section class="msa-prof-paragrafo">
+    <h4>{{ loop.index }}. {{ sezione[0] }}</h4>
+    <p>{{ sezione[1] }}</p>
+  </section>
+  {% endfor %}
+  <div class="msa-riscontri">
+    <p><strong>Indicatori per misurare il processo:</strong> {{ professionale.kpi }}</p>
+    <p><strong>Errore da prevenire:</strong> {{ professionale.error }}</p>
+  </div>
+</section>
 {% if approfondimenti %}
 <section style="padding:14px;border-left:4px solid #1b5c93;background:#f1f6fc;border-radius:8px;margin:20px 0">
 <h3>Approfondimento Pistoia · UF 8–11</h3>
