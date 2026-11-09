@@ -54,6 +54,9 @@ def righe_allievi(dal=None, al=None, anche_disattivi=True, gruppo=None):
     gruppi = dict(db.session.query(GruppoAllievo.utente_id, GruppoAllievo.gruppo).all())
     da_corr = dict(db.session.query(Consegna.utente_id, db.func.count(Consegna.id)).filter(Consegna.stato == "da_correggere")
                    .group_by(Consegna.utente_id).all())
+    checkpoints = {}
+    for item in AvanzamentoGuida.query.order_by(AvanzamentoGuida.aggiornato.desc()).all():
+        checkpoints.setdefault(item.utente_id, item)
     q = Utente.query.filter_by(ruolo="allievo")
     if not anche_disattivi:
         q = q.filter_by(attivo=True)
@@ -65,7 +68,8 @@ def righe_allievi(dal=None, al=None, anche_disattivi=True, gruppo=None):
         x = t.get(u.id, {"secondi": 0, "sessioni": 0, "ultimo": None})
         tar = u.tariffa()
         out.append({"u": u, "secondi": x["secondi"], "sessioni": x["sessioni"], "tariffa": tar,
-                    "costo": costo(x["secondi"], tar), "da_correggere": da_corr.get(u.id, 0), "gruppo": gr})
+                    "costo": costo(x["secondi"], tar), "da_correggere": da_corr.get(u.id, 0),
+                    "guida": checkpoints.get(u.id), "gruppo": gr})
     return out
 
 
