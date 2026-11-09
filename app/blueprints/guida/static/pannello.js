@@ -786,6 +786,15 @@
     bolla.className = sopra ? 'sopra' : (sotto ? 'sotto' : '');
     bolla.style.setProperty('--freccia', Math.max(14, Math.min(bw - 24, r.left + r.width / 2 - parseFloat(bolla.style.left))) + 'px');
   }
+  function segnaGruppiSalvati(elenco) {
+    var salvatoDopo = false;
+    for (var z = elenco.length - 1; z >= 0; z--) {
+      var x = elenco[z];
+      if (x.d.t === 'pulsante') salvatoDopo = !!x.fatto;
+      else if (salvatoDopo) x.fatto = true;
+    }
+    return elenco;
+  }
   function tickPunti(forza) {
     if (!bolla) return;   // il motore parte dopo il primo disegno: il primo giro lo fa il timer
     var p = PASSI[pos], c = corpo.querySelector('.msa-g-ora-c');
@@ -802,6 +811,9 @@
       // un vecchio flag di sessione: se il dato cambia tornano da correggere.
       return {d:d,k:k,el:el,fatto: p.cpmVerificato ? ok : (ok || !!memP('ok')[key])};
     });
+    // Nei passi CPM la scelta del centro e le caselle valgono finché il loro salvataggio è verificato:
+    // senza questo, dopo aver salvato 4210 e scelto 4220 il tutor richiedeva di nuovo 4210 (e così via, all'infinito).
+    if (p.cpmVerificato) segnaGruppiSalvati(elenco);
     var primo = -1; for (var i = 0; i < elenco.length; i++) if (!elenco[i].fatto) { primo = i; break; }
     var ora = primo < 0 ? null : elenco[primo];
     var esitoErrore = '';
