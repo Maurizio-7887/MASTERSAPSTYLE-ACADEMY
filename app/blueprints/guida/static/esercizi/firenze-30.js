@@ -46,6 +46,29 @@
       .replace(/^UF 10 · /, 'WMS · ').replace(/^UF 11 · /, 'Innovazione · ');
   });
 
+  // FIFO / LIFO / costo medio sono contabilità DEL MAGAZZINO, non esercizi
+  // di libro giornale. A Firenze si leggono i valori e si ragiona sulle scorte.
+  var valori = E.passi.find(function(p) {
+    return p.titolo.indexOf('Valorizza la rimanenza di ferro:') === 0;
+  });
+  if (valori) {
+    valori.campi = [
+      ['Materiale', 'FERRO'],
+      ['Giacenza da esaminare', '438 kg dopo ricevimento, produzione e rettifica inventario'],
+      ['Costo standard', '438 kg × 0,95 €/kg = 416,10 €'],
+      ['Confronto FIFO / LIFO / medio', 'Con un unico lotto al prezzo di 1,00 €/kg i tre metodi restituiscono lo stesso costo di acquisto; con prezzi differenti cambiano'],
+      ['Domanda', 'Che cosa cambia se il secondo lotto costa più del primo?']
+    ];
+    valori.nota = 'La valorizzazione è contabilità DI MAGAZZINO e rimane obbligatoria. Non compilare Dare/Avere e non entrare nel libro giornale: qui osservi quantità, costi unitari e criteri di calcolo.';
+    valori.punti = [
+      {t:'leggi',nome:'1 · Apri la valorizzazione di magazzino',serve:'Dal Launchpad apri Inventario → Valorizzazione, oppure premi «Apri ➜» nel tutor. Non aprire Contabilità generale o Libro giornale.'},
+      {t:'leggi',nome:'2 · Cerca il materiale FERRO',serve:'Nella tabella della valorizzazione individua FERRO. Leggi la quantità disponibile a fine simulazione: 438 kg.'},
+      {t:'leggi',nome:'3 · Capisci il costo standard',serve:'Il sistema calcola 438 kg × 0,95 €/kg = 416,10 €. Questo è il valore delle scorte al costo standard: non stai eseguendo una scrittura contabile.'},
+      {t:'leggi',nome:'4 · Confronta FIFO, LIFO e costo medio',serve:'Osserva le colonne FIFO, LIFO e costo medio. Con un solo prezzo di acquisto coincidono; in presenza di lotti a prezzi diversi possono cambiare. Non inventare un secondo acquisto nella tua azienda simulata.'},
+      {t:'leggi',nome:'5 · Verifica e conferma',serve:'Dopo aver confrontato i valori, premi «✓ Fatto» nel tutor. Non è necessaria alcuna registrazione Dare/Avere.'}
+    ];
+  }
+
   // La prima lezione DEVE partire con quiz=no, prima di toccare Avvia.
   var avvio = E.passi.find(function(p){return p.id === 'mag5-avvio';});
   if (avvio) {
