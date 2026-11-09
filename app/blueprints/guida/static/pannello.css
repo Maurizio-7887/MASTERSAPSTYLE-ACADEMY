@@ -187,3 +187,13 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 #msa-guida .msa-g-ora-attenzione{background:#FDECEA;border:2px solid #D64545;color:#7a1d1d;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:14px;font-weight:700;line-height:1.4}
 #msa-guida details.msa-g-tutto{margin-top:10px;border-top:1px solid #dfe5ee;padding-top:6px}
 #msa-guida details.msa-g-tutto>summary{cursor:pointer;color:#1f3a5f;font-weight:700;font-size:13px}
+
+/* Tutor Magazziniere: spiegazione sempre visibile per chi usa il gestionale per la prima volta. */
+.msa-g-principiante{border:1px solid #b4c8e0;border-left:4px solid #2563a8;border-radius:9px;background:#f3f8ff;color:#1c3047;padding:12px 14px;margin:12px 0;font-size:13px;line-height:1.55}
+.msa-g-principiante>strong{display:block;font-size:13px;margin:0 0 8px}
+.msa-g-principiante p{margin:4px 0 8px}
+.msa-g-principiante ol{margin:4px 0 0;padding-left:22px}
+.msa-g-principiante li{padding:4px 0}
+.msa-g-principiante li+li{border-top:1px solid #dce7f4}
+.msa-g-principiante b{color:#163b67}
+@media(prefers-color-scheme:dark){.msa-g-principiante{background:#1b2a3a;border-color:#47637e;color:#e3edf8}.msa-g-principiante b{color:#c5e2ff}.msa-g-principiante li+li{border-color:#34475c}}
