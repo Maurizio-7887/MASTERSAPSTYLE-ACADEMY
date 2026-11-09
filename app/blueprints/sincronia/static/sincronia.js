@@ -11,6 +11,53 @@
   var rete = typeof window.fetch === 'function';
   var ls; try { ls = window.localStorage; } catch (e) { ls = null; }
 
+  // ── 0. diario delle azioni (per il docente: che cosa ha premuto l'allievo e che cosa ha risposto il programma) ──
+  var coda = [], timerDiario = null;
+  var passoAttuale = function () { try { return typeof window.MSA_PASSO_CORRENTE === 'function' ? String(window.MSA_PASSO_CORRENTE() || '') : ''; } catch (e) { return ''; } };
+  var diario = function (tipo, testo) {
+    if (!rete || !C.csrf || C.battito === false) return;
+    coda.push({tipo: tipo, testo: String(testo || '').replace(/\s+/g, ' ').trim().slice(0, 400), pagina: location.pathname, passo: passoAttuale()});
+    if (coda.length > 80) coda.shift();
+    clearTimeout(timerDiario); timerDiario = setTimeout(function () { inviaDiario(false); }, 4000);
+  };
+  var inviaDiario = function (keep) {
+    if (!coda.length) return;
+    var voci = coda.splice(0, 60), corpo = JSON.stringify({csrf: C.csrf, voci: voci});
+    fetch('/api/diario', {method: 'POST', credentials: 'same-origin', keepalive: !!keep && corpo.length < 60000,
+      headers: {'Content-Type': 'text/plain;charset=UTF-8', 'X-CSRF': C.csrf}, body: corpo}).catch(function () {});
+  };
+  window.MSA_DIARIO = diario;
+  window.addEventListener('pagehide', function () { inviaDiario(true); });
+  diario('pagina', document.title || location.pathname);
+  var etichetta = function (el) {
+    var t = (el.innerText || el.value || el.getAttribute('aria-label') || el.title || '').trim();
+    var box = el.closest && el.closest('[data-prefisso],section,.lab-card,.card,form');
+    var h = box && box.querySelector && box.querySelector('h2,h3,h4,legend');
+    return (t || '(pulsante)') + (h && h.textContent ? '  ·  riquadro «' + h.textContent.trim().slice(0, 60) + '»' : '');
+  };
+  var esitiPrima = function () {
+    var out = {}, els = document.querySelectorAll('[id$="-esito"], .lab-esito');
+    for (var i = 0; i < els.length; i++) out[i] = els[i].textContent;
+    return {els: els, testi: out};
+  };
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('button, input[type=submit], input[type=button], a.lab-btn, a.msa-btn') : null;
+    if (!el || (el.closest && el.closest('#msa-guida'))) return;    // i clic dentro il pannello della guida non servono
+    var lab = etichetta(el), prima = esitiPrima();
+    diario('clic', lab);
+    setTimeout(function () {    // che cosa ha risposto il programma dopo il clic
+      var dopo = document.querySelectorAll('[id$="-esito"], .lab-esito');
+      for (var i = 0; i < dopo.length; i++) {
+        var t = (dopo[i].textContent || '').trim(), era = -1;
+        for (var k = 0; k < prima.els.length; k++) if (prima.els[k] === dopo[i]) era = k;
+        if (t && (era < 0 || prima.testi[era] !== dopo[i].textContent)) {
+          var errore = /\bko\b/.test(dopo[i].className) || /⛔|rifiutat|non (è|si) |errore|manca|bloccat/i.test(t.slice(0, 160));
+          diario(errore ? 'errore' : 'esito', t);
+        }
+      }
+    }, 1200);
+  }, true);
+
   // ── 1. stato ───────────────────────────────────────────
   if (C.chiave && ls) {
     var SPORCO = 'msa-sporco-' + C.versione, CHI = 'msa-utente';
@@ -64,6 +111,7 @@
       return fetch(C.urlStato, {method: 'POST', credentials: 'same-origin', keepalive: !!keep && corpo.length < 60000,
                                 headers: {'Content-Type': 'text/plain;charset=UTF-8', 'X-CSRF': C.csrf}, body: corpo})
         .then(function (r) {
+          diario('salvataggio', r.ok ? 'salvato sul server' : (r.status === 409 ? 'RIFIUTATO dal server (409): il lavoro sul server è stato tenuto, quello del browser messo da parte nella copia locale' : 'NON salvato: risposta ' + r.status));
           if (r.ok) { if (get(C.chiave) === dati) { rem(SPORCO); if (azz) rem(AZZ); } return r.json().then(function (j) { if (j && j.rev) set(REV, String(j.rev)); }, function () {}); }
           if (r.status === 409) {        // il server ha protetto un lavoro più completo: ci riallineiamo senza perdere la copia locale
             return r.json().then(function (j) {
@@ -75,7 +123,7 @@
           }
           if (r.status === 401) avviso('Accesso scaduto: il lavoro resta in questo browser. Rientra per salvarlo sul server.');
         })
-        .catch(function () {})
+        .catch(function () { diario('salvataggio', 'NON salvato: rete assente'); })
         .then(function () { inVolo = false; if (ancora) { ancora = false; programma(); } });
     };
     var programma = function () { clearTimeout(timer); timer = setTimeout(function () { invia(false); }, 1500); };
@@ -91,6 +139,26 @@
       return r;
     };
     if (daCaricare) { set(SPORCO, '1'); programma(); }
+    // lavoro più avanzato messo da parte in questo browser (dopo un salvataggio rifiutato): si può riprendere con un clic
+    (function () {
+      var copia = get(COPIA), a = leggi(copia), b = leggi(get(C.chiave));
+      if (!a || scritture(a) <= scritture(b)) return;
+      diario('salvataggio', 'nel browser c’è una copia più avanzata (' + scritture(a) + ' scritture contro ' + scritture(b) + ')');
+      var mostra = function () {
+        var d = document.createElement('div');
+        d.setAttribute('role', 'alert');
+        d.style.cssText = 'position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:99999;background:#0B6E4F;color:#fff;padding:12px 18px;border-radius:6px;font:14px Segoe UI,Arial,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.35);max-width:640px';
+        d.innerHTML = '🛟 <b>In questo browser c’è un tuo lavoro più avanzato</b> (' + scritture(a) + ' scritture, sul server ' + scritture(b) + '). ' +
+          '<button type="button" style="margin-left:8px;background:#fff;color:#0B6E4F;border:0;border-radius:4px;padding:6px 12px;font-weight:700;cursor:pointer">Riprendi questo lavoro</button>' +
+          ' <button type="button" style="margin-left:4px;background:transparent;color:#fff;border:1px solid #fff;border-radius:4px;padding:5px 10px;cursor:pointer">No</button>';
+        var bs = d.querySelectorAll('button');
+        bs[0].onclick = function () { diario('salvataggio', 'ripresa la copia locale più avanzata'); set(C.chiave, copia); set(AZZ, '1'); set(SPORCO, '1'); clearTimeout(timer);
+          invia(true).then(function () { location.reload(); }, function () { location.reload(); }); };
+        bs[1].onclick = function () { d.remove(); };
+        (document.body || document.documentElement).appendChild(d);
+      };
+      if (document.body) mostra(); else document.addEventListener('DOMContentLoaded', mostra);
+    })();
     window.addEventListener('pagehide', function () { if (get(SPORCO)) { clearTimeout(timer); invia(true); } });
     window.MSA_SALVA = function () { clearTimeout(timer); return get(SPORCO) ? invia(true) : Promise.resolve(); };
   }

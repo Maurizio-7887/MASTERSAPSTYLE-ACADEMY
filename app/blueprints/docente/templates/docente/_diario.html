@@ -1,0 +1,27 @@
+{# Diario delle azioni dell'allievo: che cosa ha premuto, che cosa ha risposto il programma, salvataggi riusciti o rifiutati. #}
+<section class="msa-card" id="diario">
+  <h2>📜 Diario delle azioni (ultime {{ diario|length }})</h2>
+  {% if diario %}
+    {% set ns = namespace(rifiuti=0, errori=0) %}
+    {% for v in diario %}{% if v.tipo == 'salvataggio' and ('RIFIUTATO' in v.testo or 'NON salvato' in v.testo) %}{% set ns.rifiuti = ns.rifiuti + 1 %}{% endif %}{% if v.tipo == 'errore' %}{% set ns.errori = ns.errori + 1 %}{% endif %}{% endfor %}
+    <p>Salvataggi non riusciti: <b style="color:{{ '#B42318' if ns.rifiuti else '#107E3E' }}">{{ ns.rifiuti }}</b> ·
+       messaggi di errore o blocco: <b style="color:{{ '#B42318' if ns.errori else '#107E3E' }}">{{ ns.errori }}</b>.
+       {% if ns.rifiuti %}<br><b style="color:#B42318">⚠️ Il server ha rifiutato dei salvataggi: il lavoro fatto dopo non risulta sul server.
+       Alla prossima apertura del simulatore l'allievo vede un riquadro verde «🛟 Riprendi questo lavoro»: deve premerlo.</b>{% endif %}</p>
+    <div class="msa-scroll" style="max-height:520px;overflow:auto"><table class="msa-tab">
+      <tr><th>Ora</th><th>Passo della guida</th><th>Cosa</th><th>Dettaglio</th><th>Pagina</th></tr>
+      {% for v in diario %}
+      {% set grave = v.tipo == 'errore' or (v.tipo == 'salvataggio' and ('RIFIUTATO' in v.testo or 'NON salvato' in v.testo)) %}
+      <tr style="{{ 'background:#FDECEA' if grave else '' }}">
+        <td style="white-space:nowrap">{{ ora_italiana(v.quando, '%d/%m %H:%M:%S') }}</td>
+        <td style="font-size:12px">{{ v.passo }}</td>
+        <td>{{ {'clic':'🖱️ premuto','esito':'✅ risposta','errore':'⛔ errore','salvataggio':'💾 salvataggio','pagina':'📄 pagina'}.get(v.tipo, v.tipo) }}</td>
+        <td style="{{ 'color:#B42318;font-weight:600' if grave else '' }}">{{ v.testo }}</td>
+        <td style="font-size:12px;color:#666">{{ v.pagina }}</td>
+      </tr>
+      {% endfor %}
+    </table></div>
+  {% else %}
+    <p>Ancora nessuna azione registrata: il diario parte dalla prossima volta che l'allievo apre il simulatore (dopo l'aggiornamento di oggi).</p>
+  {% endif %}
+</section>

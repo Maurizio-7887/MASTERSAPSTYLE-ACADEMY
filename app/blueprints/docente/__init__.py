@@ -9,7 +9,7 @@ from urllib.parse import quote
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 
 from ...accesso import solo_docente, utente_corrente
-from ...db import GRUPPI, ROMA, AvanzamentoGuida, ArchivioLavoro, Consegna, GruppoAllievo, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
+from ...db import GRUPPI, ROMA, AvanzamentoGuida, ArchivioLavoro, DiarioAzione, Consegna, GruppoAllievo, Impostazione, Sessione, StatoLavoro, Utente, adesso, costo_orario_generale, db, ora_italiana
 from ...pagine import LAB_SLOTS, VERSIONI
 
 LAVORI = {'erp-ft': 'Sistema integrato', **{v: 'Archivio storico · ' + v for v in VERSIONI}, **{k: 'Archivio laboratorio · ' + v for k, v in LAB_SLOTS.items() if k != 'erp-ft'}}
@@ -178,8 +178,10 @@ def monitoraggio(uid):
                              automatici=sum(x["stato"] == "auto" for x in righe),
                              manuali=sum(x["stato"] == "mano" for x in righe),
                              da_fare=sum(not x["stato"] for x in righe)))
+    diario = (DiarioAzione.query.filter_by(utente_id=uid)
+              .order_by(DiarioAzione.quando.desc(), DiarioAzione.id.desc()).limit(400).all())
     return render_template("docente/monitoraggio.html", u=u, dettagli=dettagli,
-                           lavoro=lavoro, verifica=verifica)
+                           lavoro=lavoro, verifica=verifica, diario=diario)
 
 
 @bp.route("/allievo/<int:uid>/monitoraggio/<int:gid>/nota", methods=["POST"])
