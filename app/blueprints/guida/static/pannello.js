@@ -214,6 +214,7 @@
   function urlPasso(p) {
     var base = (C.url || {})[p.dove && p.dove.ep];
     if (!base) return null;
+    if (p.dove.esercizio) return base + '?esercizio=' + encodeURIComponent(p.dove.esercizio);
     if (p.dove.sd) return base + '?sd=' + encodeURIComponent(p.dove.sd);
     if (p.dove.pp) return base + '?pp=' + encodeURIComponent(p.dove.pp);
     return base;
