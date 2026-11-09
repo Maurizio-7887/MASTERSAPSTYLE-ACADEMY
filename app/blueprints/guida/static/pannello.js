@@ -71,6 +71,10 @@
     return res.map(function (s, i) {
       var p = PASSI[i];
       if (s || p.fatto || p.cpmVerificato) return s;
+      // Firenze e gli altri nuovi percorsi a spunta obbligatoria: vietato
+      // inferire una lettura confermata dalla presenza di documenti futuri.
+      // La convalida richiede un clic dell'allievo o del docente.
+      if (E.codice === 'firenze-30') return s;
       return (i < ultimoVerificato || salvati[p.titolo] === 'mano') ? 'mano' : s;
     });
   }
