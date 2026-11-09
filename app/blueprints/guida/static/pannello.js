@@ -340,6 +340,21 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    if (p.principiante) {
+      // Lezione parlata per chi non ha mai utilizzato un gestionale.
+      // La guida spiega, ma le spunte reali restano governate dai dati ERP.
+      var introPrincipiante = pos === 0 ?
+        '<p><b>Prima di cominciare:</b> accedi al portale con il tuo account, scegli «Entra nel sistema integrato», poi la tessera del tuo corso. Non scegliere un altro esercizio. Se trovi già un’azienda non tua, NON premere Azzera: chiedi un account dedicato.</p>' : '';
+      h += '<div class="msa-g-principiante" role="region" aria-label="Guida per chi inizia da zero">' +
+        '<strong>👣 PRIMA VOLTA? UNA COSA ALLA VOLTA</strong>' + introPrincipiante +
+        '<ol>' +
+        '<li><b>DOVE ENTRO?</b> Segui il percorso qui sopra: <em>' + esc(p.percorso || p.titolo) + '</em>. Se non sei nella schermata giusta, premi <b>«Apri ➜»</b>.</li>' +
+        '<li><b>CHE COSA DEVO FARE?</b> Nel riquadro giallo <b>«ORA TOCCA A TE»</b> trovi il primo campo da compilare, il valore e il pulsante. Completa un punto prima di passare al successivo.</li>' +
+        '<li><b>PERCHÉ LO FACCIO?</b> ' + esc(p.grande || ('Stai completando la fase «' + p.titolo + '».')) + '</li>' +
+        '<li><b>COME VERIFICO?</b> Dopo il comando controlla il messaggio del programma e il risultato atteso. Una registrazione reale riceve la <b>spunta ✓ automatica</b>; soltanto per una lettura puoi premere <b>✓ Fatto</b>.</li>' +
+        '<li><b>SE MI BLOCCO?</b> Rileggi il campo richiesto, apri la pagina giusta e correggi l’errore. <b>Non ripetere un movimento già salvato e non azzerare i dati</b>; se il documento esiste, chiedi al docente di verificare.</li>' +
+        '</ol></div>';
+    }
     // Passi del budget: una cosa alla volta. In cima c'è solo l'azione da fare adesso; tutto il resto è a scomparsa.
     var focus = !st && !pendente && p.regole && p.regole.length && p.punti && p.punti.length && ls('msa-g-suggeritore') !== 'no';
     var inizioResto = h.length;
