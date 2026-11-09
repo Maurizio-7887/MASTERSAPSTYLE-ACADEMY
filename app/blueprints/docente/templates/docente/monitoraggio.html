@@ -64,6 +64,7 @@
     <td><b>{{ p.titolo }}</b><div style="font-size:12px;color:#555">{{ p.gruppo }}</div></td>
     <td>
       {% if p.stato == 'auto' %}<span class="msa-stato corretta">✓ Verificato dal tutor</span>
+      {% elif p.stato == 'docente' %}<span class="msa-stato corretta">✓ Verificato dal docente</span>
       {% elif p.stato == 'mano' %}<span class="msa-stato">✓ Spuntato manualmente</span>
       {% else %}<span class="msa-stato da_correggere">Non ancora verificato</span>{% endif %}
     </td>
