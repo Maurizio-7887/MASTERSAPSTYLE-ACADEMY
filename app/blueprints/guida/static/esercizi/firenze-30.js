@@ -79,7 +79,8 @@
   // documento e lo stesso WMS: nessuna simulazione "finta" di spunta.
   E.passi.forEach(function(p) {
     if (!p.fatto && p.titolo.indexOf('Consegna l’esercitazione') === 0) {
-      p.nota = 'Al termine consegna il lavoro operativo al docente e premi ✓ Fatto. Non è richiesto il libro giornale.';
+      p.nota = 'Al termine consegna il lavoro operativo al docente scegliendo l’esercizio «Firenze · Innovazione digitale nel magazzino (30 ore)», poi premi ✓ Fatto. Non è richiesto il libro giornale.';
+      p.dove.esercizio = 'firenze-30';
     }
   });
 })();
