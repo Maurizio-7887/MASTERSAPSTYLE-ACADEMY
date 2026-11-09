@@ -5,6 +5,9 @@
   var N = SD.avvia(C.chiave), radice = document.getElementById('lab');
   if (!radice) return;
   var e = L.esc, eur = L.eur, n0 = L.n0, S = function () { return N.S; };
+  // Firenze 30h: percorso operativo senza quiz contabili, soltanto sulla
+  // schermata di avvio scelta dal Launchpad. Pistoia mantiene le sue opzioni.
+  var firenze30 = /(?:[?&])esercizio_guida=firenze-30(?:&|$)/.test(location.search);
   var PAGINE = {
     avvio: function () {
       // Il reset non deve mai comparire automaticamente nel percorso didattico.
@@ -19,7 +22,7 @@
                 '<p class="lab-nota">I soci versano il capitale sul conto corrente della società: D 10 Banca / A 08 Crediti verso soci. Ancora da versare: <b>' + eur(N.saldo('08')) + ' €</b>.</p>'
                 : '<p class="lab-nota">Capitale interamente versato: crediti verso soci (08) a zero.</p>')) : '');
       var pAvviata = (S().percorso === 'logistica' ? L.scheda('📦', 'Percorso logistico avviato il ' + L.fd(S().avviato), 'Magazziniere 5.0', '<div class="lab-esito ok">✓ Azienda avviata: banca 50.000 €, prodotti finiti a scaffale a costo standard (561). Produzione della TR-STD a tre fasi sullo stesso ordine. ' + (S().quizContabile === false ? 'Ricostruzione delle scritture disattivata: le scritture si leggono nel libro giornale.' : 'Ricostruzione delle scritture attiva: dopo ogni documento contabile ricostruisci Dare e Avere nella finestra Esercizio.') + '</div>') : '') +
-        (!S().avviato ? L.scheda('📦', 'Percorso logistico · Magazziniere 5.0', 'corsi di magazzino e logistica', L.modulo('lg', [['data', 'Data di avvio', 'date', '2027-01-04'], ['quiz', 'Ricostruzione delle scritture (ragioneria di magazzino)', 'select', 'si', [['si', 'sì: dopo ogni documento contabile l\'allievo ricostruisce la scrittura'], ['no', 'no: classe solo operativa, scritture visibili nel giornale']]]], [['lg', 'Avvia il percorso logistico']]) + '<p class="lab-nota">Azienda già avviata: banca 50.000 €, a scaffale 200 TR-STD, 200 TR-ALTA e 300 TR-PED; la TR-STD si produce con un ordine a tre fasi (Taglio, Piegatura, Saldatura). Ogni documento registra le sue scritture nel giornale come sempre. Con la ricostruzione attiva (consigliata, come FORMAS) dopo ricevimento merci' + L.sap('MIGO') + ', fattura fornitore' + L.sap('MIRO') + ', consumi, versamenti, rottamazioni e differenze d\'inventario l\'allievo ricostruisce Dare e Avere; per una classe solo operativa si può disattivare. È il percorso dell\'esercizio «Magazziniere 5.0: un mese di magazzino».</p>') : '') +
+        (!S().avviato ? L.scheda('📦', 'Percorso logistico · Magazziniere 5.0', 'corsi di magazzino e logistica', L.modulo('lg', [['data', 'Data di avvio', 'date', '2027-01-04'], ['quiz', firenze30 ? 'Firenze · SOLO OPERATIVITÀ, niente partita doppia' : 'Ricostruzione delle scritture (ragioneria di magazzino)', 'select', firenze30 ? 'no' : 'si', [['si', 'sì: dopo ogni documento contabile l\'allievo ricostruisce la scrittura'], ['no', 'no: classe solo operativa, scritture visibili nel giornale']]]], [['lg', 'Avvia il percorso logistico']]) + '<p class="lab-nota">Azienda già avviata: banca 50.000 €, a scaffale 200 TR-STD, 200 TR-ALTA e 300 TR-PED; la TR-STD si produce con un ordine a tre fasi (Taglio, Piegatura, Saldatura). Ogni documento registra le sue scritture nel giornale come sempre. Con la ricostruzione attiva (consigliata, come FORMAS) dopo ricevimento merci' + L.sap('MIGO') + ', fattura fornitore' + L.sap('MIRO') + ', consumi, versamenti, rottamazioni e differenze d\'inventario l\'allievo ricostruisce Dare e Avere; per una classe solo operativa si può disattivare. È il percorso dell\'esercizio «Magazziniere 5.0: un mese di magazzino».</p>') : '') +
         (!S().costituzione && S().percorso !== 'logistica' ? L.scheda('🚀', 'Alternativa: saldi già pronti', 'NON usare per FORMAS da zero', (S().avviato
           ? '<div class="lab-esito ok">✓ Sistema avviato il ' + L.fd(S().avviato) + ': banca 50.000 €, magazzino 500 TR-STD · 200 TR-ALTA · 300 TR-PED a costo standard, listino e condizioni predefinite caricate.</div>'
           : L.modulo('av', [['data', 'Data di avvio', 'date']], [['av', 'Carica saldi pronti (NON caso da zero)']]) +
@@ -43,7 +46,18 @@
         [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.classList.toggle('att', b.getAttribute('data-scelta') === c); });
       };
       [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.onclick = function () { mostra(b.getAttribute('data-scelta')); }; });
-      mostra(S().percorso === 'logistica' ? 'avviata' : scelta);
+      mostra(firenze30 ? 'avviata' : S().percorso === 'logistica' ? 'avviata' : scelta);
+      if (firenze30) {
+        var avvio30 = radice.querySelector('#lg-quiz');
+        if (avvio30) { avvio30.value = 'no'; avvio30.disabled = true; }
+        var pan30 = radice.querySelector('[data-pannello="avviata"]');
+        if (pan30) {
+          var info30 = document.createElement('div');
+          info30.className = 'lab-esito ok';
+          info30.textContent = '🚀 FIRENZE · INNOVAZIONE MAGAZZINO 30 ORE: la contabilità rimane automatica nel gestionale; non sono richiesti quiz, scritture o Dare/Avere. Usa un account allievo dedicato; non azzerare un lavoro esistente.';
+          pan30.insertBefore(info30, pan30.firstChild);
+        }
+      }
       var bottoneReset = radice.querySelector('#reset-ora');
       if (bottoneReset) bottoneReset.onclick = function () {
         if (!confirm('ATTENZIONE: vuoi davvero CANCELLARE tutta l’azienda di questo account e ricominciare da zero?\n\nDocumenti, contabilità, magazzino e spunte della guida vengono azzerati. Nome utente e password restano.\n\nOK = sì, ricomincia da zero      Annulla = no, tengo il lavoro')) return;
@@ -63,7 +77,11 @@
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
       L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v); }}, rendi);
       L.collega(radice, 'ng', {ng: function (v) { v.modo = 'negozio'; return SD.avviaSistema(v); }}, rendi);
-      L.collega(radice, 'lg', {lg: function (v) { v.modo = 'logistica'; return SD.avviaSistema(v); }}, rendi);
+      L.collega(radice, 'lg', {lg: function (v) {
+        v.modo = 'logistica';
+        if (firenze30) v.quiz = 'no';  // anche se si modifica il DOM
+        return SD.avviaSistema(v);
+      }}, rendi);
       L.collega(radice, 'vs', {vs: N.versaCapitale}, rendi);
       radice.querySelector('#backup-azienda').onclick = function () {
         try {
