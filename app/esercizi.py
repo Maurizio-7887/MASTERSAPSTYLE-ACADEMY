@@ -289,6 +289,23 @@ ESERCIZI = {
 }
 
 
+# Firenze (30 ore) condivide i documenti logistici del Magazziniere 5.0,
+# ma il voto riguarda SOLO scorte, WMS, picking, SSCC, inventario e quadratura.
+# Nessun indicatore ricavato da Dare/Avere o da conti di contabilità generale.
+_INDICATORI_FIRENZE = {
+    "mg_percorso", "mg_scorte", "mg_colli", "mg_ondate",
+    "mg_inventari_chiusi", "rw_compiti_aperti", "quadratura_im_wm",
+}
+ESERCIZI["firenze-30"] = {
+    "titolo": "Firenze · Innovazione digitale nel magazzino (30 ore, senza ragioneria)",
+    "versione": "erp-ft",
+    "attesi": [
+        indicatore for indicatore in ESERCIZI["magazziniere-5"]["attesi"]
+        if indicatore[0] in _INDICATORI_FIRENZE
+    ],
+}
+
+
 def scelte(versione=None):
     return [(k, e["titolo"]) for k, e in ESERCIZI.items() if not versione or e["versione"] in (None, versione)]
 
