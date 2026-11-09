@@ -209,5 +209,102 @@
      nota:'Il fondo ammortamento è in Avere: rettifica il valore della saldatrice, che in bilancio vale 12.000 − 800 = 11.200. Spunta a mano dopo il controllo.'},
     {g:'16 · Riapertura',titolo:'Consegna la seconda parte al docente',dove:{ep:'allievo.consegna'},percorso:'La mia area → Consegna il lavoro',campi:[['Lavoro','Sistema integrato'],['Esercizio','Ragioneria con WMS — seconda parte: cespiti, Ri.Ba., factoring, IVA, IRES, chiusura e riapertura'],['Nota','Spiega perché la Ri.Ba. salvo buon fine non chiude il credito e il factoring pro soluto sì']]},
   ];
+
+  // Unifica il suggeritore per TUTTI i passi, compresi quelli successivi al 4.
+  // Non alterare i controlli p.fatto né le registrazioni del simulatore.
+  var leggi = function(nome,serve,sel){return {t:'leggi',nome:nome,serve:serve,sel:sel||undefined};};
+  function guidaCampi(p) {
+    var out = [leggi('Dove andare / Apri ➜',
+      'Premi il pulsante «Apri ➜» in alto e apri: '+String(p.percorso||'il modulo indicato')+
+      '. Le attività seguenti sono in ordine: fai una cosa alla volta e premi «Ho letto, vai avanti» solo dopo averla eseguita.')];
+    (p.campi||[]).forEach(function(c,i){
+      out.push(leggi('Campo '+(i+1)+' · '+String(c[0]),'Nella schermata «'+
+        String(p.percorso||'gestionale')+'», trova '+String(c[0])+
+        '. Inserisci, seleziona o verifica: '+String(c[1])+'. Non inventare valori quando la schermata mostra documenti o ubicazioni reali.'));
+    });
+    if(p.nota)out.push(leggi('Attenzione prima di confermare',String(p.nota)));
+    out.push(leggi(p.fatto?'Salva nel modulo e controlla l’esito':'Verifica il risultato',
+      p.fatto?'Dopo aver compilato la schermata, premi il comando di salvataggio/registrazione previsto DAL MODULO. '+
+       'Attendi il messaggio positivo, poi verifica «Cosa devi vedere». Il tutor controlla la registrazione reale: '+
+       'una spunta di lettura non dimostra che il movimento esista.':
+       'Confronta la schermata con il risultato richiesto e, se è corretto, segnala il passo come fatto nel tutor.'));
+    return out;
+  }
+  // Budget 2027: la guida precedente presentava soltanto una tabella testuale.
+  // Ora ogni centro/campo e ogni tasto ha un passaggio dedicato.
+  function budgetPunti() {
+    var out=[
+      leggi('Apri Controllo di gestione → KP06','Premi «Apri ➜» nel pannello e apri CO → Controllo di gestione → 2 · Pianificazione costi per centro.'),
+      {t:'scelta',sel:'#kp06-versione',nome:'Versione di piano',valore:'0',
+       serve:'Usa la versione 0 (piano operativo) per tutto il budget: la versione 1 è per il confronto con le paghe.'}
+    ];
+    ['4210','4220','4230'].forEach(function(c){
+      out.push(leggi('Seleziona il centro '+c,'Nel menu «Centro di costo» scegli '+c+
+        ' ('+({'4210':'Taglio','4220':'Piegatura','4230':'Saldatura'}[c])+'). Questo budget è un anno intero, non un mese.'));
+      out.push(leggi('Salari e stipendi del centro '+c,'Nella riga 80 «Salari e stipendi €/anno» scrivi 36000. Le altre classi restano a zero.'));
+      out.push(leggi('Salva il piano di '+c,'Premi «Salva il piano del centro». Aspetta la conferma prima di scegliere il reparto seguente.'));
+    });
+    out.push(leggi('Seleziona 4200 Produzione','Nel menu centro scegli 4200 Produzione, il centro dei servizi generali.'));
+    out.push(leggi('86 Fitti passivi','Nella casella «86 Fitti passivi €/anno» scrivi 12000.'));
+    out.push(leggi('54 Consulenze e servizi','Nella casella «54 Consulenze e servizi €/anno» scrivi 6000 (energia e manutenzioni): non 3100, che appartiene a un diverso esercizio.'));
+    out.push(leggi('Salva il centro Produzione','Premi «Salva il piano del centro» anche per 4200. Non basta lasciare i numeri visibili nei campi.'));
+    out.push(leggi('Controlla il totale 126.000','Leggi la tabella della versione 0: 4210/4220/4230 da 36.000 ciascuno e 4200 da 18.000. Totale 126.000. Solo dopo passa al punto successivo.'));
+    return out;
+  }
+  var ssccIntro='SSCC significa Serial Shipping Container Code: è un codice di 18 cifre che identifica UN COLLO/PALLET. '+
+    'Non è il numero della consegna, né un codice da inventare: il programma lo GENERA con «Crea i colli (SSCC)». '+
+    'Per l’esercitazione il prefisso GS1 è fittizio.';
+  function crea11Sscc(){
+    return [
+      leggi('1 · Dove si creano i codici',
+        'Vai su Sistema integrato → Spedizione → Imballo (VL02N /SCWM/PACK). '+ssccIntro),
+      {t:'scelta',sel:'#im-consegna',nome:'Consegna già prelevata',valore:'80000001',
+       serve:'Seleziona la consegna 80000001 di Beta. Prima devi aver completato gli 11 compiti PICK: se il prelievo non è completato, non puoi imballare.'},
+      {t:'scelta',sel:'#im-imballo',nome:'Materiale di imballo',valore:'EUR',
+       serve:'Scegli EUR (pallet europeo) che contiene fino a 50 transenne secondo la regola di confezionamento.'},
+      {t:'campo',sel:'#im-perCollo',nome:'Pezzi per collo',valore:'50',
+       serve:'Ogni pallet contiene 50 TR-STD: 550 ÷ 50 = 11 pallet. Non devi inserire manualmente gli SSCC.'},
+      {t:'campo',sel:'#im-data',nome:'Data dell’imballaggio',valore:'2027-02-14',
+       serve:'Scrivi 14/02/2027, data della preparazione degli undici pallet.'},
+      {t:'pulsante',sel:'[data-prefisso="im"] [data-azione="im"]',nome:'Crea i colli (SSCC)',
+       serve:'Premi una sola volta. Il software assegna AUTOMATICAMENTE 11 codici SSCC diversi: uno per pallet. Non ripetere se il risultato è già salvato.'},
+      leggi('2 · Trova gli 11 codici',
+       'Nella stessa pagina Spedizione → Imballo, sotto «Colli della consegna 80000001», leggi la colonna SSCC. Troverai 11 numeri distinti di 18 cifre. Conserva i codici visibili per il carico.'),
+      leggi('3 · Stampa le etichette',
+       'Sempre in Imballo, usa «Stampa le etichette». Ogni etichetta contiene il GS1-128 (00) del singolo collo. L’etichetta va sul pallet corrispondente.'),
+      leggi('4 · Controlla il lavoro',
+       'Verifica undici pallet da 50 transenne, con undici SSCC differenti: totale 550 pezzi. Poi vai a Spedizione → Trasporti e carico.')
+    ];
+  }
+  function carica11Sscc(){
+    return [
+      leggi('1 · Recupera i codici reali',
+       'Apri Spedizione → Imballo, scegli la consegna 80000001 e leggi gli 11 SSCC dalla tabella «Colli della consegna». Puoi stampare le etichette o tenere aperta questa pagina in un’altra scheda. '+ssccIntro),
+      leggi('2 · Crea prima il trasporto',
+       'Vai su Spedizione → Trasporti e carico. Il trasporto deve già contenere la consegna 80000001; se manca, completa prima «Crea il trasporto».'),
+      leggi('3 · Apri Carico da scrivania',
+       'Resta in Spedizione → Trasporti e carico. Nel riquadro «Carico (da scrivania) · VT02N» trovi la casella «SSCC letto sul collo». Puoi usare anche Magazzino → Pistola RF → 🚛 Carico.'),
+      {t:'leggi',sel:'#ca-sscc',nome:'Inserisci il PRIMO SSCC',
+       serve:'Incolla il PRIMO codice di 18 cifre generato nell’Imballo nella casella «SSCC letto sul collo», poi indica la data 15/02/2027 e premi «Carica il collo». NON scrivere 80000001: è il numero della consegna.'},
+      {t:'leggi',sel:'#ca-sscc',nome:'Ripeti per tutti gli undici colli',
+       serve:'Copia il SECONDO SSCC, premi «Carica il collo», poi il terzo e così via fino all’undicesimo. Ogni codice si usa UNA VOLTA: se lo ripeti il gestionale segnala un doppio carico.'},
+      leggi('4 · Controlla prima dell’uscita merci',
+       'Il monitor deve mostrare 11 colli su 11 caricati. Solo allora premi la Partenza/uscita merci 601: genera il DDT. Se uno manca, non registrare la partenza.')
+    ];
+  }
+  passi.forEach(function(p) {
+    if(!p.punti || !p.punti.length) p.punti=guidaCampi(p);
+    if(p.titolo==='KP06: pianifica i costi annui dei centri (versione 0)') p.punti=budgetPunti();
+    if(p.titolo==='Imballa in 11 pallet identificati da SSCC') {
+      p.punti=crea11Sscc();
+      p.grande='CREA 11 PALLET, POI LEGGI E STAMPA 11 CODICI SSCC DIFFERENTI. '+ssccIntro;
+    }
+    if(p.titolo==='Carica tutti gli 11 SSCC') {
+      p.punti=carica11Sscc();
+      p.grande='CARICA UNO ALLA VOLTA GLI 11 PALLET LEGGENDO I LORO SSCC REALI. '+ssccIntro;
+    }
+    if(!p.grande)p.grande='ORA DEVI: '+p.titolo+'. Il tutor indica ogni comando in ordine. Il salvataggio effettivo deve essere confermato dal gestionale.';
+  });
+
   window.MSA_ESERCIZIO = {codice:'ragioneria-wms',titolo:'Ragioneria con WMS — dall’apertura alla chiusura e riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
 })();
