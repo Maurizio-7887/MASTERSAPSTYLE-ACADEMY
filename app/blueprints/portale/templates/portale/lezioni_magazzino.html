@@ -21,6 +21,16 @@
 .msa-lessoni small{color:#597080}.msa-lezione .tag{display:inline-block;background:#e9f3fd;color:#1c527f;padding:3px 8px;border-radius:12px;font-size:.85em}
 @media(max-width:760px){.msa-lessoni-layout{grid-template-columns:1fr}.msa-lessoni-nav{max-height:260px;overflow:auto}.msa-lezione{padding:15px}}
 @media print{.msa-lessoni-nav,.msa-naviga,.msa-lessoni-head a,.msa-sim{display:none!important}.msa-lessoni-layout{display:block}.msa-lezione{border:0;padding:0}}
+
+/* Accesso all'esercizio separato dal testo, sempre a portata di mano. */
+.msa-pratica-fissa{position:sticky;top:0;z-index:35;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin:0 0 15px;background:#123b63;color:#fff;border-radius:10px;box-shadow:0 3px 16px rgba(0,0,0,.18)}
+.msa-pratica-fissa strong{display:block;font-size:15px}.msa-pratica-fissa small{display:block;color:#e0edfa;margin:2px 0}
+.msa-pratica-fissa .msa-pratica-btn{display:inline-block;background:white;color:#123b63;border-radius:9px;padding:12px 18px;font-weight:800;text-decoration:none}
+.msa-pratica-fissa .msa-pratica-btn:focus-visible{outline:3px solid #ffca45;outline-offset:3px}
+.msa-flusso{background:#eaf2fb;color:#123b63;border-radius:10px;padding:13px 16px;margin-bottom:14px;line-height:1.55}
+.msa-flusso p{margin:6px 0;font-size:14px}
+@media(max-width:760px){.msa-pratica-fissa{padding:10px}.msa-pratica-fissa .msa-pratica-btn{width:100%;text-align:center}}
+@media print{.msa-pratica-fissa{display:none!important}}
 </style></head><body>
 {% include "simulatore/_shell.html" %}
 <main class="msa-lessoni">
@@ -29,6 +39,16 @@
 <h1>📚 {{ programma.titolo }}</h1>
 <p>{{ programma.descrizione }}</p>
 <p>Prima leggi la spiegazione, poi svolgi l'operazione guidata. <b>È un simulatore didattico: non è SAP originale.</b></p>
+</div>
+<div class="msa-pratica-fissa" role="navigation" aria-label="Esercitazione sempre disponibile">
+<div><strong>🎯 ESERCITAZIONE — SEMPRE DISPONIBILE</strong>
+<small>La lezione resta aperta qui. L'esercizio si apre in un'altra scheda per lavorare in parallelo.</small></div>
+<a class="msa-pratica-btn" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida=programma.esercizio) }}" target="_blank" rel="noopener">Apri / riprendi esercizio {{ 'Firenze' if percorso == 'firenze' else 'Pistoia' }} ↗</a>
+</div>
+<div class="msa-flusso" aria-label="Ciclo completo dell'esercitazione">
+<strong>Il percorso pratico della nostra azienda</strong>
+<p>Ordini clienti (SD) → fabbisogno → ordine fornitori (MM) → ricevimento materie prime (MIGO) → ubicazioni e RF (WMS) → ordine produzione (PP) → staging e consumo ferro → lavorazioni e semilavorati in corso (WIP) → versamento prodotti finiti → picking → imballo SSCC → carico, DDT e consegna.</p>
+<p><small>Le fasi Taglio, Piegatura e Saldatura rappresentano il lavoro in corso. Non è prevista qui una distinta produzione di semilavorati HALB a scorta.</small></p>
 </div>
 <div class="msa-lessoni-layout">
 <nav class="msa-lessoni-nav" aria-label="Indice lezioni">
@@ -59,19 +79,14 @@
 {% endif %}
 <div class="esempio"><h3>3. Esempio concreto: Ferro &amp; Transenne</h3><p>{{ lezione.esempio }}</p></div>
 <div class="operazioni">
-<h3>4. Poi facciamo la prova nel simulatore</h3>
+<h3>4. Alterniamo spiegazione e pratica</h3>
 <ol>{% for step in lezione.operativo.split('; ') %}<li>{{ step }}</li>{% endfor %}</ol>
-<p><b>Regola:</b> il testo ti insegna che cosa fare; il tutor nell'esercizio ti indica il campo e il pulsante precisi. Non registrare due volte un movimento già salvato.</p>
+<p><b>Regola:</b> il testo ti insegna che cosa fare; il tutor nell'esercizio, aperto con il pulsante separato in alto, ti indica il campo e il pulsante precisi. Non registrare due volte un movimento già salvato.</p>
 </div>
 <div class="verifica"><h3>5. Domande per controllare se hai capito</h3>
 {% for qa in lezione.quiz.split('\n') %}{% set parts=qa.split('|') %}
 {% if parts|length == 2 %}<details><summary>{{ loop.index }}. {{ parts[0] }}</summary><p><b>Risposta:</b> {{ parts[1] }}</p></details>{% endif %}
 {% endfor %}
-</div>
-<div class="msa-sim">
-<p><b>Quando hai capito la lezione, apri la pratica:</b></p>
-<a class="msa-naviga" style="display:inline-block;background:#17486f;color:white;border-radius:8px;padding:11px 16px;text-decoration:none" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida=programma.esercizio) }}">🎯 Vai all'esercizio guidato {{ 'Firenze' if percorso == 'firenze' else 'Pistoia' }}</a>
-<p><small>Se hai già avviato l'azienda simulata, riprendila senza azzerare. Il progresso della lezione e i documenti ERP sono due cose differenti.</small></p>
 </div>
 <div class="msa-naviga">
 {% if indice > 0 %}<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso=percorso, lezione=ordine[indice-1]) }}">← Lezione precedente</a>{% endif %}
