@@ -112,8 +112,15 @@
   // Il server vince sulle vecchie sessioni: un progresso salvato su PostgreSQL
   // non deve tornare al punto 5 quando la scheda viene chiusa.
   var serverPos = C.progress && Number(C.progress.posizione);
-  var pos = (C.progress && Number.isInteger(serverPos) && serverPos >= 0 && serverPos < N)
-    ? serverPos : parseInt(ss(POS), 10);
+  // Il titolo resta stabile anche se nuovi passaggi vengono inseriti prima della riapertura.
+  // La vecchia posizione numerica non è affidabile se è cambiato il numero totale.
+  var titoloSalvato = C.progress && C.progress.titolo;
+  var matchSalvato = titoloSalvato ? PASSI.findIndex(function(p) {
+    return p.titolo === titoloSalvato && (!C.progress.gruppo || p.g === C.progress.gruppo);
+  }) : -1;
+  var pos = matchSalvato >= 0 ? matchSalvato :
+    (C.progress && Number(C.progress.totale) === N && Number.isInteger(serverPos) && serverPos >= 0 && serverPos < N
+      ? serverPos : parseInt(ss(POS), 10));
   if (!(pos >= 0 && pos < N)) pos = primoDaFare();
   // Ripresa dopo un salvataggio seguito subito da un cambio di pagina.
   if (guidata && stati[pos]) { while (pos < N - 1 && stati[pos]) pos++; ss(POS, String(pos)); }
