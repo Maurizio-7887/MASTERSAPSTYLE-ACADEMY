@@ -52,7 +52,7 @@
         var archivioEstraneo = haAzienda && !giaLogistica;
         var presentazione = '<div class="lab-esito ' + (archivioEstraneo ? 'errore' : 'ok') + '">' +
           (archivioEstraneo
-            ? '⚠️ In questo account esiste già un altro percorso. Non cancellare né inizializzare: chiedi al docente un account dedicato.'
+            ? '⚠️ Questo account contiene già un\'azienda di un altro esercizio: la stessa azienda è condivisa fra i corsi. Per proteggere i documenti esistenti, l\'esercizio di magazzino non può essere inizializzato qui. Accedi con un account di prova dedicato al corso, senza cancellare nulla.'
             : giaLogistica
               ? '✓ Percorso magazzino già avviato. Segui il tutor laterale: riprende dall’ultimo passo salvato.'
               : '📦 Primo accesso al corso magazzino: avvia una sola volta il percorso logistico, poi il tutor ti guiderà automaticamente.') +
