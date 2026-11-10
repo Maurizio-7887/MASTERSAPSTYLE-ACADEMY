@@ -25,9 +25,15 @@
   <div class="msa-riga">
     {% if moduli is defined %}
     <a href="{{ url_for('portale.ingresso', versione=versione) }}" class="{{ 'attivo' if not modulo_attivo }}" title="Tutti i moduli">⊞ Moduli</a>
+    {% set guida_magazzino = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
     {% for m in moduli %}
+      {% if guida_magazzino not in ['firenze-30', 'magazziniere-5'] or m.codice in ['sd', 'mm', 'pp', 'wms'] %}
       <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}" class="{{ 'attivo' if modulo_attivo and modulo_attivo.codice == m.codice }}"><b class="msa-sigla sap">{{ m.sigla }}</b> {{ m.breve }}</a>
+      {% endif %}
     {% endfor %}
+    {% if guida_magazzino in ['firenze-30', 'magazziniere-5'] %}
+      <a href="{{ url_for('portale.ingresso', versione=versione) }}" title="Gli altri moduli rimangono disponibili nel Launchpad">⋯ Altri moduli</a>
+    {% endif %}
     {% else %}
     {% for a in attivita_tutte %}
       <a href="{{ url_for(a.blueprint ~ '.' ~ a.pagine[0].endpoint, versione=versione) }}" class="{{ 'attivo' if attivita and a.blueprint == attivita.blueprint }}">{{ a.titolo }}</a>
