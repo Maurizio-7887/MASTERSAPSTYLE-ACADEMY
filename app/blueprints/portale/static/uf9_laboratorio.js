@@ -27,6 +27,19 @@
       }
       counts.set(inp.dataset.id,n);
     }
+    // Il foglio delle misure simulate è il riferimento fisico, distinto
+    // dalle quantità teoriche nel WMS. Una lettura errata va ricontrollata
+    // prima di poter iniziare la riconciliazione contabile.
+    const lettureErrate=rows.filter(item=>counts.get(item.id)!==item.fisico).map(x=>x.id);
+    if(lettureErrate.length){
+      $('u9-count-status').textContent='Lettura fisica da verificare: '+lettureErrate.join(', ')+'. Confronta le misure sul foglio consegnato dal docente, correggi e conferma nuovamente.';
+      $('u9-count-status').className='u9-status u9-bad';
+      state.counted=false;state.reconciled=false;state.closed=false;
+      $('u9-reconciliation').hidden=true;
+      $('u9-recount-area').textContent='Completa correttamente la prima conta prima della riconta.';
+      $('u9-close-status').textContent='In attesa delle ricontazioni.';
+      finalize();return;
+    }
     state.counted=true;state.reconciled=false;state.closed=false;
     const tbody=$('u9-diffrows');tbody.replaceChildren();
     let differences=0;let amount=0;
