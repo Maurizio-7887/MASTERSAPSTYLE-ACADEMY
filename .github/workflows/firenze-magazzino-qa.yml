@@ -37,4 +37,5 @@ jobs:
       - name: Test Firenze clone, Pistoia original, complete 82-step simulated scenario and Flask routes
         run: npm run test:magazziniere
       - name: Docente Pistoia e Firenze con archivi indipendenti
+        if: always()
         run: python -m tests.test_docente_magazzino_isolato
