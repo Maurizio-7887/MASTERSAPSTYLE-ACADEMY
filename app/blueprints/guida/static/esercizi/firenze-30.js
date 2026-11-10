@@ -61,7 +61,7 @@
     ];
     valori.nota = 'La valorizzazione è contabilità DI MAGAZZINO e rimane obbligatoria. Non compilare Dare/Avere e non entrare nel libro giornale: qui osservi quantità, costi unitari e criteri di calcolo.';
     valori.punti = [
-      {t:'leggi',nome:'1 · Apri la valorizzazione di magazzino',serve:'Dal Launchpad apri Inventario → Valorizzazione, oppure premi «Apri ➜» nel tutor. Non aprire Contabilità generale o Libro giornale.'},
+      {t:'leggi',nome:'1 · Apri la valorizzazione di magazzino',serve:'Dal Launchpad apri Inventario → Valorizzazione, oppure premi «Apri ➜» nel tutor. Rimani nel modulo di magazzino, senza aprire le funzioni amministrative.'},
       {t:'leggi',nome:'2 · Cerca il materiale FERRO',serve:'Nella tabella della valorizzazione individua FERRO. Leggi la quantità disponibile a fine simulazione: 438 kg.'},
       {t:'leggi',nome:'3 · Capisci il costo standard',serve:'Il sistema calcola 438 kg × 0,95 €/kg = 416,10 €. Questo è il valore delle scorte al costo standard: non stai eseguendo una scrittura contabile.'},
       {t:'leggi',nome:'4 · Confronta FIFO, LIFO e costo medio',serve:'Osserva le colonne FIFO, LIFO e costo medio. Con un solo prezzo di acquisto coincidono; in presenza di lotti a prezzi diversi possono cambiare. Non inventare un secondo acquisto nella tua azienda simulata.'},
