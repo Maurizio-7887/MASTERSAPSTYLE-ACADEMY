@@ -110,6 +110,25 @@ def uf9_pistoia(versione):
         livelli=LIVELLI)
 
 
+@bp.route("/<versione>/uf9-pistoia/laboratorio")
+def uf9_laboratorio(versione):
+    """Prova inventariale multiarticolo separata e senza scritture sul database.
+
+    La prova contiene una simulazione autocorrettiva a fini didattici.
+    Il docente assegna il voto sui quattro indicatori previsti dall'ente.
+    """
+    if versione not in VERSIONI:
+        abort(404)
+    from .uf9_esame import VALUTAZIONE
+    from .uf9_laboratorio import POSIZIONI, DISTINTE, CALCOLI, TRASFERIMENTO
+    return render_template(
+        "portale/uf9_laboratorio.html", versione=versione, moduli=MODULI,
+        modulo_attivo=None, posizioni=POSIZIONI, distinte=DISTINTE,
+        calcoli=CALCOLI, trasferimento=TRASFERIMENTO, valutazione=VALUTAZIONE,
+        scenario={"posizioni": POSIZIONI, "distinte": DISTINTE,
+                  "calcoli": CALCOLI, "trasferimento": TRASFERIMENTO})
+
+
 @bp.route("/<versione>/tutto")
 def tutto(versione):
     """Tutte le schede in una pagina, come il file originale: serve ai test e a chi preferisce le linguette."""
