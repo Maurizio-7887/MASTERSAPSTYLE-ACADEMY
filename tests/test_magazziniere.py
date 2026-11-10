@@ -16,7 +16,9 @@ def config(html):
 
 c = docente()
 h = c.get('/vuoto/').get_data(as_text=True)
-assert 'Magazziniere 5.0: un mese di magazzino' in h and 'esercizio_guida=magazziniere-5' in h
+assert 'PISTOIA · MAGAZZINO 80 ORE' in h and 'lezioni-magazzino/pistoia' in h
+lezioni = c.get('/vuoto/lezioni-magazzino/pistoia').get_data(as_text=True)
+assert 'esercizio_guida=magazziniere-5' in lezioni and 'riprendi=1' in lezioni
 assert c.get('/static/guida/esercizi/magazziniere-5.js').status_code == 200
 assert config(c.get('/vuoto/s4/dati/?esercizio_guida=magazziniere-5').get_data(as_text=True))['esercizio'] == 'magazziniere-5'
 g = config(c.get('/vuoto/m/wms').get_data(as_text=True))
