@@ -14,8 +14,8 @@ class Tiles(HTMLParser):
 
 c = docente()
 expected = {
-    "firenze-magazzino-30": "/vuoto/s4/dati/?esercizio_guida=firenze-30",
-    "pistoia-magazzino-80": "/vuoto/s4/dati/?esercizio_guida=magazziniere-5",
+    "firenze-magazzino-30": "/vuoto/lezioni-magazzino/firenze",
+    "pistoia-magazzino-80": "/vuoto/lezioni-magazzino/pistoia",
     "firenze-amministrazione": "/vuoto/?esercizio_guida=s4-integrato",
 }
 for url in ("/", "/vuoto/"):
@@ -29,6 +29,13 @@ for url in ("/", "/vuoto/"):
     assert actual == expected, (url, actual)
     for _, target in parser.found:
         assert c.get(target).status_code == 200, target
+    # Le due tile dei magazzinieri includono gia' la teoria completa,
+    # con l'accesso al corretto esercizio operativo in altra scheda.
+    for slug, script in [('firenze', 'firenze-30'), ('pistoia', 'magazziniere-5')]:
+        page = c.get(f'/vuoto/lezioni-magazzino/{slug}').get_data(as_text=True)
+        assert 'Indice delle lezioni' in page
+        assert 'ESERCITAZIONE — SEMPRE DISPONIBILE' in page
+        assert 'esercizio_guida=' + script in page
     assert page.index('data-corso="firenze-magazzino-30"') < page.index('data-corso="pistoia-magazzino-80"')
     assert page.index('data-corso="pistoia-magazzino-80"') < page.index('data-corso="firenze-amministrazione"')
     assert "PISTOIA · MAGAZZINO 80 ORE" in page
