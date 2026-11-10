@@ -53,7 +53,7 @@
 <div class="msa-pratica-fissa" role="navigation" aria-label="Esercitazione sempre disponibile">
 <div><strong>🎯 ESERCITAZIONE — SEMPRE DISPONIBILE</strong>
 <small>La lezione resta aperta qui. L'esercizio si apre in un'altra scheda per lavorare in parallelo.</small></div>
-<a class="msa-pratica-btn" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida=programma.esercizio) }}" target="_blank" rel="noopener">Apri / riprendi esercizio {{ 'Firenze' if percorso == 'firenze' else 'Pistoia' }} ↗</a>
+<a class="msa-pratica-btn" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida=programma.esercizio, riprendi=1) }}" target="_blank" rel="noopener">Apri / riprendi esercizio {{ 'Firenze' if percorso == 'firenze' else 'Pistoia' }} ↗</a>
 </div>
 <div class="msa-flusso" aria-label="Ciclo completo dell'esercitazione">
 <strong>Il percorso pratico della nostra azienda</strong>
