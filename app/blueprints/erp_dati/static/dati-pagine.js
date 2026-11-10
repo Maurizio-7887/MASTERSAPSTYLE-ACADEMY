@@ -8,6 +8,10 @@
   // Firenze 30h: percorso operativo senza quiz contabili, soltanto sulla
   // schermata di avvio scelta dal Launchpad. Pistoia mantiene le sue opzioni.
   var firenze30 = /(?:[?&])esercizio_guida=firenze-30(?:&|$)/.test(location.search);
+  // Il corso scelto nel Launchpad resta attivo lungo le pagine del simulatore.
+  // Nessuna seconda scelta tra Amministrazione, Logistica e Continua.
+  var corsoMagazzino = /(?:[?&])esercizio_guida=(?:firenze-30|magazziniere-5)(?:&|$)/.test(location.search) ||
+    ['firenze-30', 'magazziniere-5'].indexOf((window.MSA_GUIDA || {}).esercizio) >= 0;
   var PAGINE = {
     avvio: function () {
       // Il reset non deve mai comparire automaticamente nel percorso didattico.
@@ -41,12 +45,31 @@
           '<p class="lab-nota">Stesso account = stessa azienda: cambiare percorso non crea archivi separati.</p>') +
         '<div class="lab-pannelli"><div data-pannello="zero">' + pZero + '</div><div data-pannello="avviata">' + pAvviata + '</div><div data-pannello="continua">' + pContinua + '</div></div>' +
         info + avanzate;
+      if (corsoMagazzino) {
+        // Non modificare mai un archivio esistente e non avviare automaticamente
+        // la logistica senza un gesto esplicito dell'allievo.
+        var giaLogistica = S().percorso === 'logistica';
+        var archivioEstraneo = haAzienda && !giaLogistica;
+        var presentazione = '<div class="lab-esito ' + (archivioEstraneo ? 'errore' : 'ok') + '">' +
+          (archivioEstraneo
+            ? '⚠️ In questo account esiste già un altro percorso. Non cancellare né inizializzare: chiedi al docente un account dedicato.'
+            : giaLogistica
+              ? '✓ Percorso magazzino già avviato. Segui il tutor laterale: riprende dall’ultimo passo salvato.'
+              : '📦 Primo accesso al corso magazzino: avvia una sola volta il percorso logistico, poi il tutor ti guiderà automaticamente.') +
+          '</div>';
+        radice.innerHTML = L.scheda('📦',
+          firenze30 ? 'Firenze · Magazzino 30 ore' : 'Pistoia · Magazzino 80 ore',
+          'Percorso selezionato nel Launchpad · nessuna seconda scelta',
+          presentazione + (archivioEstraneo ? '' : giaLogistica ? pContinua : pAvviata));
+        // Il reset e le tre scelte rimangono disponibili solo al docente
+        // nella navigazione amministrativa ordinaria, non nel corso.
+      }
       var mostra = function (c) {
         [].forEach.call(radice.querySelectorAll('[data-pannello]'), function (d) { d.hidden = d.getAttribute('data-pannello') !== c; });
         [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.classList.toggle('att', b.getAttribute('data-scelta') === c); });
       };
       [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.onclick = function () { mostra(b.getAttribute('data-scelta')); }; });
-      mostra(firenze30 ? 'avviata' : S().percorso === 'logistica' ? 'avviata' : scelta);
+      if (!corsoMagazzino) mostra(firenze30 ? 'avviata' : S().percorso === 'logistica' ? 'avviata' : scelta);
       if (firenze30) {
         var avvio30 = radice.querySelector('#lg-quiz');
         if (avvio30) { avvio30.value = 'no'; avvio30.disabled = true; }
@@ -83,7 +106,7 @@
         return SD.avviaSistema(v);
       }}, rendi);
       L.collega(radice, 'vs', {vs: N.versaCapitale}, rendi);
-      radice.querySelector('#backup-azienda').onclick = function () {
+      if (radice.querySelector('#backup-azienda')) radice.querySelector('#backup-azienda').onclick = function () {
         try {
           var file = new Blob([JSON.stringify({formato:'msa-erp-ft-backup-v1',creatoIl:new Date().toISOString(),stato:S()}, null, 2)], {type:'application/json'});
           var url = URL.createObjectURL(file), a = document.createElement('a');
@@ -93,7 +116,7 @@
           radice.querySelector('#backup-azienda-esito').textContent = 'Download richiesto: verifica che il file sia stato salvato prima di proseguire.';
         } catch(err) { radice.querySelector('#backup-azienda-esito').textContent = 'Backup non riuscito: nessuna cancellazione eseguita. ' + err.message; }
       };
-      radice.querySelector('#azzera').onclick = function () {
+      if (radice.querySelector('#azzera')) radice.querySelector('#azzera').onclick = function () {
         if (this.disabled) return;
         if ((prompt('Hai verificato il backup? Scrivi NUOVA AZIENDA per cancellare soltanto l’azienda integrata corrente. Account e password restano.') || '').trim().toUpperCase().replace(/\s+/g, ' ') !== 'NUOVA AZIENDA') return;
         N.azzera();
