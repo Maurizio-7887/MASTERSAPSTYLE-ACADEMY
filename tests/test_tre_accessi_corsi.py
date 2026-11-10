@@ -21,9 +21,9 @@ expected = {
 for url in ("/", "/vuoto/"):
     response = c.get(url)
     assert response.status_code == 200
-    page = response.get_data(as_text=True)
+    landing = response.get_data(as_text=True)
     parser = Tiles()
-    parser.feed(page)
+    parser.feed(landing)
     actual = dict(parser.found)
     assert len(parser.found) == 3, (url, parser.found)
     assert actual == expected, (url, actual)
@@ -32,14 +32,18 @@ for url in ("/", "/vuoto/"):
     # Le due tile dei magazzinieri includono gia' la teoria completa,
     # con l'accesso al corretto esercizio operativo in altra scheda.
     for slug, script in [('firenze', 'firenze-30'), ('pistoia', 'magazziniere-5')]:
-        page = c.get(f'/vuoto/lezioni-magazzino/{slug}').get_data(as_text=True)
-        assert 'Indice delle lezioni' in page
-        assert 'ESERCITAZIONE — SEMPRE DISPONIBILE' in page
-        assert 'esercizio_guida=' + script in page
-    assert page.index('data-corso="firenze-magazzino-30"') < page.index('data-corso="pistoia-magazzino-80"')
-    assert page.index('data-corso="pistoia-magazzino-80"') < page.index('data-corso="firenze-amministrazione"')
-    assert "PISTOIA · MAGAZZINO 80 ORE" in page
-    assert "FIRENZE · MAGAZZINO 30 ORE" in page
-    assert "FIRENZE · AMMINISTRAZIONE" in page
-    assert "Cambiare pulsante" in page or "Cambiare guida" in page
+        theory_page = c.get(f'/vuoto/lezioni-magazzino/{slug}').get_data(as_text=True)
+        assert 'Indice delle lezioni' in theory_page
+        assert 'ESERCITAZIONE — SEMPRE DISPONIBILE' in theory_page
+        assert 'esercizio_guida=' + script in theory_page
+    assert landing.index('data-corso="firenze-magazzino-30"') < landing.index('data-corso="pistoia-magazzino-80"')
+    assert landing.index('data-corso="pistoia-magazzino-80"') < landing.index('data-corso="firenze-amministrazione"')
+    assert "PISTOIA · MAGAZZINO 80 ORE" in landing
+    assert "FIRENZE · MAGAZZINO 30 ORE" in landing
+    assert "FIRENZE · AMMINISTRAZIONE" in landing
+    assert "Cambiare pulsante" in landing or "Cambiare guida" in landing
+    if url == "/":
+        for obsolete in ("Entra nel sistema integrato", "Avvio e ripresa del lavoro", "Corso FORMAS Pistoia"):
+            assert obsolete not in landing, obsolete
+        assert landing.count('data-corso="') == 3
 print("OK: three separate course tiles with correct guided access on Home and Launchpad")
