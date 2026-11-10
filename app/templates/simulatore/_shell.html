@@ -19,7 +19,7 @@
     </span>
   </div>
 </header>
-{% if versione %}
+{% if versione and (request.args.get('esercizio_guida') or session.get('guida_integrata')) not in ['firenze-30', 'magazziniere-5'] %}
 {# classe "tabs": il modulo Fabbisogno del simulatore vi aggancia la sua voce (nascosta, il menu è già qui) #}
 <nav class="msa-attivita tabs" aria-label="{{ 'Moduli' if moduli is defined else 'Attività' }}">
   <div class="msa-riga">
