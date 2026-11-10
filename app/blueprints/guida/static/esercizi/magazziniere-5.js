@@ -352,10 +352,9 @@
     return p;
   }
   function istruzioni(p) {
-    var out=[leggi('Dove andare',
-      'Nel Launchpad scegli il modulo indicato, oppure premi «Apri ➜» qui sopra. '+
-      'Percorso da raggiungere: '+String(p.percorso||p.titolo)+'. '+
-      'Controlla il titolo della schermata prima di inserire dati.')];
+    var out=[leggi('Apri la schermata del passo',
+      'Rimani nell’esercitazione già aperta. Premi «Apri ➜» nella guida per raggiungere direttamente la schermata operativa di questo passo. '+
+      'Se compare «Sei qui ✓» sei già nella schermata giusta: non tornare al Launchpad e non cambiare corso.')];
     (p.campi||[]).forEach(function(c,i) {
       var nome=String(c[0]||'Campo '+(i+1)), valore=String(c[1] == null ? '' : c[1]);
       var comando=/^(pulsante|comando|azione|salva|conferma|stampa)$/i.test(nome);
@@ -387,10 +386,6 @@
   }
   function avvioDettagli() {
     return [
-      leggi('1 · Apri l’ambiente giusto',
-        'Dal Launchpad scegli PISTOIA · MAGAZZINO 80 ORE, poi premi «Apri / riprendi esercizio Pistoia». '+
-        'Se sei già nell’esercizio, premi «Apri ➜» nel tutor: ti porta al comando necessario. Non cercare «Nuova azienda». '+
-        'Se vedi già documenti o un’azienda avviata, NON azzerare: chiedi al docente un account libero.'),
       {t:'campo',sel:'#lg-data',nome:'Data di avvio',valore:'2027-01-04',
        serve:'Inserisci 04/01/2027: è la data dello SCENARIO SIMULATO, anche se il corso viene svolto in un altro giorno o anno.'},
       {t:'scelta',sel:'#lg-quiz',nome:'Ricostruzione delle scritture',valore:'si',
@@ -407,7 +402,7 @@
   function attivazioneWms() {
     return [
       leggi('1 · Vai in WMS → Struttura e attivazione',
-        'Dal Launchpad apri Magazzino → Struttura e attivazione. Il WMS serve a conoscere DOVE si trova ogni unità di carico, '+
+        'Premi «Apri ➜» nel tutor per entrare direttamente in Struttura e attivazione WMS. Non tornare al Launchpad. Il WMS serve a conoscere DOVE si trova ogni unità di carico, '+
         'non solo quanti pezzi ci sono in contabilità.'),
       {t:'campo',sel:'#at-data',nome:'Data di attivazione',valore:'2027-01-04',
        serve:'La data WMS deve coincidere con l’avvio: 04/01/2027.'},
