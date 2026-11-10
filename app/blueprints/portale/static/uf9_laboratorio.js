@@ -128,5 +128,49 @@
     $('u9-scoretotal').textContent=(bad||vals.includes(null))?'— / 100':vals.reduce((a,b)=>a+b,0)+' / 100';
   }
   document.querySelectorAll('.u9-score').forEach(x=>x.addEventListener('input',scores));
+  // Il verbale resta in possesso dell'allievo/docente; nessun nominativo,
+  // punteggio o dato del corso e' inviato automaticamente al server.
+  $('u9-export').addEventListener('click',()=>{
+    const record=[];
+    function cell(v){
+      let str=String(v===undefined||v===null?'':v).replace(/\r?\n/g,' ');
+      // Esportazioni aperte con Excel: neutralizzare formule contenute
+      // in campi liberi compilati dagli allievi.
+      if(/^[=+@-]/.test(str))str="'"+str;
+      return '"'+str.replace(/"/g,'""')+'"';
+    }
+    function push(){
+      record.push(Array.from(arguments).map(cell).join(';'));
+    }
+    push('Sezione','Riferimento','Articolo','Quantità teorica','Quantità contata','Valore / Stato');
+    push('Anagrafica','Allievo','','','',$('u9-nome').value);
+    push('Anagrafica','Data prova','','','',$('u9-data').value);
+    rows.forEach(row=>{
+      const q=document.querySelector('.u9-count[data-id="'+row.id+'"]');
+      const n=q?num(q):null;
+      push('Inventario',row.id,row.art,row.teorico,n===null?'':n,
+           n===null?'Da contare':formatDelta(n-row.teorico)+' '+row.um);
+      const recon=recountInputs.get(row.id);
+      if(recon)push('Riconta',row.id,row.art,'',num(recon),
+                    document.querySelector('.u9-cause[data-id="'+row.id+'"]')?.value||'');
+    });
+    loads.forEach(row=>push('Spedizione',row.ddt,row.cliente,row.attesi,
+                            row.scansionati.length,row.sscc.filter(x=>!row.scansionati.includes(x)).join(', ')));
+    [['FIFO','u9-fifo'],['LIFO','u9-lifo'],['Costo medio','u9-medio'],['Valore in viaggio','u9-transit'],['Giacenze rete','u9-network']]
+      .forEach(([label,key])=>push('Valorizzazione',label,'','',$(key).value,''));
+    document.querySelectorAll('.u9-score').forEach((field,i)=>push('Valutazione','Indicatore '+(i+1),'','',field.value,'/25'));
+    push('Valutazione','Totale','','','',$('u9-scoretotal').textContent);
+    push('Commenti','Spedizioni','','','',$('u9-note-ship').value);
+    push('Commenti','Causali inventariali','','','',$('u9-causali').value);
+    push('Commenti','Allievo','','','',$('u9-student-notes').value);
+    push('Commenti','Docente','','','',$('u9-judgment').value);
+    push('Commenti','Valutatore','','','',$('u9-teacher').value);
+    push('Stato','Simulazione','','','',$('u9-finalstatus').textContent);
+    const payload='\uFEFF'+record.join('\r\n')+'\r\n';
+    const url=URL.createObjectURL(new Blob([payload],{type:'text/csv;charset=utf-8;'}));
+    const a=document.createElement('a');a.href=url;a.download='UF9_Pistoia_verbale_'+($('u9-data').value||'prova')+'.csv';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+  });
   finalize();
 }());
