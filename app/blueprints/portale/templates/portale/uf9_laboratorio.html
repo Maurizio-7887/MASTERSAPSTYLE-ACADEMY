@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laboratorio UF 9 · Prova inventariale multiarticolo · Pistoia</title>
+<link rel="stylesheet" href="{{ url_for('static',filename='css/fiori.css') }}">
+<style>
+.u9{max-width:1200px;margin:0 auto;padding:20px 16px 80px;font-family:system-ui,sans-serif;color:#1b3045;line-height:1.55}
+.u9 *{box-sizing:border-box}.u9-head{background:#123c60;color:#fff;border-radius:15px;padding:22px}
+.u9-head h1{font-size:1.65rem;color:#fff;margin:6px 0}.u9-head a{color:#deedfc}.u9-head p{margin:8px 0}
+.u9-toolbar{position:sticky;top:0;z-index:30;display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:12px;margin:12px 0;background:#e4eff9;border-radius:10px;box-shadow:0 2px 8px #1233}
+.u9-btn,.u9-toolbar a{display:inline-block;padding:10px 14px;border-radius:8px;font:inherit;font-weight:700;color:#16446c;background:#fff;border:1px solid #a5c3da;cursor:pointer;text-decoration:none}
+.u9-btn.primary{background:#18527d;color:#fff}.u9-btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #eca82d;outline-offset:2px}
+.u9-section{background:#fff;border:1px solid #cedde9;border-radius:12px;padding:18px;margin:14px 0}.u9-section h2{font-size:1.22rem;color:#12436c;margin:0 0 10px}
+.u9-info{background:#eef6fc;border-left:4px solid #3480ac;border-radius:5px;padding:12px;margin:10px 0}
+.u9-warning{background:#fff6e9;border-left:4px solid #bb842d;padding:12px;margin:10px 0}
+.u9-tablewrap{overflow:auto}.u9 table{border-collapse:collapse;width:100%;font-size:.94rem;min-width:720px}
+.u9 th,.u9 td{padding:9px;border:1px solid #c5d5e1;text-align:left;vertical-align:middle}
+.u9 th{background:#e7f1fa}.u9 input[type=number],.u9 input[type=text],.u9 input[type=date],.u9 textarea{font:inherit;max-width:100%;padding:8px;border-radius:6px;border:1px solid #9eb5c5}
+.u9 input[type=number]{width:115px}.u9 label{display:block;margin:8px 0}.u9 textarea{width:100%;min-height:74px}
+.u9-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.u9-status{font-size:.92rem;margin:9px 0;color:#244966}.u9-bad{color:#a32222;font-weight:750}
+.u9-good{color:#13623d;font-weight:750}.u9-separator{border-top:1px solid #cfdae4;margin:18px 0}
+.u9-total{font-size:1.55rem;font-weight:850;color:#123c60}
+.u9-label{font-size:.84rem;border-radius:5px;padding:3px 8px;background:#e1edf6;color:#123c60}
+.u9-evidence{background:#f1f7f0;border:1px solid #cbdcc9;padding:12px;border-radius:8px}
+@media(max-width:720px){.u9-grid{grid-template-columns:1fr}.u9{padding:12px 10px}.u9-toolbar{top:0}.u9-toolbar>*{flex:1}.u9-head h1{font-size:1.4rem}}
+@media print{.u9-toolbar,.u9-hideprint,.msa-shell{display:none!important}.u9-section{break-inside:avoid}.u9{font-size:11pt;padding:0}.u9-head{color:#111;background:transparent}.u9-head h1{color:#111}.u9-section textarea{min-height:40px}}
+</style></head><body>
+{% include "simulatore/_shell.html" %}
+<main class="u9">
+<header class="u9-head">
+<a href="{{ url_for('portale.uf9_pistoia',versione=versione) }}">← Torna al programma UF 9 e alla griglia dell'ente</a>
+<h1>Prova pratica UF 9 · Inventario complesso multiarticolo</h1>
+<p>Ferro &amp; Transenne · scenario indipendente di esame · 10 ubicazioni · 4 codici articolo · conta cieca · rettifiche · spedizioni · valorizzazione</p>
+<p><strong>Non modifica mai le giacenze, i documenti o il progresso dell'esercizio SAP STYLE.</strong> Si svolge in questa scheda e si stampa come evidenza della prova.</p>
+</header>
+<div class="u9-toolbar">
+<a href="{{ url_for('erp_dati.avvio',versione=versione,esercizio_guida='magazziniere-5') }}" target="_blank" rel="noopener">Apri il gestionale principale ↗</a>
+<a href="{{ url_for('portale.uf9_pistoia',versione=versione) }}" target="_blank" rel="noopener">Lezioni / Griglia UF 9 ↗</a>
+<button class="u9-btn primary" type="button" onclick="window.print()">Stampa la prova</button>
+</div>
+<section class="u9-section">
+<h2>1. Identificazione e istruzioni per gli allievi</h2>
+<div class="u9-grid">
+<label>Allievo <input id="u9-nome" type="text" placeholder="Nome e cognome" style="width:100%"></label>
+<label>Data della prova <input id="u9-data" type="date" style="width:100%"></label>
+</div>
+<p class="u9-info">Questa è una <strong>conta cieca</strong>: nella prima fase vedi ubicazione, articolo, lotto e unità di misura, ma non la giacenza teorica. Il docente consegna i valori effettivamente rilevati sul foglio di conta della prova; inseriscili come se li avessi appena letti con il terminale RF. Se stai studiando da solo usa la <strong>scheda misure simulate</strong> soltanto dopo aver compreso la procedura. Non sono dati del database reale.</p>
+<details class="u9-hideprint"><summary>Apri la scheda delle quantità fisiche simulate (da utilizzare come foglio consegnato dal docente)</summary>
+<table><thead><tr><th>Ubicazione</th><th>Lotto</th><th>Quantità contata</th></tr></thead><tbody>{% for x in posizioni %}
+<tr><td>{{ x.id }}</td><td>{{ x.lotto }}</td><td>{{ x.fisico }} {{ x.um }}</td></tr>
+{% endfor %}</tbody></table>
+</details>
+</section>
+<section class="u9-section">
+<h2>2. Conta cieca: dieci ubicazioni, materiali diversi</h2>
+<p>Simula LI01N e l'acquisizione con pistola RF: per ogni riga inserisci la quantità osservata. <strong>Non confrontare ancora con le giacenze teoriche.</strong></p>
+<div class="u9-tablewrap"><table>
+<thead><tr><th>Ubicazione</th><th>Materiale</th><th>Lotto</th><th>U.M.</th><th>Quantità rilevata</th><th>Esito</th></tr></thead>
+<tbody>{% for x in posizioni %}<tr><td>{{ x.id }}</td><td><strong>{{ x.art }}</strong><br><small>{{ x.nome }}</small></td><td>{{ x.lotto }}</td><td>{{ x.um }}</td><td><input class="u9-count" type="number" min="0" step="1" data-id="{{ x.id }}" aria-label="Quantità fisica in {{ x.id }}" placeholder="Conta"></td><td class="u9-checkresult" data-id="{{ x.id }}">Da contare</td></tr>{% endfor %}</tbody></table></div>
+<button id="u9-closecount" type="button" class="u9-btn primary u9-hideprint">Conferma la conta e confronta con il gestionale</button>
+<p id="u9-count-status" class="u9-status" aria-live="polite">Conta da completare: 10 ubicazioni.</p>
+<div id="u9-reconciliation" hidden>
+<h3>Risultato della conta e prospetto delle differenze</h3>
+<div class="u9-tablewrap"><table><thead><tr><th>Ubicazione</th><th>Articolo</th><th>Teorica</th><th>Contata</th><th>Differenza</th><th>Valore differenza</th><th>Decisione / causale</th></tr></thead><tbody id="u9-diffrows"></tbody></table></div>
+<label>Motivazione delle differenze e controllo documentale<textarea id="u9-causali" placeholder="Cerca trasferimenti, errori RF, scarti, merce in quarantena, unità di misura..."></textarea></label>
+<p class="u9-warning">Le differenze negative e positive vanno trattate <strong>separatamente</strong>. Non si compensano automaticamente quantità appartenenti ad articoli diversi; per la stessa referenza verificare anche ubicazioni e stati di stock.</p>
+</div>
+</section>
+<section class="u9-section">
+<h2>3. Riconta LI14, chiusura LI20 e rettifica LI21</h2>
+<p>Per ogni ubicazione risultata differente, compila la riconta. Poi verifica i documenti e stabilisci se la rettifica è giustificata. <strong>La chiusura e la rettifica qui sono simulate, non registrate nel gestionale principale.</strong></p>
+<div id="u9-recount-area" class="u9-info">Completa prima la conta cieca.</div>
+<button class="u9-btn u9-hideprint" id="u9-close" type="button">Simula chiusura inventario e rettifiche autorizzate</button>
+<p id="u9-close-status" class="u9-status" aria-live="polite">In attesa delle ricontazioni.</p>
+</section>
+<section class="u9-section">
+<h2>4. Spedizioni: distinta di carico, SSCC e DDT per cliente</h2>
+<p>Confronta il numero di colli atteso con quelli effettivamente scansionati sul mezzo. Un camion può avere il totale complessivo apparentemente corretto, ma un cliente avere un collo sbagliato: verifica <strong>per cliente e per SSCC</strong>.</p>
+<div class="u9-tablewrap"><table><thead><tr><th>Cliente / DDT</th><th>Ordine</th><th>Articolo</th><th>Pezzi</th><th>Colli distinta</th><th>Colli caricati</th><th>Esito e SSCC</th></tr></thead>
+<tbody>{% for d in distinte %}<tr><td>{{ d.cliente }}<br><strong>{{ d.ddt }}</strong></td><td>{{ d.ordine }}</td><td>{{ d.art }}</td><td>{{ d.pezzi }}</td><td>{{ d.attesi }}</td><td>{{ d.scansionati|length }}</td><td data-shipment="{{ loop.index0 }}">Da verificare</td></tr>{% endfor %}</tbody></table></div>
+<button id="u9-shipcheck" class="u9-btn primary u9-hideprint" type="button">Controlla distinta, SSCC, colli e DDT</button>
+<div id="u9-ship-result" class="u9-status" aria-live="polite"></div>
+<label>Spiega cosa fare con il collo mancante senza dichiarare il camion completo<textarea id="u9-note-ship" placeholder="Indica cliente, SSCC e procedura di controllo..."></textarea></label>
+</section>
+<section class="u9-section">
+<h2>5. Valorizzazione: FIFO, LIFO, costo medio e merce in viaggio</h2>
+<div class="u9-grid">
+<div><h3>Costi per lotti di FERRO (esercizio didattico)</h3>
+<p>Lotto 1: 100 kg × 1,00 €/kg. Lotto 2: 100 kg × 1,20 €/kg. Consumo: 120 kg. Rimanenza: 80 kg.</p>
+<label>Valore finale FIFO (€) <input id="u9-fifo" type="number" min="0" step=".01"></label>
+<label>Valore finale LIFO (€) <input id="u9-lifo" type="number" min="0" step=".01"></label>
+<label>Valore finale costo medio (€) <input id="u9-medio" type="number" min="0" step=".01"></label>
+</div><div><h3>Merci in viaggio tra depositi</h3>
+<p>Trasferimento {{ trasferimento.numero }}: {{ trasferimento.qta }} {{ trasferimento.art }} da {{ trasferimento.origine }} a {{ trasferimento.destinazione }}. Costo unitario € {{ '%.2f'|format(trasferimento.costo_unitario) }}. Alla partenza W100 contiene 200 pezzi, 100 sono in viaggio, D200 ne ha zero.</p>
+<label>Valore della merce in viaggio (€) <input id="u9-transit" type="number" min="0" step=".01"></label>
+<label>Totale pezzi sulla rete (W100 + transito + D200) <input id="u9-network" type="number" min="0" step="1"></label>
+</div></div>
+<button id="u9-valuationcheck" class="u9-btn primary u9-hideprint" type="button">Verifica calcoli e riconciliazione</button>
+<p id="u9-valuationstatus" class="u9-status" aria-live="polite"></p>
+<p class="u9-info">Il LIFO è incluso come metodo di confronto teorico richiesto dal programma; non è consentito nella contabilità IFRS. I valori a due lotti sono un esercizio distinto dai movimenti realmente registrati nell'azienda ERP.</p>
+</section>
+<section class="u9-section">
+<h2>6. Evidenze finali per il docente</h2>
+<div class="u9-evidence">
+<p>Documentazione da verificare: 10 ubicazioni contate, differenze per più articoli, riconta, rettifica simulata motivata, documenti di spedizione per ciascun cliente, valore FIFO/LIFO/medio, stato e valore delle merci in viaggio.</p>
+<p><strong>Stato della simulazione:</strong> <span id="u9-finalstatus">Da iniziare</span></p>
+</div>
+<label>Osservazioni dell'allievo<textarea id="u9-student-notes" placeholder="Procedure, problemi riscontrati, azioni proposte..."></textarea></label>
+<p class="u9-warning">La correzione automatica segnala la coerenza dei calcoli e dei dati; <strong>non assegna il voto d'esame</strong>. Il docente valuta la qualità del lavoro utilizzando quattro indicatori da 1 a 25 punti ciascuno nella griglia riportata sotto.</p>
+<h3>Griglia docente: quattro indicatori × 25 punti</h3>
+<div class="u9-tablewrap"><table><thead><tr><th>Indicatore</th><th>Descrizione</th><th>Punteggio 1–25</th></tr></thead><tbody>
+{% for x in valutazione %}<tr><td><strong>{{ x.numero }}. {{ x.titolo }}</strong></td><td>{{ x.descrizione }}</td><td><input class="u9-score" type="number" min="1" max="25" step="1" aria-label="Indicatore {{ x.numero }}"></td></tr>{% endfor %}</tbody></table></div>
+<p>Livelli richiesti dall'ente: <strong>1–5 insufficiente; 6–10 parzialmente sufficiente; 11–15 sufficiente; 16–20 buono; 21–25 ottimo.</strong></p>
+<p>Valutazione finale: <span class="u9-total" id="u9-scoretotal" aria-live="polite">— / 100</span></p>
+<p class="u9-status" id="u9-scoreerror" role="status"></p>
+<label>Giudizio motivato del docente<textarea id="u9-judgment"></textarea></label>
+<div class="u9-grid"><label>Nome docente <input type="text" id="u9-teacher"></label><label>Firma docente sul documento stampato <input type="text" placeholder="Firma autografa dopo la stampa"></label></div>
+<p>Non è stata indicata una soglia di promozione complessiva: il software non dichiara automaticamente promosso o bocciato.</p>
+</section>
+</main>
+<script id="u9-dataset" type="application/json">{{ scenario|tojson }}</script>
+<script src="{{ url_for('portale.static',filename='uf9_laboratorio.js') }}"></script>
+</body></html>
