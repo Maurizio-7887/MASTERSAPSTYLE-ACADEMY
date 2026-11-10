@@ -13,7 +13,9 @@ from datetime import timedelta
 from ...db import ArchivioLavoro, DiarioAzione, Sessione, StatoLavoro, adesso, db
 from ...pagine import LAB_SLOTS, VERSIONI
 
-SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS)   # versioni del simulatore e laboratori
+SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS) | {
+    "erp-ft-docente-pistoia", "erp-ft-docente-firenze"
+}  # le due prove del docente sono indipendenti dall'azienda principale
 
 bp = Blueprint("sincronia", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sincronia")
 
