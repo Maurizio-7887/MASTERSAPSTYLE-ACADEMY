@@ -63,7 +63,7 @@ assert "Prova inventariale UF 9" in pistoia_html
 assert 'uf9-pistoia/laboratorio' in pistoia_html
 assert "FI</b>" not in pistoia_html
 assert "Contabilità finanziaria" not in pistoia_html
-assert "Altri moduli" in pistoia_html
+assert "Altri moduli" not in pistoia_html  # vista allievo essenziale, senza menu ERP
 
 firenze = c.get("/vuoto/s4/dati/?esercizio_guida=firenze-30")
 assert firenze.status_code == 200
