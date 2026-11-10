@@ -14,7 +14,7 @@ from ...db import ArchivioLavoro, DiarioAzione, Sessione, StatoLavoro, adesso, d
 from ...pagine import LAB_SLOTS, VERSIONI
 
 SLOT_VALIDI = set(VERSIONI) | set(LAB_SLOTS) | {
-    "erp-ft-docente-pistoia", "erp-ft-docente-firenze"
+    "erp-ft-doc-pistoia", "erp-ft-doc-firenze"
 }  # le due prove del docente sono indipendenti dall'azienda principale
 
 bp = Blueprint("sincronia", __name__, template_folder="templates", static_folder="static", static_url_path="/static/sincronia")
@@ -135,7 +135,7 @@ def stato(versione):
     u = utente_corrente()
     # Le prove isolate sono riservate al docente; le normali classi
     # continuano a lavorare nei propri archivi esistenti.
-    if versione in {"erp-ft-docente-pistoia", "erp-ft-docente-firenze"} and (u is None or not u.docente):
+    if versione in {"erp-ft-doc-pistoia", "erp-ft-doc-firenze"} and (u is None or not u.docente):
         return jsonify(errore="archivio di prova riservato al docente"), 403
     s = stato_salvato(u, versione)
     if request.method == "GET":
