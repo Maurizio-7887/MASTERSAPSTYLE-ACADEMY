@@ -11,6 +11,8 @@
 </head>
 <body class="msa-launchpad msa-lab">
 {% include "simulatore/_shell.html" %}
+{% set corso_barra = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
+{% if corso_barra not in ['firenze-30', 'magazziniere-5'] %}
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
     › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla sap">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
@@ -19,11 +21,14 @@
     {% for p in lab.nav %}<a href="{{ url_for(p.ep) }}" class="{{ 'attivo' if p.ep == pagina.ep }}">{{ p.icona }} {{ p.titolo }}</a>{% endfor %}
   </nav>
 </div></div>
+{% endif %}
 <main class="msa-lp">
+  {% if corso_barra not in ['firenze-30', 'magazziniere-5'] %}
   <div class="msa-lp-intro">
     <h1>{{ pagina.icona }} {{ pagina.titolo }} <span class="lab-tc">{{ pagina.tcode }}</span></h1>
     <p>{% block intro %}{% endblock %}</p>
   </div>
+  {% endif %}
   {# Per i due percorsi logistici una sola barra compatta in ogni pagina.
      Il tutor mostra i passi; le lezioni e la prova hanno UN solo accesso qui. #}
   {% set corso_attivo = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
@@ -34,9 +39,7 @@
     {% if corso_attivo == 'magazziniere-5' %}
     <a href="{{ url_for('portale.uf9_laboratorio', versione=versione) }}" target="_blank" rel="noopener" style="padding:8px 12px;border-radius:7px;background:#fff;border:1px solid #8fbbd1;color:#174868;text-decoration:none;font-weight:700">🧪 Prova inventariale UF 9 ↗</a>
     {% endif %}
-    {% if blueprint == 'erp_dati' and config.pagina == 'avvio' %}
-    <span style="font-size:.86rem;color:#345b75">Prima volta? Scegli «Azienda già avviata». Hai già iniziato? «Continua il mio lavoro». Non azzerare.</span>
-    {% endif %}
+    <span style="font-size:.86rem;color:#345b75">Segui il tutor a destra: il corso è già selezionato, senza altre scelte. Non azzerare il lavoro.</span>
   </nav>
   {% endif %}
   <div id="lab" class="lab"></div>
