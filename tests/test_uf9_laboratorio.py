@@ -63,5 +63,14 @@ firenze = c.get("/vuoto/s4/dati/?esercizio_guida=firenze-30")
 assert firenze.status_code == 200
 firenze_html = firenze.get_data(as_text=True)
 assert "FIRENZE · Innovazione digitale" in firenze_html
-assert "Apri percorso PISTOIA" in firenze_html
+assert "Le lezioni Firenze" in firenze_html
 assert "4 articoli, 10 ubicazioni" not in firenze_html
+
+# Nessuna duplicazione dei pulsanti teorici sulla schermata di avvio:
+# la teoria rimane nel tutor laterale e nella tile principale del corso.
+assert "LEZIONI TEORICHE DEL MIO CORSO" not in pistoia_html
+assert "📚 Apri le lezioni teoriche Pistoia" not in pistoia_html
+assert "📚 Apri le lezioni teoriche Firenze" not in firenze_html
+assert "QUALE ESERCIZIO SCELGO QUI SOTTO?" in pistoia_html
+assert "Continua il mio lavoro" in pistoia_html
+assert "APRI LE LEZIONI DEL MIO CORSO" in pannello
