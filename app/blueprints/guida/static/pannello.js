@@ -353,6 +353,16 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    // La prova UF9 e' una simulazione SEPARATA: non altera la progressione
+    // e le giacenze dell'esercitazione aziendale Pistoia.
+    if (E.codice === 'magazziniere-5') {
+      h += '<div style="margin:10px 0;padding:10px;border:1px solid #b7d4e7;background:#eef7ff;border-radius:9px">' +
+        '<b>🎓 UF 9 · ESAME INTERMEDIO INVENTARIALE (40 ORE)</b><p style="margin:5px 0;font-size:.9em">' +
+        'Prova autonoma con 4 articoli, 10 ubicazioni, conto e riconta, colli/SSCC e valutazione docente in centesimi. Non modifica il gestionale principale.</p>' +
+        '<a href="/' + encodeURIComponent(C.versione === 'completo' ? 'completo' : 'vuoto') +
+        '/uf9-pistoia/laboratorio" target="_blank" rel="noopener" style="display:inline-block;color:white;background:#164c76;padding:9px 14px;border-radius:7px;text-decoration:none;font-weight:bold">' +
+        '🧪 Apri la prova UF 9 in una nuova scheda ↗</a></div>';
+    }
     if (p.principiante) {
       // Lezione parlata per chi non ha mai utilizzato un gestionale.
       // La guida spiega, ma le spunte reali restano governate dai dati ERP.
