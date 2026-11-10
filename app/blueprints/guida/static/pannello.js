@@ -233,6 +233,21 @@
     if (p.dove.pp) return base + '?pp=' + encodeURIComponent(p.dove.pp);
     return base;
   }
+  // Arrivando dal pulsante del corso, riprendi direttamente sulla schermata
+  // del passo salvato. Nessuna seconda scelta, nessuna modifica al database
+  // e nessuna navigazione forzata durante il normale uso del simulatore.
+  if ((E.codice === 'magazziniere-5' || E.codice === 'firenze-30') &&
+      new URLSearchParams(location.search).get('riprendi') === '1') {
+    ls(APERTA + '-' + E.codice, '1');
+    var destinazioneRipresa = urlPasso(PASSI[pos]);
+    if (destinazioneRipresa) {
+      var paginaRipresa = new URL(destinazioneRipresa, location.href);
+      if (paginaRipresa.pathname !== location.pathname) {
+        paginaRipresa.searchParams.set('esercizio_guida', E.codice);
+        location.replace(paginaRipresa.href);
+      }
+    }
+  }
   function suQuestaPagina(p) {
     var u = urlPasso(p);
     if (!u) return true;
