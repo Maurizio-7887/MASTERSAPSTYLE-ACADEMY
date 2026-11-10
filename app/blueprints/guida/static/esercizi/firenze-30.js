@@ -87,8 +87,6 @@
     ];
     avvio.nota = 'Attenzione: usa un account di prova vuoto dedicato a Firenze. Se il sistema è già avviato, NON premere Azzera e non selezionare Pistoia nello stesso account. Per la spunta iniziale deve risultare «Ricostruzione delle scritture disattivata»; altrimenti usa un nuovo account Firenze dedicato.';
     avvio.punti = [
-      {t:'leggi',nome:'Apri Avvio del sistema',
-        serve:'Dal Launchpad scegli FIRENZE · MAGAZZINO 30 ORE, poi «Apri / riprendi esercizio Firenze». Se sei già nel tutor premi «Apri ➜» e segui la schermata operativa. Non cercare «Nuova azienda».'},
       {t:'campo',sel:'#lg-data',nome:'Data dello scenario',valore:'2027-01-04',
         serve:'Inserisci 04/01/2027: data della simulazione, non la data reale del corso.'},
       {t:'scelta',sel:'#lg-quiz',nome:'Ragioneria disattivata',valore:'no',
