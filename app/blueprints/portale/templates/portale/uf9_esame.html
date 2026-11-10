@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/fiori.css') }}">
+<title>{{ titolo }} · Simulazione e valutazione</title>
+<style>
+.uf9-main{max-width:1180px;margin:auto;padding:16px 15px 90px;color:#1b3348;font:16px/1.62 system-ui,sans-serif}
+.uf9-main *{box-sizing:border-box}
+.uf9-top{background:#133f62;color:white;padding:22px;border-radius:14px}
+.uf9-top h1{color:white;font-size:1.65rem;margin:5px 0 10px}
+.uf9-top a{color:#e8f3ff}.uf9-top p{margin:8px 0}
+.uf9-tools{position:sticky;top:0;z-index:25;display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px;margin:12px 0;background:#e6f1fb;border:1px solid #b4cddd;border-radius:10px}
+.uf9-tools a,.uf9-tools button{font:inherit;font-size:.93rem;text-decoration:none;border-radius:8px;border:1px solid #164969;padding:10px 13px;background:#fff;color:#153f63;cursor:pointer;font-weight:750}
+.uf9-tools a.uf9-primary{background:#144d79;color:white}
+.uf9-box{padding:19px;background:#fff;border:1px solid #d2dee8;border-radius:12px;margin:15px 0}
+.uf9-box h2{margin:0 0 10px;font-size:1.3rem;color:#154a72}
+.uf9-box h3{color:#174c74;font-size:1.06rem;margin:12px 0 5px}
+.uf9-box p{margin:7px 0}
+.uf9-note{padding:11px 14px;background:#f0f7fb;border-left:4px solid #2c81b5;border-radius:6px}
+.uf9-table{width:100%;border-collapse:collapse;margin-top:12px}
+.uf9-table th,.uf9-table td{border:1px solid #bdcedd;padding:8px 11px;text-align:left;vertical-align:top}
+.uf9-table th{background:#eaf3fa}
+.uf9-fase{padding:14px 0;border-top:1px solid #dae3eb}
+.uf9-fase:first-of-type{border-top:0}
+.uf9-evidenze{padding:9px 13px;background:#f7f9fa;border-radius:7px}
+.uf9-evidenze li{margin:5px 0}
+.uf9-field{display:block;font-weight:650;font-size:.94rem;margin:8px 0}
+.uf9-field input,.uf9-field textarea{display:block;border:1px solid #a5bbca;border-radius:6px;padding:8px;font:inherit;width:100%;margin:4px 0 8px}
+.uf9-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.uf9-badge{font-size:.82rem;background:#e8f2fb;color:#164769;border-radius:7px;padding:3px 9px;display:inline-block}
+.uf9-score{width:85px;font:inherit;padding:9px 7px;border:1px solid #9bb5c7;border-radius:7px}
+.uf9-total{font-size:1.45rem;font-weight:850;color:#133e61}
+.uf9-error{color:#a62a2a;font-weight:700}
+.uf9-simple{color:#485f75;font-size:.9rem}
+.uf9-after{border:1px solid #b9d1b5;background:#f2f7ee;padding:12px;border-radius:8px}
+@media(max-width:680px){.uf9-grid{grid-template-columns:1fr}.uf9-table{font-size:.85rem}.uf9-main{padding:10px}.uf9-tools a{flex:1}}
+@media print{.uf9-tools,.uf9-top a,.uf9-no-print,.msa-shell{display:none!important}.uf9-main{padding:0;font-size:11pt}.uf9-box{break-inside:avoid}.uf9-top{color:#111;background:transparent;padding:0}.uf9-top h1{color:#111}}
+</style>
+</head>
+<body>{% include "simulatore/_shell.html" %}
+<main class="uf9-main">
+<header class="uf9-top">
+<a href="{{ url_for('portale.lezioni_magazzino', versione=versione,percorso='pistoia',lezione='inventario') }}">← Lezioni Pistoia</a>
+<h1>{{ titolo }}</h1>
+<p><strong>Prova intermedia:</strong> {{ prova.titolo }} · <b>valutazione /100</b></p>
+<p>Fonte: progetto didattico dell'ente. La suddivisione delle 40 ore e i nomi dei quattro indicatori sono proposte operative per applicare le specifiche ricevute.</p>
+</header>
+<div class="uf9-tools" aria-label="Comandi disponibili durante tutta la lezione">
+<a class="uf9-primary" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='magazziniere-5') }}" target="_blank" rel="noopener">🎯 Apri / riprendi il gestionale Pistoia ↗</a>
+<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='inventario') }}" target="_blank" rel="noopener">📖 Teoria inventari ↗</a>
+<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='valori') }}" target="_blank" rel="noopener">📖 FIFO, LIFO, valore ↗</a>
+<button type="button" onclick="window.print()">🖨️ Stampa scheda esame</button>
+</div>
+<section class="uf9-box" aria-labelledby="obiettivi">
+<h2 id="obiettivi">1 · Obiettivi specifici della UF 9 indicati dall'ente</h2>
+<h3>Conoscenze</h3><p>{{ obiettivi.conoscenze }}</p>
+<h3>Capacità</h3><ul>{% for x in obiettivi.capacita %}<li>{{ x }}</li>{% endfor %}</ul>
+<h3>Contenuti formativi</h3><ol>{% for x in contenuti %}<li>{{ x }}</li>{% endfor %}</ol>
+<p class="uf9-note"><strong>Prova di fine modulo richiesta dall'ente:</strong> prova pratica di simulazione di un processo inventariale. La valutazione va espressa in centesimi, con quattro indicatori da 1 a 25 punti ciascuno.</p>
+</section>
+<section class="uf9-box">
+<h2>2 · Programma didattico di 40 ore e collegamento alle schermate</h2>
+<p>Distribuzione delle ore <strong>proposta</strong> per preparare la prova. Le operazioni vengono insegnate lungo il flusso commerciale → acquisti → produzione → spedizioni → inventario; non occorre aprire più aziende o rifare da zero i movimenti.</p>
+<div style="overflow-x:auto"><table class="uf9-table"><thead><tr><th>Ore</th><th>Argomento</th><th>Passi della guida Pistoia</th><th>Attività</th></tr></thead>
+<tbody>{% for modulo in programma %}<tr><td><strong>{{ modulo.ore }}</strong></td><td>{{ modulo.titolo }}<div><a href="{{ url_for('portale.lezioni_magazzino',versione=versione,percorso='pistoia',lezione=modulo.lezione) }}">Apri teoria</a></div></td><td>{{ modulo.passi }}</td><td>{{ modulo.attivita }}</td></tr>{% endfor %}</tbody>
+<tfoot><tr><th>{{ totale_ore }}</th><th colspan="3">Totale ore UF 9</th></tr></tfoot></table></div>
+</section>
+<section class="uf9-box">
+<h2>3 · Traccia dell'esame intermedio (allievo)</h2>
+<p><strong>Contesto:</strong> {{ prova.contesto }}</p>
+<p><strong>Tempo suggerito:</strong> {{ prova.durata_suggerita }}.</p>
+<p class="uf9-note">Lavora nel tuo account. Usa i numeri documentali realmente presenti. <strong>Non creare movimenti già esistenti</strong> e non modificare la quantità per far quadrare un risultato. Se il documento è già stato completato nell'esercitazione, mostra l'evidenza e spiegane il funzionamento.</p>
+<div class="uf9-grid">
+<label class="uf9-field">Nome e cognome allievo<input id="uf9-allievo" placeholder="Scrivi il nominativo" autocomplete="name"></label>
+<label class="uf9-field">Data della prova<input id="uf9-data" type="date"></label>
+</div>
+{% for fase in fasi %}
+<div class="uf9-fase">
+<h3>Fase {{ fase.codice }} · {{ fase.titolo }}</h3>
+<span class="uf9-badge">Guida ERP · passi {{ fase.passi }}</span>
+<p>{{ fase.consegna }}</p>
+<div class="uf9-evidenze"><strong>Da consegnare / mostrare al docente</strong>
+<ul>{% for evidence in fase.evidenze %}<li><label><input type="checkbox" class="uf9-check" style="margin-right:7px"> {{ evidence }}</label></li>{% endfor %}</ul></div>
+<label class="uf9-field">Codici documento, osservazioni e anomalie della fase {{ fase.codice }}
+<textarea rows="2" id="uf9-nota-{{ fase.codice }}" placeholder="Annota numeri e osservazioni reali, non inventati"></textarea></label>
+</div>
+{% endfor %}
+</section>
+<section class="uf9-box">
+<h2>4 · Griglia docente di valutazione /100</h2>
+<p>I quattro indicatori sotto sono una <strong>proposta di ripartizione coerente con le capacità e i contenuti dell'ente</strong>. La valutazione è assegnata dal docente: non viene calcolata automaticamente dal simulatore in base alle registrazioni e non viene salvata sul server.</p>
+<table class="uf9-table"><thead><tr><th>Livello Likert richiesto</th><th>Punti per indicatore</th></tr></thead><tbody>
+{% for livello in livelli %}<tr><td>{{ livello.label }}</td><td>{{ livello.da }}–{{ livello.a }}</td></tr>{% endfor %}
+</tbody></table>
+<div class="uf9-no-print"><p class="uf9-simple">Compila ogni casella con un numero intero tra 1 e 25. Il totale appare soltanto quando tutti i quattro indicatori sono valutati.</p></div>
+<div style="overflow-x:auto"><table class="uf9-table"><thead><tr><th>Indicatore</th><th>Osservazioni del valutatore</th><th>Punti /25</th></tr></thead><tbody>
+{% for indicatore in valutazione %}
+<tr><td><strong>{{ indicatore.numero }}. {{ indicatore.titolo }}</strong></td>
+<td>{{ indicatore.descrizione }}</td>
+<td><input class="uf9-score" type="number" min="1" max="25" step="1" aria-label="Punteggio indicatore {{ indicatore.numero }} da 1 a 25" data-numero="{{ indicatore.numero }}" placeholder="1–25"></td></tr>
+{% endfor %}</tbody></table></div>
+<p><strong>Totale:</strong> <span id="uf9-totale" class="uf9-total" aria-live="polite">— / 100</span> <span id="uf9-livello" class="uf9-simple"></span></p>
+<p id="uf9-errore" class="uf9-error" role="alert"></p>
+<label class="uf9-field">Giudizio motivato del docente<textarea rows="3" id="uf9-giudizio" placeholder="Motiva punti di forza, carenze e eventuali recuperi"></textarea></label>
+<div class="uf9-grid"><label class="uf9-field">Docente / valutatore<input id="uf9-docente"></label><label class="uf9-field">Firma docente<input placeholder="Da firmare sul foglio stampato"></label></div>
+<p class="uf9-after"><strong>Attenzione:</strong> la scala dell'ente definisce i livelli per ciascun indicatore. Non è stata indicata una soglia di superamento complessiva: <strong>nessun esito promosso/bocciato è dedotto automaticamente</strong>.</p>
+</section>
+<section class="uf9-box">
+<h2>5 · Dalla pratica alla prova, senza azzerare nulla</h2>
+<p>Domani il corso parte regolarmente da SD (ordini cliente), poi MM (materie prime), PP (produzione), WMS (ubicazioni e movimenti), consegne e spedizioni. <strong>La parte inventariale verrà esercitata durante il percorso e valutata come prova intermedia UF 9</strong>, usando i passaggi 38–51 e 64–78 già presenti nella guida. Il calendario della prova è deciso dal docente; non è necessario anticiparla al primo giorno.</p>
+<p><strong>Prima della prova:</strong> ogni allievo deve sapere recuperare giacenze, documenti, distinta di carico, SSCC e stato di una spedizione; deve anche distinguere conte fisiche da movimenti contabili. L'esame si svolge nello stesso caso aziendale, senza reinizializzare il database.</p>
+</section>
+</main>
+<script>
+(function(){
+  const inputs=[...document.querySelectorAll('.uf9-score')];
+  const total=document.getElementById('uf9-totale');
+  const error=document.getElementById('uf9-errore');
+  function update(){
+    const values=inputs.map(x=>x.value.trim()===''?null:Number(x.value));
+    const invalid=values.some(x=>x!==null&&(!Number.isInteger(x)||x<1||x>25));
+    error.textContent=invalid?'Ogni indicatore richiede un valore intero tra 1 e 25.':'';
+    total.textContent=invalid||values.some(x=>x===null)?'— / 100':values.reduce((a,b)=>a+b,0)+' / 100';
+  }
+  inputs.forEach(x=>x.addEventListener('input',update));
+  update();
+}());
+</script>
+</body></html>
