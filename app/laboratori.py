@@ -17,9 +17,9 @@ def render_lab(blueprint, endpoint):
     u = utente_corrente()
     if slot == "erp-ft" and u is not None and u.docente:
         if corso == "magazziniere-5":
-            slot = "erp-ft-docente-pistoia"
+            slot = "erp-ft-doc-pistoia"
         elif corso == "firenze-30":
-            slot = "erp-ft-docente-firenze"
+            slot = "erp-ft-doc-firenze"
     config = {"chiave": f"ferro-transenne-fi-2026-{slot}-civilistico", "pagina": endpoint, "slot": slot}
     return render_template(f"{blueprint}/{endpoint}.html", lab=lab, pagina=pagina, blueprint=blueprint, config=config,
                            versione=g.versione, versioni=VERSIONI, moduli=MODULI, modulo_attivo=modulo(codice),
