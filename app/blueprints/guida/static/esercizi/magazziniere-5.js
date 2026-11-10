@@ -27,7 +27,7 @@
   var passi = [
     // ══════════ UF 10 · avvio: il magazzino e il sistema ══════════
     {id: 'mag5-avvio', g: 'UF 10 · 0 · Avvio', data: '04/01/2027', titolo: 'Avvia il percorso logistico', contabile: true, dove: {ep: D + 'avvio'},
-     percorso: 'Launchpad → Avvio e dati di base → Nuova azienda / Avvio → scheda «Percorso logistico · Magazziniere 5.0»',
+     percorso: 'Pistoia · Magazzino 80 ore → Apri / riprendi esercizio → avvio del percorso logistico',
      campi: [['Ambiente', 'Sistema integrato in uno spazio vuoto dedicato a questo esercizio (se trovi documenti di altri esercizi chiedi al docente)'], ['Data di avvio', '04/01/2027'],
        ['Ricostruzione delle scritture', 'sì (ragioneria di magazzino): dopo ogni documento contabile ricostruisci Dare e Avere. «No» solo se il docente ha scelto la classe solo operativa'], ['Pulsante', 'Avvia il percorso logistico']],
      attesa: 'Saldi di apertura (561): D 10 Banca 50.000 + D 13 Prodotti finiti 22.785 / A 30 Capitale 72.785. A scaffale contabile: 200 TR-STD × 31,40 = 6.280; 200 TR-ALTA × 36,94 = 7.388; 300 TR-PED × 30,39 = 9.117. Ferro: zero.',
@@ -388,8 +388,8 @@
   function avvioDettagli() {
     return [
       leggi('1 · Apri l’ambiente giusto',
-        'Entra nel Sistema integrato → Avvio e dati di base → Avvio del sistema. '+
-        'Scegli la scheda «Percorso logistico · Magazziniere 5.0», NON «Crea nuova azienda vuota (costituzione)» e NON un altro esercizio. '+
+        'Dal Launchpad scegli PISTOIA · MAGAZZINO 80 ORE, poi premi «Apri / riprendi esercizio Pistoia». '+
+        'Se sei già nell’esercizio, premi «Apri ➜» nel tutor: ti porta al comando necessario. Non cercare «Nuova azienda». '+
         'Se vedi già documenti o un’azienda avviata, NON azzerare: chiedi al docente un account libero.'),
       {t:'campo',sel:'#lg-data',nome:'Data di avvio',valore:'2027-01-04',
        serve:'Inserisci 04/01/2027: è la data dello SCENARIO SIMULATO, anche se il corso viene svolto in un altro giorno o anno.'},
