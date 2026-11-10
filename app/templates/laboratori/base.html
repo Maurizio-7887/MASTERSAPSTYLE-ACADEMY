@@ -10,8 +10,12 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tutor-laterale.css') }}">
 </head>
 <body class="msa-launchpad msa-lab">
+{# Risolvi la guida PRIMA di renderizzare shell, etichette e menu:
+   una vecchia sessione Firenze non deve comparire nell'esercizio Pistoia. #}
+{% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
+{% set corso_selezionato = guida.esercizio if guida else None %}
 {% include "simulatore/_shell.html" %}
-{% set corso_barra = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
+{% set corso_barra = corso_selezionato %}
 {% if corso_barra not in ['firenze-30', 'magazziniere-5'] %}
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
@@ -31,7 +35,7 @@
   {% endif %}
   {# Per i due percorsi logistici una sola barra compatta in ogni pagina.
      Il tutor mostra i passi; le lezioni e la prova hanno UN solo accesso qui. #}
-  {% set corso_attivo = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
+  {% set corso_attivo = corso_selezionato %}
   {% if corso_attivo in ['firenze-30', 'magazziniere-5'] %}
   <nav aria-label="Strumenti del corso di magazzino" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;background:#eaf3fa;border:1px solid #b9d1e1;border-radius:9px;color:#183b58">
     <strong style="font-size:.91rem;margin-right:5px">{{ 'FIRENZE · 30 ORE' if corso_attivo == 'firenze-30' else 'PISTOIA · 80 ORE' }}</strong>
@@ -57,7 +61,6 @@
 <script src="{{ url_for('erp_costi.static', filename='mensile-pagine.js') }}"></script>
 {% endif %}
 <script src="{{ url_for('static', filename='js/erp/tutor-laterale.js') }}"></script>
-{% set guida = config_guida(versione, esercizio=lab.esercizio, chiave=config.chiave) %}
 {% include "guida/_pannello.html" %}
 <script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
