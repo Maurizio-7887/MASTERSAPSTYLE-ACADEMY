@@ -24,6 +24,16 @@
     <h1>{{ pagina.icona }} {{ pagina.titolo }} <span class="lab-tc">{{ pagina.tcode }}</span></h1>
     <p>{% block intro %}{% endblock %}</p>
   </div>
+  {# Il collegamento alle lezioni accompagna l'allievo in OGNI schermata del
+      gestionale, non solo in Avvio. I dati ERP non vengono duplicati. #}
+  {% set corso_attivo = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
+  {% if corso_attivo in ['firenze-30', 'magazziniere-5'] %}
+  <nav aria-label="Teoria ed esercitazione del corso selezionato" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 13px;padding:12px 15px;border:1px solid #adc7dc;border-radius:10px;background:#e9f3fc;color:#163b5d">
+    <strong>{{ 'FIRENZE · MAGAZZINO 30 ORE' if corso_attivo == 'firenze-30' else 'PISTOIA · MAGAZZINO 80 ORE' }}</strong>
+    <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='firenze' if corso_attivo == 'firenze-30' else 'pistoia') }}" target="_blank" rel="noopener" style="display:inline-block;background:#fff;color:#135079;border:1px solid #7cabc8;border-radius:8px;padding:9px 13px;text-decoration:none;font-weight:750">📚 LEZIONI TEORICHE DEL MIO CORSO ↗</a>
+    <small>Stai lavorando nel gestionale; questo collegamento apre la teoria in un'altra scheda. Il menu dei passi del tutor non serve per cambiare corso.</small>
+  </nav>
+  {% endif %}
   {% if blueprint == 'erp_dati' and config.pagina == 'avvio' %}
     {% set percorso_logistico = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
     {% if percorso_logistico in ['magazziniere-5', 'firenze-30'] %}
@@ -31,12 +41,13 @@
       {% if percorso_logistico == 'magazziniere-5' %}
       <h2 style="font-size:1.17rem;margin:0 0 8px">📦 PISTOIA · Magazziniere 5.0 · UF 8, 9, 10 e 11</h2>
       <p style="margin:5px 0 10px">Stai lavorando nel <strong>percorso operativo lungo di Pistoia (82 passaggi)</strong>. Il percorso parte dagli ordini clienti, segue acquisti di materie prime, produzione, WIP, finiti, spedizioni e inventari. L'<strong>esame intermedio UF 9 di 40 ore</strong> ha una prova pratica separata, più ampia e multiarticolo.</p>
+      <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia') }}" style="display:inline-block;background:#145f4d;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">📚 Apri le lezioni teoriche Pistoia</a>
       <a href="{{ url_for('portale.uf9_laboratorio', versione=versione) }}" target="_blank" rel="noopener" style="display:inline-block;background:#145f4d;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">🧪 Apri prova pratica UF 9 · 4 articoli, 10 ubicazioni ↗</a>
       <a href="{{ url_for('portale.uf9_pistoia', versione=versione) }}" target="_blank" rel="noopener" style="display:inline-block;margin:5px 0 0 8px;border:1px solid #145f4d;color:#145f4d;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:750">Lezioni / griglia di valutazione ↗</a>
       {% else %}
       <h2 style="font-size:1.17rem;margin:0 0 8px">💻 FIRENZE · Innovazione digitale nel magazzino · 30 ore</h2>
       <p style="margin:5px 0 10px">Questa scheda ha caricato la <strong>guida Firenze da 81 passaggi, senza ricostruzione Dare/Avere</strong>. Non è l'esercizio operativo di Pistoia. Se devi tenere la lezione a Pistoia, usa il collegamento qui sotto.</p>
-      <a href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='magazziniere-5') }}" style="display:inline-block;background:#16476b;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">Apri percorso PISTOIA · 82 passaggi ↗</a>
+      <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='firenze') }}" style="display:inline-block;background:#16476b;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">📚 Apri le lezioni teoriche Firenze</a>
       {% endif %}
       <p style="margin:10px 0 0;font-size:.88rem"><strong>Attenzione:</strong> cambiare guida non crea un'azienda separata. Per due classi diverse usa account/allievi distinti e non premere «Azzera» per cambiare corso.</p>
     </section>
