@@ -80,8 +80,9 @@
 {% include "sincronia/_stato.html" %}
 <script>window.MSA_CHIAVE = {{ chiave_storage | tojson }};</script>
 <script src="{{ url_for('static', filename='js/launchpad.js') }}"></script>
-{% set guida = config_guida_modulo(versione, "sd") %}
-{% include "guida/_pannello.html" %}
+{# Il Launchpad serve esclusivamente a scegliere il corso o il modulo.
+   Il tutor passo-passo si apre soltanto nella pagina operativa:
+   sul Launchpad non deve simulare che l'allievo sia già nel modulo Avvio. #}
 <script src="{{ url_for('static', filename='js/codici-sap.js') }}" defer></script>
 </body>
 </html>
