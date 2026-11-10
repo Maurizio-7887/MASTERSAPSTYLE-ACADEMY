@@ -17,6 +17,16 @@
   const countInputs=[...document.querySelectorAll('.u9-count')];
   const rowIndex=new Map(rows.map(x=>[x.id,x]));
   let recountInputs=new Map();
+  countInputs.forEach(input=>input.addEventListener('input',()=>{
+    if(!state.counted&&!state.reconciled&&!state.closed)return;
+    state.counted=false;state.reconciled=false;state.closed=false;
+    $('u9-reconciliation').hidden=true;
+    $('u9-recount-area').textContent='La conta è stata modificata: confermala nuovamente per riconciliare.';
+    $('u9-close-status').textContent='Da riconfermare dopo la nuova conta.';
+    $('u9-count-status').textContent='Quantità modificate: ripeti la conferma della conta prima di chiudere.';
+    document.querySelectorAll('.u9-checkresult').forEach(x=>x.textContent='Da riconfermare');
+    recountInputs=new Map();finalize();
+  }));
   $('u9-closecount').addEventListener('click',()=>{
     const counts=new Map();
     for(const inp of countInputs){
@@ -69,8 +79,12 @@
       label.appendChild(span(item.id+' · '+item.art+' · prima conta '+counts.get(item.id)+' '+item.um+' · seconda conta: '));
       const input=document.createElement('input');input.type='number';input.min='0';input.step='1';
       input.dataset.id=item.id;input.className='u9-recount';input.setAttribute('aria-label','Riconta '+item.id);
+      input.addEventListener('input',()=>{state.closed=false;$('u9-close-status').textContent='Riconta modificata: confermare di nuovo la chiusura.';finalize();});
       label.appendChild(input);area.appendChild(label);recountInputs.set(item.id,input);
     });
+    document.querySelectorAll('.u9-cause').forEach(input=>input.addEventListener('input',()=>{
+      if(state.closed){state.closed=false;$('u9-close-status').textContent='Causale modificata: confermare nuovamente la rettifica.';finalize();}
+    }));
     if(differences===0)area.appendChild(span('Nessuno scostamento: verifica la correttezza del foglio di conta.'));
     state.reconciled=true;finalize();
   });
@@ -112,6 +126,9 @@
     const p=document.createElement('p');p.appendChild(span('Totale camion: '+loaded+'/'+expected+' colli. '+(complete?'Tutte le spedizioni sono complete.':'Non autorizzare la partenza finché le anomalie non sono risolte.'),complete?'u9-good':'u9-bad'));out.appendChild(p);
     state.ship=true;finalize();
   });
+  ['u9-fifo','u9-lifo','u9-medio','u9-transit','u9-network'].forEach(id=>$(id).addEventListener('input',()=>{
+    if(state.valuation){state.valuation=false;$('u9-valuationstatus').textContent='Calcoli modificati: premi di nuovo Verifica.';finalize();}
+  }));
   $('u9-valuationcheck').addEventListener('click',()=>{
     const checks=[['u9-fifo',values.fifo],['u9-lifo',values.lifo],['u9-medio',values.medio],['u9-transit',transit.in_viaggio_valore],['u9-network',transit.totale_rete]];
     const mistakes=[];
