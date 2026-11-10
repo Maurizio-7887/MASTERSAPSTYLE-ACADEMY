@@ -89,6 +89,27 @@ def lezioni_magazzino(versione, percorso):
                            indice=idx, totale=len(programma["ordine"]))
 
 
+@bp.route("/<versione>/uf9-pistoia")
+def uf9_pistoia(versione):
+    """Programma ufficiale UF9 da 40 ore e griglia docente della prova pratica.
+
+    Pagina didattica indipendente dal salvataggio dei movimenti ERP: le
+    evidenze vengono prodotte nell'esercitazione Magazziniere 5.0 esistente.
+    """
+    if versione not in VERSIONI:
+        abort(404)
+    from .uf9_esame import (TITOLO, OBIETTIVI_ENTE, CONTENUTI_ENTE,
+                           PROGRAMMA_ORE, PROVA, FASI_ESAME,
+                           VALUTAZIONE, LIVELLI)
+    return render_template(
+        "portale/uf9_esame.html", versione=versione, moduli=MODULI,
+        modulo_attivo=None, titolo=TITOLO, obiettivi=OBIETTIVI_ENTE,
+        contenuti=CONTENUTI_ENTE, programma=PROGRAMMA_ORE,
+        totale_ore=sum(m["ore"] for m in PROGRAMMA_ORE),
+        prova=PROVA, fasi=FASI_ESAME, valutazione=VALUTAZIONE,
+        livelli=LIVELLI)
+
+
 @bp.route("/<versione>/tutto")
 def tutto(versione):
     """Tutte le schede in una pagina, come il file originale: serve ai test e a chi preferisce le linguette."""
