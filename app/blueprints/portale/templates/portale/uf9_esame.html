@@ -45,6 +45,7 @@
 <p>Fonte: progetto didattico dell'ente. La suddivisione delle 40 ore e i nomi dei quattro indicatori sono proposte operative per applicare le specifiche ricevute.</p>
 </header>
 <div class="uf9-tools" aria-label="Comandi disponibili durante tutta la lezione">
+<a href="{{ url_for('portale.uf9_laboratorio',versione=versione) }}" target="_blank" rel="noopener" style="background:#174b72;color:white">🧪 AVVIA PROVA PRATICA MULTIARTICOLO ↗</a>
 <a class="uf9-primary" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='magazziniere-5') }}" target="_blank" rel="noopener">🎯 Apri / riprendi il gestionale Pistoia ↗</a>
 <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='inventario') }}" target="_blank" rel="noopener">📖 Teoria inventari ↗</a>
 <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='valori') }}" target="_blank" rel="noopener">📖 FIFO, LIFO, valore ↗</a>
