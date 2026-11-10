@@ -360,9 +360,23 @@
     radice.querySelector('.msa-g-ind').disabled = !!pendente || pos === 0;
     radice.querySelector('.msa-g-av').disabled = !!pendente || !st || pos === N - 1 || primoBlocco(pos, stati) >= 0;
     if (pendente) {
-      corpo.innerHTML = '<button type="button" class="msa-g-vai-saldi">📒 Non ricordi un saldo? Apri i saldi dei conti e i tuoi appunti ↓</button>' + quiz.html(stato(), esc) + strumenti(true);
+      var isMagazzino = E.codice === 'magazziniere-5';
+      var introContabile = isMagazzino
+        ? '<section class="msa-g-quiz-intro" style="background:#e9f5ed;border-left:4px solid #23794d;border-radius:7px;padding:12px;margin:0 0 12px;color:#153b2b">' +
+          '<strong>✅ AVVIO MAGAZZINO COMPLETATO</strong>' +
+          '<p>La tua azienda simulata è stata avviata. <b>Non crearne un’altra e non tornare al Launchpad.</b></p>' +
+          '<strong>🎯 ADESSO: VERIFICA LA PRIMA SCRITTURA</strong>' +
+          '<p>Il programma ha già registrato il documento contabile. Tu devi soltanto ricostruirlo: per ogni riga scegli <b>Dare o Avere</b>, indica <b>l’importo</b> e cerca il <b>conto</b>. Poi premi «Verifica la mia scrittura».</p>' +
+          '<p>Se non ricordi un conto, consulta il piano dei conti nei suggerimenti. Il riquadro «Saldi e appunti» è facoltativo e resta chiuso.</p>' +
+          '</section>'
+        : '';
+      // La vista dei saldi, se lasciata aperta nella sessione precedente,
+      // copriva totalmente il quiz e sembrava il primo esercizio da svolgere.
+      corpo.innerHTML = introContabile + quiz.html(stato(), esc) +
+        '<details class="msa-g-tools"><summary>📒 Saldi dei conti e appunti (facoltativi)</summary><div class="msa-g-tcorpo"></div></details>';
+      corpo.scrollTop = 0;
       ripristinaFuoco();
-      num.textContent = 'Laboratorio di ragioneria';
+      num.textContent = isMagazzino ? 'Avvio ✓ · Verifica contabile' : 'Laboratorio di ragioneria';
       disegnaElenco();
       return;
     }
