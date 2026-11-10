@@ -112,7 +112,7 @@
       '<header><div><b>📘 Esercizio passo passo</b><small>' + esc(E.titolo) + '</small></div>' +
       '<button type="button" class="msa-g-chiudi" title="Riduci">—</button></header>' +
       '<div class="msa-g-barra"><span></span></div>' +
-      '<label class="msa-g-elenco"><span class="vis">Vai al passo</span><select></select></label>' +
+      '<label class="msa-g-elenco"><span class="vis">Scegli il PASSO dell’esercizio (non il corso)</span><select aria-label="Scegli il passo della tua esercitazione, non il corso"></select></label>' +
       '<div class="msa-g-corpo" aria-live="polite"></div>' +
       '<footer><button type="button" class="msa-g-ind">◀</button><span class="msa-g-num"></span><button type="button" class="msa-g-av">Avanti ▶</button></footer>' +
       '<div class="msa-g-salva-bar" style="padding:8px 12px;border-top:1px solid #ddd;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
@@ -353,6 +353,19 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
+    // La teoria e' PARTE del corso: accessibile dal tutor in qualunque
+    // schermata ERP senza cercare le lezioni nel Launchpad.
+    if (E.codice === 'firenze-30' || E.codice === 'magazziniere-5') {
+      var cFirenze = E.codice === 'firenze-30';
+      var cNome = cFirenze ? 'FIRENZE · MAGAZZINO 30 ORE' : 'PISTOIA · MAGAZZINO 80 ORE';
+      var cUrl = '/' + encodeURIComponent(C.versione === 'completo' ? 'completo' : 'vuoto') +
+        '/lezioni-magazzino/' + (cFirenze ? 'firenze' : 'pistoia');
+      h += '<div style="margin:9px 0;padding:11px 12px;border:1px solid #a5c9df;background:#edf6ff;border-radius:9px">' +
+        '<b>📚 TEORIA E PRATICA · ' + cNome + '</b>' +
+        '<p style="font-size:.88em;margin:5px 0">Le lezioni sono incluse nel tuo corso. Tieni la teoria aperta accanto a questa esercitazione, senza cambiare guida.</p>' +
+        '<a href="' + cUrl + '" target="_blank" rel="noopener" style="display:inline-block;padding:9px 12px;background:#154c75;color:white;border-radius:7px;text-decoration:none;font-weight:bold">📚 APRI LE LEZIONI DEL MIO CORSO ↗</a>' +
+        '</div>';
+    }
     // La prova UF9 e' una simulazione SEPARATA: non altera la progressione
     // e le giacenze dell'esercitazione aziendale Pistoia.
     if (E.codice === 'magazziniere-5') {
