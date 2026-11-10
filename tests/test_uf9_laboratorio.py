@@ -51,3 +51,17 @@ root = Path(__file__).resolve().parent.parent
 pannello = (root / 'app/blueprints/guida/static/pannello.js').read_text(encoding='utf-8')
 assert "E.codice === 'magazziniere-5'" in pannello
 assert '/uf9-pistoia/laboratorio' in pannello
+
+# L'avvio del gestionale distingue esplicitamente la guida Firenze da Pistoia.
+pistoia = c.get("/vuoto/s4/dati/?esercizio_guida=magazziniere-5")
+assert pistoia.status_code == 200
+pistoia_html = pistoia.get_data(as_text=True)
+assert "PISTOIA · Magazziniere 5.0" in pistoia_html
+assert "4 articoli, 10 ubicazioni" in pistoia_html
+assert 'uf9-pistoia/laboratorio' in pistoia_html
+firenze = c.get("/vuoto/s4/dati/?esercizio_guida=firenze-30")
+assert firenze.status_code == 200
+firenze_html = firenze.get_data(as_text=True)
+assert "FIRENZE · Innovazione digitale" in firenze_html
+assert "Apri percorso PISTOIA" in firenze_html
+assert "4 articoli, 10 ubicazioni" not in firenze_html
