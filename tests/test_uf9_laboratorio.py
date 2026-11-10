@@ -44,3 +44,10 @@ assert "uf9-pistoia/laboratorio" in lessons
 assert "uf9-pistoia/laboratorio" not in c.get("/vuoto/lezioni-magazzino/firenze").get_data(as_text=True)
 assert c.get("/not-a-version/uf9-pistoia/laboratorio").status_code==404
 print("OK UF9: 40 ore, 4 materiali / 10 ubicazioni, documenti di trasporto, conte, valorizzazione, 4 indicatori")
+
+# Anche il tutor operativo del corso lungo contiene il pulsante dedicato.
+from pathlib import Path
+root = Path(__file__).resolve().parent.parent
+pannello = (root / 'app/blueprints/guida/static/pannello.js').read_text(encoding='utf-8')
+assert "E.codice === 'magazziniere-5'" in pannello
+assert '/uf9-pistoia/laboratorio' in pannello
