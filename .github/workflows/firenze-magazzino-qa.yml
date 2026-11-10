@@ -8,6 +8,7 @@ on:
       - 'app/blueprints/portale/**'
       - 'tests/firenze-30.js'
       - 'tests/test_docente_magazzino_isolato.py'
+      - 'tests/test_magazziniere.py'
       - 'app/laboratori.py'
       - 'app/blueprints/sincronia/**'
       - 'app/templates/laboratori/base.html'
