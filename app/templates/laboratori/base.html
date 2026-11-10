@@ -24,6 +24,24 @@
     <h1>{{ pagina.icona }} {{ pagina.titolo }} <span class="lab-tc">{{ pagina.tcode }}</span></h1>
     <p>{% block intro %}{% endblock %}</p>
   </div>
+  {% if blueprint == 'erp_dati' and config.pagina == 'avvio' %}
+    {% set percorso_logistico = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
+    {% if percorso_logistico in ['magazziniere-5', 'firenze-30'] %}
+    <section aria-label="Percorso logistico selezionato" style="margin:0 0 14px;padding:16px 18px;border:2px solid {{ '#136b57' if percorso_logistico == 'magazziniere-5' else '#ac8631' }};border-radius:12px;background:{{ '#edf9f5' if percorso_logistico == 'magazziniere-5' else '#fff8e8' }};color:#173950">
+      {% if percorso_logistico == 'magazziniere-5' %}
+      <h2 style="font-size:1.17rem;margin:0 0 8px">📦 PISTOIA · Magazziniere 5.0 · UF 8, 9, 10 e 11</h2>
+      <p style="margin:5px 0 10px">Stai lavorando nel <strong>percorso operativo lungo di Pistoia (82 passaggi)</strong>. Il percorso parte dagli ordini clienti, segue acquisti di materie prime, produzione, WIP, finiti, spedizioni e inventari. L'<strong>esame intermedio UF 9 di 40 ore</strong> ha una prova pratica separata, più ampia e multiarticolo.</p>
+      <a href="{{ url_for('portale.uf9_laboratorio', versione=versione) }}" target="_blank" rel="noopener" style="display:inline-block;background:#145f4d;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">🧪 Apri prova pratica UF 9 · 4 articoli, 10 ubicazioni ↗</a>
+      <a href="{{ url_for('portale.uf9_pistoia', versione=versione) }}" target="_blank" rel="noopener" style="display:inline-block;margin:5px 0 0 8px;border:1px solid #145f4d;color:#145f4d;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:750">Lezioni / griglia di valutazione ↗</a>
+      {% else %}
+      <h2 style="font-size:1.17rem;margin:0 0 8px">💻 FIRENZE · Innovazione digitale nel magazzino · 30 ore</h2>
+      <p style="margin:5px 0 10px">Questa scheda ha caricato la <strong>guida Firenze da 81 passaggi, senza ricostruzione Dare/Avere</strong>. Non è l'esercizio operativo di Pistoia. Se devi tenere la lezione a Pistoia, usa il collegamento qui sotto.</p>
+      <a href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='magazziniere-5') }}" style="display:inline-block;background:#16476b;color:white;padding:11px 15px;border-radius:8px;text-decoration:none;font-weight:750">Apri percorso PISTOIA · 82 passaggi ↗</a>
+      {% endif %}
+      <p style="margin:10px 0 0;font-size:.88rem"><strong>Attenzione:</strong> cambiare guida non crea un'azienda separata. Per due classi diverse usa account/allievi distinti e non premere «Azzera» per cambiare corso.</p>
+    </section>
+    {% endif %}
+  {% endif %}
   <div id="lab" class="lab"></div>
   <p class="msa-lp-nota">{% block nota %}Laboratorio della Ferro &amp; Transenne con un proprio libro giornale: non modifica il simulatore principale. Il lavoro si salva sul portale e si consegna dalla tua area.{% endblock %}</p>
 </main>
