@@ -35,4 +35,8 @@ for(const [name,num] of [['Imballa Beta in colli SSCC',7],['Imballa Delta in col
 }
 const rf=e.passi.find(q=>q.titolo.startsWith('RF Carico:'));
 assert(rf.punti.some(q=>q.sel==='#rf-sscc'));
+const tutor=fs.readFileSync(path.join(__dirname,'../app/blueprints/guida/static/pannello.js'),'utf8');
+assert(tutor.includes('AVVIO MAGAZZINO COMPLETATO'), 'Opening accounting quiz must explain that startup succeeded');
+assert(tutor.includes('ADESSO: VERIFICA LA PRIMA SCRITTURA'), 'Quiz must show a direct next action');
+assert(tutor.includes('Saldi dei conti e appunti (facoltativi)'), 'Accounting reference tools must not obscure the exercise');
 console.log('OK: 82/82 guided steps, start and WMS validation, initial page selectors and SSCC creation/use.');
