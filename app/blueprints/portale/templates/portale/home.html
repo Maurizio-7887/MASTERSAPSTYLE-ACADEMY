@@ -37,19 +37,19 @@
   {% endif %}
   <section aria-labelledby="scelta-corsi" style="margin:24px 0">
     <h2 class="msa-gruppo" id="scelta-corsi">🎓 SCEGLI UNO DEI 3 CORSI</h2>
-    <p style="margin:0 0 14px">Tre accessi separati alla stessa piattaforma. <strong>Seleziona il tuo corso: la guida giusta si apre automaticamente.</strong></p>
+    <p style="margin:0 0 14px">Tre accessi separati alla stessa piattaforma. <strong>Seleziona il corso: le lezioni si aprono subito, con il pulsante per esercitarti sempre visibile.</strong></p>
     <div class="msa-tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:15px">
-      <a class="msa-tile grande g-magazzino" data-corso="firenze-magazzino-30" href="{{ url_for('erp_dati.avvio',versione='vuoto',esercizio_guida='firenze-30') }}" style="border:2px solid #3c94bb;border-radius:14px">
+      <a class="msa-tile grande g-magazzino" data-corso="firenze-magazzino-30" href="{{ url_for('portale.lezioni_magazzino',versione='vuoto',percorso='firenze') }}" style="border:2px solid #3c94bb;border-radius:14px">
         <span class="ic" aria-hidden="true">💻</span>
         <b>FIRENZE · MAGAZZINO 30 ORE</b>
         <p>Innovazione digitale · WMS, barcode/QR, RF, RFID, picking, spedizioni e KPI. <strong>81 passaggi senza esercizi Dare/Avere.</strong></p>
-        <strong>ENTRA NEL CORSO FIRENZE →</strong>
+        <strong>APRI LEZIONI ED ESERCITAZIONE FIRENZE →</strong>
       </a>
-      <a class="msa-tile grande g-magazzino" data-corso="pistoia-magazzino-80" href="{{ url_for('erp_dati.avvio',versione='vuoto',esercizio_guida='magazziniere-5') }}" style="border:2px solid #1d8168;border-radius:14px">
+      <a class="msa-tile grande g-magazzino" data-corso="pistoia-magazzino-80" href="{{ url_for('portale.lezioni_magazzino',versione='vuoto',percorso='pistoia') }}" style="border:2px solid #1d8168;border-radius:14px">
         <span class="ic" aria-hidden="true">📦</span>
         <b>PISTOIA · MAGAZZINO 80 ORE</b>
         <p>UF 8–11 · Ciclo completo SD/MM/PP/WMS, contabilità di magazzino e <strong>UF 9: prova inventariale di 40 ore</strong>. Tutor di 82 passaggi.</p>
-        <strong>ENTRA NEL CORSO PISTOIA →</strong>
+        <strong>APRI LEZIONI ED ESERCITAZIONE PISTOIA →</strong>
       </a>
       <a class="msa-tile grande g-contabilita" data-corso="firenze-amministrazione" href="{{ url_for('portale.ingresso',versione='vuoto',esercizio_guida='s4-integrato') }}" style="border:2px solid #8066a6;border-radius:14px">
         <span class="ic" aria-hidden="true">🏛️</span>
