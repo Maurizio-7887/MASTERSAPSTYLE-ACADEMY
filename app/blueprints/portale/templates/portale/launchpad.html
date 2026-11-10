@@ -14,6 +14,27 @@
     <h1>Sistema integrato — Ferro &amp; Transenne</h1>
     <p>Un solo ambiente per SD, MM, PP, WMS e contabilità. Scegli il modulo: dentro trovi le sue funzioni.</p>
   </div>
+  <section aria-labelledby="scelta-corso-principale" style="margin:0 0 24px">
+  <h2 class="msa-gruppo" id="scelta-corso-principale">🎓 I TRE ACCESSI AI CORSI · SCEGLI IL TUO</h2>
+  <div class="msa-tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+    <a class="msa-tile grande g-magazzino" data-corso="firenze-magazzino-30" href="{{ url_for('erp_dati.avvio',versione=versione,esercizio_guida='firenze-30') }}" style="border:2px solid #3c94bb;border-radius:13px">
+      <span class="ic" aria-hidden="true">💻</span><b>FIRENZE · MAGAZZINO 30 ORE</b>
+      <p>Corso breve, innovazione del magazzino · 81 passaggi, nessuna partita doppia.</p>
+      <strong>APRI FIRENZE MAGAZZINO →</strong>
+    </a>
+    <a class="msa-tile grande g-magazzino" data-corso="pistoia-magazzino-80" href="{{ url_for('erp_dati.avvio',versione=versione,esercizio_guida='magazziniere-5') }}" style="border:2px solid #1d8168;border-radius:13px">
+      <span class="ic" aria-hidden="true">📦</span><b>PISTOIA · MAGAZZINO 80 ORE</b>
+      <p>Corso lungo UF 8–11 · 82 passaggi e prova pratica inventariale UF 9 (40 ore).</p>
+      <strong>APRI PISTOIA MAGAZZINO →</strong>
+    </a>
+    <a class="msa-tile grande g-contabilita" data-corso="firenze-amministrazione" href="{{ url_for('portale.ingresso',versione=versione,esercizio_guida='s4-integrato') }}" style="border:2px solid #8066a6;border-radius:13px">
+      <span class="ic" aria-hidden="true">🏛️</span><b>FIRENZE · AMMINISTRAZIONE</b>
+      <p>MASTER SAP STYLE completo · contabilità, bilancio, SD/MM/PP, FI e CO.</p>
+      <strong>APRI FIRENZE AMMINISTRAZIONE →</strong>
+    </a>
+  </div>
+  <p style="margin:9px 0 0;font-size:.9rem"><strong>Attenzione:</strong> è un'unica applicazione ERP. I pulsanti scelgono la guida, non creano tre aziende diverse. Evita di usare lo stesso account per più classi.</p>
+  </section>
   {% macro tile_modulo(m) %}
     <a class="msa-modulo g-{{ m.colore }}" data-modulo="{{ m.codice }}" href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}">
       <span class="sigla sap">{{ m.sigla }}</span>
@@ -23,7 +44,7 @@
   {% endmacro %}
   {% set operativi = ['sd', 'mm', 'pp', 'wms'] %}
   <section aria-labelledby="moduli-operativi">
-  <h2 class="msa-gruppo" id="moduli-operativi">Moduli operativi · SD · MM · PP · WMS</h2>
+  <h2 class="msa-gruppo" id="moduli-operativi">Funzioni ERP · SD · MM · PP · WMS</h2>
   <div class="msa-moduli msa-moduli-operativi">
   {% for m in moduli | selectattr('codice', 'in', operativi) %}
     {{ tile_modulo(m) }}
@@ -38,6 +59,7 @@
   {% endfor %}
   </div>
   </section>
+  <h2 class="msa-gruppo">Materiali e altre esercitazioni · strumenti aggiuntivi</h2>
   <div class="msa-tiles compatte">
     <a class="msa-tile g-impostazioni" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='completo-formas') }}"><b>Esercitazione completa — azienda, magazzino e innovazione</b><p>Parti da Nuova azienda: costituzione e capitale → WMS → acquisto beni strumentali → budget annuo dei quattro centri e standard → ordini clienti → acquisti materiali → produzione → consegna e contabilità. Transenna con WIP e semilavorato autonomo; inventari, innovazione e laboratori FORMAS Pistoia/Firenze. Cambiare guida non separa i dati; le prove alternative usano account dedicati.</p></a>
     <a class="msa-tile g-impostazioni" href="{{ url_for('portale.materiale', file='Esercitazione_Completa_FORMAS.pdf') }}"><b>Guida completa stampabile (PDF)</b><p>Consegne operative, dati da inserire, risultati, domande e mappa dei comandi. Laboratori separati dal caso principale; verifiche manuali non equivalgono a certificazione automatica.</p></a>
