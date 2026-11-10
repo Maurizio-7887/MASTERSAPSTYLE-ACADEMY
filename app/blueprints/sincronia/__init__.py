@@ -133,6 +133,10 @@ def stato(versione):
     if versione not in SLOT_VALIDI:
         return jsonify(errore="versione sconosciuta"), 404
     u = utente_corrente()
+    # Le prove isolate sono riservate al docente; le normali classi
+    # continuano a lavorare nei propri archivi esistenti.
+    if versione in {"erp-ft-docente-pistoia", "erp-ft-docente-firenze"} and (u is None or not u.docente):
+        return jsonify(errore="archivio di prova riservato al docente"), 403
     s = stato_salvato(u, versione)
     if request.method == "GET":
         return jsonify(rev=s.rev if s else 0, stato=s.dati if s else None)
