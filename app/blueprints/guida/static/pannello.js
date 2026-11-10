@@ -378,12 +378,15 @@
     if (p.principiante) {
       // Lezione parlata per chi non ha mai utilizzato un gestionale.
       // La guida spiega, ma le spunte reali restano governate dai dati ERP.
+      var corsoMagazzino = E.codice === 'magazziniere-5' || E.codice === 'firenze-30';
       var introPrincipiante = pos === 0 ?
-        '<p><b>Prima di cominciare:</b> accedi al portale con il tuo account, scegli «Entra nel sistema integrato», poi la tessera del tuo corso. Non scegliere un altro esercizio. Se trovi già un’azienda non tua, NON premere Azzera: chiedi un account dedicato.</p>' : '';
+        (corsoMagazzino
+          ? '<p><b>Sei già nell’esercitazione del corso selezionato.</b> Non tornare al Launchpad. Se vedi «Sei qui ✓», segui i campi indicati nel riquadro «ORA TOCCA A TE». Se non vedi i campi, premi «Apri ➜» nella guida. Se questo account contiene un’altra azienda, non azzerarla: usa un account dedicato.</p>'
+          : '<p><b>Prima di cominciare:</b> entra nel tuo esercizio e segui i comandi indicati. Non azzerare i dati esistenti.</p>') : '';
       h += '<div class="msa-g-principiante" role="region" aria-label="Guida per chi inizia da zero">' +
         '<strong>👣 PRIMA VOLTA? UNA COSA ALLA VOLTA</strong>' + introPrincipiante +
         '<ol>' +
-        '<li><b>DOVE ENTRO?</b> Segui il percorso qui sopra: <em>' + esc(p.percorso || p.titolo) + '</em>. Se non sei nella schermata giusta, premi <b>«Apri ➜»</b>.</li>' +
+        '<li><b>DOVE LAVORO?</b> ' + (corsoMagazzino ? 'Sei nel corso giusto. <b>Resta nell’esercitazione</b>; premi «Apri ➜» solo per raggiungere la schermata del comando, mai per tornare al Launchpad.' : 'Segui la schermata del passo: <em>' + esc(p.percorso || p.titolo) + '</em>. Premi «Apri ➜» se necessario.') + '</li>' +
         '<li><b>CHE COSA DEVO FARE?</b> Nel riquadro giallo <b>«ORA TOCCA A TE»</b> trovi il primo campo da compilare, il valore e il pulsante. Completa un punto prima di passare al successivo.</li>' +
         '<li><b>PERCHÉ LO FACCIO?</b> ' + esc(p.grande || ('Stai completando la fase «' + p.titolo + '».')) + '</li>' +
         '<li><b>COME VERIFICO?</b> Dopo il comando controlla il messaggio del programma e il risultato atteso. Una registrazione reale riceve la <b>spunta ✓ automatica</b>; soltanto per una lettura puoi premere <b>✓ Fatto</b>.</li>' +
