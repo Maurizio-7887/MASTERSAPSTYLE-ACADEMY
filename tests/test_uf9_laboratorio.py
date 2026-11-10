@@ -45,32 +45,34 @@ assert "uf9-pistoia/laboratorio" not in c.get("/vuoto/lezioni-magazzino/firenze"
 assert c.get("/not-a-version/uf9-pistoia/laboratorio").status_code==404
 print("OK UF9: 40 ore, 4 materiali / 10 ubicazioni, documenti di trasporto, conte, valorizzazione, 4 indicatori")
 
-# Anche il tutor operativo del corso lungo contiene il pulsante dedicato.
+# I link del corso sono in UNA sola barra didattica dell'ERP, non nel tutor.
 from pathlib import Path
 root = Path(__file__).resolve().parent.parent
 pannello = (root / 'app/blueprints/guida/static/pannello.js').read_text(encoding='utf-8')
-assert "E.codice === 'magazziniere-5'" in pannello
-assert '/uf9-pistoia/laboratorio' in pannello
+shell = (root / 'app/templates/simulatore/_shell.html').read_text(encoding='utf-8')
+assert 'APRI LE LEZIONI DEL MIO CORSO' not in pannello
+assert 'ESAME INTERMEDIO INVENTARIALE (40 ORE)' not in pannello
+assert "m.codice in ['sd', 'mm', 'pp', 'wms']" in shell
 
-# L'avvio del gestionale distingue esplicitamente la guida Firenze da Pistoia.
 pistoia = c.get("/vuoto/s4/dati/?esercizio_guida=magazziniere-5")
 assert pistoia.status_code == 200
 pistoia_html = pistoia.get_data(as_text=True)
-assert "PISTOIA · Magazziniere 5.0" in pistoia_html
-assert "4 articoli, 10 ubicazioni" in pistoia_html
+assert "PISTOIA · 80 ORE" in pistoia_html
+assert "Lezioni teoriche" in pistoia_html
+assert "Prova inventariale UF 9" in pistoia_html
 assert 'uf9-pistoia/laboratorio' in pistoia_html
+assert "FI</b>" not in pistoia_html
+assert "Contabilità finanziaria" not in pistoia_html
+assert "Altri moduli" in pistoia_html
+
 firenze = c.get("/vuoto/s4/dati/?esercizio_guida=firenze-30")
 assert firenze.status_code == 200
 firenze_html = firenze.get_data(as_text=True)
-assert "FIRENZE · Innovazione digitale" in firenze_html
-assert "Le lezioni Firenze" in firenze_html
-assert "4 articoli, 10 ubicazioni" not in firenze_html
+assert "FIRENZE · 30 ORE" in firenze_html
+assert "Lezioni teoriche" in firenze_html
+assert "Prova inventariale UF 9" not in firenze_html
+assert "PISTOIA · 80 ORE" not in firenze_html
 
-# Nessuna duplicazione dei pulsanti teorici sulla schermata di avvio:
-# la teoria rimane nel tutor laterale e nella tile principale del corso.
-assert "LEZIONI TEORICHE DEL MIO CORSO" not in pistoia_html
-assert "📚 Apri le lezioni teoriche Pistoia" not in pistoia_html
-assert "📚 Apri le lezioni teoriche Firenze" not in firenze_html
-assert "QUALE ESERCIZIO SCELGO QUI SOTTO?" in pistoia_html
-assert "Continua il mio lavoro" in pistoia_html
-assert "APRI LE LEZIONI DEL MIO CORSO" in pannello
+# La pagina avvio ha la barra compatta soltanto una volta.
+assert pistoia_html.count('aria-label="Strumenti del corso di magazzino"') == 1
+assert firenze_html.count('aria-label="Strumenti del corso di magazzino"') == 1
