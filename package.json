@@ -23,7 +23,7 @@
     "test:didattica": "node tests/fi-didattica.test.js && node tests/presidio-didattico.js && node tests/avvio-didattico.js && node tests/cpm-centri.js && node tests/bpc-atp.js && node tests/percorso-ordinato.js && node tests/percorso-cpm-completo.js && npm run test:migliorie",
     "test:migliorie": "node tests/quiz-pagina-senza-simulatore.js && node tests/pannello-saldi-semplice.js && node tests/quiz-ordine-ricerca.js && node tests/cespiti-codifica.js && node tests/budget-guida-campi.js && node tests/pagamenti-banca.js && node tests/wms-guida-campi.js && node tests/esercizio-migliorie.js",
     "test:executive": "node tests/esercizio-executive.js && python3 tests/test_executive.py && python3 tests/test_integrazione_executive.py",
-    "test:magazziniere": "node tests/firenze-30.js && node tests/magazziniere-prima-lezione.js && node tests/guida_blocco_avanzamento.js && node tests/esercizio-magazziniere.js senza-quiz && node tests/esercizio-magazziniere.js && python3 tests/test_magazziniere.py && python3 tests/test_magazzino_lezioni.py && node tests/magazzino-integrazione.js"
+    "test:magazziniere": "node tests/firenze-30.js && node tests/magazziniere-prima-lezione.js && node tests/guida_blocco_avanzamento.js && node tests/esercizio-magazziniere.js senza-quiz && node tests/esercizio-magazziniere.js && python3 tests/test_magazziniere.py && python3 tests/test_magazzino_lezioni.py && python3 tests/test_uf9_laboratorio.py && node tests/magazzino-integrazione.js"
   },
   "devDependencies": {
     "jsdom": "24.1.3"
