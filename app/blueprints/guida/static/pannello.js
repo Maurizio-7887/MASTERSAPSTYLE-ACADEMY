@@ -124,7 +124,7 @@
   var bottone = radice.querySelector('.msa-g-apri'), pannello = radice.querySelector('.msa-g-pannello');
   // anche nella barra blu in alto, ben visibile
   var dx = document.querySelector('.msa-shell .msa-dx');
-  if (dx) {
+  if (dx && E.codice !== 'firenze-30' && E.codice !== 'magazziniere-5') {
     var b2 = document.createElement('button');
     b2.type = 'button'; b2.className = 'msa-g-shell'; b2.textContent = '📘 Esercizio passo passo';
     b2.addEventListener('click', function () { apri(pannello.hidden); });
@@ -353,29 +353,8 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
     h += avvisoCompleto;
-    // La teoria e' PARTE del corso: accessibile dal tutor in qualunque
-    // schermata ERP senza cercare le lezioni nel Launchpad.
-    if (E.codice === 'firenze-30' || E.codice === 'magazziniere-5') {
-      var cFirenze = E.codice === 'firenze-30';
-      var cNome = cFirenze ? 'FIRENZE · MAGAZZINO 30 ORE' : 'PISTOIA · MAGAZZINO 80 ORE';
-      var cUrl = '/' + encodeURIComponent(C.versione === 'completo' ? 'completo' : 'vuoto') +
-        '/lezioni-magazzino/' + (cFirenze ? 'firenze' : 'pistoia');
-      h += '<div style="margin:9px 0;padding:11px 12px;border:1px solid #a5c9df;background:#edf6ff;border-radius:9px">' +
-        '<b>📚 TEORIA E PRATICA · ' + cNome + '</b>' +
-        '<p style="font-size:.88em;margin:5px 0">Le lezioni sono incluse nel tuo corso. Tieni la teoria aperta accanto a questa esercitazione, senza cambiare guida.</p>' +
-        '<a href="' + cUrl + '" target="_blank" rel="noopener" style="display:inline-block;padding:9px 12px;background:#154c75;color:white;border-radius:7px;text-decoration:none;font-weight:bold">📚 APRI LE LEZIONI DEL MIO CORSO ↗</a>' +
-        '</div>';
-    }
-    // La prova UF9 e' una simulazione SEPARATA: non altera la progressione
-    // e le giacenze dell'esercitazione aziendale Pistoia.
-    if (E.codice === 'magazziniere-5') {
-      h += '<div style="margin:10px 0;padding:10px;border:1px solid #b7d4e7;background:#eef7ff;border-radius:9px">' +
-        '<b>🎓 UF 9 · ESAME INTERMEDIO INVENTARIALE (40 ORE)</b><p style="margin:5px 0;font-size:.9em">' +
-        'Prova autonoma con 4 articoli, 10 ubicazioni, conto e riconta, colli/SSCC e valutazione docente in centesimi. Non modifica il gestionale principale.</p>' +
-        '<a href="/' + encodeURIComponent(C.versione === 'completo' ? 'completo' : 'vuoto') +
-        '/uf9-pistoia/laboratorio" target="_blank" rel="noopener" style="display:inline-block;color:white;background:#164c76;padding:9px 14px;border-radius:7px;text-decoration:none;font-weight:bold">' +
-        '🧪 Apri la prova UF 9 in una nuova scheda ↗</a></div>';
-    }
+    // Per Firenze e Pistoia i collegamenti a teoria e UF9 sono nella
+    // barra didattica della pagina ERP. Qui il tutor mostra solo il passo.
     if (p.principiante) {
       // Lezione parlata per chi non ha mai utilizzato un gestionale.
       // La guida spiega, ma le spunte reali restano governate dai dati ERP.
