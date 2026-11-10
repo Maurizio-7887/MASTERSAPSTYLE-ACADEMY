@@ -228,10 +228,15 @@
   function urlPasso(p) {
     var base = (C.url || {})[p.dove && p.dove.ep];
     if (!base) return null;
-    if (p.dove.esercizio) return base + '?esercizio=' + encodeURIComponent(p.dove.esercizio);
-    if (p.dove.sd) return base + '?sd=' + encodeURIComponent(p.dove.sd);
-    if (p.dove.pp) return base + '?pp=' + encodeURIComponent(p.dove.pp);
-    return base;
+    var url = new URL(base, location.href);
+    if (p.dove.esercizio) url.searchParams.set('esercizio', p.dove.esercizio);
+    if (p.dove.sd) url.searchParams.set('sd', p.dove.sd);
+    if (p.dove.pp) url.searchParams.set('pp', p.dove.pp);
+    // La selezione esplicita appartiene alla scheda del corso, non alla
+    // sessione condivisa con altre schede del docente.
+    if (E.codice === 'magazziniere-5' || E.codice === 'firenze-30')
+      url.searchParams.set('esercizio_guida', E.codice);
+    return url.href;
   }
   // Arrivando dal pulsante del corso, riprendi direttamente sulla schermata
   // del passo salvato. Nessuna seconda scelta, nessuna modifica al database
