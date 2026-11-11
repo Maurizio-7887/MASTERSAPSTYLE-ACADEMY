@@ -164,6 +164,14 @@
       if (srv && srv.lab === 'erp') { S = srv; completa(S); } else S = statoNuovo();
     } else completa(S);
     baseRagioneria(S);
+    // Le classi magazzinieri non devono produrre quiz di partita doppia,
+    // nemmeno quando riprendono un archivio avviato in una versione vecchia.
+    // Non cancelliamo documenti, scritture, esiti o tentativi storici.
+    var corso = new URLSearchParams(location.search).get('esercizio_guida');
+    var slot = ((window.LAB_PAGINA || {}).slot || '');
+    var soloMagazzino = corso === 'magazziniere-5' || corso === 'firenze-30' ||
+      slot === 'erp-ft-doc-pistoia' || slot === 'erp-ft-doc-firenze';
+    if (soloMagazzino) S.quizContabile = false;
     var N = {
       get S() { return S; },
       // Conti di dettaglio distinti: 10 resta il conto operativo storico, NON
@@ -179,7 +187,7 @@
           if (!visti.has(k)) {
             visti.add(k); q.visti.push(k);
             if (r.quiz === false) return;   // solo documenti salvati prima con quiz:false; epilogo, chiusura e riapertura ora si ricostruiscono come le altre
-            if (S.quizContabile === false) return;   // percorso logistico: le scritture restano nel giornale, senza domanda bloccante
+            if (S.quizContabile === false || soloMagazzino) return;   // percorso logistico: le scritture restano nel giornale, senza domanda bloccante
             q.coda.push({chiave: k, documento: JSON.parse(JSON.stringify(r)), risposte: [], tentativi: 0});
             aggiunti++;
           }
@@ -299,7 +307,7 @@
         if (i.modo === 'logistica') {
           // Percorso logistico (corsi di magazzino): azienda già avviata con prodotti finiti a scaffale, produzione a tre fasi.
           // Ricostruzione delle scritture come sempre (ragioneria di magazzino); con quiz «no» la classe solo operativa non la vede.
-          S.avviato = data; S.percorso = 'logistica'; if (i.quiz === 'no') S.quizContabile = false;
+          S.avviato = data; S.percorso = 'logistica'; if (i.quiz === 'no' || soloMagazzino) S.quizContabile = false;
           modelloFasi();
           if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
           var scorte = {'TR-STD': 200, 'TR-ALTA': 200, 'TR-PED': 300}, valore = 0;
