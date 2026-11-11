@@ -450,13 +450,14 @@
         serve:'Premi «Stampa / salva PDF» per la seconda etichetta. Anche qui puoi scegliere «Salva come PDF». Alla fine apri «Tutti i punti di questo passo» per ricontrollare e conferma «✓ Fatto» nella guida: questa prova di sola lettura non modifica le scorte.'}
     ];
     if(p.titolo.indexOf('RF Interroga:')===0)return [
-      leggi('1 · Apri la pistola RF','Vai su Magazzino → Pistola RF, poi premi la scheda «🔎 Interroga». «📦 Compiti» è un’altra funzione, per movimentare merci.'),
-      {t:'leggi',sel:'#rf-q',nome:'Leggi un indirizzo',
-       serve:'Nella casella «Leggi un’ubicazione, un’unità di carico o un articolo» digita 01-03-1 e premi Invio. Leggi articolo, quantità e UdC; NON stai movimentando nulla.'},
-      {t:'leggi',sel:'#rf-q',nome:'Interroga una UdC',
-       serve:'Pulisci la casella, digita un codice UdC effettivamente letto dalla mappa, premi Invio e controlla dove si trova il pallet.'},
-      {t:'leggi',sel:'#rf-q',nome:'Interroga TR-PED',
-       serve:'Digita TR-PED e premi Invio: devono risultare sei pallet da 50. Poi premi «✓ Fatto» nel tutor: questa interrogazione non registra una scrittura.'}
+      leggi('1 · Che cosa stai imparando?',
+        'Una pistola RF legge un barcode e chiede al WMS dove si trova la merce. Ora SIMULI la lettura digitando il codice e premendo Invio. La scheda «Interroga» serve solo a consultare: non carica, non scarica e non sposta pallet. La risorsa MAG01 Marco va bene. Premi «Ho letto» per iniziare.'),
+      {t:'leggi',sel:'#rf-q',nome:'2 · Digita 01-03-1 e premi INVIO',
+       serve:'GUARDA LA CASELLA A SINISTRA, evidenziata in giallo. Scrivi esattamente 01-03-1 (corsia 01, campata 03, livello 1: attenzione, NON 01-03-01). Poi premi il tasto Invio della tastiera. Leggi il risultato sotto la casella: articolo, quantità e codice UdC. Solo DOPO premi «Ho letto, vai avanti».'},
+      {t:'leggi',sel:'#rf-q',nome:'3 · Interroga un pallet (UdC)',
+       serve:'Nel risultato della prova precedente trova «UdC» e il suo codice reale. Copialo, scrivilo nella stessa casella e premi INVIO: ora il WMS ti dice dove si trova quel pallet. La casella si svuota automaticamente dopo la lettura, non è un errore. Leggi la risposta e premi «Ho letto».'},
+      {t:'leggi',sel:'#rf-q',nome:'4 · Cerca tutti i pallet TR-PED',
+       serve:'Nella stessa casella digita TR-PED e premi INVIO: il WMS elenca le sue ubicazioni. Controlla che le quantità complessive siano 300 pezzi su sei pallet da 50. Premi «Ho letto» e poi «✓ Fatto, avanti» per continuare il corso.'}
     ];
     return null;
   }
