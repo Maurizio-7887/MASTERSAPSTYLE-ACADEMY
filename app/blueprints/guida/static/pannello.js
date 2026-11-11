@@ -389,7 +389,9 @@
     h += avvisoCompleto;
     // Per Firenze e Pistoia i collegamenti a teoria e UF9 sono nella
     // barra didattica della pagina ERP. Qui il tutor mostra solo il passo.
-    if (p.principiante) {
+    if (p.principiante && E.codice !== 'magazziniere-5' && E.codice !== 'firenze-30') {
+      // Il promemoria generico non viene ripetuto nei corsi magazzinieri:
+      // le istruzioni puntuali sono già nel suggeritore «ORA TOCCA A TE».
       // Lezione parlata per chi non ha mai utilizzato un gestionale.
       // La guida spiega, ma le spunte reali restano governate dai dati ERP.
       var corsoMagazzino = E.codice === 'magazziniere-5' || E.codice === 'firenze-30';
