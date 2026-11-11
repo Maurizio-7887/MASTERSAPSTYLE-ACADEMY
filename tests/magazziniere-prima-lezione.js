@@ -31,6 +31,13 @@ assert(etichette.punti.filter(p=>p.sel==='#stampa').length===2,'Due stampe guida
 const etPage=fs.readFileSync(path.join(__dirname,'../app/blueprints/erp_magazzino/static/wm-pagine.js'),'utf8');
 for(const sel of ['id="cosa"','id="et-codice"','id="stampa"']) assert(etPage.includes(sel),'Controllo presente: '+sel);
 assert(etPage.includes('q.mat === \'TR-ALTA\''),'UdC TR-ALTA proposta da scorte reali');
+const interrogazione=e.passi.find(p=>p.titolo.startsWith('RF Interroga:'));
+assert(interrogazione && interrogazione.punti.length===4,'Interrogazione RF: quattro operazioni guidate');
+assert(interrogazione.punti.some(p=>p.serve.includes('NON 01-03-01')),'Il tutor avverte sul codice errato');
+assert(interrogazione.punti.some(p=>p.serve.includes('tasto Invio')),'Il tutor spiega come eseguire la lettura');
+const rfPage=fs.readFileSync(path.join(__dirname,'../app/blueprints/erp_magazzino/static/wm-pagine.js'),'utf8');
+assert(rfPage.includes('Correggi il codice:') && rfPage.includes('01-03-1'),'RF guida la correzione del codice');
+assert(rfPage.includes('PROVA RF: tre interrogazioni'),'La schermata spiega il lavoro da svolgere');
 const first=e.passi[0],second=e.passi[1];
 assert(first.fatto({S:{percorso:'logistica'}}));
 assert(!first.fatto({S:{percorso:'negozio'}}));
