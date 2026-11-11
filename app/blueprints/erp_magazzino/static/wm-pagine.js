@@ -219,12 +219,39 @@
     etichette: function () {
       if (!WM.attivo()) { radice.innerHTML = nonAttivo(); return; }
       var w = W(), cosa = radice.dataset.cosa || 'ubicazioni';
+      var ubics = Object.keys(w.ubicazioni).sort();
+      var carichi = WM.quanti(function (q) { return q.udc && q.qta > 0; });
+      var codici = cosa === 'udc' ? carichi.map(function(q){return q.udc;}) : ubics;
+      var preferito = cosa === 'udc'
+        ? (carichi.find(function(q){return q.mat === 'TR-ALTA';}) || carichi[0] || {}).udc
+        : (ubics.indexOf('01-03-1') >= 0 ? '01-03-1' : ubics[0]);
+      var sel = radice.dataset.etCodice;
+      if (codici.indexOf(sel) < 0) sel = preferito || '';
+      radice.dataset.etCodice = sel;
       var et = cosa === 'udc'
-        ? WM.quanti(function (q) { return q.udc && q.qta > 0; }).map(function (q) { return window.S4Etichette.etichetta(q.udc, 'UNITÀ DI CARICO · W100', q.mat + ' · ' + n0(q.qta) + ' ' + um(q.mat) + ' · in ' + q.ubic); })
-        : Object.keys(w.ubicazioni).sort().map(function (b) { return window.S4Etichette.etichetta(b, 'UBICAZIONE · W100 · tipo ' + w.ubicazioni[b].tipo, WM.TIPI[w.ubicazioni[b].tipo].nome); });
-      radice.innerHTML = '<div class="lab-filtro no-stampa"><label>Etichette <select id="cosa"><option value="ubicazioni"' + (cosa === 'ubicazioni' ? ' selected' : '') + '>ubicazioni (' + Object.keys(w.ubicazioni).length + ')</option><option value="udc"' + (cosa === 'udc' ? ' selected' : '') + '>unità di carico a magazzino</option></select></label> <button type="button" class="lab-btn" id="stampa">🖨️ Stampa</button>' +
-        '<span class="lab-nota">Code 128 per la pistola, QR per lo smartphone. Fogli A4 adesivi, 3 per riga.</span></div><div class="s4-ets">' + et.join('') + '</div>';
-      radice.querySelector('#cosa').onchange = function () { radice.dataset.cosa = this.value; rendi(); };
+        ? carichi.filter(function(q){return q.udc === sel;}).map(function (q) {
+            return window.S4Etichette.etichetta(q.udc, 'UNITÀ DI CARICO · W100', q.mat + ' · ' + n0(q.qta) + ' ' + um(q.mat) + ' · in ' + q.ubic);
+          })
+        : ubics.filter(function(b){return b === sel;}).map(function (b) {
+            return window.S4Etichette.etichetta(b, 'UBICAZIONE · W100 · tipo ' + w.ubicazioni[b].tipo, WM.TIPI[w.ubicazioni[b].tipo].nome);
+          });
+      var opzioni = (cosa === 'udc' ? carichi.map(function(q) {
+        return {codice:q.udc, testo:q.udc + ' · ' + q.mat + ' · ' + n0(q.qta) + ' pz · ubicazione ' + q.ubic};
+      }) : ubics.map(function(b) {
+        return {codice:b, testo:b + ' · scaffale / ubicazione'};
+      })).map(function(x) {
+        return '<option value="' + e(x.codice) + '"' + (x.codice === sel ? ' selected' : '') + '>' + e(x.testo) + '</option>';
+      }).join('');
+      radice.innerHTML = '<div class="lab-esito" style="margin-bottom:12px"><b>🎯 Esercitazione etichette: due prove, una alla volta</b>' +
+        '<p><b>1.</b> Seleziona «Ubicazioni» e il codice 01-03-1: identifica il posto sullo scaffale. <b>2.</b> Seleziona «Unità di carico» e una UdC del materiale TR-ALTA: identifica il pallet. ' +
+        'Controlla testo, codice a barre e QR. La stampa può essere fatta su carta o salvata come PDF; non sposta né contabilizza la merce.</p></div>' +
+        '<div class="lab-filtro no-stampa"><label>Tipo di etichetta <select id="cosa"><option value="ubicazioni"' + (cosa === 'ubicazioni' ? ' selected' : '') + '>Ubicazioni (scaffale)</option><option value="udc"' + (cosa === 'udc' ? ' selected' : '') + '>Unità di carico (pallet)</option></select></label> ' +
+        '<label>Codice da stampare <select id="et-codice">' + opzioni + '</select></label> ' +
+        '<button type="button" class="lab-btn" id="stampa">🖨️ Stampa / salva PDF</button>' +
+        '<span class="lab-nota">Code 128: pistola RF · QR: smartphone. La stampa contiene soltanto l’etichetta scelta.</span></div>' +
+        '<div class="s4-ets">' + (et.length ? et.join('') : '<p class="lab-nota">Nessuna etichetta per questo filtro.</p>') + '</div>';
+      radice.querySelector('#cosa').onchange = function () { radice.dataset.cosa = this.value; radice.dataset.etCodice = ''; rendi(); };
+      radice.querySelector('#et-codice').onchange = function () { radice.dataset.etCodice = this.value; rendi(); };
       radice.querySelector('#stampa').onclick = function () { window.print(); };
     },
     bloccato: function () {
