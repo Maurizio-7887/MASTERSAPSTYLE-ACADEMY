@@ -130,7 +130,13 @@
         }).join('') + '<div class="rf-campo"><label>Leggi l\'SSCC del collo da caricare<input id="rf-sscc" autocomplete="off"></label></div><div class="lab-esito" id="rf-ce"></div>'
           : '<p class="lab-nota">Nessun trasporto da caricare: crealo da Spedizione → Trasporti.</p>';
       } else if (scheda === 'interroga') {
-        corpo = '<div class="rf-campo"><label>Leggi un\'ubicazione, un\'unità di carico o un articolo<input id="rf-q" autocomplete="off"></label></div><div id="rf-ris-q"></div>';
+        corpo = '<div class="lab-esito" style="margin-bottom:12px"><b>🎯 PROVA RF: tre interrogazioni senza muovere la merce</b>' +
+          '<p><b>1.</b> Scrivi <code>01-03-1</code> (una sola cifra nell’ultimo gruppo) e premi <b>Invio</b>: leggi articolo, quantità e UdC nell’ubicazione. ' +
+          '<b>2.</b> Copia uno dei codici UdC restituiti e premi Invio: verifica il pallet. ' +
+          '<b>3.</b> Scrivi <code>TR-PED</code> e premi Invio: verifica le ubicazioni e le quantità dell’articolo.</p>' +
+          '<p>La casella si svuota dopo ogni lettura, ma il risultato rimane qui sotto. Non sono richiesti clic su «Conferma», né movimenti, né scritture.</p></div>' +
+          '<div class="rf-campo"><label>Codice da interrogare (prima prova: 01-03-1)<input id="rf-q" autocomplete="off" placeholder="01-03-1" aria-describedby="rf-istruzione"></label>' +
+          '<small id="rf-istruzione">Digita il codice e premi INVIO sulla tastiera, come con una pistola barcode.</small></div><div id="rf-ris-q" role="status" aria-live="polite"></div>';
       } else {
         var docs = w.inventari.filter(function (d) { return d.stato === 'attivo' || d.stato === 'riconta'; });
         corpo = docs.length ? '<p class="lab-nota">Documenti in conta: ' + docs.map(function (d) { return d.numero + ' (' + d.stato + ')'; }).join(', ') + '. Conta «cieca»: la quantità a sistema non si vede.</p>' +
@@ -176,7 +182,10 @@
         try {
           var u = q ? WM.ubicazione(q.ubic) : WM.ubicazione(v);
           box.innerHTML = '<div class="rf-compito"><h3>' + (q ? 'UdC ' + v + ' in ' + q.ubic : 'Ubicazione ' + u.id) + (u.blocco ? ' 🔒' : '') + '</h3>' + (u.quanti.length ? u.quanti.map(function (x) { return '<div class="rf-riga"><span>' + x.mat + ' · UdC ' + (x.udc || '—') + ' · ' + fd(x.data) + '</span><b>' + n0(x.qta) + ' ' + um(x.mat) + '</b></div>'; }).join('') : '<p>Vuota.</p>') + '</div>';
-        } catch (x) { box.innerHTML = '<div class="lab-esito ko">⛔ ' + e(x.message) + '</div>'; }
+        } catch (x) {
+          box.innerHTML = '<div class="lab-esito ko">⛔ ' + e(x.message) +
+            (v === '01-03-01' ? '<p><b>Correggi il codice:</b> usa <code>01-03-1</code>, con una sola cifra per il livello, poi premi Invio. Non modificare i dati di magazzino.</p>' : '') + '</div>';
+        }
         var i = radice.querySelector('#rf-q'); i.value = ''; i.focus();
       }
       function contaUbic(v) {
