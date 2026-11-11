@@ -23,6 +23,14 @@ for(let i=0;i<expected.length;i++){
  assert(p.titolo.startsWith(name),String(i+1)+' correct start');
  for(const sel of selectors)assert(p.punti.some(q=>q.sel===sel),p.titolo+' selector '+sel);
 }
+const etichette=e.passi.find(p=>p.titolo.startsWith('Stampa le etichette'));
+assert(etichette,'Etichette: passo presente');
+assert(etichette.punti.some(p=>p.sel==='#cosa'&&p.valore==='udc'),'Il tutor deve chiedere la UdC');
+assert(etichette.punti.some(p=>p.sel==='#et-codice'&&p.valore==='01-03-1'),'Il tutor seleziona un indirizzo vero');
+assert(etichette.punti.filter(p=>p.sel==='#stampa').length===2,'Due stampe guidate');
+const etPage=fs.readFileSync(path.join(__dirname,'../app/blueprints/erp_magazzino/static/wm-pagine.js'),'utf8');
+for(const sel of ['id="cosa"','id="et-codice"','id="stampa"']) assert(etPage.includes(sel),'Controllo presente: '+sel);
+assert(etPage.includes('q.mat === \'TR-ALTA\''),'UdC TR-ALTA proposta da scorte reali');
 const first=e.passi[0],second=e.passi[1];
 assert(first.fatto({S:{percorso:'logistica'}}));
 assert(!first.fatto({S:{percorso:'negozio'}}));
