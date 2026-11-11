@@ -24,7 +24,7 @@
   // oggetto finché il browser non cambia, altrimenti le risposte del laboratorio di ragioneria finivano su una
   // copia diversa da quella salvata: «Verifica la mia scrittura» non registrava nulla e ridisegnava le caselle vuote.
   var copiaLocale = null;
-  function inQuiz() { return quiz && quiz.pendente(stato()); }
+  function inQuiz() { return E.verificaRagioneria !== false && quiz && quiz.pendente(stato()); }
   function salvaQuiz() {
     if (typeof window.MSA_SALVA_STATO_CORRENTE === 'function') window.MSA_SALVA_STATO_CORRENTE();
     else scriviSeEsiste(stato());
