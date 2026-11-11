@@ -493,10 +493,10 @@
   // FIFO, LIFO, costo medio, giacenze e costi standard restano formativi.
   passi.forEach(function(p) {
     p.contabile = false;
-    if (p.attesa && /\\b[Dd] \\d|\\b[Aa] \\d|Dare\\/Avere|partita doppia/.test(p.attesa)) {
+    if (p.attesa && /\b[Dd] \d|\b[Aa] \d|Dare\/Avere|partita doppia/.test(p.attesa)) {
       p.attesa = 'Verifica nel modulo operativo il documento registrato, le quantità, il costo unitario e il valore delle scorte. Il sistema aggiorna la contabilità generale automaticamente, senza alcuna compilazione dell’allievo.';
     }
-    if (p.nota && /\\b[Dd] \\d|\\b[Aa] \\d/.test(p.nota)) {
+    if (p.nota && /\b[Dd] \d|\b[Aa] \d/.test(p.nota)) {
       p.nota = 'Verifica movimenti e valore delle scorte nel modulo di magazzino. Non è richiesto alcun esercizio di partita doppia.';
     }
     if (p.punti) p.punti = p.punti.filter(function (d) {
