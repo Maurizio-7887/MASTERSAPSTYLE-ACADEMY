@@ -29,9 +29,9 @@
     {id: 'mag5-avvio', g: 'UF 10 · 0 · Avvio', data: '04/01/2027', titolo: 'Avvia il percorso logistico', contabile: true, dove: {ep: D + 'avvio'},
      percorso: 'Pistoia · Magazzino 80 ore → Apri / riprendi esercizio → avvio del percorso logistico',
      campi: [['Ambiente', 'Sistema integrato in uno spazio vuoto dedicato a questo esercizio (se trovi documenti di altri esercizi chiedi al docente)'], ['Data di avvio', '04/01/2027'],
-       ['Ricostruzione delle scritture', 'sì (ragioneria di magazzino): dopo ogni documento contabile ricostruisci Dare e Avere. «No» solo se il docente ha scelto la classe solo operativa'], ['Pulsante', 'Avvia il percorso logistico']],
-     attesa: 'Saldi di apertura (561): D 10 Banca 50.000 + D 13 Prodotti finiti 22.785 / A 30 Capitale 72.785. A scaffale contabile: 200 TR-STD × 31,40 = 6.280; 200 TR-ALTA × 36,94 = 7.388; 300 TR-PED × 30,39 = 9.117. Ferro: zero.',
-     nota: 'Il magazzino ha un valore: quantità × costo standard. Il conto 13 è la «fotografia in euro» di quello che c’è sugli scaffali.',
+       ['Modalità esercitazione', 'Solo operazioni di magazzino, senza scritture Dare/Avere'], ['Pulsante', 'Avvia il percorso logistico']],
+     attesa: 'Giacenze iniziali: 200 TR-STD × 31,40 € = 6.280 €, 200 TR-ALTA × 36,94 € = 7.388 €, 300 TR-PED × 30,39 € = 9.117 €. Valore complessivo delle scorte: 22.785 €. Ferro: zero.',
+     nota: 'Il magazzino ha un valore: quantità × costo unitario. Impara a confrontare giacenze, valore delle scorte e criteri di valutazione.',
      fatto: function (h) { return h.S.percorso === 'logistica'; }},
     {id: 'mag5-attiva', g: 'UF 10 · 0 · Avvio', data: '04/01/2027', titolo: 'Attiva il magazzino a ubicazioni W100', dove: {ep: M + 'struttura'}, percorso: 'WMS → Struttura e attivazione',
      campi: [['Data di attivazione', '04/01/2027'], ['Pulsante', 'Attiva il WMS']],
@@ -330,10 +330,11 @@
        ['Decisione', 'la richiesta d’acquisto si farà a febbraio: in questo esercizio NON crearla']],
      attesa: 'Avviso rosso in alto: «1 materiale sotto la scorta minima: FERRO → riordina 2.562 kg». Le transenne non hanno un minimo impostato: riga grigia.',
      nota: 'Lettura: spunta a mano. Il ferro è sceso sotto il minimo dopo il prelievo per la produzione e i 12 kg mancanti all’inventario.'},
-    {g: 'UF 8 · 10 · Valori e controlli', titolo: 'Libro giornale: la storia contabile del magazzino', dove: {ep: F + 'giornale'}, percorso: 'FI → Libro giornale',
-     campi: [['Ritrova', 'apertura 561, MIGO 101 con la differenza prezzo, rottamazioni 555, MIRO, prelievo 261, conferme CO11N, versamento 101, uscite 601, reso 651, differenza 711'],
-       ['Conto 12 Materie prime', '2.850 − 142,50 − 2.280 − 11,40 = 416,10 = 438 kg × 0,95'], ['Conto 13 Prodotti finiti', '22.785 + 9.420 − 10.990 − 5.541 + 314 − 314 − 4.710 = 10.964 = 50 TR-ALTA + 300 TR-PED a standard']],
-     nota: 'Lettura e riconciliazione: spunta a mano. Ogni movimento fisico che cambia la proprietà o il valore della merce ha la sua scrittura; gli spostamenti interni no.'},
+    {g: 'UF 8 · 10 · Valori e controlli', titolo: 'Controlla il valore delle scorte e le differenze inventariali', dove: {ep: I + 'valorizzazione'}, percorso: 'Inventario → Valorizzazione delle rimanenze',
+     campi: [['Ferro residuo', '438 kg × 0,95 €/kg = 416,10 € a costo standard'],
+       ['Prodotti finiti residui', '50 TR-ALTA + 300 TR-PED a costo standard, totale 10.964 €'],
+       ['Controllo', 'Confronta quantità reali, valore delle scorte e differenze d’inventario senza compilare Dare/Avere']],
+     nota: 'Esercizio di contabilità DI MAGAZZINO: controlla giacenze, prezzi e valorizzazione. Nessuna partita doppia; conferma la lettura dopo la verifica.'},
     {g: 'UF 11 · 10 · Valori e controlli', titolo: 'KPI di magazzino del mese', dove: {ep: Z + 'kpi'}, percorso: 'WMS → Innovazione → KPI di magazzino',
      campi: [['Leggi', 'accuratezza dell’inventario, ordini perfetti, tempo dal ricevimento allo scaffale, compiti per risorsa'], ['Commenta', 'quale KPI miglioreresti per primo e con quale tecnologia (RFID, ondate, slotting)?']],
      nota: 'Lettura: spunta a mano. Un KPI vale se dichiari perimetro, unità e denominatore.'},
@@ -487,7 +488,20 @@
       'Osserva e interpreta la schermata, poi spunta «✓ Fatto» quando hai davvero completato la verifica.');
   });
 
-  // Percorso magazzinieri: nessuna prova di partita doppia. Le valutazioni FIFO/LIFO/medio restano.
-  passi.forEach(function(p) { p.contabile = false; });
+  // Percorso magazzinieri: nessuna prova di partita doppia, neppure
+  // nelle istruzioni dei movimenti contabili generati automaticamente.
+  // FIFO, LIFO, costo medio, giacenze e costi standard restano formativi.
+  passi.forEach(function(p) {
+    p.contabile = false;
+    if (p.attesa && /\\b[Dd] \\d|\\b[Aa] \\d|Dare\\/Avere|partita doppia/.test(p.attesa)) {
+      p.attesa = 'Verifica nel modulo operativo il documento registrato, le quantità, il costo unitario e il valore delle scorte. Il sistema aggiorna la contabilità generale automaticamente, senza alcuna compilazione dell’allievo.';
+    }
+    if (p.nota && /\\b[Dd] \\d|\\b[Aa] \\d/.test(p.nota)) {
+      p.nota = 'Verifica movimenti e valore delle scorte nel modulo di magazzino. Non è richiesto alcun esercizio di partita doppia.';
+    }
+    if (p.punti) p.punti = p.punti.filter(function (d) {
+      return !/ricostruisci Dare|ricostruzione contabile|libro giornale|scrittura di apertura/i.test(String(d.serve || '') + ' ' + String(d.nome || ''));
+    });
+  });
   window.MSA_ESERCIZIO = {codice: 'magazziniere-5', titolo: 'Magazziniere 5.0: un mese di magazzino (gennaio 2027)', versione: 'erp-ft', pannelloAutomatico: true, verificaRagioneria: false, passi: passi};
 })();
