@@ -58,6 +58,6 @@ assert(launch.includes("percorso='firenze'"), 'Launchpad opens Firenze lessons b
 const lessons=fs.readFileSync(path.join(__dirname,'../app/blueprints/portale/templates/portale/lezioni_magazzino.html'),'utf8');
 assert(lessons.includes('esercizio_guida=programma.esercizio'), 'Lessons retain explicit course selection');
 const start=fs.readFileSync(path.join(__dirname,'../app/blueprints/erp_dati/static/dati-pagine.js'),'utf8');
-assert(start.includes("firenze30 ? 'no' : 'si'"));
-assert(start.includes("if (firenze30) v.quiz = 'no'"));
+assert(start.includes("corsoMagazzino ? 'no' : 'si'"));
+assert(start.includes("if (corsoMagazzino) v.quiz = 'no'"));
 console.log('OK Firenze: 81 guided operational steps including FIFO/LIFO, no general ledger, beginner tutor; Pistoia 82');
