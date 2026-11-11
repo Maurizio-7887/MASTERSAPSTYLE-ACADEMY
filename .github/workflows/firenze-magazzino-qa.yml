@@ -9,6 +9,8 @@ on:
       - 'tests/firenze-30.js'
       - 'tests/test_docente_magazzino_isolato.py'
       - 'tests/test_magazziniere.py'
+      - 'tests/magazziniere-prima-lezione.js'
+      - 'app/blueprints/erp_magazzino/static/wm-pagine.js'
       - 'tests/test_uf9_laboratorio.py'
       - 'app/laboratori.py'
       - 'app/blueprints/sincronia/**'
