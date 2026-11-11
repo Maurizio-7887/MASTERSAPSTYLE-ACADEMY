@@ -18,7 +18,8 @@
   // generale e le domande Dare/Avere vengono esclusi a Firenze.
   // MIGO/MIRO/601/711 rimangono movimenti/documenti operativi.
   var esclusi = {
-    'Libro giornale: la storia contabile del magazzino': true
+    'Libro giornale: la storia contabile del magazzino': true,
+    'Controlla il valore delle scorte e le differenze inventariali': true
   };
   E.passi = E.passi.filter(function(p) { return !esclusi[p.titolo]; });
 
@@ -82,7 +83,7 @@
     avvio.campi = [
       ['Scenario', 'Percorso logistico · Magazziniere 5.0'],
       ['Data di avvio', '04/01/2027'],
-      ['Ricostruzione delle scritture', 'NO — il corso Firenze non prevede partita doppia'],
+      ['Modalità esercitazione', 'Solo magazzino e valorizzazione scorte, senza partita doppia'],
       ['Comando', 'Avvia il percorso logistico']
     ];
     avvio.nota = 'Attenzione: usa un account di prova vuoto dedicato a Firenze. Se il sistema è già avviato, NON premere Azzera e non selezionare Pistoia nello stesso account. Per la spunta iniziale deve risultare «Ricostruzione delle scritture disattivata»; altrimenti usa un nuovo account Firenze dedicato.';
