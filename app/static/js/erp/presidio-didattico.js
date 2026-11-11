@@ -4,6 +4,11 @@
   var C = window.LAB_PAGINA || {};
   if (C.slot !== 'erp-ft' && !/erp-ft/.test(C.chiave || '')) return;
   var key = C.chiave;
+  // Le esercitazioni per magazzinieri valutano FIFO, LIFO, costo medio,
+  // scorte, documenti e WMS: non bloccano mai la UI per il quiz Dare/Avere.
+  var corso = new URLSearchParams(location.search).get('esercizio_guida');
+  var soloMagazzino = corso === 'firenze-30' || corso === 'magazziniere-5' ||
+    C.slot === 'erp-ft-doc-pistoia' || C.slot === 'erp-ft-doc-firenze';
   function stato() {
     try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) { return {}; }
   }
@@ -12,6 +17,7 @@
     return q.tentato === true && Array.isArray(q.cronologiaTentativi) && q.cronologiaTentativi.length > 0;
   }
   function blocco(S) {
+    if (soloMagazzino) return false;
     if (window.MSA_RAGIONERIA && window.MSA_RAGIONERIA.protetto) return window.MSA_RAGIONERIA.protetto(S);
     return !!(S.msaRagioneria && (S.msaRagioneria.coda || []).some(function (q) { return !tentato(q); }));
   }
