@@ -688,7 +688,7 @@
       trasmettiProgresso(false);
       // Il salvataggio contabile è normalmente automatico sul server: verifichiamo lo stato GET.
       if (!window.fetch || !C.progress_version) throw Error('Controlla la connessione e riprova.');
-      return fetch('/api/stato/' + encodeURIComponent(C.progress_version), {credentials:'same-origin',cache:'no-store'});
+      return fetch('/api/stato/' + encodeURIComponent(((window.MSA_SYNC || {}).versione || C.progress_version)), {credentials:'same-origin',cache:'no-store'});
     }).then(function (r) {
       if (!r.ok) throw Error('Il server non ha confermato il salvataggio.');
       return r.json();
