@@ -374,10 +374,9 @@
     if(p.nota)out.push(leggi('Attenzione / perché lo fai',String(p.nota)));
     // Non anticipare la soluzione della partita doppia: il tutor mostra
     // Dare/Avere solo dopo la ricostruzione dell'allievo, come da regole Academy.
-    if(p.attesa && !p.contabile)out.push(leggi('Verifica il risultato',
+    if(p.attesa)out.push(leggi('Verifica il risultato',
       'Dopo il salvataggio, confronta la schermata con questo risultato atteso: '+String(p.attesa)));
-    else if(p.contabile)out.push(leggi('Dopo il documento: ricostruisci Dare e Avere',
-      'Attendi la schermata di ricostruzione contabile. Scegli i conti, Dare/Avere e gli importi PRIMA che il tutor mostri la soluzione; completa la verifica per sbloccare il passaggio.'));
+
     out.push(leggi(p.fatto?'Attendi la spunta automatica ✓':'Conferma la lettura ✓',
       p.fatto?'Non basta confermare questo testo: il tutor deve leggere il movimento, il documento o il parametro realmente SALVATO. '+
         'Se non compare ✓, torna nella schermata, verifica il messaggio di esito e NON ripetere automaticamente un movimento già contabilizzato. Chiedi al docente di controllare i dati.' :
@@ -388,14 +387,14 @@
     return [
       {t:'campo',sel:'#lg-data',nome:'Data di avvio',valore:'2027-01-04',
        serve:'Inserisci 04/01/2027: è la data dello SCENARIO SIMULATO, anche se il corso viene svolto in un altro giorno o anno.'},
-      {t:'scelta',sel:'#lg-quiz',nome:'Ricostruzione delle scritture',valore:'si',
-       serve:'Per il corso completo scegli «sì». Dopo i documenti contabili il tutor farà ricostruire Dare/Avere. Il docente può decidere prima della partenza una classe solo operativa (no).'},
+      {t:'scelta',sel:'#lg-quiz',nome:'Esercizio solo magazzino',valore:'no',
+       serve:'Il corso Pistoia è operativo: i documenti logistici sono registrati automaticamente. Non si compilano scritture Dare/Avere.'},
       {t:'pulsante',sel:'[data-prefisso="lg"] [data-azione="lg"]',
        nome:'Avvia il percorso logistico',
        serve:'Premi UNA volta «Avvia il percorso logistico». Attendi «Percorso logistico avviato». NON premere di nuovo e NON selezionare un secondo scenario.'},
       leggi('2 · Controlla le giacenze iniziali',
         'Devi trovare banca 50.000 €, 200 TR-STD, 200 TR-ALTA, 300 TR-PED (totale prodotti 22.785 €); ferro ZERO. '+
-        'Con la ricostruzione attiva, completa anche la partita doppia di apertura che compare nel tutor. '+
+        'Non devi ricostruire alcuna scrittura di apertura. '+
         'La spunta arriva dai dati salvati: non la metti manualmente.')
     ];
   }
@@ -488,5 +487,7 @@
       'Osserva e interpreta la schermata, poi spunta «✓ Fatto» quando hai davvero completato la verifica.');
   });
 
-  window.MSA_ESERCIZIO = {codice: 'magazziniere-5', titolo: 'Magazziniere 5.0: un mese di magazzino (gennaio 2027)', versione: 'erp-ft', pannelloAutomatico: true, verificaRagioneria: true, passi: passi};
+  // Percorso magazzinieri: nessuna prova di partita doppia. Le valutazioni FIFO/LIFO/medio restano.
+  passi.forEach(function(p) { p.contabile = false; });
+  window.MSA_ESERCIZIO = {codice: 'magazziniere-5', titolo: 'Magazziniere 5.0: un mese di magazzino (gennaio 2027)', versione: 'erp-ft', pannelloAutomatico: true, verificaRagioneria: false, passi: passi};
 })();
