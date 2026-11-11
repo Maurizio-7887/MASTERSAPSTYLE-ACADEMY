@@ -48,8 +48,8 @@
      attesa: '4 pallet da 50 TR-ALTA, tutti ✅ «LIBERA a scaffale». In alto: 200 libere da prelevare = 200 nelle ubicazioni = 200 in contabilità; 0 bloccate.',
      nota: 'Lettura: spunta a mano. È la domanda che il magazziniere si fa ogni giorno: «dove prendo questo articolo?». Il sistema mette prima le ubicazioni da cui si può prelevare.'},
     {g: 'UF 10 · 0 · Avvio', titolo: 'Stampa le etichette di un’ubicazione e di una UdC', dove: {ep: M + 'etichette'}, percorso: 'WMS → Etichette barcode e QR',
-     campi: [['Etichette', 'ubicazione 01-03-1 e la UdC del pallet TR-ALTA che contiene'], ['Leggi', 'codice a barre (per la pistola) e QR (per lo smartphone)'], ['Stampa', '🖨️ oppure salva in PDF']],
-     nota: 'Lettura: spunta a mano. Etichetta dell’ubicazione sullo scaffale, etichetta della UdC sul pallet: la pistola legge entrambe.'},
+     campi: [['Primo foglio', 'Ubicazioni (scaffale) → 01-03-1 → Stampa / salva PDF'], ['Secondo foglio', 'Unità di carico (pallet) → una UdC di TR-ALTA → Stampa / salva PDF'], ['Differenza', 'ubicazione = indirizzo dello scaffale, UdC = singolo pallet']],
+     nota: 'Prova pratica di identificazione: stampa o salva due PDF; etichetta scaffale ≠ etichetta pallet. Non crea movimenti, né registrazioni contabili.'},
     {g: 'UF 10 · 0 · Avvio', titolo: 'RF Interroga: che cosa c’è in 01-03-1?', dove: {ep: M + 'rf'}, percorso: 'WMS → Pistola RF → scheda 🔎 Interroga',
      campi: [['Risorsa', 'MAG01 Marco'], ['Leggi', '01-03-1 e premi Invio'], ['Poi', 'leggi una UdC copiata dalla mappa'], ['Infine', 'leggi il codice articolo TR-PED e premi Invio']],
      attesa: 'Materiale, quantità e UdC dell’ubicazione. Con il codice articolo la pistola elenca tutte le ubicazioni delle TR-PED (6 pallet). Interrogare non cambia nulla.', nota: 'Lettura: spunta a mano.'},
@@ -430,9 +430,24 @@
       leggi('3 · Ricordati gli identificativi','Per le esercitazioni RF userai i veri codici UdC esposti dal tuo account. Non copiarli da esempi di altri allievi. Premi «✓ Fatto» dopo la verifica.')
     ];
     if(p.titolo.indexOf('Stampa le etichette')===0)return [
-      leggi('1 · Apri Etichette barcode e QR','Vai su Magazzino → Etichette barcode e QR. Seleziona una ubicazione (es. 01-03-1) e una UdC effettivamente presente sulla mappa.'),
-      leggi('2 · Quale etichetta applicare?','L’etichetta UBICAZIONE va sullo scaffale; l’etichetta UdC va sul pallet. Il codice a barre è per la pistola, il QR per lo smartphone.'),
-      leggi('3 · Stampa o salva','Usa il pulsante di stampa o PDF della pagina; verifica che i due codici siano differenti. Spunta «✓ Fatto» dopo la prova.')
+      leggi('Che cosa devi fare in questo esercizio',
+        'Devi preparare DUE etichette diverse. La prima identifica l’indirizzo dello scaffale 01-03-1. La seconda identifica un pallet reale TR-ALTA (UdC): serve alla pistola RF per riconoscere esattamente quel pallet. Nessun movimento e nessuna partita doppia. Premi «Ho letto» per iniziare.'),
+      {t:'scelta',sel:'#cosa',nome:'Tipo etichetta: scaffale',valore:'ubicazioni',mostra:'Ubicazioni (scaffale)',
+        serve:'Nella zona a SINISTRA, sopra i codici, scegli «Ubicazioni (scaffale)». Un’ubicazione è un indirizzo fisso, non è un pallet.'},
+      {t:'scelta',sel:'#et-codice',nome:'Ubicazione da stampare',valore:'01-03-1',
+        serve:'Nel menu «Codice da stampare» scegli 01-03-1. Significa corsia 01, campata 03, livello 1. Sotto deve apparire UNA sola etichetta con scritto UBICAZIONE e 01-03-1.'},
+      leggi('Controlla il primo codice',
+        'Verifica con gli occhi che l’etichetta mostri 01-03-1, il barcode nero a righe e il QR quadrato. Questo foglio sarebbe applicato allo scaffale. Premi «Ho letto» solo dopo averlo trovato.'),
+      {t:'pulsante',sel:'#stampa',nome:'Stampa / salva PDF della posizione',
+        serve:'Premi «Stampa / salva PDF». Se non hai una stampante, nella finestra di stampa del browser scegli «Salva come PDF» e salva il documento. Non devi necessariamente stampare su carta: questa è una prova.'},
+      {t:'scelta',sel:'#cosa',nome:'Tipo etichetta: pallet',valore:'udc',mostra:'Unità di carico (pallet)',
+        serve:'Adesso cambia il menu «Tipo di etichetta» in «Unità di carico (pallet)». Il codice cambia: una UdC identifica il pallet e non l’indirizzo dello scaffale.'},
+      leggi('Scegli un pallet reale TR-ALTA',
+        'Nel menu «Codice da stampare» scegli una riga che contenga TR-ALTA. I codici UdC sono generati dal TUO magazzino: non inventarne uno. Se il primo codice proposto è già TR-ALTA, lascialo selezionato e premi «Ho letto».'),
+      leggi('Confronta le due etichette',
+        'Verifica che quella attuale riporti UNITÀ DI CARICO, articolo TR-ALTA, quantità del pallet e ubicazione. Il codice UdC deve essere diverso da 01-03-1, perché identifica una cosa diversa. Poi premi «Ho letto».'),
+      {t:'pulsante',sel:'#stampa',nome:'Stampa / salva PDF del pallet',
+        serve:'Premi «Stampa / salva PDF» per la seconda etichetta. Anche qui puoi scegliere «Salva come PDF». Alla fine apri «Tutti i punti di questo passo» per ricontrollare e conferma «✓ Fatto» nella guida: questa prova di sola lettura non modifica le scorte.'}
     ];
     if(p.titolo.indexOf('RF Interroga:')===0)return [
       leggi('1 · Apri la pistola RF','Vai su Magazzino → Pistola RF, poi premi la scheda «🔎 Interroga». «📦 Compiti» è un’altra funzione, per movimentare merci.'),
