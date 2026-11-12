@@ -185,3 +185,13 @@ body.msa-ac{margin:0;background:var(--f-sfondo);color:var(--f-testo);font-family
 
 /* codici SAP: nascosti finche non si preme «Scopri i codici SAP» */
 .sap{display:none}body.msa-sap .sap{display:inline}
+/* Launchpad: materiali aggiuntivi raccolti in un riquadro chiuso */
+details.msa-altri{margin:22px 0 8px;border:1px solid var(--f-bordo,#d9dee3);border-radius:10px;padding:10px 14px;background:rgba(0,0,0,.015)}
+details.msa-altri>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+details.msa-altri>summary::-webkit-details-marker{display:none}
+details.msa-altri>summary::before{content:"▸";font-size:14px}
+details.msa-altri[open]>summary::before{content:"▾"}
+details.msa-altri>summary .msa-gruppo{margin:0}
+details.msa-altri>summary small{opacity:.7}
+.msa-sottogruppo{font-size:13px;margin:16px 0 0;text-transform:uppercase;letter-spacing:.04em;opacity:.8}
+details.msa-altri .msa-tile p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
