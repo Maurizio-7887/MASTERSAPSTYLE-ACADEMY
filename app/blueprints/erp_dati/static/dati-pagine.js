@@ -7,11 +7,18 @@
   var e = L.esc, eur = L.eur, n0 = L.n0, S = function () { return N.S; };
   // Firenze 30h: percorso operativo senza quiz contabili, soltanto sulla
   // schermata di avvio scelta dal Launchpad. Pistoia mantiene le sue opzioni.
-  var firenze30 = /(?:[?&])esercizio_guida=firenze-30(?:&|$)/.test(location.search);
+  // Il corso lo decide il server (window.MSA_CORSO_GUIDA, scritto prima degli script): chi aveva già iniziato il vecchio
+  // percorso logistico continua con la sua guida anche se il pulsante del corso ora apre «Dicembre in magazzino».
+  // L'indirizzo (?esercizio_guida=) serve solo se la pagina non ha una guida.
+  var guidaCorso = window.MSA_CORSO_GUIDA || (window.MSA_GUIDA || {}).esercizio ||
+    ((/(?:[?&])esercizio_guida=([\w-]+)/.exec(location.search) || [])[1]) || '';
+  var firenze30 = guidaCorso === 'firenze-30';
   // Il corso scelto nel Launchpad resta attivo lungo le pagine del simulatore.
   // Nessuna seconda scelta tra Amministrazione, Logistica e Continua.
-  var corsoMagazzino = /(?:[?&])esercizio_guida=(?:firenze-30|magazziniere-5)(?:&|$)/.test(location.search) ||
-    ['firenze-30', 'magazziniere-5'].indexOf((window.MSA_GUIDA || {}).esercizio) >= 0;
+  var corsoMagazzino = guidaCorso === 'firenze-30' || guidaCorso === 'magazziniere-5';
+  // «Dicembre in magazzino» (magazzinieri, senza ragioneria): Pistoia 80 ore completo, Firenze 30 ore essenziale.
+  // Stessa azienda di Dicembre che nasce il 01/12/2026, creata senza quiz Dare/Avere. Non tocca un archivio di un altro esercizio.
+  var dicembreMagazzino = guidaCorso === 'dicembre-magazzino' || guidaCorso === 'dicembre-magazzino-30';
   var PAGINE = {
     avvio: function () {
       // Il reset non deve mai comparire automaticamente nel percorso didattico.
@@ -64,6 +71,19 @@
         // Il reset e le tre scelte rimangono disponibili solo al docente
         // nella navigazione amministrativa ordinaria, non nel corso.
       }
+      if (dicembreMagazzino && !corsoMagazzino) {
+        var suo = haAzienda && S().corsoMagazzino === 'dicembre-magazzino';
+        var estraneo = haAzienda && !suo;
+        var essenziale = guidaCorso === 'dicembre-magazzino-30';
+        radice.innerHTML = L.scheda('📦', essenziale ? 'Dicembre in magazzino · essenziale (Firenze 30 ore)' : 'Dicembre in magazzino', 'magazzinieri · vendite, acquisti, produzione e WMS · senza ragioneria',
+          (estraneo
+            ? '<div class="lab-esito errore">⚠️ Questo account contiene già un\'azienda di un altro esercizio. Per proteggere i documenti esistenti l\'esercizio di magazzino non parte qui: accedi con un account dedicato, senza cancellare niente.</div>'
+            : suo
+              ? '<div class="lab-esito ok">✓ Azienda creata il ' + L.fd(S().costituzione.data) + '. Segui il pannello a destra: riparte dall’ultimo passo salvato.</div>' + pContinua
+              : '<div class="lab-esito ok">📦 L’azienda Ferro &amp; Transenne nasce il 1° dicembre 2026 con il magazzino vuoto. Creala una sola volta, poi il pannello ti guida passo per passo.</div>' +
+                L.modulo('cs', [['data', 'Data di nascita dell’azienda', 'date', '2026-12-01']], [['cs', 'Crea l’azienda per il magazzino']]) +
+                '<p class="lab-nota">Lavori solo sulla merce: ordini dei clienti, acquisti, produzione e magazzino. Il programma tiene da solo la contabilità (la vede il docente): <b>non ti chiede scritture Dare/Avere</b>.</p>'));
+      }
       var mostra = function (c) {
         [].forEach.call(radice.querySelectorAll('[data-pannello]'), function (d) { d.hidden = d.getAttribute('data-pannello') !== c; });
         [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.classList.toggle('att', b.getAttribute('data-scelta') === c); });
@@ -98,7 +118,7 @@
         if (window.MSA_SALVA) { window.MSA_SALVA().then(vai, vai); setTimeout(vai, 4000); } else vai();
       };
       L.collega(radice, 'av', {av: SD.avviaSistema}, rendi);
-      L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; return SD.avviaSistema(v); }}, rendi);
+      L.collega(radice, 'cs', {cs: function (v) { v.modo = 'costituzione'; if (dicembreMagazzino) v.quiz = 'no'; return SD.avviaSistema(v); }}, rendi);
       L.collega(radice, 'ng', {ng: function (v) { v.modo = 'negozio'; return SD.avviaSistema(v); }}, rendi);
       L.collega(radice, 'lg', {lg: function (v) {
         v.modo = 'logistica';

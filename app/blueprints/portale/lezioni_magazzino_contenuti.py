@@ -133,7 +133,7 @@ PERCORSI = {
   "firenze": {
     "titolo": "Firenze · Innovazione digitale del magazzino · 30 ore",
     "descrizione": "Sette lezioni introduttive compatte, concentrate su digitalizzazione, mappa, RF, interoperabilità SD/MM/PP, spedizioni smart, valorizzazione essenziale e innovazione. Nessun quiz Dare/Avere.",
-    "esercizio": "firenze-30",
+    "esercizio": "dicembre-magazzino-30",   # Dicembre in magazzino · essenziale (chi aveva iniziato firenze-30 lo continua)
     "ordine": [
       "fondamenti",
       "mappa",
@@ -147,7 +147,7 @@ PERCORSI = {
   "pistoia": {
     "titolo": "Pistoia · Magazziniere 5.0 · UF 8, 9, 10, 11",
     "descrizione": "Percorso approfondito: contabilità di magazzino, inventari, sistemi informativi e innovazione, con esercitazioni complete.",
-    "esercizio": "magazziniere-5",
+    "esercizio": "dicembre-magazzino",   # Dicembre in magazzino completo (chi aveva iniziato magazziniere-5 lo continua)
     "ordine": [
       "fondamenti",
       "ordini",

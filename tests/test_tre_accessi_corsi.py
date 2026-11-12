@@ -31,7 +31,7 @@ for url in ("/", "/vuoto/"):
         assert c.get(target).status_code == 200, target
     # Le due tile dei magazzinieri includono gia' la teoria completa,
     # con l'accesso al corretto esercizio operativo in altra scheda.
-    for slug, script in [('firenze', 'firenze-30'), ('pistoia', 'magazziniere-5')]:
+    for slug, script in [('firenze', 'dicembre-magazzino-30'), ('pistoia', 'dicembre-magazzino')]:
         theory_page = c.get(f'/vuoto/lezioni-magazzino/{slug}').get_data(as_text=True)
         assert 'Indice delle lezioni' in theory_page
         assert 'ESERCITAZIONE — SEMPRE DISPONIBILE' in theory_page

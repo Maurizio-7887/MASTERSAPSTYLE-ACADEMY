@@ -215,8 +215,15 @@ def _pratica(u, c):
     s = StatoLavoro.query.filter_by(utente_id=u.id, versione=VERSIONE_LAVORO).first()
     if s is None:
         return {"righe": [], "esatti": 0, "totale": 0, "quota": 0.0, "iniziato": False}
+    esercizio = c["esercizio"]
     try:
-        r = report(s.dati, c["esercizio"])
+        import json
+        if esercizio == "magazziniere-5" and (json.loads(s.dati) or {}).get("corsoMagazzino") == "dicembre-magazzino":
+            esercizio = "dicembre-magazzino"   # il pulsante Pistoia apre ora «Dicembre in magazzino» completo
+    except (ValueError, TypeError, AttributeError):
+        pass
+    try:
+        r = report(s.dati, esercizio)
     except Exception:  # noqa: BLE001 — un lavoro rovinato non deve bloccare la pagina
         return {"righe": [], "esatti": 0, "totale": 0, "quota": 0.0, "iniziato": True}
     tot = len(r["confronto"])

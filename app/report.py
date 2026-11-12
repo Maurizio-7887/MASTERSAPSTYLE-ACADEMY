@@ -282,6 +282,16 @@ class Lavoro:
                 "dc_mutuo": -s26("37.10"), "dc_interessi_mutuo": s26("74"), "dc_ritenuta": -s26("29.10"),
                 "dc_bollo": s26("87"), "dc_leasing": s26("88"), "dc_svalutazione": s26("89"),
             })
+            # «Dicembre in magazzino» (magazzinieri, senza ragioneria): solo quantità e documenti, nessun conto
+            mov = s.get("movimenti") or []
+            base.update({
+                "dm_corso": "sì" if s.get("corsoMagazzino") == "dicembre-magazzino" and s.get("quizContabile") is False else "no",
+                "dm_ferro_ricevuto": round(sum(o.get("entrato") or 0 for o in s.get("acquisti") or [] if o.get("materiale") == "FERRO"), 3),
+                "dm_rottamato_kg": round(-sum(m.get("qta") or 0 for m in mov if m.get("tipo") == "555" and m.get("mat") == "FERRO"), 3),
+                "dm_consegne_spedite": sum(1 for c in s.get("consegne") or [] if c.get("pgi")),
+                "dm_differenza_kit": round(sum(m.get("qta") or 0 for m in mov if m.get("tipo") == "711" and m.get("mat") == "SL-TAGLIO"), 3),
+                "dm_kit_deposito": round(sum(t.get("ricevuto") or 0 for t in wm.get("trasferimenti") or [] if t.get("a") == "D200" and t.get("arrivato")), 3),
+            })
             # «Magazziniere 5.0: un mese di magazzino» (percorso logistico, gennaio 2027)
             def sg(conto):
                 return sc(conto, fino="2027-01-31")

@@ -1,3 +1,35 @@
+# Dicembre in due versioni: per MAGAZZINIERI e per RAGIONIERI (novembre 2026)
+
+**Corsi di magazzino (dal 12/11/2026).** Il pulsante «Apri / riprendi esercizio» dei due corsi apre:
+- **FIRENZE · MAGAZZINO 30 ORE** → `dicembre-magazzino-30` «Dicembre in magazzino · essenziale»: 54 passi semplici
+  (azienda, W100, ordini clienti, acquisto e ricevimento con quarantena, produzione, ondata, picking, SSCC, carico RF e
+  RFID, 601 e DDT, inventario). Testo `Esercitazione_Dicembre_Magazzino_30.docx`, 14 numeri di controllo.
+- **PISTOIA · MAGAZZINO 80 ORE** → `dicembre-magazzino` completo, 84 passi (vedi sotto); anche i link della prova UF9.
+- Chi aveva già avviato il vecchio percorso logistico di gennaio (`percorso=logistica`) continua con `firenze-30` /
+  `magazziniere-5`; un link vecchio su un'azienda di Dicembre apre la guida nuova (`guida_secondo_lavoro` in
+  `guida/__init__.py`). Le prove del docente usano archivi nuovi `erp-ft-doc-dic-firenze` e `erp-ft-doc-dic-pistoia`.
+- Corso online di magazzino: l'esame confronta il lavoro con `dicembre-magazzino` se l'azienda è di Dicembre, altrimenti
+  con `magazziniere-5` come prima. Le lezioni di teoria non sono cambiate (i loro esempi citano ancora il percorso di gennaio).
+
+Stessa azienda (Ferro & Transenne nasce il 01/12/2026), stessi documenti e stesse date, due esercizi:
+
+- **📦 Dicembre in magazzino** (`dicembre-magazzino`, magazzinieri, **senza ragioneria**): 84 passi. Vendite (VA01, ATP),
+  acquisti (ME21N, conferma fornitore, MIGO con 200 kg in quarantena e rottamazione 555, riordino urgente), produzione
+  (un ordine TR-STD a tre fasi, kit SL-TAGLIO a scorta), tutto il WMS (RF, interroga, blocco/sblocco, LT10, slotting,
+  ondate, picking FIFO, SSCC, piano di carico 3D, RFID, 601 e DDT, tracciabilità, inventario LI01N→LI21, FIFO/LIFO/medio,
+  scorta minima, deposito esterno D200 con arrivo il 02/01/2027). Niente cespiti, fatture, pagamenti, finanza, paghe,
+  ratei, IVA, chiusura e nessuna domanda Dare/Avere: il programma registra comunque il giornale (lo vede il docente).
+  Launchpad → «📦 Dicembre in magazzino»; l'azienda si crea dal riquadro «Dicembre in magazzino» (marcata
+  `corsoMagazzino=dicembre-magazzino`, `quizContabile=false`). Menu ridotto a SD, MM, PP, WMS. Testo Word:
+  `app/static/docs/Esercitazione_Dicembre_Magazzino.docx` (e PDF). Consegna con 15 numeri di controllo solo di quantità e documenti.
+- **🏛️ Dicembre con ragioneria** (`dicembre-wms`): invariato.
+
+La guida del magazzino (`guida/static/esercizi/dicembre-magazzino.js`) prende i passi da `dicembre-wms.js` per titolo e toglie
+la ragioneria dai testi: un cambiamento nella versione con ragioneria passa anche ai magazzinieri; se un titolo cambia il
+test lo segnala. Test: `npm run test:dicembre-magazzino`. Nessuna migrazione: le aziende esistenti non cambiano.
+
+---
+
 # Executive Assistant — corso per segreteria (novembre 2026)
 
 Esercizio guidato **«Executive Assistant: quattro mesi di un negozio di informatica»** (110 passi, senza produzione) per l'aula. La vendita online passa da

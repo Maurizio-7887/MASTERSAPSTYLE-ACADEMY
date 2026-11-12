@@ -23,6 +23,28 @@ ESERCIZI = {
             ("quadratura_im_wm", "Quantità IM e WMS riconciliate", "sì", None),
         ],
     },
+    "dicembre-magazzino": {
+        "titolo": "Dicembre in magazzino: vendite, acquisti, produzione e WMS (magazzinieri, senza ragioneria)",
+        "versione": "erp-ft",
+        # solo quantità, documenti e compiti: nessun indicatore preso da conti o da Dare/Avere
+        "attesi": [
+            ("dm_corso", "Azienda del corso magazzino (senza quiz Dare/Avere)", "sì", None),
+            ("dc_costituzione", "Data di nascita dell'azienda", "2026-12-01", None),
+            ("dm_ferro_ricevuto", "Ferro ricevuto con le due MIGO (kg)", 3500, 0.001),
+            ("dm_rottamato_kg", "Ferro schiacciato rottamato con il 555 (kg)", 200, 0.001),
+            ("dc_ordini_pp", "Ordini di produzione: transenne a fasi + kit a scorta", 2, 0),
+            ("dc_scorte", "Scorte finali: ferro kg / SL-TAGLIO / TR-STD", "740/19/0", None),
+            ("dm_consegne_spedite", "Consegne partite con l'uscita merci 601", 2, 0),
+            ("dc_colli", "Colli con SSCC spediti", 7, 0),
+            ("mg_ondate", "Ondate di prelievo rilasciate", 1, 0),
+            ("mg_inventari_chiusi", "Documenti d'inventario chiusi", 1, 0),
+            ("dm_differenza_kit", "Differenza inventariale registrata con il 711 (kit)", -1, 0),
+            ("dm_kit_deposito", "Kit arrivati al deposito esterno D200", 10, 0),
+            ("rw_compiti_confermati", "Compiti RF confermati", 28, 0),
+            ("rw_compiti_aperti", "Compiti WMS ancora aperti", 0, 0),
+            ("quadratura_im_wm", "Quantità IM e WMS riconciliate", "sì", None),
+        ],
+    },
     "executive-assistant": {
         "titolo": "Executive Assistant: quattro mesi di un negozio di informatica (settembre-dicembre 2026, chiusura e riapertura)",
         "versione": "erp-ft",
@@ -286,6 +308,19 @@ ESERCIZI = {
         ],
     },
     "libero": {"titolo": "Lavoro libero (senza numeri di controllo)", "versione": None, "attesi": []},
+}
+
+
+# Firenze 30 ore dal 12/11/2026: «Dicembre in magazzino · essenziale», stessa azienda senza deposito esterno
+# né letture di approfondimento. Solo quantità, documenti e compiti.
+_ESSENZIALE = {"dm_corso", "dc_costituzione", "dm_ferro_ricevuto", "dm_rottamato_kg", "dc_ordini_pp", "dc_scorte",
+               "dm_consegne_spedite", "dc_colli", "mg_ondate", "mg_inventari_chiusi", "dm_differenza_kit",
+               "rw_compiti_confermati", "rw_compiti_aperti", "quadratura_im_wm"}
+ESERCIZI["dicembre-magazzino-30"] = {
+    "titolo": "Dicembre in magazzino · essenziale (Firenze 30 ore, magazzinieri, senza ragioneria)",
+    "versione": "erp-ft",
+    "attesi": [(k, label, 23 if k == "rw_compiti_confermati" else v, tol)
+               for k, label, v, tol in ESERCIZI["dicembre-magazzino"]["attesi"] if k in _ESSENZIALE],
 }
 
 

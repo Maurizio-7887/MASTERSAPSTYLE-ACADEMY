@@ -16,7 +16,7 @@
 {% set corso_selezionato = guida.esercizio if guida else None %}
 {% include "simulatore/_shell.html" %}
 {% set corso_barra = corso_selezionato %}
-{% if corso_barra not in ['firenze-30', 'magazziniere-5'] %}
+{% if corso_barra not in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] %}
 <div class="msa-sottobarra"><div class="msa-riga">
   <span class="msa-percorso"><a href="{{ url_for('portale.ingresso', versione=versione) }}">Launchpad</a>
     › <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=modulo_attivo.codice) }}"><b class="msa-sigla sap">{{ modulo_attivo.sigla }}</b> {{ modulo_attivo.titolo }}</a>
@@ -27,7 +27,7 @@
 </div></div>
 {% endif %}
 <main class="msa-lp">
-  {% if corso_barra not in ['firenze-30', 'magazziniere-5'] %}
+  {% if corso_barra not in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] %}
   <div class="msa-lp-intro">
     <h1>{{ pagina.icona }} {{ pagina.titolo }} <span class="lab-tc">{{ pagina.tcode }}</span></h1>
     <p>{% block intro %}{% endblock %}</p>
@@ -36,11 +36,11 @@
   {# Per i due percorsi logistici una sola barra compatta in ogni pagina.
      Il tutor mostra i passi; le lezioni e la prova hanno UN solo accesso qui. #}
   {% set corso_attivo = corso_selezionato %}
-  {% if corso_attivo in ['firenze-30', 'magazziniere-5'] %}
+  {% if corso_attivo in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] %}
   <nav aria-label="Strumenti del corso di magazzino" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:9px 12px;background:#eaf3fa;border:1px solid #b9d1e1;border-radius:9px;color:#183b58">
-    <strong style="font-size:.91rem;margin-right:5px">{{ 'FIRENZE · 30 ORE' if corso_attivo == 'firenze-30' else 'PISTOIA · 80 ORE' }}</strong>
-    <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='firenze' if corso_attivo == 'firenze-30' else 'pistoia') }}" target="_blank" rel="noopener" style="padding:8px 12px;border-radius:7px;background:#fff;border:1px solid #8fbbd1;color:#174868;text-decoration:none;font-weight:700">📚 Lezioni teoriche ↗</a>
-    {% if corso_attivo == 'magazziniere-5' %}
+    <strong style="font-size:.91rem;margin-right:5px">{{ 'FIRENZE · 30 ORE' if corso_attivo in ['firenze-30', 'dicembre-magazzino-30'] else 'PISTOIA · 80 ORE' }}</strong>
+    <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='firenze' if corso_attivo in ['firenze-30', 'dicembre-magazzino-30'] else 'pistoia') }}" target="_blank" rel="noopener" style="padding:8px 12px;border-radius:7px;background:#fff;border:1px solid #8fbbd1;color:#174868;text-decoration:none;font-weight:700">📚 Lezioni teoriche ↗</a>
+    {% if corso_attivo in ['magazziniere-5', 'dicembre-magazzino'] %}
     <a href="{{ url_for('portale.uf9_laboratorio', versione=versione) }}" target="_blank" rel="noopener" style="padding:8px 12px;border-radius:7px;background:#fff;border:1px solid #8fbbd1;color:#174868;text-decoration:none;font-weight:700">🧪 Prova inventariale UF 9 ↗</a>
     {% endif %}
     <span style="font-size:.86rem;color:#345b75">Segui il tutor a destra: il corso è già selezionato, senza altre scelte. Non azzerare il lavoro.</span>
@@ -51,6 +51,8 @@
 </main>
 {% set sync = config_sincronia(config.slot) %}
 {% if sync %}<script>window.MSA_SYNC = {{ sync | tojson }};</script><script src="{{ url_for('sincronia.static', filename='sincronia.js') }}"></script>{% endif %}
+{# la guida già decisa dal server (anche il ritorno alla guida vecchia per chi aveva iniziato): serve subito alle pagine #}
+<script>window.MSA_CORSO_GUIDA = {{ (guida.esercizio if guida else none) | tojson }};</script>
 <script>window.LAB_PAGINA = {{ config | tojson }};</script>
 <script src="{{ url_for('static', filename='js/erp/presidio-didattico.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lab-motore.js') }}"></script>

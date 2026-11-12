@@ -5,8 +5,8 @@ from app.blueprints.portale.lezioni_magazzino_professionali import TEORIA_PROFES
 
 assert len(PERCORSI["firenze"]["ordine"]) == 7
 assert len(PERCORSI["pistoia"]["ordine"]) == 11
-assert PERCORSI["firenze"]["esercizio"] == "firenze-30"
-assert PERCORSI["pistoia"]["esercizio"] == "magazziniere-5"
+assert PERCORSI["firenze"]["esercizio"] == "dicembre-magazzino-30"   # dal 12/11/2026: essenziale
+assert PERCORSI["pistoia"]["esercizio"] == "dicembre-magazzino"      # dal 12/11/2026: completo
 assert "flussi" in PERCORSI["firenze"]["ordine"]
 assert "valori" in PERCORSI["firenze"]["ordine"]
 assert "valori" in PERCORSI["pistoia"]["ordine"]

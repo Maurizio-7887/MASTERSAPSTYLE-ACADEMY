@@ -7,7 +7,7 @@
   // Le esercitazioni per magazzinieri valutano FIFO, LIFO, costo medio,
   // scorte, documenti e WMS: non bloccano mai la UI per il quiz Dare/Avere.
   var corso = new URLSearchParams(location.search).get('esercizio_guida');
-  var soloMagazzino = corso === 'firenze-30' || corso === 'magazziniere-5' ||
+  var soloMagazzino = corso === 'firenze-30' || corso === 'magazziniere-5' || corso === 'dicembre-magazzino' || corso === 'dicembre-magazzino-30' || /^erp-ft-doc-dic-/.test(C.slot || '') ||
     C.slot === 'erp-ft-doc-pistoia' || C.slot === 'erp-ft-doc-firenze';
   function stato() {
     try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) { return {}; }

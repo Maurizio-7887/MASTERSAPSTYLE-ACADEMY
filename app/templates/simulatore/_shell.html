@@ -19,7 +19,7 @@
     </span>
   </div>
 </header>
-{% if versione and (request.args.get('esercizio_guida') or session.get('guida_integrata')) not in ['firenze-30', 'magazziniere-5'] %}
+{% if versione and (request.args.get('esercizio_guida') or session.get('guida_integrata')) not in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] %}
 {# classe "tabs": il modulo Fabbisogno del simulatore vi aggancia la sua voce (nascosta, il menu è già qui) #}
 <nav class="msa-attivita tabs" aria-label="{{ 'Moduli' if moduli is defined else 'Attività' }}">
   <div class="msa-riga">
@@ -27,11 +27,11 @@
     <a href="{{ url_for('portale.ingresso', versione=versione) }}" class="{{ 'attivo' if not modulo_attivo }}" title="Tutti i moduli">⊞ Moduli</a>
     {% set guida_magazzino = request.args.get('esercizio_guida') or session.get('guida_integrata') %}
     {% for m in moduli %}
-      {% if guida_magazzino not in ['firenze-30', 'magazziniere-5'] or m.codice in ['sd', 'mm', 'pp', 'wms'] %}
+      {% if guida_magazzino not in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] or m.codice in ['sd', 'mm', 'pp', 'wms'] %}
       <a href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}" class="{{ 'attivo' if modulo_attivo and modulo_attivo.codice == m.codice }}"><b class="msa-sigla sap">{{ m.sigla }}</b> {{ m.breve }}</a>
       {% endif %}
     {% endfor %}
-    {% if guida_magazzino in ['firenze-30', 'magazziniere-5'] %}
+    {% if guida_magazzino in ['firenze-30', 'magazziniere-5', 'dicembre-magazzino', 'dicembre-magazzino-30'] %}
       <a href="{{ url_for('portale.ingresso', versione=versione) }}" title="Gli altri moduli rimangono disponibili nel Launchpad">⋯ Altri moduli</a>
     {% endif %}
     {% else %}

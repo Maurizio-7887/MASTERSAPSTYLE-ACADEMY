@@ -169,7 +169,7 @@
     // Non cancelliamo documenti, scritture, esiti o tentativi storici.
     var corso = new URLSearchParams(location.search).get('esercizio_guida');
     var slot = ((window.LAB_PAGINA || {}).slot || '');
-    var soloMagazzino = corso === 'magazziniere-5' || corso === 'firenze-30' ||
+    var soloMagazzino = corso === 'magazziniere-5' || corso === 'firenze-30' || corso === 'dicembre-magazzino' || corso === 'dicembre-magazzino-30' || /^erp-ft-doc-dic-/.test(slot) ||
       slot === 'erp-ft-doc-pistoia' || slot === 'erp-ft-doc-firenze';
     if (soloMagazzino) S.quizContabile = false;
     var N = {
@@ -333,6 +333,8 @@
         if (i.modo === 'costituzione') {
           var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
           S.avviato = data; S.costituzione = {data: data, capitale: cap};
+          // «Dicembre in magazzino»: stessa azienda, ma l'allievo non ricostruisce le scritture (restano nel giornale per il docente)
+          if (i.quiz === 'no') { S.quizContabile = false; S.corsoMagazzino = 'dicembre-magazzino'; }
           modelloFasi();
           var rc = N.post({data: data, tipo: 'COSTITUZIONE', rif: 'COSTITUZIONE', descrizione: 'Costituzione di ' + S.societa + ': i soci sottoscrivono il capitale sociale di ' + L.eur(cap) + ' €',
             righe: [{conto: '08', dareAvere: 'DARE', importo: cap, testo: 'capitale sottoscritto e non ancora versato'}, {conto: '30', dareAvere: 'AVERE', importo: cap, testo: 'capitale sociale'}]});

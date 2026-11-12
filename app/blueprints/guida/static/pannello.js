@@ -124,7 +124,7 @@
   var bottone = radice.querySelector('.msa-g-apri'), pannello = radice.querySelector('.msa-g-pannello');
   // anche nella barra blu in alto, ben visibile
   var dx = document.querySelector('.msa-shell .msa-dx');
-  if (dx && E.codice !== 'firenze-30' && E.codice !== 'magazziniere-5') {
+  if (dx && E.codice !== 'firenze-30' && E.codice !== 'magazziniere-5' && E.codice !== 'dicembre-magazzino' && E.codice !== 'dicembre-magazzino-30') {
     var b2 = document.createElement('button');
     b2.type = 'button'; b2.className = 'msa-g-shell'; b2.textContent = '📘 Esercizio passo passo';
     b2.addEventListener('click', function () { apri(pannello.hidden); });
@@ -234,14 +234,14 @@
     if (p.dove.pp) url.searchParams.set('pp', p.dove.pp);
     // La selezione esplicita appartiene alla scheda del corso, non alla
     // sessione condivisa con altre schede del docente.
-    if (E.codice === 'magazziniere-5' || E.codice === 'firenze-30')
+    if (E.codice === 'magazziniere-5' || E.codice === 'firenze-30' || E.codice === 'dicembre-magazzino' || E.codice === 'dicembre-magazzino-30')
       url.searchParams.set('esercizio_guida', E.codice);
     return url.href;
   }
   // Arrivando dal pulsante del corso, riprendi direttamente sulla schermata
   // del passo salvato. Nessuna seconda scelta, nessuna modifica al database
   // e nessuna navigazione forzata durante il normale uso del simulatore.
-  if ((E.codice === 'magazziniere-5' || E.codice === 'firenze-30') &&
+  if ((E.codice === 'magazziniere-5' || E.codice === 'firenze-30' || E.codice === 'dicembre-magazzino' || E.codice === 'dicembre-magazzino-30') &&
       new URLSearchParams(location.search).get('riprendi') === '1') {
     ls(APERTA + '-' + E.codice, '1');
     var destinazioneRipresa = urlPasso(PASSI[pos]);
@@ -389,7 +389,7 @@
     h += avvisoCompleto;
     // Per Firenze e Pistoia i collegamenti a teoria e UF9 sono nella
     // barra didattica della pagina ERP. Qui il tutor mostra solo il passo.
-    if (p.principiante && E.codice !== 'magazziniere-5' && E.codice !== 'firenze-30') {
+    if (p.principiante && E.codice !== 'magazziniere-5' && E.codice !== 'firenze-30' && E.codice !== 'dicembre-magazzino' && E.codice !== 'dicembre-magazzino-30') {
       // Il promemoria generico non viene ripetuto nei corsi magazzinieri:
       // le istruzioni puntuali sono già nel suggeritore «ORA TOCCA A TE».
       // Lezione parlata per chi non ha mai utilizzato un gestionale.

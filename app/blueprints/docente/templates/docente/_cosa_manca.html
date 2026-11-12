@@ -21,6 +21,10 @@
 <script src="{{ url_for('guida.static', filename='esercizi/uso-programma.js') }}"></script>
 {% endif %}
 {% if es == 'firenze-30' %}<script src="{{ url_for('guida.static', filename='esercizi/magazziniere-5.js') }}"></script>{% endif %}
+{# Dicembre in magazzino: stessi passi di Dicembre, poi il filtro che toglie la ragioneria #}
+{% if es in ['dicembre-magazzino', 'dicembre-magazzino-30'] %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
+{% if es == 'dicembre-magazzino-30' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-magazzino.js') }}"></script>{% endif %}
 <script src="{{ url_for('guida.static', filename='esercizi/' ~ es ~ '.js') }}"></script>
 {% if es == 'dicembre-wms' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
 <script>
