@@ -254,6 +254,7 @@ def crea_docente_iniziale(app):
         u.ruolo = "docente"
         u.imposta_password(password)
         u.deve_cambiare_password = False
+        u.tentativi_falliti, u.bloccato_fino = 0, None   # il recupero sblocca anche l'account bloccato dai tentativi sbagliati
         if not db.session.get(Impostazione, "costo_orario"):
             db.session.add(Impostazione(chiave="costo_orario", valore=os.environ.get("COSTO_ORARIO", "0")))
         db.session.commit()
