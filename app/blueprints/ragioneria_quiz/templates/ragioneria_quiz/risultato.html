@@ -1,0 +1,53 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import contenuto, barra %}
+{% block titolo %}Risultato · {{ M.titolo }}{% endblock %}
+{% block rq %}
+<p><a href="{{ url_for('ragioneria_quiz.docente_allievo', uid=allievo.id) if u.docente and allievo.id != u.id else url_for('ragioneria_quiz.indice') }}">← {{ 'Scheda di ' ~ allievo.nome if u.docente and allievo.id != u.id else 'Torna alle unità' }}</a></p>
+<h1>{{ M.titolo }}{% if t.unita %} · {{ t.unita }} {{ rq_unita[t.unita].titolo }}{% endif %}</h1>
+<p class="rq-nd">{{ allievo.nome }} · iniziata {{ ora_italiana(t.iniziato) }}{% if t.consegnato %} · consegnata {{ ora_italiana(t.consegnato) }}{% endif %} · banca {{ t.versione_banca }}</p>
+
+{% if t.stato == 'annullato' %}<div class="msa-msg errore">Prova annullata dal docente: non conta nei risultati.</div>{% endif %}
+{% if t.stato != 'in_corso' and t.massimo %}
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Punteggio</div><div class="v">{{ t.punti }} / {{ t.massimo }}</div></div>
+  <div class="msa-card"><div class="l">Percentuale</div><div class="v">{{ t.percentuale }}%</div></div>
+  {% if t.max_teoria %}<div class="msa-card"><div class="l">Teoria</div><div class="v">{{ t.punti_teoria }} / {{ t.max_teoria }}</div></div>{% endif %}
+  {% if t.max_app %}<div class="msa-card"><div class="l">Applicazione</div><div class="v">{{ t.punti_app }} / {{ t.max_app }}</div></div>{% endif %}
+  <div class="msa-card"><div class="l">Aiuti usati</div><div class="v">{{ t.aiuti }}</div></div>
+  {% if t.superato is not none %}<div class="msa-card" style="border-top-color:{{ 'var(--f-verde)' if t.superato else 'var(--f-rosso)' }}"><div class="l">Esito</div><div class="v">{{ '✅ Superata' if t.superato else '❌ Da ripetere' }}</div></div>{% endif %}
+</div>
+{% if t.modalita == 'finale' %}<p>Soglia: almeno {{ SOGLIA }}% in totale e almeno {{ SOGLIA_PARTE }}% sia in teoria sia in applicazione.</p>{% elif t.modalita == 'verifica' %}<p>Soglia di superamento: {{ SOGLIA }}%.</p>{% endif %}
+
+{% if per_unita | length > 1 %}
+<h2>Per unità</h2>
+<div class="rq-perunita">{% for c, s in per_unita.items() %}<a href="{{ url_for('ragioneria_quiz.unita', cod=c) }}"><span class="rq-cod">{{ c }}</span> {{ rq_unita[c].titolo }} <b>{{ s[0] }}/{{ s[1] }}</b></a>{% endfor %}</div>
+{% endif %}
+
+<h2>Correzione domanda per domanda</h2>
+{% for r in righe %}
+<article class="rq-domanda rq-corr {{ 'ok' if r.ok else 'ko' }}">
+  <p class="rq-meta"><b>{{ loop.index }}.</b> <span class="rq-cod">{{ r.q.unita }}</span> {{ 'Teoria' if r.q.area == 'teoria' else 'Applicazione' }} · {{ '✅ giusta' if r.ok else ('❌ sbagliata' if r.scelta else '⚪ senza risposta') }}{% if r.aiuto %} · 💡 con aiuto{% endif %}{% if u.docente %} · <code>{{ r.q.id }}</code>{% endif %}</p>
+  <h3 class="rq-testo">{{ r.q.testo }}</h3>
+  <div class="rq-opzioni {{ 'scr' if r.q.tipo == 'scrittura' }}">
+  {% for o in r.q.opzioni %}{% set sc = o.id in r.scelta %}
+    {% if o.ok or sc %}
+    <div class="rq-opz {{ 'giusta' if o.ok }} {{ 'sbagliata' if sc and not o.ok }}">
+      <span class="rq-segno">{{ '✔' if o.ok else '✘' }}</span>
+      <div>{{ contenuto(o) }}
+        {% if sc and not o.ok %}<p class="rq-perche">❌ La tua scelta: {{ o.perche }}</p>{% endif %}
+        {% if o.ok %}<p class="rq-perche ok">✔ Corretta{{ ' — scelta da te' if sc }}</p>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+  </div>
+  <p class="rq-spieg">📖 {{ r.q.spiegazione }}</p>
+</article>
+{% endfor %}
+{% endif %}
+
+<div class="rq-azioni">
+  <a class="msa-btn" href="{{ url_for('ragioneria_quiz.indice') }}">Torna alle unità</a>
+  {% if t.unita %}<a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.unita', cod=t.unita) }}">Ristudia {{ t.unita }}</a>{% endif %}
+</div>
+{% endblock %}

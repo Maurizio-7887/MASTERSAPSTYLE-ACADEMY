@@ -1,0 +1,22 @@
+{% macro scrittura(righe) -%}
+<table class="rq-scr">
+  <thead><tr><th>Conto</th><th class="n">Dare</th><th class="n">Avere</th></tr></thead>
+  <tbody>
+  {% for r in righe | sort(attribute='sez', reverse=true) %}
+  <tr><td class="{{ 'rq-av' if r.sez == 'A' }}">{{ r.conto }}</td>
+      <td class="n">{{ (r.cent / 100) | euro if r.sez == 'D' }}</td>
+      <td class="n">{{ (r.cent / 100) | euro if r.sez == 'A' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{%- endmacro %}
+
+{% macro contenuto(o) -%}
+{% if o.righe is defined %}{{ scrittura(o.righe) }}{% else %}<span>{{ o.testo }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro barra(perc, soglia=None) -%}
+{% if perc is none %}<span class="rq-nd">—</span>{% else %}
+<span class="rq-barra {{ 'ok' if soglia and perc >= soglia else ('ko' if soglia else '') }}" title="{{ perc }}%"><i style="width:{{ perc }}%"></i><b>{{ perc }}%</b></span>
+{% endif %}
+{%- endmacro %}

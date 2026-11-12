@@ -1,0 +1,30 @@
+name: Firenze Amministrazione - Quiz di ragioneria
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/blueprints/ragioneria_quiz/**'
+      - 'app/blueprints/portale/templates/portale/home.html'
+      - 'app/blueprints/docente/templates/docente/_menu.html'
+      - 'app/blueprints/allievo/templates/allievo/area.html'
+      - 'tests/test_ragioneria_quiz.py'
+      - '.github/workflows/ragioneria-quiz.yml'
+  pull_request:
+    paths:
+      - 'app/blueprints/ragioneria_quiz/**'
+      - 'tests/test_ragioneria_quiz.py'
+  workflow_dispatch:
+jobs:
+  quiz:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - name: Banca valida, correzione lato server, chiavi nascoste, tentativi, isolamento, pannello docente
+        run: python -m tests.test_ragioneria_quiz
+      - name: I tre corsi restano separati
+        run: python -m tests.test_tre_accessi_corsi

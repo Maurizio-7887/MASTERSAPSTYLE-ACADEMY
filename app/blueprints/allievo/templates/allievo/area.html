@@ -19,6 +19,11 @@
     <span class="kpi"><strong>{{ l.scritture if l else 0 }}</strong><span>scritture del sistema integrato</span></span>
   </a>
 
+  <a class="msa-tile g-contabilita" href="{{ url_for('ragioneria_quiz.indice') }}">
+    <span class="ic" aria-hidden="true">🧮</span><b>Ragioneria: teoria e quiz</b>
+    <p>Studia, allenati con correzione immediata, fai le verifiche e rivedi i tuoi errori.</p>
+  </a>
+
   <a class="msa-tile g-personale" href="{{ url_for('allievo.consegna') }}">
     <span class="ic" aria-hidden="true">📤</span><b>Consegna il lavoro</b>
     <p>Invia al docente una fotografia del tuo lavoro: la correggerà e ti risponderà qui.</p>

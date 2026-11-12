@@ -1,0 +1,24 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import contenuto %}
+{% block titolo %}Banca domande con soluzioni{% endblock %}
+{% block rq %}
+{% include "docente/_menu.html" %}
+<p><a href="{{ url_for('ragioneria_quiz.docente') }}">← Risultati della classe</a></p>
+<h1>🔑 Banca domande con soluzioni <small class="rq-nd">solo docente</small></h1>
+<p>Versione {{ banca.versione }} · {{ banca.quesiti }} domande · {{ banca.teoria }} teoria · {{ banca.applicazione }} applicazione. Ogni alternativa sbagliata ha la sua spiegazione; <code>Mxx</code> indica la missione del simulatore Colab da cui deriva la domanda (riscritta e corretta).</p>
+<p class="rq-nd">Indice: {% for c, un in rq_unita.items() %}<a href="#{{ c }}">{{ c }}</a> {% endfor %}</p>
+{% for c, un in rq_unita.items() %}
+<h2 id="{{ c }}"><span class="rq-cod">{{ c }}</span> {{ un.titolo }} <small class="rq-nd">{{ un.domande | length }} domande</small></h2>
+{% for q in un.domande %}
+<details class="rq-domanda">
+  <summary><code>{{ q.id }}</code> {{ 'T' if q.area == 'teoria' else 'A' }}{{ q.livello }}{% if q.origine %} · {{ q.origine }}{% endif %} — {{ q.testo }}</summary>
+  <div class="rq-opzioni {{ 'scr' if q.tipo == 'scrittura' }}">
+  {% for o in q.opzioni %}
+    <div class="rq-opz {{ 'giusta' if o.ok else 'sbagliata' }}"><span class="rq-segno">{{ '✔' if o.ok else '✘' }}</span><div>{{ contenuto(o) }}{% if not o.ok %}<p class="rq-perche">{{ o.perche }}</p>{% endif %}</div></div>
+  {% endfor %}
+  </div>
+  <p class="rq-spieg">📖 {{ q.spiegazione }}</p>
+</details>
+{% endfor %}
+{% endfor %}
+{% endblock %}

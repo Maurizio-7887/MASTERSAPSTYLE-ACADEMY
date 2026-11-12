@@ -1,0 +1,76 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import contenuto %}
+{% block titolo %}{{ M.titolo }} · domanda {{ n + 1 }}{% endblock %}
+{% block rq %}
+<div class="rq-testa">
+  <div><b>{{ M.titolo }}</b>{% if t.unita %} · {{ t.unita }} {{ rq_unita[t.unita].titolo }}{% endif %}</div>
+  <div>Domanda <b>{{ n + 1 }}</b> di {{ tot }} · risposte date {{ risposte_date }}/{{ tot }}</div>
+</div>
+
+<nav class="rq-nav" aria-label="Domande della prova">
+{% for s in stato_nav %}<a href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=loop.index0) }}" class="{{ s }} {{ 'qui' if loop.index0 == n }}" aria-label="Domanda {{ loop.index }}{{ ' (risposta data)' if s != 'vuota' }}">{{ loop.index }}</a>{% endfor %}
+</nav>
+
+<article class="rq-domanda">
+  <p class="rq-meta"><span class="rq-cod">{{ q.unita }}</span> {{ un.titolo }} · {{ 'Teoria' if q.area == 'teoria' else 'Applicazione' }} · livello {{ q.livello }}{% if q.origine %} · dalla missione {{ q.origine }}{% endif %}</p>
+  <h2 class="rq-testo">{{ q.testo }}</h2>
+  <p class="rq-istr">{% if q.tipo == 'scrittura' %}Scegli la scrittura in partita doppia corretta.{% elif q.multi %}<strong>Seleziona tutte le risposte corrette</strong> (il punto si ottiene solo con l'insieme esatto).{% else %}Scegli una risposta.{% endif %}</p>
+
+  <form method="post" action="{{ url_for('ragioneria_quiz.risposta', tid=t.id) }}">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="n" value="{{ n }}">
+    <div class="rq-opzioni {{ 'scr' if q.tipo == 'scrittura' }}">
+    {% for o in q.opzioni %}
+      {% set scelta_qui = o.id in scelta %}
+      {% if mostra_esito %}
+        <div class="rq-opz {{ 'giusta' if o.ok }} {{ 'sbagliata' if scelta_qui and not o.ok }} {{ 'scelta' if scelta_qui }}">
+          <span class="rq-segno" aria-hidden="true">{{ '✔' if o.ok else ('✘' if scelta_qui else '') }}</span>
+          <div>{{ contenuto(o) }}
+            {% if scelta_qui and not o.ok %}<p class="rq-perche">❌ {{ o.perche }}</p>{% endif %}
+            {% if o.ok %}<p class="rq-perche ok">✔ Risposta corretta{{ ' (scelta da te)' if scelta_qui }}</p>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <label class="rq-opz {{ 'scelta' if scelta_qui }}">
+          <input type="{{ 'checkbox' if q.multi else 'radio' }}" name="scelta" value="{{ o.id }}" {{ 'checked' if scelta_qui }} {{ 'required' if not q.multi }}>
+          <div>{{ contenuto(o) }}</div>
+        </label>
+      {% endif %}
+    {% endfor %}
+    </div>
+
+    {% if mostra_esito %}
+      {% set giusta = (scelta | sort) == (q.opzioni | selectattr('ok') | map(attribute='id') | sort) %}
+      <div class="msa-msg {{ 'ok' if giusta else 'errore' }} rq-esito"><b>{{ '✅ Esatto!' if giusta else '❌ Non è corretta.' }}</b> {{ q.spiegazione }}</div>
+    {% else %}
+      <button class="msa-btn" type="submit">{{ 'Conferma la risposta' if M.feedback == 'subito' else ('Salva e vai avanti →' if n + 1 < tot else 'Salva la risposta') }}</button>
+    {% endif %}
+  </form>
+
+  {% if M.feedback == 'subito' and not mostra_esito %}
+    {% if aiuto_aperto or aiuto %}
+    <div class="rq-aiuto"><b>💡 Le regole di {{ un.codice }}</b><ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul><small>L'aiuto resta segnato in questa domanda.</small></div>
+    {% else %}
+    <form method="post" action="{{ url_for('ragioneria_quiz.aiuto', tid=t.id) }}" class="rq-inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="n" value="{{ n }}"><button class="msa-btn sec">💡 Mi serve un aiuto (rivedi le regole)</button></form>
+    {% endif %}
+  {% endif %}
+</article>
+
+<div class="rq-azioni">
+  {% if n > 0 %}<a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=n - 1) }}">← Indietro</a>{% endif %}
+  {% if n + 1 < tot and (mostra_esito or M.feedback != 'subito') %}<a class="msa-btn {{ 'sec' if not mostra_esito }}" href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=n + 1) }}">{{ 'Prossima domanda →' if mostra_esito else 'Salta →' }}</a>{% endif %}
+</div>
+
+{% set testo_btn = 'Concludi e vedi il risultato' if M.feedback == 'subito' else 'Confermo: consegna' %}
+{% if risposte_date == tot %}
+<section class="rq-consegna rq-pronta">
+  <p><b>Hai risposto a tutte le {{ tot }} domande.</b>{% if M.feedback != 'subito' %} Dopo la consegna non potrai più cambiare le risposte: vedrai voto, soluzioni e spiegazioni.{% endif %}</p>
+  <form method="post" action="{{ url_for('ragioneria_quiz.consegna', tid=t.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="msa-btn">{{ testo_btn if M.feedback == 'subito' else '📤 Consegna la prova' }}</button></form>
+</section>
+{% else %}
+<details class="rq-consegna">
+  <summary>{{ 'Concludi prima della fine' if M.feedback == 'subito' else '📤 Consegna la prova' }}</summary>
+  <p>Hai risposto a <b>{{ risposte_date }}</b> domande su {{ tot }}. {% if M.feedback != 'subito' %}Le domande senza risposta valgono zero. Dopo la consegna non potrai più cambiare le risposte.{% else %}Le domande senza risposta contano come sbagliate.{% endif %}</p>
+  <form method="post" action="{{ url_for('ragioneria_quiz.consegna', tid=t.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="msa-btn">{{ testo_btn }}</button></form>
+</details>
+{% endif %}
+{% endblock %}

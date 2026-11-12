@@ -1,0 +1,82 @@
+/* Ragioneria · teoria e quiz — Firenze Amministrazione */
+.rq-banner{background:#FFF4D6;border:1px solid #E8C468;color:#6B4E00;font-weight:700;font-size:12px;letter-spacing:.03em;padding:6px 10px;border-radius:4px;margin:0 0 10px}
+.rq-menu{margin:0 0 16px}
+.rq-intro{font-size:15px;max-width:900px}
+.rq-nd{color:var(--f-attenuato);font-weight:400}
+.rq-piede{color:var(--f-attenuato);font-size:12px;margin-top:28px;border-top:1px solid var(--f-bordo);padding-top:8px}
+.rq-cod{display:inline-block;background:#8066a6;color:#fff;border-radius:3px;font-size:11px;font-weight:700;padding:1px 6px;vertical-align:middle}
+.rq-percorso{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.rq-percorso span{background:#F3EFF9;border:1px solid #D9CCEC;border-radius:20px;padding:5px 12px;font-size:13px}
+.rq-percorso b{display:inline-block;background:#8066a6;color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;margin-right:4px;font-size:12px}
+.rq-grandi{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:14px 0 22px}
+.rq-box{background:#fff;border:1px solid var(--f-bordo);border-top:4px solid #8066a6;border-radius:8px;padding:12px 16px}
+.rq-box h2{margin:0 0 6px;font-size:18px}
+.rq-box.rq-finale{border-top-color:var(--f-arancio,#E9730C)}
+.rq-unita{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.rq-ucard{display:flex;flex-direction:column;gap:4px;background:#fff;border:1px solid var(--f-bordo);border-left:5px solid #C9BEDB;border-radius:6px;padding:10px 12px;color:inherit;text-decoration:none}
+.rq-ucard:hover{border-color:#8066a6;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.rq-ucard.superata{border-left-color:var(--f-verde,#107E3E)}
+.rq-ucard b{font-size:15px}
+.rq-ucard .rq-cod{align-self:flex-start}
+.rq-riga{font-size:13px}
+.rq-aperta{font-size:12px;color:#8066a6;font-weight:700}
+.rq-barra{display:inline-flex;align-items:center;position:relative;width:90px;height:16px;background:#EEF0F3;border-radius:8px;overflow:hidden;vertical-align:middle}
+.rq-barra i{position:absolute;left:0;top:0;bottom:0;background:#9B8BBF}
+.rq-barra.ok i{background:#4CAF7A}.rq-barra.ko i{background:#E57373}
+.rq-barra b{position:relative;width:100%;text-align:center;font-size:11px;color:#222}
+.rq-studio{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:12px 18px}
+.rq-studio li{margin:5px 0;font-size:15px}
+.rq-esempio{background:#F7F5FB;border-radius:6px;padding:10px;margin-top:10px}
+.rq-testa{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;background:#F3EFF9;border-radius:6px;padding:8px 12px}
+.rq-nav{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.rq-nav a{min-width:28px;height:28px;line-height:28px;text-align:center;border:1px solid var(--f-bordo);border-radius:4px;background:#fff;color:#333;text-decoration:none;font-size:12px}
+.rq-nav a.data{background:#E3DCF0;border-color:#B6A6D3}
+.rq-nav a.ok{background:#DFF3E6;border-color:#7BC596}
+.rq-nav a.ko{background:#FCE3E3;border-color:#E39B9B}
+.rq-nav a.qui{outline:3px solid #8066a6;font-weight:700}
+.rq-domanda{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:12px 16px;margin:12px 0}
+.rq-domanda summary{cursor:pointer}
+.rq-meta{font-size:12px;color:var(--f-attenuato);margin:0 0 4px}
+.rq-testo{font-size:18px;line-height:1.4;margin:4px 0 6px}
+.rq-istr{font-size:13px;color:#555;margin:0 0 10px}
+.rq-opzioni{display:grid;gap:8px}
+.rq-opzioni.scr{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.rq-opz{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--f-bordo);border-radius:6px;padding:9px 11px;background:#fff;cursor:pointer}
+label.rq-opz:hover{border-color:#B6A6D3;background:#FBFAFD}
+.rq-opz input{margin-top:3px;transform:scale(1.25)}
+.rq-opz.scelta{border-color:#8066a6;background:#F7F5FB}
+.rq-opz.giusta{border-color:#4CAF7A;background:#F1FBF4;cursor:default}
+.rq-opz.sbagliata{border-color:#E57373;background:#FFF5F5;cursor:default}
+.rq-opz>div{flex:1;min-width:0}
+.rq-segno{font-weight:700;width:16px;flex:none}
+.rq-opz.giusta .rq-segno{color:#107E3E}.rq-opz.sbagliata .rq-segno{color:#BB0000}
+.rq-perche{margin:6px 0 0;font-size:13px;color:#8A1F1F}
+.rq-perche.ok{color:#107E3E}
+.rq-esito{margin-top:12px}
+.rq-spieg{background:#F7F5FB;border-radius:4px;padding:6px 10px;font-size:14px}
+.rq-scr{width:100%;border-collapse:collapse;font-size:13px}
+.rq-scr th{text-align:left;font-weight:600;color:#666;border-bottom:1px solid #DDD;padding:3px 6px}
+.rq-scr td{padding:3px 6px;border-bottom:1px solid #F0F0F0}
+.rq-scr .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rq-scr td.rq-av{padding-left:22px}
+.rq-aiuto{background:#FFFBEA;border:1px solid #F0D98C;border-radius:6px;padding:8px 12px;margin-top:10px}
+.rq-inline{display:inline}
+.rq-azioni{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.rq-azioni .msa-btn{margin-top:0}
+.rq-consegna{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:10px 14px;margin:16px 0}
+.rq-consegna.rq-pronta{border:2px solid #4CAF7A;background:#F1FBF4}
+.rq-consegna summary{cursor:pointer;font-weight:700;color:#8066a6}
+.rq-corr.ok{border-left:5px solid #4CAF7A}.rq-corr.ko{border-left:5px solid #E57373}
+.rq-perunita{display:flex;flex-wrap:wrap;gap:6px}
+.rq-perunita a{background:#fff;border:1px solid var(--f-bordo);border-radius:4px;padding:4px 8px;font-size:13px;color:inherit;text-decoration:none}
+.rq-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.rq-form .msa-btn{margin-top:0}
+.rq-form select,.rq-form input{padding:6px;border:1px solid var(--f-bordo);border-radius:4px;font:inherit}
+.rq-piano{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.rq-piano section{background:#fff;border:1px solid var(--f-bordo);border-radius:6px;padding:8px 14px}
+.rq-piano h2{font-size:16px;margin:4px 0}
+.rq-piano ul{margin:4px 0;padding-left:18px;font-size:14px}
+@media (max-width:600px){.rq-testo{font-size:16px}.rq-opzioni.scr{grid-template-columns:1fr}}
+@media print{.rq-menu,.rq-nav,.rq-azioni,.rq-consegna,.msa-pagine{display:none}.rq-banner::after{content:" — SIMULAZIONE DIDATTICA, NON VALIDA AI FINI FISCALI O COMMERCIALI"}}
+/* le domande non richiedono codici SAP: il pulsante flottante qui non serve e copriva «Consegna» */
+#msa-sap-btn{display:none!important}

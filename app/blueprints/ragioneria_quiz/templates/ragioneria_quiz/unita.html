@@ -1,0 +1,37 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import barra %}
+{% block titolo %}{{ un.codice }} {{ un.titolo }}{% endblock %}
+{% block rq %}
+<p><a href="{{ url_for('ragioneria_quiz.indice') }}">← Tutte le unità</a></p>
+<h1><span class="rq-cod">{{ un.codice }}</span> {{ un.titolo }}</h1>
+
+<section class="rq-studio" aria-labelledby="studia">
+  <h2 id="studia">📖 Studia: le regole da ricordare</h2>
+  <ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul>
+  {% if un.esempio %}
+  <div class="rq-esempio"><b>Esempio:</b> {{ un.esempio.testo }}
+    <table class="rq-scr"><thead><tr><th>Conto</th><th class="n">Dare</th><th class="n">Avere</th></tr></thead><tbody>
+    {% for c, s, imp in un.esempio.righe %}<tr><td class="{{ 'rq-av' if s == 'A' }}">{{ c }}</td><td class="n">{{ imp | euro if s == 'D' }}</td><td class="n">{{ imp | euro if s == 'A' }}</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  {% endif %}
+</section>
+
+<div class="rq-grandi">
+  <div class="rq-box">
+    <h2>🏋️ Allenati</h2>
+    <p>8 domande dell'unità, con la correzione e la spiegazione <strong>subito dopo ogni risposta</strong>. Puoi ripeterlo quante volte vuoi.</p>
+    <form method="post" action="{{ url_for('ragioneria_quiz.avvia') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="modalita" value="allenamento"><input type="hidden" name="unita" value="{{ un.codice }}">
+      <button class="msa-btn">Allenati su {{ un.codice }}</button></form>
+  </div>
+  <div class="rq-box">
+    <h2>📝 Verifica</h2>
+    <p>10 domande. Vedi il voto e le soluzioni <strong>quando consegni</strong>. Superata con almeno {{ SOGLIA }}%.</p>
+    <p>Tentativi: <strong>{{ usati }} di {{ concessi }}</strong>{% if st.migliore %} · migliore {{ barra(st.migliore.percentuale, SOGLIA) }}{% endif %}</p>
+    <form method="post" action="{{ url_for('ragioneria_quiz.avvia') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="modalita" value="verifica"><input type="hidden" name="unita" value="{{ un.codice }}">
+      {% if ap_ver %}<button class="msa-btn">Riprendi la verifica</button>{% elif usati < concessi %}<button class="msa-btn">Inizia la verifica</button>
+      {% else %}<button class="msa-btn sec" disabled>Tentativi esauriti: chiedi al docente</button>{% endif %}</form>
+  </div>
+</div>
+<p class="rq-nd">Risposte giuste in questa unità: {{ st.giuste }} su {{ st.viste }} viste.</p>
+{% endblock %}

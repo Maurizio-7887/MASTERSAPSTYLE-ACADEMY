@@ -1,0 +1,42 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import barra, contenuto %}
+{% block titolo %}Ragioneria · risultati della classe{% endblock %}
+{% block rq %}
+{% include "docente/_menu.html" %}
+<h1>🎓 Ragioneria: risultati della classe</h1>
+<p><a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.esporta') }}">⬇ Esporta CSV</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.docente_banca') }}">🔑 Banca domande con soluzioni</a></p>
+
+<div class="msa-scroll"><table class="msa-tab">
+<tr><th>Allievo</th><th class="n">Prove</th><th>Test d'ingresso</th><th class="n">Verifiche superate</th><th>Finale (migliore)</th><th class="n">Da ripassare</th><th>Ultima attività</th><th></th></tr>
+{% for r in righe %}
+<tr><td><b>{{ r.u.nome }}</b><br><small>{{ r.u.username }}</small></td>
+{% if r.a %}
+<td class="n">{{ r.a.tentativi | length }}</td>
+<td>{{ barra(r.a.diagnostiche[-1].percentuale if r.a.diagnostiche else None) }}</td>
+<td class="n">{{ r.a.verifiche_superate }} / 20</td>
+<td>{{ barra(r.a.migliore_finale.percentuale if r.a.migliore_finale else None, SOGLIA) }}{% if r.a.migliore_finale %} <small>T {{ r.a.migliore_finale.punti_teoria }}/{{ r.a.migliore_finale.max_teoria }} · A {{ r.a.migliore_finale.punti_app }}/{{ r.a.migliore_finale.max_app }}</small>{% endif %}</td>
+<td class="n">{{ r.a.da_ripassare }}</td>
+<td>{{ ora_italiana(r.ultimo) }}</td>
+{% else %}<td class="n">0</td><td colspan="5" class="rq-nd">Non ha ancora iniziato</td>{% endif %}
+<td><a href="{{ url_for('ragioneria_quiz.docente_allievo', uid=r.u.id) }}">Dettaglio</a></td></tr>
+{% else %}<tr><td colspan="8">Nessun allievo attivo.</td></tr>{% endfor %}
+</table></div>
+
+<h2>Padronanza della classe per unità</h2>
+<p class="rq-nd">Risposte giuste / risposte date, su tutte le prove non annullate. Le unità con poche risposte non dicono ancora molto.</p>
+<div class="rq-perunita">
+{% for c, s in unita_stat.items() %}<a href="{{ url_for('ragioneria_quiz.unita', cod=c) }}"><span class="rq-cod">{{ c }}</span> {{ rq_unita[c].titolo }} {{ barra((100 * s[0] / s[1]) | round | int if s[1] else None, SOGLIA) }} <small>{{ s[1] }} risp.</small></a>{% endfor %}
+</div>
+
+<h2>Le domande più sbagliate</h2>
+{% if difficili %}
+{% for d in difficili %}
+<article class="rq-domanda">
+  <p class="rq-meta"><code>{{ d.q.id }}</code> · <span class="rq-cod">{{ d.q.unita }}</span> · sbagliata da <b>{{ d.ko }} su {{ d.tot }}</b> ({{ d.perc }}%)</p>
+  <h3 class="rq-testo">{{ d.q.testo }}</h3>
+  {% if d.errore %}<div class="rq-opz sbagliata"><span class="rq-segno">✘</span><div><small>Errore più frequente:</small> {{ contenuto(d.errore) }}<p class="rq-perche">{{ d.errore.perche }}</p></div></div>{% endif %}
+</article>
+{% endfor %}
+{% else %}<p class="rq-nd">Servono almeno due risposte per domanda per vedere le statistiche.</p>{% endif %}
+<p class="rq-nd">Banca {{ banca.versione }} · {{ banca.quesiti }} domande.</p>
+{% endblock %}

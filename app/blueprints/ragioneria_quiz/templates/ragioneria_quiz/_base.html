@@ -1,0 +1,15 @@
+{% extends "academy/base.html" %}
+{% block testa %}<link rel="stylesheet" href="{{ url_for('ragioneria_quiz.static', filename='quiz.css') }}">{% endblock %}
+{% block contenuto %}
+<div class="rq-banner">AMBIENTE FORMATIVO — DATI SIMULATI · Firenze · Amministrazione · Ragioneria: teoria e quiz</div>
+<nav class="msa-pagine rq-menu" aria-label="Ragioneria">
+  <a href="{{ url_for('ragioneria_quiz.indice') }}" class="{{ 'attivo' if request.endpoint in ('ragioneria_quiz.indice','ragioneria_quiz.unita') }}">📚 Le 20 unità</a>
+  <a href="{{ url_for('ragioneria_quiz.piano') }}" class="{{ 'attivo' if request.endpoint == 'ragioneria_quiz.piano' }}">📒 Piano dei conti</a>
+  {% if utente_corrente().docente %}
+  <a href="{{ url_for('ragioneria_quiz.docente') }}" class="{{ 'attivo' if request.endpoint.startswith('ragioneria_quiz.docente') }}">🎓 Risultati della classe</a>
+  {% endif %}
+  <a href="{{ url_for('portale.ingresso', versione='vuoto', esercizio_guida='s4-integrato') }}">🏛️ Apri il laboratorio (facoltativo)</a>
+</nav>
+{% block rq %}{% endblock %}
+<p class="rq-piede">Le risposte del questionario non creano fatture, scritture o movimenti nel simulatore. Il voto del questionario è separato dalla valutazione dell'esercitazione pratica.</p>
+{% endblock %}

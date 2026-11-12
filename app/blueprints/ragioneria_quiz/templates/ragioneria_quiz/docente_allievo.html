@@ -1,0 +1,54 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import barra %}
+{% block titolo %}Ragioneria · {{ al.nome }}{% endblock %}
+{% block rq %}
+{% include "docente/_menu.html" %}
+<p><a href="{{ url_for('ragioneria_quiz.docente') }}">← Risultati della classe</a></p>
+<h1>{{ al.nome }} <small class="rq-nd">{{ al.username }}</small></h1>
+
+<div class="msa-kpis">
+  <div class="msa-card"><div class="l">Prove</div><div class="v">{{ a.tentativi | length }}</div></div>
+  <div class="msa-card"><div class="l">Verifiche superate</div><div class="v">{{ a.verifiche_superate }} / 20</div></div>
+  <div class="msa-card"><div class="l">Finale (migliore)</div><div class="v">{{ (a.migliore_finale.percentuale ~ '%') if a.migliore_finale else '—' }}</div></div>
+  <div class="msa-card"><div class="l">Domande da ripassare</div><div class="v">{{ a.da_ripassare }}</div></div>
+</div>
+
+<h2>Per unità</h2>
+<div class="msa-scroll"><table class="msa-tab">
+<tr><th>Unità</th><th class="n">Risposte giuste / viste</th><th>Verifica migliore</th><th class="n">Tentativi verifica</th><th class="n">Allenamenti</th></tr>
+{% for c, st in a.unita.items() %}{% set us, co = limiti[c] %}
+<tr><td><span class="rq-cod">{{ c }}</span> {{ rq_unita[c].titolo }}</td>
+<td class="n">{{ st.giuste }} / {{ st.viste }}</td>
+<td>{{ barra(st.migliore.percentuale if st.migliore else None, SOGLIA) }}</td>
+<td class="n">{{ us }} / {{ co }}</td><td class="n">{{ st.allenamenti }}</td></tr>
+{% endfor %}
+</table></div>
+
+<h2>Concedi un tentativo in più</h2>
+<form method="post" action="{{ url_for('ragioneria_quiz.tentativo_extra', uid=al.id) }}" class="rq-form">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+  <select name="chiave" required>
+    <option value="finale">Prova finale ({{ limiti['finale'][0] }}/{{ limiti['finale'][1] }} usati)</option>
+    {% for c in rq_unita %}<option value="verifica:{{ c }}">Verifica {{ c }} {{ rq_unita[c].titolo }} ({{ limiti[c][0] }}/{{ limiti[c][1] }})</option>{% endfor %}
+  </select>
+  <input name="nota" required maxlength="300" placeholder="Motivo (resta registrato)">
+  <button class="msa-btn">Concedi</button>
+</form>
+
+<h2>Tutte le prove</h2>
+<div class="msa-scroll"><table class="msa-tab">
+<tr><th>Iniziata</th><th>Prova</th><th>Unità</th><th>Stato</th><th class="n">Risultato</th><th class="n">Aiuti</th><th></th><th>Annulla</th></tr>
+{% for t in tutti %}
+<tr><td>{{ ora_italiana(t.iniziato) }}</td><td>{{ MODALITA[t.modalita].titolo }}</td><td>{{ t.unita or '—' }}</td><td>{{ t.stato }}</td>
+<td class="n">{% if t.massimo %}{{ t.punti }}/{{ t.massimo }} ({{ t.percentuale }}%){% if t.superato %} ✅{% elif t.superato == false %} ❌{% endif %}{% else %}—{% endif %}</td>
+<td class="n">{{ t.aiuti }}</td>
+<td><a href="{{ url_for('ragioneria_quiz.risultato', tid=t.id) }}">Apri</a></td>
+<td>{% if t.stato != 'annullato' %}<form method="post" action="{{ url_for('ragioneria_quiz.annulla', tid=t.id) }}" class="rq-inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input name="nota" required maxlength="300" placeholder="motivo" size="12"><button class="msa-btn sec">Annulla</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="8">Nessuna prova.</td></tr>{% endfor %}
+</table></div>
+
+{% if eventi %}
+<h2>Registro del docente</h2>
+<ul>{% for e in eventi %}<li>{{ ora_italiana(e.data) }} · {{ 'Tentativo in più' if e.tipo == 'tentativo_extra' else 'Prova annullata' }} · {{ e.chiave }} · «{{ e.nota }}» · {{ autori.get(e.autore_id, '') }}</li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}
