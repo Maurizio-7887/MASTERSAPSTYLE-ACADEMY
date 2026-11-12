@@ -57,7 +57,7 @@
 
 <div class="rq-azioni">
   {% if n > 0 %}<a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=n - 1) }}">← Indietro</a>{% endif %}
-  {% if n + 1 < tot and (mostra_esito or M.feedback != 'subito') %}<a class="msa-btn {{ 'sec' if not mostra_esito }}" href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=n + 1) }}">{{ 'Prossima domanda →' if mostra_esito else 'Salta →' }}</a>{% endif %}
+  {% if n + 1 < tot %}<a class="msa-btn {{ 'sec' if not mostra_esito }}" href="{{ url_for('ragioneria_quiz.tentativo', tid=t.id, n=n + 1) }}">{{ 'Prossima domanda →' if mostra_esito else 'Salta →' }}</a>{% endif %}
 </div>
 
 {% set testo_btn = 'Concludi e vedi il risultato' if M.feedback == 'subito' else 'Confermo: consegna' %}

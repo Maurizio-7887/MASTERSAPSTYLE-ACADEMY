@@ -103,13 +103,17 @@ class Percorso(unittest.TestCase):
         for o in qs[0]["opzioni"]:
             if o["perche"]:
                 self.assertNotIn(str(escape(o["perche"])), html)
-        self.assertNotIn("giusta", html)
+        self.assertNotIn("rq-opz giusta", html)
         self.assertNotIn(str(escape(qs[0]["spiegazione"])), html)
         # risponde giusto alle prime 7, sbagliato alle altre 3
         for i, q in enumerate(qs):
             giuste = [o["id"] for o in q["opzioni"] if o["ok"]]
             sbagliata = [next(o["id"] for o in q["opzioni"] if not o["ok"])]
             rispondi(c, tid, i, giuste if i < 7 else sbagliata)
+        # correzione subito dopo la risposta, anche in verifica
+        dopo = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0").get_data(as_text=True)
+        self.assertIn("rq-esito", dopo)
+        self.assertIn("Esatto", dopo)
         # punteggio inviato dal browser: ignorato
         html = c.get(f"/ragioneria-quiz/tentativo/{tid}").get_data(as_text=True)
         c.post(f"/ragioneria-quiz/tentativo/{tid}/consegna", data={"csrf": csrf(html), "punti": 10})

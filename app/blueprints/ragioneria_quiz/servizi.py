@@ -9,9 +9,9 @@ from .modelli import EventoQuiz, RispostaQuiz, TentativoQuiz
 MODALITA = {
     "allenamento": {"titolo": "Allenamento", "domande": 8, "feedback": "subito", "tentativi": None},
     "ripasso": {"titolo": "Ripasso degli errori", "domande": 10, "feedback": "subito", "tentativi": None},
-    "verifica": {"titolo": "Verifica dell'unità", "domande": 10, "feedback": "consegna", "tentativi": 2},
-    "diagnostica": {"titolo": "Test d'ingresso", "domande": 20, "feedback": "consegna", "tentativi": None},
-    "finale": {"titolo": "Prova finale", "domande": 60, "feedback": "consegna", "tentativi": 2},
+    "verifica": {"titolo": "Verifica dell'unità", "domande": 10, "feedback": "subito", "tentativi": 2},
+    "diagnostica": {"titolo": "Test d'ingresso", "domande": 20, "feedback": "subito", "tentativi": None},
+    "finale": {"titolo": "Prova finale", "domande": 60, "feedback": "subito", "tentativi": 2},
 }
 SOGLIA = 70          # % per verifica e finale
 SOGLIA_PARTE = 60    # % minima separata di teoria e applicazione nella finale
