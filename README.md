@@ -4,7 +4,11 @@
 - **FIRENZE · MAGAZZINO 30 ORE** → `dicembre-magazzino-30` «Dicembre in magazzino · essenziale»: 54 passi semplici
   (azienda, W100, ordini clienti, acquisto e ricevimento con quarantena, produzione, ondata, picking, SSCC, carico RF e
   RFID, 601 e DDT, inventario). Testo `Esercitazione_Dicembre_Magazzino_30.docx`, 14 numeri di controllo.
-- **PISTOIA · MAGAZZINO 80 ORE** → `dicembre-magazzino` completo, 84 passi (vedi sotto); anche i link della prova UF9.
+- **PISTOIA · MAGAZZINO 80 ORE** → `dicembre-magazzino` completo, 92 passi; anche i link della prova UF9. Alla fine
+  (fase 12, 8 letture) il **libro giornale dell'esercitazione spiegato operazione per operazione** nella nuova pagina
+  WMS → «La ragioneria del magazzino» (`erp_magazzino.giornale`, `giornale-magazzino.js`): le scritture vere dell'allieva
+  per fase, con conti, importi e il «Perché», che cosa non scrive niente e i saldi finali (rimanenze 980,40). Sola lettura,
+  nessun quiz. Firenze 30 ore non ha questa parte.
 - Chi aveva già avviato il vecchio percorso logistico di gennaio (`percorso=logistica`) continua con `firenze-30` /
   `magazziniere-5`; un link vecchio su un'azienda di Dicembre apre la guida nuova (`guida_secondo_lavoro` in
   `guida/__init__.py`). Le prove del docente usano archivi nuovi `erp-ft-doc-dic-firenze` e `erp-ft-doc-dic-pistoia`.

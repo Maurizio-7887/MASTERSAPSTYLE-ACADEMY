@@ -154,7 +154,7 @@
   var NUOVO = {
     'Prima di cominciare: un sistema vuoto': {
       percorso: 'Launchpad → «📦 Dicembre in magazzino» → Avvio del sistema',
-      campi: [['Ambiente', 'Sistema integrato, guida «Dicembre in magazzino (senza ragioneria)», un account dedicato a questo esercizio'], ['Se l’account è vuoto', 'Vedi il riquadro «Dicembre in magazzino»: crei l’azienda al passo seguente'], ['Se l’account contiene già un’altra azienda', 'Non cancellare niente: chiedi al docente un account dedicato']],
+      campi: [['Ambiente', 'Sistema integrato, guida «Dicembre in magazzino», un account dedicato a questo esercizio'], ['Se l’account è vuoto', 'Vedi il riquadro «Dicembre in magazzino»: crei l’azienda al passo seguente'], ['Se l’account contiene già un’altra azienda', 'Non cancellare niente: chiedi al docente un account dedicato']],
       nota: 'Il tuo lavoro resta salvato nel tuo account: puoi chiudere e riprendere quando vuoi, il pannello riparte dall’ultimo passo.',
       grande: 'PRIMA DI COMINCIARE: CONTROLLA DI ESSERE NEL POSTO GIUSTO. Ti serve un account vuoto, dedicato a questo esercizio.',
       fai: [APRI, R('In alto nella pagina', 'Controlla che ci sia il riquadro «Dicembre in magazzino»'), R('Se vedi un avviso rosso «c’è già un’azienda»', 'Fermati e chiama il docente')],
@@ -259,18 +259,72 @@
     return p;
   });
 
+  // ── Pistoia 80 ore, alla fine: la ragioneria di tutta l'esercitazione, operazione per operazione (sola lettura) ──
+  var GR = '12 · La ragioneria del tuo magazzino: il libro giornale spiegato';
+  var gm = function (fase) { return {ep: 'erp_magazzino.giornale'}; };
+  var leggi = function (fase, cosa) {
+    return [R('Qui nel pannello, in alto', 'Premi il pulsante blu «Apri ➜»'),
+      R('In alto nella pagina, fra i bottoni delle fasi', fase ? 'Premi «' + fase + '»' : 'Premi «Tutte»'),
+      R('Ogni riquadro bianco', cosa),
+      R('Sotto ogni scrittura, il riquadro verde «💡 Perché»', 'Leggilo: spiega la scrittura con le tue operazioni'),
+      R('Qui nel pannello, in basso', 'Premi «✓ Fatto»')];
+  };
+  var RAGIONERIA = [
+    {titolo: 'Il libro giornale: che cos’è e come si legge', fase: '',
+     grande: 'ADESSO GUARDIAMO LA RAGIONERIA DI TUTTO QUELLO CHE HAI FATTO. Mentre lavoravi, il programma ha scritto da solo il LIBRO GIORNALE: ogni volta che la merce cambia valore per l’azienda nasce una scrittura. Non devi scrivere niente: leggi e capisci.',
+     campi: [['Scrittura', 'una riga del libro giornale: data, operazione, conti e importi'], ['Dare (a sinistra)', 'dove va il valore: per esempio il magazzino che aumenta, o un costo'], ['Avere (a destra)', 'da dove viene: per esempio il magazzino che diminuisce, o un debito'], ['Partita doppia', 'totale Dare = totale Avere, SEMPRE'], ['Le tue scritture', '15: guarda in alto il numero e i due totali uguali']],
+     vedi: ['15 scritture nel libro giornale', 'Totale Dare = totale Avere: ✅ uguali'],
+     nota: 'Lettura: spunta con «Fatto». Nei passi seguenti guardi le scritture una fase alla volta.'},
+    {titolo: 'Ragioneria · la nascita dell’azienda (1 scrittura)', fase: '🏛️ La nascita dell’azienda',
+     grande: 'LA PRIMA SCRITTURA: NASCE L’AZIENDA. I soci promettono 80.000 € di capitale.',
+     campi: [['01/12 · Costituzione', 'Dare 08 Crediti verso soci 80.000 · Avere 30 Capitale 80.000']],
+     vedi: ['Dare 08 = Avere 30 = 80.000'], nota: 'Non è un’operazione di magazzino: è il punto di partenza di tutti i conti. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · gli acquisti del ferro (2 scritture)', fase: '🚛 Gli acquisti',
+     grande: 'IL FERRO ENTRA IN MAGAZZINO E VALE 0,95 €/KG (IL COSTO STANDARD). Il fornitore lo vende a 1,00 e poi a 1,08: la differenza va in un conto a parte.',
+     campi: [['04/12 · MIGO 101, 3.000 kg', 'Dare 12 Magazzino ferro 2.850 + Dare 63 Differenze prezzo 150 · Avere 22 Fatture da ricevere 3.000'], ['06/12 · MIGO 101, 500 kg', 'Dare 12 475 + Dare 63 65 · Avere 22 540'], ['Conto 22', 'il debito verso il fornitore al prezzo dell’ordine: la fattura la registra l’amministrazione']],
+     vedi: ['Due scritture di entrata merci', 'Il magazzino ferro sale di 3.325 (3.500 kg × 0,95)'], nota: 'Anche i 200 kg schiacciati sono entrati: erano nostri, solo bloccati. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · il ferro schiacciato (1 scrittura)', fase: '🗑️ Il ferro schiacciato',
+     grande: 'IL FERRO BUTTATO ESCE DAL MAGAZZINO E DIVENTA UNA PERDITA.',
+     campi: [['05/12 · Movimento 555, 200 kg', 'Dare 69 Rottamazioni 190 · Avere 12 Magazzino ferro 190 (200 × 0,95)']],
+     vedi: ['Il magazzino ferro scende di 190', 'Il costo 69 sale di 190'], nota: 'Mettere in quarantena NON scriveva niente; buttare sì. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · la produzione (8 scritture)', fase: '🏭 La produzione',
+     grande: 'LA PRODUZIONE IN TRE MOSSE: IL FERRO SI CONSUMA (261), I REPARTI DICHIARANO LE ORE (CO11N), IL PRODOTTO FINITO ENTRA IN MAGAZZINO (101).',
+     campi: [['07/12 · 261, 2.400 kg', 'Dare 70 Consumi 2.280 · Avere 12 Magazzino ferro 2.280'], ['07-09-11/12 · CO11N Taglio, Piegatura, Saldatura', 'Dare 72 / Avere 75: 2.100 + 1.680 + 3.360 (ore × 28 €/h)'], ['12/12 · 101, 300 transenne', 'Dare 13 Prodotti finiti 9.420 · Avere 73 Output di produzione 9.420 (300 × 31,40)'], ['12/12 · i 20 kit', '261 ferro 152 · CO11N 5 ore 140 · 101 Dare 07 Semilavorati 292 / Avere 73 292']],
+     vedi: ['Costo delle transenne: ferro 2.280 + ore 7.140 = 9.420 = 300 × 31,40', 'Portare il ferro alla linea con la pistola NON scriveva niente'],
+     nota: 'Le ore sono contabilità industriale: dicono quanto costa davvero fare una transenna. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · la spedizione (2 scritture)', fase: '🚚 La spedizione',
+     grande: 'IL CAMION PARTE: IL MAGAZZINO SCENDE E NASCE IL COSTO DEL VENDUTO.',
+     campi: [['15/12 · 601 Beta, 180 pz', 'Dare 41 Costo del venduto 5.652 · Avere 13 Prodotti finiti 5.652'], ['15/12 · 601 Delta, 120 pz', 'Dare 41 3.768 · Avere 13 3.768'], ['Il ricavo', 'nasce con la fattura di vendita, che fa l’amministrazione: non è nel lavoro del magazzino']],
+     vedi: ['Prodotti finiti (conto 13) tornano a zero', 'Costo del venduto 9.420'], nota: 'Prelievo, imballo, SSCC e carico del camion NON scrivevano niente: scrive solo l’uscita 601. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · l’inventario (1 scrittura)', fase: '📝 L’inventario',
+     grande: 'ALLA CONTA MANCAVA UN KIT: CON IL 711 IL SUO VALORE ESCE DAL MAGAZZINO.',
+     campi: [['31/12 · 711, 1 SL-TAGLIO', 'Dare 65 Differenze inventariali 14,60 · Avere 07 Semilavorati 14,60']],
+     vedi: ['Il magazzino semilavorati scende di 14,60'], nota: 'Contare non scrive niente: scrive solo la differenza trovata. Spunta con «Fatto».'},
+    {titolo: 'Ragioneria · che cosa NON scrive e i saldi finali', fase: '📊 Saldi finali',
+     grande: 'IL MAGAZZINO IN EURO: QUELLO CHE CONTI NEGLI SCAFFALI È QUELLO CHE DICE LA CONTABILITÀ.',
+     campi: [['Ferro (conto 12)', '740 kg × 0,95 = 703'], ['Kit (conto 07)', '19 × 14,60 = 277,40'], ['Transenne (conto 13)', '0'], ['Rimanenze di magazzino', '980,40'], ['Non scrivono niente', 'ordini, pistola RF, quarantena 344/343, trasferimenti, deposito esterno 351/101, imballo e SSCC']],
+     vedi: ['Rimanenze di magazzino 980,40 €', 'Magazzino e contabilità dicono la stessa cosa'],
+     nota: 'Premi anche «🚫 Che cosa NON scrive» e leggi l’elenco. Regola: scrive quello che cambia il valore; non scrive quello che sposta soltanto la merce. Spunta con «Fatto».'}
+  ].map(function (x) {
+    return {g: GR, titolo: x.titolo, dove: gm(x.fase), percorso: 'WMS → La ragioneria del magazzino: il libro giornale spiegato' + (x.fase ? ' → «' + x.fase + '»' : ''),
+      campi: x.campi, attesa: x.vedi.join(' · '), nota: x.nota, grande: x.grande,
+      fai: leggi(x.fase, x.fase === '📊 Saldi finali' ? 'Leggi la tabella dei saldi e il riquadro verde delle rimanenze' : 'Leggi la data, l’operazione e le righe Dare e Avere'),
+      vedi: x.vedi, ragioneria: true};
+  });
+  passi = passi.concat(RAGIONERIA);
+
   passi.push(
-    {g: '12 · Verifica e consegna', titolo: 'Verifica finale del magazzino', dove: {ep: 'erp_magazzino.monitor'}, percorso: 'WMS → Monitor; WMS → Mappa; MM → Scorte per luogo',
+    {g: '13 · Verifica e consegna', titolo: 'Verifica finale del magazzino', dove: {ep: 'erp_magazzino.monitor'}, percorso: 'WMS → Monitor; WMS → Mappa; MM → Scorte per luogo',
      campi: [['Ferro', '740 kg in F-02 (240 kg COL-1204 + 500 kg COL-1206)'], ['Kit SL-TAGLIO', '19: 9 in W100 (03-05-2) + 10 al deposito esterno D200'], ['Transenne TR-STD', '0: tutte spedite a Beta (180) e Delta (120)'], ['Colli spediti', '7 con SSCC'], ['Compiti RF aperti', '0'], ['Quadratura', 'IM = WMS su tutte le righe']],
      attesa: 'Tutto torna: quantità del gestionale = quantità nelle ubicazioni, nessun compito aperto, nessuna merce in quarantena.',
      nota: 'Lettura: spunta a mano dopo il controllo.',
      grande: 'CONTROLLA CHE TUTTO TORNI PRIMA DI CONSEGNARE.',
      fai: [APRI, R('WMS → Monitor', 'Leggi la quadratura IM / WMS e i compiti aperti'), R('WMS → Mappa', 'Cerca FERRO e SL-TAGLIO con «🔎 Dove si trova?»'), FATTO],
      vedi: ['FERRO 740 · SL-TAGLIO 19 (9 + 10 al deposito) · TR-STD 0', '0 compiti aperti · IM = WMS']},
-    {g: '12 · Verifica e consegna', titolo: 'Consegna il lavoro al docente', dove: {ep: 'allievo.consegna'}, percorso: 'La mia area → Consegna il lavoro',
-     campi: [['Lavoro', 'Sistema integrato'], ['Esercizio', 'Dicembre in magazzino (senza ragioneria)'], ['Nota', 'Spiega perché i 200 kg schiacciati non sono mai andati a scaffale e come hai trovato il kit mancante']],
+    {g: '13 · Verifica e consegna', titolo: 'Consegna il lavoro al docente', dove: {ep: 'allievo.consegna'}, percorso: 'La mia area → Consegna il lavoro',
+     campi: [['Lavoro', 'Sistema integrato'], ['Esercizio', 'Dicembre in magazzino (Pistoia 80 ore)'], ['Nota', 'Spiega perché i 200 kg schiacciati non sono mai andati a scaffale e quale scrittura del libro giornale è nata quando li hai buttati']],
      grande: 'CONSEGNA IL LAVORO. Il docente vede che cosa hai fatto, quanto tempo hai lavorato e i numeri di controllo.',
-     fai: [APRI, R('Menu «Esercizio»', 'Scegli «Dicembre in magazzino (senza ragioneria)»'), R('Casella «Nota»', 'Scrivi la tua spiegazione'), R('Sotto', 'Premi «Consegna»')],
+     fai: [APRI, R('Menu «Esercizio»', 'Scegli «Dicembre in magazzino … Pistoia 80 ore»'), R('Casella «Nota»', 'Scrivi la tua spiegazione'), R('Sotto', 'Premi «Consegna»')],
      vedi: ['Consegna registrata con i numeri di controllo del magazzino']}
   );
 
@@ -280,7 +334,7 @@
     if (t.nome === 'Inventario di fine anno') { t.serve = 'Conti quello che c’è davvero, trovi la differenza, allinei il gestionale e mandi 10 kit al deposito esterno.'; t.porta = 'Un magazzino in cui gestionale e scaffali dicono la stessa cosa.'; }
   });
 
-  window.MSA_ESERCIZIO = {codice: 'dicembre-magazzino', titolo: 'Dicembre in magazzino: vendite, acquisti, produzione e WMS (senza ragioneria)',
+  window.MSA_ESERCIZIO = {codice: 'dicembre-magazzino', titolo: 'Dicembre in magazzino: vendite, acquisti, produzione e WMS (alla fine il libro giornale spiegato)',
     versione: 'erp-ft', pannelloAutomatico: true, verificaRagioneria: false, soloMagazzino: true,
     tappeMagazzino: E.tappeMagazzino, mancanti: mancanti, passi: passi};
 })();

@@ -24,14 +24,17 @@ const completo = f => { if (!S30) f(); };
   const E = w.MSA_ESERCIZIO;
   ok(E.codice === CODICE && E.verificaRagioneria === false, 'esercizio magazzino senza verifica di ragioneria');
   ok(E.mancanti.length === 0, 'tutti i passi di magazzino trovati nella versione con ragioneria: ' + E.mancanti.join(' | '));
-  ok(S30 ? E.passi.length >= 45 && E.passi.length <= 60 : E.passi.length >= 80, 'passi di magazzino: ' + E.passi.length);
+  ok(S30 ? E.passi.length >= 45 && E.passi.length <= 60 : E.passi.length >= 88, 'passi di magazzino: ' + E.passi.length);
+  const rag = E.passi.filter(p => p.ragioneria);
+  ok(S30 ? rag.length === 0 : rag.length === 8, 'libro giornale spiegato: ' + (S30 ? 'assente a Firenze' : '8 passi di lettura a Pistoia') + ' (' + rag.length + ')');
+  ok(rag.every(p => !p.fatto && p.dove.ep === 'erp_magazzino.giornale'), 'i passi del libro giornale sono letture sulla pagina giusta');
   ok(E.passi.every(p => !p.contabile), 'nessun passo contabile');
   const vietati = /F-90|FB60|F-53|F-28|MIRO|VF01|SdI|mutuo|leasing|stipend|paghe|ratei|risconti|AFAB|IRES|IRAP|chiudi l.esercizio|Riapri i conti|KO88|giornale|mastrin/i, iva = /\bIVA\b/;
-  const ragioneria = x => vietati.test(x.titolo) || iva.test(x.titolo);
+  const ragioneria = x => !x.ragioneria && (vietati.test(x.titolo) || iva.test(x.titolo));
   ok(!E.passi.some(ragioneria), 'nessun passo di ragioneria: ' + E.passi.filter(ragioneria).map(p => p.titolo).join(' | '));
   const testo = p => [p.attesa, p.nota, p.grande].concat((p.campi || []).map(c => c.join(' ')), p.vedi || [], (p.punti || []).map(q => q.serve)).join(' ');
   const contabile = /\b[DA] \d{2}\b|scrittur|Dare\b|Avere\b|\bconto \d|giornale|ricostruisci|\bIVA\b|€/;
-  const sporchi = E.passi.filter(p => contabile.test(testo(p).replace(/Prezzo netto €\/unità/g, '')));
+  const sporchi = E.passi.filter(p => !p.ragioneria && !(!S30 && p.titolo === 'Consegna il lavoro al docente') && contabile.test(testo(p).replace(/Prezzo netto €\/unità/g, '')));
   ok(sporchi.length === 0, 'testi senza conti, Dare/Avere ed euro: ' + sporchi.map(p => p.titolo + ' → ' + (testo(p).match(contabile) || [])[0]).join(' | '));
   ok(E.passi.every(p => p.g && p.titolo), 'ogni passo ha gruppo e titolo');
   ok(new Set(E.passi.map(p => p.titolo)).size === E.passi.length, 'titoli unici (il progresso si salva per titolo)');
@@ -50,7 +53,7 @@ function apri(bp, pagina, corso) {
   w.LAB_PAGINA = {chiave: CHIAVE, pagina: pagina, slot: 'erp-ft'};
   w.MSA_CORSO_GUIDA = CODICE;
   w.MSA_GUIDA = {esercizio: CODICE, chiave: CHIAVE, versione: 'vuoto', url: {}};
-  LOGICA.concat(['app/blueprints/' + bp + '/static/' + PAGINE[bp]]).forEach(f => w.eval(R(f)));
+  LOGICA.concat(bp === 'erp_magazzino' ? ['app/blueprints/erp_magazzino/static/giornale-magazzino.js'] : [], ['app/blueprints/' + bp + '/static/' + PAGINE[bp]]).forEach(f => w.eval(R(f)));
   GUIDA.forEach(f => w.eval(R('app/blueprints/guida/static/esercizi/' + f)));
   w.eval(R('app/blueprints/guida/static/ragioneria.js'));
   w.eval(R('app/blueprints/guida/static/pannello.js'));
@@ -213,6 +216,26 @@ if (S30) ok(p.w.WM4.inUbic('03-05-2')[0].qta === 19, 'essenziale: 19 kit nel cas
 quadra('Fine');
 ok(p.w.WM4.aperti().length === 0, 'nessun compito RF aperto');
 ok(codaMax === 0, 'in tutto l’esercizio nessuna domanda di ragioneria');
+// Pistoia: la pagina del libro giornale spiegato mostra le scritture vere, una per una, con il «Perché»
+completo(() => {
+  p = apri('erp_magazzino', 'giornale');
+  const n = p.S().registrazioni.length, schede = p.lab.querySelectorAll('.gm-scrittura');
+  ok(n === 15 && schede.length === 15, 'libro giornale: 15 scritture mostrate (' + schede.length + ')');
+  ok([...schede].every(x => /Perché:/.test(x.textContent) && x.querySelector('table')), 'ogni scrittura ha conti, importi e spiegazione');
+  ok(/✅ uguali/.test(p.testo()), 'totale Dare = totale Avere');
+  ok(/Rimanenze di magazzino: 980,40/.test(p.testo()), 'rimanenze 980,40 nei saldi finali: ' + (p.testo().match(/Rimanenze di magazzino: [\d.,]+/) || [])[0]);
+  ok(/NON scrivono niente/.test(p.testo()), 'elenco di ciò che non scrive');
+  const tipi = [...schede].map(x => x.dataset.tipo);
+  ['COSTITUZIONE', 'ENTRATA_ACQUISTO', 'ROTTAMAZIONE', 'PRELIEVO_261', 'CONFERMA', 'ENTRATA_PRODUZIONE', 'USCITA_MERCI', 'DIFFERENZA_INVENTARIO'].forEach(t => ok(tipi.includes(t), 'scrittura spiegata: ' + t));
+  ok(!/Altre scritture/.test(p.testo()), 'nessuna scrittura senza spiegazione');
+  ok(p.S().registrazioni.length === n, 'la pagina non registra niente');
+  // filtro per fase
+  const w2 = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/magazzino/giornale?fase=produzione', runScripts: 'outside-only'}).window;
+  w2.localStorage.setItem(CHIAVE, memoria); w2.LAB_PAGINA = {chiave: CHIAVE, pagina: 'giornale', slot: 'erp-ft'};
+  LOGICA.concat(['app/blueprints/erp_magazzino/static/giornale-magazzino.js', 'app/blueprints/erp_magazzino/static/wm-pagine.js']).forEach(f => w2.eval(R(f)));
+  ok(w2.document.querySelectorAll('.gm-scrittura').length === 8, 'fase produzione: 8 scritture');
+  w2.close();
+});
 // il programma ha comunque tenuto la sua contabilità, in pareggio (per il docente)
 { const tot = p.S().registrazioni.reduce((v, r) => { r.righe.forEach(x => v[x.dareAvere === 'DARE' ? 0 : 1] += x.importo); return v; }, [0, 0]); vicino(tot[0], tot[1], 'giornale automatico in pareggio'); }
 // tutti i passi automatici spuntati

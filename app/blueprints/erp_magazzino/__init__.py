@@ -66,3 +66,9 @@ def scorte():
 @bp.route("/depositi")
 def depositi():
     return render_lab("erp_magazzino", "depositi")
+
+
+@bp.route("/giornale")
+def giornale():
+    """La ragioneria del magazzino: il libro giornale dell'allievo spiegato scrittura per scrittura (sola lettura)."""
+    return render_lab("erp_magazzino", "giornale")

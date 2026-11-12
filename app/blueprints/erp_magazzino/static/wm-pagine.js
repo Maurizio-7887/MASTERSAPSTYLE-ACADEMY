@@ -394,6 +394,11 @@
       L.collega(radice, 'er', {er: WM.riceviTrasferimento}, rendi);
     },
   };
+  // La ragioneria del magazzino: il libro giornale spiegato (giornale-magazzino.js), sola lettura
+  PAGINE.giornale = function () {
+    if (window.WMGiornale) window.WMGiornale.render(radice, N, L);
+    else radice.innerHTML = '<div class="lab-esito ko">Pagina del libro giornale non caricata: ricarica la pagina.</div>';
+  };
   function rendi() {
     (PAGINE[C.pagina] || PAGINE.struttura)();
     radice.insertAdjacentHTML('afterbegin', window.WMGuida.pagina(C.pagina));

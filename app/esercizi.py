@@ -24,7 +24,7 @@ ESERCIZI = {
         ],
     },
     "dicembre-magazzino": {
-        "titolo": "Dicembre in magazzino: vendite, acquisti, produzione e WMS (magazzinieri, senza ragioneria)",
+        "titolo": "Dicembre in magazzino: vendite, acquisti, produzione e WMS (Pistoia 80 ore, alla fine il libro giornale spiegato)",
         "versione": "erp-ft",
         # solo quantità, documenti e compiti: nessun indicatore preso da conti o da Dare/Avere
         "attesi": [

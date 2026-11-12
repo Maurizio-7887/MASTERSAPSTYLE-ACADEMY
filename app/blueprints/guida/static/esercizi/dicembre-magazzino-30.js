@@ -48,7 +48,8 @@
   var presenti = {};
   E.passi.forEach(function (p) { presenti[p.titolo] = true; });
   var mancanti = TOLGO.filter(function (t) { return !presenti[t]; });
-  var passi = E.passi.filter(function (p) { return TOLGO.indexOf(p.titolo) < 0; }).map(function (p) { return Object.assign({}, p); });
+  // il libro giornale spiegato è solo per Pistoia 80 ore: Firenze 30 ore resta senza ragioneria
+  var passi = E.passi.filter(function (p) { return TOLGO.indexOf(p.titolo) < 0 && !p.ragioneria; }).map(function (p) { return Object.assign({}, p); });
 
   passi.push(
     {g: 'Verifica e consegna', titolo: 'Verifica finale del magazzino (essenziale)', dove: {ep: 'erp_magazzino.monitor'}, percorso: 'WMS → Monitor; WMS → Mappa',
@@ -75,7 +76,7 @@
   // testi che rimandavano a passi tolti
   passi.forEach(function (p) {
     if (p.titolo === 'Prima di cominciare: un sistema vuoto') {
-      p.campi = (p.campi || []).map(function (c) { return [c[0], String(c[1]).replace('«Dicembre in magazzino (senza ragioneria)»', '«Dicembre in magazzino · essenziale»')]; });
+      p.campi = (p.campi || []).map(function (c) { return [c[0], String(c[1]).replace('«Dicembre in magazzino»', '«Dicembre in magazzino · essenziale»')]; });
       p.percorso = 'Corso Firenze 30 ore → «Apri / riprendi esercizio» → Avvio del sistema';
     }
     if (p.titolo === 'Partenza: uscita merci 601 e DDT') p.nota = 'Prima della partenza tutti e 7 i colli devono risultare caricati.';

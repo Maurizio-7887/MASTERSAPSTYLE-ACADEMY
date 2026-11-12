@@ -66,6 +66,13 @@ for ep in sorted(eps | {prefissi[p] + n for p, n in re.findall(r"ep:([A-Z])\+'(\
     r = c.get(g['url'][ep])
     assert r.status_code == 200, (ep, r.status_code)
 
+# Pistoia: la pagina del libro giornale spiegato (sola lettura) con il suo file JS prima delle pagine del magazzino
+gp = c.get(g['url']['erp_magazzino.giornale'] + '?esercizio_guida=dicembre-magazzino')
+assert gp.status_code == 200
+gh = gp.get_data(as_text=True)
+assert gh.index('giornale-magazzino.js') < gh.index('wm-pagine.js')
+assert 'libro giornale spiegato' in gh
+
 # la versione con ragioneria resta com'è
 h2 = c.get('/vuoto/s4/dati/?esercizio_guida=dicembre-wms').get_data(as_text=True)
 assert config(h2)['esercizio'] == 'dicembre-wms'

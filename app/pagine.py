@@ -193,6 +193,7 @@ MODULI = [
         ("erp_magazzino.scorte", None, "Scorta minima e riordino", "📉", "punto di riordino · MD04", None, "3 · Giacenze, lotti e movimenti interni"),
         ("erp_magazzino.arretrato", None, "Arretrato e scadenze", "⏰", "VL10 · ME2M · compiti aperti", None, "3 · Giacenze, lotti e movimenti interni"),
         ("erp_magazzino.depositi", None, "Deposito esterno e merce in viaggio", "🚚", "UB · 351 · 101 · stock in transito", None, "3 · Giacenze, lotti e movimenti interni"),
+        ("erp_magazzino.giornale", None, "La ragioneria del magazzino: libro giornale spiegato", "📒", "FB03 · sola lettura", None, "4 · Inventario fisico e contabile (UF 9)"),
         ("erp_produzione.avanzamento", None, "Prelievi per la produzione", "🏭", "MIGO 261 · PSA", None, "3 · Giacenze, lotti e movimenti interni"),
         ("erp_inventario.documenti", None, "Documenti d'inventario", "📝", "LI01N · LI11N · LI14 · LI20", None, "4 · Inventario fisico e contabile (UF 9)"),
         ("erp_inventario.lista", None, "Lista di conta da stampare", "🖨️", "LI04", None, "4 · Inventario fisico e contabile (UF 9)"),
@@ -369,7 +370,8 @@ _ERP_PAGINE = {
                       {"endpoint": "allocare", "titolo": "Merce da mettere a posto", "icona": "📥", "tcode": "/SCWM/PRDI · messe a posto aperte"},
                       {"endpoint": "scorte", "titolo": "Scorta minima e riordino", "icona": "📉", "tcode": "punto di riordino · MD04"},
                       {"endpoint": "arretrato", "titolo": "Arretrato e scadenze", "icona": "⏰", "tcode": "VL10 · ME2M · compiti aperti"},
-                      {"endpoint": "depositi", "titolo": "Deposito esterno e merce in viaggio", "icona": "🚚", "tcode": "UB · 351 · 101 · stock in transito"}],
+                      {"endpoint": "depositi", "titolo": "Deposito esterno e merce in viaggio", "icona": "🚚", "tcode": "UB · 351 · 101 · stock in transito"},
+                      {"endpoint": "giornale", "titolo": "La ragioneria del magazzino: il libro giornale spiegato", "icona": "📒", "tcode": "FB03 · S_ALR_87012287 · sola lettura"}],
     "erp_inventario": [{"endpoint": "documenti", "titolo": "Documenti d'inventario", "icona": "📝", "tcode": "LI01N · LI11N · LI14 · LI20"},
                        {"endpoint": "lista", "titolo": "Lista di conta da stampare", "icona": "🖨️", "tcode": "LI04"},
                        {"endpoint": "differenze", "titolo": "Differenze inventariali", "icona": "⚖️", "tcode": "LI21 · 711/712"},
@@ -442,6 +444,8 @@ _ERP_NAV = [p for g in _ERP_GRUPPI for p in _ERP_PAGINE[g]]   # mattonelle del m
 for _bp, _pp in _ERP_PAGINE.items():
     LABORATORI[_bp] = {"slot": "erp-ft", "titolo": "Sistema integrato S/4", "sigla": "S/4", "codice": "wms" if _bp in _WMS else "s4", "esercizio": "s4-integrato",
                        "js": _ERP_COMUNI + [(f"{_bp}.static", _ERP_JS[_bp])], "pagine": _pp, "nav": _pp, "copione": "SD4", "area": _ERP_GRUPPI[_bp]}
+# la pagina del libro giornale spiegato ha il suo file, caricato prima delle pagine del magazzino
+LABORATORI["erp_magazzino"]["js"].insert(-1, ("erp_magazzino.static", "giornale-magazzino.js"))
 for _k, _lab in LABORATORI.items():
     for _p in _lab["pagine"]:
         _p.setdefault("ep", f"{_k}.{_p['endpoint']}")
