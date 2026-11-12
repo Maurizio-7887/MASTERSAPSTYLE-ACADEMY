@@ -42,3 +42,22 @@
   </div>
 </nav>
 {% endif %}
+{# Corsi di magazzino: il corso appartiene alla SCHEDA. Se questa pagina è stata aperta con ?esercizio_guida=<corso di magazzino>,
+   ogni link interno se lo porta dietro (anche Launchpad e mattonelle, che non hanno la guida): Firenze e Pistoia aperti in due
+   schede non si scambiano il tutor. Link esterni e API non cambiano. #}
+<script>
+(function () {
+  var CORSI = ['magazziniere-5', 'firenze-30', 'dicembre-magazzino', 'dicembre-magazzino-30'];
+  var corso = new URLSearchParams(location.search).get('esercizio_guida') || window.MSA_CORSO_GUIDA || '';
+  if (CORSI.indexOf(corso) < 0) return;
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+    if (!a) return;
+    var u;
+    try { u = new URL(a.getAttribute('href'), location.href); } catch (e) { return; }
+    if (u.origin !== location.origin || !/^\/(vuoto|completo)\//.test(u.pathname) || u.searchParams.has('esercizio_guida')) return;
+    u.searchParams.set('esercizio_guida', corso);
+    a.setAttribute('href', u.pathname + u.search + u.hash);
+  }, true);
+})();
+</script>

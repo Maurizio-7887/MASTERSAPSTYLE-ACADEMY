@@ -1,7 +1,7 @@
 """Blueprint «Portale» — pagina iniziale, materiali e pagina unica di verifica."""
 import json
 
-from flask import Blueprint, abort, g, redirect, render_template, request, send_from_directory, url_for
+from flask import Blueprint, abort, g, redirect, render_template, request, send_from_directory, url_for, session
 
 from ...pagine import ATTIVITA, MODULI, VERSIONI, app_modulo, modulo
 from ...simulatore import STATIC, mappa_url, meta
@@ -87,6 +87,8 @@ def lezioni_magazzino(versione, percorso):
     if not slug:
         slug = programma["ordine"][0]
     idx = programma["ordine"].index(slug)
+    # aprire il corso sceglie la sua guida: dopo Pistoia, Firenze non deve ritrovarsi il tutor di Pistoia
+    session["guida_integrata"] = programma["esercizio"]
     return render_template("portale/lezioni_magazzino.html",
                            versione=versione, moduli=MODULI, modulo_attivo=None,
                            percorso=percorso, programma=programma,

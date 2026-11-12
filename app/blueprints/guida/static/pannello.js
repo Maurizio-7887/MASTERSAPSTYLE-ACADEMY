@@ -238,6 +238,21 @@
       url.searchParams.set('esercizio_guida', E.codice);
     return url.href;
   }
+  // Corsi di magazzino: il corso appartiene alla SCHEDA, non alla sessione condivisa fra le schede.
+  // Ogni link interno (Launchpad, menu, moduli) si porta dietro ?esercizio_guida=<corso di questa scheda>:
+  // Firenze e Pistoia aperti insieme non si scambiano la guida. I link esterni e le API non cambiano.
+  var CORSI_SCHEDA = ['magazziniere-5', 'firenze-30', 'dicembre-magazzino', 'dicembre-magazzino-30'];
+  if (CORSI_SCHEDA.indexOf(E.codice) >= 0) {
+    document.addEventListener('click', function (ev) {
+      var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+      if (!a || a.target === '_blank' && /lezioni-magazzino|uf9/.test(a.getAttribute('href') || '')) return;
+      var u;
+      try { u = new URL(a.getAttribute('href'), location.href); } catch (e) { return; }
+      if (u.origin !== location.origin || !/^\/(vuoto|completo)\//.test(u.pathname) || u.searchParams.has('esercizio_guida')) return;
+      u.searchParams.set('esercizio_guida', E.codice);
+      a.setAttribute('href', u.pathname + u.search + u.hash);
+    }, true);
+  }
   // Arrivando dal pulsante del corso, riprendi direttamente sulla schermata
   // del passo salvato. Nessuna seconda scelta, nessuna modifica al database
   // e nessuna navigazione forzata durante il normale uso del simulatore.

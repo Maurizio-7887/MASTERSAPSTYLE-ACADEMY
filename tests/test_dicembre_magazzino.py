@@ -73,6 +73,12 @@ gh = gp.get_data(as_text=True)
 assert gh.index('giornale-magazzino.js') < gh.index('wm-pagine.js')
 assert 'libro giornale spiegato' in gh
 
+# aprire la pagina di un corso sceglie la sua guida anche per le pagine senza ?esercizio_guida (Launchpad, moduli)
+c.get('/vuoto/lezioni-magazzino/pistoia'); assert config(c.get('/vuoto/m/wms').get_data(as_text=True))['esercizio'] == 'dicembre-magazzino'
+c.get('/vuoto/lezioni-magazzino/firenze'); assert config(c.get('/vuoto/m/wms').get_data(as_text=True))['esercizio'] == 'dicembre-magazzino-30'
+assert config(c.get('/vuoto/m/img?esercizio_guida=dicembre-magazzino').get_data(as_text=True))['esercizio'] == 'dicembre-magazzino'
+c.get('/vuoto/s4/dati/?esercizio_guida=dicembre-magazzino')
+
 # la versione con ragioneria resta com'è
 h2 = c.get('/vuoto/s4/dati/?esercizio_guida=dicembre-wms').get_data(as_text=True)
 assert config(h2)['esercizio'] == 'dicembre-wms'
