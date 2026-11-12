@@ -24,7 +24,8 @@
       // Il reset non deve mai comparire automaticamente nel percorso didattico.
       var occupato = !!(S().avviato || S().costituzione || (S().registrazioni || []).length);
       var haAzienda = !!(S().avviato || S().costituzione);
-      var pZero = (!S().avviato && !S().costituzione ? L.scheda('🏛️', 'Nuova azienda · parti da zero', 'percorso consigliato FORMAS / esercizio libero', L.modulo('cs', [['data', 'Data di costituzione', 'date', '2026-12-01'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Crea nuova azienda vuota (costituzione)']]) + '<p class="lab-nota">Registra soltanto la sottoscrizione del capitale. Poi versa i soci, acquista i beni e i materiali con documenti espliciti. I materiali e i costi standard predefiniti sono dati di base, <b>non acquisti né giacenze</b>.</p>') +
+      var pNuova = L.scheda('🏛️', 'Nuova azienda · parti da zero', 'percorso consigliato FORMAS / esercizio libero', L.modulo('cs', [['data', 'Data di costituzione', 'date', '2026-12-01'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 80000]], [['cs', 'Crea nuova azienda vuota (costituzione)']]) + '<p class="lab-nota">Registra soltanto la sottoscrizione del capitale. Poi versa i soci, acquista i beni e i materiali con documenti espliciti. I materiali e i costi standard predefiniti sono dati di base, <b>non acquisti né giacenze</b>.</p>');
+      var pZero = (!S().avviato && !S().costituzione ? pNuova +
           L.scheda('🖥️', 'Executive Assistant · negozio di informatica', 'corso breve per segreteria e assistenti di direzione: niente produzione', L.modulo('ng', [['data', 'Data di apertura (costituzione)', 'date', '2026-09-01'], ['capitale', 'Capitale sociale sottoscritto €', 'num', 30000]], [['ng', 'Apri il negozio Pixel & Bit (costituzione)']]) +
             '<p class="lab-nota">Società nuova che <b>compra e rivende</b> PC, stampanti, monitor, mouse e cavi: 4 fornitori, 2 clienti, 1 dipendente, magazzino W100 con la pistola RF. Registra soltanto la sottoscrizione del capitale; tutto il resto si fa con i documenti dell’esercizio guidato. Le merci (HAWA) sono dati di base, <b>non acquisti né giacenze</b>.</p>') : '') +
         (S().costituzione && S().percorso !== 'logistica' ? L.scheda('🏛️', 'Versa in banca il capitale sottoscritto · società costituita il ' + L.fd(S().costituzione.data), 'capitale sociale ' + eur(S().costituzione.capitale) + ' €',
@@ -83,6 +84,16 @@
               : '<div class="lab-esito ok">📦 L’azienda Ferro &amp; Transenne nasce il 1° dicembre 2026 con il magazzino vuoto. Creala una sola volta, poi il pannello ti guida passo per passo.</div>' +
                 L.modulo('cs', [['data', 'Data di nascita dell’azienda', 'date', '2026-12-01']], [['cs', 'Crea l’azienda per il magazzino']]) +
                 '<p class="lab-nota">Lavori solo sulla merce: ordini dei clienti, acquisti, produzione e magazzino. Il programma tiene da solo la contabilità (la vede il docente): <b>non ti chiede scritture Dare/Avere</b>.</p>'));
+      }
+      // Firenze · Amministrazione (Dicembre CON ragioneria): percorso già scelto nel Launchpad, nessuna seconda scelta.
+      if (guidaCorso === 'dicembre-wms') {
+        var altroEsercizio = haAzienda && (S().percorso === 'logistica' || !!S().corsoMagazzino || !!S().negozio);
+        radice.innerHTML = L.scheda('🏛️', 'Firenze · Amministrazione', 'Dicembre: dalla costituzione alla riapertura · CON ragioneria · nessuna seconda scelta',
+          (altroEsercizio
+            ? '<div class="lab-esito errore">⚠️ Questo account contiene già un\'azienda di un altro esercizio (magazzino o negozio). Per proteggere i documenti esistenti l\'esercitazione di amministrazione non parte qui: accedi con un account dedicato, senza cancellare niente.</div>'
+            : haAzienda
+              ? '<div class="lab-esito ok">✓ Segui il pannello a destra: riparte dall’ultimo passo salvato.</div>' + pZero + pContinua
+              : '<div class="lab-esito ok">🏛️ La Ferro &amp; Transenne nasce il 1° dicembre 2026. Costituiscila una sola volta, poi il pannello a destra ti guida passo per passo.</div>' + pNuova)) + info;
       }
       var mostra = function (c) {
         [].forEach.call(radice.querySelectorAll('[data-pannello]'), function (d) { d.hidden = d.getAttribute('data-pannello') !== c; });
