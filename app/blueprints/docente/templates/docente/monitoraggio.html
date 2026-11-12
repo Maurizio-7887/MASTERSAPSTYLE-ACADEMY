@@ -3,7 +3,7 @@
 {% block contenuto %}
 <h1>Monitoraggio attività — {{ u.nome }}</h1>
 {% include "docente/_menu.html" %}
-<p><a href="{{ url_for('docente.allievo', uid=u.id) }}">← Scheda allievo</a></p>
+<p><a href="{{ url_for('docente.allievo', uid=u.id) }}">← Scheda allievo</a> · <a href="{{ url_for('docente.check', uid=u.id) }}"><b>⚡ Check rapido: perché è ferma?</b></a></p>
 <div class="msa-card">
   <p>Questa è una <b>fotografia del lavoro ancora in corso</b>: non occorre attendere la consegna.
   Le spunte <b>automatiche</b> indicano controlli del tutor soddisfatti; quelle <b>manuali</b> vanno

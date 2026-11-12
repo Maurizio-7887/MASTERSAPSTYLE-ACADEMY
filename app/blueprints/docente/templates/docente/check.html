@@ -1,0 +1,24 @@
+{% extends "academy/base.html" %}
+{% block titolo %}Check rapido · {{ u.nome }}{% endblock %}
+{% block contenuto %}
+<h1>⚡ Check rapido — {{ u.nome }}</h1>
+{% include "docente/_menu.html" %}
+<p><a href="{{ url_for('docente.allievo', uid=u.id) }}">← Scheda allievo</a> · <a href="{{ url_for('docente.monitoraggio', uid=u.id) }}">🔎 Avanzamento completo e note</a></p>
+<section class="msa-card">
+  {% if g %}
+  <p><b>Esercizio:</b> {{ g.esercizio }} · <b>fermo al passo {{ g.posizione + 1 }}</b> di {{ g.totale }} (il più avanti raggiunto: {{ g.posizione_massima + 1 }}) ·
+     guida aggiornata {{ ora_italiana(g.aggiornato) }}{% if lavoro %} · dati ERP salvati {{ ora_italiana(lavoro.aggiornato) }} (revisione {{ lavoro.rev }}){% endif %}</p>
+  {% if guide|length > 1 %}<p style="font-size:13px">Altri esercizi iniziati: {% for x in guide %}{% if x.id != g.id %}<a href="{{ url_for('docente.check', uid=u.id, esercizio=x.esercizio) }}">{{ x.esercizio }} (passo {{ x.posizione + 1 }})</a> {% endif %}{% endfor %}</p>{% endif %}
+  <p style="font-size:13px;color:#555">Stessi controlli del tutor sui dati salvati sul server, più il diario dei pulsanti premuti. Solo lettura: non cambia niente dell'allievo.
+     Se ha lavorato dopo l'ultimo salvataggio, chiedile «Salva il lavoro fino a qui» e ricarica questa pagina.</p>
+  <div id="ck-corpo"><p>Sto controllando…</p></div>
+  {% else %}
+  <p>L'allievo non ha ancora aperto nessun esercizio guidato: non c'è niente da controllare.</p>
+  {% endif %}
+</section>
+{% if g %}
+<script>window.CK = {{ ck | tojson }}; window.CK.stato = {{ (lavoro.dati if lavoro else '{}') | tojson }};</script>
+{% include "docente/_script_guida.html" %}
+<script src="{{ url_for('static', filename='js/check-allievo.js') }}"></script>
+{% endif %}
+{% endblock %}

@@ -184,6 +184,24 @@ def monitoraggio(uid):
                            lavoro=lavoro, verifica=verifica, diario=diario)
 
 
+@bp.route("/allievo/<int:uid>/check")
+def check(uid):
+    """⚡ Check rapido: perché l'allievo è fermo a quel passo (stessi controlli del tutor sui dati salvati + diario). Solo lettura."""
+    u = _allievo(uid)
+    guide = AvanzamentoGuida.query.filter_by(utente_id=uid).order_by(AvanzamentoGuida.aggiornato.desc()).all()
+    scelta = request.args.get("esercizio")
+    g = next((x for x in guide if x.esercizio == scelta), guide[0] if guide else None)
+    lavoro = StatoLavoro.query.filter_by(utente_id=uid, versione=(g.versione if g and g.versione else "erp-ft")).first() \
+        or StatoLavoro.query.filter_by(utente_id=uid, versione="erp-ft").first()
+    diario = (DiarioAzione.query.filter_by(utente_id=uid)
+              .order_by(DiarioAzione.quando.desc(), DiarioAzione.id.desc()).limit(300).all())
+    ck = {"esercizio": g.esercizio if g else None, "pos": g.posizione if g else 0, "massimo": g.posizione_massima if g else 0,
+          "totale": g.totale if g else 0, "passiServer": (g.passi or {}) if g else {},
+          "diario": [{"quando": ora_italiana(v.quando, "%d/%m %H:%M:%S"), "tipo": v.tipo, "testo": v.testo, "passo": v.passo, "pagina": v.pagina}
+                     for v in diario]}
+    return render_template("docente/check.html", u=u, g=g, guide=guide, lavoro=lavoro, ck=ck, es=ck["esercizio"])
+
+
 @bp.route("/allievo/<int:uid>/monitoraggio/<int:gid>/nota", methods=["POST"])
 def annota_passo(uid, gid):
     """La nota docente non modifica le scritture e non sposta l'allievo."""

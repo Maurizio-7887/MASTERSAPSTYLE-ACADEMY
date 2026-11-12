@@ -31,7 +31,7 @@
   <tr><th>Allievo</th><th>Gruppo</th><th>Nome utente</th><th>Ultimo accesso</th><th class="n">Sessioni</th><th class="n">Tempo collegato</th><th class="n">€/ora</th><th class="n">Costo €</th><th class="n">Da correggere</th><th>Guida in corso</th></tr>
   {% for r in righe %}
   <tr style="{{ '' if r.u.attivo else 'opacity:.55' }}">
-    <td><a href="{{ url_for('docente.allievo', uid=r.u.id) }}">{{ r.u.nome }}</a> · <a href="{{ url_for('docente.monitoraggio', uid=r.u.id) }}" style="white-space:nowrap;font-size:12px">🔎 Avanzamento</a>{% if not r.u.attivo %} (disattivato){% endif %}</td>
+    <td><a href="{{ url_for('docente.allievo', uid=r.u.id) }}">{{ r.u.nome }}</a> · <a href="{{ url_for('docente.monitoraggio', uid=r.u.id) }}" style="white-space:nowrap;font-size:12px">🔎 Avanzamento</a> · <a href="{{ url_for('docente.check', uid=r.u.id) }}" style="white-space:nowrap;font-size:12px;font-weight:700">⚡ Check</a>{% if not r.u.attivo %} (disattivato){% endif %}</td>
     <td>{{ gruppi.get(r.gruppo, r.gruppo) }}</td><td>{{ r.u.username }}</td><td>{{ ora_italiana(r.u.ultimo_accesso) }}</td><td class="n">{{ r.sessioni }}</td>
     <td class="n">{{ durata(r.secondi) }}</td><td class="n">{{ r.tariffa | euro }}</td><td class="n">{{ r.costo | euro }}</td><td class="n">{{ r.da_correggere or '' }}</td><td>{% if r.guida %}<a href="{{ url_for('docente.monitoraggio', uid=r.u.id) }}">Punto {{ r.guida.posizione + 1 }}/{{ r.guida.totale }} · {{ r.guida.esercizio }}</a>{% else %}<span style="color:#777">Non sincronizzato</span>{% endif %}</td>
   </tr>
