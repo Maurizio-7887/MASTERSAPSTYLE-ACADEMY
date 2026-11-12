@@ -16,7 +16,7 @@ c = docente()
 expected = {
     "firenze-magazzino-30": "/vuoto/lezioni-magazzino/firenze",
     "pistoia-magazzino-80": "/vuoto/lezioni-magazzino/pistoia",
-    "firenze-amministrazione": "/vuoto/?esercizio_guida=s4-integrato",
+    "firenze-amministrazione": "/vuoto/s4/dati/?esercizio_guida=dicembre-wms",
 }
 for url in ("/", "/vuoto/"):
     response = c.get(url)
