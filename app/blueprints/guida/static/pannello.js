@@ -350,6 +350,10 @@
     sel.innerHTML = html + '</optgroup>';
     sel.value = String(pos);
   }
+  // Vista semplice (predefinita nelle pagine del sistema integrato, vedi js/erp/vista-semplice.js): stessa guida, meno testo
+  // in vista: titolo, dove, che cosa scrivere, che cosa devi vedere; spiegazioni lunghe, mappa e note a scomparsa.
+  function semplice() { return typeof window.MSA_VISTA_SEMPLICE === 'function' && window.MSA_VISTA_SEMPLICE(); }
+  var GENERICO = /^ESEGUI: .*Apri la schermata indicata e completa UNA azione alla volta/;
   function disegna() {
     var p = PASSI[pos], st = stati[pos], fatti = stati.filter(Boolean).length;
     barra.style.width = Math.round(fatti / N * 100) + '%';
@@ -432,8 +436,8 @@
       }).join('') + '</table>' : '';
     // Passi contabili: soluzione e spiegazioni sulla scrittura restano nascoste finché l'allievo non registra e ricostruisce la partita doppia
     var nascosto = E.verificaRagioneria && p.contabile && !st;
-    if (p.grande) h += '<div class="msa-g-grande"><span>A CHE COSA SERVE QUESTO PASSO</span>' + esc(p.grande) + '</div>';
-    if (p.mappa) h += mappaHtml(p.mappa);
+    if (p.grande && !(semplice() && GENERICO.test(p.grande))) h += '<div class="msa-g-grande"><span>A CHE COSA SERVE QUESTO PASSO</span>' + esc(p.grande) + '</div>';
+    if (p.mappa) h += semplice() ? mappaHtml(p.mappa).replace(/^<div class="msa-g-mappa"><b>([\s\S]*?)<\/b>/, '<details class="msa-g-mappa"><summary>$1</summary>').replace(/<\/div>$/, '</details>') : mappaHtml(p.mappa);
     if (p.fai && !(p.punti && p.punti.length)) {
       // versione semplice: in una frase, cosa fai (clic per clic), cosa devi vedere; il resto a scomparsa
       if (p.idea && !p.grande) h += '<p class="msa-g-idea">' + esc(p.idea) + '</p>';
@@ -454,12 +458,15 @@
       if (spiega) h += '<details class="msa-g-piu"><summary>📖 Perché? Da dove vengono i numeri</summary>' + spiega + '</details>';
       if (tabellaCampi) h += '<details class="msa-g-piu"><summary>🔎 Tutti i dati del passo (valori da copiare)</summary>' + tabellaCampi + '</details>';
     } else {
-      h += tabellaCampi;
-      if (p.attesa && !nascosto) h += '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
+      // vista semplice: se c'è «ORA TOCCA A TE» i valori sono già lì, la tabella completa si apre a richiesta
+      h += (semplice() && p.punti && p.punti.length && tabellaCampi) ? '<details class="msa-g-piu"><summary>🔎 Tutti i dati del passo (valori da copiare)</summary>' + tabellaCampi + '</details>' : tabellaCampi;
+      if (p.attesa && !nascosto) h += semplice()
+        ? '<details class="msa-g-piu msa-g-attesa"><summary>✅ Che cosa deve succedere</summary>' + esc(p.attesa) + '</details>'
+        : '<div class="msa-g-attesa"><b>Scrittura / controllo atteso</b>' + esc(p.attesa) + '</div>';
     }
     if (p.dopo && !nascosto) h += '<p class="msa-g-nota">📒 ' + esc(p.dopo) + '</p>';
     if (nascosto) h += '<div class="msa-g-esito">✍️ Registra l’operazione nel programma: poi qui a destra ricostruirai tu la scrittura in partita doppia (conto, Dare/Avere, importo). La soluzione compare solo dopo il tuo tentativo.</div>';
-    if (p.nota && !p.fai) h += '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
+    if (p.nota && !p.fai) h += semplice() ? '<details class="msa-g-piu msa-g-nota"><summary>📖 Più informazioni</summary>' + esc(p.nota) + '</details>' : '<p class="msa-g-nota">💡 ' + esc(p.nota) + '</p>';
     if (st === 'auto') h += '<div class="msa-g-esito ok">✓ Fatto: il programma lo ha già registrato.</div>';
     else if (st === 'docente') h += '<div class="msa-g-esito ok">✓ Verificato dal docente sui documenti dell’allievo. Nessuna seconda registrazione necessaria.</div>';
     else if (st === 'mano') h += '<div class="msa-g-esito ok">✓ Segnato come fatto. <button type="button" class="msa-g-togli">togli la spunta</button></div>';
@@ -511,13 +518,18 @@
     }
     if(!st && p.fatto) {
       var esito = corpo.querySelector('.msa-g-esito');
-      if(esito) esito.textContent = '🔍 Il tutor verifica l’operazione realmente registrata. «Avanti» si sblocca soltanto quando il passo ha la spunta ✓. Se la registrazione esiste già, non ripeterla: chiedi al docente di controllare i dati.';
+      // vista semplice: niente secondo avviso uguale, resta solo «Non ancora registrato…»
+      if(esito && semplice()) { if (!esito.classList.contains('msa-g-ritorno') && corpo.querySelectorAll('.msa-g-esito').length > 1) esito.remove(); else esito.textContent = '○ Fai l’operazione nel programma: quando è registrata il passo si spunta da solo.'; }
+      else if(esito) esito.textContent = '🔍 Il tutor verifica l’operazione realmente registrata. «Avanti» si sblocca soltanto quando il passo ha la spunta ✓. Se la registrazione esiste già, non ripeterla: chiedi al docente di controllare i dati.';
     }
     radice.querySelector('.msa-g-av').classList.toggle('pronto', !!st);
+    var rs = radice.querySelector('.msa-g-riprendi-suggeritore');
+    if (rs) rs.classList.toggle('nascosto', semplice() && ls('msa-g-suggeritore') !== 'no');
     disegnaElenco();
     firmaPunti = ''; tickPunti(true);
   }
   // spunte delle righe «Cosa fai» (per scheda del browser): aiutano a non perdere il segno, non cambiano lo stato
+  window.addEventListener('msa:vista', function () { try { disegna(); } catch (e) { /* la guida resta com’era */ } });
   function spunteDi(p) { try { return JSON.parse(ss('msa-g-punti-' + E.codice + '-' + (p.id || p.titolo)) || '{}'); } catch (e) { return {}; } }
   function spunta(p, k, si) { var x = spunteDi(p); if (si) x[k] = 1; else delete x[k]; ss('msa-g-punti-' + E.codice + '-' + (p.id || p.titolo), JSON.stringify(x)); }
 

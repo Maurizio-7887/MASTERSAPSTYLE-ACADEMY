@@ -75,7 +75,7 @@
         var suo = haAzienda && S().corsoMagazzino === 'dicembre-magazzino';
         var estraneo = haAzienda && !suo;
         var essenziale = guidaCorso === 'dicembre-magazzino-30';
-        radice.innerHTML = L.scheda('📦', essenziale ? 'Dicembre in magazzino · essenziale (Firenze 30 ore)' : 'Dicembre in magazzino', 'magazzinieri · vendite, acquisti, produzione e WMS · senza ragioneria',
+        radice.innerHTML = L.scheda('📦', essenziale ? 'Dicembre in magazzino · essenziale (Firenze 30 ore)' : 'Dicembre in magazzino', 'magazzinieri · vendite, acquisti, produzione e WMS · nessuna scrittura da fare',
           (estraneo
             ? '<div class="lab-esito errore">⚠️ Questo account contiene già un\'azienda di un altro esercizio. Per proteggere i documenti esistenti l\'esercizio di magazzino non parte qui: accedi con un account dedicato, senza cancellare niente.</div>'
             : suo

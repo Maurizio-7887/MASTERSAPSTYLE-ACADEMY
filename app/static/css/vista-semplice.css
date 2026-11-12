@@ -1,0 +1,22 @@
+/* VISTA SEMPLICE (predefinita): nella pagina restano campi e pulsanti, le spiegazioni lunghe si aprono a richiesta.
+   «🔎 Vista completa» in alto la toglie (scelta ricordata nel browser). Nessun dato cambia: è solo come si vede. */
+.msa-vista-semplice .wms-aiuto-campo{display:none!important}
+.msa-vista-semplice label:focus-within>.wms-aiuto-campo{display:block!important;background:#FFF8DC;border-radius:4px;padding:4px 6px;color:#3d3200}
+/* istruzioni numerate dei moduli: una riga «Come si usa», clic per aprirle */
+.msa-vista-semplice #lab .wms-guida-modulo:not(.aperta){cursor:pointer;padding:2px 0;display:block;margin:0 0 8px}
+.msa-vista-semplice #lab .wms-guida-modulo:not(.aperta) ol{display:none}
+.msa-vista-semplice #lab .wms-guida-modulo:not(.aperta)::before{content:"ℹ️ Come si usa questo riquadro (clic)";font-size:12px;color:#0a6ed1;font-weight:600}
+.msa-vista-semplice #lab .wms-guida-pagina:not(.aperta){cursor:pointer}
+.msa-vista-semplice #lab .wms-guida-pagina:not(.aperta)>*:not(h3){display:none}
+.msa-vista-semplice #lab .wms-guida-pagina:not(.aperta) h3::after{content:" · ℹ️ clic per leggere";font-weight:400;font-size:12px;color:#0a6ed1}
+/* note sotto i pulsanti: una riga, clic per leggere tutto */
+.msa-vista-semplice #lab .lab-card p.lab-nota:not(.aperta){display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;opacity:.85;padding-right:90px;position:relative}
+.msa-vista-semplice #lab .lab-card p.lab-nota:not(.aperta)::after{content:"ℹ️ leggi tutto";position:absolute;right:0;top:0;background:#fff;padding-left:6px;font-size:12px;color:#0a6ed1;font-weight:600}
+/* pulsante per cambiare vista */
+.msa-vista-btn{background:#fff;color:#1b3a5c;border:1px solid #9bb5cc;border-radius:6px;padding:4px 10px;margin-right:8px;cursor:pointer;font-size:13px}
+.msa-vista-btn.flottante{position:fixed;left:12px;bottom:12px;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+/* guida laterale più calma */
+.msa-vista-semplice #msa-guida .msa-g-grande{font-size:14px;font-weight:500;padding:8px 10px;border-width:1px;line-height:1.4}
+.msa-vista-semplice #msa-guida .msa-g-grande span{font-size:10.5px}
+.msa-vista-semplice #msa-guida details.msa-g-mappa{padding:5px 9px}
+.msa-vista-semplice #msa-guida .msa-g-riprendi-suggeritore.nascosto{display:none}
