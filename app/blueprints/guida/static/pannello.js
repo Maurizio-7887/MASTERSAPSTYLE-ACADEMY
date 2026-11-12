@@ -401,10 +401,11 @@
     }
     var qui = suQuestaPagina(p);
     var avvisoCompleto = (C.versione === 'completo' && pos === 0) ? '<div class="msa-g-esito">⚠️ Sei nella versione <b>completa</b>: il preset «Azienda nuova» cancella i dati di esempio. Per l\'esercizio è più comodo la <a href="' + location.pathname.replace('/completo/', '/vuoto/') + '">versione vuota</a>.</div>' : '';
-    var h = '<div class="msa-g-gruppo">' + esc(p.g) + '</div>' +
+    // intestazione FISSA: il passo e il pulsante «Apri ➜» restano in vista anche quando si scorre il pannello
+    var h = '<div class="msa-g-testa"><div class="msa-g-gruppo">' + esc(p.g) + '</div>' +
       '<h3>' + (p.data ? '<span class="msa-g-data">' + esc(p.data) + '</span>' : '') + esc(p.titolo) + '</h3>' +
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
-        (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div>';
+        (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div></div>';
     h += avvisoCompleto;
     // Per Firenze e Pistoia i collegamenti a teoria e UF9 sono nella
     // barra didattica della pagina ERP. Qui il tutor mostra solo il passo.
@@ -873,8 +874,116 @@
     for (var i = 0; i < els.length; i++) if (!radice.contains(els[i]) && els[i].getBoundingClientRect) return els[i];
     return null;
   }
+  // ── punti «auto» (scritti come testo: casella «X», Premi «Y»): la casella e il pulsante si trovano per NOME nella pagina ──
+  function normT(s) { return String(s == null ? '' : s).toLowerCase().replace(/[«»"“”…:.()·,;'’‘]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function visibileP(el) { return !!el && !radice.contains(el) && !!(el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length)); }
+  // il campo sta nel riquadro indicato? Titolo uguale, contenuto, oppure metà delle parole con la stessa radice
+  // («Paga il canone» ≈ «Canoni, risconto e riscatto»)
+  function titoloSimile(h, n) {
+    if (!h || !n) return 0;
+    if (h.indexOf(n) >= 0 || (n.indexOf(h) >= 0 && h.length > 5)) return 2;
+    var w = n.split(' ').filter(function (x) { return x.length > 3; }), hw = h.split(' ');
+    var colpi = w.filter(function (x) { return hw.some(function (y) { return y.slice(0, 5) === x.slice(0, 5); }); }).length;
+    return w.length && colpi * 2 >= w.length ? 1 : 0;
+  }
+  function titoloRiquadro(el) {
+    var c = el.closest && el.closest('.lab-card,section,fieldset'), t = c && c.querySelector('h2,h3,legend,header');
+    return t ? normT(t.textContent) : '';
+  }
+  function nelRiquadro(el, r) { return r && el.closest && titoloSimile(titoloRiquadro(el), normT(r)) ? 1 : 0; }
+  function primarioDi(contenitore) {
+    var bs = [].filter.call(contenitore.querySelectorAll('button[data-azione]'), visibileP);
+    return bs.filter(function (b) { return !/\b(sec|rosso)\b/.test(b.className); })[0] || bs[0] || null;
+  }
+  // 3 = uguale · 2 = inizia uguale · 1 = contiene, oppure contiene tutte le parole («Ritenuta %» → «Ritenuta d'acconto %»)
+  function somiglia(t, n, min) {
+    if (t === n) return 3;
+    if (t.indexOf(n) === 0 || (n.indexOf(t) === 0 && t.length >= min)) return 2;
+    if (t.indexOf(n) >= 0) return 1;
+    var parole = n.split(' ').filter(function (w) { return w.length > 1 || /\W/.test(w); });
+    return parole.length > 1 && parole.every(function (w) { return (' ' + t + ' ').indexOf(' ' + w + ' ') >= 0; }) ? 1 : 0;
+  }
+  function trovaTesto(d, k, passo) {
+    var best = null, score = 0;
+    if (d.modulo && d.fine) {
+      // 1) un pulsante che si chiama come l'ultima voce del percorso («Paga la rata», «Versa con F24 (1040)»)
+      var nf = normT(d.fine);
+      [].forEach.call(document.querySelectorAll('button[data-azione]'), function (b) {
+        if (!visibileP(b)) return;
+        var t = normT(b.textContent), s = t === nf ? 3 : (t.indexOf(nf) === 0 || (nf.indexOf(t) === 0 && t.length >= 6)) ? 2 : 0;
+        if (s > score) { score = s; best = b; }
+      });
+      if (best) d.nome = String(best.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    if (d.modulo && !best && d.fine) {
+      // 2) il pulsante principale del riquadro che ha per titolo l'ultima voce del percorso («Sconto in banca»)
+      var nt = normT(d.fine), migliore = 0;
+      [].forEach.call(document.querySelectorAll('.lab-card'), function (c) {
+        var b = primarioDi(c); if (!b) return;
+        var sc = titoloSimile(titoloRiquadro(b), nt);
+        if (sc > migliore) { migliore = sc; best = b; }
+      });
+      if (best) d.nome = String(best.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+    if (d.modulo && !best) {
+      // 3) il pulsante di registrazione del riquadro in cui stanno le caselle del passo (il primo non secondario)
+      var pp = passo || PASSI[pos], mod = null;
+      for (var j = pp.punti.length - 1; j >= 0 && !mod; j--) {
+        var q = pp.punti[j]; if (q === d || !q.etichetta) continue;
+        var e = (q.sel && trovaP(q.sel)) || trovaTesto(q, j, pp);
+        mod = e && e.closest ? e.closest('.lab-mod') : null;
+      }
+      if (mod) {
+        best = primarioDi(mod);
+        if (best) d.nome = String(best.textContent || '').replace(/\s+/g, ' ').trim();
+      }
+    } else if (!d.modulo && d.t === 'pulsante') {
+      var nb = normT(d.bottone); if (!nb) return null;
+      var corto = nb.slice(0, 24);
+      [].forEach.call(document.querySelectorAll('button,input[type=button],input[type=submit],a.lab-btn'), function (b) {
+        if (!visibileP(b)) return;
+        var t = normT(b.textContent || b.value); if (!t) return;
+        var s = t === nb ? 3 : (t.indexOf(corto) === 0 || (nb.indexOf(t) === 0 && t.length >= 6)) ? 2 : t.indexOf(nb) >= 0 ? 1 : 0;
+        if (s) { s += nelRiquadro(b, d.riquadro); if (s > score) { score = s; best = b; } }
+      });
+    } else if (!d.modulo) {
+      var ne = normT(d.etichetta); if (!ne) return null;
+      [].forEach.call(document.querySelectorAll('label'), function (l) {
+        var c = l.querySelector('input,select,textarea'); if (!visibileP(c)) return;
+        var sp = l.querySelector('span'), t = normT(sp ? sp.textContent : l.textContent); if (!t) return;
+        var s = somiglia(t, ne, 4);
+        if (s) { s += nelRiquadro(c, d.riquadro); if (s > score) { score = s; best = c; } }
+      });
+    }
+    if (best) { var id = E.codice + '-' + pos + '-' + k; best.setAttribute('data-msa-g', id); d.sel = '[data-msa-g="' + id + '"]'; }
+    return best;
+  }
+  function elementoP(d, k) {
+    if (d.sel) { var e = trovaP(d.sel); if (e && (!d.auto || visibileP(e))) return e; if (!d.auto) return null; }
+    return d.auto && (d.etichetta || d.bottone || d.modulo) ? trovaTesto(d, k) : null;
+  }
+  function valoreOkP(el, d) {
+    var cerca = [d.testo, d.valore].filter(function (x) { return x !== undefined && x !== ''; });
+    if (el.tagName === 'SELECT') {
+      var o = el.options[el.selectedIndex], txt = normT(o ? o.text : ''), val = normT(el.value);
+      return cerca.some(function (c) {
+        var n = normT(vis({valore: c})), primo = n.split(' ')[0];
+        return val === n || txt === n || txt.indexOf(n) === 0 || (n.indexOf(txt) === 0 && txt.length > 2) || val === primo || txt.split(' ')[0] === primo;
+      });
+    }
+    if (d.libero) return String(el.value || '').trim() !== '';
+    if (el.type === 'checkbox' || d.valore === undefined) return false;
+    if (d.descrittivo && /^vuoto/i.test(d.valore) && el.value === '') return true;
+    return ugualeP(el.value, d.valore) || ugualeP(el.value, vis(d));
+  }
   function fattoP(p, d, k, el, h) {
     var key = chiaveP(p, k);
+    if (d.auto) {
+      if (stati[pos] || memP('letto')[key]) return true;
+      if (d.t === 'leggi' || !el) return false;
+      if (d.t === 'pulsante') return !!memP('clic')[key];
+      return valoreOkP(el, d);
+    }
     if (!p.cpmVerificato && memP('salta')[key]) return true;
     if (d.finale && stati[pos]) return true;
     if (d.fatto) { try { if (d.fatto(h, el)) return true; } catch (e) { /* stato non pronto */ } }
@@ -889,7 +998,7 @@
     return !!memP('clic')[key];
   }
   function vis(d) { if (d.mostra !== undefined) return d.mostra; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d.valore)); return m ? m[3] + '/' + m[2] + '/' + m[1] : d.valore; }
-  function tipoLabel(d) { return d.t === 'campo' ? '✍️ Scrivi' : d.t === 'scelta' ? '👆 Scegli' : d.t === 'pulsante' ? '🖱️ Premi' : '👀 Leggi'; }
+  function tipoLabel(d) { if (d.auto && d.t === 'campo') return d.testo || d.tipoEl === 'SELECT' ? '👆 Scegli' : '✍️ Scrivi'; if (d.auto && d.t === 'leggi') return '👉'; return d.t === 'campo' ? '✍️ Scrivi' : d.t === 'scelta' ? '👆 Scegli' : d.t === 'pulsante' ? '🖱️ Premi' : '👀 Leggi'; }
   function spegniPunti() {
     var a = document.querySelectorAll('.msa-g-brilla'); for (var i = 0; i < a.length; i++) a[i].classList.remove('msa-g-brilla');
     bolla.hidden = true; ultimoPunto = '';
@@ -938,7 +1047,8 @@
       tickPunti.el = null; tickPunti.k = -1; return;
     }
     var h = aiutanti(stato()), elenco = p.punti.map(function (d, k) {
-      var el = d.sel ? trovaP(d.sel) : null, ok = fattoP(p, d, k, el, h), key = chiaveP(p, k);
+      var el = elementoP(d, k), ok = fattoP(p, d, k, el, h), key = chiaveP(p, k);
+      if (el && d.auto) d.tipoEl = el.tagName;
       if (ok && !memP('ok')[key] && !p.cpmVerificato) segnaP('ok', key);
       // I controlli CPM con esito di stato non si possono scavalcare con
       // un vecchio flag di sessione: se il dato cambia tornano da correggere.
@@ -946,7 +1056,7 @@
     });
     // Nei passi CPM la scelta del centro e le caselle valgono finché il loro salvataggio è verificato:
     // senza questo, dopo aver salvato 4210 e scelto 4220 il tutor richiedeva di nuovo 4210 (e così via, all'infinito).
-    if (p.cpmVerificato) segnaGruppiSalvati(elenco);
+    if (p.cpmVerificato || (p.punti[0] && p.punti[0].auto)) segnaGruppiSalvati(elenco);
     var primo = -1; for (var i = 0; i < elenco.length; i++) if (!elenco[i].fatto) { primo = i; break; }
     var ora = primo < 0 ? null : elenco[primo];
     var esitoErrore = '';
@@ -959,12 +1069,35 @@
     if (firma !== firmaPunti || forza) {
       firmaPunti = firma;
       var fatti = elenco.filter(function (x) { return x.fatto; }).length;
-      var h2 = '<div class="msa-g-ora"><div class="msa-g-ora-t">🎯 ' + (ora ? 'ORA TOCCA A TE' : 'TUTTI I PUNTI FATTI') + '<small>punto ' + Math.min(fatti + 1, elenco.length) + ' di ' + elenco.length + '</small></div>' +
+      var h2 = '<div class="msa-g-ora"><div class="msa-g-ora-t">🎯 ' + (ora ? 'ORA TOCCA A TE' : 'TUTTI I PUNTI FATTI') + '<small>' + (ora && p.punti[0] && p.punti[0].auto ? 'riga ' + (ora.k + 1) + ' di ' + elenco.length + ' · fatte ' + fatti : 'punto ' + Math.min(fatti + 1, elenco.length) + ' di ' + elenco.length) + '</small></div>' +
         '<div class="msa-g-ora-barra"><span style="width:' + Math.round(fatti / elenco.length * 100) + '%"></span></div>';
       if (ora) {
         var d = ora.d;
         h2 += '<button type="button" class="msa-g-sugg-off" title="Per chi non ne ha bisogno: lo puoi riaccendere quando vuoi">🙈 Spegni il suggeritore</button>';
         if (p.regole && p.regole.length) h2 += '<div class="msa-g-ora-num">AZIONE ' + Math.min(fatti + 1, elenco.length) + ' DI ' + elenco.length + '</div>';
+        if (d.auto) {
+          // istruzione in una riga: che cosa, dove, con quale valore; la casella giusta brilla nella pagina
+          var sel2 = d.testo || ora.el && ora.el.tagName === 'SELECT';
+          var cosa = d.t === 'pulsante' ? '🖱️ Premi <b>«' + esc(d.nome) + '»</b>' :
+            d.t === 'campo' ? (sel2 ? '👆 Nel menu <b>«' + esc(d.etichetta) + '»</b> scegli' : '✍️ Nella casella <b>«' + esc(d.etichetta) + '»</b> scrivi') :
+            '👉 <b>' + esc(d.nome) + '</b>';
+          h2 += '<div class="msa-g-ora-azione">' + cosa + '</div>';
+          var mostraV = d.t === 'campo' ? (d.testo !== undefined ? d.testo : d.valore !== undefined ? vis(d) : d.istruzione || '') : '';
+          if (mostraV !== '' && !d.descrittivo) h2 += '<div class="msa-g-ora-val"><button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(mostraV) + '</button><small>' + (ora.el ? (sel2 ? 'la voce va scelta nel menu che brilla' : ora.el.type === 'date' ? 'scrivi questa data nella casella che brilla' : 'clic per copiarlo, poi incollalo nella casella che brilla') : '') + '</small></div>';
+          else if (mostraV !== '') h2 += '<div class="msa-g-ora-serve">' + esc(mostraV) + '</div>';
+          if (d.dove && d.t !== 'leggi' && !ora.el && !/^(Sotto|Stessa pagina)$/i.test(d.dove)) h2 += '<div class="msa-g-ora-dove2">📍 ' + esc(d.dove) + '</div>';
+          if (d.t === 'leggi' && d.dove) h2 += '<div class="msa-g-ora-dove2">📍 ' + esc(d.dove) + '</div>';
+          if (d.t === 'pulsante' && d.serve) h2 += '<div class="msa-g-ora-serve">' + esc(d.serve) + '</div>';
+          if (!ora.el && d.t !== 'leggi') {
+            h2 += suQuestaPagina(p)
+              ? '<div class="msa-g-ora-dove">🔎 Non trovo «' + esc(d.etichetta || d.nome) + '» in questa schermata' + (d.riquadro ? ': guarda nel riquadro «' + esc(d.riquadro) + '»' : '') + '. Quando l’hai fatto premi «✓ Fatto» qui sotto.</div>'
+              : '<div class="msa-g-ora-dove">📍 Sei in un’altra pagina: premi il pulsante blu <b>«Apri ➜»</b> in alto nel pannello.</div>';
+          }
+          // il pulsante che registra non si può «saltare»: si spunta solo premendolo davvero nella pagina
+          // sulla pagina sbagliata niente «✓ Fatto»: prima si apre la schermata giusta
+          if (!(d.t === 'pulsante' && ora.el) && (d.t === 'leggi' || ora.el || suQuestaPagina(p))) h2 += '<button type="button" class="msa-g-letto lab-btn' + (d.t === 'leggi' || !ora.el ? '' : ' sec msa-g-letto-piccolo') + '" data-k="' + ora.k + '">' +
+            (d.t === 'leggi' || !ora.el ? '✓ Fatto, vai avanti' : '✓ Fatto (se non si spunta da solo)') + '</button>';
+        } else {
         h2 += '<div class="msa-g-ora-azione">' + tipoLabel(d) + (d.nome ? ' · <b>' + esc(d.nome) + '</b>' : '') + '</div>';
         if (d.valore !== undefined && d.t !== 'pulsante') h2 += '<div class="msa-g-ora-val"><button type="button" class="msa-g-val msa-g-grosso" title="Clic per copiare">' + esc(vis(d)) + '</button><small>' + (d.t === 'campo' ? (d.controlla ? 'controlla la casella che brilla: se non c’è già, scrivilo tu' : 'scrivilo tu nella casella che brilla (clic per copiarlo)') : 'scegli questa voce nell’elenco che brilla') + '</small></div>';
         if (d.t === 'pulsante') h2 += '<div class="msa-g-ora-val"><small>Premi il pulsante che brilla' + (d.nome ? ': «' + esc(d.nome) + '»' : '') + '.</small></div>';
@@ -972,13 +1105,16 @@
         if (p.regole && p.regole.length) { var att = attenzioneDi(d); if (att) h2 += '<div class="msa-g-ora-attenzione">⚠️ ' + esc(att) + '</div>'; }
         if (!ora.el && d.t !== 'leggi') h2 += '<div class="msa-g-ora-dove">📍 Non vedo ancora questa schermata: premi <b>«Apri ➜»</b> qui sopra, poi la casella comincerà a brillare.</div>';
         if (d.t === 'leggi' || d.controlla) h2 += '<button type="button" class="msa-g-letto lab-btn" data-k="' + ora.k + '">' + (d.controlla ? '✓ Ho verificato la casella' : '✓ Ho letto, vai avanti') + '</button>';
+        }
         // Nessun pulsante "salta" nel percorso obbligatorio: i dettagli
         // di lettura si confermano, le operazioni si verificano nel gestionale.
         if (p.cpmVerificato && d.t === 'pulsante') h2 += '<div class="msa-g-ora-dove">🔍 Dopo il clic controllo il modello salvato. Se non coincide, correggi i campi indicati e ripeti il salvataggio; la spunta non può sostituire questo controllo.</div>';
         if (esitoErrore) h2 += '<div class="msa-g-ora-correzione"><b>⛔ Il salvataggio è stato rifiutato.</b> '+esc(esitoErrore)+'<div>Correggi i dati del riquadro evidenziato e premi di nuovo il pulsante. Non si passa al comando successivo finché il modello non è salvato.</div></div>';
         if (p.cpmVerificato && (d.t === 'campo' || d.t === 'scelta') && ora.el && d.valore !== undefined && !ugualeP(ora.el.value,d.valore))
           h2 += '<div class="msa-g-ora-correzione">⚠️ Valore trovato: <b>'+esc(ora.el.value)+'</b>. Valore richiesto: <b>'+esc(vis(d))+'</b>. Correggi nel campo evidenziato e salva con il pulsante previsto.</div>';
-      } else h2 += '<div class="msa-g-ora-serve">Ora controlla qui sotto «Cosa devi vedere» e passa al passo successivo.</div>';
+      } else h2 += '<div class="msa-g-ora-serve">' + (p.fatto && !stati[pos]
+        ? 'Hai fatto tutti i punti, ma il programma <b>non ha ancora registrato</b> l’operazione. Guarda il messaggio sotto il pulsante nella pagina: se è rosso correggi il dato indicato e premi di nuovo.'
+        : 'Ora controlla qui sotto «Cosa devi vedere» e passa al passo successivo.') + '</div>';
       h2 += '<details class="msa-g-ora-elenco"><summary>Tutti i punti di questo passo</summary><ol>' + elenco.map(function (x) {
         return '<li class="' + (x.fatto ? 'fatto' : x === ora ? 'adesso' : '') + '">' + (x.fatto ? '✓ ' : '') + tipoLabel(x.d) + ' ' + esc(x.d.nome || '') + (x.d.valore !== undefined && x.d.t !== 'pulsante' ? ' → <code>' + esc(vis(x.d)) + '</code>' : '') + '</li>';
       }).join('') + '</ol></details></div>';
@@ -1043,5 +1179,6 @@
   window.addEventListener('resize', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); });
   setInterval(function () { tickPunti(); }, 450);
 
-  window.MSA_GUIDA_API = {stati: function () { return esiti(); }, vaiA: vaiA, apri: apri, passo: function () { return pos; }};
+  window.MSA_GUIDA_API = {stati: function () { return esiti(); }, vaiA: vaiA, apri: apri, passo: function () { return pos; },
+    trova: function (d, passo) { return trovaTesto(d, 0, passo); }};   // per i test: la casella che il suggeritore farebbe brillare
 })();

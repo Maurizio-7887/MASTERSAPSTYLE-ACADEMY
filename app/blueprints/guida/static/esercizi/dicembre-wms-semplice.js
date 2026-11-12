@@ -40,8 +40,58 @@
   var TAPPA = {};
   TAPPE.forEach(function (t, i) { t.g.forEach(function (g) { TAPPA[g] = i; }); });
 
+  // ── i macchinari: sempre lo stesso modulo «Nuovo cespite con la fattura del fornitore» (F-90) ──
+  function cespite(descrizione, classe, rif, imponibile) {
+    return [APRI,
+      R('Riquadro «Nuovo cespite con la fattura del fornitore», casella «Descrizione del bene»', 'Scrivi', descrizione),
+      R('Menu «Classe»', 'Scegli «' + classe + '»'),
+      R('Menu «Fornitore»', 'Scegli «F300 Macchine Alfa»'),
+      R('Casella «Numero fattura del fornitore»', 'Scrivi', rif),
+      R('Casella «Costo (imponibile) €»', 'Scrivi', imponibile),
+      R('Casella «IVA %»', 'Scrivi', '22'),
+      R('Casella «Aliquota civilistica annua %»', 'Lasciala vuota (= aliquota della classe)'),
+      R('Casella «Entrata in funzione»', 'Scrivi', '01/12/2026'),
+      R('Casella «Data della fattura»', 'Scrivi', '01/12/2026'),
+      R('Caselle «Codice interno», «Matricola», «Modello», «Ubicazione»', 'Lasciale vuote: sono dati tecnici facoltativi'),
+      R('Sotto', 'Premi «Registra il cespite e la fattura»')];
+  }
+  var CESPITE_VEDI = ['Il cespite compare nell’elenco dei cespiti con il suo codice', 'Poi qui nel pannello ricostruisci la scrittura'];
+  var CESPITE_PERCHE = 'Un macchinario non è un costo dell’anno: è un bene che dura anni. Si registra come cespite (immobilizzazione) e diventerà costo un po’ alla volta con l’ammortamento.';
+
   // ── i passi: titolo → [a grandi lettere, cosa fai, cosa devi vedere, perché (facoltativo)] ──
   var P = {
+    'Calcola e registra IRES e IRAP': ['CALCOLA LE TASSE DELL’ANNO: IRES sull’utile e IRAP sul valore della produzione. Il programma fa i conti: tu controlli i dati e registri.',
+      [APRI, R('Riquadro «Registra le imposte», casella «Esercizio»', 'Scrivi', '2026'), R('Casella «Altre variazioni in aumento €»', 'Scrivi', '0'), R('Casella «Altre variazioni in diminuzione €»', 'Scrivi', '0'),
+        R('Casella «Aliquota IRES %»', 'Scrivi', '24'), R('Casella «Aliquota IRAP %»', 'Scrivi', '3,9'), R('Casella «Data»', 'Scrivi', '31/12/2026'), R('Sotto', 'Premi «Registra IRES, IRAP e imposte anticipate»')],
+      ['Il riquadro mostra il calcolo: risultato prima delle imposte, IRES, IRAP e utile netto', 'Poi qui nel pannello ricostruisci la scrittura'],
+      'Per l’IRAP non si deducono gli interessi e la svalutazione dei crediti: per questo la base IRAP è diversa dal risultato prima delle imposte.'],
+    'Prima di cominciare: un sistema vuoto': ['PARTI DA UN’AZIENDA VUOTA. Questa esercitazione fa nascere la Ferro & Transenne il 1° dicembre 2026: in questo account non deve esserci un’altra azienda.',
+      [R('Pagina Avvio, riquadro «Firenze · Amministrazione»', 'Controlla che sotto ci sia «Nuova azienda · parti da zero». Se invece c’è un avviso rosso, fermati e chiama il docente: non cancellare niente')],
+      ['Il riquadro «Nuova azienda · parti da zero» con data e capitale']],
+    'Costituisci la società con 80.000 € di capitale': ['FAI NASCERE LA SOCIETÀ. I soci si impegnano a versare 80.000 € di capitale: per ora è solo una promessa, i soldi arrivano al passo dopo.',
+      [R('Riquadro «Nuova azienda · parti da zero», casella «Data di costituzione»', 'Scrivi', '01/12/2026'), R('Casella «Capitale sociale sottoscritto €»', 'Scrivi', '80000'), R('Sotto', 'Premi «Crea nuova azienda vuota (costituzione)»')],
+      ['Compare il riquadro «Versa in banca il capitale sottoscritto»', 'Poi qui nel pannello ricostruisci la scrittura'],
+      'Il capitale sottoscritto è un credito della società verso i soci finché non lo versano in banca.'],
+    'I soci versano il capitale in banca': ['I SOCI VERSANO GLI 80.000 € IN BANCA. Da adesso la società ha i soldi sul conto corrente.',
+      [R('Riquadro «Versa in banca il capitale sottoscritto», casella «Importo versato»', 'Lasciala vuota (= tutti gli 80.000 €)'), R('Casella «Data del versamento»', 'Scrivi', '01/12/2026'), R('Sotto', 'Premi «Versa in banca»')],
+      ['«Capitale interamente versato: crediti verso soci (08) a zero»', 'Poi qui nel pannello ricostruisci la scrittura']],
+    'F-90: compra la taglierina a nastro': ['COMPRA LA PRIMA MACCHINA: LA TAGLIERINA (15.000 € + IVA). La fattura arriva dal fornitore F300 Macchine Alfa: si paga più avanti.',
+      cespite('Taglierina a nastro', 'IMP Impianti e macchinari', 'MA-101', '15000'), CESPITE_VEDI, CESPITE_PERCHE],
+    'F-90: compra la piegatubi idraulica': ['COMPRA LA PIEGATUBI (8.000 € + IVA). Stesso modulo della taglierina: cambiano descrizione, numero fattura e importo.',
+      cespite('Piegatubi idraulica', 'IMP Impianti e macchinari', 'MA-102', '8000'), CESPITE_VEDI, CESPITE_PERCHE],
+    'F-90: compra la saldatrice a filo': ['COMPRA LA SALDATRICE (6.000 € + IVA). Stesso modulo: cambiano descrizione, numero fattura e importo.',
+      cespite('Saldatrice a filo', 'IMP Impianti e macchinari', 'MA-103', '6000'), CESPITE_VEDI, CESPITE_PERCHE],
+    'F-90: compra il carrello elevatore del magazzino': ['COMPRA IL CARRELLO ELEVATORE (12.000 € + IVA). Attenzione alla CLASSE: è un mezzo di movimentazione, si ammortizza al 20%.',
+      cespite('Carrello elevatore elettrico', 'MEZ Mezzi di movimentazione interna', 'MA-104', '12000'), CESPITE_VEDI, CESPITE_PERCHE],
+    'F-90: compra una sega circolare d’occasione': ['COMPRA UNA SEGA CIRCOLARE USATA (2.000 € + IVA). La rivenderai più avanti con una plusvalenza.',
+      cespite('Sega circolare', 'IMP Impianti e macchinari', 'MA-105', '2000'), CESPITE_VEDI, CESPITE_PERCHE],
+    'FB60: registra la polizza annuale': ['ARRIVA LA FATTURA DELL’ASSICURAZIONE: 1.200 € per un anno, dal 01/12/2026 al 30/11/2027. È esente IVA. Si paga domani.',
+      [APRI, R('Riquadro «Fattura passiva di servizi», menu «Fornitore»', 'Scegli «F400 Assicurazioni Omega»'), R('Casella «Numero della fattura del fornitore»', 'Scrivi', 'POL-2026-118'),
+        R('Menu «Conto di costo»', 'Scegli «83 Assicurazioni»'), R('Casella «Descrizione»', 'Scrivi', 'premio annuo polizza incendio e furto'), R('Casella «Imponibile €»', 'Scrivi', '1200'),
+        R('Casella «IVA %»', 'Scrivi', '0'), R('Casella «Competenza dal»', 'Scrivi', '01/12/2026'), R('Casella «Competenza al»', 'Scrivi', '30/11/2027'),
+        R('Casella «Scadenza del pagamento»', 'Scrivi', '02/12/2026'), R('Casella «Data di registrazione»', 'Scrivi', '01/12/2026'), R('Sotto', 'Premi «Registra la fattura»')],
+      ['La fattura POL-2026-118 compare nella tabella «Fatture passive di servizi»', 'Poi qui nel pannello ricostruisci la scrittura'],
+      'La competenza (dicembre-novembre) serve a fine anno: 11 mesi su 12 riguardano il 2027 e diventeranno un risconto attivo.'],
     'Attiva il magazzino W100 (vuoto)': ['ACCENDI IL MAGAZZINO. Il programma crea gli scaffali con il loro indirizzo (es. 01-03-2 = corsia 01, campata 03, piano 2). Sono tutti vuoti: la merce arriverà con gli acquisti.',
       [APRI, R('Riquadro «Numero magazzino W100», casella «Data di attivazione»', 'Scrivi', '01/12/2026'), R('Sotto', 'Premi «Attiva il magazzino W100…»')],
       ['41 ubicazioni create', 'Nessuna merce: il magazzino è vuoto']],
@@ -300,37 +350,71 @@
   // prime quattro. I controlli CPM specifici (con verifica sullo stato) prevalgono.
   // Le righe descrittive diventano micro-passaggi di lettura/conferma: NON
   // vengono mai scambiate per registrazioni ERP validate automaticamente.
+  // Ogni riga diventa UNA azione vera, agganciata alla casella o al pulsante della pagina (il pannello li cerca per nome
+  // e li fa brillare): ✍️ Scrivi «valore» nella casella X · 👆 Scegli «voce» nel menu X · 🖱️ Premi «pulsante».
+  // Le righe che non sono azioni sulla pagina (guarda, leggi, calcola) restano «👀 Leggi» con «✓ Fatto».
+  // Le righe «Apri ➜» e «✓ Fatto» non diventano punti: «Apri ➜» è sempre in cima al pannello, «✓ Fatto» in fondo.
+  var DATA_IT = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  function iso(v) { var m = DATA_IT.exec(String(v == null ? '' : v).trim()); return m ? m[3] + '-' + m[2] + '-' + m[1] : v; }
+  function ultimo(re, t) { var m, x = null; re.lastIndex = 0; while ((m = re.exec(t))) x = m; return x; }
+  function riquadroDi(t) { var m = /riquadro\s+«([^»]+)»/i.exec(t || ''); return m ? m[1] : ''; }
+  function puntoDaRiga(f) {
+    var dove = String(f.dove || ''), fai = String(f.fai || ''), valore = f.valore;
+    if (/«Apri ➜»/.test(fai) || /^Premi «✓ Fatto»$/.test(fai)) return null;
+    var base = {auto: true, dove: dove, riquadro: riquadroDi(dove)};
+    var premi = /^Premi\s+«([^»]+)»/.exec(fai);
+    if (premi) return Object.assign(base, {t: 'pulsante', nome: premi[1], bottone: premi[1],
+      serve: fai.length > premi[0].length ? fai : 'Premi il pulsante una volta sola: è lui che registra.'});
+    var casella = ultimo(/(?:casella|menu)\s+«([^»]+)»/ig, dove);
+    var scegli = /^Scegli\s+«([^»]+)»/.exec(fai);
+    if (casella && (valore !== undefined || scegli)) {
+      return Object.assign(base, {t: 'campo', etichetta: casella[1], nome: casella[1],
+        valore: valore !== undefined ? iso(valore) : undefined, testo: scegli ? scegli[1] : undefined,
+        serve: (scegli ? 'Scegli «' + scegli[1] + '»' : (/^Scegli/.test(fai) ? 'Scegli' : 'Scrivi')) + ' nel campo «' + casella[1] + '».'});
+    }
+    // casella da lasciare com'è: la si fa brillare, ma si conferma a mano
+    if (casella && /^(Lascia|Non toccarla|Non cambiarla)/i.test(fai)) return Object.assign(base, {t: 'leggi', etichetta: casella[1], nome: fai, serve: '📍 ' + dove});
+    // casella da riempire con un valore che si legge sulla pagina (pistola RF: «scrivi quello che c’è accanto a Da»)
+    if (casella && /^Scrivi /.test(fai)) return Object.assign(base, {t: 'campo', etichetta: casella[1], nome: casella[1], libero: true, descrittivo: true, istruzione: fai, serve: fai});
+    // R('Caselle', 'Pezzi per collo', '50'): la casella è scritta nel testo, il valore a parte
+    if (valore !== undefined && !/^(Scrivi|Scegli)$/.test(fai) && fai.length < 40) {
+      return Object.assign(base, {t: 'campo', etichetta: fai, nome: fai, valore: iso(valore), serve: 'Scrivi nel campo «' + fai + '».'});
+    }
+    return Object.assign(base, {t: 'leggi', nome: fai + (valore !== undefined ? ' ' + valore : ''), serve: dove ? '📍 ' + dove : fai});
+  }
+  // un campo del passo ([etichetta, valore]): valore breve = casella da compilare; valore spiegato = da leggere,
+  // ma la casella brilla lo stesso; «Pulsante» = il pulsante da premere
+  function daCampo(p, nome, v) {
+    nome = String(nome || ''); v = v == null ? '' : String(v);
+    if (/^Pulsante$/i.test(nome)) { var b = v.split(/[;:—]| NON /)[0].trim(); return {auto: true, t: 'pulsante', nome: b, bottone: b, serve: v}; }
+    if (!p.fatto || v.length > 45 || /[;=«]|^(vuoto|quell[ao]|prima|il |la |le |lo |gli |dal |no$|sì$)/i.test(v) || /\s\(/.test(v) && !/^[A-Z0-9-]+\s/.test(v))
+      return {auto: true, t: 'leggi', etichetta: nome, nome: nome + ': ' + v, serve: nome};
+    return {auto: true, t: 'campo', etichetta: nome, nome: nome, valore: iso(v), serve: nome + ': ' + v};
+  }
+  var GENERICHE = /^(Apri il modulo indicato nel percorso|Controlla tutti i dati, esegui il comando previsto)/;
   function microPassi(p) {
     var righe = Array.isArray(p.fai) ? p.fai : [];
-    var out = [];
+    var out = [], riquadro = '';
     righe.forEach(function (f) {
       if (f && typeof f === 'object' && !Array.isArray(f) && f.fai) {
-        out.push({t:'leggi',nome:String(f.dove || 'Attività da eseguire'),
-          serve:String(f.fai) + (f.valore ? ' — Valore: ' + f.valore : '') + '. Esegui questa azione nella pagina, poi premi «Ho letto, vai avanti».'});
-      } else if (Array.isArray(f)) {
-        out.push({t:'leggi',nome:String(f[0] || 'Verifica'),serve:'Nel campo «' + String(f[0] || '') +
-          '» usa o controlla questo valore: ' + String(f[1] || '') + '. Conferma dopo avere eseguito il controllo.'});
-      } else if (typeof f === 'string') {
-        out.push({t:'leggi',nome:f.slice(0,95),
-          serve:f + '. Quando hai eseguito questa istruzione, conferma per passare alla successiva.'});
+        var x = puntoDaRiga(f); if (!x) return;
+        // il riquadro vale anche per le righe seguenti (es. «Data» o «Salva» dello stesso modulo), finché non ne compare un altro
+        if (x.riquadro) riquadro = x.riquadro; else if (/^(Poi|Pagina)\b/i.test(x.dove)) riquadro = ''; else x.riquadro = riquadro;
+        out.push(x);
       }
+      else if (Array.isArray(f)) out.push(daCampo(p, f[0], f[1]));
+      else if (typeof f === 'string' && !GENERICHE.test(f)) out.push({auto: true, t: 'leggi', nome: f, serve: f});
     });
-    if (!out.length) {
-      out.push({t:'leggi',nome:'Apri la schermata corretta',
-        serve:'Premi «Apri ➜» nel tutor per raggiungere: ' + (p.percorso || 'il modulo indicato') + '.'});
-      (p.campi || []).forEach(function(c) {
-        out.push({t:'leggi',nome:String(c[0] || 'Campo'),
-          serve:'Individua «' + String(c[0] || 'Campo') + '» nella pagina. ' +
-            'Inserisci, seleziona o verifica: ' + String(c[1] == null ? '' : c[1]) +
-            '. Conferma soltanto dopo aver eseguito il controllo.'});
-      });
-      if (p.fatto) out.push({t:'leggi',nome:'Conferma nel gestionale',
-        serve:'Esegui il comando di registrazione previsto in questa schermata. ' +
-          'Attendi la conferma reale del gestionale: la spunta del tutor da sola NON registra alcuna operazione.'});
-      else out.push({t:'leggi',nome:'Controllo finale del passaggio',
-        serve:'Confronta i dati e i documenti con «Cosa devi vedere». ' +
-          'Se è tutto corretto, marca manualmente il passo come svolto.'});
-    }
+    if (!righe.length) (p.campi || []).forEach(function (c) { out.push(daCampo(p, c[0], c[1])); });
+    // l'ultima voce del percorso («… → Paga la rata») è il riquadro giusto, spesso il nome stesso del pulsante
+    var fine = String(p.percorso || '').split(';')[0].split('→').pop().replace(/\(.*?\)/g, '').trim();
+    out.forEach(function (d) { if (!d.riquadro && fine && !d.dove) d.riquadro = fine; });
+    // passo di sola lettura (si spunta a mano): niente caselle da «compilare», solo cose da guardare
+    if (!p.fatto) out.forEach(function (d) { if (d.t === 'campo') { d.t = 'leggi'; d.nome = d.etichetta + (d.valore !== undefined ? ': ' + d.valore : d.testo ? ': ' + d.testo : ''); } });
+    // operazione senza il nome del pulsante: il pannello fa brillare il pulsante del riquadro dove stanno le caselle
+    if (p.fatto && !out.some(function (d) { return d.t === 'pulsante'; }) && out.some(function (d) { return d.etichetta; }))
+      out.push({auto: true, t: 'pulsante', modulo: true, fine: fine, riquadro: fine, nome: 'il pulsante che registra', serve: 'È il pulsante blu in fondo allo stesso riquadro delle caselle qui sopra: premilo una volta sola.'});
+    if (!out.length) out.push({auto: true, t: 'leggi', nome: p.titolo, serve: 'Leggi «Cosa devi vedere» qui sotto, poi premi «✓ Fatto».'});
     return out;
   }
 

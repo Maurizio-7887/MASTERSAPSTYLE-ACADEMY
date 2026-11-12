@@ -197,3 +197,10 @@ input.msa-g-brilla,select.msa-g-brilla,textarea.msa-g-brilla{background-color:#F
 .msa-g-principiante li+li{border-top:1px solid #dce7f4}
 .msa-g-principiante b{color:#163b67}
 @media(prefers-color-scheme:dark){.msa-g-principiante{background:#1b2a3a;border-color:#47637e;color:#e3edf8}.msa-g-principiante b{color:#c5e2ff}.msa-g-principiante li+li{border-color:#34475c}}
+/* Guida più chiara: intestazione del passo fissa con «Apri ➜», istruzione in una riga, casella da trovare per nome */
+#msa-guida .msa-g-testa{position:sticky;top:-6px;z-index:4;background:#fff;margin:-6px -14px 8px;padding:6px 14px 2px;box-shadow:0 3px 5px -4px rgba(0,0,0,.3)}
+#msa-guida .msa-g-testa .msa-g-dove{margin-bottom:6px}
+#msa-guida .msa-g-vai{font-size:13px;padding:7px 14px}
+#msa-guida .msa-g-ora-azione b{font-weight:700}
+#msa-guida .msa-g-ora-dove2{font-size:12px;color:#5b6573;margin:4px 0 2px}
+#msa-guida .msa-g-letto-piccolo{font-size:11.5px;padding:4px 9px;margin-top:8px;opacity:.85}
