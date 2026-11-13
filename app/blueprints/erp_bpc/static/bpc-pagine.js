@@ -109,7 +109,19 @@
           L.tabella(['Centro', 'Budget anno €›', 'Budget a ' + B.MESI[mese - 1] + ' €›', 'Consuntivo a ' + B.MESI[mese - 1] + ' €›', 'Scostamento €›', 'Scost. %›', 'Forecast anno €›', 'Stato'], r.map(function (x) {
             var sem = x.percentuale == null ? '' : Math.abs(x.percentuale) <= 5 ? 'verde' : Math.abs(x.percentuale) <= 15 ? 'giallo' : 'arancio';
             return [x.cdc + ' ' + e(x.nome), eur(x.budget), eur(x.budgetYTD), eur(x.actualYTD), eur(x.scostamentoYTD), x.percentuale == null ? '—' : '<span class="lab-bd ' + sem + '">' + n0(x.percentuale) + ' %</span>', fc ? eur(x.forecast) : '—', e(B.STATI[x.stato])]; })) +
-          '<p class="lab-nota">Semaforo: verde entro ±5%, giallo entro ±15%, arancio oltre. Il budget progressivo somma i mesi del budget fino al mese scelto: se hai distribuito in 12 parti uguali è il budget annuo × mesi / 12.</p>');
+          '<p class="lab-nota">Semaforo: verde entro ±5%, giallo entro ±15%, arancio oltre. Il budget progressivo somma i mesi del budget fino al mese scelto: se hai distribuito in 12 parti uguali è il budget annuo × mesi / 12.</p>') +
+        (m.versioni.FORECAST.length ? L.scheda('🧭', 'Versioni a confronto · anno ' + m.anno, 'BUDGET V1 (benchmark bloccato) · ogni FORECAST · consuntivo da S/4',
+          (function () {
+            var fcs = m.versioni.FORECAST, tot = {v1: 0, act: 0}, tf = {};
+            var righe = cp.CDC.map(function (c) {
+              var somma = function (cat, ver) { return cp.CLASSI.reduce(function (t, k) { return t + B.totaleRiga(B.riga(cat, ver, c.codice, k[0])); }, 0); };
+              var v1 = somma('BUDGET', 'V1'), act = somma('ACTUAL', 'A'); tot.v1 += v1; tot.act += act;
+              return [c.codice + ' ' + e(c.nome), eur(v1)].concat(fcs.map(function (f) { var x = somma('FORECAST', f); tf[f] = (tf[f] || 0) + x; return eur(x) + ' <small>(' + (x - v1 >= 0 ? '+' : '') + eur(x - v1) + ')</small>'; })).concat([eur(act)]);
+            });
+            righe.push(['<b>Totale</b>', '<b>' + eur(tot.v1) + '</b>'].concat(fcs.map(function (f) { return '<b>' + eur(tf[f]) + '</b> <small>(' + (tf[f] - tot.v1 >= 0 ? '+' : '') + eur(tf[f] - tot.v1) + ')</small>'; })).concat(['<b>' + eur(tot.act) + '</b>']));
+            return L.tabella(['Centro', 'Budget V1 anno €›'].concat(fcs.map(function (f) { return 'Forecast ' + e(f) + ' €› (vs V1)'; })).concat(['Consuntivo caricato €›']), righe) +
+              '<p class="lab-nota">Ogni forecast = mesi chiusi a consuntivo + mesi rimanenti stimati. Il V1 non cambia mai: tra parentesi la distanza dal budget approvato. In SAP Analytics Cloud lo stesso confronto si fa con le versioni Actual, Budget e Forecast nella stessa tabella.</p>';
+          })()) : '');
       ['mese', 'fc'].forEach(function (id) { var x = radice.querySelector('#' + id); if (x) x.onchange = function () { radice.dataset[id] = this.value; rendi(); }; });
     }
   };

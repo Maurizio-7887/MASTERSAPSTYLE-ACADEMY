@@ -95,6 +95,27 @@
               ? '<div class="lab-esito ok">✓ Segui il pannello a destra: riparte dall’ultimo passo salvato.</div>' + pZero + pContinua
               : '<div class="lab-esito ok">🏛️ La Ferro &amp; Transenne nasce il 1° dicembre 2026. Costituiscila una sola volta, poi il pannello a destra ti guida passo per passo.</div>' + pNuova)) + info;
       }
+      // «Pianificazione e forecast 2027» (corso di controllo di gestione SAP vs Dynamics): l'allievo è il controller.
+      if (guidaCorso === 'pianificazione-forecast' || S().corsoPianificazione) {
+        var P = window.S4.PIANIFICAZIONE, chiusi = (S().pianificazione || {}).chiusi || 0, MM = window.S4.NOMI_MESE;
+        var altro = haAzienda && !S().corsoPianificazione;
+        var pfAvvio = L.scheda('📊', 'Pianificazione e forecast 2027 · parti da qui', 'sei il controller della Ferro & Transenne: budget V1, chiusure mensili, forecast 3+9, 6+6, 9+3',
+          L.modulo('pf', [['data', 'Data di partenza (fissa)', 'date', P.avvio]], [['pf', 'Crea l’azienda 2027 per la pianificazione']]) +
+          '<p class="lab-nota">La società esiste dal 2 gennaio 2027 con 80.000 € in banca. Tu prepari il budget dei sei centri di costo (KP06 e BPC), lo fai approvare e lo blocchi; poi, a ogni trimestre, l’amministrazione chiude i mesi e tu costruisci il forecast. <b>Niente quiz Dare/Avere</b>: il controller legge i consuntivi, non registra le fatture.</p>');
+        var pfChiusura = L.scheda('🗓️', 'Chiusura contabile del mese · la fa l’amministrazione', chiusi ? 'mesi chiusi: gennaio–' + MM[chiusi - 1] + ' ' + P.anno : 'nessun mese ancora chiuso',
+          '<p class="lab-nota">A fine mese l’amministrazione registra retribuzioni, energia, fitto, assicurazione e ammortamenti, ognuno con il suo centro di costo (in S/4HANA: righe del giornale unico ACDOCA). Il controller lavora dopo, sui dati chiusi (WD+5).</p>' +
+          L.tabella(['Mese', 'Stato'], MM.slice(0, P.mesi.length).map(function (x, k) { return [x + ' ' + P.anno, k < chiusi ? '<span class="lab-bd verde">✓ chiuso</span>' : k === chiusi ? '<span class="lab-bd giallo">● prossimo</span>' : '<span class="lab-bd grigio">○ aperto</span>']; })) +
+          (chiusi < P.mesi.length ? L.modulo('pfm', [], [['pfm', 'Chiudi ' + MM[chiusi] + ' ' + P.anno]]) : '<div class="lab-esito ok">✓ Settembre chiuso: l’esercitazione arriva al forecast 9+3.</div>'));
+        radice.innerHTML = L.scheda('📊', 'Pianificazione e forecast 2027', 'corso di controllo di gestione · metodo SAP (S/4HANA + BPC) · nessuna seconda scelta',
+          altro
+            ? '<div class="lab-esito errore">⚠️ Questo account contiene già un\'azienda di un altro esercizio. Per proteggerla l\'esercitazione di pianificazione non parte qui: accedi con un account dedicato, senza cancellare niente.</div>'
+            : S().corsoPianificazione
+              ? '<div class="lab-esito ok">✓ Segui il pannello a destra: riparte dall’ultimo passo salvato.</div>' + pfChiusura
+              : '<div class="lab-esito ok">📊 Crea l’azienda una sola volta, poi il pannello a destra ti guida passo per passo.</div>' + pfAvvio) + info;
+        L.collega(radice, 'pf', {pf: function (v) { v.modo = 'pianificazione'; return SD.avviaSistema(v); }}, rendi);
+        L.collega(radice, 'pfm', {pfm: function () { var r = window.S4.chiudiMesePianificazione(N); return '<p class="lab-nota">Registrata la ' + L.esc(r.descrizione.toLowerCase()) + ' (documento ' + r.numero + ').</p>'; }}, rendi);
+        return;
+      }
       var mostra = function (c) {
         [].forEach.call(radice.querySelectorAll('[data-pannello]'), function (d) { d.hidden = d.getAttribute('data-pannello') !== c; });
         [].forEach.call(radice.querySelectorAll('[data-scelta]'), function (b) { b.classList.toggle('att', b.getAttribute('data-scelta') === c); });

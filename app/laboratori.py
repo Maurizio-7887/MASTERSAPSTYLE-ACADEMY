@@ -24,6 +24,8 @@ def render_lab(blueprint, endpoint):
             slot = "erp-ft-doc-dic-pistoia"
         elif corso == "dicembre-magazzino-30":
             slot = "erp-ft-doc-dic-firenze"
+        elif corso == "pianificazione-forecast":
+            slot = "erp-ft-doc-pianificazione"
     config = {"chiave": f"ferro-transenne-fi-2026-{slot}-civilistico", "pagina": endpoint, "slot": slot}
     return render_template(f"{blueprint}/{endpoint}.html", lab=lab, pagina=pagina, blueprint=blueprint, config=config,
                            versione=g.versione, versioni=VERSIONI, moduli=MODULI, modulo_attivo=modulo(codice),

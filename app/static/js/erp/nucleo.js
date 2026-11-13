@@ -330,6 +330,18 @@
           if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
           N.salva(); return rn;
         }
+        if (i.modo === 'pianificazione') {
+          // «Pianificazione e forecast 2027»: l'allievo è il controller. La società esiste dal 02/01/2027; la contabilità generale
+          // (fatture, paghe, ammortamenti) la tiene l'amministrazione: a ogni fine mese «Chiudi il mese» registra i costi del mese
+          // con il loro centro di costo. Niente quiz di ragioneria: il controller legge i consuntivi, non li registra.
+          if (data !== PIANIFICAZIONE.avvio) throw Error('Questa esercitazione parte il ' + L.fd(PIANIFICAZIONE.avvio) + ': lascia la data proposta.');
+          S.avviato = data; S.corsoPianificazione = true; S.quizContabile = false; S.pianificazione = {chiusi: 0};
+          S.costituzione = {data: data, capitale: 80000};
+          var rp = N.post({data: data, tipo: 'APERTURA', rif: 'APERTURA', descrizione: 'Saldi di apertura della Ferro & Transenne 2027: capitale versato in banca',
+            righe: [{conto: '10', dareAvere: 'DARE', importo: 80000}, {conto: '30', dareAvere: 'AVERE', importo: 80000}]});
+          if (window.S4 && window.S4.dopoAvvio) window.S4.dopoAvvio.forEach(function (f) { f(N, i); });
+          N.salva(); return rp;
+        }
         if (i.modo === 'costituzione') {
           var cap = L.num(i.capitale == null || i.capitale === '' ? 80000 : i.capitale, 'Capitale sociale', 1);
           S.avviato = data; S.costituzione = {data: data, capitale: cap};
@@ -355,7 +367,43 @@
     window.MSA_SALVA_STATO_CORRENTE = function () { N.salva(); };
     return N;
   }
+  // «Pianificazione e forecast 2027»: costi effettivi mese per mese (gennaio–settembre), importi al netto di IVA.
+  // Energia 4200 cara nel primo semestre (+20% nel 1° trimestre, +10% nel 2°), straordinari in Saldatura da aprile,
+  // un addetto del Taglio a part-time da luglio. Tutto il resto come da budget.
+  var PIANIFICAZIONE = (function () {
+    var energia = [480, 420, 360, 220, 165, 165, 200, 100, 200];
+    var mesi = [];
+    for (var k = 0; k < 9; k++) mesi.push([
+      ['4100', '80', 2500], ['4200', '86', 1000], ['4200', '50', 241.67], ['4200', '54', energia[k]],
+      ['4210', '80', k < 6 ? 3000 : 2800], ['4220', '80', 3000], ['4230', '80', k < 3 ? 3000 : 3300],
+      ['4300', '80', 3333.33], ['4300', '83', 100]]);
+    return {avvio: '2027-01-02', anno: 2027, mesi: mesi,
+      contropartita: {'80': '27', '54': '20', '86': '20', '83': '20', '50': '02'},
+      testo: {'80': 'retribuzioni del mese', '54': 'energia e manutenzioni', '86': 'fitto del capannone (competenza)', '83': 'assicurazione (competenza)', '50': 'ammortamenti del mese'}};
+  })();
+  var NOMI_MESE = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+  // Chiusura contabile del mese (la fa l'amministrazione): registra i costi del mese successivo all'ultimo chiuso, con il centro su ogni riga
+  function chiudiMesePianificazione(N) {
+    var S = N.S, P = PIANIFICAZIONE;
+    if (!S.corsoPianificazione) throw Error('La chiusura del mese esiste solo nell’esercitazione «Pianificazione e forecast 2027».');
+    var k = (S.pianificazione || {}).chiusi || 0;
+    if (k >= P.mesi.length) throw Error('Settembre è già chiuso: l’esercitazione si ferma al forecast 9+3.');
+    var data = P.anno + '-' + String(k + 1).padStart(2, '0') + '-' + String(new Date(Date.UTC(P.anno, k + 1, 0)).getUTCDate()).padStart(2, '0');
+    var dare = {}, righe = [];
+    P.mesi[k].forEach(function (x) {
+      righe.push({conto: x[1], dareAvere: 'DARE', importo: x[2], cdc: x[0], testo: P.testo[x[1]] + ' · centro ' + x[0]});
+      var c = P.contropartita[x[1]]; dare[c] = Math.round(((dare[c] || 0) + x[2]) * 100) / 100;
+    });
+    Object.keys(dare).sort().forEach(function (c) { righe.push({conto: c, dareAvere: 'AVERE', importo: dare[c]}); });
+    var r = N.post({data: data, tipo: 'COSTI_MESE', rif: 'CHIUSURA ' + NOMI_MESE[k].toUpperCase(), quiz: false,
+      descrizione: 'Chiusura contabile di ' + NOMI_MESE[k] + ' ' + P.anno + ': retribuzioni, energia, fitto, assicurazione e ammortamenti con il centro di costo', righe: righe});
+    S.pianificazione = {chiusi: k + 1}; N.salva();
+    return r;
+  }
   window.S4 = window.S4 || {};
+  window.S4.PIANIFICAZIONE = PIANIFICAZIONE;
+  window.S4.chiudiMesePianificazione = chiudiMesePianificazione;
+  window.S4.NOMI_MESE = NOMI_MESE;
   window.S4.dopoAvvio = window.S4.dopoAvvio || [];
   window.S4.crea = crea;
   window.S4.statoNuovo = statoNuovo;

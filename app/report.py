@@ -307,6 +307,19 @@ class Lavoro:
                 "mg_ondate": len(wm.get("ondateRilasciate") or []),
                 "mg_inventari_chiusi": sum(1 for d in wm.get("inventari") or [] if d.get("stato") == "chiuso"),
             })
+            # «Pianificazione e forecast 2027»: il controller (KP06, BPC con V1 approvato e forecast F3, F6, F9)
+            bpc = (s.get("costing") or {}).get("bpc") or {}
+            def versione(cat, ver):
+                return round(sum(sum(v or 0 for v in righe) for k, righe in (bpc.get("dati") or {}).items() if k.startswith(f"{cat}|{ver}|")), 2)
+            cdc6 = ("4100", "4200", "4210", "4220", "4230", "4300")
+            base.update({
+                "pf_mesi_chiusi": (s.get("pianificazione") or {}).get("chiusi", 0),
+                "pf_v1": versione("BUDGET", "V1"),
+                "pf_v1_approvato": "sì" if bpc and all(((bpc.get("stato") or {}).get(f"BUDGET|V1|{c}") or {}).get("stato") == "approvato" for c in cdc6) and bpc.get("retract") else "no",
+                "pf_energia_v1": "/".join(str(round(x)) for x in ((bpc.get("dati") or {}).get("BUDGET|V1|4200|54") or [])),
+                "pf_actual_fino": bpc.get("actualFino") or 0,
+                "pf_f3": versione("FORECAST", "F3"), "pf_f6": versione("FORECAST", "F6"), "pf_f9": versione("FORECAST", "F9"),
+            })
             # «Executive Assistant»: il negozio di informatica Pixel & Bit, settembre-dicembre 2026 con chiusura e riapertura
             def se(conto):
                 return sc(conto, fino="2026-12-31")

@@ -72,6 +72,20 @@ ESERCIZI = {
             ("quadratura_im_wm", "Quantità IM e WMS riconciliate", "sì", None),
         ],
     },
+    "pianificazione-forecast": {
+        "titolo": "Pianificazione e forecast 2027: il controller (budget V1, forecast 3+9, 6+6, 9+3)",
+        "versione": "erp-ft",
+        "attesi": [
+            ("pf_v1", "Budget V1 dei sei centri di costo", 197200.00, 0.05),
+            ("pf_v1_approvato", "Budget V1 approvato e ritrasferito in S/4", "sì", None),
+            ("pf_energia_v1", "Energia 4200 mese per mese nel V1", "400/350/300/200/150/150/200/100/200/300/350/400", None),
+            ("pf_mesi_chiusi", "Mesi chiusi dall'amministrazione", 9, 0),
+            ("pf_actual_fino", "Consuntivo caricato in BPC fino al mese", 9, 0),
+            ("pf_f3", "Forecast F3 (3+9)", 200315.00, 0.05),
+            ("pf_f6", "Forecast F6 (6+6)", 198960.00, 0.05),
+            ("pf_f9", "Forecast F9 (9+3)", 198960.00, 0.05),
+        ],
+    },
     "dicembre-wms": {
         "titolo": "Dicembre: dalla costituzione alla riapertura — azienda nuova con WMS e produzione",
         "versione": "erp-ft",
