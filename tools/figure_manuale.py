@@ -239,14 +239,14 @@ def ahr_fattura():
 
 def ahr_inventario():
     def c(acc):
-        s = campo(16, 135, "Data valutazione", "31/12/2026", 200) + campo(232, 135, "Metodo valorizzazione", "Costo standard (come nel caso)", 260, True)
+        s = campo(16, 135, "Data valutazione", "31/12/2026", 200) + campo(232, 135, "Metodo valorizzazione", "Costo medio ponderato", 260, True)
         s += campo(508, 135, "Magazzino", "Principale", 200)
         tab, y = tabella(16, 200, ["Codice", "Descrizione", "Giacenza", "Costo (€)", "Valore (€)"],
-                         [["FERRO", "Ferro tubolare (materia prima)", "740 kg", "0,95", "703,00"], ["SL-TAGLIO", "Kit tagliato (semilavorato)", "19 pz", "14,60", "277,40"],
-                          ["TR-STD", "Transenna standard (prodotto finito)", "0 pz", "31,40", "0,00"], ["", "Totale rimanenze finali", "", "", "980,40"]],
+                         [["FERRO", "Ferro tubolare (materia prima)", "740 kg", "1,0121", "748,97"], ["SL-TAGLIO", "Kit tagliato (semilavorato)", "19 pz", "14,60", "277,40"],
+                          ["TR-STD", "Transenna standard (prodotto finito)", "0 pz", "31,40", "0,00"], ["", "Totale rimanenze finali", "", "", "1.026,37"]],
                          [130, 340, 130, 130, 138], acc, num=(2, 3, 4))
-        return s + tab + bottone(W - 196, y + 14, "Stampa inventario", acc, 180)
-    schermata("ahr_inventario", "ahr", "GESINV · Stampa Inventario Valorizzato", "Inventario valorizzato al 31 dicembre", c, 440,
+        return s + tab + t(16, y + 30, "Ferro: (2.800 kg × 1,00 + 500 kg × 1,08) ÷ 3.300 kg = 1,0121 €/kg · semilavorato al costo di produzione", 12, acc, "bold") + bottone(W - 196, y + 44, "Stampa inventario", acc, 180)
+    schermata("ahr_inventario", "ahr", "GESINV · Stampa Inventario Valorizzato", "Inventario valorizzato al 31 dicembre", c, 470,
               "Dal valore dell'inventario si registrano in Prima Nota le rimanenze finali (metodo italiano).")
 
 
@@ -255,8 +255,8 @@ def ahr_rimanenze():
         s = campo(16, 135, "Data reg.", "31/12/2026", 150) + campo(182, 135, "Causale contabile", "Assestamento — rimanenze finali", 300, True)
         s += campo(498, 135, "Note", "Da inventario valorizzato al 31/12", 386)
         tab, y = tabella(16, 205, ["Rigo", "Conto", "Descrizione", "Dare (€)", "Avere (€)"],
-                         [["10", "Rim. MP", "Rimanenze materie prime", "703,00", ""], ["20", "Rim. SL", "Rimanenze semilavorati", "277,40", ""],
-                          ["30", "Var. MP", "Variazione rimanenze materie prime", "", "703,00"], ["40", "Var. SL", "Variazione rimanenze semilavorati", "", "277,40"]],
+                         [["10", "Rim. MP", "Rimanenze materie prime", "748,97", ""], ["20", "Rim. SL", "Rimanenze semilavorati", "277,40", ""],
+                          ["30", "Var. MP", "Variazione rimanenze materie prime", "", "748,97"], ["40", "Var. SL", "Variazione rimanenze semilavorati", "", "277,40"]],
                          [60, 130, 400, 139, 139], acc, num=(3, 4))
         return s + tab + _quadra(y + 14, acc, "Al 1° gennaio, dopo la riapertura, la scrittura opposta riporta le rimanenze iniziali a costo.")
     schermata("ahr_rimanenze", "ahr", "GESCON · Prima Nota Contabile", "Rimanenze finali in Prima Nota", c, 470,

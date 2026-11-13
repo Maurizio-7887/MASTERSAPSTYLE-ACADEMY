@@ -377,6 +377,13 @@ PARTI = [
        "righe": [("Merci", "D", 3000), ("Stato patrimoniale iniziale", "A", 3000)],
        "spiegazione": "Giro opposto alla chiusura: l'attività torna con il suo saldo dare."},
       "Q15-02"]),
+("Il valore delle rimanenze: costo medio ponderato", """
+<p>In questo manuale, e nel Simulatore ad hoc del corso, le rimanenze si valorizzano al <b>costo medio ponderato</b> (OIC 13): si sommano i valori di tutti i carichi del periodo, rimanenza iniziale compresa, e si dividono per le quantità caricate.</p>
+<p class="rq-man-formula">Ferro: (2.800 kg × 1,00 + 500 kg × 1,08) ÷ 3.300 kg = 1,0121 €/kg → 740 kg × 1,0121 = 748,97 €</p>
+<p>I 200 kg rottamati non si contano: non sono più in magazzino. Il kit tagliato, fatto da noi, vale il suo <b>costo di produzione</b> (19 × 14,60 = 277,40). Rimanenze finali totali: <b>1.026,37 €</b>.</p>
+<p>Altri metodi ammessi: <b>FIFO</b> (restano i lotti più recenti: 240 × 1,00 + 500 × 1,08 = 780) e <b>LIFO</b> (restano i più vecchi: 740). Il gestionale SAP dell'esercitazione usa invece il <b>costo standard</b> (0,95 €/kg: 703 €) e mette la differenza con il prezzo pagato nel conto 63 «Differenze prezzo», già a costo: per questo il suo magazzino vale 45,97 € meno e il suo utile è più basso della stessa cifra. Business Central, con il metodo di costo «Medio» sull'articolo, arriva allo stesso valore del costo medio ponderato.</p>
+<p>Chi sceglie il metodo lo indica in nota integrativa e lo mantiene negli anni; se il valore di mercato è più basso del costo, le rimanenze si svalutano al minore.</p>
+""", []),
 ("Nel gestionale SAP: il magazzino a valore, movimento per movimento", """
 <p>Nell'esercitazione «Dicembre» il gestionale registra <b>ogni movimento di magazzino a valore</b> (metodo permanente, al costo standard):</p>
 <table class="rq-man-tab"><tr><th>Movimento</th><th>Transazione</th><th>Dare</th><th>Avere</th></tr>
@@ -387,7 +394,7 @@ PARTI = [
 <tr><td>Transenne finite a magazzino</td><td>MIGO 101 da produzione</td><td>13 Magazzino prodotti finiti</td><td>73 Output di produzione</td></tr>
 <tr><td>Consegna al cliente</td><td>uscita merci 601</td><td>41 Costo del venduto</td><td>13 Magazzino prodotti finiti</td></tr>
 <tr><td>Rottamazione / differenza inventariale</td><td>555 / 711</td><td>69 Rottamazioni · 65 Differenze inventariali</td><td>12 o 07 Magazzino</td></tr></table>
-<p>Per questo al 31/12 <b>non si fa</b> la scrittura «Merci / Variazione rimanenze»: il saldo dei conti 12, 07 e 13 è già la rimanenza (ferro 703 €, semilavorati 277,40 €). Si chiudono nello Stato patrimoniale finale (91) e il 1/1 si riaprono dallo Stato patrimoniale iniziale (92), senza giro a costo: il costo nascerà al prossimo 261 o alla prossima consegna. Le scritture complete sono nel riquadro «Nel gestionale SAP» qui sotto.</p>
+<p>Per questo al 31/12 <b>non si fa</b> la scrittura «Merci / Variazione rimanenze»: il saldo dei conti 12, 07 e 13 è già la rimanenza, a costo standard (ferro 703 €, semilavorati 277,40 €). Si chiudono nello Stato patrimoniale finale (91) e il 1/1 si riaprono dallo Stato patrimoniale iniziale (92), senza giro a costo: il costo nascerà al prossimo 261 o alla prossima consegna. Le scritture complete sono nel riquadro «Nel gestionale SAP» qui sotto.</p>
 """, []),
 ]},
 ]},
