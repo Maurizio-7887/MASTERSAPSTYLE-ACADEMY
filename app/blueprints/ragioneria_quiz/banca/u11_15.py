@@ -67,9 +67,9 @@ q("Q11-10", 2, "Quali affermazioni sul leasing (metodo patrimoniale) sono corret
   [("La società utilizzatrice ammortizza il bene dal primo canone", "Fino al riscatto il bene non è suo."),
    ("Il maxicanone è sempre tutto costo del primo anno", "Va riscontato per la parte futura.")],
   "Canoni a costo per competenza; bene in bilancio solo dal riscatto.", multi=True)
-s("Q11-11", 2, "1/1 dell'anno successivo: riapri il risconto attivo di 5.500 € sul maxicanone.",
+s("Q11-11", 2, "1/1 dell'anno successivo, dopo la riapertura dei conti: riporta a costo il risconto attivo di 5.500 € sul maxicanone.",
   [("Canoni di leasing", "D", 5500), ("Risconti attivi", "A", 5500)],
-  [([("Risconti attivi", "D", 5500), ("Canoni di leasing", "A", 5500)], "Questa è la scrittura del 31/12: all'apertura si fa il giro inverso."),
+  [([("Risconti attivi", "D", 5500), ("Canoni di leasing", "A", 5500)], "Questa è la scrittura del 31/12: il 1° gennaio, dopo la riapertura, si fa il giro inverso."),
    ([("Canoni di leasing", "D", 5500), ("Banca c/c", "A", 5500)], "Il maxicanone è già pagato: nessuna uscita di banca.")],
   "Il costo rinviato rientra nel nuovo anno (poi a fine anno si risconta la parte ancora futura).")
 q("Q11-12", 3, "Differenza tra leasing e mutuo per comprare una pressa:",

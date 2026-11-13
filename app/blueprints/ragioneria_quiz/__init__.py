@@ -12,7 +12,7 @@ from flask import Blueprint, Response, abort, flash, redirect, render_template, 
 
 from ...accesso import solo_docente, utente_corrente
 from ...db import Utente, db, ora_italiana
-from .scritture_sap import CAPITOLI as CAPITOLI_SAP, DOCUMENTI
+from .scritture_sap import ALTRI as ALTRI_SISTEMI, CAPITOLI as CAPITOLI_SAP, DOCUMENTI, FIGURE
 from .banca.aiuti import AIUTI
 from .banca import NATURA, ORDINE_NATURA, PIANO, QUESITI, REGOLA_NATURA, UNITA, riepilogo
 from .modelli import EventoQuiz, RispostaQuiz, TentativoQuiz
@@ -259,8 +259,13 @@ def _manuale():
                             visti.add(o["perche"])
                             errori.append(o["perche"])
                 sezioni.append({"num": f"{n}.{i}", "titolo": titolo, "html": Markup(html), "esempi": es})
-            sap = [{"titolo": t, "doc": DOCUMENTI[d], "righe": _righe_man(DOCUMENTI[d]["righe"]),
-                    "italiano": [_righe_man(r) for r in ita], "nota": Markup(nota)} for d, t, ita, nota in CAPITOLI_SAP.get(c["titolo"], [])]
+            sap = []
+            for d, t, ita, nota in CAPITOLI_SAP.get(c["titolo"], []):
+                bc, bc_nota, ah_nota = ALTRI_SISTEMI.get(d, (None, "Stesse righe del metodo italiano.", "Stesse righe del metodo italiano (Primanota)."))
+                sap.append({"titolo": t, "doc": DOCUMENTI[d], "righe": _righe_man(DOCUMENTI[d]["righe"]),
+                            "italiano": [_righe_man(r) for r in ita], "nota": Markup(nota),
+                            "bc": None if bc is None else _righe_man(bc), "bc_nota": Markup(bc_nota), "ah_nota": Markup(ah_nota),
+                            "figure": FIGURE.get((c["titolo"], d), [])})
             caps.append({"n": n, "titolo": c["titolo"], "unita": c["unita"], "sezioni": sezioni, "errori": errori[:6], "sap": sap})
         parti.append({"parte": p["parte"], "capitoli": caps})
     return parti, k

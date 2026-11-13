@@ -372,3 +372,90 @@ CAPITOLI = {
      "Uguale nella sostanza: il gestionale accredita il resto al conto 30 «Capitale e riserve»."),
 ],
 }
+
+
+# ── Gli stessi documenti in Microsoft Dynamics 365 Business Central (localizzazione italiana) e in ad hoc Revolution ──
+# Business Central tiene il magazzino a valore (inventario permanente), ma con il piano dei conti italiano la fattura
+# d'acquisto va comunque su «Acquisti» e il movimento di magazzino ha come contropartita conti di variazione delle rimanenze
+# (nella configurazione: «Costo diretto applicato» e «Costo del venduto» del setup registrazioni magazzino): il Conto economico
+# mostra acquisti ± variazione delle rimanenze, come nel metodo italiano. Ad hoc Revolution registra in Primanota secondo il
+# metodo italiano: le rimanenze entrano in contabilità a fine anno. I nomi dei conti dipendono dal piano dei conti dell'azienda.
+# voce: chiave documento → (righe Business Central o None = come il metodo italiano, nota Business Central, nota ad hoc Revolution)
+_UG = "Stesse righe del metodo italiano."
+ALTRI = {
+"ENTRATA_ACQUISTO": ([], "Ricevimento merce dall'ordine d'acquisto: <b>nessun movimento C/G</b> (se è attivo «Registra costo previsto» usa conti transitori, chiusi alla fattura). Aumentano solo le quantità a magazzino.",
+                     "Il carico di magazzino aggiorna quantità e valori in magazzino; in contabilità generale nessuna scrittura."),
+"FATTURA_FORNITORE": ([("Acquisti materie prime", "D", 3000), ("IVA ns/credito", "D", 660), ("Debiti v/fornitori", "A", 3660),
+                       ("Magazzino materie prime", "D", 3000), ("Variazione rimanenze materie prime (costo diretto applicato)", "A", 3000)],
+                      "Fattura d'acquisto registrata: il costo va su Acquisti come nel metodo italiano e, insieme, il valore entra a magazzino con contropartita la variazione delle rimanenze (al costo effettivo, non standard: niente conto differenze prezzo).",
+                      "Primanota con causale «Fattura acquisti»: " + _UG),
+"FATTURA_PASSIVA": (None, "Fattura d'acquisto con riga di tipo «Conto C/G». " + _UG, "Primanota, causale fattura acquisti. " + _UG),
+"PARCELLA": (None, "Fattura d'acquisto; la ritenuta si gestisce con la funzione ritenute della localizzazione italiana al pagamento. " + _UG, "Primanota con gestione ritenute. " + _UG),
+"USCITA_MERCI": ([], "La spedizione non genera movimenti C/G; il costo del venduto si registra con la fattura di vendita (riga seguente).",
+                 "Lo scarico di magazzino aggiorna solo il magazzino; in contabilità generale nessuna scrittura."),
+"FATTURA": ([("Crediti v/clienti", "D", 12912.48), ("Prodotti c/vendite", "A", 10584), ("IVA ns/debito", "A", 2328.48),
+             ("Variazione rimanenze prodotti finiti (costo del venduto)", "D", 5652), ("Magazzino prodotti finiti", "A", 5652)],
+            "Fattura di vendita registrata: ricavo al netto dello sconto riga (salvo setup «Registrazione sconti») e, insieme, lo scarico a valore del magazzino. La provvigione dell'agente si registra a parte.",
+            "Primanota, causale «Fattura vendite»: " + _UG),
+"FATTURA_SERVIZI": (None, "Fattura di vendita con riga «Conto C/G» o risorsa. " + _UG, _UG),
+"PRELIEVO_261": ([("Lavori in corso (WIP)", "D", 2280), ("Magazzino materie prime", "A", 2280)],
+                 "Registrazione del consumo sull'ordine di produzione: il materiale passa dal magazzino ai lavori in corso.",
+                 "Il magazzino scarica le quantità; in contabilità generale nessuna scrittura (metodo italiano)."),
+"CONFERMA": ([("Lavori in corso (WIP)", "D", 2100), ("Costi diretti applicati (capacità)", "A", 2100)],
+             "Registrazione delle ore (capacità) sull'ordine di produzione.", "Nessuna scrittura in contabilità generale: le ore restano nella produzione o nell'analitica."),
+"ENTRATA_PRODUZIONE": ([("Magazzino prodotti finiti", "D", 9420), ("Lavori in corso (WIP)", "A", 9420)],
+                       "Registrazione dell'output: il prodotto finito esce dai lavori in corso ed entra a magazzino. Alla chiusura dell'ordine le differenze vanno ai conti di scostamento.",
+                       "Nessuna scrittura: le transenne in magazzino si rilevano al 31/12 come rimanenze di prodotti finiti."),
+"ENTRATA_PRODUZIONE#2": ([("Magazzino semilavorati", "D", 292), ("Lavori in corso (WIP)", "A", 292)], "Come sopra, per il semilavorato.", "Nessuna scrittura (rimanenze al 31/12)."),
+"ROTTAMAZIONE": ([("Rettifiche di magazzino", "D", 190), ("Magazzino materie prime", "A", 190)], "Registrazione articoli, rettifica negativa.", "Nessuna scrittura: il ferro rottamato non entra nell'inventario finale."),
+"DIFFERENZA_INVENTARIO": ([("Rettifiche di magazzino (differenze inventariali)", "D", 14.6), ("Magazzino semilavorati", "A", 14.6)], "Registrazione inventario fisico: la differenza tra calcolato e contato diventa rettifica.", "Nessuna scrittura separata: vale il valore dell'inventario finale."),
+"PAGAMENTO_PARCELLA": (None, "Registrazione pagamenti con calcolo della ritenuta (localizzazione italiana). " + _UG, _UG),
+"ADDEBITO_ASSEGNO": ([], "Di norma non serve: il pagamento con assegno si registra direttamente sul conto banca (o su un conto transitorio, se configurato).", "Non serve."),
+"PAGHE": (None, "Le paghe arrivano dal software paghe (per esempio Zucchetti HR) e si importano in una registrazione C/G. " + _UG, "Importazione da Paghe Zucchetti in Primanota. " + _UG),
+"LIQUIDAZIONE_IVA": (None, "Funzione «Calcola e registra liquidazione IVA» della localizzazione italiana. " + _UG, "Liquidazione IVA periodica dalla gestione IVA. " + _UG),
+"FATTURA_CESPITE": (None, "Fattura d'acquisto con riga di tipo «Cespite» (scheda cespite). " + _UG, "Primanota con gestione cespiti. " + _UG),
+"AMMORTAMENTO": (None, "Registrazioni cespiti, funzione «Calcola ammortamento». " + _UG, "Elaborazione ammortamenti del modulo cespiti. " + _UG),
+"AMMORTAMENTO#3": (None, "Registrazioni cespiti, funzione «Calcola ammortamento» al 31/12. " + _UG, "Elaborazione ammortamenti di fine anno. " + _UG),
+"CESSIONE_CESPITE": (None, "Fattura di vendita con riga «Cespite» (dismissione): il sistema elimina costo e fondo e calcola plus o minusvalenza. " + _UG, _UG),
+"ASSESTAMENTO": ([("Premi di assicurazione", "D", 101.92), ("Risconti attivi", "A", 101.92)],
+                 "Con un <b>modello di differimento</b> sulla riga della fattura la polizza va subito tutta a Risconti attivi (1.200) e ogni mese passa a costo la quota di competenza: a dicembre 101,92. Al 31/12 il saldo dei risconti (1.098,08) è già giusto: nessuna scrittura di fine anno e nessuno storno al 1° gennaio.",
+                 "Registrazione di assestamento in Primanota (risconto calcolato sui giorni di competenza). " + _UG),
+"ASSESTAMENTO#2": (None, "Registrazioni periodiche con metodo <b>«Storno fisso»</b>: il rateo si registra al 31/12 e il programma ne crea da solo lo storno il giorno dopo. " + _UG, "Registrazione di assestamento in Primanota. " + _UG),
+"ASSESTAMENTO#3": (None, "Come sopra: registrazione periodica con storno automatico al 1° gennaio. " + _UG, _UG),
+"ASSESTAMENTO#4": (None, "Modello di differimento sulla fattura del maxicanone (come per l'assicurazione) oppure registrazione con storno. " + _UG, _UG),
+"SVALUTAZIONE_CREDITI": (None, _UG, _UG),
+"IMPOSTE": (None, _UG, _UG),
+"EPILOGO": ([("Prodotti c/vendite", "D", 18000), ("Profitti e perdite / utile dell'esercizio", "A", 18000)],
+            "Funzione <b>«Chiusura conto economico»</b>: azzera tutti i conti economici e porta il risultato al conto utile o perdita indicato. Prima: «Rettifica costo – Movimenti articoli» e «Registra costo magazzino in C/G», così il magazzino in contabilità è aggiornato.",
+            "Procedura <b>Chiusura/apertura conti</b>: epilogo dei conti economici nel conto Profitti e perdite."),
+"RISULTATO": (None, "Compreso nella «Chiusura conto economico» (conto utile o conto perdita).", "Compreso nella procedura di chiusura."),
+"CHIUSURA_SP": ([("Stato patrimoniale di chiusura", "D", 980.4), ("Magazzino materie prime", "A", 703), ("Magazzino semilavorati", "A", 277.4)],
+                "Funzione della localizzazione italiana <b>«Chiusura/apertura stato patrimoniale»</b>: porta ogni conto patrimoniale al conto di chiusura. Il magazzino è già a valore: nessuna rilevazione delle rimanenze.",
+                "Prima si registrano in Primanota le <b>rimanenze finali</b> (Rimanenze / Variazione rimanenze, dal valore dell'inventario), poi la procedura <b>Chiusura/apertura conti</b> chiude i patrimoniali nel Bilancio di chiusura."),
+"RIAPERTURA": ([("Magazzino materie prime", "D", 703), ("Magazzino semilavorati", "D", 277.4), ("Stato patrimoniale di apertura", "A", 980.4)],
+               "Stessa funzione, parte di apertura: riapre i conti patrimoniali dal conto di apertura. Nessun giro a costo delle rimanenze.",
+               "La procedura riapre i conti dal Bilancio di apertura; poi in Primanota le <b>rimanenze iniziali</b> tornano a costo (Variazione rimanenze / Rimanenze), come nel metodo italiano."),
+"STORNO_ASSESTAMENTI": ([], "I ratei registrati con «Storno fisso» si stornano da soli il 1° gennaio; i risconti gestiti con il modello di differimento non vanno stornati.",
+                        "Storno in Primanota dei risconti (e dei ratei, se si usa lo storno) al 1° gennaio, oppure chiusura dei ratei al pagamento."),
+"RATA_MUTUO": (None, "Se il rateo è stato registrato con storno automatico, alla rata si registrano tutti gli interessi (come nel gestionale SAP).", "Come il metodo italiano: la rata chiude il rateo e solo il resto è interesse dell'anno."),
+"DESTINAZIONE_UTILE": (None, _UG, _UG),
+}
+
+
+# ── Schermate ricostruite (tools/figure_manuale.py → static/manuale/*.svg), mostrate sotto il documento giusto ──
+# chiave: (titolo del capitolo, chiave documento) → [(file, didascalia)]
+FIGURE = {
+    ("Gli acquisti e i rapporti con i fornitori", "ENTRATA_ACQUISTO"): [("sap_migo.svg", "SAP · MIGO movimento 101: il ferro entra a magazzino prima della fattura")],
+    ("Gli acquisti e i rapporti con i fornitori", "FATTURA_FORNITORE"): [
+        ("sap_miro.svg", "SAP · MIRO: la fattura chiude il conto ponte 22"),
+        ("bc_fattura_acquisto.svg", "Business Central · Fattura acquisto con riga di tipo Articolo"),
+        ("bc_movimenti_cg.svg", "Business Central · i movimenti C/G generati dalla fattura")],
+    ("Il magazzino e la produzione", "DIFFERENZA_INVENTARIO"): [("sap_inventario.svg", "SAP · inventario fisico di fine anno e differenza 711")],
+    ("Le scritture di assestamento", "ASSESTAMENTO"): [("bc_differimento.svg", "Business Central · risconto con modello di differimento")],
+    ("Le scritture di assestamento", "ASSESTAMENTO#2"): [
+        ("sap_fbs1.svg", "SAP · FBS1: rateo con storno automatico al 1° gennaio"),
+        ("bc_registrazioni_periodiche.svg", "Business Central · registrazioni periodiche «Storno fisso»")],
+    ("La chiusura dei conti e il bilancio d'esercizio", "CHIUSURA_SP"): [
+        ("sap_chiusura.svg", "SAP · registrazioni di chiusura e apertura (Italia)"),
+        ("bc_chiusura.svg", "Business Central · Chiusura conto economico e Chiusura/apertura stato patrimoniale")],
+}

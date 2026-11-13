@@ -134,3 +134,9 @@ label.rq-opz:hover{border-color:#B6A6D3;background:#FBFAFD}
 .rq-aiuto-q p{margin:4px 0}
 .rq-man-primo{background:#EEF6EE;border:2px solid #2E7D32;border-radius:8px;padding:10px 16px;margin:12px 0}
 .rq-man-primo h2{margin:4px 0}
+.rq-man-eti.e-it{color:#2E7D32}.rq-man-eti.e-ah{color:#B35C00}.rq-man-eti.e-bc{color:#0B6A8A}.rq-man-eti.e-sap{color:#5B3C8C}
+.rq-man-sist{font-size:13.5px;margin:4px 0}
+.rq-man-due>div{background:#fff;border:1px solid #DCE6F0;border-radius:6px;padding:6px 10px}
+.rq-man-fig{margin:14px 0;text-align:center;break-inside:avoid}
+.rq-man-fig img{max-width:100%;border:1px solid #CCD;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.rq-man-fig figcaption{font-size:13px;color:#555;margin-top:4px}

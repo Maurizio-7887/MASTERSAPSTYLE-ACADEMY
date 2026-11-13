@@ -56,9 +56,9 @@ q("Q16-08", 2, "Quali di questi sono ratei? (seleziona tutte le risposte corrett
   [("Premio assicurativo pagato in anticipo per l'anno dopo", "È un risconto attivo."),
    ("Fitto attivo incassato in anticipo", "È un risconto passivo.")],
   "Ratei: componenti maturati con manifestazione finanziaria futura.", multi=True)
-s("Q16-09", 2, "1/1: riapri il risconto attivo di 900 € sul premio assicurativo.",
+s("Q16-09", 2, "1/1, dopo la riapertura dei conti: riporta a costo il risconto attivo di 900 € sul premio assicurativo.",
   [("Premi di assicurazione", "D", 900), ("Risconti attivi", "A", 900)],
-  [([("Risconti attivi", "D", 900), ("Premi di assicurazione", "A", 900)], "È la scrittura del 31/12, non la riapertura."),
+  [([("Risconti attivi", "D", 900), ("Premi di assicurazione", "A", 900)], "È la scrittura del 31/12, non il giro a costo del 1° gennaio."),
    ([("Premi di assicurazione", "D", 900), ("Banca c/c", "A", 900)], "Il premio è già pagato: nessuna uscita di banca.")],
   "Il costo rinviato diventa costo del nuovo anno.")
 q("Q16-10", 3, "Perché il risconto «presuppone la rilevazione originaria» del costo?",

@@ -263,12 +263,24 @@ class Manuale(unittest.TestCase):
         for t in ("Parte prima", "partita doppia", "Parte quinta", "La riapertura dei conti", "Capitolo 20"):
             self.assertIn(t, h)
         # metodo italiano: ciclo completo delle scorte; gestionale SAP accanto, con i conti del simulatore
-        for t in ("la chiusura delle scorte finali", "la riapertura delle scorte", "Nel gestionale SAP e con il metodo italiano",
+        for t in ("la chiusura delle scorte finali", "la riapertura delle scorte", "Lo stesso nei programmi: metodo italiano, ad hoc Revolution, Dynamics 365 Business Central, SAP",
+                  "Quattro modi di registrare le stesse operazioni", "Fine anno voce per voce: chiusura e riapertura",
+                  "Chiusura/apertura stato patrimoniale", "Chiusura/apertura conti", "modello di differimento",
+                  "31/12: chiudi il risconto attivo di 900", "1/1: riapri il rateo passivo di 160", "manuale/sap_miro.svg", "manuale/bc_chiusura.svg",
                   "12 Magazzino ferro (materie prime)", "Variazione rimanenze materie prime", "Raccordo con il piano dei conti del gestionale SAP"):
             self.assertIn(t, h)
 
     def test_scritture_sap_del_manuale_quadrano(self):
-        from app.blueprints.ragioneria_quiz.scritture_sap import CAPITOLI, DOCUMENTI
+        from pathlib import Path
+        from app.blueprints.ragioneria_quiz.scritture_sap import ALTRI, CAPITOLI, DOCUMENTI, FIGURE
+        cartella = Path(__file__).resolve().parent.parent / "app/blueprints/ragioneria_quiz/static/manuale"
+        for (cap, d), figure in FIGURE.items():
+            self.assertIn(d, [v[0] for v in CAPITOLI[cap]])
+            for f, _ in figure:
+                self.assertTrue((cartella / f).exists(), f)
+        for d, (bc, _a, _b) in ALTRI.items():
+            if bc:
+                self.assertEqual(round(sum(v for _c, z, v in bc if z == "D"), 2), round(sum(v for _c, z, v in bc if z == "A"), 2), d)
         for cap, voci in CAPITOLI.items():
             for d, _t, ita, _n in voci:
                 for righe in [DOCUMENTI[d]["righe"]] + ita:

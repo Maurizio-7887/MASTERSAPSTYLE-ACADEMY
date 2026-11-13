@@ -42,16 +42,19 @@
 
   {% if c.sap %}
   <div class="rq-man-sap">
-    <h3>🖥️ Nel gestionale SAP e con il metodo italiano</h3>
-    <p class="rq-nd">Scritture reali dell'esercitazione «Dicembre: dalla costituzione alla riapertura» (codici dei conti del simulatore) e, accanto, la stessa operazione con i conti del manuale.</p>
+    <h3>🖥️ Lo stesso nei programmi: metodo italiano, ad hoc Revolution, Dynamics 365 Business Central, SAP</h3>
+    <p class="rq-nd">SAP: scritture reali dell'esercitazione «Dicembre» (codici dei conti del simulatore). Business Central con localizzazione italiana e ad hoc Revolution: come la stessa operazione arriva in contabilità generale; i nomi dei conti dipendono dal piano dei conti dell'azienda.</p>
     {% for x in c.sap %}
     <div class="rq-man-sap-doc">
-      <p><b>{{ x.titolo }}</b> · <span class="rq-nd">{{ x.doc.data[8:10] }}/{{ x.doc.data[5:7] }}/{{ x.doc.data[:4] }} · {{ x.doc.testo }}</span></p>
+      <p><b>{{ x.titolo }}</b> · <span class="rq-nd">{{ x.doc.testo }}</span></p>
       <div class="rq-man-due">
-        <div><p class="rq-man-eti">Gestionale SAP{% if x.doc.estratto %} <small>({{ x.doc.nota_estratto }})</small>{% endif %}</p>{{ scrittura(x.righe) }}</div>
-        <div><p class="rq-man-eti">Metodo italiano</p>{% for r in x.italiano %}{{ scrittura(r) }}{% else %}<p class="rq-man-nessuna">Nessuna scrittura</p>{% endfor %}</div>
+        <div><p class="rq-man-eti e-it">📗 Metodo italiano (manuale)</p>{% for r in x.italiano %}{{ scrittura(r) }}{% else %}<p class="rq-man-nessuna">Nessuna scrittura</p>{% endfor %}
+          <p class="rq-man-perche">{{ x.nota }}</p></div>
+        <div><p class="rq-man-eti e-ah">🟧 ad hoc Revolution (Zucchetti)</p><p class="rq-man-sist">{{ x.ah_nota }}</p></div>
+        <div><p class="rq-man-eti e-bc">🟦 Dynamics 365 Business Central (localizzazione italiana)</p>{% if x.bc is none %}<p class="rq-man-sist">{{ x.bc_nota }}</p>{% else %}{% for r in [x.bc] if x.bc %}{{ scrittura(r) }}{% else %}<p class="rq-man-nessuna">Nessun movimento C/G</p>{% endfor %}<p class="rq-man-sist">{{ x.bc_nota }}</p>{% endif %}</div>
+        <div><p class="rq-man-eti e-sap">🟪 SAP S/4HANA (gestionale dell'esercitazione){% if x.doc.estratto %} <small>({{ x.doc.nota_estratto }})</small>{% endif %}</p>{{ scrittura(x.righe) }}</div>
       </div>
-      <p class="rq-man-perche">{{ x.nota }}</p>
+      {% for f, did in x.figure %}<figure class="rq-man-fig"><img src="{{ url_for('ragioneria_quiz.static', filename='manuale/' ~ f) }}" alt="{{ did }}"><figcaption>{{ did }}</figcaption></figure>{% endfor %}
     </div>
     {% endfor %}
   </div>
@@ -79,6 +82,6 @@
 {% endif %}{% endfor %}
   </div>
 </section>
-<p class="rq-nd">Gli importi e le percentuali degli esempi sono dati didattici scelti per studiare la regola contabile; nei casi reali vanno verificati con la normativa dell'anno. Banca domande {{ banca.versione }}.</p>
+<p class="rq-nd">Gli importi e le percentuali degli esempi sono dati didattici scelti per studiare la regola contabile; nei casi reali vanno verificati con la normativa in vigore.</p>
 </div>
 {% endblock %}
