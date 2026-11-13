@@ -322,7 +322,8 @@ unita("Q15", "Magazzino e produzione", [
     "Il magazzino si misura in QUANTITÀ e in VALORE: quantità × costo unitario.",
     "Materie prime → semilavorati (HALB) → prodotti finiti (FERT); la produzione in corso è WIP.",
     "Metodo periodico (quello dei quesiti, salvo diversa indicazione): gli acquisti vanno a costo; a fine anno le rimanenze finali rettificano il costo con «Variazione rimanenze».",
-    "Rimanenze finali: conto patrimoniale (es. Merci) in Dare, Variazione rimanenze in Avere. All'apertura il giro opposto.",
+    "31/12: Merci D / Variazione rimanenze A; epilogo Variazione rimanenze D / Conto economico A; chiusura SP finale D / Merci A.",
+    "1/1: riapertura Merci D / SP iniziale A; poi giro a costo Variazione rimanenze D / Merci A.",
     "Se il gestionale tiene già il magazzino a valore (metodo permanente), non si iscrivono le rimanenze una seconda volta.",
     "Un trasferimento interno tra depositi non cambia il valore totale del magazzino.",
 ])
@@ -331,14 +332,14 @@ s = lambda *a, **k: S("Q15", *a, **k)
 
 s("Q15-01", 2, "31/12, metodo periodico: l'inventario delle merci vale 3.000 €. Rileva le rimanenze finali.",
   [("Merci", "D", 3000), ("Variazione rimanenze merci", "A", 3000)],
-  [([("Variazione rimanenze merci", "D", 3000), ("Merci", "A", 3000)], "Questa è la scrittura di riapertura (rimanenze iniziali), non di chiusura."),
+  [([("Variazione rimanenze merci", "D", 3000), ("Merci", "A", 3000)], "Questa è il giro a costo delle rimanenze iniziali del 1° gennaio, non la rilevazione del 31/12."),
    ([("Merci", "D", 3000), ("Merci c/vendite", "A", 3000)], "Le rimanenze non sono vendite: rettificano i costi d'acquisto.")],
   "Le merci non vendute diventano attività e riducono il costo dell'esercizio.", origine="M22")
-s("Q15-02", 2, "1/1: riapri le rimanenze iniziali di merci di 3.000 € dell'anno precedente.",
+s("Q15-02", 2, "1/1, dopo la riapertura dei conti (Merci già riaperte dallo Stato patrimoniale iniziale): riporta a costo le rimanenze iniziali di merci di 3.000 €.",
   [("Variazione rimanenze merci", "D", 3000), ("Merci", "A", 3000)],
   [([("Merci", "D", 3000), ("Variazione rimanenze merci", "A", 3000)], "Questa è la rilevazione delle rimanenze finali, non la riapertura."),
    ([("Merci c/acquisti", "D", 3000), ("Merci", "A", 3000)], "Le rimanenze iniziali non sono nuovi acquisti.")],
-  "Le rimanenze iniziali diventano costo del nuovo anno.")
+  "Le rimanenze iniziali diventano costo del nuovo anno: è la seconda scrittura del 1/1, dopo Merci / Stato patrimoniale iniziale.")
 s("Q15-03", 2, "31/12: in magazzino restano 40 transenne finite del valore di 55 € l'una (metodo periodico).",
   [("Prodotti finiti", "D", 2200), ("Variazione rimanenze prodotti finiti", "A", 2200)],
   [([("Merci", "D", 2200), ("Variazione rimanenze merci", "A", 2200)], "Le transenne le produci tu: sono prodotti finiti, non merci acquistate per la rivendita."),

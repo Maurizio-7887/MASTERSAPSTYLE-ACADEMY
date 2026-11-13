@@ -13,11 +13,12 @@ spiegazione per ogni alternativa sbagliata.
 """
 from collections import OrderedDict
 
-VERSIONE_BANCA = "2026.11-r1"
+VERSIONE_BANCA = "2026.11-r2"
 
 # ── PIANO DEI CONTI DIDATTICO (nome → natura) ─────────────────────────────────
 # AT = attività · PA = passività · PN = patrimonio netto · CO = costo · RI = ricavo
-# RA = rettifica di attività (fondo) · RR = rettifica di ricavo · TE = conto tecnico
+# RA = rettifica di attività (fondo) · RR = rettifica di ricavo · RC = rettifica di costo · PR = perdite (riducono il PN)
+# BI = saldo variabile (Erario c/IVA: credito o debito) · VR = variazione rimanenze (componente economico) · TE = conto tecnico
 PIANO = OrderedDict([
     # liquidità
     ("Cassa", "AT"), ("Banca c/c", "AT"),
@@ -34,14 +35,14 @@ PIANO = OrderedDict([
     ("Ratei attivi", "AT"), ("Risconti attivi", "AT"),
     # debiti
     ("Debiti v/fornitori", "PA"), ("Clienti c/anticipi", "PA"), ("Fatture da ricevere", "PA"),
-    ("IVA ns/debito", "PA"), ("Erario c/IVA", "PA"),
+    ("IVA ns/debito", "PA"), ("Erario c/IVA", "BI"),
     ("Mutui passivi", "PA"), ("Banche c/anticipi su fatture", "PA"),
     ("Personale c/retribuzioni", "PA"), ("Erario c/ritenute", "PA"), ("Istituti previdenziali", "PA"),
     ("Debiti per TFR", "PA"), ("Debiti tributari", "PA"), ("Debiti v/soci per dividendi", "PA"),
     ("Ratei passivi", "PA"), ("Risconti passivi", "PA"),
     # patrimonio netto
     ("Capitale sociale", "PN"), ("Riserva legale", "PN"), ("Utili portati a nuovo", "PN"),
-    ("Utile d'esercizio", "PN"), ("Perdita d'esercizio", "PN"),
+    ("Utile d'esercizio", "PN"), ("Perdita d'esercizio", "PR"),
     # costi
     ("Merci c/acquisti", "CO"), ("Materie prime c/acquisti", "CO"), ("Energia elettrica", "CO"),
     ("Consulenze", "CO"), ("Premi di assicurazione", "CO"), ("Cancelleria", "CO"),
@@ -51,18 +52,30 @@ PIANO = OrderedDict([
     ("Ammortamento impianti e macchinari", "CO"), ("Ammortamento automezzi", "CO"), ("Ammortamento arredamento", "CO"),
     ("Svalutazione crediti", "CO"), ("Perdite su crediti", "CO"), ("Minusvalenze", "CO"),
     ("Imposte dell'esercizio", "CO"), ("Differenze inventariali", "CO"),
-    ("Ribassi e abbuoni passivi", "CO"),
+    ("Ribassi e abbuoni passivi", "RR"),
     # ricavi e rettifiche
     ("Merci c/vendite", "RI"), ("Prodotti c/vendite", "RI"), ("Fitti attivi", "RI"), ("Interessi attivi bancari", "RI"),
-    ("Plusvalenze", "RI"), ("Sopravvenienze attive", "RI"), ("Ribassi e abbuoni attivi", "RI"), ("Resi su acquisti", "RI"),
+    ("Plusvalenze", "RI"), ("Sopravvenienze attive", "RI"), ("Ribassi e abbuoni attivi", "RC"), ("Resi su acquisti", "RC"),
     ("Resi su vendite", "RR"),
-    ("Variazione rimanenze merci", "TE"), ("Variazione rimanenze prodotti finiti", "TE"),
+    ("Variazione rimanenze merci", "VR"), ("Variazione rimanenze prodotti finiti", "VR"),
     # conti di chiusura e riapertura
     ("Conto economico", "TE"), ("Stato patrimoniale finale", "TE"), ("Stato patrimoniale iniziale", "TE"),
 ])
 
-NATURA = {"AT": "Attività", "PA": "Passività", "PN": "Patrimonio netto", "CO": "Costo",
-          "RI": "Ricavo", "RA": "Rettifica di attività (fondo)", "RR": "Rettifica di ricavo", "TE": "Conto tecnico"}
+NATURA = {"AT": "Attività", "PA": "Passività", "PN": "Patrimonio netto", "PR": "Rettifica negativa del patrimonio netto (perdite)",
+          "BI": "Conto a saldo variabile (credito o debito)", "CO": "Costo", "RC": "Rettifica di costo (resi, ribassi e abbuoni su acquisti)",
+          "RI": "Ricavo", "RR": "Rettifica di ricavo (resi, ribassi e abbuoni su vendite)", "VR": "Variazione delle rimanenze (componente economico)",
+          "RA": "Rettifica di attività (fondo)", "TE": "Conto tecnico di chiusura e riapertura"}
+
+# ordine dei gruppi nell'appendice e regola Dare/Avere di ciascuno (uguale in manuale e piano dei conti)
+ORDINE_NATURA = ["AT", "RA", "PA", "BI", "PN", "PR", "CO", "RC", "RI", "RR", "VR", "TE"]
+REGOLA_NATURA = {"AT": "Aumenta in Dare", "RA": "Aumenta in Avere: riduce l'attività a cui si riferisce",
+                 "PA": "Aumenta in Avere", "BI": "Dare se è un credito verso l'Erario, Avere se è un debito: si espone secondo il saldo",
+                 "PN": "Aumenta in Avere", "PR": "Saldo Dare: la perdita riduce il patrimonio netto",
+                 "CO": "Aumenta in Dare", "RC": "Si registra in Avere: riduce il costo d'acquisto, non è un ricavo autonomo",
+                 "RI": "Aumenta in Avere", "RR": "Si registra in Dare: riduce i ricavi di vendita",
+                 "VR": "Rimanenze iniziali in Dare, finali in Avere: entra nel Conto economico (voci A2 e B11)",
+                 "TE": "Solo per epilogo, chiusura e riapertura dei conti"}
 
 UNITA = OrderedDict()      # "Q01" → {titolo, studio:[...], esempio, domande:[...]}
 QUESITI = {}               # id → quesito normalizzato
@@ -215,6 +228,13 @@ def valida():
                 errori.append(f"{qid}: la scrittura corretta non quadra (D {d/100} ≠ A {a/100})")
             if len(set(firme)) != len(firme):
                 errori.append(f"{qid}: due alternative contabilmente equivalenti")
+    from .aiuti import AIUTI
+    for qid in QUESITI:
+        if not AIUTI.get(qid, "").strip():
+            errori.append(f"{qid}: manca il suggerimento specifico (banca/aiuti.py)")
+    for qid in AIUTI:
+        if qid not in QUESITI:
+            errori.append(f"aiuti.py: suggerimento per una domanda inesistente {qid}")
     for cod, u in UNITA.items():
         if not u["domande"]:
             errori.append(f"{cod}: unità senza domande")
@@ -229,6 +249,10 @@ def quadra(righe):
 
 
 from . import u01_05, u06_10, u11_15, u16_20  # noqa: E402,F401
+from .aiuti import AIUTI  # noqa: E402
+
+for _qid, _q in QUESITI.items():   # il suggerimento specifico della domanda (mostrato con «Mi serve un aiuto»)
+    _q["aiuto"] = AIUTI.get(_qid, "")
 
 valida()
 

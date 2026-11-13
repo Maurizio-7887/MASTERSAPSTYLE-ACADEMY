@@ -2,13 +2,13 @@
 {% block titolo %}Piano dei conti del questionario{% endblock %}
 {% block rq %}
 <h1>📒 Piano dei conti usato nelle domande</h1>
-<p>Sono i conti che trovi nelle scritture da scegliere. Ricorda: <strong>attività e costi aumentano in Dare</strong>; <strong>passività, patrimonio netto e ricavi aumentano in Avere</strong>. I fondi (ammortamento, svalutazione) rettificano un'attività e aumentano in Avere.</p>
+<p>Sono i conti che trovi nelle scritture da scegliere. Ricorda: <strong>attività e costi aumentano in Dare</strong>; <strong>passività, patrimonio netto e ricavi aumentano in Avere</strong>. I fondi (ammortamento, svalutazione) rettificano un'attività e aumentano in Avere. Le <strong>perdite</strong> riducono il patrimonio netto e hanno saldo Dare; i <strong>resi e abbuoni su acquisti</strong> riducono il costo, quelli <strong>su vendite</strong> riducono il ricavo.</p>
 {% set gruppi = {} %}
 {% for nome, nat in PIANO.items() %}{% set _ = gruppi.setdefault(nat, []).append(nome) %}{% endfor %}
 <div class="rq-piano">
-{% for nat in ['AT','RA','PA','PN','CO','RI','RR','TE'] %}{% if gruppi.get(nat) %}
+{% for nat in ORDINE_NATURA %}{% if gruppi.get(nat) %}
   <section><h2>{{ NATURA[nat] }}</h2>
-  <p class="rq-nd">{% if nat in ('AT','CO') %}Aumenta in Dare{% elif nat == 'TE' %}Conti di rettifica di fine anno, chiusura e riapertura{% elif nat == 'RR' %}Riduce i ricavi: si registra in Dare{% else %}Aumenta in Avere{% endif %}</p>
+  <p class="rq-nd">{{ REGOLA_NATURA[nat] }}</p>
   <ul>{% for n in gruppi[nat] %}<li>{{ n }}</li>{% endfor %}</ul></section>
 {% endif %}{% endfor %}
 </div>

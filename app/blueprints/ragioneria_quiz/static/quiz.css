@@ -118,3 +118,19 @@ label.rq-opz:hover{border-color:#B6A6D3;background:#FBFAFD}
   .rq-man-parte+.rq-man-cap{page-break-before:avoid}
   a{color:inherit;text-decoration:none}
 }
+/* manuale: scritture del gestionale SAP accanto al metodo italiano */
+.rq-man-tab{border-collapse:collapse;margin:8px 0;width:100%}
+.rq-man-tab th,.rq-man-tab td{border:1px solid #DDD5EA;padding:4px 6px;text-align:left;vertical-align:top}
+.rq-man-tab th{background:#F4F0FA}
+.rq-man-sap{background:#F2F7FC;border:1px solid #BFD3E8;border-radius:6px;padding:4px 14px 10px;margin-top:16px}
+.rq-man-sap h3{color:#1F4E79;margin:8px 0 4px}
+.rq-man-sap-doc{border-top:1px solid #D3E1EF;padding-top:8px;margin-top:8px;break-inside:avoid}
+.rq-man-sap-doc p{margin:4px 0}
+.rq-man-due{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.rq-man-due{grid-template-columns:1fr}}
+.rq-man-eti{font-weight:600;font-size:13px;color:#1F4E79}
+.rq-man-nessuna{font-style:italic;color:#666;border:1px dashed #BFD3E8;padding:8px;border-radius:4px}
+.rq-aiuto-q{background:#FFFBEA;border:1px solid #EAD27A;border-radius:6px;padding:8px 12px;margin-top:10px}
+.rq-aiuto-q p{margin:4px 0}
+.rq-man-primo{background:#EEF6EE;border:2px solid #2E7D32;border-radius:8px;padding:10px 16px;margin:12px 0}
+.rq-man-primo h2{margin:4px 0}

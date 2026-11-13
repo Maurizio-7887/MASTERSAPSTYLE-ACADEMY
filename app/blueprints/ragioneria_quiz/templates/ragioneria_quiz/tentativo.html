@@ -48,9 +48,12 @@
 
   {% if M.feedback == 'subito' and not mostra_esito %}
     {% if aiuto_aperto or aiuto %}
-    <div class="rq-aiuto"><b>💡 Le regole di {{ un.codice }}</b><ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul><small>L'aiuto resta segnato in questa domanda.</small></div>
+    <div class="rq-aiuto rq-aiuto-q"><p><b>💡 Suggerimento per questa domanda</b></p><p>{{ aiuto_q }}</p>
+      {% if dove_man %}<p>📘 Ripassa nel manuale: <a href="{{ url_for('ragioneria_quiz.manuale') }}#{{ dove_man.ancora }}" target="_blank" rel="noopener">{{ dove_man.testo }}</a></p>{% endif %}
+      <details><summary>Le regole generali di {{ un.codice }}</summary><ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul></details>
+      <small>L'aiuto resta segnato in questa domanda.</small></div>
     {% else %}
-    <form method="post" action="{{ url_for('ragioneria_quiz.aiuto', tid=t.id) }}" class="rq-inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="n" value="{{ n }}"><button class="msa-btn sec">💡 Mi serve un aiuto (rivedi le regole)</button></form>
+    <form method="post" action="{{ url_for('ragioneria_quiz.aiuto', tid=t.id) }}" class="rq-inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="n" value="{{ n }}"><button class="msa-btn sec">💡 Mi serve un aiuto su questa domanda</button></form>
     {% endif %}
   {% endif %}
 </article>

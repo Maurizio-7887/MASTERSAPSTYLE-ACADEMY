@@ -83,7 +83,7 @@ q("Q16-12", 2, "Il rateo attivo è nello stato patrimoniale tra…",
 # ═════════════════════════════════════════════════════════════════════════════
 unita("Q17", "Altri assestamenti e crediti", [
     "Fatture da ricevere: costo dell'anno per merci/servizi già ricevuti ma non ancora fatturati (debito senza IVA, che arriverà con la fattura).",
-    "Fatture da emettere: ricavo dell'anno per beni consegnati e non ancora fatturati.",
+    "Fatture da emettere: ricavo dell'anno per beni consegnati e non ancora fatturati; con DDT e fattura differita l'IVA è di dicembre.",
     "Svalutazione crediti: stima del rischio di non incassare → Svalutazione crediti (costo) / Fondo svalutazione crediti.",
     "Quando un credito diventa definitivamente inesigibile si usa prima il fondo; la parte eccedente è Perdita su crediti.",
     "Aspetti fiscali (deducibilità, recupero IVA) vanno dichiarati nel caso: qui si studia la regola contabile.",
@@ -96,11 +96,12 @@ s("Q17-01", 2, "31/12: hai consumato energia per 300 € a dicembre; la bolletta
   [([("Energia elettrica", "D", 300), ("IVA ns/credito", "D", 66), ("Fatture da ricevere", "A", 366)], "L'IVA si detrae solo quando arriva la fattura: oggi si rileva il costo."),
    ([("Energia elettrica", "D", 300), ("Debiti v/fornitori", "A", 300)], "Senza fattura non c'è ancora un debito di fornitura ordinario: si usa Fatture da ricevere.")],
   "Costo di competenza dell'anno in attesa del documento.")
-s("Q17-02", 2, "31/12: hai consegnato merce per 1.500 € il 30/12, la fattura sarà emessa a gennaio (ipotesi del caso).",
-  [("Fatture da emettere", "D", 1500), ("Merci c/vendite", "A", 1500)],
-  [([("Crediti v/clienti", "D", 1830), ("Merci c/vendite", "A", 1500), ("IVA ns/debito", "A", 330)], "La fattura non è ancora emessa: il credito ordinario e l'IVA nasceranno con il documento."),
-   ([("Fatture da emettere", "D", 1500), ("Risconti passivi", "A", 1500)], "Il ricavo è di quest'anno: va rilevato, non rinviato.")],
-  "Ricavo di competenza dell'anno in attesa della fattura.")
+s("Q17-02", 2, "31/12: il 30/12 hai consegnato con DDT merce per 1.500 € + IVA 22%; la fattura differita sarà emessa a gennaio, entro il 15.",
+  [("Fatture da emettere", "D", 1830), ("Merci c/vendite", "A", 1500), ("IVA ns/debito", "A", 330)],
+  [([("Fatture da emettere", "D", 1500), ("Merci c/vendite", "A", 1500)], "Con la fattura differita l'IVA è esigibile nel mese della consegna (dicembre): va rilevata ora, non a gennaio."),
+   ([("Crediti v/clienti", "D", 1830), ("Merci c/vendite", "A", 1500), ("IVA ns/debito", "A", 330)], "La fattura non c'è ancora: il credito si rileva in Fatture da emettere; a gennaio la fattura lo riclassifica in Crediti v/clienti."),
+   ([("Fatture da emettere", "D", 1830), ("Risconti passivi", "A", 1500), ("IVA ns/debito", "A", 330)], "Il ricavo è di quest'anno: va rilevato, non rinviato.")],
+  "Ricavo e IVA di dicembre (consegna con DDT); a gennaio la fattura differita chiude Fatture da emettere senza duplicare ricavo e IVA.")
 s("Q17-03", 2, "31/12: stimi che 500 € dei crediti verso clienti non saranno incassati.",
   [("Svalutazione crediti", "D", 500), ("Fondo svalutazione crediti", "A", 500)],
   [([("Perdite su crediti", "D", 500), ("Crediti v/clienti", "A", 500)], "È una stima, non una perdita certa: si accantona al fondo."),

@@ -5,8 +5,14 @@
 <p><a href="{{ url_for('ragioneria_quiz.indice') }}">← Tutte le unità</a></p>
 <h1><span class="rq-cod">{{ un.codice }}</span> {{ un.titolo }}</h1>
 
+<section class="rq-man-primo">
+  <h2>📘 Prima di rispondere: studia nel manuale</h2>
+  <p>{% for n, t in capitoli %}<a class="msa-btn" href="{{ url_for('ragioneria_quiz.manuale') }}#cap{{ n }}">Capitolo {{ n }} · {{ t }}</a> {% endfor %}</p>
+  <p class="rq-nd">Teoria, scritture svolte con il metodo italiano e, accanto, le stesse operazioni nel gestionale SAP.</p>
+</section>
+
 <section class="rq-studio" aria-labelledby="studia">
-  <h2 id="studia">📖 Studia: le regole da ricordare</h2>
+  <h2 id="studia">📝 Le regole da ricordare (riassunto)</h2>
   <ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul>
   {% if un.esempio %}
   <div class="rq-esempio"><b>Esempio:</b> {{ un.esempio.testo }}

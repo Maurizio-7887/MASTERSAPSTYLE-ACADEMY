@@ -12,7 +12,9 @@ from flask import Blueprint, Response, abort, flash, redirect, render_template, 
 
 from ...accesso import solo_docente, utente_corrente
 from ...db import Utente, db, ora_italiana
-from .banca import NATURA, PIANO, QUESITI, UNITA, riepilogo
+from .scritture_sap import CAPITOLI as CAPITOLI_SAP, DOCUMENTI
+from .banca.aiuti import AIUTI
+from .banca import NATURA, ORDINE_NATURA, PIANO, QUESITI, REGOLA_NATURA, UNITA, riepilogo
 from .modelli import EventoQuiz, RispostaQuiz, TentativoQuiz
 from . import servizi as sv
 
@@ -57,7 +59,7 @@ def unita(cod):
     a = sv.andamento(u.id)
     return render_template("ragioneria_quiz/unita.html", u=u, un=UNITA[cod], st=a["unita"][cod],
                            usati=sv.tentativi_usati(u.id, "verifica", cod), concessi=sv.tentativi_concessi(u.id, "verifica", cod),
-                           ap_ver=sv.aperto(u.id, "verifica", cod), SOGLIA=sv.SOGLIA)
+                           ap_ver=sv.aperto(u.id, "verifica", cod), SOGLIA=sv.SOGLIA, capitoli=capitoli_unita(cod))
 
 
 @bp.post("/avvia")
@@ -120,7 +122,7 @@ def tentativo(tid):
     return render_template("ragioneria_quiz/tentativo.html", u=u, t=t, q=q, n=n, tot=len(qs), scelta=scelta,
                            mostra_esito=mostra_esito, aiuto=bool(r and r.aiuto), aiuto_aperto=request.args.get("aiuto") == "1",
                            risposte_date=risposte_date, stato_nav=stato_nav, M=sv.MODALITA[t.modalita],
-                           un=UNITA[q["unita"]])
+                           un=UNITA[q["unita"]], dove_man=_dove_nel_manuale(q), aiuto_q=AIUTI.get(q["id"], ""))
 
 
 @bp.post("/tentativo/<int:tid>/risposta")
@@ -181,6 +183,57 @@ def risultato(tid):
                            M=sv.MODALITA[t.modalita], allievo=t.utente, SOGLIA=sv.SOGLIA, SOGLIA_PARTE=sv.SOGLIA_PARTE)
 
 
+def _dove_nel_manuale(q):
+    """Paragrafo del manuale con la scrittura svolta della domanda; altrimenti il capitolo dell'unità."""
+    sez = sezione_di().get(q["id"])
+    if sez:
+        return {"ancora": "sez" + sez[0], "testo": f"paragrafo {sez[0]} «{sez[1]}»"}
+    cap = capitolo_di().get(q["unita"])
+    return {"ancora": f"cap{cap[0]}", "testo": f"capitolo {cap[0]} «{cap[1]}»"} if cap else None
+
+
+def _righe_man(righe):
+    return [{"conto": c, "sez": z, "cent": int(round(float(v) * 100))} for c, z, v in righe]
+
+
+def sezione_di():
+    """Paragrafo del manuale in cui è svolta o spiegata ogni domanda (per il link dall'aiuto): {qid: (num, titolo)}."""
+    from .manuale_testo import PARTI
+    out, n = {}, 0
+    for p in PARTI:
+        for c in p["capitoli"]:
+            n += 1
+            for i, (titolo, _html, esempi) in enumerate(c["sezioni"], 1):
+                for qid in esempi:
+                    if isinstance(qid, str):
+                        out.setdefault(qid, (f"{n}.{i}", titolo))
+    return out
+
+
+def capitoli_unita(cod):
+    """Tutti i capitoli del manuale che trattano l'unità: [(n, titolo)]."""
+    from .manuale_testo import PARTI
+    out, n = [], 0
+    for p in PARTI:
+        for c in p["capitoli"]:
+            n += 1
+            if cod in c["unita"]:
+                out.append((n, c["titolo"]))
+    return out
+
+
+def capitolo_di():
+    """Primo capitolo che tratta ogni unità: {unità: (n, titolo)}."""
+    from .manuale_testo import PARTI
+    out, n = {}, 0
+    for p in PARTI:
+        for c in p["capitoli"]:
+            n += 1
+            for u in c["unita"]:
+                out.setdefault(u, (n, c["titolo"]))
+    return out
+
+
 def _manuale():
     """Trattato in ordine logico (manuale_testo.py) con le scritture corrette della banca come esempi."""
     from .manuale_testo import PARTI
@@ -194,16 +247,21 @@ def _manuale():
             for i, (titolo, html, esempi) in enumerate(c["sezioni"], 1):
                 es = []
                 for qid in esempi:
-                    q = QUESITI[qid]
                     k += 1
+                    if isinstance(qid, dict):   # scrittura svolta scritta nel manuale (non presa dalla banca)
+                        es.append({"n": k, "testo": qid["testo"], "righe": _righe_man(qid["righe"]), "spiegazione": qid["spiegazione"]})
+                        continue
+                    q = QUESITI[qid]
                     giusta = next(o for o in q["opzioni"] if o["ok"])
-                    es.append({"n": k, "testo": q["testo"], "righe": giusta["righe"], "spiegazione": q["spiegazione"]})
+                    es.append({"n": k, "testo": q["testo"], "righe": giusta["righe"], "spiegazione": q["spiegazione"], "qid": qid})
                     for o in q["opzioni"]:
                         if not o["ok"] and not o["perche"].startswith(generici) and o["perche"] not in visti:
                             visti.add(o["perche"])
                             errori.append(o["perche"])
                 sezioni.append({"num": f"{n}.{i}", "titolo": titolo, "html": Markup(html), "esempi": es})
-            caps.append({"n": n, "titolo": c["titolo"], "unita": c["unita"], "sezioni": sezioni, "errori": errori[:6]})
+            sap = [{"titolo": t, "doc": DOCUMENTI[d], "righe": _righe_man(DOCUMENTI[d]["righe"]),
+                    "italiano": [_righe_man(r) for r in ita], "nota": Markup(nota)} for d, t, ita, nota in CAPITOLI_SAP.get(c["titolo"], [])]
+            caps.append({"n": n, "titolo": c["titolo"], "unita": c["unita"], "sezioni": sezioni, "errori": errori[:6], "sap": sap})
         parti.append({"parte": p["parte"], "capitoli": caps})
     return parti, k
 
@@ -214,13 +272,13 @@ def manuale():
     for nome, nat in PIANO.items():
         gruppi.setdefault(nat, []).append(nome)
     parti, esempi = _manuale()
-    return render_template("ragioneria_quiz/manuale.html", parti=parti, esempi=esempi, gruppi=gruppi, NATURA=NATURA,
+    return render_template("ragioneria_quiz/manuale.html", parti=parti, esempi=esempi, gruppi=gruppi, NATURA=NATURA, ORDINE_NATURA=ORDINE_NATURA, REGOLA_NATURA=REGOLA_NATURA,
                            banca=riepilogo())
 
 
 @bp.get("/piano-dei-conti")
 def piano():
-    return render_template("ragioneria_quiz/piano.html", PIANO=PIANO, NATURA=NATURA)
+    return render_template("ragioneria_quiz/piano.html", PIANO=PIANO, NATURA=NATURA, ORDINE_NATURA=ORDINE_NATURA, REGOLA_NATURA=REGOLA_NATURA)
 
 
 # ── DOCENTE ──────────────────────────────────────────────────────────────────

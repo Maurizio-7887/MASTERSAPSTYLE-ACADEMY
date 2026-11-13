@@ -163,6 +163,19 @@ class Percorso(unittest.TestCase):
         tid2 = avvia(c, "ripasso")
         self.assertIn(q["id"], [x["id"] for x in prova(tid2)])
 
+    def test_aiuto_specifico_della_domanda_con_rimando_al_manuale(self):
+        from app.blueprints.ragioneria_quiz.banca.aiuti import AIUTI
+        c = nuovo_allievo("rq_aiuto")
+        tid = avvia(c, "allenamento", "Q15")
+        html = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0").get_data(as_text=True)
+        self.assertIn("Mi serve un aiuto su questa domanda", html)
+        c.post(f"/ragioneria-quiz/tentativo/{tid}/aiuto", data={"csrf": csrf(html), "n": 0})
+        h = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0&aiuto=1").get_data(as_text=True)
+        q = prova(tid)[0]
+        self.assertIn(str(escape(AIUTI[q["id"]])), h)
+        self.assertIn("Ripassa nel manuale", h)
+        self.assertIn("/ragioneria-quiz/manuale#", h)
+
     def test_limite_tentativi_e_concessione_docente(self):
         c = nuovo_allievo("rq_dario")
         for _ in range(2):
@@ -235,7 +248,11 @@ class Percorso(unittest.TestCase):
 class Manuale(unittest.TestCase):
     def test_manuale_completo_e_coerente_con_la_banca(self):
         from app.blueprints.ragioneria_quiz.manuale_testo import PARTI
-        usati = [q for p in PARTI for c in p["capitoli"] for s in c["sezioni"] for q in s[2]]
+        tutti = [q for p in PARTI for c in p["capitoli"] for s in c["sezioni"] for q in s[2]]
+        usati = [q for q in tutti if isinstance(q, str)]
+        liberi = [q for q in tutti if isinstance(q, dict)]   # scritture svolte scritte nel manuale: devono quadrare
+        for e in liberi:
+            self.assertEqual(round(sum(v for _c, z, v in e["righe"] if z == "D"), 2), round(sum(v for _c, z, v in e["righe"] if z == "A"), 2), e["testo"])
         self.assertEqual([q for q in usati if q not in QUESITI], [])
         self.assertTrue(all(QUESITI[q]["tipo"] == "scrittura" for q in usati))
         self.assertEqual(sum(len(p["capitoli"]) for p in PARTI), 20)
@@ -245,6 +262,22 @@ class Manuale(unittest.TestCase):
         h = c.get("/ragioneria-quiz/manuale").get_data(as_text=True)
         for t in ("Parte prima", "partita doppia", "Parte quinta", "La riapertura dei conti", "Capitolo 20"):
             self.assertIn(t, h)
+        # metodo italiano: ciclo completo delle scorte; gestionale SAP accanto, con i conti del simulatore
+        for t in ("la chiusura delle scorte finali", "la riapertura delle scorte", "Nel gestionale SAP e con il metodo italiano",
+                  "12 Magazzino ferro (materie prime)", "Variazione rimanenze materie prime", "Raccordo con il piano dei conti del gestionale SAP"):
+            self.assertIn(t, h)
+
+    def test_scritture_sap_del_manuale_quadrano(self):
+        from app.blueprints.ragioneria_quiz.scritture_sap import CAPITOLI, DOCUMENTI
+        for cap, voci in CAPITOLI.items():
+            for d, _t, ita, _n in voci:
+                for righe in [DOCUMENTI[d]["righe"]] + ita:
+                    self.assertEqual(round(sum(v for _c, z, v in righe if z == "D"), 2), round(sum(v for _c, z, v in righe if z == "A"), 2), (cap, d))
+
+    def test_ogni_domanda_ha_un_suggerimento_specifico(self):
+        from app.blueprints.ragioneria_quiz.banca.aiuti import AIUTI
+        self.assertEqual(set(AIUTI), set(QUESITI))
+        self.assertEqual(len(set(AIUTI.values())), len(AIUTI))   # nessun suggerimento generico ripetuto
 
 
 if __name__ == "__main__":

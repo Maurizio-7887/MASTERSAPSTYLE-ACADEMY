@@ -83,7 +83,9 @@ PARTI = [
 <li><b>conti patrimoniali</b>: attività, passività e patrimonio netto. Restano aperti da un anno all'altro e a fine esercizio confluiscono nello <b>Stato patrimoniale</b>;</li>
 <li><b>conti economici</b>: costi e ricavi. Misurano il reddito di un solo esercizio, a fine anno si chiudono nel <b>Conto economico</b> e ripartono da zero;</li>
 <li><b>conti di rettifica</b>: i fondi ammortamento e il fondo svalutazione crediti, che riducono indirettamente il valore di un'attività, e i conti che rettificano i ricavi come i resi su vendite;</li>
-<li><b>conti tecnici</b>: Conto economico, Stato patrimoniale finale e iniziale, variazioni delle rimanenze, usati nelle scritture di fine anno.</li>
+<li><b>variazioni delle rimanenze</b>: componenti economici di fine anno (rimanenze iniziali in Dare, finali in Avere), che entrano nel Conto economico;</li>
+<li><b>conti tecnici</b>: Conto economico, Stato patrimoniale finale e iniziale, usati solo per epilogo, chiusura e riapertura;</li>
+<li><b>rettifiche</b>: dei costi (resi, ribassi e abbuoni su acquisti, in Avere), dei ricavi (resi, ribassi e abbuoni su vendite, in Dare), delle attività (fondi ammortamento e svalutazione); le <b>perdite</b> hanno saldo Dare e riducono il patrimonio netto; <b>Erario c/IVA</b> può essere a credito o a debito secondo il saldo.</li>
 </ul>
 <p>L'elenco completo usato in questo manuale è nell'appendice.</p>
 """, []),
@@ -97,6 +99,10 @@ PARTI = [
 </ul>
 <p>Clienti e fornitori hanno un conto <b>generale</b> (Crediti v/clienti, Debiti v/fornitori) e un <b>partitario</b> per ciascuna controparte; la somma dei partitari è sempre uguale al saldo del conto generale.</p>
 """, ["Q02-12", "Q02-11"]),
+("Raccordo con il piano dei conti del gestionale SAP", """
+<p>Nell'esercitazione «Dicembre» i conti hanno un <b>codice</b>. La tabella collega i codici del gestionale ai conti del manuale e alla voce del bilancio civilistico (art. 2424 e 2425 c.c.). Dove c'è una lineetta il conto esiste solo perché il gestionale tiene il magazzino a valore (metodo permanente) o fa contabilità analitica.</p>
+<div style="overflow-x:auto"><table class="rq-man-tab"><tr><th>Gestionale SAP</th><th>Manuale (metodo italiano)</th><th>Natura · voce di bilancio</th></tr><tr><td>01 Impianti e macchinari</td><td>Impianti e macchinari</td><td>Attività · B.II.2</td></tr><tr><td>02 Fondo ammortamento impianti e macchinari</td><td>F.do amm. impianti e macchinari</td><td>Rettifica di attività</td></tr><tr><td>06 Risconti attivi</td><td>Risconti attivi</td><td>Attività · D</td></tr><tr><td>07 Magazzino semilavorati</td><td>Prodotti in lavorazione e semilavorati</td><td>Attività · C.I.2</td></tr><tr><td>08 Crediti verso soci</td><td>Soci c/sottoscrizione</td><td>Attività · A</td></tr><tr><td>10 Banca c/c</td><td>Banca c/c</td><td>Attività · C.IV.1</td></tr><tr><td>11 Crediti verso clienti</td><td>Crediti v/clienti</td><td>Attività · C.II.1</td></tr><tr><td>12 Magazzino ferro (materie prime)</td><td>Materie prime</td><td>Attività · C.I.1</td></tr><tr><td>13 Magazzino prodotti finiti</td><td>Prodotti finiti</td><td>Attività · C.I.4</td></tr><tr><td>14 IVA a credito</td><td>IVA ns/credito</td><td>Attività · C.II.5-bis</td></tr><tr><td>20 Debiti verso fornitori</td><td>Debiti v/fornitori</td><td>Passività · D.7</td></tr><tr><td>21 IVA a debito</td><td>IVA ns/debito</td><td>Passività · D.12</td></tr><tr><td>22 Fatture da ricevere (WE/RE)</td><td>Fatture da ricevere</td><td>Passività · D.7 (nel gestionale fa da ponte tra MIGO e MIRO)</td></tr><tr><td>25 Erario c/IVA</td><td>Erario c/IVA</td><td>a credito o a debito secondo il saldo</td></tr><tr><td>27 Debiti verso dipendenti</td><td>Personale c/retribuzioni</td><td>Passività · D.14</td></tr><tr><td>28 Debiti verso INPS · 24 INAIL</td><td>Istituti previdenziali</td><td>Passività · D.13</td></tr><tr><td>29 Erario c/ritenute</td><td>Erario c/ritenute</td><td>Passività · D.12</td></tr><tr><td>30 Capitale e riserve · 33 Riserva legale</td><td>Capitale sociale · Riserva legale</td><td>Patrimonio netto · A.I, A.IV</td></tr><tr><td>31 Fondo TFR</td><td>Debiti per TFR</td><td>Passività · C</td></tr><tr><td>32 Utile (perdita) d'esercizio</td><td>Utile d'esercizio / Perdita d'esercizio</td><td>Patrimonio netto · A.IX</td></tr><tr><td>37.10 Mutui passivi</td><td>Mutui passivi</td><td>Passività · D.4</td></tr><tr><td>38 Banca c/anticipi su fatture</td><td>Banche c/anticipi su fatture</td><td>Passività · D.4</td></tr><tr><td>39 Ratei passivi</td><td>Ratei passivi</td><td>Passività · E</td></tr><tr><td>40 Ricavi di vendita · 47 Sconti su vendite</td><td>Prodotti c/vendite (al netto degli sconti)</td><td>Ricavo · A.1</td></tr><tr><td>41 Costo del venduto a standard</td><td>— (nel metodo italiano: acquisti ± variazione rimanenze)</td><td>Costo · nel CE civilistico si riparte per natura</td></tr><tr><td>50 Ammortamenti</td><td>Ammortamento …</td><td>Costo · B.10</td></tr><tr><td>54 Consulenze e servizi</td><td>Consulenze</td><td>Costo · B.7</td></tr><tr><td>63 Differenze prezzo materiali</td><td>— (non esiste: il ferro è a costo effettivo)</td><td>Costo · B.6</td></tr><tr><td>65 Differenze inventariali · 69 Rottamazioni</td><td>— (entrano nel valore delle rimanenze finali)</td><td>Costo · B.11 / B.14</td></tr><tr><td>70 Consumi di materie prime</td><td>— (acquisti ± variazione rimanenze)</td><td>Costo · B.6 e B.11</td></tr><tr><td>72 / 75 Attività addebitate e accreditate</td><td>— (contabilità analitica)</td><td>si compensano: non cambiano l'utile</td></tr><tr><td>80 · 81 · 82 Salari, oneri sociali, TFR</td><td>Salari e stipendi · Oneri sociali · TFR</td><td>Costo · B.9</td></tr><tr><td>90 · 91 · 92</td><td>Conto economico · Stato patrimoniale finale · Stato patrimoniale iniziale</td><td>Conti tecnici</td></tr></table></div>
+""", []),
 ]},
 
 {"titolo": "I libri contabili: giornale, mastro, partitari e bilancio di verifica", "unita": ["Q03", "Q20"], "sezioni": [
@@ -160,18 +166,18 @@ PARTI = [
 
 {"titolo": "Gli acquisti e i rapporti con i fornitori", "unita": ["Q05"], "sezioni": [
 ("La fattura di acquisto", """
-<p>Con la fattura del fornitore nascono il <b>costo</b> (per natura: merci, servizi, utenze), l'<b>IVA a credito</b> e il <b>debito</b> verso il fornitore per il totale.</p>
+<p>Con la fattura del fornitore si registrano il <b>costo</b> (per natura: merci, servizi, utenze), l'<b>IVA a credito</b> e il <b>debito</b> verso il fornitore per il totale. Attenzione: la fattura è il documento, ma la <b>competenza</b> dipende dal fatto economico. Un ordine non è ancora un costo; per i beni conta il passaggio sostanziale di rischi e benefici (di norma la consegna), per i servizi il momento in cui sono resi (OIC 19, OIC 34). Se il bene è arrivato a dicembre e la fattura arriva a gennaio, il costo è di dicembre (Fatture da ricevere, capitolo 18).</p>
 <p class="rq-man-formula">Costo (D) + IVA ns/credito (D) = Debiti v/fornitori (A)</p>
 <p>Il costo nasce con la fattura o con la consegna, anche se il pagamento avviene dopo: principio di competenza.</p>
 """, ["Q05-01", "Q05-11"]),
 ("Resi e note di credito del fornitore", """
-<p>Se restituiamo merce o il fornitore riduce il prezzo, emette una <b>nota di credito</b>: il debito diminuisce (Dare) e si rettificano costo e IVA a credito (Avere). Il conto «Resi su acquisti» rettifica in diminuzione gli acquisti.</p>
+<p>Se restituiamo merce o il fornitore riduce il prezzo, emette una <b>nota di credito</b>: il debito diminuisce (Dare) e si rettificano costo e IVA a credito (Avere). Il conto «Resi su acquisti» rettifica in diminuzione gli acquisti: non è un ricavo, e nel Conto economico gli acquisti si espongono al netto dei resi (OIC 12).</p>
 """, ["Q05-04"]),
 ("Acconti ai fornitori", """
 <p>Se paghiamo prima della consegna e riceviamo una fattura d'acconto, l'anticipo è un <b>credito transitorio</b> verso il fornitore (Fornitori c/anticipi) con la sua IVA. Alla fattura finale si registra il costo intero, l'IVA solo sulla parte non ancora fatturata e si chiude l'anticipo: resta da pagare il residuo.</p>
 """, ["Q05-05", "Q05-06"]),
 ("Abbuoni ottenuti", """
-<p>L'abbuono concesso dal fornitore dopo la fattura riduce il debito (o entra in banca se la fattura era già pagata) ed è un componente positivo: <b>Ribassi e abbuoni attivi</b>.</p>
+<p>L'abbuono concesso dal fornitore dopo la fattura riduce il debito (o entra in banca se la fattura era già pagata) e si registra in Avere in <b>Ribassi e abbuoni attivi</b>: è una rettifica del costo d'acquisto, non un ricavo autonomo. Gli sconti di natura finanziaria (per pagamento anticipato) sono un'altra cosa e stanno nella gestione finanziaria.</p>
 """, ["Q05-07"]),
 ("Registrazioni doppie", """
 <p>Una fattura registrata due volte raddoppia costo, IVA detraibile e debito. Si corregge con lo storno della seconda registrazione: Debiti v/fornitori in Dare, costo e IVA in Avere.</p>
@@ -180,7 +186,7 @@ PARTI = [
 
 {"titolo": "Le vendite e i rapporti con i clienti", "unita": ["Q06"], "sezioni": [
 ("La fattura di vendita", """
-<p>Con la fattura al cliente nascono il <b>credito</b> per il totale, il <b>ricavo</b> per l'imponibile e l'<b>IVA a debito</b>. Se il cliente paga subito, al posto del credito si muove la cassa o la banca.</p>
+<p>Con la fattura al cliente si registrano il <b>credito</b> per il totale, il <b>ricavo</b> per l'imponibile e l'<b>IVA a debito</b>. Se il cliente paga subito, al posto del credito si muove la cassa o la banca. Il ricavo dei beni è di competenza dell'esercizio della consegna (passaggio di rischi e benefici, OIC 34), non necessariamente di quello della fattura; un acconto ricevuto non è un ricavo.</p>
 <p class="rq-man-formula">Crediti v/clienti (D) = Merci c/vendite (A) + IVA ns/debito (A)</p>
 <p>Il ricavo nasce con la vendita, non con l'incasso.</p>
 """, ["Q06-01", "Q06-02"]),
@@ -253,7 +259,7 @@ PARTI = [
 """, ["Q05-03", "Q03-12"]),
 ("Il costo da iscrivere", """
 <p>Il cespite si iscrive al <b>costo d'acquisto più gli oneri accessori</b> necessari a renderlo utilizzabile: trasporto, montaggio, collaudo. Non fanno parte del costo l'IVA detraibile, le manutenzioni ordinarie successive e gli interessi del finanziamento degli anni seguenti.</p>
-<p>L'ammortamento parte dall'<b>entrata in funzione</b> del bene, non dalla data della fattura né dal pagamento.</p>
+<p>L'ammortamento parte da quando il bene è <b>disponibile e pronto per l'uso</b>, non dalla data della fattura né dal pagamento (OIC 16). La quota dipende da costo ammortizzabile, valore residuo e vita utile. La <b>metà dell'aliquota</b> nel primo anno è un'approssimazione ammessa solo se non si discosta molto dalla quota effettiva: per un bene pronto il 1° dicembre la quota corretta è un mese, non sei. L'ammortamento civilistico e quello deducibile fiscalmente sono due calcoli distinti.</p>
 """, ["Q13-02", "Q13-10"]),
 ]},
 
@@ -327,10 +333,50 @@ PARTI = [
 <p>Il magazzino si misura in <b>quantità</b> e in <b>valore</b>: quantità × costo unitario. Un trasferimento tra depositi cambia l'ubicazione, non il valore totale. Le differenze tra inventario fisico e giacenza a sistema si rettificano: prevale la conta fisica.</p>
 <p class="rq-man-formula">120 pezzi × 5,50 € = 660 €; mancano 5 pezzi da 4 € → differenza inventariale 20 €</p>
 """, []),
-("Metodo periodico e metodo permanente", """
-<p>Con il <b>metodo periodico</b> gli acquisti vanno a costo durante l'anno e a fine anno le rimanenze finali rettificano il costo con le «variazioni delle rimanenze» (capitolo 18).</p>
-<p class="rq-man-formula">Costo del venduto = rimanenze iniziali + acquisti − rimanenze finali (2.000 + 10.000 − 3.000 = 9.000)</p>
-<p>Con il <b>metodo permanente</b> il gestionale registra a valore ogni entrata e uscita: le scorte sono già in contabilità e non si iscrivono una seconda volta a fine anno. Rimanenze finali più alte, a parità di tutto il resto, aumentano l'utile.</p>
+("Due modi di tenere il magazzino in contabilità", """
+<table class="rq-man-tab"><tr><th></th><th>Metodo italiano (periodico) · quello dei quiz</th><th>Gestionale SAP (permanente) · quello dell'esercitazione</th></tr>
+<tr><td>Acquisto</td><td>Merci c/acquisti (costo) in Dare</td><td>MIGO 101: 12 Magazzino ferro (attività) in Dare</td></tr>
+<tr><td>Consumo / vendita</td><td>nessuna scrittura</td><td>MIGO 261 o uscita 601: il magazzino scende, nasce il costo (70 Consumi, 41 Costo del venduto)</td></tr>
+<tr><td>Prodotto finito</td><td>nessuna scrittura</td><td>MIGO 101 da produzione: 13 Magazzino prodotti finiti in Dare</td></tr>
+<tr><td>31 dicembre</td><td>si conta il magazzino e si rileva il valore con «Variazione rimanenze»</td><td>il saldo dei conti 12, 07, 13 è già la rimanenza: nessuna rilevazione</td></tr>
+<tr><td>Chiusura e riapertura</td><td>Merci nello Stato patrimoniale finale; il 1/1 riapertura e giro a costo</td><td>12, 07, 13 nello Stato patrimoniale finale; il 1/1 solo riapertura</td></tr></table>
+<p class="rq-man-formula">Costo del venduto (periodico) = rimanenze iniziali + acquisti − rimanenze finali (2.000 + 10.000 − 3.000 = 9.000)</p>
+<p>I due metodi arrivano allo <b>stesso utile</b> e allo <b>stesso magazzino</b> di fine anno: cambia solo <b>quando</b> nasce il costo. Rimanenze finali più alte, a parità di tutto il resto, aumentano l'utile.</p>
+""", []),
+("Metodo italiano: la chiusura delle scorte finali (31/12)", """
+<p>Con il metodo periodico gli acquisti dell'anno sono tutti tra i costi. Il 31 dicembre si fa l'<b>inventario</b> (quantità × costo) e si eseguono <b>tre scritture</b>, sempre in quest'ordine:</p>
+<ol><li><b>Rilevazione</b> (assestamento): Merci in Dare, Variazione rimanenze merci in Avere. Le merci non vendute diventano un'attività e smettono di pesare sui costi.</li>
+<li><b>Epilogo</b>: Variazione rimanenze merci in Dare, Conto economico in Avere. Il conto della variazione si azzera e il suo valore entra nel reddito.</li>
+<li><b>Chiusura patrimoniale</b>: Stato patrimoniale finale in Dare, Merci in Avere. Le merci, un'attività con saldo dare, si chiudono in Avere.</li></ol>
+<p>Lo stesso schema vale per le <b>materie prime</b> (Materie prime / Variazione rimanenze materie prime) e per i <b>prodotti finiti</b> (Prodotti finiti / Variazione rimanenze prodotti finiti): i prodotti che fabbrichi non sono merci.</p>
+""", ["Q15-01",
+      {"testo": "31/12, metodo periodico: dopo la rilevazione, chiudi nel Conto economico la variazione delle rimanenze di merci di 3.000 €.",
+       "righe": [("Variazione rimanenze merci", "D", 3000), ("Conto economico", "A", 3000)],
+       "spiegazione": "Epilogo: la variazione delle rimanenze ha saldo avere e si chiude in Dare; nel Conto economico va in Avere, tra i componenti positivi."},
+      {"testo": "31/12, chiusura patrimoniale: chiudi il conto Merci (saldo dare 3.000 €).",
+       "righe": [("Stato patrimoniale finale", "D", 3000), ("Merci", "A", 3000)],
+       "spiegazione": "Le merci sono un'attività: si chiudono in Avere e passano in Dare dello Stato patrimoniale finale."},
+      "Q15-03"]),
+("Metodo italiano: la riapertura delle scorte (1/1)", """
+<p>Il 1° gennaio le scritture sono <b>due</b>, e l'ordine conta:</p>
+<ol><li><b>Riapertura</b>: Merci in Dare, Stato patrimoniale iniziale in Avere. È il giro opposto della chiusura, come per la banca o i debiti.</li>
+<li><b>Giro a costo delle rimanenze iniziali</b>: Variazione rimanenze merci in Dare, Merci in Avere. Quelle merci saranno vendute nel nuovo anno: diventano costo del nuovo anno e il conto Merci torna a zero fino al prossimo inventario.</li></ol>
+<p>A fine anno il conto Variazione rimanenze ha le <b>iniziali in Dare</b> e le <b>finali in Avere</b>: il suo saldo è proprio la variazione. Iniziali 2.000, finali 3.000 → saldo avere 1.000, il costo del venduto scende di 1.000.</p>
+""", [{"testo": "1/1: riapri il conto Merci, chiuso al 31/12 con 3.000 €.",
+       "righe": [("Merci", "D", 3000), ("Stato patrimoniale iniziale", "A", 3000)],
+       "spiegazione": "Giro opposto alla chiusura: l'attività torna con il suo saldo dare."},
+      "Q15-02"]),
+("Nel gestionale SAP: il magazzino a valore, movimento per movimento", """
+<p>Nell'esercitazione «Dicembre» il gestionale registra <b>ogni movimento di magazzino a valore</b> (metodo permanente, al costo standard):</p>
+<table class="rq-man-tab"><tr><th>Movimento</th><th>Transazione</th><th>Dare</th><th>Avere</th></tr>
+<tr><td>Entrata del ferro dal fornitore</td><td>MIGO 101</td><td>12 Magazzino ferro (a standard) · 63 Differenze prezzo</td><td>22 Fatture da ricevere (WE/RE)</td></tr>
+<tr><td>Fattura del fornitore</td><td>MIRO</td><td>22 Fatture da ricevere · 14 IVA a credito</td><td>20 Debiti verso fornitori</td></tr>
+<tr><td>Ferro all'ordine di produzione</td><td>MIGO 261</td><td>70 Consumi di materie prime</td><td>12 Magazzino ferro</td></tr>
+<tr><td>Ore lavorate sull'ordine</td><td>CO11N</td><td>72 Attività addebitate agli ordini</td><td>75 Attività accreditate dai centri</td></tr>
+<tr><td>Transenne finite a magazzino</td><td>MIGO 101 da produzione</td><td>13 Magazzino prodotti finiti</td><td>73 Output di produzione</td></tr>
+<tr><td>Consegna al cliente</td><td>uscita merci 601</td><td>41 Costo del venduto</td><td>13 Magazzino prodotti finiti</td></tr>
+<tr><td>Rottamazione / differenza inventariale</td><td>555 / 711</td><td>69 Rottamazioni · 65 Differenze inventariali</td><td>12 o 07 Magazzino</td></tr></table>
+<p>Per questo al 31/12 <b>non si fa</b> la scrittura «Merci / Variazione rimanenze»: il saldo dei conti 12, 07 e 13 è già la rimanenza (ferro 703 €, semilavorati 277,40 €). Si chiudono nello Stato patrimoniale finale (91) e il 1/1 si riaprono dallo Stato patrimoniale iniziale (92), senza giro a costo: il costo nascerà al prossimo 261 o alla prossima consegna. Le scritture complete sono nel riquadro «Nel gestionale SAP» qui sotto.</p>
 """, []),
 ]},
 ]},
@@ -351,10 +397,10 @@ PARTI = [
 """, []),
 ("Fatture da ricevere e da emettere", """
 <p>Se a dicembre abbiamo ricevuto un bene o un servizio ma la fattura arriverà a gennaio, il costo è dell'anno: si rileva in contropartita a <b>Fatture da ricevere</b> (debito), senza IVA, che nascerà con la fattura. All'arrivo della fattura si chiude il debito stimato senza registrare di nuovo il costo.</p>
-<p>Simmetricamente, la merce consegnata e non ancora fatturata genera un ricavo dell'anno in contropartita a <b>Fatture da emettere</b> (credito).</p>
+<p>Simmetricamente, la merce consegnata e non ancora fatturata genera un ricavo dell'anno in contropartita a <b>Fatture da emettere</b> (credito). Per i <b>beni consegnati con DDT</b> a dicembre e fatturati in modo <b>differito</b> entro il 15 gennaio, l'IVA è comunque esigibile nel mese della consegna e va nella liquidazione di dicembre: si rileva subito anche l'IVA a debito. La fattura di gennaio riclassifica il credito (Crediti v/clienti in Dare, Fatture da emettere in Avere) senza registrare di nuovo ricavo e IVA. Per gli acquisti non c'è simmetria: l'IVA si detrae solo con la fattura ricevuta e registrata, per questo Fatture da ricevere è senza IVA.</p>
 """, ["Q17-01", "Q17-02"]),
 ("I ratei", """
-<p>Il <b>rateo</b> rileva un costo o un ricavo <b>maturato</b> nell'anno che avrà la sua manifestazione finanziaria nell'anno successivo. Nulla è ancora stato registrato: il rateo aggiunge la parte di competenza.</p>
+<p>Il <b>rateo</b> rileva la quota maturata nell'anno di un costo o di un ricavo <b>comune a due o più esercizi</b>, il cui importo <b>varia con il tempo</b> (interessi, fitti, canoni) e la cui manifestazione finanziaria avverrà nell'anno successivo. Nulla è ancora stato registrato: il rateo aggiunge la parte di competenza (OIC 18). Non ogni costo da pagare è un rateo: un bene o servizio già ricevuto in attesa della fattura va in Fatture da ricevere; un debito certo è un debito; una passività incerta è un fondo.</p>
 <ul>
 <li><b>Rateo passivo</b>: costo maturato da pagare (interessi del mutuo, fitto pagato posticipato). È un debito.</li>
 <li><b>Rateo attivo</b>: ricavo maturato da incassare (interessi attivi liquidati in seguito). È un credito.</li>
@@ -372,7 +418,7 @@ PARTI = [
 """, ["Q16-01", "Q16-02", "Q11-03"]),
 ("Gli ammortamenti", """
 <p>L'ammortamento ripartisce il costo dei cespiti sugli anni di utilizzo. La quota dell'anno è un costo (Ammortamento) e si accumula nel fondo ammortamento, che riduce indirettamente il valore del bene: il cespite resta al costo storico.</p>
-<p class="rq-man-formula">12.800 × 15% ÷ 2 (primo anno, ipotesi del caso) = 960</p>
+<p class="rq-man-formula">12.800 × 15% ÷ 2 (primo anno, ipotesi del caso: bene in uso da metà anno) = 960 · bene in uso dal 1° dicembre: 12.800 × 15% × 1/12 = 160</p>
 <p>L'ammortamento è un costo che non comporta uscite di denaro; il fondo non è un deposito in banca né un debito.</p>
 """, ["Q13-01", "Q13-08"]),
 ("Svalutazione e perdite su crediti", """
@@ -384,8 +430,9 @@ PARTI = [
 <p>La quota di TFR maturata nell'anno è un costo di competenza e aumenta il debito verso i dipendenti; non si paga oggi.</p>
 """, ["Q09-05"]),
 ("Le rimanenze finali", """
-<p>Con il metodo periodico le merci e i prodotti non venduti si iscrivono tra le attività e rettificano i costi dell'anno attraverso le variazioni delle rimanenze. I prodotti fabbricati dall'azienda sono prodotti finiti, non merci.</p>
-""", ["Q15-01", "Q15-03"]),
+<p>Con il metodo periodico le merci e i prodotti non venduti si iscrivono tra le attività e rettificano i costi dell'anno attraverso le variazioni delle rimanenze: <b>Merci (o Materie prime, Prodotti finiti) in Dare, Variazione rimanenze in Avere</b>, per il valore dell'inventario. È una scrittura di rettifica: toglie dai costi dell'anno quello che non è stato venduto né consumato. I prodotti fabbricati dall'azienda sono prodotti finiti, non merci.</p>
+<p>Il ciclo completo (rilevazione, epilogo, chiusura, riapertura e giro a costo) è nel capitolo 17. Nel gestionale SAP questa scrittura <b>non si fa</b>: il magazzino è già a valore nei conti 12, 07 e 13.</p>
+""", []),
 ("Le imposte dell'esercizio", """
 <p>Le imposte sul reddito di competenza dell'anno si rilevano come costo (Imposte dell'esercizio) in contropartita a Debiti tributari. Gli acconti già versati si compensano con il debito: resta da pagare il saldo, che si versa l'anno successivo.</p>
 <p class="rq-man-formula">Imposta 3.000 − acconti 2.200 = saldo 800</p>
@@ -416,6 +463,7 @@ PARTI = [
 """, ["Q19-03", "Q19-04"]),
 ("La chiusura dei conti patrimoniali", """
 <p>Le <b>attività</b> (saldo dare) si chiudono in Avere, con lo Stato patrimoniale finale in Dare; le <b>passività</b> e il <b>patrimonio netto</b>, compreso l'utile, si chiudono in Dare, con lo Stato patrimoniale finale in Avere. I conti patrimoniali non passano mai dal Conto economico.</p>
+<p>Le <b>rimanenze</b> sono attività come le altre: Merci (o Materie prime, Prodotti finiti) si chiudono in Avere verso lo Stato patrimoniale finale, mentre Variazione rimanenze, che è un componente di reddito, è già stato chiuso nell'epilogo. Nel gestionale SAP si chiudono allo stesso modo i conti di magazzino 12, 07 e 13 (conto 91).</p>
 """, ["Q19-05", "Q19-06"]),
 ("Il bilancio d'esercizio", """
 <p>Dai conti chiusi si redige il <b>bilancio d'esercizio</b>: Stato patrimoniale, Conto economico, nota integrativa (e, quando richiesto, rendiconto finanziario). Nello Stato patrimoniale i debiti si distinguono tra quelli esigibili entro e oltre l'esercizio successivo; i crediti si espongono al netto del fondo svalutazione, i cespiti al netto dei fondi ammortamento.</p>
@@ -430,11 +478,11 @@ PARTI = [
 ("Lo storno delle scritture di assestamento", """
 <p>Le rettifiche di fine anno si riversano nel nuovo esercizio:</p>
 <ul>
-<li>le <b>rimanenze iniziali</b> tornano a costo (Variazione rimanenze in Dare, Merci in Avere);</li>
+<li>le <b>rimanenze</b>: prima si riapre il conto Merci dallo Stato patrimoniale iniziale, poi le rimanenze iniziali tornano a costo (Variazione rimanenze in Dare, Merci in Avere), come al capitolo 17; nel gestionale SAP c'è solo la riapertura dei conti 12, 07, 13;</li>
 <li>i <b>risconti</b> riportano nel nuovo anno il costo o il ricavo rinviato;</li>
 <li>i <b>ratei</b> e le <b>fatture da ricevere/emettere</b> si chiudono quando arriva il pagamento, l'incasso o il documento, senza registrare di nuovo la parte già rilevata: alla rata del mutuo, ad esempio, Ratei passivi in Dare per gli interessi dell'anno precedente e Interessi in Dare solo per il nuovo periodo.</li>
 </ul>
-""", ["Q15-02", "Q16-09", "Q11-11"]),
+""", ["Q16-09", "Q11-11"]),
 ("La destinazione dell'utile", """
 <p>Dopo l'approvazione del bilancio l'assemblea delibera la destinazione dell'utile:</p>
 <ul>
