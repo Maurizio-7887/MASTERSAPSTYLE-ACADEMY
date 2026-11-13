@@ -9,7 +9,7 @@ PARTI = [
 # ══════════════════════════════════════════════════════════════════════════════
 {"parte": "Parte prima — I fondamenti", "capitoli": [
 
-{"titolo": "L'azienda, il patrimonio e il reddito", "unita": ["Q01", "Q04"], "sezioni": [
+{"titolo": "L'azienda, il patrimonio e il reddito", "unita": ["C01"], "sezioni": [
 ("Che cosa misura la contabilità", """
 <p>L'azienda è un'organizzazione di persone e di beni che produce o scambia beni e servizi per soddisfare dei bisogni e ottenere un guadagno. Per governarla occorre sapere, in ogni momento, <b>che cosa possiede, che cosa deve e quanto ha guadagnato</b>. La contabilità generale (o contabilità «in partita doppia») è il sistema che registra tutti i fatti di gestione per rispondere a queste tre domande.</p>
 <p>I fatti che si registrano sono le <b>operazioni con l'esterno</b>: acquisti, vendite, pagamenti, incassi, stipendi, finanziamenti, imposte. A fine anno si aggiungono le <b>scritture di assestamento</b>, che adeguano i conti al principio di competenza (parte quarta).</p>
@@ -45,7 +45,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "Il conto e il metodo della partita doppia", "unita": ["Q01"], "sezioni": [
+{"titolo": "Il conto e il metodo della partita doppia", "unita": ["C02"], "sezioni": [
 ("Il conto", """
 <p>Il <b>conto</b> è lo strumento che registra le variazioni di un singolo elemento: la banca, i crediti verso clienti, il costo dell'energia. Ha due sezioni affiancate: a sinistra il <b>Dare</b>, a destra l'<b>Avere</b>. La differenza tra il totale Dare e il totale Avere è il <b>saldo</b>: «saldo dare» se prevale il Dare, «saldo avere» se prevale l'Avere.</p>
 """, []),
@@ -76,7 +76,7 @@ PARTI = [
 """, ["Q01-09", "Q01-10", "Q01-11", "Q01-12"]),
 ]},
 
-{"titolo": "Il piano dei conti", "unita": ["Q02"], "sezioni": [
+{"titolo": "Il piano dei conti", "unita": ["C03"], "sezioni": [
 ("Struttura del piano dei conti", """
 <p>Il <b>piano dei conti</b> è l'elenco ordinato dei conti che l'azienda utilizza. Si divide in:</p>
 <ul>
@@ -105,7 +105,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "I libri contabili: giornale, mastro, partitari e bilancio di verifica", "unita": ["Q03", "Q20"], "sezioni": [
+{"titolo": "I libri contabili: giornale, mastro, partitari e bilancio di verifica", "unita": ["C04"], "sezioni": [
 ("Quattro modi di registrare le stesse operazioni", """
 <p>Le regole della partita doppia sono le stesse ovunque; cambia <b>dove</b> e <b>quando</b> il programma scrive. In questo manuale ogni operazione è mostrata in quattro modi:</p>
 <div style="overflow-x:auto"><table class="rq-man-tab"><tr><th></th><th>📗 Metodo italiano (manuale)</th><th>🟧 ad hoc Revolution (Zucchetti)</th><th>🟦 Dynamics 365 Business Central (localizzazione italiana)</th><th>🟪 SAP S/4HANA (esercitazione)</th></tr>
@@ -144,7 +144,7 @@ PARTI = [
 # ══════════════════════════════════════════════════════════════════════════════
 {"parte": "Parte seconda — La costituzione dell'azienda", "capitoli": [
 
-{"titolo": "La costituzione e il capitale sociale", "unita": ["Q04"], "sezioni": [
+{"titolo": "La costituzione e il capitale sociale", "unita": ["C05"], "sezioni": [
 ("Sottoscrizione e versamento", """
 <p>Con l'atto costitutivo i soci <b>sottoscrivono</b> il capitale, cioè si impegnano a conferirlo. Nasce un credito della società verso i soci e il capitale sociale, voce del patrimonio netto.</p>
 <p>Con il <b>versamento</b> il denaro entra in banca e il credito verso i soci si chiude. Se sottoscrizione e versamento sono contestuali, la scrittura si fa in un solo passaggio: Banca c/c a Capitale sociale.</p>
@@ -160,7 +160,7 @@ PARTI = [
 # ══════════════════════════════════════════════════════════════════════════════
 {"parte": "Parte terza — Le operazioni di gestione", "capitoli": [
 
-{"titolo": "Il meccanismo dell'IVA", "unita": ["Q08"], "sezioni": [
+{"titolo": "Il meccanismo dell'IVA", "unita": ["C06"], "sezioni": [
 ("IVA a credito e IVA a debito", """
 <p>L'IVA è un'imposta sui consumi che l'azienda <b>incassa dai clienti per conto dello Stato</b> e <b>paga ai fornitori</b> sui propri acquisti.</p>
 <ul>
@@ -175,7 +175,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "Gli acquisti e i rapporti con i fornitori", "unita": ["Q05"], "sezioni": [
+{"titolo": "Gli acquisti e i rapporti con i fornitori", "unita": ["C07"], "sezioni": [
 ("La fattura di acquisto", """
 <p>Con la fattura del fornitore si registrano il <b>costo</b> (per natura: merci, servizi, utenze), l'<b>IVA a credito</b> e il <b>debito</b> verso il fornitore per il totale. Attenzione: la fattura è il documento, ma la <b>competenza</b> dipende dal fatto economico. Un ordine non è ancora un costo; per i beni conta il passaggio sostanziale di rischi e benefici (di norma la consegna), per i servizi il momento in cui sono resi (OIC 19, OIC 34). Se il bene è arrivato a dicembre e la fattura arriva a gennaio, il costo è di dicembre (Fatture da ricevere, capitolo 18).</p>
 <p class="rq-man-formula">Costo (D) + IVA ns/credito (D) = Debiti v/fornitori (A)</p>
@@ -195,7 +195,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "Le vendite e i rapporti con i clienti", "unita": ["Q06"], "sezioni": [
+{"titolo": "Le vendite e i rapporti con i clienti", "unita": ["C08"], "sezioni": [
 ("La fattura di vendita", """
 <p>Con la fattura al cliente si registrano il <b>credito</b> per il totale, il <b>ricavo</b> per l'imponibile e l'<b>IVA a debito</b>. Se il cliente paga subito, al posto del credito si muove la cassa o la banca. Il ricavo dei beni è di competenza dell'esercizio della consegna (passaggio di rischi e benefici, OIC 34), non necessariamente di quello della fattura; un acconto ricevuto non è un ricavo.</p>
 <p class="rq-man-formula">Crediti v/clienti (D) = Merci c/vendite (A) + IVA ns/debito (A)</p>
@@ -209,7 +209,7 @@ PARTI = [
 """, ["Q06-04", "Q06-08"]),
 ]},
 
-{"titolo": "Il regolamento: incassi, pagamenti, cassa e banca", "unita": ["Q07"], "sezioni": [
+{"titolo": "Il regolamento: incassi, pagamenti, cassa e banca", "unita": ["C09"], "sezioni": [
 ("Incassi e pagamenti", """
 <p>Incassi e pagamenti sono operazioni <b>solo finanziarie</b>: non creano costi né ricavi.</p>
 <ul>
@@ -229,7 +229,7 @@ PARTI = [
 """, ["Q07-05"]),
 ]},
 
-{"titolo": "La liquidazione e il versamento dell'IVA", "unita": ["Q08"], "sezioni": [
+{"titolo": "La liquidazione e il versamento dell'IVA", "unita": ["C10"], "sezioni": [
 ("La liquidazione periodica", """
 <p>Alla fine del periodo (mese o trimestre) si confrontano IVA a debito e IVA a credito. I due conti si chiudono e la differenza passa in <b>Erario c/IVA</b>:</p>
 <ul>
@@ -249,7 +249,7 @@ PARTI = [
 """, ["Q08-05"]),
 ]},
 
-{"titolo": "Il personale", "unita": ["Q09"], "sezioni": [
+{"titolo": "Il personale", "unita": ["C11"], "sezioni": [
 ("Il costo del lavoro e la busta paga", """
 <p>Il costo del lavoro per l'azienda è la <b>retribuzione lorda</b> (Salari e stipendi) più i <b>contributi a carico dell'azienda</b> (Oneri sociali).</p>
 <p>Dal lordo l'azienda trattiene l'<b>IRPEF</b> (come sostituto d'imposta) e i <b>contributi a carico del dipendente</b>: diventano debiti verso l'Erario (Erario c/ritenute) e verso gli enti previdenziali (Istituti previdenziali). Al dipendente spetta il <b>netto</b> (Personale c/retribuzioni).</p>
@@ -264,7 +264,7 @@ PARTI = [
 """, ["Q09-11"]),
 ]},
 
-{"titolo": "I beni strumentali: acquisto e costo", "unita": ["Q13"], "sezioni": [
+{"titolo": "I beni strumentali: acquisto e costo", "unita": ["C12"], "sezioni": [
 ("Le immobilizzazioni materiali", """
 <p>I beni destinati a restare in azienda per più esercizi (impianti e macchinari, automezzi, arredamento) sono <b>immobilizzazioni</b>. Si iscrivono nell'attivo e il loro costo si distribuisce negli anni di utilizzo con l'<b>ammortamento</b> (capitolo 18).</p>
 """, ["Q05-03", "Q03-12"]),
@@ -274,7 +274,7 @@ PARTI = [
 """, ["Q13-02", "Q13-10"]),
 ]},
 
-{"titolo": "Il leasing", "unita": ["Q11"], "sezioni": [
+{"titolo": "Il leasing", "unita": ["C13"], "sezioni": [
 ("Il leasing con il metodo patrimoniale", """
 <p>Con il leasing l'azienda usa un bene che resta di proprietà della società di leasing, pagando dei canoni, con la facoltà di riscattarlo alla fine. Nei bilanci redatti con i principi contabili italiani (OIC) si usa il <b>metodo patrimoniale</b>:</p>
 <ul>
@@ -288,7 +288,7 @@ PARTI = [
 """, ["Q11-04", "Q11-02", "Q11-01", "Q11-05"]),
 ]},
 
-{"titolo": "I finanziamenti bancari: mutuo, anticipo fatture, factoring", "unita": ["Q10", "Q12"], "sezioni": [
+{"titolo": "I finanziamenti bancari: mutuo, anticipo fatture, factoring", "unita": ["C14"], "sezioni": [
 ("Il mutuo", """
 <p>All'<b>erogazione</b> entra denaro in banca e nasce il debito (Mutui passivi) per il valore nominale; le spese trattenute dalla banca sono un costo. Il patrimonio netto non cambia.</p>
 <p>La <b>rata</b> ha due parti: la <b>quota capitale</b> rimborsa il debito, la <b>quota interessi</b> è un costo. La rata intera non è un costo.</p>
@@ -310,7 +310,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "La cessione e la dismissione dei cespiti", "unita": ["Q14"], "sezioni": [
+{"titolo": "La cessione e la dismissione dei cespiti", "unita": ["C15"], "sezioni": [
 ("Valore netto contabile, plusvalenze e minusvalenze", """
 <p>Il <b>valore netto contabile</b> di un cespite è il costo storico meno il fondo ammortamento. Alla vendita si confronta con il prezzo:</p>
 <ul>
@@ -328,7 +328,7 @@ PARTI = [
 """, ["Q14-03", "Q14-11"]),
 ]},
 
-{"titolo": "Ritenute e imposte durante l'anno", "unita": ["Q18"], "sezioni": [
+{"titolo": "Ritenute e imposte durante l'anno", "unita": ["C16"], "sezioni": [
 ("La ritenuta d'acconto sui professionisti", """
 <p>La parcella del professionista si registra come una fattura di servizi, con IVA. Al pagamento l'azienda trattiene la <b>ritenuta d'acconto</b> (20% dell'imponibile, non del totale con IVA) e la versa all'Erario con F24 entro il 16 del mese successivo.</p>
 <p class="rq-man-formula">Imponibile 2.000 + IVA 440 − ritenuta 400 = 2.040 pagati al professionista</p>
@@ -338,7 +338,7 @@ PARTI = [
 """, ["Q18-02"]),
 ]},
 
-{"titolo": "Il magazzino e la produzione", "unita": ["Q15"], "sezioni": [
+{"titolo": "Il magazzino e la produzione", "unita": ["C17"], "sezioni": [
 ("Le scorte", """
 <p>Le rimanenze di magazzino comprendono <b>merci</b> (acquistate per la rivendita), <b>materie prime</b> (da trasformare), <b>semilavorati</b> (prodotti che hanno fatto una parte della lavorazione), <b>prodotti finiti</b> (pronti per la vendita) e <b>prodotti in corso di lavorazione</b> (WIP).</p>
 <p>Il magazzino si misura in <b>quantità</b> e in <b>valore</b>: quantità × costo unitario. Un trasferimento tra depositi cambia l'ubicazione, non il valore totale. Le differenze tra inventario fisico e giacenza a sistema si rettificano: prevale la conta fisica.</p>
@@ -402,7 +402,7 @@ PARTI = [
 # ══════════════════════════════════════════════════════════════════════════════
 {"parte": "Parte quarta — L'assestamento di fine esercizio", "capitoli": [
 
-{"titolo": "Le scritture di assestamento", "unita": ["Q16", "Q17", "Q13", "Q15", "Q18", "Q09"], "sezioni": [
+{"titolo": "Le scritture di assestamento", "unita": ["C18"], "sezioni": [
 ("Perché si assesta", """
 <p>Al 31 dicembre i conti contengono le operazioni con l'esterno registrate durante l'anno. Per determinare il reddito di competenza e il patrimonio di fine anno occorre <b>adeguarli</b>:</p>
 <ul>
@@ -461,7 +461,7 @@ PARTI = [
 # ══════════════════════════════════════════════════════════════════════════════
 {"parte": "Parte quinta — La chiusura e la riapertura dei conti", "capitoli": [
 
-{"titolo": "La chiusura dei conti e il bilancio d'esercizio", "unita": ["Q19"], "sezioni": [
+{"titolo": "La chiusura dei conti e il bilancio d'esercizio", "unita": ["C19"], "sezioni": [
 ("L'ordine delle operazioni", """
 <ol>
 <li>bilancio di verifica;</li>
@@ -489,7 +489,7 @@ PARTI = [
 """, []),
 ]},
 
-{"titolo": "La riapertura dei conti e la destinazione dell'utile", "unita": ["Q20", "Q04"], "sezioni": [
+{"titolo": "La riapertura dei conti e la destinazione dell'utile", "unita": ["C20"], "sezioni": [
 ("La riapertura dei conti patrimoniali", """
 <p>Il 1° gennaio si riaprono <b>solo i conti patrimoniali</b>, con il giro opposto alla chiusura e in contropartita allo Stato patrimoniale iniziale: le attività tornano in Dare, passività e patrimonio netto in Avere. I conti di costo e di ricavo ripartono da zero: il Conto economico del nuovo anno misura solo il nuovo reddito.</p>
 """, ["Q20-01", "Q20-02", "Q20-03", "Q20-09"]),

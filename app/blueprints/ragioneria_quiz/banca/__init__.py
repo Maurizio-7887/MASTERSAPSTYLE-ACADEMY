@@ -13,7 +13,7 @@ spiegazione per ogni alternativa sbagliata.
 """
 from collections import OrderedDict
 
-VERSIONE_BANCA = "2026.11-r2"
+VERSIONE_BANCA = "2026.11-b1"
 
 # ── PIANO DEI CONTI DIDATTICO (nome → natura) ─────────────────────────────────
 # AT = attività · PA = passività · PN = patrimonio netto · CO = costo · RI = ricavo
@@ -36,7 +36,7 @@ PIANO = OrderedDict([
     # debiti
     ("Debiti v/fornitori", "PA"), ("Clienti c/anticipi", "PA"), ("Fatture da ricevere", "PA"),
     ("IVA ns/debito", "PA"), ("Erario c/IVA", "BI"),
-    ("Mutui passivi", "PA"), ("Banche c/anticipi su fatture", "PA"),
+    ("Mutui passivi", "PA"), ("Debiti v/soci per finanziamenti", "PA"), ("Banche c/anticipi su fatture", "PA"),
     ("Personale c/retribuzioni", "PA"), ("Erario c/ritenute", "PA"), ("Istituti previdenziali", "PA"),
     ("Debiti per TFR", "PA"), ("Debiti tributari", "PA"), ("Debiti v/soci per dividendi", "PA"),
     ("Ratei passivi", "PA"), ("Risconti passivi", "PA"),
@@ -77,7 +77,16 @@ REGOLA_NATURA = {"AT": "Aumenta in Dare", "RA": "Aumenta in Avere: riduce l'atti
                  "VR": "Rimanenze iniziali in Dare, finali in Avere: entra nel Conto economico (voci A2 e B11)",
                  "TE": "Solo per epilogo, chiusura e riapertura dei conti"}
 
-UNITA = OrderedDict()      # "Q01" → {titolo, studio:[...], esempio, domande:[...]}
+class _Unita(OrderedDict):
+    """I blocchi del manuale (C01…C20); un codice storico Q01…Q20 restituisce la vecchia unità, per leggere le prove già fatte."""
+    def __missing__(self, chiave):
+        if chiave in UNITA_STORICHE:
+            return UNITA_STORICHE[chiave]
+        raise KeyError(chiave)
+
+
+UNITA_STORICHE = OrderedDict()
+UNITA = _Unita()      # "C01"… blocchi del manuale (dopo il caricamento) → {titolo, studio:[...], esempio, domande:[...]}
 QUESITI = {}               # id → quesito normalizzato
 
 
@@ -249,6 +258,19 @@ def quadra(righe):
 
 
 from . import u01_05, u06_10, u11_15, u16_20  # noqa: E402,F401
+from .blocchi import BLOCCHI, blocco_di  # noqa: E402
+
+
+# il raggruppamento storico resta per le prove già fatte; le domande passano ai blocchi del manuale, in ordine di capitolo
+UNITA_STORICHE.update((c, dict(u, domande=list(u["domande"]))) for c, u in UNITA.items())
+UNITA.clear()
+for _cod, _tit, _studio, _es in BLOCCHI:
+    unita(_cod, _tit, _studio, _es)
+for _q in list(QUESITI.values()):
+    _q["unita_storica"] = _q["unita"]
+    _q["unita"] = blocco_di(_q["id"], _q["unita_storica"])
+    UNITA[_q["unita"]]["domande"].append(_q)
+from . import nuove  # noqa: E402,F401
 from .aiuti import AIUTI  # noqa: E402
 
 for _qid, _q in QUESITI.items():   # il suggerimento specifico della domanda (mostrato con «Mi serve un aiuto»)

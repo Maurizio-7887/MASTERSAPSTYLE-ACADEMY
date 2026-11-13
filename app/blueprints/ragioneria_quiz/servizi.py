@@ -9,7 +9,7 @@ from .modelli import EventoQuiz, RispostaQuiz, TentativoQuiz
 MODALITA = {
     "allenamento": {"titolo": "Allenamento", "domande": 8, "feedback": "subito", "tentativi": None},
     "ripasso": {"titolo": "Ripasso degli errori", "domande": 10, "feedback": "subito", "tentativi": None},
-    "verifica": {"titolo": "Verifica dell'unità", "domande": 10, "feedback": "subito", "tentativi": 2},
+    "verifica": {"titolo": "Verifica del blocco", "domande": 10, "feedback": "subito", "tentativi": 2},
     "diagnostica": {"titolo": "Test d'ingresso", "domande": 20, "feedback": "subito", "tentativi": None},
     "finale": {"titolo": "Prova finale", "domande": 60, "feedback": "subito", "tentativi": 2},
 }
@@ -223,6 +223,8 @@ def andamento(uid):
     per_unita = {c: {"verifiche": [], "allenamenti": 0, "migliore": None, "aperta": None} for c in UNITA}
     finali, diagnostiche = [], []
     for t in ts:
+        if t.unita and t.unita not in per_unita:   # prova su un'unità storica (Q01…Q20): resta nell'elenco dei tentativi
+            continue
         if t.stato == "in_corso":
             if t.unita and t.modalita in ("verifica", "allenamento"):
                 per_unita[t.unita]["aperta"] = per_unita[t.unita]["aperta"] or t
@@ -247,7 +249,7 @@ def andamento(uid):
         per_unita[c]["viste"] = 0
         per_unita[c]["giuste"] = 0
     for qid, ok in righe:
-        c = qid[:3]
+        c = QUESITI[qid]["unita"] if qid in QUESITI else None   # il blocco del manuale in cui sta oggi la domanda
         if c in per_unita:
             per_unita[c]["viste"] += 1
             per_unita[c]["giuste"] += 1 if ok else 0

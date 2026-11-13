@@ -54,6 +54,9 @@ def indice():
 @bp.get("/unita/<cod>")
 def unita(cod):
     if cod not in UNITA:
+        from .banca.blocchi import DA_UNITA
+        if cod in DA_UNITA:   # vecchio codice Q01…Q20: si va al blocco del manuale corrispondente
+            return redirect(url_for(".unita", cod=DA_UNITA[cod]))
         abort(404)
     u = utente_corrente()
     a = sv.andamento(u.id)
@@ -183,13 +186,63 @@ def risultato(tid):
                            M=sv.MODALITA[t.modalita], allievo=t.utente, SOGLIA=sv.SOGLIA, SOGLIA_PARTE=sv.SOGLIA_PARTE)
 
 
+_PAROLE_VUOTE = set("il lo la i gli le un uno una di a da in con su per tra fra e o che non si è al allo alla ai agli alle del dello della dei degli delle nel nello nella nei negli nelle sul sulla sui come più anche ma se ha hai sono quale quali quanto quando dove cosa perché questo questa".split())
+
+
+def _parole(testo):
+    import re
+    return {w[:6] for w in re.findall(r"[a-zà-ù0-9/]{3,}", (testo or "").lower()) if w not in _PAROLE_VUOTE}   # radice: risconto ≈ risconti
+
+
+_PARAGRAFI = None
+
+
+def _paragrafi():
+    """{numero capitolo: [(num paragrafo, titolo, frasi del testo)]}: il testo vero del manuale, senza tag."""
+    global _PARAGRAFI
+    if _PARAGRAFI is None:
+        import re
+        from html import unescape
+        from .manuale_testo import PARTI
+        _PARAGRAFI, n = {}, 0
+        for p in PARTI:
+            for c in p["capitoli"]:
+                n += 1
+                for i, (titolo, html, _es) in enumerate(c["sezioni"], 1):
+                    html = re.sub(r"<table.*?</table>", " ", html, flags=re.S)   # si cita il testo, non le celle delle tabelle
+                    html = re.sub(r"<li>|</li>|</p>|<ul>|<ol>", ". ", html)
+                    testo = unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))).strip()
+                    testo = re.sub(r"\s+([,.;:])", r"\1", testo)
+                    testo = re.sub(r"([.;:])\.", r"\1", testo)
+                    frasi = [f.strip() for f in re.split(r"(?<=[.;])\s+(?=[A-Za-zÈÀÌÒÙèàìòù«(])", testo) if len(f.strip()) > 25]
+                    _PARAGRAFI.setdefault(n, []).append((f"{n}.{i}", titolo, frasi))
+    return _PARAGRAFI
+
+
 def _dove_nel_manuale(q):
-    """Paragrafo del manuale con la scrittura svolta della domanda; altrimenti il capitolo dell'unità."""
-    sez = sezione_di().get(q["id"])
-    if sez:
-        return {"ancora": "sez" + sez[0], "testo": f"paragrafo {sez[0]} «{sez[1]}»"}
-    cap = capitolo_di().get(q["unita"])
-    return {"ancora": f"cap{cap[0]}", "testo": f"capitolo {cap[0]} «{cap[1]}»"} if cap else None
+    """Il paragrafo del manuale che spiega la domanda e la frase del manuale più vicina alla domanda.
+    Prima il paragrafo in cui la domanda è svolta come esempio; altrimenti il paragrafo del capitolo del blocco più simile per parole."""
+    qq = QUESITI.get(q["id"], q)
+    blocco = qq["unita"]
+    if not blocco.startswith("C"):
+        return None
+    cap = int(blocco[1:])
+    giusta = " ".join(o.get("testo", "") or " ".join(r["conto"] for r in o.get("righe", [])) for o in qq["opzioni"] if o["ok"])
+    chiave = _parole(qq["testo"] + " " + giusta + " " + AIUTI.get(qq["id"], ""))
+    forte = _parole(giusta)      # la risposta giusta pesa di più del testo della domanda
+    punti = lambda testo: len(chiave & _parole(testo)) + 2 * len(forte & _parole(testo))
+    paragrafi = _paragrafi().get(cap, [])
+    svolta = sezione_di().get(qq["id"])
+    scelto = next((x for x in paragrafi if svolta and x[0] == svolta[0]), None)
+    if scelto is None and paragrafi:
+        scelto = max(paragrafi, key=lambda x: punti(x[1] + " " + " ".join(x[2])) + 2 * punti(x[1]))
+    if scelto is None:
+        return None
+    num, titolo, frasi = scelto
+    citazione = max(frasi, key=punti, default="").rstrip(";:. ") + "."
+    if len(citazione) > 320:
+        citazione = citazione[:317].rsplit(" ", 1)[0] + "…"
+    return {"ancora": "sez" + num, "testo": f"paragrafo {num} «{titolo}»", "citazione": citazione}
 
 
 def _righe_man(righe):
@@ -312,9 +365,10 @@ def docente():
     for qid, ok, scelta in dati:
         s = stat.setdefault(qid, {"tot": 0, "ko": 0, "scelte": {}})
         s["tot"] += 1
-        if qid[:3] in unita_stat:
-            unita_stat[qid[:3]][1] += 1
-            unita_stat[qid[:3]][0] += 1 if ok else 0
+        bl = QUESITI[qid]["unita"] if qid in QUESITI else None
+        if bl in unita_stat:
+            unita_stat[bl][1] += 1
+            unita_stat[bl][0] += 1 if ok else 0
         if not ok:
             s["ko"] += 1
             for o in json.loads(scelta or "[]"):

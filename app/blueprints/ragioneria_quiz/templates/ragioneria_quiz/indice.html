@@ -7,8 +7,8 @@
 
 <section class="rq-man-primo">
   <h2>📘 Si parte dal manuale</h2>
-  <p>Prima delle domande studia il <b>Manuale di ragioneria</b>: venti capitoli dalla partita doppia alla chiusura e riapertura, con tutte le scritture svolte secondo il <b>metodo italiano</b> (compresa la chiusura e la riapertura delle scorte) e, accanto, le <b>stesse operazioni nel gestionale SAP</b> dell'esercitazione di dicembre.</p>
-  <p><a class="msa-btn" href="{{ url_for('ragioneria_quiz.manuale') }}">Apri il manuale</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.manuale') }}#cap17">Capitolo 17 · Magazzino: chiusura e riapertura delle scorte</a></p>
+  <p>Prima delle domande studia il <b>Manuale di ragioneria</b>. Le domande sono divise in <b>20 blocchi, uno per capitolo</b>, nello stesso ordine del manuale: venti capitoli dalla partita doppia alla chiusura e riapertura, con tutte le scritture svolte secondo il <b>metodo italiano</b> (compresa la chiusura e la riapertura delle scorte) e, accanto, le <b>stesse operazioni nel gestionale SAP</b> dell'esercitazione di dicembre.</p>
+  <p><a class="msa-btn" href="{{ url_for('ragioneria_quiz.manuale') }}">Apri il manuale</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.static', filename='manuale/Manuale_di_ragioneria.pdf') }}" download>⬇️ Scarica il PDF</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.manuale') }}#cap17">Capitolo 17 · Magazzino: chiusura e riapertura delle scorte</a></p>
 </section>
 
 <div class="rq-percorso">
@@ -18,7 +18,7 @@
 <div class="rq-grandi">
   <div class="rq-box">
     <h2>🧭 Test d'ingresso</h2>
-    <p>20 domande, una per unità. Non conta per il voto: ti dice da dove partire.</p>
+    <p>20 domande, una per blocco. Non conta per il voto: ti dice da dove partire.</p>
     {% if a.diagnostiche %}<p>Ultimo risultato: {{ barra(a.diagnostiche[-1].percentuale) }}</p>{% endif %}
     <form method="post" action="{{ url_for('ragioneria_quiz.avvia') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="modalita" value="diagnostica">
       <button class="msa-btn">{{ 'Riprendi il test' if aperte.get(('diagnostica', None)) else 'Inizia il test d\'ingresso' }}</button></form>
@@ -32,7 +32,7 @@
   </div>
   <div class="rq-box rq-finale">
     <h2>🏁 Prova finale</h2>
-    <p>60 domande: 3 per ciascuna delle 20 unità (30 teoria, 30 applicazione). Superata con almeno {{ SOGLIA }}% e almeno {{ SOGLIA_PARTE }}% sia in teoria sia in applicazione.</p>
+    <p>60 domande: 3 per ciascuno dei 20 blocchi (30 teoria, 30 applicazione). Superata con almeno {{ SOGLIA }}% e almeno {{ SOGLIA_PARTE }}% sia in teoria sia in applicazione.</p>
     {% set uf, cf = limiti['finale'] %}
     <p>Tentativi usati: <strong>{{ uf }} di {{ cf }}</strong>{% if a.migliore_finale %} · migliore: {{ barra(a.migliore_finale.percentuale, SOGLIA) }}{% endif %}</p>
     <form method="post" action="{{ url_for('ragioneria_quiz.avvia') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><input type="hidden" name="modalita" value="finale">
@@ -42,7 +42,7 @@
   </div>
 </div>
 
-<h2>📚 Le 20 unità <small class="rq-nd">· verifiche superate: {{ a.verifiche_superate }} / 20</small></h2>
+<h2>📚 I 20 blocchi, uno per capitolo del manuale <small class="rq-nd">· verifiche superate: {{ a.verifiche_superate }} / 20</small></h2>
 <div class="rq-unita">
 {% for cod, un in rq_unita.items() %}
   {% set st = a.unita[cod] %}{% set uv, cv = limiti[cod] %}
@@ -69,5 +69,5 @@
 {% endif %}{% endfor %}
 </table></div>
 {% endif %}
-<p class="rq-nd">Banca {{ banca.versione }} · {{ banca.quesiti }} domande in {{ banca.unita }} unità ({{ banca.teoria }} di teoria, {{ banca.applicazione }} di applicazione, di cui {{ banca.scritture }} scritture Dare/Avere).</p>
+<p class="rq-nd">Banca {{ banca.versione }} · {{ banca.quesiti }} domande in {{ banca.unita }} blocchi ({{ banca.teoria }} di teoria, {{ banca.applicazione }} di applicazione, di cui {{ banca.scritture }} scritture Dare/Avere).</p>
 {% endblock %}

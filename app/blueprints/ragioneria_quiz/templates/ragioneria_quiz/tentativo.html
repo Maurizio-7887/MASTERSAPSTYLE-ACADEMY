@@ -49,7 +49,7 @@
   {% if M.feedback == 'subito' and not mostra_esito %}
     {% if aiuto_aperto or aiuto %}
     <div class="rq-aiuto rq-aiuto-q"><p><b>💡 Suggerimento per questa domanda</b></p><p>{{ aiuto_q }}</p>
-      {% if dove_man %}<p>📘 Ripassa nel manuale: <a href="{{ url_for('ragioneria_quiz.manuale') }}#{{ dove_man.ancora }}" target="_blank" rel="noopener">{{ dove_man.testo }}</a></p>{% endif %}
+      {% if dove_man %}<p>📘 Dal manuale, <a href="{{ url_for('ragioneria_quiz.manuale') }}#{{ dove_man.ancora }}" target="_blank" rel="noopener">{{ dove_man.testo }}</a>{% if dove_man.citazione %}: <i>«{{ dove_man.citazione }}»</i>{% endif %}</p>{% endif %}
       <details><summary>Le regole generali di {{ un.codice }}</summary><ul>{% for r in un.studio %}<li>{{ r }}</li>{% endfor %}</ul></details>
       <small>L'aiuto resta segnato in questa domanda.</small></div>
     {% else %}

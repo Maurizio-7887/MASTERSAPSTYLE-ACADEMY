@@ -8,7 +8,7 @@
   <h1>Manuale di ragioneria</h1>
   <p class="rq-man-sotto">Dalla partita doppia alla chiusura e riapertura dei conti</p>
   <p>Il manuale segue l'ordine con cui si studia la ragioneria: prima i fondamenti, poi la costituzione dell'azienda, le operazioni di gestione dell'anno, le scritture di assestamento e infine la chiusura e la riapertura dei conti. Ogni capitolo contiene la teoria, le scritture svolte ({{ esempi }} in tutto) e gli errori da evitare, e rimanda alle unità del quiz con cui allenarsi.</p>
-  <p class="rq-nessuna-stampa"><button class="msa-btn" type="button" onclick="window.print()">🖨️ Stampa o salva in PDF</button></p>
+  <p class="rq-nessuna-stampa"><a class="msa-btn" href="{{ url_for('ragioneria_quiz.static', filename='manuale/Manuale_di_ragioneria.pdf') }}" download>⬇️ Scarica il PDF</a> <button class="msa-btn sec" type="button" onclick="window.print()">🖨️ Stampa</button></p>
 </header>
 
 <nav class="rq-man-indice" aria-label="Indice del manuale">

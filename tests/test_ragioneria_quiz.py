@@ -57,8 +57,12 @@ class Banca(unittest.TestCase):
         r = riepilogo()
         self.assertEqual(r["unita"], 20)
         self.assertGreaterEqual(r["quesiti"], 240)
+        from app.blueprints.ragioneria_quiz.manuale_testo import PARTI
+        capitoli = [c["titolo"] for p in PARTI for c in p["capitoli"]]
+        self.assertEqual(list(UNITA), [f"C{i:02d}" for i in range(1, 21)])          # blocchi = capitoli, in ordine
+        self.assertEqual([u["titolo"] for u in UNITA.values()], capitoli)
         for cod, u in UNITA.items():
-            self.assertGreaterEqual(len(u["domande"]), 12, cod)
+            self.assertGreaterEqual(len(u["domande"]), 8, cod)
             self.assertTrue(any(q["area"] == "teoria" for q in u["domande"]), cod)
             self.assertTrue(any(q["area"] != "teoria" for q in u["domande"]), cod)
             self.assertTrue(u["studio"], cod)
@@ -76,8 +80,8 @@ class Banca(unittest.TestCase):
 
     def test_argomenti_richiesti(self):
         titoli = " ".join(u["titolo"].lower() for u in UNITA.values())
-        for parola in ("dare/avere", "mastrini", "giornale", "acquisti", "vendite", "incassi", "pagamenti",
-                       "stipendi", "mutuo", "leasing", "anticipo fatture", "chiusure"):
+        for parola in ("partita doppia", "mastro", "giornale", "acquisti", "vendite", "incassi", "pagamenti",
+                       "personale", "mutuo", "leasing", "anticipo fatture", "magazzino", "chiusura", "riapertura"):
             self.assertIn(parola, titoli)
 
     def test_correzioni_missioni_colab(self):
@@ -92,10 +96,49 @@ class Banca(unittest.TestCase):
         self.assertFalse(any(r["conto"] == "Riserva legale" and r["sez"] == "D" for r in giusta))
 
 
+class BlocchiDelManuale(unittest.TestCase):
+    def test_ogni_domanda_in_un_solo_blocco_e_id_storici_conservati(self):
+        from app.blueprints.ragioneria_quiz.banca import UNITA_STORICHE
+        visti = [q["id"] for u in UNITA.values() for q in u["domande"]]
+        self.assertEqual(sorted(visti), sorted(QUESITI))
+        self.assertEqual(len(UNITA_STORICHE), 20)
+        self.assertEqual(QUESITI["Q15-02"]["unita"], "C17")
+        self.assertEqual(QUESITI["Q08-05"]["unita"], "C06")
+        self.assertEqual(QUESITI["Q16-09"]["unita"], "C20")
+        self.assertEqual(UNITA["Q05"]["titolo"], UNITA_STORICHE["Q05"]["titolo"])   # le prove vecchie si leggono ancora
+        self.assertNotIn("Q05", UNITA)
+
+    def test_prove_fatte_con_le_unita_storiche_restano_leggibili(self):
+        c = nuovo_allievo("rq_storico")
+        with app.app_context():
+            u = Utente.query.filter_by(username="rq_storico").first()
+            q = json.loads(json.dumps(QUESITI["Q05-01"]))
+            q["unita"] = "Q05"
+            t = TentativoQuiz(utente_id=u.id, modalita="verifica", unita="Q05", versione_banca="2026.11-r1",
+                              prova=json.dumps([q]), stato="consegnato", punti=1, massimo=1, superato=True)
+            db.session.add(t)
+            db.session.commit()
+            tid = t.id
+        self.assertEqual(c.get("/ragioneria-quiz/").status_code, 200)
+        self.assertEqual(c.get(f"/ragioneria-quiz/tentativo/{tid}/risultato").status_code, 200)
+        r = c.get("/ragioneria-quiz/unita/Q05")
+        self.assertEqual(r.status_code, 302)
+        self.assertIn("/unita/C07", r.headers["Location"])
+
+    def test_aiuto_cita_il_testo_del_manuale(self):
+        from app.blueprints.ragioneria_quiz import _dove_nel_manuale
+        for qid in QUESITI:
+            d = _dove_nel_manuale(QUESITI[qid])
+            self.assertTrue(d and d["citazione"].strip(". "), qid)
+            self.assertTrue(d["testo"].startswith(f"paragrafo {int(QUESITI[qid]['unita'][1:])}."), qid)
+        self.assertIn("Variazione rimanenze merci in Dare, Merci in Avere", _dove_nel_manuale(QUESITI["Q15-02"])["citazione"])
+        self.assertIn("Merci in Dare, Stato patrimoniale iniziale in Avere", _dove_nel_manuale(QUESITI["N17-03"])["citazione"])
+
+
 class Percorso(unittest.TestCase):
     def test_verifica_senza_chiavi_e_correzione_server(self):
         c = nuovo_allievo("rq_anna")
-        tid = avvia(c, "verifica", "Q05")
+        tid = avvia(c, "verifica", "C07")
         qs = prova(tid)
         self.assertEqual(len(qs), 10)
         html = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0").get_data(as_text=True)
@@ -134,7 +177,7 @@ class Percorso(unittest.TestCase):
 
     def test_scelta_multipla_insieme_esatto(self):
         c = nuovo_allievo("rq_bruno")
-        tid = avvia(c, "allenamento", "Q01")
+        tid = avvia(c, "allenamento", "C02")
         qs = prova(tid)
         for i, q in enumerate(qs):
             giuste = [o["id"] for o in q["opzioni"] if o["ok"]]
@@ -147,7 +190,7 @@ class Percorso(unittest.TestCase):
 
     def test_allenamento_correzione_subito_e_risposta_definitiva(self):
         c = nuovo_allievo("rq_carla")
-        tid = avvia(c, "allenamento", "Q10")
+        tid = avvia(c, "allenamento", "C14")
         q = prova(tid)[0]
         sbagliata = next(o for o in q["opzioni"] if not o["ok"])
         rispondi(c, tid, 0, [sbagliata["id"]])
@@ -166,36 +209,36 @@ class Percorso(unittest.TestCase):
     def test_aiuto_specifico_della_domanda_con_rimando_al_manuale(self):
         from app.blueprints.ragioneria_quiz.banca.aiuti import AIUTI
         c = nuovo_allievo("rq_aiuto")
-        tid = avvia(c, "allenamento", "Q15")
+        tid = avvia(c, "allenamento", "C17")
         html = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0").get_data(as_text=True)
         self.assertIn("Mi serve un aiuto su questa domanda", html)
         c.post(f"/ragioneria-quiz/tentativo/{tid}/aiuto", data={"csrf": csrf(html), "n": 0})
         h = c.get(f"/ragioneria-quiz/tentativo/{tid}?n=0&aiuto=1").get_data(as_text=True)
         q = prova(tid)[0]
         self.assertIn(str(escape(AIUTI[q["id"]])), h)
-        self.assertIn("Ripassa nel manuale", h)
+        self.assertIn("Dal manuale", h)
         self.assertIn("/ragioneria-quiz/manuale#", h)
 
     def test_limite_tentativi_e_concessione_docente(self):
         c = nuovo_allievo("rq_dario")
         for _ in range(2):
-            tid = avvia(c, "verifica", "Q03")
+            tid = avvia(c, "verifica", "C04")
             consegna(c, tid)
         t = csrf(c.get("/ragioneria-quiz/").get_data(as_text=True))
-        r = c.post("/ragioneria-quiz/avvia", data={"csrf": t, "modalita": "verifica", "unita": "Q03"})
+        r = c.post("/ragioneria-quiz/avvia", data={"csrf": t, "modalita": "verifica", "unita": "C04"})
         self.assertNotIn("/tentativo/", r.headers["Location"])
         d = docente()
         with app.app_context():
             uid = Utente.query.filter_by(username="rq_dario").first().id
         h = d.get(f"/ragioneria-quiz/docente/allievo/{uid}").get_data(as_text=True)
         d.post(f"/ragioneria-quiz/docente/allievo/{uid}/tentativo-extra",
-               data={"csrf": csrf(h), "chiave": "verifica:Q03", "nota": "assente alla lezione"})
-        avvia(c, "verifica", "Q03")
+               data={"csrf": csrf(h), "chiave": "verifica:C04", "nota": "assente alla lezione"})
+        avvia(c, "verifica", "C04")
 
     def test_isolamento_allievi(self):
         a = nuovo_allievo("rq_elena")
         b = nuovo_allievo("rq_fabio")
-        tid = avvia(a, "verifica", "Q08")
+        tid = avvia(a, "verifica", "C10")
         self.assertEqual(b.get(f"/ragioneria-quiz/tentativo/{tid}").status_code, 403)
         self.assertEqual(b.get(f"/ragioneria-quiz/tentativo/{tid}/risultato").status_code, 403)
         h = b.get("/ragioneria-quiz/").get_data(as_text=True)
@@ -215,7 +258,7 @@ class Percorso(unittest.TestCase):
 
     def test_pagine_e_pannello_docente(self):
         c = nuovo_allievo("rq_ilaria")
-        for p in ("/ragioneria-quiz/", "/ragioneria-quiz/unita/Q11", "/ragioneria-quiz/piano-dei-conti"):
+        for p in ("/ragioneria-quiz/", "/ragioneria-quiz/unita/C13", "/ragioneria-quiz/piano-dei-conti"):
             self.assertEqual(c.get(p).status_code, 200, p)
         tid = avvia(c, "diagnostica")
         self.assertEqual(len(prova(tid)), 20)
@@ -232,7 +275,7 @@ class Percorso(unittest.TestCase):
 
     def test_annullamento_motivato(self):
         c = nuovo_allievo("rq_luca")
-        tid = avvia(c, "verifica", "Q19")
+        tid = avvia(c, "verifica", "C19")
         consegna(c, tid)
         d = docente()
         with app.app_context():
@@ -242,7 +285,7 @@ class Percorso(unittest.TestCase):
                data={"csrf": csrf(h), "nota": "problema di rete"})
         with app.app_context():
             self.assertEqual(db.session.get(TentativoQuiz, tid).stato, "annullato")
-            self.assertEqual(sv.tentativi_usati(uid, "verifica", "Q19"), 0)
+            self.assertEqual(sv.tentativi_usati(uid, "verifica", "C19"), 0)
 
 
 class Manuale(unittest.TestCase):
