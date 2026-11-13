@@ -80,3 +80,41 @@ label.rq-opz:hover{border-color:#B6A6D3;background:#FBFAFD}
 @media print{.rq-menu,.rq-nav,.rq-azioni,.rq-consegna,.msa-pagine{display:none}.rq-banner::after{content:" — SIMULAZIONE DIDATTICA, NON VALIDA AI FINI FISCALI O COMMERCIALI"}}
 /* le domande non richiedono codici SAP: il pulsante flottante qui non serve e copriva «Consegna» */
 #msa-sap-btn{display:none!important}
+/* ── Manuale ─────────────────────────────────────────────── */
+.rq-man{max-width:880px;margin:0 auto;font-size:16px;line-height:1.6}
+.rq-man-cop{text-align:center;padding:28px 10px 18px;border-bottom:3px double #8066a6;margin-bottom:18px}
+.rq-man-cop h1{font-size:34px;margin:4px 0}
+.rq-man-sopra{text-transform:uppercase;letter-spacing:.12em;color:#8066a6;font-weight:700;margin:0}
+.rq-man-sotto{font-size:18px;color:#555;margin:0 0 12px}
+.rq-man-cop p{text-align:left}
+.rq-man-cop .rq-man-sotto,.rq-man-cop .rq-man-sopra,.rq-man-cop .rq-nessuna-stampa{text-align:center}
+.rq-man-indice{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:10px 22px;margin-bottom:26px}
+.rq-man-indice ol{margin:2px 0 8px}
+.rq-man-indice ul{font-size:13px;margin:0 0 4px;padding-left:18px;color:#555}
+.rq-man-parte-ind{font-weight:700;color:#8066a6;margin:10px 0 2px}
+.rq-man-parte{background:#8066a6;color:#fff;padding:10px 16px;border-radius:6px;margin:34px 0 12px;font-size:20px}
+.rq-man-cap{background:#fff;border:1px solid var(--f-bordo);border-radius:8px;padding:6px 24px 14px;margin:14px 0}
+.rq-man-cap>h2{border-bottom:2px solid #E3DCF0;padding-bottom:6px}
+.rq-man-cap h3{color:#4E3A73;margin:20px 0 6px}
+.rq-man-testo p{margin:6px 0}
+.rq-man-formula{background:#F7F5FB;border-left:4px solid #8066a6;padding:6px 12px;font-weight:600;font-variant-numeric:tabular-nums}
+.rq-man-nota{background:#FFFBEA;border-left:4px solid #E8C468;padding:6px 12px;font-size:14px}
+.rq-man-tab th,.rq-man-tab td{font-size:14px}
+.rq-man-es{border:1px solid #E3DCF0;border-radius:6px;padding:8px 12px;margin:10px 0;break-inside:avoid}
+.rq-man-es p{margin:4px 0}
+.rq-man-perche{font-size:14px;color:#444;font-style:italic}
+.rq-man-box{background:#FFF5F5;border:1px solid #F0C2C2;border-radius:6px;padding:4px 14px;margin-top:16px}
+.rq-man-box h3{color:#8A1F1F;margin:8px 0 4px}
+.rq-man-errori li{font-size:14px;margin:3px 0}
+.rq-man-allenati{font-size:14px;margin-top:14px}
+@media print{
+  .rq-banner,.rq-piede,.rq-nessuna-stampa,body>header,.msa-testata,.msa-barra,nav.msa-pagine{display:none!important}
+  html,body,main{background:#fff!important}
+  .rq-man{max-width:none;font-size:11.5pt}
+  .rq-man-cop{page-break-after:always;padding-top:30%}
+  .rq-man-indice{page-break-after:always;border:none}
+  .rq-man-parte{page-break-before:always;background:none;color:#4E3A73;border-bottom:2px solid #4E3A73;border-radius:0}
+  .rq-man-cap{border:none;padding:0;page-break-before:always}
+  .rq-man-parte+.rq-man-cap{page-break-before:avoid}
+  a{color:inherit;text-decoration:none}
+}

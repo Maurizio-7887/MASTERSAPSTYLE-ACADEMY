@@ -232,5 +232,20 @@ class Percorso(unittest.TestCase):
             self.assertEqual(sv.tentativi_usati(uid, "verifica", "Q19"), 0)
 
 
+class Manuale(unittest.TestCase):
+    def test_manuale_completo_e_coerente_con_la_banca(self):
+        from app.blueprints.ragioneria_quiz.manuale_testo import PARTI
+        usati = [q for p in PARTI for c in p["capitoli"] for s in c["sezioni"] for q in s[2]]
+        self.assertEqual([q for q in usati if q not in QUESITI], [])
+        self.assertTrue(all(QUESITI[q]["tipo"] == "scrittura" for q in usati))
+        self.assertEqual(sum(len(p["capitoli"]) for p in PARTI), 20)
+        coperte = {u for p in PARTI for c in p["capitoli"] for u in c["unita"]}
+        self.assertEqual(coperte, set(UNITA))
+        c = nuovo_allievo("rq_manuale")
+        h = c.get("/ragioneria-quiz/manuale").get_data(as_text=True)
+        for t in ("Parte prima", "partita doppia", "Parte quinta", "La riapertura dei conti", "Capitolo 20"):
+            self.assertIn(t, h)
+
+
 if __name__ == "__main__":
     unittest.main()

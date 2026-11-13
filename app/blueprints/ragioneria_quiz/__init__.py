@@ -7,6 +7,7 @@ import csv
 import io
 import json
 
+from markupsafe import Markup
 from flask import Blueprint, Response, abort, flash, redirect, render_template, request, url_for
 
 from ...accesso import solo_docente, utente_corrente
@@ -178,6 +179,43 @@ def risultato(tid):
         s[0] += 1 if r and r.corretta else 0
     return render_template("ragioneria_quiz/risultato.html", u=u, t=t, righe=righe, per_unita=per_unita,
                            M=sv.MODALITA[t.modalita], allievo=t.utente, SOGLIA=sv.SOGLIA, SOGLIA_PARTE=sv.SOGLIA_PARTE)
+
+
+def _manuale():
+    """Trattato in ordine logico (manuale_testo.py) con le scritture corrette della banca come esempi."""
+    from .manuale_testo import PARTI
+    generici = ("Le sezioni sono invertite", "Conto sbagliato: qui serve")
+    parti, n, k = [], 0, 0
+    for p in PARTI:
+        caps = []
+        for c in p["capitoli"]:
+            n += 1
+            sezioni, errori, visti = [], [], set()
+            for i, (titolo, html, esempi) in enumerate(c["sezioni"], 1):
+                es = []
+                for qid in esempi:
+                    q = QUESITI[qid]
+                    k += 1
+                    giusta = next(o for o in q["opzioni"] if o["ok"])
+                    es.append({"n": k, "testo": q["testo"], "righe": giusta["righe"], "spiegazione": q["spiegazione"]})
+                    for o in q["opzioni"]:
+                        if not o["ok"] and not o["perche"].startswith(generici) and o["perche"] not in visti:
+                            visti.add(o["perche"])
+                            errori.append(o["perche"])
+                sezioni.append({"num": f"{n}.{i}", "titolo": titolo, "html": Markup(html), "esempi": es})
+            caps.append({"n": n, "titolo": c["titolo"], "unita": c["unita"], "sezioni": sezioni, "errori": errori[:6]})
+        parti.append({"parte": p["parte"], "capitoli": caps})
+    return parti, k
+
+
+@bp.get("/manuale")
+def manuale():
+    gruppi = {}
+    for nome, nat in PIANO.items():
+        gruppi.setdefault(nat, []).append(nome)
+    parti, esempi = _manuale()
+    return render_template("ragioneria_quiz/manuale.html", parti=parti, esempi=esempi, gruppi=gruppi, NATURA=NATURA,
+                           banca=riepilogo())
 
 
 @bp.get("/piano-dei-conti")
