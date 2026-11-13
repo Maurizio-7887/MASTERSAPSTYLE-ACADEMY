@@ -388,7 +388,8 @@ ALTRI = {
 "FATTURA_FORNITORE": ([("Acquisti materie prime", "D", 3000), ("IVA ns/credito", "D", 660), ("Debiti v/fornitori", "A", 3660),
                        ("Magazzino materie prime", "D", 3000), ("Variazione rimanenze materie prime (costo diretto applicato)", "A", 3000)],
                       "Fattura d'acquisto registrata: il costo va su Acquisti come nel metodo italiano e, insieme, il valore entra a magazzino con contropartita la variazione delle rimanenze (al costo effettivo, non standard: niente conto differenze prezzo).",
-                      "Primanota con causale «Fattura acquisti»: " + _UG),
+                      "Prima Nota con causale FA (Fattura acquisti): la causale propone costo, IVA e fornitore. " + _UG),
+"INCASSO#2": (None, "Registrazione incassi con abbinamento della partita aperta del cliente. " + _UG, "Prima Nota con causale IN (Incasso) e chiusura della partita del cliente. " + _UG),
 "FATTURA_PASSIVA": (None, "Fattura d'acquisto con riga di tipo «Conto C/G». " + _UG, "Primanota, causale fattura acquisti. " + _UG),
 "PARCELLA": (None, "Fattura d'acquisto; la ritenuta si gestisce con la funzione ritenute della localizzazione italiana al pagamento. " + _UG, "Primanota con gestione ritenute. " + _UG),
 "USCITA_MERCI": ([], "La spedizione non genera movimenti C/G; il costo del venduto si registra con la fattura di vendita (riga seguente).",
@@ -396,7 +397,7 @@ ALTRI = {
 "FATTURA": ([("Crediti v/clienti", "D", 12912.48), ("Prodotti c/vendite", "A", 10584), ("IVA ns/debito", "A", 2328.48),
              ("Variazione rimanenze prodotti finiti (costo del venduto)", "D", 5652), ("Magazzino prodotti finiti", "A", 5652)],
             "Fattura di vendita registrata: ricavo al netto dello sconto riga (salvo setup «Registrazione sconti») e, insieme, lo scarico a valore del magazzino. La provvigione dell'agente si registra a parte.",
-            "Primanota, causale «Fattura vendite»: " + _UG),
+            "Prima Nota con causale FV (Fattura vendite). " + _UG),
 "FATTURA_SERVIZI": (None, "Fattura di vendita con riga «Conto C/G» o risorsa. " + _UG, _UG),
 "PRELIEVO_261": ([("Lavori in corso (WIP)", "D", 2280), ("Magazzino materie prime", "A", 2280)],
                  "Registrazione del consumo sull'ordine di produzione: il materiale passa dal magazzino ai lavori in corso.",
@@ -447,15 +448,20 @@ ALTRI = {
 FIGURE = {
     ("Gli acquisti e i rapporti con i fornitori", "ENTRATA_ACQUISTO"): [("sap_migo.svg", "SAP · MIGO movimento 101: il ferro entra a magazzino prima della fattura")],
     ("Gli acquisti e i rapporti con i fornitori", "FATTURA_FORNITORE"): [
+        ("ahr_primanota_fa.svg", "ad hoc Revolution · Prima Nota con causale FA"),
         ("sap_miro.svg", "SAP · MIRO: la fattura chiude il conto ponte 22"),
         ("bc_fattura_acquisto.svg", "Business Central · Fattura acquisto con riga di tipo Articolo"),
         ("bc_movimenti_cg.svg", "Business Central · i movimenti C/G generati dalla fattura")],
     ("Il magazzino e la produzione", "DIFFERENZA_INVENTARIO"): [("sap_inventario.svg", "SAP · inventario fisico di fine anno e differenza 711")],
-    ("Le scritture di assestamento", "ASSESTAMENTO"): [("bc_differimento.svg", "Business Central · risconto con modello di differimento")],
+    ("Il magazzino e la produzione", "CHIUSURA_SP"): [("ahr_inventario.svg", "ad hoc Revolution · inventario valorizzato al 31 dicembre"),
+                                                      ("ahr_rimanenze.svg", "ad hoc Revolution · rimanenze finali in Prima Nota")],
+    ("Le scritture di assestamento", "ASSESTAMENTO"): [("ahr_risconto.svg", "ad hoc Revolution · risconto attivo in Prima Nota"),
+                                                       ("bc_differimento.svg", "Business Central · risconto con modello di differimento")],
     ("Le scritture di assestamento", "ASSESTAMENTO#2"): [
         ("sap_fbs1.svg", "SAP · FBS1: rateo con storno automatico al 1° gennaio"),
         ("bc_registrazioni_periodiche.svg", "Business Central · registrazioni periodiche «Storno fisso»")],
     ("La chiusura dei conti e il bilancio d'esercizio", "CHIUSURA_SP"): [
+        ("ahr_chiusura.svg", "ad hoc Revolution · Chiusura/apertura conti"),
         ("sap_chiusura.svg", "SAP · registrazioni di chiusura e apertura (Italia)"),
         ("bc_chiusura.svg", "Business Central · Chiusura conto economico e Chiusura/apertura stato patrimoniale")],
 }

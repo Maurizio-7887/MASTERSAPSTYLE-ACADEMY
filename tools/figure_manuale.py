@@ -1,5 +1,6 @@
 """Genera le figure del Manuale di ragioneria: schermate RICOSTRUITE a scopo didattico di SAP S/4HANA e di
-Microsoft Dynamics 365 Business Central (localizzazione italiana). Non sono schermate originali e non contengono loghi:
+Microsoft Dynamics 365 Business Central (localizzazione italiana) e di ad hoc Revolution (stile e causali del Simulatore AHR
+del corso: Prima Nota con causale, F3 zoom, F10 registra). Non sono schermate originali e non contengono loghi:
 riproducono campi, numeri e scritture dell'esercitazione «Dicembre» per far riconoscere all'allievo dove si guarda.
 
 Uso:  python3 tools/figure_manuale.py   →  app/blueprints/ragioneria_quiz/static/manuale/*.svg
@@ -13,6 +14,8 @@ STILI = {
     # sistema: (colore barra, colore testo barra, accento, sfondo pagina, nome mostrato)
     "sap": ("#354A5F", "#FFFFFF", "#0A6ED1", "#F5F6F7", "SAP S/4HANA"),
     "bc": ("#00796B", "#FFFFFF", "#008489", "#FAFAFA", "Dynamics 365 Business Central"),
+    # stile ripreso dal Simulatore AHR del corso (Maurizio-7887/Simulatore-AHR): maschere con testata scura, blu Zucchetti
+    "ahr": ("#2B2B2B", "#FFFFFF", "#0054A6", "#F4F7F9", "ad hoc Revolution"),
 }
 
 
@@ -216,7 +219,78 @@ def bc_chiusura():
               "Prima i conti economici nell'utile, poi i patrimoniali nel conto di chiusura e riapertura dal conto di apertura.")
 
 
+# ─────────────────────────── AD HOC REVOLUTION ───────────────────────────
+def _quadra(y, acc, testo="Totale Dare = Totale Avere: la registrazione è in quadratura"):
+    return esito(16, y, testo) + bottone(W - 196, y + 40, "F10 — Registra", acc, 180)
+
+
+def ahr_fattura():
+    def c(acc):
+        s = campo(16, 135, "Data reg.", "05/12/2026", 150) + campo(182, 135, "Causale contabile (F3 zoom)", "FA — Fattura acquisti", 260, True)
+        s += campo(458, 135, "N. doc / protocollo", "FR-2026-871 / 12", 200) + campo(674, 135, "Fornitore", "Acciaierie Umbre Spa", 210)
+        s += t(16, 205, "Righe contabili — partita doppia", 13, acc, "bold")
+        tab, y = tabella(16, 215, ["Rigo", "Conto (PDC)", "Descrizione sottoconto", "Dare (€)", "Avere (€)"],
+                         [["10", "601001", "Materie prime c/acquisti", "3.000,00", ""], ["20", "260100", "IVA su acquisti 22%", "660,00", ""],
+                          ["30", "400101", "Debiti v/fornitori · Acciaierie Umbre", "", "3.660,00"]], [60, 130, 400, 139, 139], acc, num=(3, 4))
+        return s + tab + _quadra(y + 14, acc)
+    schermata("ahr_primanota_fa", "ahr", "GESCON · Prima Nota Contabile", "Fattura d'acquisto in Prima Nota", c, 460,
+              "La causale FA propone i conti: costo d'acquisto, IVA e fornitore. Il magazzino non entra in contabilità generale.")
+
+
+def ahr_inventario():
+    def c(acc):
+        s = campo(16, 135, "Data valutazione", "31/12/2026", 200) + campo(232, 135, "Metodo valorizzazione", "Costo standard (come nel caso)", 260, True)
+        s += campo(508, 135, "Magazzino", "Principale", 200)
+        tab, y = tabella(16, 200, ["Codice", "Descrizione", "Giacenza", "Costo (€)", "Valore (€)"],
+                         [["FERRO", "Ferro tubolare (materia prima)", "740 kg", "0,95", "703,00"], ["SL-TAGLIO", "Kit tagliato (semilavorato)", "19 pz", "14,60", "277,40"],
+                          ["TR-STD", "Transenna standard (prodotto finito)", "0 pz", "31,40", "0,00"], ["", "Totale rimanenze finali", "", "", "980,40"]],
+                         [130, 340, 130, 130, 138], acc, num=(2, 3, 4))
+        return s + tab + bottone(W - 196, y + 14, "Stampa inventario", acc, 180)
+    schermata("ahr_inventario", "ahr", "GESINV · Stampa Inventario Valorizzato", "Inventario valorizzato al 31 dicembre", c, 440,
+              "Dal valore dell'inventario si registrano in Prima Nota le rimanenze finali (metodo italiano).")
+
+
+def ahr_rimanenze():
+    def c(acc):
+        s = campo(16, 135, "Data reg.", "31/12/2026", 150) + campo(182, 135, "Causale contabile", "Assestamento — rimanenze finali", 300, True)
+        s += campo(498, 135, "Note", "Da inventario valorizzato al 31/12", 386)
+        tab, y = tabella(16, 205, ["Rigo", "Conto", "Descrizione", "Dare (€)", "Avere (€)"],
+                         [["10", "Rim. MP", "Rimanenze materie prime", "703,00", ""], ["20", "Rim. SL", "Rimanenze semilavorati", "277,40", ""],
+                          ["30", "Var. MP", "Variazione rimanenze materie prime", "", "703,00"], ["40", "Var. SL", "Variazione rimanenze semilavorati", "", "277,40"]],
+                         [60, 130, 400, 139, 139], acc, num=(3, 4))
+        return s + tab + _quadra(y + 14, acc, "Al 1° gennaio, dopo la riapertura, la scrittura opposta riporta le rimanenze iniziali a costo.")
+    schermata("ahr_rimanenze", "ahr", "GESCON · Prima Nota Contabile", "Rimanenze finali in Prima Nota", c, 470,
+              "Codici dei conti indicativi: dipendono dal piano dei conti dell'azienda.")
+
+
+def ahr_risconto():
+    def c(acc):
+        s = campo(16, 135, "Data reg.", "31/12/2026", 150) + campo(182, 135, "Causale contabile", "Assestamento — risconti", 260, True)
+        s += campo(458, 135, "Competenza", "01/12/2026 – 30/11/2027", 220) + campo(694, 135, "Giorni nel 2027", "334 su 365", 190)
+        tab, y = tabella(16, 205, ["Rigo", "Conto", "Descrizione", "Dare (€)", "Avere (€)"],
+                         [["10", "Risc. att.", "Risconti attivi", "1.098,08", ""], ["20", "Assic.", "Premi di assicurazione", "", "1.098,08"]],
+                         [60, 130, 400, 139, 139], acc, num=(3, 4))
+        return s + tab + _quadra(y + 14, acc, "Al 1° gennaio, dopo la riapertura, il risconto torna a costo con la scrittura opposta.")
+    schermata("ahr_risconto", "ahr", "GESCON · Prima Nota Contabile", "Risconto attivo di fine anno", c, 420,
+              "Le scritture di assestamento si registrano in Prima Nota con una causale dedicata.")
+
+
+def ahr_chiusura():
+    def c(acc):
+        s = campo(16, 135, "Esercizio da chiudere", "2026", 150) + campo(182, 135, "Data chiusura", "31/12/2026", 150) + campo(348, 135, "Data apertura", "01/01/2027", 150)
+        s += campo(16, 190, "Conto profitti e perdite", "Conto economico", 260, True) + campo(292, 190, "Bilancio di chiusura", "Stato patrimoniale finale", 280, True)
+        s += campo(588, 190, "Bilancio di apertura", "Stato patrimoniale iniziale", 296, True)
+        tab, y = tabella(16, 260, ["Fase", "Che cosa genera"],
+                         [["1 · Epilogo", "Costi e ricavi (comprese le variazioni delle rimanenze) → Conto economico; utile o perdita"],
+                          ["2 · Chiusura", "Attività, passività e patrimonio netto → Stato patrimoniale finale"],
+                          ["3 · Apertura", "Gli stessi conti riaperti dallo Stato patrimoniale iniziale al 01/01/2027"]], [160, 708], acc)
+        return s + tab + bottone(W - 196, y + 14, "F10 — Elabora", acc, 180)
+    schermata("ahr_chiusura", "ahr", "Contabilità generale · Chiusura/apertura conti", "Chiusura e apertura dei conti", c, 420,
+              "Prima di elaborare: rimanenze, ratei, risconti, ammortamenti e imposte già registrati in Prima Nota.")
+
+
 if __name__ == "__main__":
-    for f in (sap_migo, sap_miro, sap_fbs1, sap_inventario, sap_chiusura, bc_fattura, bc_movimenti, bc_differimento, bc_periodiche, bc_chiusura):
+    for f in (sap_migo, sap_miro, sap_fbs1, sap_inventario, sap_chiusura, bc_fattura, bc_movimenti, bc_differimento, bc_periodiche, bc_chiusura,
+              ahr_fattura, ahr_inventario, ahr_rimanenze, ahr_risconto, ahr_chiusura):
         f()
     print("\n".join(sorted(p.name for p in OUT.glob("*.svg"))))

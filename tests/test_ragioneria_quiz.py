@@ -266,7 +266,7 @@ class Manuale(unittest.TestCase):
         for t in ("la chiusura delle scorte finali", "la riapertura delle scorte", "Lo stesso nei programmi: metodo italiano, ad hoc Revolution, Dynamics 365 Business Central, SAP",
                   "Quattro modi di registrare le stesse operazioni", "Fine anno voce per voce: chiusura e riapertura",
                   "Chiusura/apertura stato patrimoniale", "Chiusura/apertura conti", "modello di differimento",
-                  "31/12: chiudi il risconto attivo di 900", "1/1: riapri il rateo passivo di 160", "manuale/sap_miro.svg", "manuale/bc_chiusura.svg",
+                  "31/12: chiudi il risconto attivo di 900", "1/1: riapri il rateo passivo di 160", "manuale/sap_miro.svg", "manuale/bc_chiusura.svg", "manuale/ahr_primanota_fa.svg", "manuale/ahr_chiusura.svg", "causale FA",
                   "12 Magazzino ferro (materie prime)", "Variazione rimanenze materie prime", "Raccordo con il piano dei conti del gestionale SAP"):
             self.assertIn(t, h)
 
