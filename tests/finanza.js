@@ -219,8 +219,8 @@ const l2 = w.FIN4.contrattoLeasing({societa: 'F810', bene: 'Carrello B', valore:
 const contrattoB = w.FIN4.X().leasing[1];
 w.FIN4.riscontoMaxicanone({leasing: contrattoA.numero, data: '2027-12-31'});
 w.FIN4.riscontoMaxicanone({leasing: contrattoB.numero, data: '2027-12-31'});
-assert.equal(w.FIN4.X().assestamenti.filter(x => /maxicanone del leasing/.test(x.testo)).length, 2, 'risconti distinti anche con le stesse date');
-assert.notEqual(w.FIN4.X().assestamenti[0].testo, w.FIN4.X().assestamenti[1].testo, 'riferimento univoco del contratto nel risconto');
+assert.equal(w.CH4.X().assestamenti.filter(x => /maxicanone del leasing/.test(x.testo)).length, 2, 'risconti distinti anche con le stesse date');
+assert.notEqual(w.CH4.X().assestamenti[0].testo, w.CH4.X().assestamenti[1].testo, 'riferimento univoco del contratto nel risconto');
 
 quadra(n);
 console.log('OK finanza: ' + controlli + ' controlli, ' + n.S.registrazioni.length + ' registrazioni');
