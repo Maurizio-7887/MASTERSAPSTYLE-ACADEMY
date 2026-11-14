@@ -156,7 +156,7 @@ const regPrimaCh = p.S().registrazioni.length; p.fai('ch', {anno: '2027', forza:
   ok(Object.values(nz).every(v => Math.abs(v) < 0.005), 'dopo la chiusura tutti i conti a zero'); }
 p = apri('erp_fi', 'fatture'); ok(/chiuso/.test(p.fai('fs', {cliente: 'C200', testo: 'prova', imponibile: '10', iva: '22', scadenza: '', data: '2027-12-31'})), 'nessuna scrittura nel 2027 chiuso');
 p = apri('erp_chiusura', 'riapertura'); p.fai('ra', {anno: '2028', data: '2028-01-01'}); ok(!!p.S().chiusure['2027'].riapertura && /riaperto/.test(p.testo()), 'riapertura 2028'); checkpoint('Riapertura');
-vicino(saldo('10'), 77807.7, 'banca riaperta'); vicino(saldo('13'), 17842.37, 'prodotti finiti riaperti'); vicino(saldo('01') + saldo('02'), 11200, 'saldatrice netta'); vicino(-saldo('32'), 19042.11, 'utile da destinare'); vicino(saldo('17'), 55.8, 'imposte anticipate riaperte');
+vicino(saldo('10'), 77807.7, 'banca riaperta'); vicino(saldo('13'), 17842.37, 'prodotti finiti riaperti'); vicino(saldo('01') + saldo('02'), 11200, 'saldatrice netta'); vicino(-saldo('32'), 19042.11, 'utile da destinare'); vicino(saldo('17'), 48, 'imposte anticipate IRES riaperte');
 vicino(saldo('90') + saldo('91') + saldo('92'), 0, 'conti di chiusura a zero');
 { const c = p.w.CH4.calcolaIva('2028-T1'); vicino(c.credito, 0, 'la riapertura non è IVA del 2028'); vicino(c.riporto, 110, 'credito IVA riportato dal 2027'); vicino(c.saldo, -110, 'primo trimestre 2028 parte a credito');
   ok(!p.w.CH4.controlli('2028').some(x => /IVA non ancora liquidata/.test(x)), 'riapertura non risulta come IVA da liquidare'); }
