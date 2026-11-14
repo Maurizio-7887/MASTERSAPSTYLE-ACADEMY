@@ -9,7 +9,7 @@ from collections import defaultdict
 
 from .esercizi import ESERCIZI, attesi_esercizio
 
-TECNICHE = {"CHIUSURA_CE", "CHIUSURA_SP", "APERTURA_SP"}
+TECNICHE = {"CHIUSURA_CE", "CHIUSURA_SP", "APERTURA_SP", "EPILOGO", "RISULTATO", "RIAPERTURA"}
 
 
 def _c(x):
