@@ -10,7 +10,7 @@ from .db import Utente, db
 PUBBLICHE = {"accessi.accesso", "integrazioni.iscrizione_executive", "portale.home", "portale.health", "portale.materiale", "static",
              # corsi online per privati: programma, iscrizione, acquisto e verifica degli attestati
              "privati.corso_pubblico", "privati.prova", "privati.iscriviti", "privati.acquista", "privati.verifica", "privati.verifica_form",
-             "privati.static", "executive_api.iscrivi_executive"}
+             "privati.static", "executive_api.iscrivi_executive", "public_stats.allievi_count"}
 
 
 def utente_corrente():
