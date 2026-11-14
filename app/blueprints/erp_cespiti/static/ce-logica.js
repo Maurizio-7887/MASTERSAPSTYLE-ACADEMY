@@ -87,6 +87,7 @@ window.CE4 = (function () {
     var n = N(), data = n.data(i.data), c = trova(i.cespite), cl = CLASSI[c.classe];
     if (c.cessione) throw Error('Cespite ' + c.codice + ' già ceduto il ' + L.fd(c.cessione.data) + '.');
     if (data < c.inFunzione) throw Error('Data di cessione anteriore all\'entrata in funzione.');
+    if ((c.ammortamenti || []).some(function (a) { return a.data > data; })) throw Error('Cessione retrodatata: esiste già un ammortamento registrato dopo la data di vendita. Storna prima AFAB successivo e poi registra la cessione, così il fondo non comprende quote maturate dopo l\'uscita.');
     var cli = n.cliente(i.cliente), prezzo = i.prezzo == null || i.prezzo === '' ? 0 : L.num(i.prezzo, 'Prezzo di vendita', 0), ivaP = i.iva == null || i.iva === '' ? 22 : L.num(i.iva, 'IVA %', 0), iva = r2(prezzo * ivaP / 100);
     c.cessione = {data: data};   // fissa il mese di uscita per la quota
     var q = quota(c, data), ra = null;
