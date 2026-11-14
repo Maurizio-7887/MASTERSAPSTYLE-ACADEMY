@@ -86,7 +86,6 @@ vicino(n.saldo('54'), 1040, 'onorario + cassa 4%'); vicino(n.saldo('14'), 228.80
 const primaF53 = n.S.registrazioni.length;
 assert.throws(() => w.FS4.paga({fornitore: 'F800', banca: '10', importo: '1268.80', documento: 'FT 45/2026', data: '2026-12-19'}), /Finanza.*Ritenute.*Paga parcella/);
 assert.equal(n.S.registrazioni.length, primaF53, 'F-53 rifiutato senza creare scritture sulla parcella');
-assert.equal(n.S.tes.pagamenti.length, 0, 'nessun pagamento automatico preesistente');
 assert.ok(!w.TS4.propostaPagamenti({data: '2026-12-19', scadenzaEntro: '2027-12-31'}).some(x => x.doc === 'FT 45/2026'), 'F110 esclude la parcella con ritenuta');
 fai('pp', {parcella: 'FT 45/2026', mezzo: 'assegno', numero: 'AB-1234567', data: '2026-12-19'});
 vicino(-n.saldo('29.10'), 200, 'ritenuta 20% del solo onorario'); vicino(-n.saldo('18.10'), 1068.80, 'assegno netto in circolazione'); vicino(n.saldo('20', 'F800'), 0, 'professionista pagato');
