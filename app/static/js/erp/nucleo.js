@@ -216,7 +216,8 @@
         });
         if (!righe.length) return null;
         if (Math.abs(r2(d) - r2(a)) > 0.001) throw Error('Documento non quadrato: Dare ' + L.eur(d) + ' ≠ Avere ' + L.eur(a));
-        var anno = String(reg.data || '').slice(0, 4);
+        var anno = String(reg.data || '').slice(0, 4);   // esercizio chiuso: niente più scritture con data in quell'anno
+        if (S.chiusure && S.chiusure[anno] && !reg.chiusura) throw Error('L\'esercizio ' + anno + ' è chiuso (chiusura del ' + L.fd(S.chiusure[anno].data) + '): non si registra più con data ' + L.fd(reg.data) + '.');
         // Una liquidazione già registrata non può restare valida se si inserisce dopo una fattura
         // con IVA riferita allo stesso periodo: blocco preventivo, prima di assegnare numeri o mutare il giornale.
         if (!reg.chiusura && reg.tipo !== 'LIQUIDAZIONE_IVA' && reg.tipo !== 'F24_IVA') {
