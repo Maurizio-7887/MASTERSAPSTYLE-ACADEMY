@@ -120,7 +120,9 @@ vicino(-saldo('36'), 4880, 'anticipo SBF'); vicino(p.w.SD4.N.saldo('11', 'C200')
 p = apri('erp_tesoreria', 'factoring'); ok(!p.lab.querySelector('#fc-fattura option[value="' + fD + '"]'), 'la fattura in Ri.Ba. non si cede al factor');
 bene(p.fai('fc', {fattura: fB, modo: 'soluto', factor: 'Factor Italia SpA', anticipo: '90', commissione: '2', data: '2027-05-14'}), 'factoring pro soluto'); checkpoint('Factoring');
 vicino(p.w.SD4.N.saldo('11', 'C100'), 0, 'pro soluto: credito Beta chiuso'); vicino(saldo('15'), 780.8, 'credito residuo verso factor');
-p = apri('erp_chiusura', 'iva'); bene(p.fai('lq', {periodo: '2027-T1', data: '2027-03-31'}), 'liquidazione T1');
+p = apri('erp_chiusura', 'iva');
+ok(/ko/.test(p.fai('lq', {periodo: '2027-T2', data: '2027-06-30'})), 'liquidazione T2 anticipata bloccata finché T1 non è liquidato');
+bene(p.fai('lq', {periodo: '2027-T1', data: '2027-03-31'}), 'liquidazione T1');
 { const x = p.S().chiusura.iva[0]; vicino(x.debito, 6969.6, 'IVA debito T1'); vicino(x.credito, 660, 'IVA credito T1'); vicino(x.saldo, 6309.6, 'IVA da versare T1'); vicino(x.interessi, 63.1, 'interessi 1%'); ok(x.scadenza === '2027-05-17', 'scadenza 17/05 (16 domenica)'); }
 ok(/ko/.test(p.fai('lq', {periodo: '2027-T1', data: '2027-03-31'})), 'doppia liquidazione rifiutata');
 p = apri('erp_chiusura', 'iva'); bene(p.fai('vs', {periodo: '2027-T1', data: '2027-05-17'}), 'F24 T1'); checkpoint('IVA T1');
