@@ -134,7 +134,7 @@ window.PC4 = (function () {
     mats.forEach(function (m) {
       var st = C().stime[m], mm = n.materiale(m), g = S().giacenze[m] || 0, delta = r2(g * (st.unitario - mm.std));
       dett.push({materiale: m, data: data, vecchio: mm.std, nuovo: st.unitario, giacenza: g, rivalutazione: delta, cpm: cpm.attivo() ? cpm.modello().revisione : null});
-      if (Math.abs(delta) > 0.004) righe.push({conto: '13', dareAvere: 'DARE', importo: delta, testo: m + ' ' + g + ' pz × (' + L.eur(st.unitario) + ' − ' + L.eur(mm.std) + ')'});
+      if (Math.abs(delta) > 0.004) righe.push({conto: n.contoMag(m), dareAvere: 'DARE', importo: delta, testo: m + ' ' + g + ' pz × (' + L.eur(st.unitario) + ' − ' + L.eur(mm.std) + ')'});
       mm.std = st.unitario; st.stato = 'FR'; st.rilascio = data;
     });
     var tot = r2(dett.reduce(function (t, x) { return t + x.rivalutazione; }, 0));
