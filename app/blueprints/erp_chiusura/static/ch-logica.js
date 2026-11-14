@@ -32,7 +32,7 @@ window.CH4 = (function () {
   function scadenzaF24(a, m) { if (m > 12) { a++; m -= 12; } var d = new Date(Date.UTC(a, m - 1, 16)), g = d.getUTCDay(); if (g === 6) d.setUTCDate(18); if (g === 0) d.setUTCDate(17); return d.toISOString().slice(0, 10); }
   var noLiq = function (r) { return r.tipo !== 'LIQUIDAZIONE_IVA' && !r.chiusura; };   // chiusura e riapertura spostano saldi, non sono operazioni IVA
   function calcolaIva(p) {
-    var P = periodo(p), liq = X().iva.filter(function (x) { return x.al < P.al; });
+    var P = periodo(p), liq = X().iva.filter(function (x) { return x.al < P.al; }).slice().sort(function (a, b) { return a.al < b.al ? -1 : a.al > b.al ? 1 : 0; });
     // IVA del periodo = saldi a fine periodo − saldi a fine periodo precedente, senza le liquidazioni; più il credito riportato
     var deb = r2(-saldo('21', P.al, noLiq) + saldo('21', addGiorni(P.dal, -1), noLiq)), cre = r2(saldo('14', P.al, noLiq) - saldo('14', addGiorni(P.dal, -1), noLiq));
     var riporto = liq.length ? liq[liq.length - 1].creditoRiportato : 0;
@@ -44,6 +44,7 @@ window.CH4 = (function () {
   function liquidaIva(i) {
     var n = N(), c = calcolaIva(String(i.periodo || '').trim()), data = n.data(i.data || c.al);
     if (X().iva.some(function (x) { return x.periodo === c.periodo || (x.dal <= c.al && x.al >= c.dal); })) throw Error('Periodo ' + c.periodo + ' già liquidato (o sovrapposto a una liquidazione già fatta).');
+    if (X().iva.some(function (x) { return x.dal > c.al; })) throw Error('Liquidazione fuori sequenza: esiste già un periodo successivo liquidato. Storna e ricalcola i periodi successivi in ordine cronologico.');
     if (data < c.al) throw Error('La liquidazione si registra a fine periodo (' + L.fd(c.al) + ') o dopo.');
     if (Math.abs(c.debito) < 0.005 && Math.abs(c.credito) < 0.005) throw Error('Nel periodo ' + c.periodo + ' non c\'è IVA da liquidare.');
     // un periodo precedente dello stesso anno con IVA non ancora liquidata falserebbe il riporto del credito: va liquidato prima
@@ -56,7 +57,7 @@ window.CH4 = (function () {
     // La liquidazione chiude SEMPRE i conti IVA del periodo (21 IVA a debito e 14 IVA a credito) contro l'Erario c/IVA (25):
     //   a debito  → Erario c/IVA in Avere (da versare);  a credito → Erario c/IVA in Dare (credito verso l'Erario, che si riporta al periodo dopo).
     // Il credito riportato resta quindi sul conto 25 e non sul 14. Fanno eccezione i vecchi lavori salvati, dove il credito riportato era rimasto sul 14.
-    var ultimaLiq = X().iva.filter(function (x) { return x.al < c.dal; }).slice(-1)[0], sul14 = ultimaLiq && !ultimaLiq.su25 ? c.riporto : 0;
+    var ultimaLiq = X().iva.filter(function (x) { return x.al < c.dal; }).slice().sort(function (a, b) { return a.al < b.al ? -1 : a.al > b.al ? 1 : 0; }).slice(-1)[0], sul14 = ultimaLiq && !ultimaLiq.su25 ? c.riporto : 0;
     var diff = r2(c.debito - c.credito - sul14);   // + = debito del periodo verso l'Erario, − = credito del periodo
     var righe = [{conto: '21', dareAvere: 'DARE', importo: c.debito, testo: 'IVA a debito ' + c.periodo}, {conto: '14', dareAvere: 'AVERE', importo: r2(c.credito + sul14), testo: 'IVA a credito ' + c.periodo + (sul14 ? ' + credito riportato' : '')},
       {conto: '25', dareAvere: diff >= 0 ? 'AVERE' : 'DARE', importo: Math.abs(diff), testo: diff >= 0 ? 'Erario c/IVA: IVA a debito del periodo' + (c.saldo > 0 ? ', da versare entro il ' + L.fd(c.scadenza) : ', compensata dal credito riportato') : 'Erario c/IVA: IVA a credito del periodo, da riportare'}];
@@ -233,7 +234,7 @@ window.CH4 = (function () {
   function assestamento(i) {
     var n = N(), c = calcolaAssestamento(i); n.data(c.data);
     var testo = String(i.testo || '').trim() || nome(c.conto);
-    if (X().assestamenti && X().assestamenti.some(function (x) { return x.conto === c.conto && x.dal === c.dal && x.al === c.al && x.data === c.data && !x.stornato; })) throw Error('Questo ' + c.nome.toLowerCase() + ' è già registrato.');
+    if (X().assestamenti && X().assestamenti.some(function (x) { return x.conto === c.conto && x.dal === c.dal && x.al === c.al && x.data === c.data && x.testo === testo && !x.stornato; })) throw Error('Questo ' + c.nome.toLowerCase() + ' è già registrato per ' + testo + '.');
     var t = TIPI_ASS[c.tipo], righe = c.tipo === 'risconto-attivo' ? [{conto: '06', dareAvere: 'DARE', importo: c.quota}, {conto: c.conto, dareAvere: 'AVERE', importo: c.quota, testo: 'quota di competenza futura'}]
       : c.tipo === 'risconto-passivo' ? [{conto: c.conto, dareAvere: 'DARE', importo: c.quota, testo: 'quota di competenza futura'}, {conto: '34', dareAvere: 'AVERE', importo: c.quota}]
       : c.tipo === 'rateo-attivo' ? [{conto: '05', dareAvere: 'DARE', importo: c.quota}, {conto: c.conto, dareAvere: 'AVERE', importo: c.quota, testo: 'quota maturata'}]
