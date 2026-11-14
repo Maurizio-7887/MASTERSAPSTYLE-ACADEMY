@@ -195,5 +195,28 @@ vicino(n.saldo('62'), 9950, 'perdita residua dopo utilizzo del fondo precedente'
 assert.equal(w.FIN4.X().perdite.slice(-1)[0].fondo, 50, 'lo stralcio usa il fondo riportato');
 assert.equal(w.FIN4.X().perdite.slice(-1)[0].perdita, 9950, 'la perdita non duplica il fondo');
 
+// ── cespite ceduto retrodatato dopo AFAB: blocco prima di qualsiasi mutazione ──
+n = open('cespiti');
+n.avvia({modo: 'costituzione', capitale: 100000, data: '2027-01-01'}); n.versaCapitale({data: '2027-01-01'}); quiz();
+w.CE4.acquista({classe: 'IMP', descrizione: 'Impianto per prova retrodatazione', fornitore: 'F100', importo: 12000, iva: 22, aliquota: 10, data: '2027-01-01'});
+w.CE4.ammortizza({data: '2027-12-31'});
+const cespiteTest = n.S.cespiti[0], registrazioniPrimaCessione = n.S.registrazioni.length, fondoPrimaCessione = cespiteTest.ammortamenti.reduce((t, x) => t + x.importo, 0);
+assert.throws(() => w.CE4.cedi({cespite: cespiteTest.codice, cliente: 'C100', prezzo: 11000, iva: 22, data: '2027-06-30'}), /Cessione retrodatata/);
+assert.equal(n.S.registrazioni.length, registrazioniPrimaCessione, 'cessione retrodatata non crea scritture');
+assert.equal(cespiteTest.cessione, null, 'cessione retrodatata non modifica lo stato del cespite');
+vicino(cespiteTest.ammortamenti.reduce((t, x) => t + x.importo, 0), fondoPrimaCessione, 'fondo ammortamento invariato dopo rifiuto');
+
+// ── due leasing distinti con date uguali: entrambi devono avere il proprio risconto ──
+n = open('leasing');
+n.avvia({modo: 'costituzione', capitale: 100000, data: '2027-01-01'}); n.versaCapitale({data: '2027-01-01'}); quiz();
+const l1 = w.FIN4.contrattoLeasing({societa: 'F810', bene: 'Carrello A', valore: 18000, maxicanone: 1800, canone: 480, canoni: 35, riscatto: 180, durata: 36, iva: 22, banca: '10', data: '2027-01-10'});
+const contrattoA = w.FIN4.X().leasing[0];
+const l2 = w.FIN4.contrattoLeasing({societa: 'F810', bene: 'Carrello B', valore: 9000, maxicanone: 900, canone: 240, canoni: 35, riscatto: 90, durata: 36, iva: 22, banca: '10', data: '2027-01-10'});
+const contrattoB = w.FIN4.X().leasing[1];
+w.FIN4.riscontoMaxicanone({leasing: contrattoA.numero, data: '2027-12-31'});
+w.FIN4.riscontoMaxicanone({leasing: contrattoB.numero, data: '2027-12-31'});
+assert.equal(w.FIN4.X().assestamenti.filter(x => /maxicanone del leasing/.test(x.testo)).length, 2, 'risconti distinti anche con le stesse date');
+assert.notEqual(w.FIN4.X().assestamenti[0].testo, w.FIN4.X().assestamenti[1].testo, 'riferimento univoco del contratto nel risconto');
+
 quadra(n);
 console.log('OK finanza: ' + controlli + ' controlli, ' + n.S.registrazioni.length + ' registrazioni');
