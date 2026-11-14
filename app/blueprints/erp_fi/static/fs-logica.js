@@ -47,6 +47,10 @@ window.FS4 = (function () {
     var imp = i.importo == null || i.importo === '' ? aperto : L.num(i.importo, 'Importo', 0.01);
     if (imp > aperto + 0.005) throw Error('Verso ' + f.nome + ' ci sono debiti aperti per ' + L.eur(aperto) + ' €: non si paga di più.');
     var doc = String(i.documento || '').trim();
+    // Le parcelle professionali devono passare dal modulo Ritenute: qui si evita il pagamento lordo
+    // e la successiva seconda estinzione dello stesso debito.
+    var parcelleAperte = window.FIN4 && window.FIN4.X ? window.FIN4.X().parcelle.filter(function (p) { return p.fornitore === i.fornitore && !p.pagata; }) : [];
+    if (parcelleAperte.length) throw Error('Il fornitore ha una parcella professionale ancora da pagare (' + parcelleAperte.map(function (p) { return p.rif; }).join(', ') + '). Usa Finanza → Ritenute → Paga parcella: il pagamento calcola il netto e trattiene correttamente la ritenuta.');
     if (doc) {   // la fattura indicata deve essere del fornitore scelto: evita di pagare la polizza al fornitore proposto dal modulo
       var fp = P().filter(function (x) { return String(x.rif).toUpperCase() === doc.toUpperCase(); })[0];
       if (fp && fp.fornitore !== i.fornitore) {
