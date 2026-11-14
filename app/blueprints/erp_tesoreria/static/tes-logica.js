@@ -80,7 +80,12 @@ window.TS4 = (function () {
   // ── F110: programma di pagamento automatico ──
   function propostaPagamenti(i) {
     var data = i.data, entro = i.scadenzaEntro || data;
-    return partite('fornitore', null, data).filter(function (x) { return x.aperto > 0.004 && x.scadenza <= entro && x.valuta === 'EUR' && !T().pagamenti.some(function (r) { return !r.eseguito && r.partite.some(function (p) { return p.doc === x.doc; }); }); });
+    var parcelle = window.FIN4 && window.FIN4.X ? window.FIN4.X().parcelle : [];
+    return partite('fornitore', null, data).filter(function (x) {
+      var parcellaDaGestireConRitenuta = parcelle.some(function (p) { return p.fornitore === x.partner && p.rif === x.doc && !p.pagata; });
+      return x.aperto > 0.004 && x.scadenza <= entro && x.valuta === 'EUR' && !parcellaDaGestireConRitenuta &&
+        !T().pagamenti.some(function (r) { return !r.eseguito && r.partite.some(function (p) { return p.doc === x.doc; }); });
+    });
   }
   function eseguiPagamenti(i) {
     var n = N(), data = n.data(i.data), prop = propostaPagamenti({data: data, scadenzaEntro: i.scadenzaEntro || data});
