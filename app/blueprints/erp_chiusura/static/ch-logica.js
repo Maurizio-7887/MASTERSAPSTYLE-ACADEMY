@@ -87,10 +87,10 @@ window.CH4 = (function () {
   // IRES (art. 83 TUIR): risultato prima delle imposte ± variazioni. Automatiche: ammortamenti oltre i coefficienti fiscali
   // (in aumento), recuperi e minor valore fiscale alla cessione (in diminuzione). Manuali: le altre variazioni.
   // IRAP (art. 5 D.Lgs. 446/1997, società di capitali): valore della produzione = differenza tra valore e costi della produzione,
-  // quindi SENZA proventi e oneri finanziari (area C: interessi, oneri di factoring, cambi) e senza le imposte. I costi del
-  // personale dipendente a tempo indeterminato sono deducibili (art. 11 c. 4-octies). Ammortamenti nei limiti fiscali come IRES.
-  // L'IRAP non è deducibile dall'IRES (la deduzione forfetaria del 10% e quella sul costo del personale sono per cassa: nel primo anno
-  // senza versamenti IRAP non spettano). Imposte anticipate (OIC 25): differenze temporanee × (aliquota IRES + IRAP).
+  // senza area finanziaria e imposte. Per il regime ordinario art. 5, le variazioni IRES ex art. 102 TUIR non si trasferiscono
+  // automaticamente alla base IRAP: gli ammortamenti seguono il valore civilistico, salvo specifiche norme IRAP applicabili.
+  // Le differenze temporanee qui modellate da CE4.fiscale riguardano il doppio binario IRES; le relative anticipate sono quindi
+  // calcolate all'aliquota IRES, senza sommare automaticamente l'aliquota IRAP. Le altre variazioni IRAP restano esplicite in fv.irap.
   var FINANZIARI = {'60': 'interessi passivi bancari', '74': 'interessi passivi su mutui', '53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
   var IMPOSTE = {'56': 1, '52': 1, '51': 1};
   function calcolaImposte(i) {
@@ -108,9 +108,10 @@ window.CH4 = (function () {
     var baseIres = r2(Math.max(0, ante + varIres.reduce(function (t, v) { return t + v[1]; }, 0))), ires = r2(baseIres * aIres / 100);
     var fin = Object.keys(FINANZIARI).filter(function (c) { return Math.abs(voci[c] || 0) > 0.004; }).map(function (c) { return [c + ' ' + FINANZIARI[c], voci[c]]; });
     var vp = r2(ante + fin.reduce(function (t, v) { return t + v[1]; }, 0));   // si tolgono gli oneri (si aggiungono) e i proventi (si sottraggono) finanziari
-    var varIrap = [['Ammortamenti oltre il limite fiscale', ft.aumento], ['Recupero di ammortamenti non dedotti', -ft.diminuzione], ['Cessioni: maggior valore fiscale residuo', -ft.recuperoCessione]].concat(fv.irap);
+    // Non replicare in IRAP le variazioni del doppio binario IRES: art. 102 TUIR non è, da solo, una variazione IRAP.
+    var varIrap = fv.irap.slice();
     var baseIrap = r2(Math.max(0, vp + varIrap.reduce(function (t, v) { return t + v[1]; }, 0))), irap = r2(baseIrap * aIrap / 100);
-    var tempFine = ft.eccedenzaFine, tempInizio = ft.eccedenzaInizio, anticipate = r2((tempFine - tempInizio) * (aIres + aIrap) / 100);
+    var tempFine = ft.eccedenzaFine, tempInizio = ft.eccedenzaInizio, anticipate = r2((tempFine - tempInizio) * aIres / 100);
     return {anno: anno, risultato: ante, voci: voci, fiscale: fis, variazioniIres: varIres, aumenti: aum, diminuzioni: dim, base: baseIres, aliquota: aIres, ires: ires,
       finanziari: fin, valoreProduzione: vp, variazioniIrap: varIrap, baseIrap: baseIrap, aliquotaIrap: aIrap, irap: irap,
       differenzeTemporanee: {inizio: tempInizio, fine: tempFine}, anticipate: anticipate, totaleImposte: r2(ires + irap - anticipate), utile: r2(ante - ires - irap + anticipate)};
