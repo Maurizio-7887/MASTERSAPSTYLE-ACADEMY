@@ -228,7 +228,9 @@ window.SD4 = (function () {
   function incassoAcconto(i) {
     var a = S().acconti.find(function (x) { return x.numero === String(i.richiesta); }); if (!a) throw Error('Richiesta di acconto inesistente.');
     if (a.pagato) throw Error('Acconto già incassato il ' + L.fd(a.pagato) + '.');
-    var data = N.data(i.data); a.pagato = data;
+    var data = N.data(i.data);
+    if (N.S.chiusure && N.S.chiusure[data.slice(0, 4)]) throw Error('Incasso acconto bloccato: l\'esercizio ' + data.slice(0, 4) + ' è chiuso. La richiesta resta non pagata.');
+    a.pagato = data;
     var r = N.post({data: data, tipo: 'ACCONTO', rif: a.numero, descrizione: 'Incasso acconto ' + a.numero + ' — ' + N.cliente(a.cliente).nome + ' (F-29, fattura d\'acconto)',
       righe: [{conto: '10', dareAvere: 'DARE', importo: a.imponibile + a.iva}, {conto: '19', dareAvere: 'AVERE', importo: a.imponibile, partner: a.cliente}, {conto: '21', dareAvere: 'AVERE', importo: a.iva}]});
     N.salva(); return r;
