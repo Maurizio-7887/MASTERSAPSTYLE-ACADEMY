@@ -128,6 +128,12 @@ rfTutti('2027-02-05','PUTAWAY'); checkpoint('Ferro a dimora');
 p=apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa,rif:'FT-RAG-001',data:'2027-02-06'}),'MIRO'); checkpoint('Fattura fornitore');
 p=apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:'TR-STD',qta:'100',data:'2027-02-07'}),'CO01'); const op=p.S().produzione[0].numero;
 p=apri('erp_produzione','avanzamento');
+const chiusuraPrima = JSON.stringify(p.S().giacenze), eventiPrima = JSON.stringify(p.S().produzione.find(x=>x.numero===op).eventi), movimentiPrima = p.S().movimenti.length, registrazioniPrima = p.S().registrazioni.length;
+p.S().chiusure = p.S().chiusure || {}; p.S().chiusure['2027'] = {data:'2027-12-31'};
+ok(/ko/.test(p.fai('pr',{ordine:op,kg:'1',data:'2027-02-08'})),'261 su esercizio chiuso rifiutato');
+ok(JSON.stringify(p.S().giacenze)===chiusuraPrima && JSON.stringify(p.S().produzione.find(x=>x.numero===op).eventi)===eventiPrima &&
+   p.S().movimenti.length===movimentiPrima && p.S().registrazioni.length===registrazioniPrima,'rifiuto su esercizio chiuso non modifica stock, eventi, movimenti o giornale');
+delete p.S().chiusure['2027'];
 const prima = JSON.stringify(p.S().giacenze), nreg=p.S().registrazioni.length;
 ok(/ko/.test(p.fai('pr',{ordine:op,kg:'800',data:'2027-02-08'})),'261 bloccato senza staging');
 ok(JSON.stringify(p.S().giacenze)===prima && p.S().registrazioni.length===nreg,'rifiuto 261 non altera giacenze/scritture');
