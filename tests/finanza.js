@@ -172,5 +172,28 @@ fai('ic', {cliente: 'C700', imponibile: '3000', data: '2027-02-12'}); assert.ok(
 assert.equal(w.FIN4.intrastat('2027-02').length, 2, 'elenchi Intrastat del mese');
 assert.equal(w.FIN4.riepilogoBolli('2027-T1').fatture.length, 0, 'la cessione intracomunitaria non sconta bollo');
 
+// ── riporto pluriennale dei crediti e del fondo: chiusura/riapertura non duplicano i saldi ──
+n = open('crediti');
+w.FS4.fattura({cliente: 'C200', imponibile: 10000, iva: 0, testo: 'credito da riportare', scadenza: '2027-06-30', data: '2026-12-10'}); quiz();
+fai('sv', {importo: '50', data: '2026-12-31'});
+// Rappresenta le due scritture tecniche di chiusura e riapertura: non devono raddoppiare il saldo fiscale.
+n.post({data: '2026-12-31', tipo: 'CHIUSURA_SP', rif: 'CHIUSURA 2026', descrizione: 'chiusura tecnica del credito e del fondo', chiusura: 'stato patrimoniale',
+  righe: [{conto: '91', dareAvere: 'DARE', importo: 10000}, {conto: '11', dareAvere: 'AVERE', importo: 10000},
+          {conto: '11.90', dareAvere: 'DARE', importo: 50}, {conto: '91', dareAvere: 'AVERE', importo: 50}]});
+n.post({data: '2027-01-01', tipo: 'RIAPERTURA', rif: 'RIAPERTURA 2027', descrizione: 'riapertura tecnica del credito e del fondo', chiusura: 'riapertura',
+  righe: [{conto: '11', dareAvere: 'DARE', importo: 10000}, {conto: '92', dareAvere: 'AVERE', importo: 10000},
+          {conto: '92', dareAvere: 'DARE', importo: 50}, {conto: '11.90', dareAvere: 'AVERE', importo: 50}]});
+const limite27 = w.FIN4.limiteSvalutazione('2027');
+vicino(limite27.crediti, 10000, 'credito riportato una sola volta');
+vicino(limite27.fondoPrima, 50, 'fondo precedente riportato una sola volta');
+vicino(limite27.deducibile, 50, 'limite annuo 2027 al netto del fondo precedente');
+const creditoRiportato = w.FIN4.crediteInesigibili('2027-06-30').find(x => x.nome && x.aperto === 10000);
+assert.ok(creditoRiportato, 'credito riportato disponibile per lo stralcio');
+w.FIN4.perdita({credito: creditoRiportato.id, motivo: 'credito inesigibile riportato', data: '2027-06-30'});
+vicino(n.saldo('11.90'), 0, 'fondo precedente interamente utilizzato');
+vicino(n.saldo('62'), 9950, 'perdita residua dopo utilizzo del fondo precedente');
+assert.equal(w.FIN4.X().perdite.slice(-1)[0].fondo, 50, 'lo stralcio usa il fondo riportato');
+assert.equal(w.FIN4.X().perdite.slice(-1)[0].perdita, 9950, 'la perdita non duplica il fondo');
+
 quadra(n);
 console.log('OK finanza: ' + controlli + ' controlli, ' + n.S.registrazioni.length + ' registrazioni');
