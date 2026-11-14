@@ -337,3 +337,56 @@ class Manuale(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrimaNota(unittest.TestCase):
+    def test_operazioni_seguono_il_manuale_e_quadrano(self):
+        from app.blueprints.ragioneria_quiz.primanota import operazioni
+        ops = operazioni()
+        self.assertEqual(list(ops), list(range(1, 21)))
+        tutte = [op for b in ops.values() for op in b["lista"]]
+        self.assertGreaterEqual(len(tutte), 150)
+        self.assertEqual(len({op["eid"] for op in tutte}), len(tutte))
+        for op in tutte:
+            d = sum(v for _c, z, v in op["righe"] if z == "D")
+            a = sum(v for _c, z, v in op["righe"] if z == "A")
+            self.assertEqual(d, a, op["eid"])
+            self.assertTrue(op["spiegazione"], op["eid"])
+        self.assertTrue(any(op["eid"].startswith("M17") for op in ops[17]["lista"]))   # chiusura/riapertura scorte
+
+    def test_importi_e_diagnosi(self):
+        from app.blueprints.ragioneria_quiz.primanota import _importo, correggi
+        self.assertEqual(_importo("1.500,00"), 150000)
+        self.assertEqual(_importo("1500,5"), 150050)
+        self.assertEqual(_importo("1.500"), 150000)
+        self.assertEqual(_importo(""), 0)
+        self.assertIsNone(_importo("abc"))
+        g = [("Merci c/acquisti", "D", 100000), ("IVA ns/credito", "D", 22000), ("Debiti v/fornitori", "A", 122000)]
+        self.assertEqual(correggi(list(reversed(g)), g), (True, []))
+        ok, note = correggi([(c, "A" if z == "D" else "D", v) for c, z, v in g], g)
+        self.assertFalse(ok)
+        self.assertIn("invertite", note[0])
+        ok, note = correggi([("Merci c/acquisti", "D", 122000), ("Debiti v/fornitori", "A", 122000)], g)
+        self.assertIn("Manca il conto «IVA ns/credito».", note)
+
+    def test_correzione_immediata_e_avanzamento(self):
+        from app.blueprints.ragioneria_quiz.primanota import operazioni
+        op = operazioni()[17]["lista"][0]
+        c = nuovo_allievo("pn-allievo")
+        self.assertIn("Prima nota", c.get("/ragioneria-quiz/prima-nota").get_data(as_text=True))
+        html = c.get(f"/ragioneria-quiz/prima-nota/{op['eid']}").get_data(as_text=True)
+        self.assertIn(str(escape(op["testo"])), html)
+        self.assertNotIn("La scrittura del manuale", html)       # la soluzione non c'è prima della risposta
+        sbagliata = {"csrf": csrf(html), "conto": [r[0] for r in op["righe"]],
+                     "dare": [("%.2f" % (r[2] / 100)).replace(".", ",") if r[1] == "A" else "" for r in op["righe"]],
+                     "avere": [("%.2f" % (r[2] / 100)).replace(".", ",") if r[1] == "D" else "" for r in op["righe"]]}
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=sbagliata).get_data(as_text=True)
+        self.assertIn("Non è ancora giusta", r)
+        self.assertIn("invertite", r)
+        self.assertIn("Dal manuale", r)
+        giusta = dict(sbagliata, dare=sbagliata["avere"], avere=sbagliata["dare"])
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=giusta).get_data(as_text=True)
+        self.assertIn("Scrittura giusta", r)
+        self.assertIn("1 / ", c.get("/ragioneria-quiz/prima-nota").get_data(as_text=True))
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=dict(giusta, conto=["Conto inventato", "Banca c/c"])).get_data(as_text=True)
+        self.assertIn("non è un conto del piano dei conti", r)

@@ -22,9 +22,14 @@ bp = Blueprint("ragioneria_quiz", __name__, url_prefix="/ragioneria-quiz",
                template_folder="templates", static_folder="static", static_url_path="/static-rq")
 
 
+def _pn_operazioni():
+    from .primanota import operazioni
+    return operazioni()
+
+
 @bp.app_context_processor
 def _contesto():
-    return {"rq_unita": UNITA}
+    return {"rq_unita": UNITA, "rq_pn": {n: b["lista"][0]["eid"] for n, b in _pn_operazioni().items() if b["lista"]}}
 
 
 def _tentativo(tid, scrivere=False):
@@ -47,7 +52,7 @@ def indice():
         limiti[c] = (sv.tentativi_usati(u.id, "verifica", c), sv.tentativi_concessi(u.id, "verifica", c))
     limiti["finale"] = (sv.tentativi_usati(u.id, "finale"), sv.tentativi_concessi(u.id, "finale"))
     aperte = {(t.modalita, t.unita): t for t in a["tentativi"] if t.stato == "in_corso"}
-    return render_template("ragioneria_quiz/indice.html", u=u, a=a, limiti=limiti, aperte=aperte,
+    return render_template("ragioneria_quiz/indice.html", pn_tot=sum(len(b["lista"]) for b in _pn_operazioni().values()), u=u, a=a, limiti=limiti, aperte=aperte,
                            banca=riepilogo(), MODALITA=sv.MODALITA, SOGLIA=sv.SOGLIA, SOGLIA_PARTE=sv.SOGLIA_PARTE)
 
 
@@ -464,3 +469,8 @@ def esporta():
 @solo_docente
 def docente_banca():
     return render_template("ragioneria_quiz/docente_banca.html", banca=riepilogo())
+
+
+from . import primanota as _primanota  # noqa: E402
+
+_primanota.registra(bp)

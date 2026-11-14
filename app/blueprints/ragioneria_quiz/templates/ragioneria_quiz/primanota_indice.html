@@ -1,0 +1,19 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import barra %}
+{% block titolo %}Ragioneria · prima nota{% endblock %}
+{% block rq %}
+<h1>✍️ Esercitazione di prima nota</h1>
+<p class="rq-intro">Per ogni operazione <b>scrivi tu la scrittura in partita doppia</b>: scegli i conti dal piano dei conti e metti gli importi in Dare o in Avere. Quando confermi, <b>la correzione è immediata</b>: vedi se è giusta, che cosa non va e la scrittura del manuale, con il paragrafo da rileggere. Le operazioni seguono i capitoli del <a href="{{ url_for('ragioneria_quiz.manuale') }}">manuale</a>, dall'inizio alla fine: prima le scritture svolte nel capitolo, poi le operazioni del caso Ferro &amp; Transenne del riquadro «Lo stesso nei programmi», poi le scritture del blocco di domande.</p>
+<p><b>{{ giuste }} / {{ tot }}</b> operazioni registrate correttamente. {% if prima %}<a class="msa-btn" href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=prima) }}">{{ 'Comincia' if giuste == 0 else 'Continua da dove eri rimasto' }}</a>{% endif %}</p>
+<table class="rq-tab">
+  <thead><tr><th>Capitolo del manuale</th><th class="n">Operazioni</th><th>Giuste</th><th></th></tr></thead>
+  <tbody>
+  {% for c in capitoli %}{% if c.tot %}
+  <tr><td><a href="{{ url_for('ragioneria_quiz.manuale') }}#cap{{ c.n }}">{{ c.n }}. {{ c.titolo }}</a></td>
+      <td class="n">{{ c.tot }}</td>
+      <td>{{ barra((100 * c.giuste / c.tot) | round | int if c.fatte else none, 100) }}</td>
+      <td><a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=c.prossima) }}">{{ 'Ripassa' if c.giuste == c.tot else ('Continua' if c.fatte else 'Inizia') }}</a></td></tr>
+  {% endif %}{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

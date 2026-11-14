@@ -53,3 +53,15 @@ class EventoQuiz(db.Model):
     chiave = db.Column(db.String(24), nullable=True)             # es. verifica:Q05, finale
     nota = db.Column(db.String(300), default="")
     data = db.Column(db.DateTime, default=adesso, nullable=False)
+
+
+class PrimaNotaRisposta(db.Model):
+    """Esercitazione di prima nota: ogni registrazione scritta dall'allievo e la correzione del server."""
+    __tablename__ = "rq_primanota"
+    id = db.Column(db.Integer, primary_key=True)
+    utente_id = db.Column(db.Integer, db.ForeignKey("utente.id"), nullable=False, index=True)
+    eid = db.Column(db.String(16), nullable=False, index=True)    # Q07-03 (banca) oppure M17-02 (scrittura svolta del manuale)
+    righe = db.Column(db.Text, nullable=False)                   # json: [[conto, D/A, centesimi], …] scritte dall'allievo
+    corretta = db.Column(db.Boolean, nullable=False)
+    aiuto = db.Column(db.Boolean, default=False, nullable=False)
+    data = db.Column(db.DateTime, default=adesso, nullable=False)

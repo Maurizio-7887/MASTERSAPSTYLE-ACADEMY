@@ -41,7 +41,7 @@
   {% endfor %}
 
   {% if c.sap %}
-  <div class="rq-man-sap">
+  <div class="rq-man-sap" id="sap{{ c.n }}">
     <h3>🖥️ Lo stesso nei programmi: metodo italiano, ad hoc Revolution, Dynamics 365 Business Central, SAP</h3>
     <p class="rq-nd">SAP: scritture reali dell'esercitazione «Dicembre» (codici dei conti del simulatore). Business Central con localizzazione italiana e ad hoc Revolution: come la stessa operazione arriva in contabilità generale; i nomi dei conti dipendono dal piano dei conti dell'azienda.</p>
     {% for x in c.sap %}
@@ -66,7 +66,7 @@
     <ul class="rq-man-errori">{% for e in c.errori %}<li>{{ e }}</li>{% endfor %}</ul>
   </div>
   {% endif %}
-  <p class="rq-man-allenati">🏋️ Per allenarti: {% for u in c.unita %}<a href="{{ url_for('ragioneria_quiz.unita', cod=u) }}">{{ u }} {{ rq_unita[u].titolo }}</a>{{ ' · ' if not loop.last }}{% endfor %} <span class="rq-nessuna-stampa">· <a href="#inizio">↑ Indice</a></span></p>
+  <p class="rq-man-allenati">🏋️ Per allenarti: {% for u in c.unita %}<a href="{{ url_for('ragioneria_quiz.unita', cod=u) }}">{{ u }} {{ rq_unita[u].titolo }}</a>{{ ' · ' if not loop.last }}{% endfor %}{% if c.n in rq_pn and rq_pn[c.n] %} <span class="rq-nessuna-stampa">· <a href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=rq_pn[c.n]) }}">✍️ Prima nota del capitolo</a></span>{% endif %} <span class="rq-nessuna-stampa">· <a href="#inizio">↑ Indice</a></span></p>
 </section>
 {% endfor %}
 {% endfor %}

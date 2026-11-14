@@ -7,8 +7,14 @@
 
 <section class="rq-man-primo">
   <h2>📘 Si parte dal manuale</h2>
-  <p>Prima delle domande studia il <b>Manuale di ragioneria</b>. Le domande sono divise in <b>20 blocchi, uno per capitolo</b>, nello stesso ordine del manuale: venti capitoli dalla partita doppia alla chiusura e riapertura, con tutte le scritture svolte secondo il <b>metodo italiano</b> (compresa la chiusura e la riapertura delle scorte) e, accanto, le <b>stesse operazioni nel gestionale SAP</b> dell'esercitazione di dicembre.</p>
-  <p><a class="msa-btn" href="{{ url_for('ragioneria_quiz.manuale') }}">Apri il manuale</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.static', filename='manuale/Manuale_di_ragioneria.pdf') }}" download>⬇️ Scarica il PDF</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.manuale') }}#cap17">Capitolo 17 · Magazzino: chiusura e riapertura delle scorte</a></p>
+  <p>Prima delle domande studia il <b>Manuale di ragioneria</b>. Le domande sono divise in <b>20 blocchi, uno per capitolo</b>, nello stesso ordine del manuale: venti capitoli dalla partita doppia alla chiusura e riapertura, con tutte le scritture svolte secondo il <b>metodo italiano</b> e, accanto, le <b>stesse operazioni nel gestionale SAP</b> dell'esercitazione di dicembre.</p>
+  <p><a class="msa-btn" href="{{ url_for('ragioneria_quiz.manuale') }}">Apri il manuale</a> <a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.static', filename='manuale/Manuale_di_ragioneria.pdf') }}" download>⬇️ Scarica il PDF</a></p>
+</section>
+
+<section class="rq-box rq-pn-box">
+  <h2>📒 Esercitazione di prima nota</h2>
+  <p>Leggi l'operazione e <b>scrivi tu la scrittura</b>: conti, Dare e Avere. La correzione è immediata e rimanda al paragrafo del manuale. {{ pn_tot }} operazioni, capitolo per capitolo.</p>
+  <p><a class="msa-btn" href="{{ url_for('ragioneria_quiz.prima_nota') }}">Vai alla prima nota</a></p>
 </section>
 
 <div class="rq-percorso">

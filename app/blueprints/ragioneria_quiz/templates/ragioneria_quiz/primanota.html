@@ -1,0 +1,71 @@
+{% extends "ragioneria_quiz/_base.html" %}
+{% from "ragioneria_quiz/_macro.html" import scrittura %}
+{% block titolo %}Prima nota · {{ op.eid }}{% endblock %}
+{% block rq %}
+<p class="rq-nd"><a href="{{ url_for('ragioneria_quiz.prima_nota') }}">✍️ Prima nota</a> · Capitolo {{ cap }} · {{ titolo_cap }} · operazione {{ pos }} di {{ tot }}</p>
+<div class="rq-pn-op"><b>Operazione</b><p>{{ op.testo }}</p></div>
+
+{% if esito and esito.valida %}
+  <div class="rq-esito {{ 'ok' if esito.ok else 'ko' }}">
+    <h2>{{ '✅ Scrittura giusta!' if esito.ok else '❌ Non è ancora giusta' }}</h2>
+    {% if esito.note %}<ul>{% for n in esito.note %}<li>{{ n }}</li>{% endfor %}</ul>{% endif %}
+  </div>
+  <div class="rq-man-due">
+    <div><h3>La tua scrittura</h3>{{ scrittura(scritte_d) }}</div>
+    <div><h3>La scrittura del manuale</h3>{{ scrittura(giuste) }}</div>
+  </div>
+  <p><b>Perché:</b> {{ op.spiegazione }}</p>
+  {% if dove %}<p>📘 Dal manuale, <a href="{{ url_for('ragioneria_quiz.manuale') }}#{{ dove.ancora }}" target="_blank" rel="noopener">{{ dove.testo }}</a>{% if dove.citazione and dove.citazione != op.spiegazione %}: <i>«{{ dove.citazione }}»</i>{% endif %}</p>{% endif %}
+  <p>{% if not esito.ok %}<a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=op.eid) }}">↺ Riprova</a> {% endif %}
+     {% if dopo %}<a class="msa-btn" href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=dopo) }}">Avanti →</a>{% else %}<a class="msa-btn" href="{{ url_for('ragioneria_quiz.prima_nota') }}">Fine: torna all'elenco</a>{% endif %}</p>
+{% else %}
+  {% if esito %}<div class="rq-esito ko"><ul>{% for n in esito.note %}<li>{{ n }}</li>{% endfor %}</ul></div>{% endif %}
+  <form method="post" class="rq-pn" id="pn">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="aiuto" value="{{ '1' if aiuto else '0' }}">
+    <datalist id="pn-conti">{% for c in conti %}<option value="{{ c }}">{% endfor %}</datalist>
+    <table class="rq-scr rq-pn-griglia">
+      <thead><tr><th>Conto</th><th class="n">Dare</th><th class="n">Avere</th></tr></thead>
+      <tbody id="pn-righe">
+      {% set pre = scritte if scritte else [] %}
+      {% for i in range([righe_vuote, pre | length] | max) %}{% set r = pre[i] if i < pre | length else none %}
+      <tr><td><input name="conto" list="pn-conti" autocomplete="off" placeholder="scegli il conto" value="{{ r[0] if r }}"></td>
+          <td class="n"><input name="dare" inputmode="decimal" value="{{ ('%.2f' % (r[2] / 100)) | replace('.', ',') if r and r[1] == 'D' }}"></td>
+          <td class="n"><input name="avere" inputmode="decimal" value="{{ ('%.2f' % (r[2] / 100)) | replace('.', ',') if r and r[1] == 'A' }}"></td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th>Totali <span id="pn-quadra"></span></th><th class="n" id="pn-td">0,00</th><th class="n" id="pn-ta">0,00</th></tr></tfoot>
+    </table>
+    <p><button type="button" class="msa-btn sec" id="pn-piu">+ riga</button> <button class="msa-btn">Correggi la scrittura</button></p>
+  </form>
+  {% if aiuto %}
+    <div class="rq-aiuto rq-aiuto-q"><p><b>💡 Suggerimento</b></p>{% if aiuto_testo %}<p>{{ aiuto_testo }}</p>{% endif %}
+      <p>Conti da usare: {% for c in giuste | map(attribute='conto') | unique %}<b>{{ c }}</b>{{ ', ' if not loop.last }}{% endfor %} (sezioni e importi li decidi tu).</p>
+      {% if dove %}<p>📘 Dal manuale, <a href="{{ url_for('ragioneria_quiz.manuale') }}#{{ dove.ancora }}" target="_blank" rel="noopener">{{ dove.testo }}</a>{% if dove.citazione and op.qid %}: <i>«{{ dove.citazione }}»</i>{% endif %}</p>{% endif %}</div>
+  {% else %}
+    <p><a class="msa-btn sec" href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=op.eid, aiuto=1) }}">💡 Mi serve un aiuto</a></p>
+  {% endif %}
+  <p class="rq-nd">{% if prec %}<a href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=prec) }}">← precedente</a> · {% endif %}{% if dopo %}<a href="{{ url_for('ragioneria_quiz.prima_nota_op', eid=dopo) }}">salta →</a>{% endif %}</p>
+  <script>
+  (function () {
+    var tb = document.getElementById('pn-righe');
+    function num(v) { v = (v || '').replace(/[€\s]/g, ''); if (v.indexOf(',') >= 0) v = v.replace(/\./g, '').replace(',', '.'); var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+    function fmt(n) { var p = n.toFixed(2).split('.'); return p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + p[1]; }
+    function tot() {
+      var d = 0, a = 0;
+      tb.querySelectorAll('input[name=dare]').forEach(function (i) { d += num(i.value); });
+      tb.querySelectorAll('input[name=avere]').forEach(function (i) { a += num(i.value); });
+      document.getElementById('pn-td').textContent = fmt(d); document.getElementById('pn-ta').textContent = fmt(a);
+      var q = document.getElementById('pn-quadra');
+      q.textContent = (d || a) ? (Math.abs(d - a) < 0.005 ? '· ✅ quadra' : '· ⚠️ differenza ' + fmt(Math.abs(d - a))) : '';
+    }
+    tb.addEventListener('input', tot);
+    document.getElementById('pn-piu').addEventListener('click', function () {
+      var r = tb.rows[tb.rows.length - 1].cloneNode(true);
+      r.querySelectorAll('input').forEach(function (i) { i.value = ''; }); tb.appendChild(r);
+    });
+    tot();
+  })();
+  </script>
+{% endif %}
+{% endblock %}

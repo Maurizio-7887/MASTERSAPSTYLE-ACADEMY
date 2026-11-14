@@ -5,6 +5,7 @@
 <nav class="msa-pagine rq-menu" aria-label="Ragioneria">
   <a href="{{ url_for('ragioneria_quiz.indice') }}" class="{{ 'attivo' if request.endpoint in ('ragioneria_quiz.indice','ragioneria_quiz.unita') }}">📚 I 20 blocchi</a>
   <a href="{{ url_for('ragioneria_quiz.manuale') }}" class="{{ 'attivo' if request.endpoint == 'ragioneria_quiz.manuale' }}">📘 Manuale</a>
+  <a href="{{ url_for('ragioneria_quiz.prima_nota') }}" class="{{ 'attivo' if request.endpoint.startswith('ragioneria_quiz.prima_nota') }}">✍️ Prima nota</a>
   <a href="{{ url_for('ragioneria_quiz.piano') }}" class="{{ 'attivo' if request.endpoint == 'ragioneria_quiz.piano' }}">📒 Piano dei conti</a>
   {% if utente_corrente().docente %}
   <a href="{{ url_for('ragioneria_quiz.docente') }}" class="{{ 'attivo' if request.endpoint.startswith('ragioneria_quiz.docente') }}">🎓 Risultati della classe</a>

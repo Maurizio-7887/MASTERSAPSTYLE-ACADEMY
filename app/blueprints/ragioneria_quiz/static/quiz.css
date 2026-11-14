@@ -140,3 +140,15 @@ label.rq-opz:hover{border-color:#B6A6D3;background:#FBFAFD}
 .rq-man-fig{margin:14px 0;text-align:center;break-inside:avoid}
 .rq-man-fig img{max-width:100%;border:1px solid #CCD;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .rq-man-fig figcaption{font-size:13px;color:#555;margin-top:4px}
+/* prima nota */
+.rq-pn-op{background:#F4F8FC;border-left:4px solid #0A6ED1;padding:10px 14px;margin:10px 0;font-size:1.05em}
+.rq-pn-op p{margin:4px 0 0}
+.rq-pn-griglia{width:100%;max-width:760px}
+.rq-pn-griglia input{width:100%;box-sizing:border-box;padding:5px 6px;border:1px solid #BBB;border-radius:4px;font:inherit}
+.rq-pn-griglia td.n input{text-align:right;max-width:130px}
+.rq-pn-griglia td:first-child{width:60%}
+.rq-pn-griglia tfoot th{border-top:2px solid #999;padding:5px 6px}
+.rq-esito.ok{background:#EEF8EE;border:1px solid #9CCB9C;border-radius:6px;padding:8px 14px}
+.rq-esito.ko{background:#FDF1EE;border:1px solid #E3A99A;border-radius:6px;padding:8px 14px}
+.rq-esito h2{margin:4px 0;font-size:1.15em}
+.rq-pn-box{margin:12px 0}
