@@ -198,6 +198,7 @@ assert.equal(w.FIN4.X().perdite.slice(-1)[0].fondo, 50, 'lo stralcio usa il fond
 assert.equal(w.FIN4.X().perdite.slice(-1)[0].perdita, 9950, 'la perdita non duplica il fondo');
 
 // ── cespite ceduto retrodatato dopo AFAB: blocco prima di qualsiasi mutazione ──
+if (w) { w.close(); w = null; } saved = null;
 n = open('cespiti');
 n.avvia({modo: 'costituzione', capitale: 100000, data: '2027-01-01'}); n.versaCapitale({data: '2027-01-01'}); quiz();
 w.CE4.acquista({classe: 'IMP', descrizione: 'Impianto per prova retrodatazione', fornitore: 'F100', importo: 12000, iva: 22, aliquota: 10, data: '2027-01-01'});
@@ -209,6 +210,7 @@ assert.equal(cespiteTest.cessione, null, 'cessione retrodatata non modifica lo s
 vicino(cespiteTest.ammortamenti.reduce((t, x) => t + x.importo, 0), fondoPrimaCessione, 'fondo ammortamento invariato dopo rifiuto');
 
 // ── due leasing distinti con date uguali: entrambi devono avere il proprio risconto ──
+if (w) { w.close(); w = null; } saved = null;
 n = open('leasing');
 n.avvia({modo: 'costituzione', capitale: 100000, data: '2027-01-01'}); n.versaCapitale({data: '2027-01-01'}); quiz();
 const l1 = w.FIN4.contrattoLeasing({societa: 'F810', bene: 'Carrello A', valore: 18000, maxicanone: 1800, canone: 480, canoni: 35, riscatto: 180, durata: 36, iva: 22, banca: '10', data: '2027-01-10'});
