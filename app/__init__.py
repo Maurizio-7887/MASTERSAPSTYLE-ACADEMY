@@ -39,6 +39,7 @@ from .blueprints.impostazioni import bp as impostazioni
 from .blueprints.personale import bp as personale
 from .blueprints.pianificazione import bp as pianificazione
 from .blueprints.portale import bp as portale
+from .blueprints.public_stats import bp as public_stats
 from .blueprints.privati import bp as privati
 from .blueprints.produzione import bp as produzione
 from .blueprints.ragioneria_quiz import bp as ragioneria_quiz
@@ -49,7 +50,7 @@ from .blueprints.sincronia import bp as sincronia
 from .blueprints.vendite_acquisti import bp as vendite_acquisti
 from .db import inizializza, ora_italiana
 
-BLUEPRINT = [executive_api, portale, privati, accessi, sincronia, guida, allievo, docente, riprendi,
+BLUEPRINT = [executive_api, portale, privati, public_stats, accessi, sincronia, guida, allievo, docente, riprendi,
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
              erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_controllo, erp_costi, erp_bpc, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_finanza, erp_valute, erp_paghe, erp_copa, erp_fi, erp_cespiti, erp_chiusura,
