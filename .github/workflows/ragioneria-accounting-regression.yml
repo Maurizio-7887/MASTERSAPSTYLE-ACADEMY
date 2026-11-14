@@ -38,4 +38,4 @@ jobs:
       - name: Test finanza, parcelle e pagamenti
         run: node tests/finanza.js
       - name: Test esercizio completo, IVA, imposte, chiusura e riapertura
-        run: node tests/esercizio-ragioneria-chiusura.js
+        run: node tests/esercizio-ragioneria-wms.js && node tests/esercizio-ragioneria-chiusura.js
