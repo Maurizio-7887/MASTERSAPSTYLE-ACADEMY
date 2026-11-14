@@ -216,7 +216,25 @@
         });
         if (!righe.length) return null;
         if (Math.abs(r2(d) - r2(a)) > 0.001) throw Error('Documento non quadrato: Dare ' + L.eur(d) + ' ≠ Avere ' + L.eur(a));
-        var anno = String(reg.data || '').slice(0, 4);   // esercizio chiuso: niente più scritture con data in quell'anno
+        var anno = String(reg.data || '').slice(0, 4);
+        // Una liquidazione già registrata non può restare valida se si inserisce dopo una fattura
+        // con IVA riferita allo stesso periodo: blocco preventivo, prima di assegnare numeri o mutare il giornale.
+        if (!reg.chiusura && reg.tipo !== 'LIQUIDAZIONE_IVA' && reg.tipo !== 'F24_IVA') {
+          var toccaIva = righe.some(function (x) { return x.conto === '14' || x.conto === '21'; });
+          var liq = S.chiusura && S.chiusura.iva || [];
+          if (toccaIva && liq.some(function (x) { return x.dal <= reg.data && x.al >= reg.data; }))
+            throw Error('Registrazione IVA bloccata: il periodo ' + reg.data.slice(0,7) + ' è già stato liquidato. Per correggere, storna la liquidazione e rifai in ordine liquidazione e versamento prima di registrare altri documenti IVA.');
+        }
+        // Dopo la determinazione delle imposte non si possono aggiungere costi/ricavi dell'anno:
+        // altrimenti la chiusura userebbe imposte calcolate su una base ormai superata.
+        if (!reg.chiusura && reg.tipo !== 'IMPOSTE' && S.chiusura && (S.chiusura.imposte || []).some(function (x) { return String(x.anno) === anno; })) {
+          var toccaEconomici = righe.some(function (x) {
+            var pc = S.pianoDeiConti.find(function (c) { return c.codice === x.conto; });
+            return pc && (pc.tipo === 'COSTO' || pc.tipo === 'RICAVO');
+          });
+          if (toccaEconomici) throw Error('Registrazione bloccata: le imposte ' + anno + ' sono già state determinate. Storna prima la registrazione delle imposte, aggiorna le scritture e ricalcola IRES e IRAP.');
+        }
+        // esercizio chiuso: niente più scritture con data in quell'anno
         if (S.chiusure && S.chiusure[anno] && !reg.chiusura) throw Error('L\'esercizio ' + anno + ' è chiuso (chiusura del ' + L.fd(S.chiusure[anno].data) + '): non si registra più con data ' + L.fd(reg.data) + '.');
         var r = {id: S.prossimoIdRegistrazione++, numero: N.numero('contabile'), data: reg.data, tipo: reg.tipo, descrizione: reg.descrizione, righe: righe, rif: reg.rif || ''};
         if (reg.quiz === false) r.quiz = false; if (reg.chiusura) r.chiusura = reg.chiusura;
