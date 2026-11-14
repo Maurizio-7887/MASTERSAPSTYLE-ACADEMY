@@ -173,7 +173,9 @@ assert.equal(w.FIN4.intrastat('2027-02').length, 2, 'elenchi Intrastat del mese'
 assert.equal(w.FIN4.riepilogoBolli('2027-T1').fatture.length, 0, 'la cessione intracomunitaria non sconta bollo');
 
 // ── riporto pluriennale dei crediti e del fondo: chiusura/riapertura non duplicano i saldi ──
+if (w) { w.close(); w = null; } saved = null;
 n = open('crediti');
+n.avvia({modo: 'costituzione', capitale: 100000, data: '2026-01-01'}); n.versaCapitale({data: '2026-01-01'}); quiz();
 w.FS4.fattura({cliente: 'C200', imponibile: 10000, iva: 0, testo: 'credito da riportare', scadenza: '2027-06-30', data: '2026-12-10'}); quiz();
 fai('sv', {importo: '50', data: '2026-12-31'});
 // Rappresenta le due scritture tecniche di chiusura e riapertura: non devono raddoppiare il saldo fiscale.
