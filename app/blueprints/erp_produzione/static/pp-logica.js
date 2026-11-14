@@ -47,6 +47,7 @@ window.PP4 = (function () {
     var n = N(), o = ord(i.ordine); aperto(o);
     var cm = comp(o).mat, mm = n.materiale(cm), ferro = cm === 'FERRO';
     var data = n.data(i.data), kg = L.num(i.kg == null || i.kg === '' ? i.qta : i.kg, ferro ? 'Quantità ferro (kg)' : 'Quantità di ' + cm + ' (pz)', 0.001); if (data < o.data) throw Error('Prelievo anteriore all\'ordine.');
+    if (S().chiusure && S().chiusure[data.slice(0, 4)]) throw Error('Prelievo bloccato: l\'esercizio ' + data.slice(0, 4) + ' è chiuso. Nessuna quantità di magazzino è stata modificata.');
     if (o.fasi) cronologia(o, data);
     var val = r2(kg * mm.std), doc = n.numero('materiale');
     if (window.WM4 && window.WM4.attivo(data)) window.WM4.consumaPSA(cm, kg, o.numero);
