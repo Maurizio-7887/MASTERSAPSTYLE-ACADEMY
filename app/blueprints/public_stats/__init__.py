@@ -1,7 +1,7 @@
 """Statistiche aggregate pubbliche, senza dati identificativi degli allievi."""
 from flask import Blueprint, jsonify, request
 
-from ..db import Utente, db
+from ...db import Utente, db
 
 bp = Blueprint("public_stats", __name__)
 
