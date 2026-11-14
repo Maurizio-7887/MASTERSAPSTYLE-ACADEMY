@@ -102,8 +102,9 @@ let p = apri('erp_dati','avvio');
 p.fai('av',{data:'2027-01-02'}); ok(p.S().avviato==='2027-01-02','avvio'); checkpoint('Apertura');
 p = apri('erp_magazzino','struttura'); p.fai('at',{data:'2027-01-02'}); ok(p.S().wm.attivo==='2027-01-02','W100'); checkpoint('WMS iniziale');
 ok(p.S().wm.carico.length === 20,'20 pallet iniziali');
-const halb = Object.keys(p.S().materiali).find(k => p.S().materiali[k].tipo === 'HALB');
-ok(!!halb && p.w.SD4.N.contoMag(halb) === '07', 'il semilavorato HALB usa il conto rimanenze 07 anche in CK24');
+p.S().materiali.__TEST_HALB = {tipo: 'HALB'};
+ok(p.w.SD4.N.contoMag('__TEST_HALB') === '07', 'il semilavorato HALB usa il conto rimanenze 07 anche in CK24');
+delete p.S().materiali.__TEST_HALB;
 // 2 · costo standard con il ciclo CO, come nell'esercizio di dicembre: piano dei centri, tariffe KSPI, scheda dei sovraccosti, CK11N
 p = apri('erp_controllo','centri'); const fiPrimaCO = JSON.stringify(p.S().registrazioni);
 p.fai('cpm-start',{conferma:'ATTIVA'},'start'); ok(p.w.PC4.cpm.attivo() && p.w.PC4.cpm.modello().anno===2027,'piano CO 2027 aperto');
