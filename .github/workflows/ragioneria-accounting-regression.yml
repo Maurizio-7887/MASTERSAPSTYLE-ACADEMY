@@ -36,6 +36,6 @@ jobs:
           npm ci
           python -m pip install -r requirements.txt
       - name: Test finanza, parcelle e pagamenti
-        run: npm run test:s4
+        run: node tests/finanza.js
       - name: Test esercizio completo, IVA, imposte, chiusura e riapertura
         run: npm run test:ragioneria-wms
