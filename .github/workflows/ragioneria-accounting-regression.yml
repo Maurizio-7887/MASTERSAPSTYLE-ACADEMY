@@ -1,0 +1,41 @@
+name: Ragioneria contabile - regressione Firenze
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/static/js/erp/nucleo.js'
+      - 'app/report.py'
+      - 'app/blueprints/erp_fi/static/**'
+      - 'app/blueprints/erp_tesoreria/static/**'
+      - 'app/blueprints/erp_finanza/static/**'
+      - 'app/blueprints/erp_chiusura/static/**'
+      - 'app/blueprints/erp_costi/static/**'
+      - 'app/blueprints/erp_cespiti/static/**'
+      - 'app/blueprints/erp_produzione/static/**'
+      - 'app/blueprints/erp_vendite/static/**'
+      - 'tests/finanza.js'
+      - 'tests/esercizio-ragioneria-chiusura.js'
+      - '.github/workflows/ragioneria-accounting-regression.yml'
+
+jobs:
+  accounting-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installa dipendenze
+        run: |
+          npm ci
+          python -m pip install -r requirements.txt
+      - name: Test finanza, parcelle e pagamenti
+        run: npm run test:s4
+      - name: Test esercizio completo, IVA, imposte, chiusura e riapertura
+        run: npm run test:ragioneria-wms
