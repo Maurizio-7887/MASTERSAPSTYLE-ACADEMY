@@ -336,11 +336,12 @@ window.FIN4 = (function () {
   }
 
   // ═════════════════════════ CREDITI DUBBI ═════════════════════════
-  var saldoAl = function (conto, alla) { return r2(S().registrazioni.reduce(function (t, r) { if (r.data > alla || ['epilogo', 'stato patrimoniale'].indexOf(r.chiusura) >= 0) return t; return t + r.righe.filter(function (x) { return x.conto === conto; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0)); };
+  var saldoAl = function (conto, alla) { return r2(S().registrazioni.reduce(function (t, r) { if (r.data > alla || r.chiusura) return t; return t + r.righe.filter(function (x) { return x.conto === conto; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0)); };
   // art. 106 TUIR: deducibile lo 0,5% dei crediti commerciali di fine anno, finché il fondo non supera il 5%
   function limiteSvalutazione(anno) {
     var al = anno + '-12-31', crediti = r2(Math.max(0, saldoAl('11', al)) + Math.max(0, saldoAl('11.10', al)) + Math.max(0, saldoAl('11.20', al)));
-    var fondoPrima = r2(-S().registrazioni.filter(function (r) { return r.data <= al && r.tipo !== 'SVALUTAZIONE_CREDITI' && !r.chiusura; }).reduce(function (t, r) { return t + r.righe.filter(function (x) { return x.conto === '11.90'; }).reduce(function (u, x) { return u + (x.dareAvere === 'DARE' ? x.importo : -x.importo); }, 0); }, 0));
+    var annoPrecedente = String(+anno - 1) + '-12-31';
+    var fondoPrima = +anno > 1000 ? r2(-saldoAl('11.90', annoPrecedente)) : 0;
     var annuo = r2(crediti * 0.005), tetto = r2(crediti * 0.05), deducibile = r2(Math.max(0, Math.min(annuo, tetto - fondoPrima)));
     var accantonato = r2(X().svalutazioni.filter(function (s) { return s.anno === String(anno); }).reduce(function (t, s) { return t + s.importo; }, 0));
     return {anno: String(anno), crediti: crediti, fondoPrima: fondoPrima, limiteAnnuo: annuo, tetto: tetto, deducibile: deducibile, accantonato: accantonato, eccedenza: r2(Math.max(0, accantonato - deducibile))};
