@@ -24,6 +24,10 @@ try {
   const originalIndex = all.findIndex(p => p.titolo === 'Leggi la mappa delle ubicazioni');
   assert.equal(originalIndex, 59, 'il controllo deve riguardare proprio il passo 60');
   const step60 = all[originalIndex];
+  assert.match(step60.campi[1][1], /annota il codice UdC e la sua ubicazione effettiva/i,
+    'anche i dati dettagliati del passo 60 indicano di annotare UdC e ubicazione reale');
+  assert.match(step60.nota, /non un movimento di magazzino/i,
+    'il passo 60 chiarisce che è una lettura e non registra movimenti');
   const step61 = all[originalIndex + 1];
   assert.equal(step61.titolo, 'Dove si trova? Cerca il ferro', 'il passo successivo deve essere il 61');
 
