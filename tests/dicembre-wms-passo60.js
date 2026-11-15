@@ -53,7 +53,6 @@ try {
   fatto.click();
 
   const salvato = JSON.parse(w.localStorage.getItem(key));
-  assert.equal(salvato.msaGuida.dicembre-wms, undefined, 'la chiave del percorso non deve essere alterata');
   assert.equal(salvato.msaGuida['dicembre-wms']['Leggi la mappa delle ubicazioni'], 1,
     'il clic su «Fatto» viene salvato nel progresso della guida');
   assert.equal(api.stati()[0], 'mano', 'il passo 60 risulta completato manualmente');
