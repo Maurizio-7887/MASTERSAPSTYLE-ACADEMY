@@ -121,9 +121,20 @@ p = apri('erp_cespiti','acquisto');
 [['Taglierina a nastro','IMP','15000','MA-101'],['Piegatubi idraulica','IMP','8000','MA-102'],['Saldatrice a filo','IMP','6000','MA-103'],['Carrello elevatore elettrico','MEZ','12000','MA-104'],['Sega circolare','IMP','2000','MA-105']].forEach(x => {
   p = apri('erp_cespiti','acquisto'); bene(p.fai('ac',{descrizione:x[0],classe:x[1],fornitore:'F300',importo:x[2],iva:'22',rif:x[3],inFunzione:'2026-12-01',data:'2026-12-01'}),'F-90 '+x[0]); });
 fino('sega circolare'); vicinoS('20',-52460,'debito Macchine Alfa'); controlla('Macchinari');
+// 2b · affitto del capannone: cauzione con la prima nota libera, canone trimestrale anticipato con FB60 e F-53
+p = apri('erp_fi','prima_nota');
+{ const f = p.lab.querySelector('#fi-free-form'), rr = p.lab.querySelectorAll('#fi-free-rows tbody tr');
+  f.querySelector('[name="dataDoc"]').value='2026-12-01'; f.querySelector('[name="data"]').value='2026-12-01';
+  f.querySelector('[name="descrizione"]').value='cauzione contratto di locazione capannone'; f.querySelector('[name="rif"]').value='LOC-2026-01';
+  [['09.20','DARE'],['10','AVERE']].forEach(([c,d],i)=>{ rr[i].querySelector('.fi-conto').value=c; rr[i].querySelector('.fi-da').value=d; rr[i].querySelector('.fi-val').value='3000'; });
+  f.dispatchEvent(new p.w.Event('submit',{cancelable:true})); memoria = p.w.localStorage.getItem(CHIAVE);
+  ok(/registrato nel libro giornale/.test(p.lab.querySelector('#fi-free-msg').textContent),'cauzione registrata: '+p.lab.querySelector('#fi-free-msg').textContent); }
+fino('versa la cauzione'); vicinoS('09.20',3000,'deposito cauzionale'); vicinoS('10',77000,'banca dopo la cauzione');
+p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F450',rif:'AFF-2026-12',conto:'86',testo:'canone capannone 1° trimestre anticipato',imponibile:'3000',iva:'0',dal:'2026-12-01',al:'2027-02-28',scadenza:'2026-12-01',data:'2026-12-01'}),'FB60 affitto'); fino('fattura del primo trimestre di affitto');
+p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F450',documento:'AFF-2026-12',data:'2026-12-01'}),'F-53 affitto'); fino('paga in anticipo il primo trimestre'); vicinoS('10',74000,'banca dopo il canone anticipato'); vicinoS('86',3000,'canone del trimestre a costo');
 // 3 · assicurazione
 p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F400',rif:'POL-2026-118',conto:'83',testo:'premio annuo polizza incendio e furto',imponibile:'1200',iva:'0',dal:'2026-12-01',al:'2027-11-30',scadenza:'2026-12-02',data:'2026-12-01'}),'FB60 polizza'); fino('polizza annuale');
-p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F400',documento:'POL-2026-118',data:'2026-12-02'}),'F-53 polizza'); fino('paga la polizza'); vicinoS('10',78800,'banca dopo la polizza');
+p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F400',documento:'POL-2026-118',data:'2026-12-02'}),'F-53 polizza'); fino('paga la polizza'); vicinoS('10',72800,'banca dopo la polizza');
 // 4 · ordini cliente
 p = apri('erp_vendite','ordini'); bene(p.fai('va',{cliente:'C100',materiale:'TR-STD',qta:'180',rif:'BETA-180',data:'2026-12-02',consegna:'2026-12-14'}),'VA01 Beta');
 ok(!p.lab.querySelector('#va-materiale option[value="SL-TAGLIO"]'),'i semilavorati non si vendono');
@@ -255,11 +266,11 @@ p = apri('erp_tesoreria','anticipi'); bene(p.fai('an',{fattura:fb,percentuale:'8
 vicinoS('38',-10329.98,'debito per anticipo'); vicinoS('11',21520.80,'crediti verso clienti restano aperti');
 p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F100',data:'2026-12-17'}),'paga ferro'); fino('paga il ferro');
 p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F300',data:'2026-12-18'}),'paga macchine'); fino('paga i macchinari');
-vicinoS('20',0,'fornitori pagati'); vicinoS('10',32321.18,'banca dopo i pagamenti');
+vicinoS('20',0,'fornitori pagati'); vicinoS('10',26321.18,'banca dopo i pagamenti');
 // 10 · finanza: mutuo, parcella con ritenuta, noleggio a Edil Sigma pagato con una tratta
 p = apri('erp_finanza','mutui'); ok(/1.?313,46/.test(p.fai('mu',{ente:'Banca Popolare dell’Umbria',importo:'30000',tasso:'4,8',rate:'24',periodicita:'1',spese:'200',data:'2026-12-18'},'calcola')),'anteprima della rata');
 bene(p.fai('mu',{ente:'Banca Popolare dell’Umbria',importo:'30000',tasso:'4,8',rate:'24',periodicita:'1',spese:'200',data:'2026-12-18'}),'mutuo'); fino('Mutuo: la banca presta');
-vicinoS('10',62121.18,'banca dopo il mutuo'); vicinoS('37.10',-30000,'debito per mutuo'); vicino(p.S().fin.mutui[0].rata,1313.46,'rata del mutuo'); fino('Leggi il piano di ammortamento');
+vicinoS('10',56121.18,'banca dopo il mutuo'); vicinoS('37.10',-30000,'debito per mutuo'); vicino(p.S().fin.mutui[0].rata,1313.46,'rata del mutuo'); fino('Leggi il piano di ammortamento');
 p = apri('erp_finanza','ritenute'); bene(p.fai('rp',{professionista:'F800',rif:'FT 45/2026',testo:'assistenza alla costituzione della società',onorario:'1000',cassa:'4',iva:'22',ritenuta:'20',data:'2026-12-19'}),'parcella'); fino('Parcella del commercialista');
 vicinoS('20',-1268.80,'debito verso il commercialista');
 p = apri('erp_fi','fatture'); bene(p.fai('fs',{cliente:'C400',testo:'noleggio transenne per cantiere',imponibile:'1000',iva:'22',scadenza:'2027-02-20',data:'2026-12-20'}),'FB70 Edil Sigma'); fino('noleggio di transenne a Edil Sigma');
@@ -295,10 +306,11 @@ bene(p.fai('pn',{periodo:'2026-12',data:'2026-12-31'}),'netti pagati'); fino('Pa
 p = apri('erp_chiusura','assestamenti');
 ok(/1098,08/.test(p.fai('as',{tipo:'risconto-attivo',conto:'83',testo:'polizza POL-2026-118',importo:'1200',dal:'2026-12-01',al:'2027-11-30',data:'2026-12-31'},'prova')),'anteprima del risconto');
 bene(p.fai('as',{tipo:'risconto-attivo',conto:'83',testo:'polizza POL-2026-118',importo:'1200',dal:'2026-12-01',al:'2027-11-30',data:'2026-12-31'}),'risconto'); fino('Risconto attivo');
-p = apri('erp_chiusura','assestamenti'); bene(p.fai('as',{tipo:'rateo-passivo',conto:'86',testo:'fitto capannone, trimestre posticipato',importo:'3000',dal:'2026-12-01',al:'2027-02-28',data:'2026-12-31'}),'rateo'); fino('Rateo passivo');
-vicinoS('06',1098.08,'risconto'); vicinoS('39',-1033.33,'rateo');
-p = apri('erp_finanza','mutui'); bene(p.fai('mt',{mutuo:'MU-001',data:'2026-12-31'}),'rateo interessi mutuo'); fino('Rateo passivo sugli interessi del mutuo'); vicinoS('39',-1033.33-54.19,'ratei: fitto + interessi');
-p = apri('erp_finanza','leasing'); bene(p.fai('lr',{leasing:'LS-001',data:'2026-12-31'}),'risconto maxicanone'); fino('Risconto attivo sul maxicanone'); vicinoS('06',1098.08+1785.22,'risconti: assicurazione + maxicanone'); vicinoS('88',14.78,'canoni di competenza 2026');
+p = apri('erp_chiusura','assestamenti'); ok(/1\.?966,67/.test(p.fai('as',{tipo:'risconto-attivo',conto:'86',testo:'fitto capannone AFF-2026-12, trimestre anticipato',importo:'3000',dal:'2026-12-01',al:'2027-02-28',data:'2026-12-31'},'prova')),'anteprima del risconto sul fitto');
+bene(p.fai('as',{tipo:'risconto-attivo',conto:'86',testo:'fitto capannone AFF-2026-12, trimestre anticipato',importo:'3000',dal:'2026-12-01',al:'2027-02-28',data:'2026-12-31'}),'risconto fitto'); fino('Risconto attivo sul fitto');
+vicinoS('06',1098.08+1966.67,'risconti: assicurazione + fitto'); vicinoS('39',0,'nessun rateo sul fitto'); vicinoS('86',1033.33,'fitto di competenza 2026');
+p = apri('erp_finanza','mutui'); bene(p.fai('mt',{mutuo:'MU-001',data:'2026-12-31'}),'rateo interessi mutuo'); fino('Rateo passivo sugli interessi del mutuo'); vicinoS('39',-54.19,'ratei: solo interessi del mutuo');
+p = apri('erp_finanza','leasing'); bene(p.fai('lr',{leasing:'LS-001',data:'2026-12-31'}),'risconto maxicanone'); fino('Risconto attivo sul maxicanone'); vicinoS('06',1098.08+1966.67+1785.22,'risconti: assicurazione + fitto + maxicanone'); vicinoS('88',14.78,'canoni di competenza 2026');
 p = apri('erp_finanza','crediti'); vicino(p.w.FIN4.limiteSvalutazione('2026').deducibile,64.56,'0,5% dei crediti (Beta)'); bene(p.fai('sv',{importo:'',data:'2026-12-31'}),'svalutazione crediti'); fino('Svalutazione crediti'); vicinoS('11.90',-64.56,'fondo svalutazione');
 p = apri('erp_finanza','bolli'); { const b = p.w.FIN4.riepilogoBolli('2026-T4'); ok(b.fatture.length===0 && b.cambiali.length===1 && Math.abs(b.bolloCambiali-14.64)<0.006,'bolli del 4° trimestre: nessuna fattura esente, la tratta'); } fino('Imposta di bollo del 4° trimestre');
 p = apri('erp_cespiti','ammortamenti'); bene(p.fai('af',{data:'2026-12-31'}),'AFAB'); fino('AFAB'); vicinoS('50',458.34,'ammortamenti');
@@ -333,13 +345,13 @@ vicino(calcoloImposte.baseIrap,calcoloImposte.risultato+10.83+54.19+64.56,'base 
 p.fai('ir',{anno:'2026',aumenti:'',diminuzioni:'',data:'2026-12-31'}); ok(/Imposte 2026 registrate/.test(p.testo()),'imposte'); fino('IRES e IRAP');
 vicinoS('23',-507.68,'IRES'); vicinoS('35',-87.55,'IRAP');
 p = apri('erp_chiusura','chiusura'); { const t=p.testo(), i=t.search(/1.?520,09/); ok(i>=0,'utile nel prospetto di chiusura: '+t.slice(t.indexOf('Conto economico'),t.indexOf('Conto economico')+1500)); }
-p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,1520.09,'utile'); vicinoS('10',79517.15,'banca al 31/12');
+p.fai('ch',{anno:'2026',forza:'no'}); ok(!!p.S().chiusure['2026'],'chiusura 2026'); fino('Chiudi l’esercizio 2026'); vicino(p.S().chiusure['2026'].utile,1520.09,'utile'); vicinoS('10',73517.15,'banca al 31/12'); vicinoS('09.20',3000,'cauzione al 31/12');
 fs.writeFileSync(path.join(__dirname,'dicembre-wms-31-12.json'),JSON.stringify(p.S(),null,2));
 // 16 · riapertura e gennaio
-p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,129130.13,'totale riapertura'); } fino('Riapri i conti');
+p = apri('erp_chiusura','riapertura'); p.fai('ra',{anno:'2027',data:'2027-01-01'}); ok(!!p.S().chiusure['2026'].riapertura,'riapertura'); { const r = p.S().registrazioni.find(x => x.tipo==='RIAPERTURA'); vicino(r.righe.filter(x=>x.conto==='92' && x.dareAvere==='AVERE')[0].importo,128096.80,'totale riapertura'); } fino('Riapri i conti');
 p = apri('erp_chiusura','assestamenti'); bene(p.fai('st',{data:'2027-01-01'}),'storno ratei e risconti'); fino('Storna i risconti');
 p = apri('erp_magazzino','depositi'); bene(p.fai('er',{trasferimento:'UB001',qta:'',data:'2027-01-02'}),'entrata kit al deposito'); fino('i kit sono arrivati'); { const x = p.w.WM4.perLuogo().find(y=>y.mat==='SL-TAGLIO'); ok(x.w100===9 && x.d200===10 && x.viaggio===0,'kit nel deposito'); }
-vicinoS('06',0,'risconto stornato'); vicinoS('39',0,'rateo stornato'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='83').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1098.08,'assicurazione di competenza 2027 (334 giorni)');
+vicinoS('06',0,'risconto stornato'); vicinoS('39',0,'rateo stornato'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='86').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1966.67,'fitto di competenza 2027 dopo lo storno (gennaio e febbraio)'); vicino(Math.round(p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='83').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0)*100)/100,1098.08,'assicurazione di competenza 2027 (334 giorni)');
 p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C100',importo:'12912,48',rif:'SALDO FATTURA BETA',data:'2027-01-14'}),'incasso Beta'); fino('Beta paga');
 p = apri('erp_tesoreria','anticipi'); bene(p.fai('ae',{anticipo:'ANT-001',interessi:'25',data:'2027-01-14'}),'estinzione anticipo'); fino('ripaga l’anticipo');
 p = apri('erp_paghe','contabilita'); bene(p.fai('f2',{periodo:'2026-12',data:'2027-01-18'}),'F24'); fino('F24');
@@ -348,7 +360,7 @@ p = apri('erp_finanza','mutui'); bene(p.fai('mr',{mutuo:'MU-001',data:'2027-01-1
 { const i27 = p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='74').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0); vicino(Math.round(i27*100)/100,65.81,'interessi di competenza 2027 dopo lo storno del rateo'); }
 p = apri('erp_finanza','leasing'); bene(p.fai('lc',{leasing:'LS-001',data:'2027-01-23'}),'primo canone'); fino('Primo canone del leasing');
 p = apri('erp_chiusura','riapertura'); bene(p.fai('du',{legale:'5',data:'2027-04-30'}),'destinazione utile'); fino('destina l’utile');
-vicinoS('33',-76,'riserva legale'); vicinoS('10',76046.72,'banca finale'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
+vicinoS('33',-76,'riserva legale'); vicinoS('10',70046.72,'banca finale'); vicinoS('09.20',3000,'cauzione ancora aperta'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
 controlla('Fine');
 ok(p.w.WM4.aperti().length===0,'nessun compito aperto');
 const S = p.S();

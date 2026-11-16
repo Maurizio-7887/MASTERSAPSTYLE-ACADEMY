@@ -910,6 +910,94 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+## 2b · Affitto del capannone
+
+
+### 26a. Firma il contratto d’affitto e versa la cauzione
+
+**Percorso:** FI → Contabilità → Prima nota libera (F0718 / FB50)  
+**Schermata:** `erp_fi.prima_nota`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Contratto:** locazione del capannone da F450 Immobiliare Arno Srl: 6 anni + 6 dal 01/12/2026, canone 12.000 € l’anno pagato a TRIMESTRI ANTICIPATI (3.000 €), cauzione 3.000 € (3 mensilità, il massimo per legge)
+
+- **Data documento e di registrazione:** 01/12/2026
+
+- **Testo testata:** cauzione contratto di locazione capannone
+
+- **Riferimento:** LOC-2026-01
+
+- **Posizione 1:** 09.20 Depositi cauzionali attivi · Dare · 3000
+
+- **Posizione 2:** 10 Banca c/c · Avere · 3000
+
+
+**Risultato / controllo atteso:** D 09.20 Depositi cauzionali attivi / A 10 Banca 3.000. Banca 77.000.
+
+**Attenzione e ragionamento:** la cauzione NON è un costo: è un credito verso il proprietario, che la restituirà alla fine del contratto. Resta nello stato patrimoniale anche al 31/12 e alla riapertura.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 26b. FB60: registra la fattura del primo trimestre di affitto
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Fornitore:** F450 Immobiliare Arno
+
+- **Numero:** AFF-2026-12
+
+- **Conto di costo:** 86 Fitti passivi
+
+- **Descrizione:** canone capannone 1° trimestre anticipato
+
+- **Imponibile:** 3000
+
+- **IVA %:** 0 (locazione di immobile strumentale esente, art. 10 n. 8 DPR 633/72)
+
+- **Competenza:** dal 01/12/2026 al 28/02/2027
+
+- **Scadenza:** 01/12/2026
+
+- **Data:** 01/12/2026
+
+
+**Risultato / controllo atteso:** D 86 Fitti passivi / A 20 Fornitore 3.000, senza IVA. Il canone copre dicembre, gennaio e febbraio: solo dicembre è del 2026; a fine anno si sistema con il risconto attivo.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 26c. F-53: paga in anticipo il primo trimestre di affitto
+
+**Percorso:** FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Fornitore:** F450 Immobiliare Arno: cambialo, il modulo propone il primo fornitore con debiti aperti
+
+- **Fattura:** AFF-2026-12
+
+- **Importo:** vuoto = tutto il debito
+
+- **Data:** 01/12/2026
+
+
+**Risultato / controllo atteso:** D 20 / A 10 Banca 3.000. Banca 74.000: 80.000 − cauzione 3.000 − canone 3.000.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
 ## 3 · Assicurazione
 
 
@@ -964,7 +1052,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Conto bancario di addebito:** 10 Banca c/c (predefinito): non scegliere 10.02 nel caso principale
 
 
-**Risultato / controllo atteso:** D 20 / A 10 Banca 1.200. Banca 78.800.
+**Risultato / controllo atteso:** D 20 / A 10 Banca 1.200. Banca 72.800.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2234,7 +2322,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Conto bancario di addebito:** 10 Banca c/c (predefinito): non scegliere 10.02 nel caso principale
 
 
-**Risultato / controllo atteso:** D 20 / A 10 52.460. Debiti verso fornitori a zero; banca 32.321,18.
+**Risultato / controllo atteso:** D 20 / A 10 52.460. Debiti verso fornitori a zero; banca 26.321,18.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2495,18 +2583,18 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 91. Rateo passivo sul fitto del capannone
+### 91. Risconto attivo sul fitto del capannone
 
 **Percorso:** FI → IVA, imposte, chiusura → Ratei e risconti  
 **Schermata:** `erp_chiusura.assestamenti`
 
 **Data aziendale simulata:** 31/12/2026
 
-- **Tipo:** Rateo passivo
+- **Tipo:** Risconto attivo
 
 - **Conto:** 86 Fitti passivi
 
-- **Descrizione:** fitto capannone, trimestre posticipato
+- **Descrizione:** fitto capannone AFF-2026-12, trimestre anticipato
 
 - **Importo:** 3000
 
@@ -2514,8 +2602,12 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **Data:** 31/12/2026
 
+- **Prima:** «Calcola la quota» per vedere il conto
 
-**Risultato / controllo atteso:** Il fitto del trimestre dicembre–febbraio si paga a fine febbraio, ma dicembre è del 2026: 3.000 × 31 / 90 = 1.033,33. D 86 Fitti passivi / A 39 Ratei passivi.
+
+**Risultato / controllo atteso:** Il 01/12 abbiamo pagato in anticipo dicembre, gennaio e febbraio (3.000 €, 90 giorni), ma solo dicembre è del 2026: 3.000 × 59 / 90 = 1.966,67 sono del 2027. D 06 Risconti attivi / A 86 Fitti passivi 1.966,67. Nel 2026 resta un costo di 1.033,33 (31 giorni).
+
+**Attenzione e ragionamento:** con il fitto posticipato servirebbe un rateo passivo di 1.033,33: il costo del 2026 è lo stesso. La cauzione (09.20) non si tocca.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -2724,7 +2816,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 **Data aziendale simulata:** 31/12/2026
 
-- **Consuntivo automatico:** Scegli il centro 4200: trovi la paga di Sara Bianchi (80, 81, 82 con origine «riga FI»), il fitto del rateo (86) e gli ammortamenti (50) con origine «OKB9». Nessun costo va riportato a mano
+- **Consuntivo automatico:** Scegli il centro 4200: trovi la paga di Sara Bianchi (80, 81, 82 con origine «riga FI»), il fitto di competenza (86: canone anticipato 3.000 − risconto 1.966,67) e gli ammortamenti (50) con origine «OKB9». Nessun costo va riportato a mano
 
 - **Tabella di controllo del personale (KP06):** La colonna «Consuntivo registro paghe» ora contiene la paga di dicembre di ogni dipendente sul suo centro; Consumo % = consuntivo / piano
 
@@ -2758,7 +2850,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 - **Leggi il report (fino a Dic, forecast F1):** Per ogni centro: budget dell’anno, consuntivo, forecast. Il forecast F1 = gennaio–novembre a consuntivo (zero: la società non esisteva) + dicembre a budget
 
-- **Centro 4200 a dicembre:** Forecast F1 = budget di dicembre: 400 energia + 241,63 ammortamenti + 1.000 fitto = 1.641,63. Consuntivo 4.867,30 = paga di Sara Bianchi 2.437,50 + oneri 757,57 + TFR 180,56 + fitto del rateo 1.033,33 + ammortamenti di dicembre 458,34
+- **Centro 4200 a dicembre:** Forecast F1 = budget di dicembre: 400 energia + 241,63 ammortamenti + 1.000 fitto = 1.641,63. Consuntivo 4.867,30 = paga di Sara Bianchi 2.437,50 + oneri 757,57 + TFR 180,56 + fitto di competenza 1.033,33 (canone anticipato meno risconto) + ammortamenti di dicembre 458,34
 
 - **Centri 4100 e 4300:** Consuntivo 3.150,60 (Marco Rossi) e 4.002,65 (Giulia Verdi) contro forecast 0: il budget versione 0 non prevede personale su questi centri. È la stessa differenza della tabella di controllo del personale
 
@@ -2956,14 +3048,14 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data:** 01/01/2027
 
 
-**Risultato / controllo atteso:** D attività / A 92 e D 92 / A passività per 99.213,38: macchine 29.000 (fondo 241,67), risconto 1.098,08, semilavorati 277,40, ferro 703, banca 51.790,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.814,98, anticipo bancario 10.329,98, rateo 1.033,33, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.
+**Risultato / controllo atteso:** D attività / A 92 e D 92 / A passività per 98.180,05: macchine 29.000 (fondo 241,67), risconti 3.064,75 (assicurazione 1.098,08 + fitto 1.966,67), cauzione 3.000, semilavorati 277,40, ferro 703, banca 45.790,42, credito Beta 12.912,48, IVA a credito 3.432; capitale 80.000, utile 1.814,98, anticipo bancario 10.329,98, nessun rateo, debiti verso INPS, Erario, INAIL, agenti, TFR e imposte.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
-### 111. Storna il risconto e il rateo
+### 111. Storna i risconti
 
 **Percorso:** FI → IVA, imposte, chiusura → Ratei e risconti → Storno al 1° gennaio  
 **Schermata:** `erp_chiusura.assestamenti`
@@ -2973,7 +3065,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 - **Data dello storno:** 01/01/2027
 
 
-**Risultato / controllo atteso:** D 83 Assicurazioni / A 06 Risconti attivi 1.098,08 · D 39 Ratei passivi / A 86 Fitti passivi 1.033,33. Il 2027 ha così 11 mesi di polizza; quando a febbraio arriverà la fattura del fitto (3.000), al 2027 resteranno 1.966,67.
+**Risultato / controllo atteso:** D 83 Assicurazioni / A 06 Risconti attivi 1.098,08 · D 86 Fitti passivi / A 06 Risconti attivi 1.966,67. Il 2027 ha così 11 mesi di polizza e gennaio–febbraio di fitto, già pagati il 01/12: nessuna nuova fattura, niente contato due volte. La cauzione resta aperta.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
@@ -3070,7 +3162,7 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Percorso:** FI → Contabilità → Bilancio di verifica; WMS → Monitor  
 **Schermata:** `erp_fi.bilancio`
 
-- **Banca:** 31/12/2026: 51.790,42 · dopo il 18/01/2027: 50.419,05
+- **Banca:** 31/12/2026: 45.790,42 · dopo il 18/01/2027: 44.419,05 (cauzione 09.20 3.000 ancora aperta)
 
 - **Scorte:** FERRO 740 kg · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto
 

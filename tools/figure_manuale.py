@@ -117,11 +117,11 @@ def sap_fbs1():
         s += campo(448, 135, "Motivo storno", "01", 200, True) + campo(664, 135, "Data storno", "01.01.2027", 200, True)
         s += t(16, 205, "Righe", 13, acc, "bold")
         tab, y = tabella(16, 215, ["Conto", "Descrizione", "Dare", "Avere"],
-                         [["86", "Fitti passivi (31 giorni di dicembre)", "1.033,33", ""], ["39", "Ratei passivi", "", "1.033,33"]],
+                         [["06", "Risconti attivi (59 giorni del 2027)", "1.966,67", ""], ["86", "Fitti passivi (canone anticipato dic–feb)", "", "1.966,67"]],
                          [80, 470, 157, 161], acc, num=(2, 3))
-        return s + tab + esito(16, y + 14, "Al 1° gennaio l'elaborazione F.81 crea lo storno: Ratei passivi in Dare, Fitti passivi in Avere.")
-    schermata("sap_fbs1", "sap", "Contabilità generale › Chiusura › Rettifiche › FBS1", "Rateo con storno automatico", c, 380,
-              "Il rateo vale al 31/12 e si storna da solo il giorno dopo: al pagamento del fitto si registra tutto il costo.")
+        return s + tab + esito(16, y + 14, "Al 1° gennaio l'elaborazione F.81 crea lo storno: Fitti passivi in Dare, Risconti attivi in Avere.")
+    schermata("sap_fbs1", "sap", "Contabilità generale › Chiusura › Rettifiche › FBS1", "Risconto con storno automatico", c, 380,
+              "Il risconto vale al 31/12 e si storna da solo il giorno dopo: gennaio e febbraio tornano a costo del 2027 senza nuove fatture.")
 
 
 def sap_inventario():
@@ -197,12 +197,12 @@ def bc_differimento():
 def bc_periodiche():
     def c(acc):
         tab, y = tabella(16, 130, ["Metodo ricorrente", "Data reg.", "N. conto", "Importo", "Contropartita"],
-                         [["RF Storno fisso", "31/12/2026", "Fitti passivi", "1.033,33", "Ratei passivi"],
+                         [["RF Storno fisso", "31/12/2026", "Risconti attivi", "1.966,67", "Fitti passivi"],
                           ["RF Storno fisso", "31/12/2026", "Interessi passivi su mutui", "54,19", "Ratei passivi"]],
                          [170, 120, 250, 130, 198], acc, num=(3,))
         return tab + esito(16, y + 14, "Registrando, il programma crea anche lo storno con data 01/01/2027.") + bottone(W - 146, y + 56, "Registra", acc, 130)
-    schermata("bc_registrazioni_periodiche", "bc", "Contabilità › Registrazioni periodiche", "Ratei con storno automatico", c, 330,
-              "Metodo «Storno fisso»: al 1° gennaio i ratei si chiudono da soli e la fattura successiva va tutta a costo.")
+    schermata("bc_registrazioni_periodiche", "bc", "Contabilità › Registrazioni periodiche", "Ratei e risconti con storno automatico", c, 330,
+              "Metodo «Storno fisso»: al 1° gennaio ratei e risconti si chiudono da soli; la rata successiva va tutta a costo.")
 
 
 def bc_chiusura():
