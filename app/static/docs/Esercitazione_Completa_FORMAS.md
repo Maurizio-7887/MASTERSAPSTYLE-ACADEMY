@@ -998,6 +998,33 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 **Verifica:** riscontro manuale con evidenze e docente.
 
 
+### 26d. F24: versa l’imposta di registro del contratto d’affitto
+
+**Percorso:** FI → Contabilità → Prima nota libera (F0718 / FB50)  
+**Schermata:** `erp_fi.prima_nota`
+
+**Data aziendale simulata:** 01/12/2026
+
+- **Calcolo:** 12.000 × 1% = 120 € (locazione di immobile strumentale esente IVA)
+
+- **Chi paga:** metà a testa per legge (art. 8 L. 392/78): versiamo 120 e chiediamo 60 al proprietario
+
+- **Posizione 1:** 87.10 Imposta di registro · Dare · 60
+
+- **Posizione 2:** 09.30 Crediti verso il locatore · Dare · 60
+
+- **Posizione 3:** 10 Banca c/c · Avere · 120
+
+
+**Risultato / controllo atteso:** D 87.10 60 + D 09.30 60 / A 10 Banca 120.
+
+**Attenzione e ragionamento:** solo la nostra metà è un costo; l’altra metà è un credito verso il proprietario.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
 ## 3 · Assicurazione
 
 
@@ -2323,6 +2350,200 @@ Riferimenti contabili, fiscali e alle logiche ERP sono semplificazioni formative
 
 
 **Risultato / controllo atteso:** D 20 / A 10 52.460. Debiti verso fornitori a zero; banca 26.321,18.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+## 10b · Spese generali e trasferte
+
+
+### 80a. FB60: fattura del corriere per le due spedizioni
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 16/12/2026
+
+- **Fornitore:** F460 Trasporti Toscani
+
+- **Numero:** TT-2026-881
+
+- **Conto di costo:** 57.10 Trasporti su vendite (corrieri)
+
+- **Imponibile:** 140 (Beta 80 + Delta 60)
+
+- **IVA %:** 22
+
+- **IVA detraibile %:** 100
+
+
+**Risultato / controllo atteso:** D 57.10 140 + D 14 30,80 / A 20 170,80.
+
+**Attenzione e ragionamento:** resa franco destino: il trasporto è a carico nostro.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80b. FB60: bolletta del telefono e internet di dicembre
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitore:** F470 Telecomunicazioni Etruria
+
+- **Numero:** TEL-2026-1201
+
+- **Conto di costo:** 54.10 Spese telefoniche
+
+- **Imponibile:** 60
+
+- **IVA %:** 22
+
+- **IVA detraibile %:** 100
+
+
+**Risultato / controllo atteso:** D 54.10 60 + D 14 13,20 / A 20 73,20.
+
+**Attenzione e ragionamento:** IRES: deducibile all’80% (variazione in aumento 12, calcolata dal programma). IRAP: tutto.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80c. FB60: hotel della trasferta alla fiera di Bologna
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitore:** F480 Hotel Fiera Bologna
+
+- **Numero:** HFB-3317
+
+- **Conto di costo:** 54.40 Viaggi e soggiorni (alberghi)
+
+- **Imponibile:** 150
+
+- **IVA %:** 10
+
+- **IVA detraibile %:** 100
+
+
+**Risultato / controllo atteso:** D 54.40 150 + D 14 15 / A 20 165.
+
+**Attenzione e ragionamento:** IVA alberghiera al 10%, detraibile.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80d. FB60: carburante dell’auto aziendale
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitore:** F490 Carburanti Valdarno
+
+- **Numero:** CV-2026-0457
+
+- **Conto di costo:** 54.30 Carburanti e lubrificanti (auto a uso promiscuo)
+
+- **Imponibile:** 100
+
+- **IVA %:** 22
+
+- **IVA detraibile %:** 40
+
+
+**Risultato / controllo atteso:** IVA detraibile 40% = 8,80; indetraibile 13,20 a costo. D 54.30 113,20 + D 14 8,80 / A 20 122.
+
+**Attenzione e ragionamento:** IRES: deducibile solo il 20% (variazione in aumento 90,56). IRAP: tutto. Pagamento tracciabile obbligatorio.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80e. FB60: cena di rappresentanza con il cliente Beta
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitore:** F495 Enoteca Il Ceppo
+
+- **Numero:** ENO-2026-212
+
+- **Conto di costo:** 54.50 Spese di rappresentanza
+
+- **Imponibile:** 300
+
+- **IVA %:** 22
+
+- **IVA detraibile %:** 0
+
+
+**Risultato / controllo atteso:** IVA indetraibile: D 54.50 366 / A 20 366.
+
+**Attenzione e ragionamento:** IRES: deducibile fino all’1,5% dei ricavi caratteristici; il resto è una variazione in aumento calcolata dal programma. IRAP: tutto.
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80f. FB60: riparazione della saldatrice
+
+**Percorso:** FI → Contabilità → Fatture passive di servizi e pagamenti  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitore:** F498 Officina Meccanica Tosi
+
+- **Numero:** OT-2026-77
+
+- **Conto di costo:** 54.20 Manutenzioni e riparazioni
+
+- **Imponibile:** 300
+
+- **IVA %:** 22
+
+- **IVA detraibile %:** 100
+
+
+**Risultato / controllo atteso:** D 54.20 300 + D 14 66 / A 20 366.
+
+**Attenzione e ragionamento:** manutenzione ordinaria deducibile entro il 5% del costo dei beni ammortizzabili (1.450).
+
+
+**Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  
+**Verifica:** riscontro manuale con evidenze e docente.
+
+
+### 80g. F-53: paga le sei fatture (una alla volta, per fornitore)
+
+**Percorso:** FI → Fatture passive e pagamenti → Pagamento a un fornitore  
+**Schermata:** `erp_fi.passive`
+
+**Data aziendale simulata:** 18/12/2026
+
+- **Fornitori:** F460, F470, F480, F490, F495, F498: un pagamento per fornitore, importo vuoto = tutto il debito
+
+
+**Risultato / controllo atteso:** D 20 / A 10 Banca 1.263 in tutto (170,80 + 73,20 + 165 + 122 + 366 + 366). Debiti verso fornitori a zero.
 
 
 **Evidenza allievo:** documento __________; quantità/valore prima e dopo __________; spiegazione __________.  

@@ -283,6 +283,9 @@ class Lavoro:
                 "dc_bollo": s26("87"), "dc_leasing": s26("88"), "dc_svalutazione": s26("89"),
                 # affitto del capannone: cauzione (09.20) e fitto di competenza 2026
                 "dc_cauzione": s26("09.20"), "dc_fitto": s26("86"),
+                # spese generali di dicembre (corriere, telefono, hotel, carburante, rappresentanza, manutenzione, registro)
+                "dc_spese_generali": round(sum(s26(c) for c in ("57.10", "54.10", "54.40", "54.30", "54.50", "54.20", "87.10")), 2),
+                "dc_rappresentanza": s26("54.50"), "dc_carburante": s26("54.30"),
             })
             # «Dicembre in magazzino» (magazzinieri, senza ragioneria): solo quantità e documenti, nessun conto
             mov = s.get("movimenti") or []

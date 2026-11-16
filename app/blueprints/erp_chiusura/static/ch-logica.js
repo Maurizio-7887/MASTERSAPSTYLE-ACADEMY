@@ -94,6 +94,18 @@ window.CH4 = (function () {
   // calcolate all'aliquota IRES, senza sommare automaticamente l'aliquota IRAP. Le altre variazioni IRAP restano esplicite in fv.irap.
   var FINANZIARI = {'60': 'interessi passivi bancari', '74': 'interessi passivi su mutui', '53': 'interessi su IVA trimestrale', '55': 'oneri su cessione crediti (factoring)', '59': 'interessi attivi', '66': 'utili su cambi', '67': 'perdite su cambi', '68': 'differenze cambio da valutazione'};
   var IMPOSTE = {'56': 1, '52': 1, '51': 1};
+  // Spese a deducibilità limitata ai fini IRES (variazioni in aumento automatiche, solo se i conti sono usati).
+  // Per l'IRAP delle società di capitali vale il bilancio: nessuna di queste limitazioni si applica.
+  function limitate(voci) {
+    var v = function (c) { return voci[c] || 0; }, out = [];
+    if (v('54.30') > 0.004) out.push(['Carburante auto a uso promiscuo: deducibile solo il 20% (art. 164, c. 1, lett. b, TUIR)', r2(v('54.30') * 0.8)]);
+    if (v('54.10') > 0.004) out.push(['Spese telefoniche: deducibili all’80% (art. 102, c. 9, TUIR)', r2(v('54.10') * 0.2)]);
+    if (v('54.50') > 0.004) {
+      var ricavi = r2(-(v('40') + v('47') + v('48') + v('49') + v('44'))), tetto = r2(Math.max(0, ricavi) * 0.015);
+      out.push(['Spese di rappresentanza oltre l’1,5% dei ricavi caratteristici (' + L.eur(ricavi) + ' × 1,5% = ' + L.eur(tetto) + '; art. 108, c. 2, TUIR e DM 19/11/2008)', r2(Math.max(0, v('54.50') - tetto))]);
+    }
+    return out;
+  }
   function calcolaImposte(i) {
     var anno = String(i.anno || '').trim(); if (!/^\d{4}$/.test(anno)) throw Error('Anno non valido.');
     var al = anno + '-12-31', dal = anno + '-01-01', voci = {};
@@ -105,7 +117,7 @@ window.CH4 = (function () {
     var aIres = L.num(i.aliquota || i.aliquotaIres || 24, 'Aliquota IRES %', 0), aIrap = L.num(i.aliquotaIrap == null || i.aliquotaIrap === '' ? 3.9 : i.aliquotaIrap, 'Aliquota IRAP %', 0);
     var fv = window.FIN4 ? window.FIN4.variazioniFiscali(anno) : {ires: [], irap: []};   // svalutazione crediti oltre lo 0,5%; IRAP: svalutazioni e perdite su crediti
     var varIres = [['Ammortamenti oltre il limite fiscale (art. 102 TUIR, primo anno a metà)', ft.aumento], ['Recupero di ammortamenti non dedotti negli anni prima', -ft.diminuzione],
-      ['Cessioni: maggior valore fiscale residuo (minusvalenza fiscale più alta)', -ft.recuperoCessione]].concat(fv.ires, [['Altre variazioni in aumento', aum], ['Altre variazioni in diminuzione', -dim]]);
+      ['Cessioni: maggior valore fiscale residuo (minusvalenza fiscale più alta)', -ft.recuperoCessione]].concat(fv.ires, limitate(voci), [['Altre variazioni in aumento', aum], ['Altre variazioni in diminuzione', -dim]]);
     var baseIres = r2(Math.max(0, ante + varIres.reduce(function (t, v) { return t + v[1]; }, 0))), ires = r2(baseIres * aIres / 100);
     var fin = Object.keys(FINANZIARI).filter(function (c) { return Math.abs(voci[c] || 0) > 0.004; }).map(function (c) { return [c + ' ' + FINANZIARI[c], voci[c]]; });
     var vp = r2(ante + fin.reduce(function (t, v) { return t + v[1]; }, 0));   // si tolgono gli oneri (si aggiungono) e i proventi (si sottraggono) finanziari

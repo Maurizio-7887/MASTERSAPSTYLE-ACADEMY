@@ -24,20 +24,28 @@ window.FS4 = (function () {
   // ── FB60: fattura passiva di servizi (assicurazione, affitto, consulenze, energia) da un fornitore italiano ──
   // D conto di costo + D 14 IVA a credito / A 20 Fornitore. Le assicurazioni sono esenti IVA (art. 10 DPR 633/72): IVA 0.
   var P = function () { var s = S(); s.fatturePassive = s.fatturePassive || []; return s.fatturePassive; };
-  var COSTI = [['83', '83 Assicurazioni'], ['86', '86 Fitti passivi'], ['54', '54 Consulenze e servizi'], ['58', '58 Commissioni e spese bancarie']];
+  var COSTI = [['83', '83 Assicurazioni'], ['86', '86 Fitti passivi'], ['54', '54 Consulenze e servizi'], ['58', '58 Commissioni e spese bancarie'],
+    ['54.10', '54.10 Spese telefoniche'], ['54.20', '54.20 Manutenzioni e riparazioni'], ['54.30', '54.30 Carburanti e lubrificanti (auto a uso promiscuo)'],
+    ['54.40', '54.40 Viaggi e soggiorni (alberghi)'], ['54.50', '54.50 Spese di rappresentanza'], ['57.10', '57.10 Trasporti su vendite (corrieri)']];
   function fatturaPassiva(i) {
     var n = N(), data = n.data(i.data), f = n.fornitore(i.fornitore), conto = String(i.conto || '').trim();
     var pc = S().pianoDeiConti.find(function (c) { return c.codice === conto; }); if (!pc || pc.tipo !== 'COSTO') throw Error('Scegli un conto di costo.');
     var rif = String(i.rif || '').trim(); if (!rif) throw Error('Scrivi il numero della fattura del fornitore.');
     if (P().some(function (x) { return x.fornitore === i.fornitore && x.rif === rif; })) throw Error('Fattura ' + rif + ' di ' + f.nome + ' già registrata.');
     var imp = L.num(i.imponibile, 'Imponibile', 0.01), ivaP = i.iva == null || i.iva === '' ? 22 : L.num(i.iva, 'IVA %', 0), iva = r2(imp * ivaP / 100);
+    // IVA detraibile solo in parte (art. 19-bis1 DPR 633/72): la parte indetraibile è un costo e va sul conto della spesa
+    var detr = i.detraibile == null || i.detraibile === '' ? 100 : L.num(i.detraibile, 'IVA detraibile %', 0);
+    if (detr > 100) throw Error('La percentuale di IVA detraibile non può superare 100.');
+    if (conto === '54.50' && iva > 0 && detr > 0) throw Error('Spese di rappresentanza: l’IVA NON è detraibile (art. 19-bis1, lett. h, DPR 633/72; solo beni fino a 50 € l’uno). Scrivi 0 in «IVA detraibile %»: l’IVA diventa costo.');
+    if (conto === '54.30' && iva > 0 && detr > 40) throw Error('Carburante di un’auto a uso promiscuo: l’IVA è detraibile solo al 40% (art. 19-bis1, lett. c, DPR 633/72). Scrivi 40 in «IVA detraibile %».');
+    var ivaDetr = r2(iva * detr / 100), ivaIndetr = r2(iva - ivaDetr);
     var testo = String(i.testo || '').trim() || pc.nome, scad = i.scadenza ? L.dataOk(i.scadenza) : '';
     if (scad && scad < data) throw Error('La scadenza non può precedere la data della fattura.');
     var dal = i.dal ? L.dataOk(i.dal) : '', al = i.al ? L.dataOk(i.al) : ''; if (dal && al && al < dal) throw Error('Il periodo di competenza finisce prima di cominciare.');
     var riga = {conto: '20', dareAvere: 'AVERE', importo: r2(imp + iva), partner: i.fornitore, testo: 'fattura ' + rif}; if (scad) riga.scadenza = scad;
     var r = n.post({data: data, tipo: 'FATTURA_PASSIVA', rif: rif, descrizione: 'FB60 fattura ' + rif + ' di ' + f.nome + ': ' + testo + (dal && al ? ' (competenza ' + L.fd(dal) + ' – ' + L.fd(al) + ')' : '') + (ivaP ? '' : ' — esente IVA'),
-      righe: [{conto: conto, dareAvere: 'DARE', importo: imp, testo: testo}, {conto: '14', dareAvere: 'DARE', importo: iva, testo: 'IVA ' + ivaP + '%'}, riga]});
-    P().push({rif: rif, fornitore: i.fornitore, data: data, conto: conto, imponibile: imp, iva: iva, totale: r2(imp + iva), testo: testo, scadenza: scad, dal: dal, al: al, contabile: r.numero});
+      righe: [{conto: conto, dareAvere: 'DARE', importo: r2(imp + ivaIndetr), testo: testo + (ivaIndetr ? ' (con IVA indetraibile ' + L.eur(ivaIndetr) + ')' : '')}].concat(ivaDetr || !iva ? [{conto: '14', dareAvere: 'DARE', importo: ivaDetr, testo: 'IVA ' + ivaP + '%' + (detr < 100 ? ' detraibile al ' + detr + '%' : '')}] : [], [riga])});
+    P().push({rif: rif, fornitore: i.fornitore, data: data, conto: conto, imponibile: imp, iva: iva, ivaIndetraibile: ivaIndetr, detraibile: detr, totale: r2(imp + iva), testo: testo, scadenza: scad, dal: dal, al: al, contabile: r.numero});
     n.salva(); return r;
   }
   // ── F-53: pagamento manuale a un fornitore (bonifico dalla banca), su una fattura o in acconto sul totale aperto ──

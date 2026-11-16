@@ -24,7 +24,7 @@ PIANO = OrderedDict([
     ("Cassa", "AT"), ("Banca c/c", "AT"),
     # crediti
     ("Crediti v/clienti", "AT"), ("Crediti insoluti", "AT"), ("Fornitori c/anticipi", "AT"),
-    ("Fatture da emettere", "AT"), ("Soci c/sottoscrizione", "AT"), ("Depositi cauzionali attivi", "AT"),
+    ("Fatture da emettere", "AT"), ("Soci c/sottoscrizione", "AT"), ("Depositi cauzionali attivi", "AT"), ("Crediti diversi", "AT"),
     ("IVA ns/credito", "AT"), ("Erario c/acconti d'imposta", "AT"),
     # immobilizzazioni e fondi
     ("Impianti e macchinari", "AT"), ("Automezzi", "AT"), ("Arredamento", "AT"),
@@ -46,6 +46,8 @@ PIANO = OrderedDict([
     # costi
     ("Merci c/acquisti", "CO"), ("Materie prime c/acquisti", "CO"), ("Energia elettrica", "CO"),
     ("Consulenze", "CO"), ("Premi di assicurazione", "CO"), ("Cancelleria", "CO"),
+    ("Spese di trasporto", "CO"), ("Spese telefoniche", "CO"), ("Spese di viaggio", "CO"), ("Carburanti e lubrificanti", "CO"),
+    ("Spese di rappresentanza", "CO"), ("Manutenzioni e riparazioni", "CO"), ("Imposte e tasse", "CO"),
     ("Canoni di leasing", "CO"), ("Fitti passivi", "CO"),
     ("Salari e stipendi", "CO"), ("Oneri sociali", "CO"), ("TFR", "CO"),
     ("Interessi passivi bancari", "CO"), ("Interessi passivi su mutui", "CO"), ("Oneri bancari", "CO"),
