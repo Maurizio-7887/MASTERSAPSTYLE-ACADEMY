@@ -139,6 +139,7 @@ window.WM4 = (function () {
   // ── trasferimento tra ubicazioni (LT10 / /SCWM/ADHU) ──
   function trasferisci(i) {
     richiesto(); var n = N(), data = n.data(i.data), u = W().ubicazioni;
+    if (!String(i.udc || '').trim()) throw Error('Scegli dal menu «Unità di carico da spostare» la riga della merce da spostare: il numero all’inizio della riga è l’unità di carico.');
     var q = quanti(function (x) { return x.udc === String(i.udc).trim(); })[0]; if (!q) throw Error('Unità di carico ' + i.udc + ' non trovata.');
     if (riservato(q.id) > 0) throw Error('L\'UdC ' + q.udc + ' ha già un compito aperto.');
     var a = String(i.a || '').trim().toUpperCase() || libera(q.mat, q.ubic);
