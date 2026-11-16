@@ -380,13 +380,16 @@ class PrimaNota(unittest.TestCase):
         sbagliata = {"csrf": csrf(html), "conto": [r[0] for r in op["righe"]],
                      "dare": [("%.2f" % (r[2] / 100)).replace(".", ",") if r[1] == "A" else "" for r in op["righe"]],
                      "avere": [("%.2f" % (r[2] / 100)).replace(".", ",") if r[1] == "D" else "" for r in op["righe"]]}
-        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=sbagliata).get_data(as_text=True)
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=sbagliata)
+        self.assertEqual(r.status_code, 302)                         # Post/Redirect/Get: niente «Conferma reinvio modulo»
+        r = c.get(r.headers["Location"]).get_data(as_text=True)
         self.assertIn("Non è ancora giusta", r)
         self.assertIn("invertite", r)
         self.assertIn("Dal manuale", r)
         giusta = dict(sbagliata, dare=sbagliata["avere"], avere=sbagliata["dare"])
-        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=giusta).get_data(as_text=True)
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=giusta, follow_redirects=True).get_data(as_text=True)
         self.assertIn("Scrittura giusta", r)
         self.assertIn("1 / ", c.get("/ragioneria-quiz/prima-nota").get_data(as_text=True))
-        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=dict(giusta, conto=["Conto inventato", "Banca c/c"])).get_data(as_text=True)
+        r = c.post(f"/ragioneria-quiz/prima-nota/{op['eid']}", data=dict(giusta, conto=["Conto inventato", "Banca c/c"]), follow_redirects=True).get_data(as_text=True)
         self.assertIn("non è un conto del piano dei conti", r)
+        self.assertNotIn("non è un conto del piano dei conti", c.get(f"/ragioneria-quiz/prima-nota/{op['eid']}").get_data(as_text=True))   # aggiornare non ripete l'esito
