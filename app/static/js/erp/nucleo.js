@@ -41,14 +41,17 @@
     // azienda nuova (costituzione), produzione a tre stadi, anticipo fatture, assestamenti di fine anno
     ['08', 'Crediti verso soci per versamenti ancora dovuti', 'ATTIVO'], ['07', 'Magazzino semilavorati', 'ATTIVO'], ['71', 'Consumi di semilavorati', 'COSTO'],
     ['38', 'Banca c/anticipi su fatture', 'PASSIVO'], ['60', 'Interessi passivi bancari', 'COSTO'],
-    ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['09.20', 'Depositi cauzionali attivi', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
+    ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['09.20', 'Depositi cauzionali attivi', 'ATTIVO'], ['09.30', 'Crediti verso il locatore (imposta di registro da rimborsare)', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
     ['05', 'Ratei attivi', 'ATTIVO'], ['06', 'Risconti attivi', 'ATTIVO'], ['39', 'Ratei passivi', 'PASSIVO'], ['34', 'Risconti passivi', 'PASSIVO'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
     // finanza: cambiali, assegni, mutui, leasing, ritenute d'acconto, bolli, crediti dubbi
     ['11.10', 'Cambiali attive (effetti in portafoglio)', 'ATTIVO'], ['11.20', 'Crediti insoluti (cambiali protestate)', 'ATTIVO'], ['11.30', 'Assegni ricevuti da versare', 'ATTIVO'],
     ['11.90', 'Fondo svalutazione crediti', 'ATTIVO'], ['18.10', 'Assegni emessi in circolazione', 'ATTIVO'], ['20.10', 'Cambiali passive', 'PASSIVO'],
     ['29.10', 'Erario c/ritenute lavoro autonomo (cod. 1040)', 'PASSIVO'], ['37.10', 'Mutui passivi (debiti verso banche)', 'PASSIVO'],
-    ['62', 'Perdite su crediti', 'COSTO'], ['74', 'Interessi passivi su mutui', 'COSTO'], ['87', 'Imposta di bollo', 'COSTO'], ['88', 'Canoni di leasing', 'COSTO'], ['89', 'Svalutazione crediti', 'COSTO'],
+    ['62', 'Perdite su crediti', 'COSTO'],
+    // spese generali con regole fiscali proprie (IVA detraibile in parte, IRES deducibile in parte): non entrano nei centri di costo CO
+    ['54.10', 'Spese telefoniche', 'COSTO'], ['54.20', 'Manutenzioni e riparazioni', 'COSTO'], ['54.30', 'Carburanti e lubrificanti (auto a uso promiscuo)', 'COSTO'],
+    ['54.40', 'Viaggi e soggiorni (alberghi)', 'COSTO'], ['54.50', 'Spese di rappresentanza', 'COSTO'], ['57.10', 'Trasporti su vendite (corrieri)', 'COSTO'], ['87.10', 'Imposta di registro', 'COSTO'], ['74', 'Interessi passivi su mutui', 'COSTO'], ['87', 'Imposta di bollo', 'COSTO'], ['88', 'Canoni di leasing', 'COSTO'], ['89', 'Svalutazione crediti', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
@@ -67,6 +70,13 @@
                    'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'},
                    // contratto di locazione del capannone: canone trimestrale anticipato, fattura esente IVA (art. 10 n. 8 DPR 633/72)
                    'F450': {nome: 'Immobiliare Arno Srl', regione: 'Toscana', pagamento: 'anticipato', iban: 'IT48D0306902887100000033445'},
+                   // spese generali di dicembre: corriere, telefono, trasferta, carburante, rappresentanza, manutenzione
+                   'F460': {nome: 'Trasporti Toscani Srl (corriere V10)', regione: 'Toscana', pagamento: '30 gg', iban: 'IT17E0306902887100000055667'},
+                   'F470': {nome: 'Telecomunicazioni Etruria Spa', regione: 'Toscana', pagamento: 'RID', iban: 'IT29F0503402801000000066778'},
+                   'F480': {nome: 'Hotel Fiera Bologna Srl', regione: 'Emilia-Romagna', pagamento: 'carta aziendale', iban: 'IT63G0538702400000000077889'},
+                   'F490': {nome: 'Carburanti Valdarno Srl', regione: 'Toscana', pagamento: 'carta carburante', iban: 'IT85H0306902887100000088990'},
+                   'F495': {nome: 'Enoteca Il Ceppo Srl', regione: 'Toscana', pagamento: 'carta aziendale', iban: 'IT07I0503402801000000099001'},
+                   'F498': {nome: 'Officina Meccanica Tosi Snc', regione: 'Toscana', pagamento: 'a vista', iban: 'IT52L0306902887100000010112'},
                    // finanza: professionista con ritenuta d'acconto, società di leasing, fornitore di un altro Paese UE
                    'F800': {nome: 'Studio Rossi Commercialisti Associati', regione: 'Umbria', pagamento: 'a vista', iban: 'IT33B0306903010100000012345', professionista: true},
                    'F810': {nome: 'Leasing Umbria Spa', regione: 'Umbria', pagamento: 'SDD', iban: 'IT91C0538703000000000099887'},

@@ -418,6 +418,28 @@ def _dicembre_con_affitto(stato):
                for r in ((stato or {}).get("registrazioni") or []) for x in ((r or {}).get("righe") or []))
 
 
+# Spese generali di dicembre (dal 16/11/2026): corriere, telefono, hotel, carburante (IVA 40%), rappresentanza (IVA
+# indetraibile) e manutenzione pagati il 18/12, imposta di registro del contratto d'affitto (metà nostra) il 01/12.
+# Costi 1.189,20; variazioni IRES automatiche 188,96; IRAP senza limiti (società di capitali). Numeri con finanza e affitto.
+_DICEMBRE_SPESE_ATTESI = {
+    "dc_credito_iva": ("Credito IVA riportato al 2027 (+ 133,80 delle spese generali)", 3970.60),
+    "dc_ires": ("IRES 2026 (con le variazioni di carburante, telefono e rappresentanza)", 267.62),
+    "dc_irap": ("IRAP 2026 (spese generali deducibili per intero)", 41.17),
+    "dc_utile": ("Utile d'esercizio 2026", 617.33),
+}
+_DICEMBRE_SPESE_BANCA = -1383.00
+_DICEMBRE_SPESE_NUOVI = [
+    ("dc_spese_generali", "Spese generali 2026 (corriere, telefono, hotel, carburante, rappresentanza, manutenzione, registro)", 1189.20, 0.005),
+    ("dc_rappresentanza", "Spese di rappresentanza con l'IVA indetraibile", 366.00, 0.005),
+    ("dc_carburante", "Carburante con il 60% di IVA indetraibile", 113.20, 0.005),
+]
+
+
+def _dicembre_con_spese(stato):
+    return any((x or {}).get("conto") in ("54.50", "57.10")
+               for r in ((stato or {}).get("registrazioni") or []) for x in ((r or {}).get("righe") or []))
+
+
 def _dicembre_con_finanza(stato):
     return any(abs((m or {}).get("importo") or 0) > 0 for m in (((stato or {}).get("fin") or {}).get("mutui") or []))
 
@@ -450,6 +472,10 @@ def attesi_esercizio(codice, stato=None):
                 return (k, label, round(v + _DICEMBRE_AFFITTO_BANCA, 2), tol)
             return (k, label, v, tol)
         attesi = [_affitto(*a) for a in attesi] + _DICEMBRE_AFFITTO_NUOVI
+    if codice == "dicembre-wms" and stato is not None and _dicembre_con_spese(stato):
+        attesi = [(k, *_DICEMBRE_SPESE_ATTESI[k], tol) if k in _DICEMBRE_SPESE_ATTESI
+                  else (k, label, round(v + _DICEMBRE_SPESE_BANCA, 2), tol) if k == "dc_banca_31_12"
+                  else (k, label, v, tol) for k, label, v, tol in attesi] + _DICEMBRE_SPESE_NUOVI
     return attesi
 
 
