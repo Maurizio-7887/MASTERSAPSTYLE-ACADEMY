@@ -498,7 +498,7 @@ PARTI = [
 <ul>
 <li>le <b>rimanenze</b>: prima si riapre il conto Merci dallo Stato patrimoniale iniziale, poi le rimanenze iniziali tornano a costo (Variazione rimanenze in Dare, Merci in Avere), come al capitolo 17; nel gestionale SAP c'è solo la riapertura dei conti 12, 07, 13;</li>
 <li>i <b>risconti</b> riportano nel nuovo anno il costo o il ricavo rinviato;</li>
-<li>i <b>ratei</b> e le <b>fatture da ricevere/emettere</b> si chiudono quando arriva il pagamento, l'incasso o il documento, senza registrare di nuovo la parte già rilevata: alla rata del mutuo, ad esempio, Ratei passivi in Dare per gli interessi dell'anno precedente e Interessi in Dare solo per il nuovo periodo.</li>
+<li>i <b>ratei</b> e le <b>fatture da ricevere/emettere</b> si chiudono quando arriva il pagamento, l'incasso o il documento, senza registrare di nuovo la parte già rilevata: alla rata del mutuo, ad esempio, Ratei passivi in Dare per gli interessi dell'anno precedente e Interessi in Dare solo per il nuovo periodo. In alternativa, come fanno i gestionali, il rateo si storna il 1° gennaio e il documento si registra per intero: i due metodi e gli esempi completi sono nel paragrafo «Ratei e risconti nel nuovo anno: mai contati due volte».</li>
 </ul>
 """, ["Q16-09", "Q11-11"]),
 ("Fine anno voce per voce: chiusura e riapertura", """
@@ -520,6 +520,51 @@ PARTI = [
        "spiegazione": "È un debito: si riapre in Avere. Quando arriva la bolletta si chiude senza registrare di nuovo il costo."},
       {"testo": "15/1: arriva la bolletta dell'energia di dicembre: 300 € + IVA 66 €.", "righe": [("Fatture da ricevere", "D", 300), ("IVA ns/credito", "D", 66), ("Debiti v/fornitori", "A", 366)],
        "spiegazione": "La fattura chiude il debito stimato: nessun nuovo costo; nasce solo l'IVA detraibile."}]),
+("Ratei e risconti nel nuovo anno: mai contati due volte", """
+<p>È il passaggio più delicato della riapertura. Ratei e risconti <b>non creano</b> costi o ricavi nuovi: <b>spostano</b> una parte di un importo da un anno all'altro. La regola di controllo è una sola:</p>
+<p class="rq-man-formula">quota dell'anno vecchio + quota dell'anno nuovo = importo del documento (né un euro in più, né uno in meno)</p>
+<p>Se la somma dei due anni supera la fattura, l'importo è stato <b>contato due volte</b>.</p>
+<p><b>Due metodi corretti — se ne usa UNO solo.</b></p>
+<ul>
+<li><b>Metodo A — storno al 1° gennaio</b> (quello dei gestionali: SAP con F.81, Business Central con lo storno automatico). Dopo la riapertura si gira il rateo o il risconto sul conto di costo o di ricavo, con la scrittura opposta a quella del 31/12. Quando arriva il documento si registra <b>per intero</b>, come una fattura normale.</li>
+<li><b>Metodo B — chiusura all'arrivo del documento.</b> Il 1° gennaio non si fa nulla; quando arriva il documento lo si divide: una parte chiude il rateo, il resto è costo o ricavo del nuovo anno.</li>
+</ul>
+<p><b>Mai i due metodi insieme</b>: si toglierebbe la stessa quota due volte.</p>
+<p><b>Esempio 1 — rateo passivo: la bolletta del 31 gennaio.</b> Bolletta dell'energia per il periodo 1/12–31/1 (62 giorni), che arriva il 31/1: imponibile 600 €, IVA 132 €, totale 732 €. Dicembre = 600 × 31/62 = <b>300 €</b>, gennaio = 300 €. Il rateo si calcola sull'<b>imponibile</b>: l'IVA nasce solo con la fattura.</p>
+<div style="overflow-x:auto"><table class="rq-man-tab"><tr><th>Data</th><th>Scrittura</th><th>Energia elettrica</th></tr>
+<tr><td>31/12</td><td>Energia elettrica / Ratei passivi 300</td><td>+300 nell'anno vecchio</td></tr>
+<tr><td>31/12</td><td>Ratei passivi / Stato patrimoniale finale 300 (è un debito)</td><td>—</td></tr>
+<tr><td>1/1</td><td>Stato patrimoniale iniziale / Ratei passivi 300 (riapertura)</td><td>—</td></tr>
+<tr><td>1/1</td><td>Ratei passivi / Energia elettrica 300 (storno, metodo A)</td><td>−300 nell'anno nuovo</td></tr>
+<tr><td>31/1</td><td>Energia elettrica 600 + IVA ns/credito 132 / Debiti v/fornitori 732</td><td>+600 nell'anno nuovo</td></tr>
+<tr><td colspan="2"><b>Costo di competenza</b></td><td><b>300 + 300 = 600 ✔</b></td></tr></table></div>
+<p>Senza lo storno del 1/1 il nuovo anno avrebbe 600 € di costo: i 300 € di dicembre sarebbero contati due volte.</p>
+<p><b>Rateo o fattura da ricevere?</b> Se la bolletta riguardasse <b>solo dicembre</b> non sarebbe un rateo: al 31/12 si rileva una <b>fattura da ricevere</b> (paragrafo precedente). Il rateo serve quando il periodo del documento sta <b>a cavallo</b> dei due anni.</p>
+<p><b>Esempio 2 — rateo attivo: gli interessi di febbraio.</b> Interessi su un deposito per il periodo 1/12–28/2 (90 giorni), accreditati il 28/2: lordo 90 €, ritenuta del 26% 23,40 €, netto 66,60 €. Dicembre = 90 × 31/90 = <b>31 €</b>, il nuovo anno = 59 €. Il rateo si calcola sul <b>lordo</b>: la ritenuta la applica la banca solo al pagamento ed è un acconto d'imposta.</p>
+<div style="overflow-x:auto"><table class="rq-man-tab"><tr><th>Data</th><th>Scrittura</th><th>Interessi attivi bancari</th></tr>
+<tr><td>31/12</td><td>Ratei attivi / Interessi attivi bancari 31</td><td>+31 nell'anno vecchio</td></tr>
+<tr><td>31/12</td><td>Stato patrimoniale finale / Ratei attivi 31 (è un credito)</td><td>—</td></tr>
+<tr><td>1/1</td><td>Ratei attivi / Stato patrimoniale iniziale 31 (riapertura)</td><td>—</td></tr>
+<tr><td>1/1</td><td>Interessi attivi bancari / Ratei attivi 31 (storno, metodo A)</td><td>−31 nell'anno nuovo</td></tr>
+<tr><td>28/2</td><td>Banca c/c 66,60 + Erario c/acconti d'imposta 23,40 / Interessi attivi bancari 90</td><td>+90 nell'anno nuovo</td></tr>
+<tr><td colspan="2"><b>Ricavo di competenza</b></td><td><b>31 + 59 = 90 ✔</b></td></tr></table></div>
+<p><b>Risconti</b>: stesso giro al contrario, e nel nuovo anno <b>non arriva nessun documento</b>. Il costo (o il ricavo) rinviato torna nel conto economico solo con lo storno del 1/1 (Premi di assicurazione / Risconti attivi). Qui il rischio non è contare due volte, ma <b>dimenticare</b> lo storno e perdere il costo del nuovo anno.</p>
+<p class="rq-man-formula">Regola da ricordare: lo storno del 1° gennaio è sempre la scrittura del 31 dicembre rovesciata.</p>
+<p><b>I cinque errori da evitare</b>: 1) rateo calcolato sul totale con IVA o sugli interessi netti; 2) storno del 1/1 dimenticato; 3) storno del 1/1 <b>e</b> chiusura all'arrivo del documento insieme; 4) rateo al posto della fattura da ricevere; 5) IVA o ritenuta messe nel rateo.</p>
+""", [{"testo": "31/12: bolletta dell'energia 1/12–31/1 di 600 € + IVA, in arrivo il 31/1. Rileva la quota di dicembre (31 giorni su 62).", "righe": [("Energia elettrica", "D", 300), ("Ratei passivi", "A", 300)],
+       "spiegazione": "Costo maturato e non ancora fatturato, a cavallo dei due anni: rateo passivo sull'imponibile, senza IVA."},
+      {"testo": "1/1, dopo la riapertura: storna il rateo passivo di 300 € sulla bolletta dell'energia (metodo A).", "righe": [("Ratei passivi", "D", 300), ("Energia elettrica", "A", 300)],
+       "spiegazione": "È la scrittura del 31/12 rovesciata: l'energia del nuovo anno parte con 300 € in Avere, che neutralizzano la parte di bolletta già spesata a dicembre."},
+      {"testo": "31/1: arriva la bolletta 1/12–31/1: 600 € + IVA 132 €. Il rateo è già stato stornato il 1/1: registrala per intero.", "righe": [("Energia elettrica", "D", 600), ("IVA ns/credito", "D", 132), ("Debiti v/fornitori", "A", 732)],
+       "spiegazione": "Con lo storno al 1/1 la fattura si registra come sempre. Costo del nuovo anno: 600 − 300 = 300 €; anno vecchio 300 €; totale 600 € = bolletta."},
+      {"testo": "31/1: stessa bolletta (600 € + IVA 132 €), ma il 1/1 NON hai fatto lo storno (metodo B): chiudi il rateo di 300 €.", "righe": [("Ratei passivi", "D", 300), ("Energia elettrica", "D", 300), ("IVA ns/credito", "D", 132), ("Debiti v/fornitori", "A", 732)],
+       "spiegazione": "La fattura chiude il debito di dicembre (rateo) e porta a costo solo la parte di gennaio. Il risultato è identico al metodo A."},
+      {"testo": "31/12: interessi su un deposito 1/12–28/2, lordo 90 €, accreditati il 28/2. Rileva la quota di dicembre (31 giorni su 90).", "righe": [("Ratei attivi", "D", 31), ("Interessi attivi bancari", "A", 31)],
+       "spiegazione": "Ricavo maturato da incassare: rateo attivo calcolato sul lordo, senza ritenuta."},
+      {"testo": "1/1, dopo la riapertura: storna il rateo attivo di 31 € sugli interessi (metodo A).", "righe": [("Interessi attivi bancari", "D", 31), ("Ratei attivi", "A", 31)],
+       "spiegazione": "La scrittura del 31/12 rovesciata: gli interessi del nuovo anno partono con 31 € in Dare."},
+      {"testo": "28/2: la banca accredita gli interessi 1/12–28/2: lordo 90 €, ritenuta 26% 23,40 €, netto 66,60 €. Il rateo è già stornato.", "righe": [("Banca c/c", "D", 66.6), ("Erario c/acconti d'imposta", "D", 23.4), ("Interessi attivi bancari", "A", 90)],
+       "spiegazione": "Si registra per intero; la ritenuta subita è un acconto d'imposta. Ricavo del nuovo anno: 90 − 31 = 59 €; con i 31 € di dicembre il totale è 90 €."}]),
 ("La destinazione dell'utile", """
 <p>Dopo l'approvazione del bilancio l'assemblea delibera la destinazione dell'utile:</p>
 <ul>

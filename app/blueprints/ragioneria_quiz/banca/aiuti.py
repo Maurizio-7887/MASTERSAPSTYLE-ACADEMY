@@ -283,4 +283,10 @@ AIUTI = {
 "N20-01": "Rileggi la tabella «Fine anno voce per voce», riga Risconti attivi, colonna «31/12 chiusura».",
 "N20-02": "Tabella «Fine anno voce per voce», riga Ratei passivi, colonna «1/1 riapertura»: il rateo passivo è un debito.",
 "N20-03": "Il rateo riaperto vale 160: il pagamento lo chiude; costo del nuovo anno è solo la differenza tra gli interessi pagati e il rateo.",
+"N20-04": "Lo storno del 1/1 è la scrittura del 31/12 rovesciata: dove era Dare va Avere.",
+"N20-05": "Il rateo è già stato girato il 1/1: la bolletta si registra come una fattura normale, per intero.",
+"N20-06": "Rovescia la scrittura del 31/12 sul rateo attivo: il ricavo va in Dare.",
+"N20-07": "Interessi al lordo in Avere; la ritenuta trattenuta dalla banca è un credito verso l'Erario (acconto d'imposta).",
+"N20-08": "Somma la quota dell'anno vecchio e quella del nuovo: devono dare l'importo della bolletta.",
+"N20-09": "L'IVA non è un costo: ratei e risconti si calcolano sempre sull'imponibile.",
 }
