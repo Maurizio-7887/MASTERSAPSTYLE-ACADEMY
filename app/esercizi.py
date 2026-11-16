@@ -400,6 +400,24 @@ _DICEMBRE_FIN_NUOVI = [
 _DICEMBRE_FIN_BANCA = 27726.73   # mutuo 30.000 − spese 200 − bollo − maxicanone − assegno + sconto
 
 
+# Affitto del capannone (dal 16/11/2026): contratto firmato il 01/12 con cauzione di 3.000 € (09.20) e canone
+# trimestrale ANTICIPATO di 3.000 € pagato il 01/12. Al 31/12 non c'è più il rateo passivo di 1.033,33 sul fitto
+# posticipato ma un risconto attivo di 1.966,67 (59/90 giorni): il costo del 2026 (1.033,33), l'utile e le imposte
+# non cambiano; la banca scende di 6.000. I lavori salvati senza cauzione restano corretti con i numeri di prima.
+_DICEMBRE_AFFITTO_RISCONTO = 1966.67
+_DICEMBRE_AFFITTO_RATEO = 1033.33
+_DICEMBRE_AFFITTO_BANCA = -6000.00
+_DICEMBRE_AFFITTO_NUOVI = [
+    ("dc_cauzione", "Deposito cauzionale del capannone (09.20)", 3000.00, 0.005),
+    ("dc_fitto", "Fitti passivi di competenza 2026 (3.000 − risconto 1.966,67)", 1033.33, 0.005),
+]
+
+
+def _dicembre_con_affitto(stato):
+    return any((x or {}).get("conto") == "09.20"
+               for r in ((stato or {}).get("registrazioni") or []) for x in ((r or {}).get("righe") or []))
+
+
 def _dicembre_con_finanza(stato):
     return any(abs((m or {}).get("importo") or 0) > 0 for m in (((stato or {}).get("fin") or {}).get("mutui") or []))
 
@@ -418,6 +436,20 @@ def attesi_esercizio(codice, stato=None):
         attesi = [(k, *_DICEMBRE_FIN_ATTESI[k], tol) if k in _DICEMBRE_FIN_ATTESI
                   else (k, label, round(v + _DICEMBRE_FIN_BANCA, 2), tol) if k == "dc_banca_31_12"
                   else (k, label, v, tol) for k, label, v, tol in attesi] + _DICEMBRE_FIN_NUOVI
+    if codice == "dicembre-wms" and stato is not None and _dicembre_con_affitto(stato):
+        def _affitto(k, label, v, tol):
+            if k == "dc_risconto":
+                return (k, label.replace("Risconti attivi (", "Risconti attivi (fitto 1.966,67 + ").replace(
+                    "Risconto attivo sull'assicurazione", "Risconti attivi (assicurazione 1.098,08 + fitto 1.966,67)"),
+                        round(v + _DICEMBRE_AFFITTO_RISCONTO, 2), tol)
+            if k == "dc_rateo":
+                resto = round(v - _DICEMBRE_AFFITTO_RATEO, 2)
+                return (k, "Ratei passivi (solo interessi del mutuo: il fitto è anticipato)" if resto else
+                        "Ratei passivi (nessuno: il fitto è pagato in anticipo)", resto, tol)
+            if k == "dc_banca_31_12":
+                return (k, label, round(v + _DICEMBRE_AFFITTO_BANCA, 2), tol)
+            return (k, label, v, tol)
+        attesi = [_affitto(*a) for a in attesi] + _DICEMBRE_AFFITTO_NUOVI
     return attesi
 
 

@@ -422,6 +422,7 @@ _ERP_PAGINE = {
                      {"endpoint": "chiusura", "titolo": "Chiusura dell'esercizio", "icona": "🔒", "tcode": "epilogo · FAGLGVTR"},
                      {"endpoint": "riapertura", "titolo": "Riapertura e destinazione dell'utile", "icona": "🔓", "tcode": "1° gennaio · F.16"}],
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
+               {"endpoint": "prima_nota", "titolo": "Prima nota libera", "icona": "📝", "tcode": "FB50 · F0718"},
                {"endpoint": "mastro", "titolo": "Mastrini", "icona": "📖", "tcode": "FBL3N"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"},
                {"endpoint": "fatture", "titolo": "Fatture di servizi", "icona": "🧾", "tcode": "FB70"},

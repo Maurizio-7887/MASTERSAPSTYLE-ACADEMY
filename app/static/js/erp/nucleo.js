@@ -41,7 +41,7 @@
     // azienda nuova (costituzione), produzione a tre stadi, anticipo fatture, assestamenti di fine anno
     ['08', 'Crediti verso soci per versamenti ancora dovuti', 'ATTIVO'], ['07', 'Magazzino semilavorati', 'ATTIVO'], ['71', 'Consumi di semilavorati', 'COSTO'],
     ['38', 'Banca c/anticipi su fatture', 'PASSIVO'], ['60', 'Interessi passivi bancari', 'COSTO'],
-    ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
+    ['83', 'Assicurazioni', 'COSTO'], ['86', 'Fitti passivi', 'COSTO'], ['09', 'Crediti verso compagnie di assicurazione', 'ATTIVO'], ['09.20', 'Depositi cauzionali attivi', 'ATTIVO'], ['84', 'Sopravvenienze attive', 'RICAVO'],
     ['05', 'Ratei attivi', 'ATTIVO'], ['06', 'Risconti attivi', 'ATTIVO'], ['39', 'Ratei passivi', 'PASSIVO'], ['34', 'Risconti passivi', 'PASSIVO'],
     ['69', 'Rottamazioni e merce danneggiata', 'COSTO'], ['80', 'Salari e stipendi', 'COSTO'], ['81', 'Oneri sociali', 'COSTO'], ['82', 'Trattamento di fine rapporto', 'COSTO'],
     // finanza: cambiali, assegni, mutui, leasing, ritenute d'acconto, bolli, crediti dubbi
@@ -65,6 +65,8 @@
                    'F700': {nome: 'Acciai del Tevere Srl', regione: 'Umbria', pagamento: '30 gg', iban: 'IT05P0200803284000000077889', ferro: true},
                    'F300': {nome: 'Macchine Alfa Srl', regione: 'Emilia-Romagna', pagamento: '30 gg', iban: 'IT40S0306902480100000004567'},
                    'F400': {nome: 'Assicurazioni Omega Spa', regione: 'Toscana', pagamento: '30 gg', iban: 'IT12A0503402801000000007788'},
+                   // contratto di locazione del capannone: canone trimestrale anticipato, fattura esente IVA (art. 10 n. 8 DPR 633/72)
+                   'F450': {nome: 'Immobiliare Arno Srl', regione: 'Toscana', pagamento: 'anticipato', iban: 'IT48D0306902887100000033445'},
                    // finanza: professionista con ritenuta d'acconto, società di leasing, fornitore di un altro Paese UE
                    'F800': {nome: 'Studio Rossi Commercialisti Associati', regione: 'Umbria', pagamento: 'a vista', iban: 'IT33B0306903010100000012345', professionista: true},
                    'F810': {nome: 'Leasing Umbria Spa', regione: 'Umbria', pagamento: 'SDD', iban: 'IT91C0538703000000000099887'},

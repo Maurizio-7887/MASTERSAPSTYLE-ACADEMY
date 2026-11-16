@@ -502,7 +502,7 @@
       "linked_handler": "function (v) { var c = CH.calcolaAssestamento(v);\n      return '<!--info--><p class=\"lab-nota\">' + c.nome + ': ' + c.formula + ' — conto ' + c.contoSP + ' ' + e(S().pianoDeiConti.find(function (x) { return x.codice === c.contoSP;",
       "prerequisites": "Appropriate learner state and required source records; see referenced page logic for validation.",
       "coverage_current_exercise": "yes",
-      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Rateo passivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Risconto attivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
       "suggested_class": "main",
       "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
       "passi_completi": [
@@ -530,7 +530,7 @@
       "linked_handler": "CH.assestamento",
       "prerequisites": "Relevant fiscal period/documents must exist; ordering and close validations apply.",
       "coverage_current_exercise": "yes",
-      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Rateo passivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
+      "coverage_evidence": "December WMS guide: “Risconto attivo sull’assicurazione” | “Risconto attivo sul fitto del capannone” (app/blueprints/guida/static/esercizi/dicembre-wms.js).",
       "suggested_class": "main",
       "suggested_reason": "Explicitly executed/instructed in the named December guide step(s).",
       "passi_completi": [
