@@ -7,7 +7,7 @@ import json
 import re
 from collections import OrderedDict
 
-from flask import abort, redirect, render_template, request, url_for
+from flask import abort, redirect, render_template, request, session, url_for
 
 from ...accesso import utente_corrente
 from ...db import db
@@ -207,6 +207,13 @@ def registra(bp):
                 db.session.add(PrimaNotaRisposta(utente_id=u.id, eid=eid, righe=json.dumps(scritte), corretta=ok, aiuto=aiuto))
                 db.session.commit()
                 esito = {"valida": True, "ok": ok, "note": note}
+            # Post/Redirect/Get: la pagina del risultato si apre con un GET, così «Indietro»
+            # o «Aggiorna» non chiedono di reinviare il modulo e non registrano un secondo tentativo.
+            session["pn_esito"] = {"eid": eid, "esito": esito, "scritte": scritte}
+            return redirect(url_for(request.endpoint, eid=eid, aiuto="1" if aiuto else None))
+        salvato = session.pop("pn_esito", None)
+        if salvato and salvato.get("eid") == eid:
+            esito, scritte = salvato["esito"], [tuple(x) for x in salvato["scritte"]]
         succ = lista[i + 1]["eid"] if i + 1 < len(lista) else None
         if succ is None:
             dopo = next((b["lista"][0]["eid"] for n, b in operazioni().items() if n > cap and b["lista"]), None)
