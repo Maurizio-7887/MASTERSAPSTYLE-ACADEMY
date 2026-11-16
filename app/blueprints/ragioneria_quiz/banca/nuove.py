@@ -101,3 +101,39 @@ S("C20", "N20-03", 3, "31/1: paghi la rata del mutuo con 240 € di interessi; 1
   [([("Interessi passivi su mutui", "D", 240), ("Banca c/c", "A", 240)], "Così gli interessi dell'anno scorso, già nel rateo, diventerebbero costo due volte e il rateo resterebbe aperto."),
    ([("Ratei passivi", "D", 240), ("Banca c/c", "A", 240)], "Il rateo vale solo 160: gli altri 80 sono interessi del nuovo anno.")],
   "Il pagamento chiude il rateo; solo la parte del nuovo anno è costo.")
+
+# ratei e risconti nel nuovo anno: i due metodi e il controllo anti-doppio-conteggio
+S("C20", "N20-04", 2, "1/1, dopo la riapertura: storna il rateo passivo di 300 € rilevato al 31/12 sulla bolletta dell'energia 1/12–31/1 (metodo dello storno).",
+  [("Ratei passivi", "D", 300), ("Energia elettrica", "A", 300)],
+  [([("Energia elettrica", "D", 300), ("Ratei passivi", "A", 300)], "È la scrittura del 31/12: rifarla raddoppierebbe il costo di dicembre."),
+   ([("Stato patrimoniale iniziale", "D", 300), ("Ratei passivi", "A", 300)], "Questa è la riapertura, che viene prima: lo storno gira il rateo sul costo.")],
+  "Lo storno è la scrittura del 31/12 rovesciata: l'energia del nuovo anno parte con 300 € in Avere.")
+S("C20", "N20-05", 3, "31/1: arriva la bolletta dell'energia 1/12–31/1: 600 € + IVA 132 €. Il 1/1 hai già stornato il rateo passivo di 300 €.",
+  [("Energia elettrica", "D", 600), ("IVA ns/credito", "D", 132), ("Debiti v/fornitori", "A", 732)],
+  [([("Ratei passivi", "D", 300), ("Energia elettrica", "D", 300), ("IVA ns/credito", "D", 132), ("Debiti v/fornitori", "A", 732)],
+    "Il rateo è già stato stornato il 1/1: chiuderlo di nuovo toglierebbe due volte i 300 € di dicembre e il rateo andrebbe in negativo."),
+   ([("Energia elettrica", "D", 300), ("IVA ns/credito", "D", 132), ("Debiti v/fornitori", "A", 432)], "Il debito verso il fornitore è l'intera bolletta (732 €), non solo la parte di gennaio.")],
+  "Con lo storno al 1/1 la fattura si registra per intero: costo del nuovo anno 600 − 300 = 300 €.")
+S("C20", "N20-06", 2, "1/1, dopo la riapertura: storna il rateo attivo di 31 € sugli interessi di un deposito che la banca accrediterà il 28/2.",
+  [("Interessi attivi bancari", "D", 31), ("Ratei attivi", "A", 31)],
+  [([("Ratei attivi", "D", 31), ("Interessi attivi bancari", "A", 31)], "È la scrittura del 31/12: rifarla raddoppierebbe il ricavo di dicembre."),
+   ([("Banca c/c", "D", 31), ("Ratei attivi", "A", 31)], "La banca non ha ancora accreditato nulla: il 1/1 non entra denaro.")],
+  "Lo storno è la scrittura del 31/12 rovesciata: gli interessi del nuovo anno partono con 31 € in Dare.")
+S("C20", "N20-07", 3, "28/2: la banca accredita gli interessi 1/12–28/2: lordo 90 €, ritenuta 26% 23,40 €, netto 66,60 €. Il rateo attivo di 31 € è già stato stornato il 1/1.",
+  [("Banca c/c", "D", 66.6), ("Erario c/acconti d'imposta", "D", 23.4), ("Interessi attivi bancari", "A", 90)],
+  [([("Banca c/c", "D", 66.6), ("Interessi attivi bancari", "A", 66.6)], "Gli interessi si registrano al lordo: la ritenuta subita è un acconto d'imposta, non un minor ricavo."),
+   ([("Banca c/c", "D", 66.6), ("Erario c/acconti d'imposta", "D", 23.4), ("Ratei attivi", "A", 31), ("Interessi attivi bancari", "A", 59)],
+    "Il rateo è già stato stornato il 1/1: chiuderlo di nuovo lo porterebbe in negativo.")],
+  "Si registra per intero: ricavo del nuovo anno 90 − 31 = 59 €; con i 31 € di dicembre il totale è 90 €.")
+T("C20", "N20-08", 2, "Al 31/12 hai rilevato un rateo passivo di 300 € sulla bolletta 1/12–31/1 (600 €). Il 1/1 riapri il rateo ma dimentichi lo storno, e il 31/1 registri la bolletta per intero. Che cosa succede?",
+  "Nel nuovo anno l'energia risulta 600 € invece di 300 €: i 300 € di dicembre sono contati due volte e il rateo resta aperto",
+  [("Niente: il risultato è corretto", "Quota anno vecchio 300 + quota anno nuovo 600 = 900, più della bolletta da 600."),
+   ("Il costo del nuovo anno è di soli 300 €", "Questo succede solo se si fa lo storno oppure si chiude il rateo all'arrivo della fattura."),
+   ("Il costo di dicembre sparisce", "Il costo di dicembre è già nel conto economico dell'anno vecchio: non sparisce, si ripete.")],
+  "Controllo: quota anno vecchio + quota anno nuovo = importo del documento. Serve lo storno al 1/1 oppure la chiusura del rateo con la fattura, uno dei due.")
+T("C20", "N20-09", 2, "Bolletta 1/12–31/1: imponibile 600 €, IVA 132 €. Su quale importo si calcola il rateo passivo di dicembre?",
+  "Sull'imponibile: 600 × 31/62 = 300 €",
+  [("Sul totale con IVA: 732 × 31/62 = 366 €", "L'IVA non è un costo e nasce solo con la fattura: il rateo è sull'imponibile."),
+   ("Sull'intera bolletta: 600 €", "Gennaio è di competenza del nuovo anno: si rileva solo la quota di dicembre."),
+   ("Non si calcola: si aspetta la fattura", "Il costo di dicembre è maturato: va rilevato al 31/12 per competenza.")],
+  "Ratei e risconti si calcolano su imponibile (o interessi lordi), in giorni o mesi del periodo.")
