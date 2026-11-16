@@ -154,7 +154,7 @@
      campi: [['Data', '13/01/2027'], ['Compito', 'il PUTAWAY da Q-ZONE']], attesa: 'Q-ZONE vuota; 200 TR-ALTA disponibili.', nota: rf,
      fatto: function (h) { return confermati(h, 'PUTAWAY', 10); }},
     {g: 'UF 10 · 4 · Movimenti interni', data: '13/01/2027', titolo: 'LT10: sposta un pallet di TR-PED in fondo al magazzino', dove: {ep: M + 'compiti'}, percorso: 'WMS → Compiti → Trasferimento',
-     campi: [['Unità di carico', 'il primo pallet TR-PED (in 01-05-1)'], ['Destinazione', '03-04-1'], ['Motivo', 'riordino della corsia 01'], ['Data', '13/01/2027']],
+     campi: [['Unità di carico da spostare', 'dal menu, la riga «… · 50 pz TR-PED · in 01-05-1»: il numero all’inizio è l’unità di carico, non si scrive a mano'], ['Destinazione', '03-04-1'], ['Motivo', 'riordino della corsia 01'], ['Data', '13/01/2027']],
      attesa: 'Un compito TRASF verso 03-04-1. Nessuna scrittura.', fatto: function (h) { return compiti(h, 'TRASF').some(function (t) { return t.a === '03-04-1'; }); }},
     {g: 'UF 10 · 4 · Movimenti interni', data: '13/01/2027', titolo: 'RF: conferma lo spostamento', dove: {ep: M + 'rf'}, percorso: 'WMS → Pistola RF → Compiti',
      campi: [['Data', '13/01/2027'], ['Compito', 'il TRASF verso 03-04-1']], attesa: 'Il pallet TR-PED è in 03-04-1.', nota: rf,
