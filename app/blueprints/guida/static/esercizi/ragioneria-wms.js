@@ -87,7 +87,7 @@
      fatto:function(h){return fatti(compiti(h,'PUTAWAY').filter(function(t){return t.mat==='FERRO';}),3);}},
     {g:'3 · Acquisto e ricevimento',data:'06/02/2027',titolo:'MIRO: registra la fattura FT-RAG-001',contabile:true,dove:{ep:A+'fatture'},percorso:'MM → Fatture fornitore',campi:[['Ordine','4500000001'],['Numero fattura','FT-RAG-001'],['Prezzo','vuoto = prezzo dell’ordine'],['Data','06/02/2027']],
      attesa:'D 22 WE/RE 3.000 + D 14 IVA a credito 660 / A 20 Fornitore 3.660. WE/RE torna a zero. La fattura NON muove di nuovo la merce. Condizioni fornitore: 60 giorni, scadenza 07/04/2027.',
-     fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return f.rif==='FT-RAG-001';});}},
+     fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='FT-RAG-001';});}},
     {g:'4 · Produzione e WMS',data:'07/02/2027',titolo:'CO01: produci 100 TR-STD',dove:{ep:P+'ordini'},percorso:'PP → Ordini di produzione',campi:[['Materiale','TR-STD'],['Quantità','100'],['Data di inizio','07/02/2027'],['Prima di rilasciare','Mostra costi pianificati']],
      attesa:'Ordine 1000001, costo pianificato 3.508,40. Nessuna scrittura.',fatto:function(h){return !!produzione(h);}},
     {g:'4 · Produzione e WMS',data:'08/02/2027',titolo:'WMS: crea lo staging per l’ordine',dove:{ep:M+'compiti'},percorso:'WMS → Compiti di magazzino → Approvvigionamento della produzione',campi:[['Ordine','1000001'],['Ferro kg','800'],['Data','08/02/2027']],

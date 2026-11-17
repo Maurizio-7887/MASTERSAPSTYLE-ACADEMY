@@ -96,7 +96,7 @@
     {g:'3 · Assicurazione',data:'01/12/2026',titolo:'FB60: registra la polizza annuale',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F400 Assicurazioni Omega'],['Numero','POL-2026-118'],['Conto di costo','83 Assicurazioni'],['Descrizione','premio annuo polizza incendio e furto'],['Imponibile','1200'],['IVA %','0 (assicurazioni esenti)'],['Competenza','dal 01/12/2026 al 30/11/2027'],['Scadenza','02/12/2026'],['Data','01/12/2026']],
      attesa:'D 83 Assicurazioni / A 20 Fornitore 1.200, senza IVA. Il premio copre 12 mesi, ma solo dicembre è del 2026: lo sistemeremo a fine anno con il risconto.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return f.rif==='POL-2026-118';});}},
+     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='POL-2026-118';});}},
     {g:'3 · Assicurazione',data:'02/12/2026',titolo:'F-53: paga la polizza',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
      campi:[['Fornitore','F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],attesa:'D 20 / A 10 Banca 1.200. Banca 78.800.',fatto:function(h){return paga(h,'F400','2026-12-02');}},
     // ── 4 · ordini cliente ──
@@ -120,7 +120,7 @@
      attesa:'D 69 Rottamazioni e merce danneggiata / A 12 Ferro 190 (200 × 0,95). Il ferro esce dal magazzino e diventa un costo. Se il controllo avesse detto «buona», si sbloccava (343) e tornava a scaffale.',
      nota:'Il trasporto era a nostro rischio (franco partenza): il fornitore fattura tutti i 3.000 kg.',fatto:function(h){return reg(h,'ROTTAMAZIONE','2026-12-05');}},
     {g:'5 · Acquisto del ferro',data:'05/12/2026',titolo:'MIRO: registra la fattura del ferro',contabile:true,dove:{ep:A+'fatture'},percorso:'MM → Fatture fornitore',campi:[['Ordine','4500000001'],['Numero fattura','FR-2026-871'],['Prezzo','vuoto = quello dell’ordine'],['Data','05/12/2026']],
-     attesa:'D 22 3.000 + D 14 IVA 660 / A 20 Acciaierie Umbre 3.660. Il conto 22 torna a zero.',fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return f.rif==='FR-2026-871';});}},
+     attesa:'D 22 3.000 + D 14 IVA 660 / A 20 Acciaierie Umbre 3.660. Il conto 22 torna a zero.',fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='FR-2026-871';});}},
     {g:'5 · Acquisto del ferro',data:'05/12/2026',titolo:'ME21N: riordino urgente di 500 kg',dove:{ep:A+'ordini'},percorso:'MM → Ordini d’acquisto e rilascio',campi:[['Fornitore','F100'],['Materiale','FERRO'],['Quantità','500'],['Prezzo','1,08 (consegna urgente)'],['Data','05/12/2026']],
      attesa:'Ordine 4500000002 da 540 €. Con 2.800 kg buoni ne restano solo 240 dopo il taglio: si ricostituisce la scorta di sicurezza. Nessuna scrittura.',fatto:function(h){return !!riordino(h);}},
     {g:'5 · Acquisto del ferro',data:'06/12/2026',titolo:'MIGO 101: ricevi i 500 kg urgenti',contabile:true,dove:{ep:A+'entrate'},percorso:'MM → Entrata merci',campi:[['Ordine','4500000002'],['Numero DDT','DDT-AU-5530'],['Lotto (colata)','COL-1206'],['Danneggiati','0'],['Data','06/12/2026']],
@@ -128,7 +128,7 @@
     {g:'5 · Acquisto del ferro',data:'06/12/2026',titolo:'RF: metti a dimora il fascio urgente',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',campi:[['Data di lavoro','06/12/2026'],['Compiti','il PUTAWAY del ferro']],
      attesa:'Strategia «aggiunta a scorta esistente»: il fascio va in F-02, accanto a quello da 800. Le due colate restano distinte.',nota:rf,fatto:function(h){return fatti(compiti(h,'PUTAWAY',entrataAcq(riordino(h))),1);}},
     {g:'5 · Acquisto del ferro',data:'06/12/2026',titolo:'MIRO: fattura del riordino',contabile:true,dove:{ep:A+'fatture'},percorso:'MM → Fatture fornitore',campi:[['Ordine','4500000002'],['Numero fattura','FR-2026-902'],['Data','06/12/2026']],
-     attesa:'D 22 540 + D 14 118,80 / A 20 658,80.',fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return f.rif==='FR-2026-902';});}},
+     attesa:'D 22 540 + D 14 118,80 / A 20 658,80.',fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='FR-2026-902';});}},
     // ── 6 · taglio ──
     {g:'6 · Stadio 1: taglio',data:'07/12/2026',titolo:'CO01: ordine di taglio per 320 kit',dove:{ep:P+'ordini'},percorso:'PP → Ordini di produzione',campi:[['Materiale','SL-TAGLIO'],['Quantità','320'],['Data','07/12/2026']],
      attesa:'Ordine 1000001: componente 2.560 kg di ferro; costo pianificato 4.672 (320 × 14,60). Ne tagliamo 20 in più delle 300 transenne: resteranno a scorta. Nessuna scrittura.',fatto:function(h){var o=prod(h,'SL-TAGLIO');return !!o && o.qta===320;}},
