@@ -295,6 +295,12 @@ p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F495',rif:'ENO-2026-21
 vicinoS('54.30',113.2,'carburante con IVA indetraibile 60%'); vicinoS('54.50',366,'rappresentanza con IVA a costo'); vicinoS('54.40',150,'hotel');
 [['F460','TT-2026-881','il corriere'],['F470','TEL-2026-1201','il telefono'],['F480','HFB-3317','l’hotel'],['F490','CV-2026-0457','il carburante'],['F495','ENO-2026-212','la cena di rappresentanza'],['F498','OT-2026-77','l’officina']].forEach(x => {
   p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:x[0],documento:x[1],data:'2026-12-18'}),'F-53 '+x[1]); fino('paga '+x[2]); });
+// caso reale (Andrea): fattura sbagliata e già pagata → non si storna più, il tutor non deve bloccare chi è andato avanti
+{ const h = {S: p.S()}; const g = p.w.GUIDA_ESERCIZI || null;
+  const fp = p.S().fatturePassive.find(f=>f.rif==='OT-2026-77'); const vero = fp.totale; fp.totale = 244;
+  const passo = (p.w.MSA_ESERCIZIO || {passi:[]}).passi.find(x=>/officina|saldatrice/i.test(x.titolo||'') && /OT-2026-77/.test(String(x.fatto)));
+  ok(!!passo,'passo officina trovato'); if (passo) ok(passo.fatto(h)===true,'FB60 pagata con importo sbagliato: il tutor non blocca');
+  fp.totale = vero; }
 { const ot = p.S().fatturePassive.find(f=>f.rif==='OT-2026-77'); p = apri('erp_fi','storni'); ok(/già pagata/.test(p.fai('fb',{documento:ot.contabile,motivo:'01',data:'2026-12-18'})),'FB60 già pagata: non si storna'); }
 vicinoS('20',0,'fornitori pagati'); vicinoS('10',26201.18-170.80-73.20-165-122-366-366,'banca dopo i pagamenti');
 // 10 · finanza: mutuo, parcella con ritenuta, noleggio a Edil Sigma pagato con una tratta
