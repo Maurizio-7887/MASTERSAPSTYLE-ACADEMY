@@ -73,7 +73,11 @@
   }
   var D='erp_dati.', M='erp_magazzino.', A='erp_acquisti.', P='erp_produzione.', C='erp_costi.', V='erp_vendite.', X='erp_spedizione.', T='erp_tesoreria.', F='erp_fi.', K='erp_cespiti.', H='erp_chiusura.', Y='erp_paghe.', I='erp_inventario.', Z='erp_innovazione.';
   // FB60: il passo è fatto solo se la fattura c'è, non è stornata e ha il totale giusto (un importo sbagliato si storna con FB08 e si rifà)
-  function fb60ok(h,rif,totale){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()===rif && !f.stornata && Math.abs((f.totale||0)-totale)<0.01;});}
+  function fb60ok(h,rif,totale){
+    // importo sbagliato: blocca solo finché la fattura non è pagata (si corregge con FB08 e si rifà);
+    // una fattura già pagata non si storna più, quindi non deve fermare chi è andato avanti
+    var pagata=function(f){return (h.S.registrazioni || []).some(function(r){return r.tipo==='PAGAMENTO_FORNITORE' && !r.stornato && !r.stornoDi && String(r.descrizione||'').toUpperCase().indexOf('FATTURA '+String(f.rif).toUpperCase()+':')>=0;});};
+    return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()===rif && !f.stornata && (Math.abs((f.totale||0)-totale)<0.01 || pagata(f));});}
   var regs = function(h) { return h.S.registrazioni || []; };
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
   var saldo = function(h,c,alla,partner) { return Math.round(regs(h).reduce(function(s,r){if(alla && r.data>alla)return s;if(r.chiusura==='stato patrimoniale'||r.chiusura==='epilogo'||r.chiusura==='riapertura')return s;return s+(r.righe || []).filter(function(x){return x.conto===c && (!partner || x.partner===partner);}).reduce(function(t,x){return t+(x.dareAvere==='DARE'?x.importo:-x.importo);},0);},0)*100)/100; };
