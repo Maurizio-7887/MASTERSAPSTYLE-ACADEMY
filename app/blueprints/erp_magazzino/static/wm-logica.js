@@ -157,7 +157,14 @@ window.WM4 = (function () {
     var data = n.data(i.data || t.creato); if (data < t.creato) throw Error('Conferma anteriore alla creazione del compito (' + L.fd(t.creato) + ').');
     var scan = function (v) { return String(v == null ? '' : v).trim().toUpperCase(); };
     if (i.da !== undefined && scan(i.da) !== t.da) throw Error('Ubicazione di origine sbagliata: hai letto ' + (scan(i.da) || '(niente)') + ', il compito dice ' + t.da + '.');
-    if (i.udc !== undefined && t.udc && scan(i.udc) !== t.udc && scan(i.udc) !== t.mat) throw Error('Unità di carico sbagliata: hai letto ' + (scan(i.udc) || '(niente)') + ', il compito dice UdC ' + t.udc + ' (' + t.mat + ').');
+    if (i.udc !== undefined && t.udc) {
+      // si accetta il numero dell'UdC, il codice del materiale, o la riga copiata intera dallo schermo («1000002 · FERRO», «UdC 1000002 (FERRO)»)
+      var letto = scan(i.udc), pezzi = letto.replace(/^UDC\s*/, '').split(/[^A-Z0-9-]+/).filter(Boolean);
+      var numeri = pezzi.filter(function (x) { return /^\d{5,}$/.test(x); });
+      var okUdc = pezzi.indexOf(t.udc) >= 0 && numeri.every(function (x) { return x === t.udc; });
+      var okMat = !numeri.length && pezzi.length && pezzi.every(function (x) { return x === t.mat; });
+      if (!okUdc && !okMat) throw Error('Unità di carico sbagliata: hai letto «' + (letto || 'niente') + '». In «2 · Leggi l’unità di carico» scrivi solo il numero ' + t.udc + ' (oppure solo il materiale ' + t.mat + ').');
+    }
     if (i.a !== undefined && scan(i.a) !== t.a) throw Error('Ubicazione di destinazione sbagliata: hai letto ' + (scan(i.a) || '(niente)') + ', il compito dice ' + t.a + '.');
     [t.da, t.a].forEach(function (b) { if (u[b] && u[b].blocco) throw Error('Ubicazione ' + b + ' bloccata per inventario (' + u[b].blocco + ').'); });
     var q = w.quant.find(function (x) { return x.id === t.quant; });
