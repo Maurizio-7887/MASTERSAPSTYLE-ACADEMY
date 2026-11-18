@@ -280,6 +280,12 @@ vicinoS('10',26201.18,'banca dopo i macchinari');
 // 10b · spese generali e trasferte: IVA detraibile in parte, blocco degli errori, pagamenti
 p = apri('erp_fi','passive'); ok(/non è detraibile/i.test(p.fai('fp',{fornitore:'F495',rif:'ENO-2026-212',conto:'54.50',testo:'cena con il cliente Beta Costruzioni del 17/12',imponibile:'300',iva:'22',detraibile:'100',scadenza:'2026-12-18',data:'2026-12-18'})),'rappresentanza con IVA detraibile: bloccata');
 p = apri('erp_fi','passive'); ok(/40%/.test(p.fai('fp',{fornitore:'F490',rif:'CV-2026-0457',conto:'54.30',testo:'carburante',imponibile:'100',iva:'22',detraibile:'100',scadenza:'2026-12-18',data:'2026-12-18'})),'carburante con IVA tutta detraibile: bloccato');
+// caso reale (Svitlana): la cena registrata a 200 invece che 300 → il tutor non spunta, FB08 la storna, poi si rifà giusta
+p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F495',rif:'ENO-2026-212',conto:'54.50',testo:'cena sbagliata',imponibile:'200',iva:'22',detraibile:'0',scadenza:'2026-12-18',data:'2026-12-18'}),'FB60 ENO sbagliata a 200');
+{ const fpErr = p.S().fatturePassive.find(f=>f.rif==='ENO-2026-212'); ok(fpErr && Math.abs(fpErr.totale-244)<0.01,'fattura sbagliata a 244');
+  ok(/già registrata/.test(p.fai('fp',{fornitore:'F495',rif:'ENO-2026-212',conto:'54.50',testo:'x',imponibile:'300',iva:'22',detraibile:'0',scadenza:'2026-12-18',data:'2026-12-18'})),'non si registra due volte senza storno');
+  p = apri('erp_fi','storni'); bene(p.fai('fb',{documento:fpErr.contabile,motivo:'01',data:'2026-12-18'}),'FB08 storno della FB60 sbagliata');
+  ok(p.S().fatturePassive.find(f=>f.contabile===fpErr.contabile).stornata===true,'FB60 segnata stornata'); }
 [['F470','TEL-2026-1201','54.10','linea fissa e internet dell’ufficio, dicembre','60','22','100','bolletta del telefono'],
  ['F480','HFB-3317','54.40','trasferta del responsabile commerciale alla fiera di Bologna, una notte 16–17/12','150','10','100','hotel della trasferta'],
  ['F490','CV-2026-0457','54.30','rifornimento dell’auto aziendale per la trasferta a Bologna, pagato con carta','100','22','40','carburante dell’auto'],
@@ -289,6 +295,7 @@ p = apri('erp_fi','passive'); ok(/40%/.test(p.fai('fp',{fornitore:'F490',rif:'CV
 vicinoS('54.30',113.2,'carburante con IVA indetraibile 60%'); vicinoS('54.50',366,'rappresentanza con IVA a costo'); vicinoS('54.40',150,'hotel');
 [['F460','TT-2026-881','il corriere'],['F470','TEL-2026-1201','il telefono'],['F480','HFB-3317','l’hotel'],['F490','CV-2026-0457','il carburante'],['F495','ENO-2026-212','la cena di rappresentanza'],['F498','OT-2026-77','l’officina']].forEach(x => {
   p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:x[0],documento:x[1],data:'2026-12-18'}),'F-53 '+x[1]); fino('paga '+x[2]); });
+{ const ot = p.S().fatturePassive.find(f=>f.rif==='OT-2026-77'); p = apri('erp_fi','storni'); ok(/già pagata/.test(p.fai('fb',{documento:ot.contabile,motivo:'01',data:'2026-12-18'})),'FB60 già pagata: non si storna'); }
 vicinoS('20',0,'fornitori pagati'); vicinoS('10',26201.18-170.80-73.20-165-122-366-366,'banca dopo i pagamenti');
 // 10 · finanza: mutuo, parcella con ritenuta, noleggio a Edil Sigma pagato con una tratta
 p = apri('erp_finanza','mutui'); ok(/1.?313,46/.test(p.fai('mu',{ente:'Banca Popolare dell’Umbria',importo:'30000',tasso:'4,8',rate:'24',periodicita:'1',spese:'200',data:'2026-12-18'},'calcola')),'anteprima della rata');

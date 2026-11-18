@@ -72,6 +72,8 @@
     return;
   }
   var D='erp_dati.', M='erp_magazzino.', A='erp_acquisti.', P='erp_produzione.', C='erp_costi.', V='erp_vendite.', X='erp_spedizione.', T='erp_tesoreria.', F='erp_fi.', K='erp_cespiti.', H='erp_chiusura.', Y='erp_paghe.', I='erp_inventario.', Z='erp_innovazione.';
+  // FB60: il passo è fatto solo se la fattura c'è, non è stornata e ha il totale giusto (un importo sbagliato si storna con FB08 e si rifà)
+  function fb60ok(h,rif,totale){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()===rif && !f.stornata && Math.abs((f.totale||0)-totale)<0.01;});}
   var regs = function(h) { return h.S.registrazioni || []; };
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
   var saldo = function(h,c,alla,partner) { return Math.round(regs(h).reduce(function(s,r){if(alla && r.data>alla)return s;if(r.chiusura==='stato patrimoniale'||r.chiusura==='epilogo'||r.chiusura==='riapertura')return s;return s+(r.righe || []).filter(function(x){return x.conto===c && (!partner || x.partner===partner);}).reduce(function(t,x){return t+(x.dareAvere==='DARE'?x.importo:-x.importo);},0);},0)*100)/100; };
@@ -184,7 +186,7 @@
     {g:'2b · Affitto del capannone',data:'01/12/2026',titolo:'FB60: registra la fattura del primo trimestre di affitto',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F450 Immobiliare Arno'],['Numero','AFF-2026-12'],['Conto di costo','86 Fitti passivi'],['Descrizione','canone capannone 1° trimestre anticipato'],['Imponibile','3000'],['IVA %','0 (locazione di immobile strumentale esente, art. 10 n. 8 DPR 633/72)'],['Competenza','dal 01/12/2026 al 28/02/2027'],['Scadenza','01/12/2026'],['Data','01/12/2026']],
      attesa:'D 86 Fitti passivi / A 20 Fornitore 3.000, senza IVA. Il canone copre dicembre, gennaio e febbraio: solo dicembre è del 2026. A fine anno lo sistemeremo con il risconto attivo.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='AFF-2026-12';});}},
+     fatto:function(h){return fb60ok(h,'AFF-2026-12',3000);}},
     {g:'2b · Affitto del capannone',data:'01/12/2026',titolo:'F-53: paga in anticipo il primo trimestre di affitto',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
      campi:[['Fornitore','F450 Immobiliare Arno: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','AFF-2026-12'],['Importo','vuoto = tutto il debito'],['Data','01/12/2026']],punti:PPAGA('F450','Immobiliare Arno','AFF-2026-12','2026-12-01',function(h){return paga(h,'F450','2026-12-01');}),
      attesa:'D 20 / A 10 Banca 3.000. Banca 74.000: 80.000 − cauzione 3.000 − canone 3.000.',fatto:function(h){return paga(h,'F450','2026-12-01');}},
@@ -200,7 +202,7 @@
     {g:'3 · Assicurazione',data:'01/12/2026',titolo:'FB60: registra la polizza annuale',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F400 Assicurazioni Omega'],['Numero','POL-2026-118'],['Conto di costo','83 Assicurazioni'],['Descrizione','premio annuo polizza incendio e furto'],['Imponibile','1200'],['IVA %','0 (assicurazioni esenti)'],['Competenza','dal 01/12/2026 al 30/11/2027'],['Scadenza','02/12/2026'],['Data','01/12/2026']],
      attesa:'D 83 Assicurazioni / A 20 Fornitore 1.200, senza IVA. Il premio copre 12 mesi, ma solo dicembre è del 2026: lo sistemeremo a fine anno con il risconto.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='POL-2026-118';});}},
+     fatto:function(h){return fb60ok(h,'POL-2026-118',1200);}},
     {g:'3 · Assicurazione',data:'02/12/2026',titolo:'F-53: paga la polizza',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
      campi:[['Fornitore','F400 Assicurazioni Omega: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','POL-2026-118'],['Importo','vuoto = tutto il debito'],['Data','02/12/2026']],punti:PPAGA('F400','Assicurazioni Omega','POL-2026-118','2026-12-02',function(h){return (paga(h,'F400','2026-12-02')||paga(h,'F400','2026-12-01'));}),attesa:'D 20 / A 10 Banca 1.200. Banca 72.680.',fatto:function(h){return (paga(h,'F400','2026-12-02')||paga(h,'F400','2026-12-01'));}},
     // ── 4 · ordini cliente ──
@@ -374,7 +376,7 @@
      campi:[['Fornitore','F460 Trasporti Toscani (il vettore V10 del trasporto del 15/12)'],['Numero','TT-2026-881'],['Conto di costo','57.10 Trasporti su vendite (corrieri)'],['Descrizione','trasporto Beta 4 colli 80 € e Delta 3 colli 60 €, resa franco destino'],['Imponibile','140'],['IVA %','22'],['IVA detraibile %','100'],['Scadenza','18/12/2026'],['Data','16/12/2026']],
      attesa:'D 57.10 Trasporti su vendite 140 + D 14 IVA a credito 30,80 / A 20 Fornitore 170,80.',
      nota:'Resa franco destino: il trasporto è a carico nostro, non si addebita ai clienti (niente condizione KF00 in fattura). È un costo commerciale di vendita, interamente deducibile.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='TT-2026-881';});}},
+     fatto:function(h){return fb60ok(h,'TT-2026-881',170.8);}},
     {g:'10 · Fatture e anticipo',data:'16/12/2026',titolo:'Anticipo su fattura: la banca anticipa l’80% di Beta',contabile:true,dove:{ep:T+'anticipi'},percorso:'Tesoreria → Anticipo su fatture',campi:[['Fattura','quella di Beta (12.912,48, scade il 14/01/2027)'],['Percentuale','80'],['Commissione','30'],['Data','16/12/2026']],
       punti:[
         {t:'leggi',sel:'#an-fattura',nome:'Fattura del cliente Beta',serve:'Nel menu scegli la fattura di Beta emessa il 15/12, totale 12.912,48 €. Questo anticipo riguarda Beta, non Delta.'},
@@ -394,27 +396,27 @@
      campi:[['Fornitore','F470 Telecomunicazioni Etruria'],['Numero','TEL-2026-1201'],['Conto di costo','54.10 Spese telefoniche'],['Descrizione','linea fissa e internet dell’ufficio, dicembre'],['Imponibile','60'],['IVA %','22'],['IVA detraibile %','100'],['Scadenza','18/12/2026'],['Data','18/12/2026']],
      attesa:'D 54.10 Spese telefoniche 60 + D 14 IVA a credito 13,20 / A 20 Fornitore 73,20.',
      nota:'IVA tutta detraibile (linea dell’ufficio usata per l’azienda). Per l’IRES le spese telefoniche si deducono all’80% (art. 102, c. 9, TUIR): alle imposte il programma aggiunge da solo una variazione in aumento di 12 € (20%). Per l’IRAP si deducono per intero.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='TEL-2026-1201';});}},
+     fatto:function(h){return fb60ok(h,'TEL-2026-1201',73.2);}},
     {g:'10b · Spese generali e trasferte',data:'18/12/2026',titolo:'FB60: hotel della trasferta alla fiera di Bologna',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F480 Hotel Fiera Bologna'],['Numero','HFB-3317'],['Conto di costo','54.40 Viaggi e soggiorni (alberghi)'],['Descrizione','trasferta del responsabile commerciale alla fiera di Bologna, una notte 16–17/12'],['Imponibile','150'],['IVA %','10'],['IVA detraibile %','100'],['Scadenza','18/12/2026'],['Data','18/12/2026']],
      attesa:'D 54.40 Viaggi e soggiorni 150 + D 14 IVA a credito 15 / A 20 Fornitore 165.',
      nota:'Gli alberghi hanno l’IVA al 10%, detraibile se la fattura è intestata alla società e la trasferta riguarda l’attività. La notte di un dipendente in trasferta è un costo interamente deducibile.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='HFB-3317';});}},
+     fatto:function(h){return fb60ok(h,'HFB-3317',165);}},
     {g:'10b · Spese generali e trasferte',data:'18/12/2026',titolo:'FB60: carburante dell’auto aziendale',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F490 Carburanti Valdarno'],['Numero','CV-2026-0457'],['Conto di costo','54.30 Carburanti e lubrificanti (auto a uso promiscuo)'],['Descrizione','rifornimento dell’auto aziendale per la trasferta a Bologna, pagato con carta'],['Imponibile','100'],['IVA %','22'],['IVA detraibile %','40'],['Scadenza','18/12/2026'],['Data','18/12/2026']],
      attesa:'IVA 22 €: detraibile il 40% = 8,80; indetraibile 13,20 che diventa costo. D 54.30 Carburanti 113,20 + D 14 IVA a credito 8,80 / A 20 Fornitore 122.',
      nota:'Auto aziendale a uso promiscuo (non assegnata a un dipendente): IVA detraibile al 40% (art. 19-bis1, lett. c, DPR 633/72) e costo deducibile ai fini IRES solo al 20% (art. 164 TUIR): alle imposte il programma aggiunge da solo una variazione in aumento di 90,56 € (80% di 113,20). Per l’IRAP il costo si deduce per intero. Il carburante va pagato con mezzi tracciabili, altrimenti niente detrazione né deduzione.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='CV-2026-0457';});}},
+     fatto:function(h){return fb60ok(h,'CV-2026-0457',122);}},
     {g:'10b · Spese generali e trasferte',data:'18/12/2026',titolo:'FB60: cena di rappresentanza con il cliente Beta',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F495 Enoteca Il Ceppo'],['Numero','ENO-2026-212'],['Conto di costo','54.50 Spese di rappresentanza'],['Descrizione','cena con il cliente Beta Costruzioni del 17/12'],['Imponibile','300'],['IVA %','22'],['IVA detraibile %','0'],['Scadenza','18/12/2026'],['Data','18/12/2026']],
      attesa:'IVA 66 € NON detraibile: diventa costo. D 54.50 Spese di rappresentanza 366 / A 20 Fornitore 366. Nessuna IVA a credito.',
      nota:'Spese di rappresentanza: IVA mai detraibile, salvo beni fino a 50 € l’uno (art. 19-bis1, lett. h, DPR 633/72). Il programma blocca l’errore se scrivi una percentuale diversa da 0. Per l’IRES sono deducibili fino all’1,5% dei ricavi caratteristici (art. 108, c. 2, TUIR): il resto è una variazione in aumento calcolata dal programma alle imposte. Per l’IRAP si deducono per intero.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='ENO-2026-212';});}},
+     fatto:function(h){return fb60ok(h,'ENO-2026-212',366);}},
     {g:'10b · Spese generali e trasferte',data:'18/12/2026',titolo:'FB60: riparazione della saldatrice',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
      campi:[['Fornitore','F498 Officina Meccanica Tosi'],['Numero','OT-2026-77'],['Conto di costo','54.20 Manutenzioni e riparazioni'],['Descrizione','riparazione della saldatrice a filo (manutenzione ordinaria)'],['Imponibile','300'],['IVA %','22'],['IVA detraibile %','100'],['Scadenza','18/12/2026'],['Data','18/12/2026']],
      attesa:'D 54.20 Manutenzioni e riparazioni 300 + D 14 IVA a credito 66 / A 20 Fornitore 366.',
      nota:'La manutenzione ordinaria è un costo dell’anno (non aumenta il valore del cespite). Per l’IRES è deducibile fino al 5% del costo dei beni ammortizzabili (art. 102, c. 6, TUIR): 5% di 29.000 = 1.450, quindi i 300 € si deducono tutti.',
-     fatto:function(h){return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='OT-2026-77';});}},
+     fatto:function(h){return fb60ok(h,'OT-2026-77',366);}},
     {g:'10b · Spese generali e trasferte',data:'18/12/2026',titolo:'F-53: paga il corriere',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
      campi:[['Fornitore','F460 Trasporti Toscani: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','TT-2026-881'],['Importo','vuoto = tutto il debito'],['Data','18/12/2026']],punti:PPAGA('F460','Trasporti Toscani','TT-2026-881','2026-12-18',function(h){return paga(h,'F460','2026-12-18');}),
      attesa:'D 20 / A 10 Banca: il debito verso Trasporti Toscani va a zero.',fatto:function(h){return paga(h,'F460','2026-12-18');}},
