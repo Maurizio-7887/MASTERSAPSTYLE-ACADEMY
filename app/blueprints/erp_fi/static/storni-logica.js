@@ -191,10 +191,16 @@ window.ST4 = (function () {
     return '<p class="lab-nota">Compito ' + t.numero + ' annullato.' + (nuovo ? ' Nuovo compito ' + nuovo.map(function (x) { return x.numero + ' ' + x.da + ' → ' + x.a; }).join(' · ') + '.' : '') + '</p>';
   }
   // ── FB08 storno di un documento contabile (solo quelli che non nascono da un documento logistico) ──
-  var FB08 = {INCASSO: 'incasso F-28', ESTRATTO_CONTO: 'riga dell\'estratto conto', PAGAMENTO_STIPENDI: 'pagamento stipendi', F24: 'versamento F24', PAGAMENTO_F110: 'distinta F110 non ancora addebitata', ACCONTO: 'incasso di acconto', INCASSO_VALUTA: 'incasso in valuta', PAGAMENTO_VALUTA: 'pagamento in valuta'};
+  var FB08 = {FATTURA_PASSIVA: 'fattura passiva di servizi FB60 non ancora pagata', INCASSO: 'incasso F-28', ESTRATTO_CONTO: 'riga dell\'estratto conto', PAGAMENTO_STIPENDI: 'pagamento stipendi', F24: 'versamento F24', PAGAMENTO_F110: 'distinta F110 non ancora addebitata', ACCONTO: 'incasso di acconto', INCASSO_VALUTA: 'incasso in valuta', PAGAMENTO_VALUTA: 'pagamento in valuta'};
   function fb08(i) {
     var n = N(), s = S(), r0 = reg(i.documento);
     if (!FB08[r0.tipo]) throw Error('Il documento ' + r0.numero + ' (' + r0.tipo + ') nasce da un documento logistico o da una chiusura: si storna dalla sua transazione (VF11, VL09, MBST, MR8M, storni di produzione), non con FB08.');
+    if (r0.tipo === 'FATTURA_PASSIVA') {   // FB60 sbagliata: si storna finché non è pagata, poi si registra di nuovo giusta
+      var fp = (s.fatturePassive || []).find(function (x) { return x.contabile === r0.numero; });
+      var pagam = (s.registrazioni || []).some(function (x) { return x.tipo === 'PAGAMENTO_FORNITORE' && !x.stornato && !x.stornoDi && fp && x.data >= r0.data && String(x.descrizione || '').indexOf('fattura ' + fp.rif + ':') >= 0; });
+      if (fp && (pagam || n.saldo('20', fp.fornitore) > -fp.totale + 0.004)) throw Error('La fattura ' + fp.rif + ' risulta già pagata (in tutto o in parte): non si storna più con FB08. Se è sbagliata, chiedi al docente.');
+      if (fp) fp.stornata = true;
+    }
     if (r0.tipo === 'PAGAMENTO_F110') { var run = s.tes.pagamenti.find(function (x) { return x.contabile === r0.numero; }); if (run.addebitato) throw Error('La banca ha già addebitato la distinta: storna prima la riga dell\'estratto conto.'); run.annullato = true; run.addebitato = 'annullata'; }
     if (r0.tipo === 'ACCONTO') { var a = s.acconti.find(function (x) { return x.numero === r0.rif; }); if (a.dedotto > 0.004) throw Error('L\'acconto è già dedotto in fattura: prima storna la fattura.'); a.pagato = null; }
     if (r0.tipo === 'PAGAMENTO_STIPENDI') { s.hr.registrati.find(function (x) { return 'STIPENDI ' + x.periodo === r0.rif; }).pagato = null; }

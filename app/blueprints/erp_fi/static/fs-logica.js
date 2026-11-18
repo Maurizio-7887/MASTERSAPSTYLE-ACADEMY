@@ -31,7 +31,7 @@ window.FS4 = (function () {
     var n = N(), data = n.data(i.data), f = n.fornitore(i.fornitore), conto = String(i.conto || '').trim();
     var pc = S().pianoDeiConti.find(function (c) { return c.codice === conto; }); if (!pc || pc.tipo !== 'COSTO') throw Error('Scegli un conto di costo.');
     var rif = String(i.rif || '').trim(); if (!rif) throw Error('Scrivi il numero della fattura del fornitore.');
-    if (P().some(function (x) { return x.fornitore === i.fornitore && x.rif === rif; })) throw Error('Fattura ' + rif + ' di ' + f.nome + ' già registrata.');
+    if (P().some(function (x) { return x.fornitore === i.fornitore && x.rif === rif && !x.stornata; })) throw Error('Fattura ' + rif + ' di ' + f.nome + ' già registrata.');
     var imp = L.num(i.imponibile, 'Imponibile', 0.01), ivaP = i.iva == null || i.iva === '' ? 22 : L.num(i.iva, 'IVA %', 0), iva = r2(imp * ivaP / 100);
     // IVA detraibile solo in parte (art. 19-bis1 DPR 633/72): la parte indetraibile è un costo e va sul conto della spesa
     var detr = i.detraibile == null || i.detraibile === '' ? 100 : L.num(i.detraibile, 'IVA detraibile %', 0);
@@ -60,7 +60,7 @@ window.FS4 = (function () {
     var parcelleAperte = window.FIN4 && window.FIN4.X ? window.FIN4.X().parcelle.filter(function (p) { return p.fornitore === i.fornitore && !p.pagata; }) : [];
     if (parcelleAperte.length) throw Error('Il fornitore ha una parcella professionale ancora da pagare (' + parcelleAperte.map(function (p) { return p.rif; }).join(', ') + '). Usa Finanza → Ritenute → Paga parcella: il pagamento calcola il netto e trattiene correttamente la ritenuta.');
     if (doc) {   // la fattura indicata deve essere del fornitore scelto: evita di pagare la polizza al fornitore proposto dal modulo
-      var fp = P().filter(function (x) { return String(x.rif).toUpperCase() === doc.toUpperCase(); })[0];
+      var fp = P().filter(function (x) { return String(x.rif).toUpperCase() === doc.toUpperCase() && !x.stornata; })[0];
       if (fp && fp.fornitore !== i.fornitore) {
         var g = n.fornitore(fp.fornitore);
         throw Error('La fattura ' + fp.rif + ' è di ' + g.nome + ' (' + fp.fornitore + '), non di ' + f.nome + ' (' + i.fornitore + '): scegli il fornitore ' + fp.fornitore + '.');
