@@ -309,7 +309,7 @@ LABORATORI = {
 _ERP_COMUNI = [("static", "js/erp/nucleo.js"), ("static", "js/erp/ui.js"), ("erp_vendite.static", "sd-logica.js"), ("erp_copa.static", "copa-logica.js"),
                ("erp_acquisti.static", "mm-logica.js"), ("erp_produzione.static", "pp-logica.js"), ("erp_costi.static", "copc-logica.js"), ("erp_bpc.static", "bpc-logica.js"), ("erp_controllo.static", "co-percorso.js"),
                ("erp_magazzino.static", "wm-logica.js"), ("erp_magazzino.static", "lotti-logica.js"), ("erp_inventario.static", "inv-logica.js"), ("erp_spedizione.static", "sp-logica.js"), ("erp_innovazione.static", "in-logica.js"),
-               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"),
+               ("erp_tesoreria.static", "tes-logica.js"), ("erp_valute.static", "val-logica.js"), ("erp_paghe.static", "py-logica.js"), ("erp_fi.static", "storni-logica.js"), ("erp_fi.static", "fs-logica.js"), ("erp_fi.static", "partitari-logica.js"),
                ("erp_cespiti.static", "ce-logica.js"), ("erp_tesoreria.static", "rb-logica.js"), ("erp_finanza.static", "fin-logica.js"), ("erp_chiusura.static", "ch-logica.js"), ("static", "js/erp/ruoli.js"), ("static", "js/lab-copioni.js"),
                ("static", "js/erp/lettore.js"), ("static", "vendor/jsbarcode-3.11.6.min.js"), ("static", "vendor/qrcode-generator-1.4.4.js"), ("static", "js/erp/etichette.js")]
 # gruppi delle mattonelle del modulo S/4 (ogni gruppo è una cartella-blueprint)
@@ -424,6 +424,8 @@ _ERP_PAGINE = {
     "erp_fi": [{"endpoint": "giornale", "titolo": "Libro giornale", "icona": "📚", "tcode": "FB03"},
                {"endpoint": "prima_nota", "titolo": "Prima nota libera", "icona": "📝", "tcode": "FB50 · F0718"},
                {"endpoint": "mastro", "titolo": "Mastrini", "icona": "📖", "tcode": "FBL3N"},
+               {"endpoint": "partitari", "titolo": "Partitari clienti e fornitori", "icona": "👥", "tcode": "FBL1N · FBL5N"},
+               {"endpoint": "riconciliazione", "titolo": "Conti di riconciliazione", "icona": "🔗", "tcode": "11 · 20 ↔ partitari"},
                {"endpoint": "bilancio", "titolo": "Bilancio di verifica", "icona": "⚖️", "tcode": "F.08"},
                {"endpoint": "fatture", "titolo": "Fatture di servizi", "icona": "🧾", "tcode": "FB70"},
                {"endpoint": "passive", "titolo": "Fatture passive di servizi e pagamenti", "icona": "📥", "tcode": "FB60 · F-53"},

@@ -18,6 +18,16 @@ def prima_nota():
     return render_lab("erp_fi", "prima_nota")
 
 
+@bp.route("/partitari")
+def partitari():
+    return render_lab("erp_fi", "partitari")
+
+
+@bp.route("/riconciliazione")
+def riconciliazione():
+    return render_lab("erp_fi", "riconciliazione")
+
+
 @bp.route("/bilancio")
 def bilancio():
     return render_lab("erp_fi", "bilancio")

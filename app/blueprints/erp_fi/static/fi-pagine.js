@@ -48,7 +48,7 @@
   window.FI_DIDATTICA = {totali:totali, movimenti:movimenti, registrazioni:registrazioni};
   function base() { return location.pathname.replace(/\/contabilita-s4(?:\/.*)?$/, '/contabilita-s4/'); }
   function docId(r) { return 'fi-doc-' + encodeURIComponent(r.numero); }
-  function navigazione() { return '<nav class="fi-nav" aria-label="Consultazione contabile"><a href="'+e(base())+'">Libro giornale</a><a href="'+e(base()+'mastro')+'">Mastrini per conto</a></nav>'; }
+  function navigazione() { return '<nav class="fi-nav" aria-label="Consultazione contabile"><a href="'+e(base())+'">Libro giornale</a><a href="'+e(base()+'mastro')+'">Mastrini per conto</a><a href="'+e(base()+'partitari')+'">Partitari clienti e fornitori</a><a href="'+e(base()+'riconciliazione')+'">Conti di riconciliazione</a></nav>'; }
   function blocco() { var n = bloccati().length; return n ? '<p class="fi-avviso" role="status">'+n+' documenti esclusi: prima invia un tentativo completo e valutabile nel laboratorio di ragioneria. Anche saldi e totali sotto riportati escludono questi documenti e non rappresentano il saldo completo.</p>' : ''; }
   function contoNome(codice) { var c = (S().pianoDeiConti || []).find(function (x) { return String(x.codice) === String(codice); }); return codice + (c ? ' · '+c.nome : ''); }
   function importi(x) { return '<td class="fi-importo">'+(x.dareAvere === 'DARE' ? eur(x.importo) : '—')+'</td><td class="fi-importo">'+(x.dareAvere === 'AVERE' ? eur(x.importo) : '—')+'</td>'; }
@@ -61,14 +61,19 @@
       radice.innerHTML = navigazione() +
         '<section class="fi-fiori"><header class="fi-fiori-head"><small>Contabilità finanziaria / General Ledger</small><h2>Post General Journal Entries <span>F0718</span></h2><p>Prima Nota libera · registrazione manuale sul libro giornale integrato</p></header>' +
         '<form id="fi-free-form"><fieldset><legend>Dati di testata</legend><div class="fi-fiori-fields"><label>Data documento<input name="dataDoc" type="date" value="'+today+'" required></label><label>Data registrazione<input name="data" type="date" value="'+today+'" required></label><label>Tipo documento<select name="tipo"><option value="SA">SA · Contabilità generale</option></select></label><label>Valuta<input value="EUR" readonly aria-label="Valuta EUR"></label><label class="fi-wide">Testo testata<input name="descrizione" maxlength="160" required placeholder="Descrizione della registrazione"></label><label>Riferimento<input name="rif" maxlength="60" placeholder="Riferimento facoltativo"></label></div></fieldset>' +
-        '<fieldset><legend>Posizioni contabili</legend><div class="fi-scroll"><table class="fi-tabella" id="fi-free-rows"><thead><tr><th>Pos.</th><th>Conto Co.Ge.</th><th>Dare / Avere</th><th>Importo EUR</th><th>Testo posizione</th><th></th></tr></thead><tbody></tbody></table></div><button type="button" class="lab-btn sec" id="fi-free-add">+ Aggiungi posizione</button></fieldset>' +
+        '<fieldset><legend>Posizioni contabili</legend><div class="fi-scroll"><table class="fi-tabella" id="fi-free-rows"><thead><tr><th>Pos.</th><th>Conto Co.Ge.</th><th>Dare / Avere</th><th>Importo EUR</th><th>Cliente / Fornitore</th><th>Testo posizione</th><th></th></tr></thead><tbody></tbody></table></div><button type="button" class="lab-btn sec" id="fi-free-add">+ Aggiungi posizione</button></fieldset>' +
         '<div class="fi-free-summary" role="status" id="fi-free-total">Dare 0,00 € · Avere 0,00 €</div><p id="fi-free-msg" role="status"></p><button type="button" class="lab-btn sec" id="fi-free-check">Simula / Verifica</button> <button type="submit" class="lab-btn" id="fi-free-post">Registra documento</button> <a class="lab-btn sec" href="'+e(base())+'">Manage Journal Entries (F0717A)</a></form></section>';
       var form = radice.querySelector('#fi-free-form'), tbody = radice.querySelector('#fi-free-rows tbody');
       function add() {
-        var tr=document.createElement('tr'); tr.innerHTML='<td class="fi-pos"></td><td><select class="fi-conto" required>'+opt+'</select></td><td><select class="fi-da"><option value="DARE">Dare</option><option value="AVERE">Avere</option></select></td><td><input class="fi-val" type="number" min="0.01" step="0.01" required placeholder="0,00"></td><td><input class="fi-testo" maxlength="120" placeholder="Testo riga"></td><td><button type="button" class="fi-remove" aria-label="Rimuovi posizione">×</button></td>';
-        tbody.appendChild(tr); tr.querySelector('.fi-remove').onclick=function(){if(tbody.rows.length>2){tr.remove(); renumber(); calculate();}};
+        var tr=document.createElement('tr'); tr.innerHTML='<td class="fi-pos"></td><td><select class="fi-conto" required>'+opt+'</select></td><td><select class="fi-da"><option value="DARE">Dare</option><option value="AVERE">Avere</option></select></td><td><input class="fi-val" type="number" min="0.01" step="0.01" required placeholder="0,00"></td><td><select class="fi-partner" disabled title="Solo per i conti di riconciliazione 11 Clienti e 20 Fornitori"><option value="">—</option></select></td><td><input class="fi-testo" maxlength="120" placeholder="Testo riga"></td><td><button type="button" class="fi-remove" aria-label="Rimuovi posizione">×</button></td>';
+        tbody.appendChild(tr); tr.querySelector('.fi-conto').addEventListener('change',function(){partnerRiga(tr);}); tr.querySelector('.fi-remove').onclick=function(){if(tbody.rows.length>2){tr.remove(); renumber(); calculate();}};
         renumber(); calculate();
       }
+      // conto di riconciliazione (11 clienti, 20 fornitori): si sceglie il cliente o il fornitore della riga
+      function partnerRiga(tr){var sel=tr.querySelector('.fi-partner'),conto=tr.querySelector('.fi-conto').value,PT=window.PT4,info=PT&&PT.CONTI_RIC[conto];
+        if(!info){sel.innerHTML='<option value="">—</option>';sel.disabled=true;sel.required=false;tr.classList.remove('fi-ric');return;}
+        sel.innerHTML='<option value="">Scegli il '+info.lato+' ('+info.tcode+')</option>'+PT.anagrafiche(info.lato).map(function(a){return '<option value="'+e(a.codice)+'">'+e(a.codice+' · '+a.nome)+'</option>';}).join('');
+        sel.disabled=false;sel.required=true;tr.classList.add('fi-ric');}
       function renumber(){Array.prototype.forEach.call(tbody.rows,function(tr,i){tr.querySelector('.fi-pos').textContent=String(i+1);});}
       function calculate(){
         var d=0,a=0;Array.prototype.forEach.call(tbody.rows,function(tr){var v=Math.round(Number(tr.querySelector('.fi-val').value||0)*100);if(tr.querySelector('.fi-da').value==='DARE')d+=v;else a+=v;});
@@ -76,9 +81,10 @@
       }
       function v0(n){var el=form.querySelector('[name="'+n+'"]');return el?el.value:'';}
       function collect(){
+        Array.prototype.forEach.call(tbody.rows,function(tr){var c=tr.querySelector('.fi-conto').value,pa=tr.querySelector('.fi-partner');if(window.PT4&&window.PT4.eRic(c))window.PT4.controllaRigaLibera({conto:c,partner:pa?pa.value:''});});
         if(!form.reportValidity())throw Error('Completa i campi obbligatori.');
         if(tbody.rows.length<2)throw Error('Inserisci almeno due posizioni.');
-        var rows=Array.prototype.map.call(tbody.rows,function(tr){var conto=tr.querySelector('.fi-conto').value,imp=Number(tr.querySelector('.fi-val').value);if(!conto||!Number.isFinite(imp)||imp<=0)throw Error('Conto e importo positivo obbligatori per ogni posizione.');return {conto:conto,dareAvere:tr.querySelector('.fi-da').value,importo:imp,testo:tr.querySelector('.fi-testo').value};});
+        var rows=Array.prototype.map.call(tbody.rows,function(tr){var conto=tr.querySelector('.fi-conto').value,imp=Number(tr.querySelector('.fi-val').value);if(!conto||!Number.isFinite(imp)||imp<=0)throw Error('Conto e importo positivo obbligatori per ogni posizione.');var pa=tr.querySelector('.fi-partner'),riga={conto:conto,dareAvere:tr.querySelector('.fi-da').value,importo:imp,testo:tr.querySelector('.fi-testo').value};if(pa&&!pa.disabled&&pa.value)riga.partner=pa.value;if(window.PT4)window.PT4.controllaRigaLibera(riga);return riga;});
         if(!calculate())throw Error('Documento non quadrato: il totale Dare deve coincidere con Avere.');
         // strafalcioni ragionieristici: la prima nota libera li blocca prima della registrazione
         rows.forEach(function(r){
@@ -127,6 +133,74 @@
       var scelto = new URLSearchParams(location.search).get('conto') || (conti[0] || {}).codice || '', ms = movimenti(regs,scelto), t = totali(ms.map(function (m) { return m.riga; }));
       var righe = ms.map(function (m) { var r=m.documento,x=m.riga; return '<tr><td>'+e(fd(r.data))+'</td><td><a href="'+e(base()+'#'+docId(r))+'">'+e(r.numero)+'</a></td><td>'+e([r.descrizione,x.partner,x.testo].filter(Boolean).join(' · '))+'</td>'+importi(x)+'<td class="fi-importo">'+eur(Math.abs(m.saldo)/100)+' '+(m.saldo>0?'Dare':m.saldo<0?'Avere':'(zero)')+'</td></tr>'; }).join('');
       radice.innerHTML = navigazione()+blocco()+L.scheda('📖',e('Mastrino '+contoNome(scelto)),'FBL3N','<form class="fi-filtro" method="get"><label for="fi-conto">Conto</label> <select id="fi-conto" name="conto">'+conti.map(function (c) { return '<option value="'+e(c.codice)+'"'+(String(c.codice)===String(scelto)?' selected':'')+'>'+e(c.codice+' · '+c.nome)+'</option>'; }).join('')+'</select> <button type="submit" class="lab-btn">Mostra mastrino</button></form><p>Ordine cronologico per data; a parità di data, ordine originale del giornale. Saldo iniziale dei movimenti consultabili: 0,00 €.</p>'+tabella('Movimenti conto '+scelto,['Data','Documento / giornale','Descrizione','Dare €','Avere €','Saldo progressivo €'],righe || '<tr><td colspan="6">Nessun movimento consultabile.</td></tr>','<tr><th scope="row" colspan="3">Totali movimenti</th><td class="fi-importo">'+eur(t.dare/100)+'</td><td class="fi-importo">'+eur(t.avere/100)+'</td><td class="fi-importo">'+eur(Math.abs(t.dare-t.avere)/100)+' '+(t.dare>t.avere?'Dare':t.dare<t.avere?'Avere':'(zero)')+'</td></tr>'));
+    },
+    partitari: function () {
+      var PT = window.PT4, q = new URLSearchParams(location.search), lato = q.get('lato') === 'cliente' ? 'cliente' : 'fornitore';
+      var partner = q.get('partner') || '', dal = q.get('dal') || '', al = q.get('al') || '', stato = q.get('stato') || 'tutte', regs = registrazioni();
+      var anag = PT.anagrafiche(lato), info = PT.CONTI_RIC[PT.contoDi(lato)];
+      if (partner && !anag.some(function (a) { return a.codice === partner; })) partner = '';
+      var sezione = function (v) { return v > 0.004 ? 'Dare' : v < -0.004 ? 'Avere' : '(zero)'; };
+      var saldoTxt = function (v) { return eur(Math.abs(v)) + ' ' + sezione(v); };
+      var form = '<form class="fi-filtro fi-pt-filtro" method="get">' +
+        '<label>Partitario <select name="lato" id="pt-lato"><option value="fornitore"' + (lato === 'fornitore' ? ' selected' : '') + '>Fornitori (FBL1N · conto 20)</option><option value="cliente"' + (lato === 'cliente' ? ' selected' : '') + '>Clienti (FBL5N · conto 11)</option></select></label> ' +
+        '<label>' + (lato === 'cliente' ? 'Cliente' : 'Fornitore') + ' <select name="partner" id="pt-partner"><option value="">— tutti: elenco dei saldi —</option>' + anag.map(function (a) { return '<option value="' + e(a.codice) + '"' + (a.codice === partner ? ' selected' : '') + '>' + e(a.codice + ' · ' + a.nome) + '</option>'; }).join('') + '</select></label> ' +
+        '<label>Dal <input type="date" name="dal" id="pt-dal" value="' + e(dal) + '"></label> <label>Al <input type="date" name="al" id="pt-al" value="' + e(al) + '"></label> ' +
+        '<label>Partite <select name="stato" id="pt-stato"><option value="tutte"' + (stato === 'tutte' ? ' selected' : '') + '>tutte</option><option value="aperte"' + (stato === 'aperte' ? ' selected' : '') + '>solo aperte</option><option value="pareggiate"' + (stato === 'pareggiate' ? ' selected' : '') + '>solo pareggiate e pagamenti</option></select></label> ' +
+        '<button type="submit" class="lab-btn" id="pt-mostra">Mostra partitario</button></form>';
+      var spiega = '<p class="lab-nota">Il <b>partitario</b> è la scheda di un singolo ' + lato + ': tutte le sue fatture, note di credito e ' + (lato === 'cliente' ? 'incassi' : 'pagamenti') + ', con il saldo progressivo. Ogni riga sta anche sul <b>conto di riconciliazione ' + PT.contoDi(lato) + ' ' + info.nome + '</b>: per questo la somma di tutti i partitari è uguale al saldo del conto ' + PT.contoDi(lato) + '. Una partita è <b>aperta</b> finché ' + (lato === 'cliente' ? 'il cliente non paga' : 'non la paghiamo') + ', <b>pareggiata</b> quando è chiusa.</p>';
+      var corpo;
+      if (!partner) {
+        var el = PT.elenco(lato, {al: al, registrazioni: regs}), tot = el.reduce(function (t, x) { return t + x.saldo; }, 0);
+        var righe = el.map(function (x) { var u = base() + 'partitari?lato=' + lato + '&partner=' + encodeURIComponent(x.codice) + (al ? '&al=' + al : '');
+          return '<tr' + (x.movimenti ? '' : ' class="fi-pt-vuoto"') + '><td><a href="' + e(u) + '">' + e(x.codice) + '</a></td><td>' + e(x.nome) + '</td><td>' + e(x.contoRic) + '</td><td class="fi-importo">' + x.movimenti + '</td><td class="fi-importo">' + x.aperte + '</td><td class="fi-importo">' + eur(x.importoAperto) + '</td><td class="fi-importo">' + saldoTxt(x.saldo) + '</td></tr>'; }).join('');
+        corpo = tabella('Saldi dei partitari ' + (lato === 'cliente' ? 'clienti' : 'fornitori') + (al ? ' al ' + fd(al) : ''), ['Codice', 'Ragione sociale', 'Conto di riconciliazione', 'Movimenti', 'Partite aperte', 'Importo aperto €', 'Saldo €'], righe,
+          '<tr><th scope="row" colspan="6">Totale dei partitari (deve essere uguale al saldo del conto ' + PT.contoDi(lato) + ')</th><td class="fi-importo">' + saldoTxt(tot) + '</td></tr>') +
+          '<p>Clicca un codice per aprire la scheda con tutti i movimenti.</p>';
+      } else {
+        PT.annotaInterrogazione(lato, partner);
+        var m = PT.movimenti(lato, partner, {dal: dal, al: al, stato: stato, registrazioni: regs}), tD = 0, tA = 0;
+        var badge = function (x) { var c = {aperta: '#B45309', pareggiata: '#1E7B45', storno: '#6B7280', stornata: '#6B7280'}[x.stato] || '#2F6FB5';
+          return '<span style="display:inline-block;padding:1px 7px;border-radius:9px;font-size:.8em;font-weight:700;color:#fff;background:' + c + '">' + e(x.stato) + '</span>' + (x.stato === 'aperta' ? '<br><small>residuo ' + eur(x.residuo) + (x.scadenza ? ' · scade ' + fd(x.scadenza) : '') + '</small>' : ''); };
+        var righe = m.righe.map(function (x) { if (x.dareAvere === 'DARE') tD += x.importo; else tA += x.importo;
+          var desc = String(x.descrizione || x.testo || '').split(/ [—–(]| per la fattura|: /)[0]; if (desc.length > 60) desc = desc.slice(0, 57) + '…';
+          return '<tr><td style="white-space:nowrap">' + e(fd(x.data)) + '</td><td><a href="' + e(base() + '#' + docId({numero: x.numero})) + '">' + e(x.numero) + '</a><br><small>' + e(String(x.tipo).replace(/_/g, ' ').toLowerCase()) + '</small></td><td>' + e(x.rif) + '</td><td title="' + e(x.descrizione + (x.testo ? ' · ' + x.testo : '')) + '">' + e(desc) + '</td>' + importi(x) + '<td class="fi-importo">' + saldoTxt(x.saldo) + '</td><td>' + badge(x) + '</td></tr>'; }).join('');
+        var iniziale = dal ? '<tr><td colspan="6"><b>Saldo iniziale al ' + e(fd(dal)) + '</b></td><td class="fi-importo">' + saldoTxt(m.saldoIniziale) + '</td><td></td></tr>' : '';
+        corpo = '<div class="fi-free-summary">' + e(partner + ' · ' + m.nome) + ' · conto di riconciliazione <b>' + e(m.conto) + '</b> · saldo ' + (al ? 'al ' + e(fd(al)) : 'finale') + ': <b>' + saldoTxt(m.saldoFinale) + '</b>' +
+          (lato === 'fornitore' ? (m.saldoFinale < -0.004 ? ' → gli dobbiamo ancora dei soldi' : m.saldoFinale > 0.004 ? ' → abbiamo pagato più del dovuto' : ' → non gli dobbiamo niente') : (m.saldoFinale > 0.004 ? ' → deve ancora pagarci' : m.saldoFinale < -0.004 ? ' → ha pagato più del dovuto' : ' → non ci deve niente')) + '</div>' +
+          tabella('Partitario ' + partner, ['Data', 'Documento', 'Riferimento', 'Descrizione', 'Dare €', 'Avere €', 'Saldo progressivo €', 'Stato partita'], iniziale + (righe || '<tr><td colspan="8">Nessun movimento con questi filtri.</td></tr>'),
+            '<tr><th scope="row" colspan="4">Totali movimenti mostrati</th><td class="fi-importo">' + eur(tD) + '</td><td class="fi-importo">' + eur(tA) + '</td><td class="fi-importo">' + saldoTxt(m.saldoFinale) + '</td><td></td></tr>') +
+          '<p><a href="' + e(base() + 'partitari?lato=' + lato + (al ? '&al=' + al : '')) + '">← Torna all\'elenco dei saldi</a></p>';
+      }
+      radice.innerHTML = navigazione() + blocco() + L.scheda(lato === 'cliente' ? '👥' : '🏭', 'Partitario ' + (lato === 'cliente' ? 'clienti' : 'fornitori'), lato === 'cliente' ? 'FBL5N · tutte le partite' : 'FBL1N · tutte le partite', form + spiega + corpo);
+      radice.querySelector('#pt-lato').onchange = function () { var f = this.form; f.querySelector('#pt-partner').value = ''; f.submit(); };
+    },
+    riconciliazione: function () {
+      var PT = window.PT4, q = new URLSearchParams(location.search), al = q.get('al') || '', regs = registrazioni();
+      if (!al) { var ultime = S().registrazioni.filter(function (r) { return !r.chiusura; }).map(function (r) { return r.data; }).sort(); al = ultime[ultime.length - 1] || new Date().toISOString().slice(0, 10); }
+      var es = PT.riconcilia(al, {registrazioni: regs}), sezione = function (v) { return eur(Math.abs(v)) + ' ' + (v > 0.004 ? 'Dare' : v < -0.004 ? 'Avere' : '(zero)'); };
+      var prospetto = tabella('Riconciliazione al ' + fd(al), ['Conto di riconciliazione', 'Saldo del conto (mastro) €', 'Somma dei partitari €', 'Differenza €', 'Esito'],
+        es.map(function (x) { return '<tr><td><a href="' + e(base() + 'mastro?conto=' + x.conto) + '">' + e(x.conto + ' · ' + x.nome) + '</a></td><td class="fi-importo">' + sezione(x.saldoMastro) + '</td><td class="fi-importo"><a href="' + e(base() + 'partitari?lato=' + x.lato + '&al=' + al) + '">' + sezione(x.sommaPartitari) + '</a></td><td class="fi-importo">' + eur(x.differenza) + '</td><td>' + (x.ok ? '✅ quadra' : '❌ non quadra') + '</td></tr>'; }).join(''));
+      var dettagli = es.map(function (x) {
+        var h = '<h4 style="margin:1rem 0 .3rem">' + e(x.conto + ' ' + x.nome) + ' · ' + e(x.partitario) + ' (' + e(x.tcode) + ')</h4>';
+        h += x.partner.length ? tabella('Saldi per ' + x.lato + ' sul conto ' + x.conto, ['Codice', 'Ragione sociale', 'Saldo €'], x.partner.map(function (p) { return '<tr><td><a href="' + e(base() + 'partitari?lato=' + x.lato + '&partner=' + encodeURIComponent(p.codice) + '&al=' + al) + '">' + e(p.codice) + '</a></td><td>' + e(p.nome) + '</td><td class="fi-importo">' + sezione(p.saldo) + '</td></tr>'; }).join('')) : '<p>Nessun ' + x.lato + ' con saldo o movimenti.</p>';
+        var anom = x.senzaPartner.map(function (r) { return ['senza ' + x.lato, r]; }).concat(x.sconosciuti.map(function (r) { return [x.lato + ' ' + r.partner + ' non in anagrafica', r]; }));
+        if (anom.length) h += '<div class="fi-avviso"><b>Righe che spiegano la differenza</b> (registrate sul conto ' + e(x.conto) + ' senza un ' + x.lato + ' valido): vanno stornate e rifatte indicando il ' + x.lato + '.</div>' +
+          tabella('Righe anomale sul conto ' + x.conto, ['Problema', 'Data', 'Documento', 'Tipo', 'Descrizione', 'Dare €', 'Avere €'], anom.map(function (a) { var r = a[1]; return '<tr><td>' + e(a[0]) + '</td><td>' + e(fd(r.data)) + '</td><td><a href="' + e(base() + '#' + docId({numero: r.numero})) + '">' + e(r.numero) + '</a></td><td>' + e(r.tipo) + '</td><td>' + e(r.descrizione) + '</td>' + importi(r) + '</tr>'; }).join(''));
+        return h;
+      }).join('');
+      var anag = tabella('Anagrafiche e conto di riconciliazione', ['Codice', 'Ragione sociale', 'Tipo', 'Conto di riconciliazione'],
+        PT.anagrafiche('cliente').concat(PT.anagrafiche('fornitore')).map(function (a) { return '<tr><td>' + e(a.codice) + '</td><td>' + e(a.nome) + '</td><td>' + e(a.lato) + '</td><td>' + e(a.contoRic + ' · ' + PT.CONTI_RIC[a.contoRic].nome) + '</td></tr>'; }).join(''));
+      var storico = (S().fiRiconciliazioni || []).slice(-5).reverse().map(function (r) { return '<li>' + e(fd(r.data)) + ' · ' + (r.ok ? '✅ quadra' : '❌ differenze') + ' · eseguita il ' + e(new Date(r.eseguita).toLocaleString('it-IT')) + '</li>'; }).join('');
+      radice.innerHTML = navigazione() + blocco() + L.scheda('🔗', 'Conti di riconciliazione', 'S_ALR_87012172 · F.08 · FBL1N/FBL5N',
+        '<form class="fi-filtro" method="get"><label>Riconcilia alla data <input type="date" name="al" id="rc-al" value="' + e(al) + '"></label> <button type="submit" class="lab-btn sec">Aggiorna il prospetto</button> <button type="button" class="lab-btn" id="rc-esegui">Esegui la riconciliazione</button></form>' +
+        '<p class="lab-nota">In SAP i clienti e i fornitori non hanno un conto ciascuno nel piano dei conti: ognuno ha il suo <b>partitario</b> e, nell\'anagrafica, un <b>conto di riconciliazione</b> della contabilità generale (11 Crediti verso clienti, 20 Debiti verso fornitori). Ogni riga del partitario va in automatico anche sul conto di riconciliazione. Per questo il saldo del conto deve essere sempre uguale alla somma dei partitari: se non lo è, qualcuno ha scritto sul conto senza indicare il cliente o il fornitore. Le scritture di chiusura e riapertura (riporto dei saldi) non contano.</p>' +
+        '<p id="rc-esito" role="status"></p>' + prospetto + dettagli + (storico ? '<h4>Riconciliazioni eseguite</h4><ul>' + storico + '</ul>' : '') + '<details><summary>Anagrafiche: quale conto di riconciliazione usa ogni cliente e fornitore</summary>' + anag + '</details>');
+      radice.querySelector('#rc-esegui').onclick = function () {
+        try { var d = radice.querySelector('#rc-al').value, r = PT.eseguiRiconciliazione(d); if (window.MSA_SALVA) window.MSA_SALVA();
+          radice.querySelector('#rc-esito').innerHTML = r.registro.ok ? '✅ <b>Riconciliazione al ' + e(fd(d)) + ' eseguita: i conti 11 e 20 quadrano con i partitari.</b>' : '❌ <b>Riconciliazione al ' + e(fd(d)) + ' eseguita con differenze</b>: guarda le righe anomale qui sotto.';
+          radice.querySelector('#rc-esito').className = r.registro.ok ? 'lab-esito ok' : 'lab-esito errore';
+        } catch (err) { radice.querySelector('#rc-esito').textContent = '⚠ ' + err.message; }
+      };
     },
     bilancio: function () { radice.innerHTML = L.scheda('⚖️', 'Bilancio di verifica', 'F.08', L.bilancio(S())); },
     sdi: function () {
@@ -207,7 +281,7 @@
     L.collega(radice, 'sv', {sv: FS.sopravvenienza}, rendi); L.collega(radice, 'ii', {ii: FS.incassaIndennizzo}, rendi);
   };
   function rendi() {
-    if (bloccati().length && ['giornale','mastro','prima_nota'].indexOf(C.pagina)<0) {
+    if (bloccati().length && ['giornale','mastro','prima_nota','partitari','riconciliazione'].indexOf(C.pagina)<0) {
       // Se la domanda nasce da un form, conserva il DOM e il suo esito:
       // nasconderlo evita anche che il callback scriva su nodi staccati.
       if (radice.dataset.fiReso === '1') { radice.dataset.fiSospeso = '1'; radice.hidden = true; return; }
@@ -220,7 +294,7 @@
     radice.dataset.fiReso = '1';
   }
   function aggiornaVisibilita() {
-    if (['giornale','mastro','bilancio','prima_nota'].indexOf(C.pagina)>=0 || radice.dataset.fiSospeso === '1') { rendi(); return; }
+    if (['giornale','mastro','bilancio','prima_nota','partitari','riconciliazione'].indexOf(C.pagina)>=0 || radice.dataset.fiSospeso === '1') { rendi(); return; }
     radice.hidden = bloccati().length > 0;
   }
   window.addEventListener('msa:quiz-pronto',aggiornaVisibilita);

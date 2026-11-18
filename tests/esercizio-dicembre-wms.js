@@ -7,13 +7,13 @@ const vicino = (a, b, m) => ok(Math.abs(a - b) < 0.006, m + ': atteso ' + b + ',
 const CHIAVE = 'ferro-transenne-fi-2026-erp-ft-civilistico';
 const PAGINE = {erp_dati: 'dati-pagine.js', erp_vendite: 'sd-pagine.js', erp_copa: 'copa-pagine.js', erp_fi: 'fi-pagine.js', erp_acquisti: 'mm-pagine.js', erp_produzione: 'pp-pagine.js', erp_costi: 'copc-pagine.js', erp_controllo: 'co-pagine.js', erp_bpc: 'bpc-pagine.js', erp_magazzino: 'wm-pagine.js', erp_inventario: 'inv-pagine.js', erp_spedizione: 'sp-pagine.js', erp_tesoreria: 'tes-pagine.js', erp_finanza: 'fin-pagine.js', erp_valute: 'val-pagine.js', erp_paghe: 'py-pagine.js', erp_cespiti: 'ce-pagine.js', erp_chiusura: 'ch-pagine.js', erp_innovazione: 'in-pagine.js'};
 const LOGICA = ['app/static/js/lab-motore.js', 'app/static/js/erp/nucleo.js', 'app/static/js/erp/ui.js', 'app/blueprints/erp_vendite/static/sd-logica.js', 'app/blueprints/erp_copa/static/copa-logica.js',
-  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_bpc/static/bpc-logica.js', 'app/blueprints/erp_controllo/static/co-percorso.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/blueprints/erp_fi/static/fs-logica.js', 'app/blueprints/erp_cespiti/static/ce-logica.js', 'app/blueprints/erp_tesoreria/static/rb-logica.js', 'app/blueprints/erp_finanza/static/fin-logica.js', 'app/blueprints/erp_chiusura/static/ch-logica.js', 'app/static/js/erp/ruoli.js',
+  'app/blueprints/erp_acquisti/static/mm-logica.js', 'app/blueprints/erp_produzione/static/pp-logica.js', 'app/blueprints/erp_costi/static/copc-logica.js', 'app/blueprints/erp_bpc/static/bpc-logica.js', 'app/blueprints/erp_controllo/static/co-percorso.js', 'app/blueprints/erp_magazzino/static/wm-logica.js', 'app/blueprints/erp_magazzino/static/lotti-logica.js', 'app/blueprints/erp_inventario/static/inv-logica.js', 'app/blueprints/erp_spedizione/static/sp-logica.js', 'app/blueprints/erp_tesoreria/static/tes-logica.js', 'app/blueprints/erp_valute/static/val-logica.js', 'app/blueprints/erp_paghe/static/py-logica.js', 'app/blueprints/erp_innovazione/static/in-logica.js', 'app/blueprints/erp_fi/static/storni-logica.js', 'app/blueprints/erp_fi/static/fs-logica.js', 'app/blueprints/erp_fi/static/partitari-logica.js', 'app/blueprints/erp_cespiti/static/ce-logica.js', 'app/blueprints/erp_tesoreria/static/rb-logica.js', 'app/blueprints/erp_finanza/static/fin-logica.js', 'app/blueprints/erp_chiusura/static/ch-logica.js', 'app/static/js/erp/ruoli.js',
   'app/static/js/lab-copioni.js', 'app/static/js/erp/lettore.js', 'app/static/vendor/jsbarcode-3.11.6.min.js', 'app/static/vendor/qrcode-generator-1.4.4.js', 'app/static/js/erp/etichette.js'];
 let memoria = null, ultima = null;   // il localStorage passa da una pagina all'altra come nel browser
-function apri(bp, pagina) {
+function apri(bp, pagina, query) {
   if (ultima) memoria = ultima.localStorage.getItem(CHIAVE) || memoria;
   if (ultima) ultima.close();
-  const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/', runScripts: 'outside-only'}).window;
+  const w = new JSDOM('<!doctype html><body><div id="lab"></div></body>', {url: 'https://sim.local/vuoto/s4/contabilita-s4/' + pagina + (query || ''), runScripts: 'outside-only'}).window;
   ultima = w;
   if (memoria) w.localStorage.setItem(CHIAVE, memoria);
   w.confirm = () => true;
@@ -358,6 +358,33 @@ p = apri('erp_magazzino','scorte'); { const regs = p.S().registrazioni.length; b
 { const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); console.log('VALORIZZAZIONE FERRO', JSON.stringify({g:v.giacenza,fifo:v.fifo,lifo:v.lifo,cmp:v.cmp,std:v.standard})); vicino(v.fifo,780,'FIFO ferro'); vicino(v.lifo,740,'LIFO ferro'); }
 controlla('Inventario');
 p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length; p.fai('ko',{data:'2026-12-31'}); fino('KO88'); ok(p.S().registrazioni.length===nk,'varianza zero: nessuna scrittura'); vicinoS('61',0,'varianze');
+// 14 · partitari e conti di riconciliazione
+p = apri('erp_fi','partitari','?lato=fornitore');
+ok(/Saldi dei partitari fornitori/.test(p.lab.textContent),'elenco dei saldi dei fornitori');
+p = apri('erp_fi','partitari','?lato=fornitore&partner=F450');
+{ const m = p.w.PT4.movimenti('fornitore','F450'); ok(m.righe.length===2,'F450: fattura e pagamento ('+m.righe.length+')'); vicino(m.saldoFinale,0,'F450 saldo zero');
+  ok(m.righe.some(x=>x.stato==='pareggiata' && x.dareAvere==='AVERE' && Math.abs(x.importo-3000)<0.01),'fattura affitto pareggiata'); ok(/Partitario F450/.test(p.lab.textContent),'scheda F450 mostrata'); }
+fino('interroga il partitario di Immobiliare Arno');
+p = apri('erp_fi','partitari','?lato=cliente&partner=C100&al=2026-12-31');
+{ const m = p.w.PT4.movimenti('cliente','C100',{al:'2026-12-31'}); vicino(m.saldoFinale,12912.48,'Beta: saldo partitario al 31/12');
+  ok(m.righe.some(x=>x.stato==='aperta' && Math.abs(x.residuo-12912.48)<0.01),'Beta: fattura aperta'); }
+fino('interroga il partitario del cliente Beta');
+p = apri('erp_fi','riconciliazione','?al=2026-12-31');
+{ const es = p.w.PT4.riconcilia('2026-12-31'); ok(es.every(x=>x.ok),'riconciliazione al 31/12 quadra'); vicino(es.find(x=>x.conto==='11').saldoMastro,12912.48,'conto 11 al 31/12'); vicino(es.find(x=>x.conto==='20').sommaPartitari,0,'partitari fornitori');
+  p.lab.querySelector('#rc-al').value='2026-12-31'; p.lab.querySelector('#rc-esegui').click(); ok(/quadrano/.test(p.lab.querySelector('#rc-esito').textContent),'esito riconciliazione mostrato'); }
+fino('Riconcilia i conti 11 e 20');
+// prima nota libera: il conto 20 senza fornitore è rifiutato, senza registrare niente
+p = apri('erp_fi','prima_nota');
+{ const nr = p.S().registrazioni.length, rows = p.lab.querySelectorAll('#fi-free-rows tbody tr'); const f = p.lab.querySelector('#fi-free-form');
+  f.querySelector('[name=dataDoc]').value='2026-12-31'; f.querySelector('[name=data]').value='2026-12-31'; f.querySelector('[name=descrizione]').value='prova';
+  rows[0].querySelector('.fi-conto').value='20'; rows[0].querySelector('.fi-conto').dispatchEvent(new p.w.Event('change')); rows[0].querySelector('.fi-val').value='10';
+  rows[1].querySelector('.fi-conto').value='10'; rows[1].querySelector('.fi-conto').dispatchEvent(new p.w.Event('change')); rows[1].querySelector('.fi-val').value='10'; rows[1].querySelector('.fi-da').value='AVERE';
+  ok(!rows[0].querySelector('.fi-partner').disabled && rows[1].querySelector('.fi-partner').disabled,'colonna fornitore attiva solo sul conto 20');
+  rows[0].querySelector('.fi-partner').required=false; p.lab.querySelector('#fi-free-check').click();
+  ok(/CONTO DI RICONCILIAZIONE/.test(p.lab.querySelector('#fi-free-msg').textContent),'prima nota: conto 20 senza fornitore rifiutato → '+p.lab.querySelector('#fi-free-msg').textContent.slice(0,80));
+  rows[0].querySelector('.fi-partner').value='F450'; p.lab.querySelector('#fi-free-check').click();
+  ok(/Simulazione valida/.test(p.lab.querySelector('#fi-free-msg').textContent),'prima nota: con il fornitore la simulazione è valida');
+  ok(p.S().registrazioni.length===nr,'la simulazione non registra'); }
 // 15 · IVA, imposte, chiusura
 p = apri('erp_chiusura','iva'); bene(p.fai('lq',{periodo:'2026-12',data:'2026-12-31'}),'liquidazione IVA'); fino('Liquida l’IVA'); vicinoS('25',3970.60,'credito IVA sull\'Erario c/IVA (Dare): 3.432 + parcella 228,80 + maxicanone 396 − noleggio 220 + spese generali 133,80 (carburante solo 40%, rappresentanza 0)'); vicinoS('14',0,'IVA a credito chiusa');
 p = apri('erp_chiusura','imposte');
