@@ -783,5 +783,5 @@
     if (!p.idea) p.idea = 'Esegui questo passaggio nel programma: le caselle e i valori da utilizzare sono elencati qui sotto, senza anticipare la soluzione dell’eventuale esercizio contabile.';
     if (!p.vedi && p.attesa && !p.contabile) p.vedi = [p.attesa];
   });
-  window.MSA_ESERCIZIO = {annuncio:'🚧 <b>UNDER CONSTRUCTION: STIAMO LAVORANDO PER VOI</b> (abbiamo appena introdotto due argomenti nuovi, sono solo 18 passi in più: estero, amministratore e scontrini). Se il tutor ti riporta indietro su un passo 🆕 è per la tua preparazione, non per un errore.',codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
+  window.MSA_ESERCIZIO = {annuncio:'😈 🚧 <b>UNDER CONSTRUCTION: STIAMO LAVORANDO PER VOI</b> (abbiamo appena introdotto due argomenti nuovi, sono solo 18 passi in più: estero, amministratore e scontrini). Se il tutor ti riporta indietro su un passo 🆕 è per la tua preparazione, non per un errore… muahahah 😈',codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
 })();

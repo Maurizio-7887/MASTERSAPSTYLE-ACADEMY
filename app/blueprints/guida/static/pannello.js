@@ -314,7 +314,7 @@
       corpo.insertBefore(es, corpo.firstChild);
     }
     es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
-    if (p.nuovo) es.textContent += ' 🆕 È uno dei passi nuovi appena aggiunti (estero, amministratore e scontrini): ti riportiamo qui per la tua preparazione, non per un tuo errore.';
+    if (p.nuovo) es.textContent += ' 😈 Eh eh… ti abbiamo ricacciato indietro! È uno dei passi nuovi appena aggiunti (estero, amministratore e scontrini): lo facciamo per la tua preparazione, non per un tuo errore.';
     if (window.MSA_DIARIO) window.MSA_DIARIO('errore', 'Tutor blocca: passo ' + (indice + 1) + ' «' + (PASSI[indice] || {}).titolo + '» senza spunta');
     if (indice < pos) es.appendChild(bottoneMancante(indice));
   }
