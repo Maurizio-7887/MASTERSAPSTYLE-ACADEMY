@@ -13,6 +13,12 @@ window.SD4 = (function () {
   'use strict';
   var L = window.LabMotore, r2 = L.r2, N = null;
   var IVA = 22, PROVV = 3;
+  // regime IVA del cliente: le cessioni di beni all'estero sono NON IMPONIBILI (IVA 0)
+  //   art41 = cessione intracomunitaria (art. 41 DL 331/93, natura N3.2) · art8 = esportazione (art. 8 c. 1 lett. a DPR 633/72, natura N3.1)
+  var REGIMI = {art41: {iva: 0, natura: 'N3.2', nota: 'non imponibile art. 41 DL 331/93 (cessione intracomunitaria)'},
+                art8: {iva: 0, natura: 'N3.1', nota: 'non imponibile art. 8 c. 1 lett. a DPR 633/72 (esportazione)'}};
+  function regime(cliente) { var c = S().clienti[cliente] || {}; return REGIMI[c.regimeIva] || null; }
+  function ivaCli(cliente) { var r = regime(cliente); return r ? r.iva : IVA; }
   var TIPI = {PR00: 'Prezzo', K007: 'Sconto cliente %', ZSCA: 'Sconto quantità a scaglioni %', KF00: 'Trasporto €/pz per regione', ERB1: 'Provvigione agente %'};
   var S = function () { return N.S; };
 
@@ -66,9 +72,9 @@ window.SD4 = (function () {
     var kf = trova('KF00', function (c) { return c.regione === cli.regione; });
     var erb = trova('ERB1', function () { return true; });
     var scQ = r2(lordo * pq / 100), scC = r2(lordo * (k7 ? k7.valore : 0) / 100), tr = r2((kf ? kf.valore : 0) * qta);
-    var netto = r2(lordo - scQ - scC + tr), iva = r2(netto * IVA / 100), costo = r2(qta * N.materiale(mat).std), provv = r2(netto * (erb ? erb.valore : 0) / 100);
+    var aliq = ivaCli(cliente), netto = r2(lordo - scQ - scC + tr), iva = r2(netto * aliq / 100), costo = r2(qta * N.materiale(mat).std), provv = r2(netto * (erb ? erb.valore : 0) / 100);
     return {qta: qta, prezzo: pr.valore, prezzoDa: pr.chiave, lordo: lordo, scontoQPerc: pq, scontoQ: scQ, scontoCPerc: k7 ? k7.valore : 0, scontoC: scC,
-            trasportoUnit: kf ? kf.valore : 0, trasporto: tr, netto: netto, ivaPerc: IVA, iva: iva, totale: r2(netto + iva), costo: costo, margine: r2(netto - costo),
+            trasportoUnit: kf ? kf.valore : 0, trasporto: tr, netto: netto, ivaPerc: aliq, iva: iva, totale: r2(netto + iva), costo: costo, margine: r2(netto - costo),
             provvPerc: erb ? erb.valore : 0, provvigione: provv, traccia: traccia};
   }
 
@@ -221,7 +227,7 @@ window.SD4 = (function () {
   function richiestaAcconto(i) {
     var o = ord(i.ordine), data = N.data(i.data), imp = L.num(i.importo, 'Importo acconto (imponibile)', 1);
     if (imp > o.prezzi.netto + 1e-9) throw Error('L\'acconto supera il netto dell\'ordine (' + L.eur(o.prezzi.netto) + ').');
-    var a = {numero: N.numero('richiesta'), ordine: o.numero, cliente: o.cliente, data: data, imponibile: r2(imp), iva: r2(imp * IVA / 100), pagato: null, dedotto: 0};
+    var a = {numero: N.numero('richiesta'), ordine: o.numero, cliente: o.cliente, data: data, imponibile: r2(imp), iva: r2(imp * ivaCli(o.cliente) / 100), pagato: null, dedotto: 0};
     S().acconti.push(a); N.salva();
     return '<p class="lab-nota">Richiesta di acconto <b>' + a.numero + '</b>: ' + L.eur(a.imponibile) + ' + IVA ' + L.eur(a.iva) + '. È una partita statistica (F-37): nessun effetto sul bilancio finché il cliente non paga.</p>';
   }
@@ -299,14 +305,14 @@ window.SD4 = (function () {
     if (c.valore != null && Math.abs(c.valore - p.costo) > 0.004) { p = JSON.parse(JSON.stringify(p)); p.costo = c.valore; p.margine = r2(p.netto - c.valore); }   // VPRS ripreso dall'uscita merci
     var acc = S().acconti.filter(function (a) { return a.ordine === o.numero && a.pagato && a.imponibile - a.dedotto > 0.004; });
     var dedotto = 0; acc.forEach(function (a) { var d = Math.min(a.imponibile - a.dedotto, p.netto - dedotto); a.dedotto = r2(a.dedotto + d); dedotto = r2(dedotto + d); });
-    var ivaDovuta = r2((p.netto - dedotto) * IVA / 100), daIncassare = r2(p.netto - dedotto + ivaDovuta);
+    var ivaDovuta = r2((p.netto - dedotto) * ivaCli(o.cliente) / 100), daIncassare = r2(p.netto - dedotto + ivaDovuta);
     var f = {numero: N.numero('fattura'), tipo: 'F2', consegna: c.numero, ordine: o.numero, cliente: o.cliente, materiale: o.materiale, qta: c.qta, data: data, prezzi: p,
-             accontoDedotto: dedotto, iva: ivaDovuta, totale: daIncassare, aperto: daIncassare, resi: 0};
+             accontoDedotto: dedotto, iva: ivaDovuta, natura: regime(o.cliente) ? regime(o.cliente).natura : '', totale: daIncassare, aperto: daIncassare, resi: 0};
     var righe = [{conto: '11', dareAvere: 'DARE', importo: daIncassare, partner: o.cliente}, {conto: '40', dareAvere: 'AVERE', importo: p.lordo},
       {conto: '47', dareAvere: 'DARE', importo: p.scontoQ + p.scontoC}, {conto: '48', dareAvere: 'AVERE', importo: p.trasporto}, {conto: '21', dareAvere: 'AVERE', importo: ivaDovuta}];
     if (dedotto) righe.push({conto: '19', dareAvere: 'DARE', importo: dedotto, partner: o.cliente, testo: 'AZWB acconto dedotto'});
     if (p.provvigione) righe.push({conto: '57', dareAvere: 'DARE', importo: p.provvigione}, {conto: '26', dareAvere: 'AVERE', importo: p.provvigione});
-    var r = N.post({data: data, tipo: 'FATTURA', rif: f.numero, descrizione: 'Fattura ' + f.numero + ' (F2) — ' + N.cliente(o.cliente).nome + ' — ' + c.qta + ' pz ' + o.materiale + (dedotto ? ' — acconto dedotto ' + L.eur(dedotto) : ''), righe: righe});
+    var r = N.post({data: data, tipo: 'FATTURA', rif: f.numero, descrizione: 'Fattura ' + f.numero + ' (F2) — ' + N.cliente(o.cliente).nome + ' — ' + c.qta + ' pz ' + o.materiale + (dedotto ? ' — acconto dedotto ' + L.eur(dedotto) : '') + (regime(o.cliente) ? ' — ' + regime(o.cliente).nota : ''), righe: righe});
     f.contabile = r.numero; c.fatturata = true; o.fatturato += c.qta;
     S().fatture.push(f); rigaCopa(f.numero, data, 'F2', o.cliente, o.materiale, c.qta, p, 1);
     N.salva(); return r;
@@ -320,7 +326,7 @@ window.SD4 = (function () {
     if (q > f.qta - f.resi + 1e-9) throw Error('Si possono rendere al massimo ' + (f.qta - f.resi) + ' pz di questa fattura.');
     var k = q / f.qta, p = f.prezzi, pr = {};
     ['lordo', 'scontoQ', 'scontoC', 'trasporto', 'netto', 'iva', 'costo', 'provvigione'].forEach(function (x) { pr[x] = r2(p[x] * k); });
-    pr.netto = r2(pr.lordo - pr.scontoQ - pr.scontoC + pr.trasporto); pr.iva = r2(pr.netto * IVA / 100); pr.totale = r2(pr.netto + pr.iva);
+    pr.netto = r2(pr.lordo - pr.scontoQ - pr.scontoC + pr.trasporto); pr.iva = r2(pr.netto * ivaCli(f.cliente) / 100); pr.totale = r2(pr.netto + pr.iva);
     var o = {numero: N.numero('reso'), tipo: 'RE', data: data, fattura: f.numero, cliente: f.cliente, materiale: f.materiale, qta: q, motivo: motivo, prezzi: pr, rientrato: false, accreditato: false};
     S().ordini.push(o); f.resi += q; N.salva();
     return '<p class="lab-nota">Ordine di reso <b>' + o.numero + '</b> (tipo RE) con riferimento alla fattura ' + f.numero + ': ' + q + ' pz, prezzi copiati dalla fattura. Accredito previsto ' + L.eur(pr.totale) + ' €. Ora serve la consegna di reso (entrata merci 651), poi la nota di credito.</p>';
@@ -365,7 +371,7 @@ window.SD4 = (function () {
     var o = ord(i.richiesta); if (o.tipo !== 'G2') throw Error('Non è una richiesta G2.');
     if (o.blocco) throw Error('Richiesta bloccata per la fatturazione (blocco 08): approvala prima.');
     if (o.accreditato) throw Error('Nota di credito già emessa.');
-    var data = N.data(i.data), iva = r2(o.importo * IVA / 100);
+    var data = N.data(i.data), iva = r2(o.importo * ivaCli(o.cliente) / 100);
     var nc = {numero: N.numero('fattura'), tipo: 'G2', riferimento: o.numero, fattura: o.fattura, cliente: o.cliente, materiale: o.materiale, qta: 0, data: data, totale: r2(o.importo + iva)};
     var r = N.post({data: data, tipo: 'NOTA_CREDITO', rif: nc.numero, descrizione: 'Nota di credito ' + nc.numero + ' (G2) — abbuono: ' + o.motivo + ' — ' + N.cliente(o.cliente).nome,
       righe: [{conto: '49', dareAvere: 'DARE', importo: o.importo, testo: 'abbuoni su vendite'}, {conto: '21', dareAvere: 'DARE', importo: iva}, {conto: '11', dareAvere: 'AVERE', importo: o.importo + iva, partner: o.cliente}]});
@@ -403,7 +409,7 @@ window.SD4 = (function () {
       return {data: r.data, numero: r.numero, descrizione: r.descrizione, importo: r2(v)};
     });
   }
-  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, disponibilita: disponibilita, entrate: entrate, pianoATP: pianoATP, confermabilita: confermabilita, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
+  return {avvia: avvia, get N() { return N; }, get M() { return N; }, TIPI: TIPI, IVA: IVA, regime: regime, ivaCli: ivaCli, creaCondizione: creaCondizione, prezzi: prezzi, ordine: ordine, atp: atp, disponibilita: disponibilita, entrate: entrate, pianoATP: pianoATP, confermabilita: confermabilita, riconferma: riconferma, esposizione: esposizione, controlloCredito: controlloCredito, decisioneCredito: decisioneCredito, anagraficaCredito: anagraficaCredito, richiestaAcconto: richiestaAcconto,
     incassoAcconto: incassoAcconto, consegna: consegna, uscitaMerci: uscitaMerci, fattura: fattura, reso: reso, entrataReso: entrataReso, notaCreditoReso: notaCreditoReso,
     richiestaAbbuono: richiestaAbbuono, approvaAbbuono: approvaAbbuono, notaCreditoAbbuono: notaCreditoAbbuono, incasso: incasso, flusso: flusso, partite: partite,
     avviaSistema: function (i) { return N.avvia(i); }};

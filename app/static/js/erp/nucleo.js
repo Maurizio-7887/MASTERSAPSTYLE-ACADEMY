@@ -92,6 +92,8 @@
     'C300': {nome: 'Comune di Gamma', regione: 'Umbria', canale: '30 Enti pubblici', gruppo: 'Enti pubblici', pagamento: '60 gg', fido: 50000, rischio: 'A'},
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg', fido: 15000, rischio: 'C'},
     'C510': {nome: 'Bau Alpen GmbH', regione: 'Austria (UE)', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', fido: 20000, rischio: 'A', ue: true, partitaIva: 'ATU12345678'},
+    'C520': {nome: 'Kraus Bau GmbH', regione: 'Germania (UE)', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', fido: 30000, rischio: 'A', ue: true, partitaIva: 'DE298765432', regimeIva: 'art41', incoterms: 'DAP Monaco di Baviera'},
+    'C530': {nome: 'Liberty Barriers Corp.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', fido: 30000, rischio: 'A', regimeIva: 'art8', incoterms: 'FCA Livorno (porto)'},
     'C600': {nome: 'Usato Epsilon Srl', regione: 'Toscana', canale: '50 Cessioni di beni strumentali', gruppo: 'Diversi', pagamento: '15 gg', fido: 20000, rischio: 'B'},
     'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: '', fido: 50000, rischio: 'B'},
     'C700': {nome: 'Barrières Lyon SARL', regione: 'Francia', paese: 'FR', ue: true, partitaIvaUe: 'FR40303265045', canale: '40 Export', gruppo: 'Estero', pagamento: '60 gg', fido: 30000, rischio: 'B'},
@@ -150,7 +152,7 @@
     ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
     // partner aggiunti dopo (estero): si inseriscono senza toccare quelli già usati
     if (!S.negozio) { ['F510'].forEach(function (k) { if (S.fornitori && !S.fornitori[k] && FORNITORI[k]) S.fornitori[k] = JSON.parse(JSON.stringify(FORNITORI[k])); });
-      ['C510'].forEach(function (k) { if (S.clienti && !S.clienti[k] && CLIENTI[k]) S.clienti[k] = JSON.parse(JSON.stringify(CLIENTI[k])); }); }
+      ['C510', 'C520', 'C530'].forEach(function (k) { if (S.clienti && !S.clienti[k] && CLIENTI[k]) S.clienti[k] = JSON.parse(JSON.stringify(CLIENTI[k])); }); }
     if (!S.seriali) { S.seriali = {}; Object.keys(S.materiali).filter(function (m) { return S.materiali[m].seriale; }).forEach(function (m) {   // numeri di serie attivati su uno stato esistente
       S.seriali[m] = {}; Object.keys((S.lotti || {})[m] || {}).forEach(function (l) { for (var i = 0; i < Math.round(S.lotti[m][l].qta); i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); S.seriali[m][sn] = {stato: 'magazzino', lotto: l, cliente: '', storia: [{data: S.avviato || '', tipo: '561', rif: 'seriali attivati su uno stato esistente'}]}; } }); }); }
     if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }

@@ -81,6 +81,14 @@
   var regs = function(h) { return h.S.registrazioni || []; };
   // prima nota libera: tutte le righe indicate presenti nello stesso documento della data (conto, dare/avere, importo)
   var primaNota = function(h,data,righe) { return regs(h).some(function(r){ if (r.data!==data || r.stornato || r.stornoDi) return false; return righe.every(function(x){ return (r.righe||[]).some(function(y){ return y.conto===x[0] && y.dareAvere===x[1] && Math.abs(y.importo-x[2])<0.005; }); }); }); };
+  // ── 16d · febbraio 2027: secondo lotto di 100 transenne per l'estero ──
+  var acqFeb = function(h) { return (h.S.acquisti || []).find(function(o){return o.materiale==='FERRO' && o.qta===1000 && o.data==='2027-02-01';}); };
+  var prodFeb = function(h) { return (h.S.produzione || []).find(function(o){return o.materiale==='TR-STD' && o.qta===100 && o.data.slice(0,7)==='2027-02';}); };
+  var eventoFeb = function(h,tipo) { var o=prodFeb(h); return !!o && o.eventi.some(function(e){return e.tipo===tipo && !e.stornato;}); };
+  var faseFeb = function(h,nome) { var o=prodFeb(h); return !!o && o.eventi.filter(function(e){return e.tipo==='CO11N' && e.fase===nome && !e.stornato;}).reduce(function(q,e){return q+(e.qta || 0);},0)>=o.qta; };
+  var stagingFeb = function(h) { var o=prodFeb(h); return ((h.S.wm || {}).compiti || []).filter(function(t){return t.tipo==='STAGING' && t.stato!=='annullato' && !!o && t.ordine===o.numero;}); };
+  var traspDi = function(h,c) { return (((h.S.sped || {}).trasporti) || []).find(function(t){return !!c && t.consegne.indexOf(c.numero)>=0;}); };
+  var incassoDa = function(h,cli,imp,data) { return regs(h).some(function(r){return r.tipo==='INCASSO' && r.data===data && (r.righe||[]).some(function(x){return x.conto==='11' && x.partner===cli && Math.abs(x.importo-imp)<0.01;});}); };
   // documento in valuta (modulo Valute) del partner, importo in valuta e data
   var fxDoc = function(h,lato,partner,importo,data) { return (((h.S.fx||{}).documenti)||[]).find(function(d){ return d.lato===lato && d.partner===partner && Math.abs(d.importo-importo)<0.005 && d.data===data && !d.stornata; }); };
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
@@ -105,7 +113,7 @@
   };
   // l'ordine si riconosce dal riferimento cliente (senza badare a maiuscole, spazi e trattini) oppure, se l'allievo lo ha scritto diverso o vuoto,
   // da cliente + materiale + quantità: un riferimento scritto a modo suo non deve fermare l'esercizio
-  var ORDINI_ATTESI = {'BETA-180': ['C100', 'TR-STD', 180], 'DELTA-120': ['C200', 'TR-STD', 120]};
+  var ORDINI_ATTESI = {'KRAUS-60':['C520','TR-STD',60],'LIBERTY-40':['C530','TR-STD',40],'BETA-180': ['C100', 'TR-STD', 180], 'DELTA-120': ['C200', 'TR-STD', 120]};
   var norm = function(t) { return String(t == null ? '' : t).toUpperCase().replace(/[^A-Z0-9]/g, ''); };
   var ordine = function(h,rif) {
     var lista = h.S.ordini || [], a = ORDINI_ATTESI[rif];
@@ -357,7 +365,7 @@
     {g:'9 · Consegna con picking',data:'15/12/2026',titolo:'RF Carico: carica i 4 colli di Beta con la pistola',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → scheda 🚛 Carico',campi:[['Data','15/12/2026'],['SSCC','leggi uno alla volta i 4 SSCC della consegna 80000001 (copiali da Imballo e SSCC) e premi Invio'],['Ripetizioni','4']],
      attesa:'4 colli di Beta caricati (✅). Un collo letto due volte viene rifiutato.',fatto:function(h){var c=colliDi(h,'BETA-180');return c.length===4 && c.every(function(x){return !!x.caricato;});}},
     {g:'9 · Consegna con picking',data:'15/12/2026',titolo:'Varco RFID: carica i 3 colli di Delta in un passaggio',dove:{ep:Z+'rfid'},percorso:'WMS → Innovazione → Varco RFID',campi:[['Trasporto','quello appena creato'],['Data','15/12/2026'],['Pulsante','Fai passare il carrello dal varco']],
-     attesa:'3 tag letti in un solo passaggio, senza girare i pallet: 7/7 colli caricati. La pagina mostra il codice EPC derivato da ogni SSCC.',fatto:function(h){var t=trasp(h),c=((h.S.sped || {}).colli || []);return !!t && (t.rfid || 0)>=3 && c.length>=7 && c.every(function(x){return !!x.caricato;});}},
+     attesa:'3 tag letti in un solo passaggio, senza girare i pallet: 7/7 colli caricati. La pagina mostra il codice EPC derivato da ogni SSCC.',fatto:function(h){var t=trasp(h),c=((h.S.sped || {}).colli || []).filter(function(x){return !!t && t.consegne.indexOf(x.consegna)>=0;});return !!t && (t.rfid || 0)>=3 && c.length>=7 && c.every(function(x){return !!x.caricato;});}},
     {g:'9 · Consegna con picking',data:'15/12/2026',titolo:'Partenza: uscita merci 601 e DDT',contabile:true,dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico → Fine carico e uscita merci',campi:[['Trasporto','quello appena creato'],['Data di partenza','15/12/2026']],
      attesa:'Due scritture: D 41 Costo del venduto / A 13 Prodotti finiti 5.652 (Beta, 180 × 31,40) e 3.768 (Delta, 120 × 31,40). Nascono i DDT. Transenne a magazzino: 0.',
      fatto:function(h){var b=consegna(h,'BETA-180'),d=consegna(h,'DELTA-120');return !!b && !!d && b.pgi==='2026-12-15' && d.pgi==='2026-12-15';}},
@@ -719,6 +727,118 @@
      attesa:'3.000 / 1,0700 = 2.803,74 € incassati. D 10 Banca 2.803,74 / A 11 2.764,98 + A 66 Utili su cambi 38,76.',
      nota:'Lo stesso rafforzamento del dollaro che ci ha fatto perdere sul debito ci fa guadagnare sul credito. Se una partita in dollari fosse ancora aperta al 31/12, andrebbe valutata al cambio di fine anno (FAGL_FCV).',
      fatto:function(h){var d=fxDoc(h,'cliente','C500',3000,'2027-01-27');return !!(d&&d.chiuso);}},
+    // ── 16d · NUOVO: 100 transenne vendute all'estero (Germania e USA), prodotte e spedite dal magazzino ──
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'01/02/2027',titolo:'VA01: Kraus Bau ordina 60 transenne (Germania)',contabile:true,dove:{ep:V+'ordini'},percorso:'SD → Ordini cliente',
+     campi:[['Committente','C520 Kraus Bau GmbH (Germania, partita IVA DE298765432 verificata nel VIES)'],['Materiale','TR-STD'],['Quantità','60'],['Riferimento cliente','KRAUS-60'],['Data','01/02/2027'],['Data di consegna richiesta','10/02/2027']],
+     attesa:'Ordine da 60 × 60 € = 3.600 €, IVA 0: cessione intracomunitaria NON imponibile (art. 41 DL 331/93). Resa DAP Monaco di Baviera. Semaforo rosso: le transenne non ci sono ancora.',
+     nota:'L’anagrafica del cliente dice già il regime IVA: tra imprese UE la merce viaggia senza IVA italiana, l’IVA la applica Kraus in Germania. Condizione: il cliente deve avere una partita IVA valida nel VIES e la merce deve uscire davvero dall’Italia (CMR firmato).',
+     fatto:function(h){return !!ordine(h,'KRAUS-60');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'01/02/2027',titolo:'VA01: Liberty Barriers ordina 40 transenne (USA)',contabile:true,dove:{ep:V+'ordini'},percorso:'SD → Ordini cliente',
+     campi:[['Committente','C530 Liberty Barriers Corp. (USA)'],['Materiale','TR-STD'],['Quantità','40'],['Riferimento cliente','LIBERTY-40'],['Data','01/02/2027'],['Data di consegna richiesta','10/02/2027']],
+     attesa:'Ordine da 40 × 60 € = 2.400 €, IVA 0: esportazione NON imponibile (art. 8 DPR 633/72). Resa FCA porto di Livorno. Fatturiamo in euro.',
+     nota:'Verso un Paese extra-UE la merce esce dall’Unione con la dogana: è l’esportazione. Niente IVA, ma serve la prova dell’uscita (il «visto uscire» sul documento doganale).',
+     fatto:function(h){return !!ordine(h,'LIBERTY-40');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'01/02/2027',titolo:'ME21N: ordina 1.000 kg di ferro',contabile:true,dove:{ep:A+'ordini'},percorso:'MM → Ordini d’acquisto e rilascio',
+     campi:[['Fornitore','F100 Acciaierie Umbre'],['Materiale','FERRO'],['Quantità','1000'],['Prezzo','1,00'],['Data','01/02/2027']],
+     attesa:'Ordine da 1.000 €. Ci servono 800 kg (100 × 8 kg): in magazzino ne abbiamo 740, il resto lo compriamo e ci teniamo una scorta.',
+     fatto:function(h){return !!acqFeb(h);}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'02/02/2027',titolo:'MIGO 101: ricevi i 1.000 kg di ferro',contabile:true,dove:{ep:A+'entrate'},percorso:'MM → Entrata merci (anche da WMS)',
+     campi:[['Ordine','quello appena creato (1.000 kg FERRO)'],['Numero DDT','DDT-AU-0203'],['Lotto (colata dal certificato)','COL-0203'],['Data','02/02/2027']],
+     attesa:'D 12 Ferro 950 + D 63 Differenza prezzo 50 / A 22 Fatture da ricevere 1.000. Un fascio da 1.000 kg in ricevimento.',
+     fatto:function(h){var o=acqFeb(h);return !!o && o.entrato===1000;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'02/02/2027',titolo:'RF: metti a dimora il fascio di febbraio',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',
+     campi:[['Data di lavoro','02/02/2027'],['Compiti','1 PUTAWAY del ferro: leggi Da, il NUMERO dell’unità di carico e A']],
+     attesa:'Il fascio va in catasta. Nessuna scrittura.',fatto:function(h){return fatti(compiti(h,'PUTAWAY',entrataAcq(acqFeb(h))),1);}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'02/02/2027',titolo:'MIRO: fattura del ferro di febbraio',contabile:true,dove:{ep:A+'fatture'},percorso:'MM → Fatture fornitore',
+     campi:[['Ordine','l’ordine da 1.000 kg'],['Numero fattura','FR-2027-061'],['Prezzo','vuoto = quello dell’ordine'],['Data','02/02/2027']],
+     attesa:'D 22 1.000 + D 14 IVA 220 / A 20 Acciaierie Umbre 1.220 (fornitore italiano: IVA normale).',
+     fatto:function(h){return (h.S.fattureFornitore || []).some(function(f){return String(f.rif||'').trim().toUpperCase()==='FR-2027-061';});}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'03/02/2027',titolo:'CO01: un ordine per 100 transenne',contabile:true,dove:{ep:P+'ordini'},percorso:'PP → Ordini di produzione',
+     campi:[['Materiale','TR-STD'],['Quantità','100'],['Data','03/02/2027'],['Data di fine pianificata','05/02/2027']],
+     attesa:'Ordine da 100 transenne, budget 3.140 € (100 × 31,40). I due ordini esteri diventano verdi.',fatto:function(h){return !!prodFeb(h);}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'03/02/2027',titolo:'WMS: porta alla linea gli 800 kg di ferro',dove:{ep:M+'compiti'},percorso:'WMS → Compiti → Approvvigionamento della produzione',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Quantità','vuoto = 800 kg'],['Data','03/02/2027']],
+     attesa:'3 compiti STAGING in ordine FIFO: prima i resti delle colate di dicembre (240 + 500 kg in F-02), poi 60 kg dal fascio nuovo.',
+     nota:'FIFO: il ferro più vecchio esce per primo, così nessuna colata invecchia in catasta.',fatto:function(h){return stagingFeb(h).length>=1;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'03/02/2027',titolo:'RF: conferma l’approvvigionamento di febbraio',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',
+     campi:[['Data di lavoro','03/02/2027'],['Compiti','i 3 STAGING verso PSA-L1']],
+     attesa:'800 kg alla linea. Nessuna scrittura.',fatto:function(h){var ts=stagingFeb(h);return ts.length>=1 && confermati(ts).length===ts.length && confermati(ts).reduce(function(q,t){return q+t.qta;},0)>=800;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'03/02/2027',titolo:'261: consuma 800 kg sull’ordine',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Prelievi, conferme, entrate → Prelievo',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Quantità','800'],['Data','03/02/2027']],
+     attesa:'D 70 Consumi / A 12 Ferro 760 (800 × 0,95). WIP 760.',fatto:function(h){return eventoFeb(h,'261');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'03/02/2027',titolo:'CO11N: Taglio 25 ore',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Conferma delle ore',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Fase','Taglio'],['Attrezzaggio','0'],['Ore','25'],['Quantità fase','100'],['Data','03/02/2027']],
+     attesa:'25 h × 28 = 700. WIP 1.460.',fatto:function(h){return faseFeb(h,'Taglio');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'04/02/2027',titolo:'CO11N: Piegatura 20 ore',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Conferma delle ore',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Fase','Piegatura'],['Attrezzaggio','0'],['Ore','20'],['Quantità fase','100'],['Data','04/02/2027']],
+     attesa:'20 h × 28 = 560. WIP 2.020.',fatto:function(h){return faseFeb(h,'Piegatura');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'05/02/2027',titolo:'CO11N: Saldatura 40 ore',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Conferma delle ore',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Fase','Saldatura'],['Attrezzaggio','0'],['Ore','40'],['Quantità fase','100'],['Data','05/02/2027']],
+     attesa:'40 h × 28 = 1.120. WIP 3.140 = 100 × 31,40.',fatto:function(h){return faseFeb(h,'Saldatura');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'05/02/2027',titolo:'101: carica a magazzino le 100 transenne',contabile:true,dove:{ep:P+'avanzamento'},percorso:'PP → Entrata del prodotto',
+     campi:[['Ordine','il nuovo ordine da 100 TR-STD'],['Pezzi','vuoto = 100'],['Data','05/02/2027']],
+     attesa:'D 13 Prodotti finiti / A 73 Output di produzione 3.140. Due pallet da 50 in ricevimento.',fatto:function(h){return eventoFeb(h,'101');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'05/02/2027',titolo:'RF: metti a scaffale i 2 pallet di transenne',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',
+     campi:[['Data di lavoro','05/02/2027'],['Compiti','i 2 PUTAWAY di TR-STD (scaffale 01-01-1 e 01-01-2)']],
+     attesa:'Due pallet a scaffale. Nessuna scrittura.',
+     fatto:function(h){var o=prodFeb(h),docs=o?o.eventi.filter(function(e){return e.tipo==='101';}).map(function(e){return e.doc;}):[];return fatti(compiti(h,'PUTAWAY',function(t){return t.mat==='TR-STD' && docs.indexOf(t.rif)>=0;}),2);}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'VL01N: consegna per Kraus',dove:{ep:V+'consegne'},percorso:'SD → Consegne',
+     campi:[['Ordine','quello di Kraus Bau, 60 TR-STD'],['Data','08/02/2027']],
+     attesa:'Consegna creata: con il prelievo a ondate attivo aspetta l’ondata.',fatto:function(h){return !!consegna(h,'KRAUS-60');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'VL01N: consegna per Liberty',dove:{ep:V+'consegne'},percorso:'SD → Consegne',
+     campi:[['Ordine','quello di Liberty Barriers, 40 TR-STD'],['Data','08/02/2027']],
+     attesa:'Seconda consegna in attesa dell’ondata.',fatto:function(h){return !!consegna(h,'LIBERTY-40');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'Rilascia l’ondata di febbraio',dove:{ep:'erp_innovazione.ondate'},percorso:'WMS → Innovazione → Prelievo a ondate → Rilascia l’ondata',
+     campi:[['Data','08/02/2027'],['Pulsante','Rilascia l’ondata']],
+     attesa:'3 compiti di prelievo: 50 + 10 per Kraus, 40 per Liberty (FIFO sui pallet).',fatto:function(h){return (((h.S.wm || {}).ondateRilasciate) || []).length>=2;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'RF: preleva le transenne per l’estero',dove:{ep:M+'rf'},percorso:'WMS → Pistola RF → Compiti',
+     campi:[['Data di lavoro','08/02/2027'],['Compiti','i 3 PICK verso GI-ZONE: scrivi il NUMERO dell’unità di carico']],
+     attesa:'100 transenne in zona spedizione. Nessuna scrittura.',
+     fatto:function(h){var k=consegna(h,'KRAUS-60'),l=consegna(h,'LIBERTY-40');return !!k && !!l && fatti(compiti(h,'PICK',function(t){return t.consegna===k.numero || t.consegna===l.numero;}),3);}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'Imballa Kraus in 2 colli SSCC',dove:{ep:X+'imballo'},percorso:'WMS → Imballo e etichette SSCC',
+     campi:[['Consegna','quella di Kraus Bau'],['Imballo','EUR'],['Pezzi per collo','30'],['Data','08/02/2027']],
+     attesa:'2 colli da 30 transenne con etichetta SSCC.',fatto:function(h){return colliDi(h,'KRAUS-60').length===2;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'08/02/2027',titolo:'Imballa Liberty in 1 collo SSCC',dove:{ep:X+'imballo'},percorso:'WMS → Imballo e etichette SSCC',
+     campi:[['Consegna','quella di Liberty Barriers'],['Imballo','EUR'],['Pezzi per collo','40'],['Data','08/02/2027']],
+     attesa:'1 collo da 40 transenne.',fatto:function(h){return colliDi(h,'LIBERTY-40').length===1;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Trasporto per Kraus: camion per la Germania (CMR)',dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico → Crea il trasporto',
+     campi:[['Consegne','solo quella di Kraus Bau'],['Vettore','V10 Trasporti Toscani'],['Targa fittizia','DE-M-4711'],['Autista fittizio','Klaus Weber'],['Data di carico','09/02/2027']],
+     attesa:'Trasporto creato. Per la Germania il documento di viaggio è la lettera di vettura internazionale CMR.',fatto:function(h){return !!traspDi(h,consegna(h,'KRAUS-60'));}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Trasporto per Liberty: al porto di Livorno',dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico → Crea il trasporto',
+     campi:[['Consegne','solo quella di Liberty Barriers'],['Vettore','V10 Trasporti Toscani (per conto dello spedizioniere)'],['Targa fittizia','LI-123AB'],['Autista fittizio','Spedizioni Labronica'],['Data di carico','09/02/2027']],
+     attesa:'Trasporto creato. Con resa FCA Livorno il nostro compito finisce quando consegniamo la merce allo spedizioniere al porto.',fatto:function(h){return !!traspDi(h,consegna(h,'LIBERTY-40'));}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Varco RFID: carica i colli per l’estero',dove:{ep:'erp_innovazione.rfid'},percorso:'WMS → Innovazione → Varco RFID',
+     campi:[['Trasporto','prima quello di Kraus, poi quello di Liberty'],['Data','09/02/2027'],['Pulsante','Fai passare il carrello dal varco (una volta per trasporto)']],
+     attesa:'3 colli caricati: 2 sul camion per la Germania, 1 su quello per il porto.',
+     fatto:function(h){var c=colliDi(h,'KRAUS-60').concat(colliDi(h,'LIBERTY-40'));return c.length===3 && c.every(function(x){return !!x.caricato;});}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Partenza per la Germania: uscita merci 601',contabile:true,dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico → Fine carico e uscita merci',
+     campi:[['Trasporto','quello di Kraus'],['Data di partenza','09/02/2027']],
+     attesa:'D 41 Costo del venduto / A 13 Prodotti finiti 1.884 (60 × 31,40). DDT e CMR stampati.',fatto:function(h){var c=consegna(h,'KRAUS-60');return !!c && c.pgi==='2027-02-09';}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Partenza per il porto di Livorno: uscita merci 601',contabile:true,dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico → Fine carico e uscita merci',
+     campi:[['Trasporto','quello di Liberty'],['Data di partenza','09/02/2027']],
+     attesa:'D 41 / A 13 1.256 (40 × 31,40). Magazzino transenne di nuovo a zero.',fatto:function(h){var c=consegna(h,'LIBERTY-40');return !!c && c.pgi==='2027-02-09';}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'VF01: fattura Kraus (non imponibile art. 41)',contabile:true,dove:{ep:V+'fatture'},percorso:'SD → Fatturazione',
+     campi:[['Consegna','quella di Kraus Bau'],['Data','09/02/2027']],
+     attesa:'D 11 Kraus 3.600 / A 40 Ricavi 3.600, IVA 0 (natura N3.2). Provvigione D 57 / A 26 108.',
+     nota:'In fattura: «non imponibile art. 41 DL 331/93» e la partita IVA tedesca del cliente. Ogni mese la cessione va negli elenchi Intrastat.',fatto:function(h){return !!fattura(h,'KRAUS-60');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'VF01: fattura Liberty (non imponibile art. 8)',contabile:true,dove:{ep:V+'fatture'},percorso:'SD → Fatturazione',
+     campi:[['Consegna','quella di Liberty Barriers'],['Data','09/02/2027']],
+     attesa:'D 11 Liberty 2.400 / A 40 Ricavi 2.400, IVA 0 (natura N3.1). Provvigione D 57 / A 26 72.',
+     nota:'In fattura: «non imponibile art. 8 c. 1 lett. a DPR 633/72». La fattura accompagna la merce in dogana per la dichiarazione di esportazione.',fatto:function(h){return !!fattura(h,'LIBERTY-40');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'09/02/2027',titolo:'Trasmetti le fatture estere allo SdI',dove:{ep:F+'sdi'},percorso:'FI → Fattura elettronica (SdI)',
+     campi:[['Documento','prima la fattura Kraus, poi quella Liberty'],['Data di invio','09/02/2027']],
+     attesa:'Due file FatturaPA con codice destinatario XXXXXXX (cliente estero) e natura N3.2 / N3.1.',
+     nota:'Anche le fatture a clienti esteri passano dallo SdI: così sostituiscono l’«esterometro».',
+     fatto:function(h){var k=fattura(h,'KRAUS-60'),l=fattura(h,'LIBERTY-40');return !!k && !!l && !!k.sdi && !!l.sdi;}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'10/02/2027',titolo:'Documenti per l’estero: CMR, Intrastat e prova dell’esportazione',dove:{ep:X+'trasporti'},percorso:'WMS → Trasporti e carico',
+     campi:[['Germania (art. 41)','CMR firmato dal vettore e dal cliente all’arrivo: prova che la merce è uscita dall’Italia. Elenco Intrastat delle cessioni di beni (mensile, se si superano le soglie)'],['USA (art. 8)','Dichiarazione doganale di esportazione con numero MRN e messaggio di «uscita» dalla UE: senza, la cessione diventa imponibile al 22%'],['Incoterms','DAP: il rischio passa a Kraus quando il camion arriva a Monaco. FCA Livorno: il rischio passa a Liberty quando consegniamo allo spedizioniere al porto'],['Il magazzino','stesso giro di dicembre (ondata, prelievo, colli SSCC, carico, 601): cambiano i documenti che accompagnano la merce']],
+     nota:'Spunta a mano dopo aver letto.'},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'12/02/2027',titolo:'F-28: incassa Kraus',contabile:true,dove:{ep:V+'incassi'},percorso:'SD → Incassi e partite',
+     campi:[['Cliente','C520 Kraus Bau'],['Importo','3600'],['Riferimento','BONIFICO KRAUS'],['Data valuta','12/02/2027']],
+     attesa:'D 10 / A 11 3.600: bonifico SEPA in euro, niente IVA da incassare.',fatto:function(h){return incassoDa(h,'C520',3600,'2027-02-12');}},
+    {nuovo:true,g:'16d · Vendite di merci all’estero (con il magazzino)',data:'12/02/2027',titolo:'F-28: incassa Liberty',contabile:true,dove:{ep:V+'incassi'},percorso:'SD → Incassi e partite',
+     campi:[['Cliente','C530 Liberty Barriers'],['Importo','2400'],['Riferimento','BONIFICO LIBERTY'],['Data valuta','12/02/2027']],
+     attesa:'D 10 / A 11 2.400. Banca 76.161,78.',fatto:function(h){return incassoDa(h,'C530',2400,'2027-02-12');}},
     {g:'16 · Riapertura e gennaio',data:'30/04/2027',titolo:'L’assemblea approva il bilancio e destina l’utile',contabile:true,dove:{ep:H+'riapertura'},percorso:'FI → IVA, imposte, chiusura → Riapertura → Destinazione dell’utile',campi:[['A riserva legale %','5'],['Data della delibera','30/04/2027']],
      attesa:'D 32 Utile 617,33 / A 33 Riserva legale 30,87 + A 30 Riserve 586,46.',fatto:function(h){return reg(h,'DESTINAZIONE_UTILE');}},
     // Controller: analisi di un ordine prima della consegna finale, senza riscrivere la contabilità.
@@ -745,7 +865,7 @@
      ],
      nota:'Il tutor chiede una lettura ragionata, non un nuovo movimento contabile. Spunta il passo come svolto solo dopo aver verificato le tre sezioni.'},
     {g:'16 · Riapertura e gennaio',titolo:'Verifica finale',dove:{ep:F+'bilancio'},percorso:'FI → Contabilità → Bilancio di verifica; WMS → Monitor',
-     campi:[['Banca','31/12/2026: 72.134,15 · dopo il 23/01/2027: 68.663,72 · dopo il 29/01/2027 (estero e amministratore): 70.161,78'],['Cassa e amministratore','cassa contanti 10.50: 151,20 · 27.10 amministratore a zero · INPS 700,60 e ritenute 406,29 del compenso di gennaio da versare entro il 16/02/2027'],['Cambi','perdita su cambi 15,51 (Gamma Steel) · utile su cambi 38,76 (Zeta Barriers) · nessuna partita in dollari aperta'],['Affitto','cauzione 09.20 3.000 ancora aperta; il 01/03/2027 si pagherà in anticipo il 2° trimestre (marzo–maggio)'],['Finanza','mutuo residuo 28.806,54 · leasing: 1 canone su 35 · ritenuta 1040 versata · cambiale scontata in attesa della scadenza 20/02/2027'],['Scorte','FERRO 740 kg · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto'],['Cespiti','01 29.000 − fondo 02 241,67'],['Controllo','Dare = Avere; conti 90, 91 e 92 a zero']],
+     campi:[['Banca','31/12/2026: 72.134,15 · dopo il 23/01/2027: 68.663,72 · dopo il 29/01/2027 (estero e amministratore): 70.161,78 · dopo il 12/02/2027 (merci all’estero): 76.161,78'],['Merci all’estero','100 TR-STD prodotte e spedite (Kraus 60, Liberty 40); ricavi 6.000 senza IVA; debito verso Acciaierie Umbre 1.220 per il ferro di febbraio'],['Cassa e amministratore','cassa contanti 10.50: 151,20 · 27.10 amministratore a zero · INPS 700,60 e ritenute 406,29 del compenso di gennaio da versare entro il 16/02/2027'],['Cambi','perdita su cambi 15,51 (Gamma Steel) · utile su cambi 38,76 (Zeta Barriers) · nessuna partita in dollari aperta'],['Affitto','cauzione 09.20 3.000 ancora aperta; il 01/03/2027 si pagherà in anticipo il 2° trimestre (marzo–maggio)'],['Finanza','mutuo residuo 28.806,54 · leasing: 1 canone su 35 · ritenuta 1040 versata · cambiale scontata in attesa della scadenza 20/02/2027'],['Scorte','FERRO 940 kg (740 + 1.000 − 800) · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto'],['Cespiti','01 29.000 − fondo 02 241,67'],['Controllo','Dare = Avere; conti 90, 91 e 92 a zero']],
      nota:'Spunta a mano dopo il controllo.'},
     {g:'16 · Riapertura e gennaio',titolo:'Consegna il lavoro al docente',dove:{ep:'allievo.consegna'},percorso:'La mia area → Consegna il lavoro',campi:[['Lavoro','Sistema integrato'],['Esercizio','Dicembre: dalla costituzione alla riapertura'],['Nota','Spiega la differenza tra la minusvalenza del carrello e la plusvalenza della sega']]},
   ];
@@ -783,5 +903,5 @@
     if (!p.idea) p.idea = 'Esegui questo passaggio nel programma: le caselle e i valori da utilizzare sono elencati qui sotto, senza anticipare la soluzione dell’eventuale esercizio contabile.';
     if (!p.vedi && p.attesa && !p.contabile) p.vedi = [p.attesa];
   });
-  window.MSA_ESERCIZIO = {annuncio:'😈 🚧 <b>UNDER CONSTRUCTION: STIAMO LAVORANDO PER VOI</b> (abbiamo appena introdotto due argomenti nuovi, sono solo 18 passi in più: estero, amministratore e scontrini). Se il tutor ti riporta indietro su un passo 🆕 è per la tua preparazione, non per un errore… muahahah 😈',codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
+  window.MSA_ESERCIZIO = {annuncio:'😈 🚧 <b>UNDER CONSTRUCTION: STIAMO LAVORANDO PER VOI</b> (abbiamo appena introdotto argomenti nuovi: amministratore e scontrini, servizi con l’estero e ORA anche le merci vendute in Germania e negli USA con il magazzino). Se il tutor ti riporta indietro su un passo 🆕 è per la tua preparazione, non per un errore… muahahah 😈',codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
 })();
