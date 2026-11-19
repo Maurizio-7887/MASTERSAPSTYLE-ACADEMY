@@ -79,6 +79,10 @@
     var pagata=function(f){return (h.S.registrazioni || []).some(function(r){return r.tipo==='PAGAMENTO_FORNITORE' && !r.stornato && !r.stornoDi && String(r.descrizione||'').toUpperCase().indexOf('FATTURA '+String(f.rif).toUpperCase()+':')>=0;});};
     return (h.S.fatturePassive || []).some(function(f){return String(f.rif||'').trim().toUpperCase()===rif && !f.stornata && (Math.abs((f.totale||0)-totale)<0.01 || pagata(f));});}
   var regs = function(h) { return h.S.registrazioni || []; };
+  // prima nota libera: tutte le righe indicate presenti nello stesso documento della data (conto, dare/avere, importo)
+  var primaNota = function(h,data,righe) { return regs(h).some(function(r){ if (r.data!==data || r.stornato || r.stornoDi) return false; return righe.every(function(x){ return (r.righe||[]).some(function(y){ return y.conto===x[0] && y.dareAvere===x[1] && Math.abs(y.importo-x[2])<0.005; }); }); }); };
+  // documento in valuta (modulo Valute) del partner, importo in valuta e data
+  var fxDoc = function(h,lato,partner,importo,data) { return (((h.S.fx||{}).documenti)||[]).find(function(d){ return d.lato===lato && d.partner===partner && Math.abs(d.importo-importo)<0.005 && d.data===data && !d.stornata; }); };
   var reg = function(h,tipo,data) { return regs(h).some(function(r){return r.tipo===tipo && (!data || r.data===data);}); };
   var saldo = function(h,c,alla,partner) { return Math.round(regs(h).reduce(function(s,r){if(alla && r.data>alla)return s;if(r.chiusura==='stato patrimoniale'||r.chiusura==='epilogo'||r.chiusura==='riapertura')return s;return s+(r.righe || []).filter(function(x){return x.conto===c && (!partner || x.partner===partner);}).reduce(function(t,x){return t+(x.dareAvere==='DARE'?x.importo:-x.importo);},0);},0)*100)/100; };
   var cesp = function(h,d) { return (h.S.cespiti || []).find(function(c){return c.descrizione===d;}); };
@@ -626,6 +630,95 @@
     {g:'16 · Riapertura e gennaio',data:'23/01/2027',titolo:'Primo canone del leasing',contabile:true,dove:{ep:W+'leasing'},percorso:'Tesoreria e finanza → Leasing e canoni → Paga il canone',
      campi:[['Contratto','LS-001'],['Data','23/01/2027']],
      attesa:'D 88 Canoni di leasing 480 + D 14 IVA 105,60 / A 10 585,60.',fatto:function(h){var x=leasing(h);return !!x && !!x.canoni[0].pagato;}},
+    // ── 16b · NUOVO: documento commerciale (scontrino), cassa contanti, nota spese e compenso dell'amministratore ──
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'25/01/2027',titolo:'Preleva 200 € dalla banca per la cassa contanti',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Data documento e di registrazione','25/01/2027'],['Testo testata','prelievo per la cassa contanti'],['Riferimento','CASSA-2027-01'],['Posizione 1','10.50 Cassa contanti · Dare · 200'],['Posizione 2','10 Banca c/c · Avere · 200'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 10.50 Cassa contanti / A 10 Banca 200. È solo un giro tra due conti di liquidità: nessun costo.',
+     nota:'La cassa contanti serve per le piccole spese pagate in negozio. Da qui in poi ogni uscita di contanti va registrata con il suo documento (scontrino, ricevuta).',
+     fatto:function(h){return primaNota(h,'2027-01-25',[['10.50','DARE',200],['10','AVERE',200]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'25/01/2027',titolo:'Scontrino della ferramenta: dischi da taglio pagati in contanti',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Documento','Documento commerciale (lo «scontrino») della Ferramenta Mori: 10 dischi da taglio e 2 paia di guanti, totale 48,80 € IVA compresa, pagato in contanti'],
+       ['Data documento e di registrazione','25/01/2027'],['Testo testata','dischi da taglio e guanti - documento commerciale Ferramenta Mori'],['Riferimento','DC-0125-118'],
+       ['Posizione 1','54.60 Materiali di consumo · Dare · 48,80'],['Posizione 2','10.50 Cassa contanti · Avere · 48,80'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 54.60 Materiali di consumo / A 10.50 Cassa 48,80. Tutto a costo: niente IVA a credito.',
+     nota:'Con il documento commerciale l’IVA NON si detrae: per detrarla serve la fattura elettronica intestata alla società. I 8,80 € di IVA diventano costo. Il costo è deducibile se la spesa è inerente e documentata (meglio chiedere il documento con la partita IVA della società). Per spese di qualche importo conviene sempre chiedere la fattura: è 8,80 € di IVA recuperata ogni 48,80 €.',
+     fatto:function(h){return primaNota(h,'2027-01-25',[['54.60','DARE',48.80],['10.50','AVERE',48.80]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'26/01/2027',titolo:'Fattura o scontrino? Leggi la differenza',dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Fattura elettronica','intestata alla società, passa dallo SdI: IVA detraibile (se inerente), costo deducibile'],['Documento commerciale (scontrino)','non è una fattura: IVA mai detraibile, entra nel costo; costo deducibile se inerente e documentato'],['Ricevuta del POS','prova che il pagamento è tracciabile: dal 2025 serve per dedurre vitto, alloggio e taxi delle trasferte'],['Biglietto del treno o del bus','documento di viaggio: niente IVA detraibile, e non serve il pagamento tracciabile (trasporto di linea)']],
+     nota:'Spunta a mano dopo aver letto. Nel passo dopo ritrovi tutte e quattro le situazioni nella nota spese dell’amministratore.'},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'26/01/2027',titolo:'Nota spese dell’amministratore: trasferta a Milano',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Trasferta','L’amministratore va a Milano da un cliente (fuori dal comune della sede) e presenta la nota spese con i documenti: treno A/R 89,00 € (biglietto), pranzo 35,00 € (documento commerciale + ricevuta POS della sua carta)'],
+       ['Data documento e di registrazione','26/01/2027'],['Testo testata','nota spese amministratore trasferta Milano 26/01'],['Riferimento','NS-2027-01'],
+       ['Posizione 1','54.40 Viaggi e soggiorni · Dare · 124'],['Posizione 2','27.10 Debiti verso amministratori · Avere · 124'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 54.40 Viaggi e soggiorni / A 27.10 Debiti verso amministratori 124. È un rimborso: NON è compenso, niente contributi né ritenute.',
+     nota:'Il rimborso «a piè di lista» restituisce all’amministratore ciò che ha anticipato per la società, documento per documento: per lui non è reddito (art. 51 c. 5 TUIR) e per la società è costo. Il pranzo è pagato con carta: dal 2025 vitto e alloggio devono essere pagati in modo tracciabile, altrimenti il rimborso diventa reddito e la società non lo deduce. Il treno è trasporto di linea: basta il biglietto.',
+     fatto:function(h){return primaNota(h,'2027-01-26',[['54.40','DARE',124],['27.10','AVERE',124]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'26/01/2027',titolo:'Rimborsa la nota spese all’amministratore',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Data documento e di registrazione','26/01/2027'],['Testo testata','bonifico rimborso nota spese NS-2027-01'],['Riferimento','NS-2027-01'],['Posizione 1','27.10 Debiti verso amministratori · Dare · 124'],['Posizione 2','10 Banca c/c · Avere · 124'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 27.10 / A 10 Banca 124. Il debito verso l’amministratore per le spese è chiuso.',
+     fatto:function(h){return primaNota(h,'2027-01-26',[['27.10','DARE',124],['10','AVERE',124]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'29/01/2027',titolo:'Compenso dell’amministratore di gennaio',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Delibera','L’assemblea ha fissato un compenso di 24.000 € l’anno, 2.000 € al mese. L’amministratore non è pensionato e non ha altra cassa: gestione separata INPS 35,03% (circolare INPS 8/2026), 2/3 a carico della società e 1/3 suo'],
+       ['Calcolo','Contributi 2.000 × 35,03% = 700,60 → società 467,07, amministratore 233,53. Imponibile IRPEF 2.000 − 233,53 = 1.766,47 × 23% (ha già un altro lavoro: niente detrazioni qui) = ritenuta 406,29. Netto 2.000 − 233,53 − 406,29 = 1.360,18'],
+       ['Data documento e di registrazione','29/01/2027'],['Testo testata','compenso amministratore gennaio 2027'],['Riferimento','CA-2027-01'],
+       ['Posizione 1','80.40 Compensi amministratori · Dare · 2000'],['Posizione 2','81.40 Contributi INPS su compensi amministratori · Dare · 467,07'],['Posizione 3','28 Debiti verso INPS · Avere · 700,60'],['Posizione 4','29 Erario c/ritenute · Avere · 406,29'],['Posizione 5','27.10 Debiti verso amministratori · Avere · 1360,18'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 80.40 2.000 + D 81.40 467,07 / A 28 INPS 700,60 + A 29 Ritenute 406,29 + A 27.10 Amministratore 1.360,18 (totale 2.467,07).',
+     nota:'Il compenso dell’amministratore è un reddito «assimilato» al lavoro dipendente: la società fa da sostituto d’imposta (trattiene IRPEF e la sua quota INPS) e versa tutto con l’F24 entro il 16 del mese dopo. Per la società il costo è 2.000 + 467,07. Attenzione alla data: il compenso si deduce nell’anno in cui è PAGATO (principio di cassa, art. 95 c. 5 TUIR).',
+     fatto:function(h){return primaNota(h,'2027-01-29',[['80.40','DARE',2000],['81.40','DARE',467.07],['28','AVERE',700.60],['29','AVERE',406.29],['27.10','AVERE',1360.18]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'29/01/2027',titolo:'Paga il netto all’amministratore',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Data documento e di registrazione','29/01/2027'],['Testo testata','bonifico compenso netto amministratore gennaio'],['Riferimento','CA-2027-01'],['Posizione 1','27.10 Debiti verso amministratori · Dare · 1360,18'],['Posizione 2','10 Banca c/c · Avere · 1360,18'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 27.10 / A 10 Banca 1.360,18. Restano aperti INPS 700,60 e ritenute 406,29: si versano con l’F24 entro il 16/02/2027.',
+     fatto:function(h){return primaNota(h,'2027-01-29',[['27.10','DARE',1360.18],['10','AVERE',1360.18]]);}},
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'29/01/2027',titolo:'Leggi: compenso, rimborso e principio di cassa',dove:{ep:F+'mastrini'},percorso:'FI → Contabilità → Mastrini per conto',
+     campi:[['Conto 27.10','a zero: compenso netto e rimborso spese pagati'],['Conto 28 e 29','700,60 e 406,29 aperti fino all’F24 di febbraio (codice 1001 per le ritenute, causale C10 per la gestione separata)'],['Compenso o rimborso?','Compenso: costo con contributi e ritenute. Rimborso a piè di lista: costo, niente contributi né ritenute, purché documentato e (per vitto e alloggio) pagato in modo tracciabile'],['Principio di cassa','Un compenso di dicembre pagato a gennaio si deduce l’anno dopo (salvo pagamento entro il 12 gennaio, «cassa allargata»)']],
+     nota:'Spunta a mano dopo il controllo dei mastrini.'},
+    // ── 16c · NUOVO: acquisti e vendite con l'estero (UE ed extra-UE, euro e dollari) ──
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'25/01/2027',titolo:'OB08: inserisci i cambi del dollaro',dove:{ep:'erp_valute.'+'tassi'},percorso:'Valute → Tassi di cambio (OB08)',
+     campi:[['Primo tasso','Valuta USD · valido dal 25/01/2027 · 1 EUR = 1,0850 USD → Salva tasso'],['Secondo tasso','Valuta USD · valido dal 29/01/2027 · 1 EUR = 1,0700 USD → Salva tasso']],
+     attesa:'Due tassi USD salvati. Nessuna scrittura: il cambio serve a convertire in euro le fatture in dollari.',
+     nota:'1 EUR = 1,0850 USD vuol dire che un dollaro vale 1 / 1,0850 = 0,9217 €. Se il dollaro si rafforza (1,0700), ogni dollaro vale più euro: chi deve INCASSARE dollari guadagna, chi deve PAGARE dollari perde.',
+     fatto:function(h){var t=((h.S.fx||{}).tassi||[]);var c=function(d,v){return t.some(function(x){return x.valuta==='USD'&&x.data===d&&Math.abs(x.tasso-v)<0.00005;});};return c('2027-01-25',1.085)&&c('2027-01-29',1.07);}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'26/01/2027',titolo:'Acquisto dalla Germania: la fattura di Farben Müller (UE)',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive di servizi e pagamenti',
+     campi:[['Fornitore','F510 Farben Müller GmbH (Germania, partita IVA DE811234567)'],['Numero','FM-2027-0042'],['Conto di costo','54.60 Materiali di consumo'],['Descrizione','25 litri di vernice antiruggine - acquisto intracomunitario'],['Imponibile','1000'],['IVA %','0 (il fornitore tedesco fattura senza IVA: «non imponibile art. 138 direttiva»)'],['Scadenza','25/02/2027'],['Data','26/01/2027']],
+     attesa:'D 54.60 Materiali di consumo / A 20 Farben Müller 1.000, senza IVA. L’IVA italiana la mettiamo noi nel passo dopo.',
+     nota:'Tra imprese di due Paesi UE la merce viaggia senza IVA del Paese di partenza: l’IVA la applica chi compra, nel suo Paese, con il meccanismo dell’«integrazione».',
+     fatto:function(h){return fb60ok(h,'FM-2027-0042',1000);}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'26/01/2027',titolo:'Integra la fattura UE: IVA a debito e a credito (TD18)',contabile:true,dove:{ep:F+'prima_nota'},percorso:'FI → Contabilità → Prima nota libera (F0718 / FB50)',
+     campi:[['Documento','Integrazione TD18 trasmessa allo SdI: 1.000 × 22% = 220 €'],['Data documento e di registrazione','26/01/2027'],['Testo testata','integrazione IVA acquisto intracomunitario FM-2027-0042 (TD18)'],['Riferimento','TD18-FM-2027-0042'],
+       ['Posizione 1','14 IVA a credito · Dare · 220'],['Posizione 2','21 IVA a debito · Avere · 220'],['Pulsante','Simula / Verifica, poi Registra documento']],
+     attesa:'D 14 IVA a credito / A 21 IVA a debito 220. Effetto sulla liquidazione IVA: zero.',
+     nota:'L’IVA va sia nel registro degli acquisti sia in quello delle vendite (reverse charge): si annulla. Il documento TD18 si manda allo SdI entro il 15 del mese dopo. Il costo resta 1.000: l’IVA non è un costo perché è detraibile.',
+     fatto:function(h){return primaNota(h,'2027-01-26',[['14','DARE',220],['21','AVERE',220]]);}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'26/01/2027',titolo:'Consulenza dagli USA in dollari: Gamma Steel (reverse charge TD17)',contabile:true,dove:{ep:'erp_valute.'+'documenti'},percorso:'Valute → Documenti in valuta → Fattura da fornitore estero',
+     campi:[['Fornitore','F200 Gamma Steel Engineering LLC (USA)'],['Importo in valuta','1200 (dollari)'],['Numero fattura del fornitore','GS-7781'],['Descrizione','consulenza sulla saldatura dei telai'],['Data','26/01/2027']],
+     attesa:'1.200 / 1,0850 = 1.105,99 €. D 54 Consulenze 1.105,99 / A 20 Gamma Steel 1.105,99 (1.200 USD) + D 14 / A 21 IVA 243,32 (TD17).',
+     nota:'Un servizio comprato da un’impresa extra-UE è soggetto a IVA in Italia (art. 7-ter): l’IVA la applichiamo noi con l’autofattura TD17, a debito e a credito insieme. Il debito resta in dollari: quanti euro costerà lo sapremo solo al pagamento.',
+     fatto:function(h){return !!fxDoc(h,'fornitore','F200',1200,'2027-01-26');}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'27/01/2027',titolo:'Servizio a un’impresa austriaca: fattura senza IVA a Bau Alpen',contabile:true,dove:{ep:F+'fatture'},percorso:'FI → Fatture di servizi',
+     campi:[['Cliente','C510 Bau Alpen GmbH (Austria, partita IVA ATU12345678)'],['Descrizione','progettazione barriera su misura - operazione non soggetta art. 7-ter, inversione contabile'],['Imponibile','2500'],['IVA %','0'],['Scadenza','27/02/2027'],['Data','27/01/2027']],
+     attesa:'D 11 Bau Alpen 2.500 / A 44 Ricavi per servizi 2.500, senza IVA.',
+     nota:'Un servizio a un’impresa di un altro Paese UE non è soggetto a IVA in Italia: l’IVA la applica il cliente austriaco nel suo Paese. In fattura scriviamo «inversione contabile» e la sua partita IVA (verificata nel VIES), e lo comunichiamo negli elenchi Intrastat dei servizi resi.',
+     fatto:function(h){return (h.S.fattureServizi||[]).some(function(f){return f.cliente==='C510'&&Math.abs(f.imponibile-2500)<0.01&&Math.abs(f.iva||0)<0.01;});}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'27/01/2027',titolo:'Servizio a un cliente USA in dollari: fattura a Zeta Barriers',contabile:true,dove:{ep:'erp_valute.'+'documenti'},percorso:'Valute → Documenti in valuta → Fattura a cliente estero',
+     campi:[['Cliente','C500 Zeta Barriers Inc. (USA)'],['Importo in valuta','3000 (dollari)'],['Descrizione del servizio','collaudo e assistenza tecnica alle barriere'],['Data','27/01/2027']],
+     attesa:'3.000 / 1,0850 = 2.764,98 €. D 11 Zeta 2.764,98 (3.000 USD) / A 44 Ricavi per servizi 2.764,98, senza IVA (non soggetta art. 7-ter).',
+     fatto:function(h){return !!fxDoc(h,'cliente','C500',3000,'2027-01-27');}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'28/01/2027',titolo:'F-53: paga Farben Müller con un bonifico SEPA',contabile:true,dove:{ep:F+'passive'},percorso:'FI → Contabilità → Fatture passive e pagamenti → Pagamento a un fornitore',
+     campi:[['Fornitore','F510 Farben Müller GmbH: cambialo, il modulo propone il primo fornitore con debiti aperti'],['Fattura','FM-2027-0042'],['Importo','vuoto = tutto il debito'],['Data','28/01/2027']],
+     attesa:'D 20 / A 10 Banca 1.000. In euro: niente differenze di cambio.',fatto:function(h){return paga(h,'F510','2027-01-28');}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'29/01/2027',titolo:'Paga Gamma Steel in dollari: perdita su cambi',contabile:true,dove:{ep:'erp_valute.'+'regolazioni'},percorso:'Valute → Incassi e pagamenti in valuta',
+     campi:[['Partita in valuta','la fattura di Gamma Steel da 1.200 USD al cambio 1,0850'],['Data dell’incasso/pagamento','29/01/2027']],
+     attesa:'1.200 / 1,0700 = 1.121,50 € pagati. D 20 1.105,99 + D 67 Perdite su cambi 15,51 / A 10 Banca 1.121,50.',
+     nota:'Il dollaro si è rafforzato: per pagare gli stessi 1.200 USD servono più euro. La differenza è un costo finanziario, non un maggior costo della consulenza.',
+     fatto:function(h){var d=fxDoc(h,'fornitore','F200',1200,'2027-01-26');return !!(d&&d.chiuso);}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'29/01/2027',titolo:'F-28: incassa Bau Alpen',contabile:true,dove:{ep:V+'incassi'},percorso:'SD → Incassi e partite',
+     campi:[['Cliente','C510 Bau Alpen GmbH'],['Importo','2500'],['Riferimento','BONIFICO BAU ALPEN'],['Data valuta','29/01/2027']],
+     attesa:'D 10 / A 11 2.500. Il credito verso Bau Alpen è chiuso.',fatto:function(h){return regs(h).some(function(r){return r.tipo==='INCASSO'&&r.data==='2027-01-29'&&(r.righe||[]).some(function(x){return x.conto==='11'&&x.partner==='C510'&&Math.abs(x.importo-2500)<0.01;});});}},
+    {nuovo:true,g:'16c · Acquisti e vendite con l’estero',data:'29/01/2027',titolo:'Incassa Zeta Barriers in dollari: utile su cambi',contabile:true,dove:{ep:'erp_valute.'+'regolazioni'},percorso:'Valute → Incassi e pagamenti in valuta',
+     campi:[['Partita in valuta','la fattura a Zeta Barriers da 3.000 USD al cambio 1,0850'],['Data dell’incasso/pagamento','29/01/2027']],
+     attesa:'3.000 / 1,0700 = 2.803,74 € incassati. D 10 Banca 2.803,74 / A 11 2.764,98 + A 66 Utili su cambi 38,76.',
+     nota:'Lo stesso rafforzamento del dollaro che ci ha fatto perdere sul debito ci fa guadagnare sul credito. Se una partita in dollari fosse ancora aperta al 31/12, andrebbe valutata al cambio di fine anno (FAGL_FCV).',
+     fatto:function(h){var d=fxDoc(h,'cliente','C500',3000,'2027-01-27');return !!(d&&d.chiuso);}},
     {g:'16 · Riapertura e gennaio',data:'30/04/2027',titolo:'L’assemblea approva il bilancio e destina l’utile',contabile:true,dove:{ep:H+'riapertura'},percorso:'FI → IVA, imposte, chiusura → Riapertura → Destinazione dell’utile',campi:[['A riserva legale %','5'],['Data della delibera','30/04/2027']],
      attesa:'D 32 Utile 617,33 / A 33 Riserva legale 30,87 + A 30 Riserve 586,46.',fatto:function(h){return reg(h,'DESTINAZIONE_UTILE');}},
     // Controller: analisi di un ordine prima della consegna finale, senza riscrivere la contabilità.
@@ -652,7 +745,7 @@
      ],
      nota:'Il tutor chiede una lettura ragionata, non un nuovo movimento contabile. Spunta il passo come svolto solo dopo aver verificato le tre sezioni.'},
     {g:'16 · Riapertura e gennaio',titolo:'Verifica finale',dove:{ep:F+'bilancio'},percorso:'FI → Contabilità → Bilancio di verifica; WMS → Monitor',
-     campi:[['Banca','31/12/2026: 72.134,15 · dopo il 23/01/2027: 68.663,72'],['Affitto','cauzione 09.20 3.000 ancora aperta; il 01/03/2027 si pagherà in anticipo il 2° trimestre (marzo–maggio)'],['Finanza','mutuo residuo 28.806,54 · leasing: 1 canone su 35 · ritenuta 1040 versata · cambiale scontata in attesa della scadenza 20/02/2027'],['Scorte','FERRO 740 kg · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto'],['Cespiti','01 29.000 − fondo 02 241,67'],['Controllo','Dare = Avere; conti 90, 91 e 92 a zero']],
+     campi:[['Banca','31/12/2026: 72.134,15 · dopo il 23/01/2027: 68.663,72 · dopo il 29/01/2027 (estero e amministratore): 70.161,78'],['Cassa e amministratore','cassa contanti 10.50: 151,20 · 27.10 amministratore a zero · INPS 700,60 e ritenute 406,29 del compenso di gennaio da versare entro il 16/02/2027'],['Cambi','perdita su cambi 15,51 (Gamma Steel) · utile su cambi 38,76 (Zeta Barriers) · nessuna partita in dollari aperta'],['Affitto','cauzione 09.20 3.000 ancora aperta; il 01/03/2027 si pagherà in anticipo il 2° trimestre (marzo–maggio)'],['Finanza','mutuo residuo 28.806,54 · leasing: 1 canone su 35 · ritenuta 1040 versata · cambiale scontata in attesa della scadenza 20/02/2027'],['Scorte','FERRO 740 kg · SL-TAGLIO 19 · TR-STD 0; IM = WMS; nessun compito aperto'],['Cespiti','01 29.000 − fondo 02 241,67'],['Controllo','Dare = Avere; conti 90, 91 e 92 a zero']],
      nota:'Spunta a mano dopo il controllo.'},
     {g:'16 · Riapertura e gennaio',titolo:'Consegna il lavoro al docente',dove:{ep:'allievo.consegna'},percorso:'La mia area → Consegna il lavoro',campi:[['Lavoro','Sistema integrato'],['Esercizio','Dicembre: dalla costituzione alla riapertura'],['Nota','Spiega la differenza tra la minusvalenza del carrello e la plusvalenza della sega']]},
   ];
@@ -690,5 +783,5 @@
     if (!p.idea) p.idea = 'Esegui questo passaggio nel programma: le caselle e i valori da utilizzare sono elencati qui sotto, senza anticipare la soluzione dell’eventuale esercizio contabile.';
     if (!p.vedi && p.attesa && !p.contabile) p.vedi = [p.attesa];
   });
-  window.MSA_ESERCIZIO = {codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
+  window.MSA_ESERCIZIO = {annuncio:'🚧 <b>UNDER CONSTRUCTION: STIAMO LAVORANDO PER VOI</b> (abbiamo appena introdotto due argomenti nuovi, sono solo 18 passi in più: estero, amministratore e scontrini). Se il tutor ti riporta indietro su un passo 🆕 è per la tua preparazione, non per un errore.',codice:'dicembre-wms',titolo:'Dicembre: dalla costituzione alla riapertura',versione:'erp-ft',pannelloAutomatico:true,verificaRagioneria:true,passi:passi};
 })();

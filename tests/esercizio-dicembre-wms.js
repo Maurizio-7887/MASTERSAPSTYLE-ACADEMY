@@ -423,8 +423,42 @@ p = apri('erp_finanza','ritenute'); bene(p.fai('vr',{mese:'2026-12',data:'2027-0
 p = apri('erp_finanza','mutui'); bene(p.fai('mr',{mutuo:'MU-001',data:'2027-01-18'}),'prima rata'); fino('Paga la prima rata del mutuo'); vicinoS('37.10',-28806.54,'debito residuo dopo la rata 1');
 { const i27 = p.S().registrazioni.filter(r=>r.data>='2027-01-01').reduce((t,r)=>t+r.righe.filter(x=>x.conto==='74').reduce((u,x)=>u+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0); vicino(Math.round(i27*100)/100,65.81,'interessi di competenza 2027 dopo lo storno del rateo'); }
 p = apri('erp_finanza','leasing'); bene(p.fai('lc',{leasing:'LS-001',data:'2027-01-23'}),'primo canone'); fino('Primo canone del leasing');
+// 16b · NUOVO: cassa contanti, scontrino, nota spese e compenso dell'amministratore (prima nota libera)
+function pnLibera(data, testo, rif, righe, m) {
+  p = apri('erp_fi','prima_nota');
+  const f = p.lab.querySelector('#fi-free-form'); for (let i = 2; i < righe.length; i++) p.lab.querySelector('#fi-free-add').click();
+  const rr = p.lab.querySelectorAll('#fi-free-rows tbody tr');
+  f.querySelector('[name="dataDoc"]').value=data; f.querySelector('[name="data"]').value=data;
+  f.querySelector('[name="descrizione"]').value=testo; f.querySelector('[name="rif"]').value=rif;
+  righe.forEach(([c,d,v],i)=>{ rr[i].querySelector('.fi-conto').value=c; rr[i].querySelector('.fi-da').value=d; rr[i].querySelector('.fi-val').value=String(v); });
+  f.dispatchEvent(new p.w.Event('submit',{cancelable:true})); memoria = p.w.localStorage.getItem(CHIAVE);
+  ok(/registrato nel libro giornale/.test(p.lab.querySelector('#fi-free-msg').textContent), m+': '+p.lab.querySelector('#fi-free-msg').textContent);
+}
+const spunta = pezzo => { const x = p.w.MSA_ESERCIZIO.passi.find(y => y.titolo.indexOf(pezzo) >= 0); ok(!!x && x.nuovo, 'passo nuovo «'+pezzo+'»'); };
+ok(p.w.MSA_ESERCIZIO.passi.filter(x=>x.nuovo).length===18, '18 passi nuovi'); ok(/UNDER CONSTRUCTION/.test(p.w.MSA_ESERCIZIO.annuncio),'annuncio under construction');
+pnLibera('2027-01-25','prelievo per la cassa contanti','CASSA-2027-01',[['10.50','DARE',200],['10','AVERE',200]],'prelievo cassa'); fino('per la cassa contanti');
+pnLibera('2027-01-25','dischi da taglio e guanti - documento commerciale Ferramenta Mori','DC-0125-118',[['54.60','DARE',48.80],['10.50','AVERE',48.80]],'scontrino ferramenta'); fino('Scontrino della ferramenta');
+vicinoS('10.50',151.20,'cassa dopo lo scontrino');
+pnLibera('2027-01-26','nota spese amministratore trasferta Milano 26/01','NS-2027-01',[['54.40','DARE',124],['27.10','AVERE',124]],'nota spese'); fino('Nota spese dell’amministratore');
+pnLibera('2027-01-26','bonifico rimborso nota spese NS-2027-01','NS-2027-01',[['27.10','DARE',124],['10','AVERE',124]],'rimborso nota spese'); fino('Rimborsa la nota spese');
+pnLibera('2027-01-29','compenso amministratore gennaio 2027','CA-2027-01',[['80.40','DARE',2000],['81.40','DARE',467.07],['28','AVERE',700.60],['29','AVERE',406.29],['27.10','AVERE',1360.18]],'compenso amministratore'); fino('Compenso dell’amministratore');
+pnLibera('2027-01-29','bonifico compenso netto amministratore gennaio','CA-2027-01',[['27.10','DARE',1360.18],['10','AVERE',1360.18]],'netto amministratore'); fino('Paga il netto all’amministratore');
+vicinoS('27.10',0,'amministratore saldato'); vicinoS('80.40',2000,'compenso a costo'); vicinoS('81.40',467.07,'INPS a carico società');
+// 16c · NUOVO: estero
+p = apri('erp_valute','tassi'); bene(p.fai('tx',{valuta:'USD',data:'2027-01-25',tasso:'1,0850'}),'OB08 25/01'); bene(p.fai('tx',{valuta:'USD',data:'2027-01-29',tasso:'1,0700'}),'OB08 29/01'); fino('cambi del dollaro');
+p = apri('erp_fi','passive'); bene(p.fai('fp',{fornitore:'F510',rif:'FM-2027-0042',conto:'54.60',testo:'25 litri di vernice antiruggine - acquisto intracomunitario',imponibile:'1000',iva:'0',scadenza:'2027-02-25',data:'2027-01-26'}),'FB60 Farben Müller'); fino('Acquisto dalla Germania');
+pnLibera('2027-01-26','integrazione IVA acquisto intracomunitario FM-2027-0042 (TD18)','TD18-FM-2027-0042',[['14','DARE',220],['21','AVERE',220]],'integrazione TD18'); fino('Integra la fattura UE');
+p = apri('erp_valute','documenti'); bene(p.fai('ff',{fornitore:'F200',importo:'1200',rif:'GS-7781',testo:'consulenza sulla saldatura dei telai',data:'2027-01-26'}),'FB60 USD Gamma'); fino('Consulenza dagli USA');
+p = apri('erp_fi','fatture'); bene(p.fai('fs',{cliente:'C510',testo:'progettazione barriera su misura - operazione non soggetta art. 7-ter, inversione contabile',imponibile:'2500',iva:'0',scadenza:'2027-02-27',data:'2027-01-27'}),'FB70 Bau Alpen'); fino('Servizio a un’impresa austriaca');
+p = apri('erp_valute','documenti'); bene(p.fai('fc',{cliente:'C500',importo:'3000',testo:'collaudo e assistenza tecnica alle barriere',data:'2027-01-27'}),'FB70 USD Zeta'); fino('Servizio a un cliente USA');
+p = apri('erp_fi','passive'); bene(p.fai('pg',{fornitore:'F510',documento:'FM-2027-0042',data:'2027-01-28'}),'F-53 Farben'); fino('paga Farben Müller');
+{ p = apri('erp_valute','regolazioni'); const g = p.w.FX4.V().documenti.find(d=>d.partner==='F200'&&d.importo===1200&&d.data==='2027-01-26'); bene(p.fai('rg',{documento:g.numero,data:'2027-01-29'}),'pagamento USD Gamma'); fino('Paga Gamma Steel in dollari'); }
+p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C510',importo:'2500',rif:'BONIFICO BAU ALPEN',data:'2027-01-29'}),'incasso Bau Alpen'); fino('incassa Bau Alpen');
+{ p = apri('erp_valute','regolazioni'); const z = p.w.FX4.V().documenti.find(d=>d.partner==='C500'&&d.importo===3000&&d.data==='2027-01-27'); bene(p.fai('rg',{documento:z.numero,data:'2027-01-29'}),'incasso USD Zeta'); fino('Incassa Zeta Barriers in dollari'); }
+vicinoS('67',15.51,'perdita su cambi Gamma'); vicinoS('66',-38.76,'utile su cambi Zeta'); vicinoS('54.60',1048.80,'materiali di consumo'); vicinoS('44',-(1000+2500+2764.98),'ricavi per servizi (noleggio Edil Sigma + Bau Alpen + Zeta)','2027-12-31');
+controlla('Estero e amministratore');
 p = apri('erp_chiusura','riapertura'); bene(p.fai('du',{legale:'5',data:'2027-04-30'}),'destinazione utile'); fino('destina l’utile');
-vicinoS('33',-30.87,'riserva legale'); vicinoS('10',68663.72,'banca finale'); vicinoS('09.20',3000,'cauzione ancora aperta'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
+vicinoS('33',-30.87,'riserva legale'); vicinoS('10',70161.78,'banca finale'); vicinoS('10.50',151.20,'cassa contanti finale'); vicinoS('28',-700.60,'INPS amministratore da versare a febbraio'); vicinoS('29',-406.29,'ritenute amministratore da versare a febbraio'); vicinoS('09.20',3000,'cauzione ancora aperta'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
 controlla('Fine');
 ok(p.w.WM4.aperti().length===0,'nessun compito aperto');
 const S = p.S();
