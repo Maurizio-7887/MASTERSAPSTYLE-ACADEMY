@@ -26,7 +26,7 @@ window.FS4 = (function () {
   var P = function () { var s = S(); s.fatturePassive = s.fatturePassive || []; return s.fatturePassive; };
   var COSTI = [['83', '83 Assicurazioni'], ['86', '86 Fitti passivi'], ['54', '54 Consulenze e servizi'], ['58', '58 Commissioni e spese bancarie'],
     ['54.10', '54.10 Spese telefoniche'], ['54.20', '54.20 Manutenzioni e riparazioni'], ['54.30', '54.30 Carburanti e lubrificanti (auto a uso promiscuo)'],
-    ['54.40', '54.40 Viaggi e soggiorni (alberghi)'], ['54.50', '54.50 Spese di rappresentanza'], ['57.10', '57.10 Trasporti su vendite (corrieri)']];
+    ['54.40', '54.40 Viaggi e soggiorni (alberghi)'], ['54.50', '54.50 Spese di rappresentanza'], ['57.10', '57.10 Trasporti su vendite (corrieri)'], ['54.60', '54.60 Materiali di consumo']];
   function fatturaPassiva(i) {
     var n = N(), data = n.data(i.data), f = n.fornitore(i.fornitore), conto = String(i.conto || '').trim();
     var pc = S().pianoDeiConti.find(function (c) { return c.codice === conto; }); if (!pc || pc.tipo !== 'COSTO') throw Error('Scegli un conto di costo.');

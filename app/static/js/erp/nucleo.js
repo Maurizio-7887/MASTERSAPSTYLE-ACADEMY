@@ -51,7 +51,7 @@
     ['62', 'Perdite su crediti', 'COSTO'],
     // spese generali con regole fiscali proprie (IVA detraibile in parte, IRES deducibile in parte): non entrano nei centri di costo CO
     ['54.10', 'Spese telefoniche', 'COSTO'], ['54.20', 'Manutenzioni e riparazioni', 'COSTO'], ['54.30', 'Carburanti e lubrificanti (auto a uso promiscuo)', 'COSTO'],
-    ['54.40', 'Viaggi e soggiorni (alberghi)', 'COSTO'], ['54.50', 'Spese di rappresentanza', 'COSTO'], ['57.10', 'Trasporti su vendite (corrieri)', 'COSTO'], ['87.10', 'Imposta di registro', 'COSTO'], ['74', 'Interessi passivi su mutui', 'COSTO'], ['87', 'Imposta di bollo', 'COSTO'], ['88', 'Canoni di leasing', 'COSTO'], ['89', 'Svalutazione crediti', 'COSTO'],
+    ['54.40', 'Viaggi e soggiorni (alberghi)', 'COSTO'], ['54.50', 'Spese di rappresentanza', 'COSTO'], ['57.10', 'Trasporti su vendite (corrieri)', 'COSTO'], ['87.10', 'Imposta di registro', 'COSTO'], ['10.50', 'Cassa contanti', 'ATTIVO'], ['54.60', 'Materiali di consumo', 'COSTO'], ['80.40', 'Compensi amministratori', 'COSTO'], ['81.40', 'Contributi INPS su compensi amministratori', 'COSTO'], ['27.10', 'Debiti verso amministratori (compensi netti e rimborsi spese)', 'PASSIVO'], ['74', 'Interessi passivi su mutui', 'COSTO'], ['87', 'Imposta di bollo', 'COSTO'], ['88', 'Canoni di leasing', 'COSTO'], ['89', 'Svalutazione crediti', 'COSTO'],
   ];
   // distinta (kg di ferro per pezzo, semilavorati come fantasma) e ciclo (ore per pezzo per centro; attrezzaggio fisso per lotto)
   var MATERIALI = {
@@ -77,6 +77,7 @@
                    'F490': {nome: 'Carburanti Valdarno Srl', regione: 'Toscana', pagamento: 'carta carburante', iban: 'IT85H0306902887100000088990'},
                    'F495': {nome: 'Enoteca Il Ceppo Srl', regione: 'Toscana', pagamento: 'carta aziendale', iban: 'IT07I0503402801000000099001'},
                    'F498': {nome: 'Officina Meccanica Tosi Snc', regione: 'Toscana', pagamento: 'a vista', iban: 'IT52L0306902887100000010112'},
+                   'F510': {nome: 'Farben Müller GmbH', regione: 'Germania (UE)', pagamento: '30 gg', iban: 'DE89370400440532013000', ue: true, partitaIva: 'DE811234567'},
                    // finanza: professionista con ritenuta d'acconto, società di leasing, fornitore di un altro Paese UE
                    'F800': {nome: 'Studio Rossi Commercialisti Associati', regione: 'Umbria', pagamento: 'a vista', iban: 'IT33B0306903010100000012345', professionista: true},
                    'F810': {nome: 'Leasing Umbria Spa', regione: 'Umbria', pagamento: 'SDD', iban: 'IT91C0538703000000000099887'},
@@ -90,6 +91,7 @@
     'C200': {nome: 'Delta Noleggi Srl', regione: 'Toscana', canale: '20 Noleggio', gruppo: 'Noleggiatori', pagamento: '30 gg', fido: 30000, rischio: 'B'},
     'C300': {nome: 'Comune di Gamma', regione: 'Umbria', canale: '30 Enti pubblici', gruppo: 'Enti pubblici', pagamento: '60 gg', fido: 50000, rischio: 'A'},
     'C400': {nome: 'Edil Sigma Srl', regione: 'Lazio', canale: '10 Imprese edili', gruppo: 'Imprese', pagamento: 'acconto + 30 gg', fido: 15000, rischio: 'C'},
+    'C510': {nome: 'Bau Alpen GmbH', regione: 'Austria (UE)', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', fido: 20000, rischio: 'A', ue: true, partitaIva: 'ATU12345678'},
     'C600': {nome: 'Usato Epsilon Srl', regione: 'Toscana', canale: '50 Cessioni di beni strumentali', gruppo: 'Diversi', pagamento: '15 gg', fido: 20000, rischio: 'B'},
     'C500': {nome: 'Zeta Barriers Inc.', regione: 'USA', canale: '40 Export', gruppo: 'Estero', pagamento: '30 gg', valuta: 'USD', iban: '', fido: 50000, rischio: 'B'},
     'C700': {nome: 'Barrières Lyon SARL', regione: 'Francia', paese: 'FR', ue: true, partitaIvaUe: 'FR40303265045', canale: '40 Export', gruppo: 'Estero', pagamento: '60 gg', fido: 30000, rischio: 'B'},
@@ -146,6 +148,9 @@
       if (S.giacenze[m] == null) S.giacenze[m] = 0;
     });
     ['fornitori', 'acquisti', 'fattureFornitore', 'produzione', 'mlPD', 'costing'].forEach(function (k) { if (!S[k]) S[k] = n[k]; });
+    // partner aggiunti dopo (estero): si inseriscono senza toccare quelli già usati
+    if (!S.negozio) { ['F510'].forEach(function (k) { if (S.fornitori && !S.fornitori[k] && FORNITORI[k]) S.fornitori[k] = JSON.parse(JSON.stringify(FORNITORI[k])); });
+      ['C510'].forEach(function (k) { if (S.clienti && !S.clienti[k] && CLIENTI[k]) S.clienti[k] = JSON.parse(JSON.stringify(CLIENTI[k])); }); }
     if (!S.seriali) { S.seriali = {}; Object.keys(S.materiali).filter(function (m) { return S.materiali[m].seriale; }).forEach(function (m) {   // numeri di serie attivati su uno stato esistente
       S.seriali[m] = {}; Object.keys((S.lotti || {})[m] || {}).forEach(function (l) { for (var i = 0; i < Math.round(S.lotti[m][l].qta); i++) { var sn = 'SN' + String(++S.numeri.seriale).padStart(6, '0'); S.seriali[m][sn] = {stato: 'magazzino', lotto: l, cliente: '', storia: [{data: S.avviato || '', tipo: '561', rif: 'seriali attivati su uno stato esistente'}]}; } }); }); }
     if (!S.lotti) { S.lotti = {}; Object.keys(S.giacenze).forEach(function (m) { if (S.giacenze[m] > 1e-9) S.lotti[m] = {APERTURA: {qta: S.giacenze[m], data: S.avviato || '', tipo: '561', rif: 'lotti attivati su uno stato esistente', fornitore: '', colata: ''}}; }); }

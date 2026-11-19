@@ -314,6 +314,7 @@
       corpo.insertBefore(es, corpo.firstChild);
     }
     es.textContent = '⛔ Non puoi passare al livello successivo: ' + msg;
+    if (p.nuovo) es.textContent += ' 😈 Eh eh… ti abbiamo ricacciato indietro! È uno dei passi nuovi appena aggiunti (estero, amministratore e scontrini): lo facciamo per la tua preparazione, non per un tuo errore.';
     if (window.MSA_DIARIO) window.MSA_DIARIO('errore', 'Tutor blocca: passo ' + (indice + 1) + ' «' + (PASSI[indice] || {}).titolo + '» senza spunta');
     if (indice < pos) es.appendChild(bottoneMancante(indice));
   }
@@ -407,6 +408,9 @@
       '<div class="msa-g-dove"><span>📍 ' + esc(p.percorso || '') + '</span>' +
         (urlPasso(p) ? '<button type="button" class="msa-g-vai' + (qui && !p.dove.sd && !p.dove.pp ? ' qui' : '') + '">' + (qui && !p.dove.sd && !p.dove.pp ? 'Sei qui ✓' : 'Apri ➜') + '</button>' : '') + '</div></div>';
     h += avvisoCompleto;
+    // annuncio dell'esercizio (es. «under construction» quando si aggiungono argomenti nuovi)
+    if (E.annuncio) h += '<div class="msa-g-annuncio" role="note">' + E.annuncio + '</div>';
+    if (p.nuovo) h += '<div class="msa-g-nuovo">🆕 Passo nuovo: aggiunto per la tua preparazione. Se il tutor ti ha riportato qui da più avanti non hai sbagliato niente: fai questi passi e poi torni dov’eri.</div>';
     // Per Firenze e Pistoia i collegamenti a teoria e UF9 sono nella
     // barra didattica della pagina ERP. Qui il tutor mostra solo il passo.
     if (p.principiante && E.codice !== 'magazziniere-5' && E.codice !== 'firenze-30' && E.codice !== 'dicembre-magazzino' && E.codice !== 'dicembre-magazzino-30') {
