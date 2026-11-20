@@ -88,6 +88,15 @@
     <a class="sidebar-link {{ 'active' if request.endpoint=='gl.journal_entry' }}" href="{{ url_for('gl.journal_entry') }}">🧾 Prima nota</a>
     <a class="sidebar-link {{ 'active' if request.endpoint in ['gl.scadenzario', 'gl.scadenzario_paga'] }}" href="{{ url_for('gl.scadenzario') }}">📅 Scadenzario</a>
 
+    <div class="sidebar-title">Bilanci, IVA e chiusure</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.bilancio_verifica' }}" href="{{ url_for('chiusure.bilancio_verifica') }}">Bilancio di verifica</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.bilancio' }}" href="{{ url_for('chiusure.bilancio') }}">Stato patrimoniale e Conto economico</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.registri_iva' }}" href="{{ url_for('chiusure.registri_iva') }}">Registri IVA</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.liquidazione_iva' }}" href="{{ url_for('chiusure.liquidazione_iva') }}">Liquidazione IVA</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.ratei_risconti' }}" href="{{ url_for('chiusure.ratei_risconti') }}">Ratei e risconti</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.pareggio' }}" href="{{ url_for('chiusure.pareggio', lato='clienti') }}">Pareggio partite</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='chiusure.esercizio' }}" href="{{ url_for('chiusure.esercizio') }}">Chiusura e riapertura esercizio</a>
+
     <div class="sidebar-title">Vendite e Spedizione (VS) — dal Preventivo</div>
     <a class="sidebar-link {{ 'active' if request.endpoint=='sd.quotations' }}" href="{{ url_for('sd.quotations') }}">📝 Preventivi</a>
     <a class="sidebar-link {{ 'active' if request.endpoint=='sd.orders' }}" href="{{ url_for('sd.orders') }}">🧾 Ordini cliente</a>

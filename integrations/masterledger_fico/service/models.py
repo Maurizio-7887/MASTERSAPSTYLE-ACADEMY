@@ -248,6 +248,10 @@ class JournalEntry(db.Model):
     linked_invoice = db.relationship("JournalEntry", remote_side="JournalEntry.id",
                                      foreign_keys=[linked_invoice_id])
 
+    # Ratei e risconti (FBS1): data in cui F.81 deve generare lo storno
+    # automatico. NULL per ogni altro documento.
+    reversal_date = db.Column(db.Date, nullable=True)
+
     party = db.relationship("EconomicSubject")
 
     lines = db.relationship("JournalLine", backref="entry", cascade="all, delete-orphan")
@@ -267,6 +271,23 @@ class JournalEntry(db.Model):
 
     def __repr__(self):
         return f"<JournalEntry {self.doc_number}>"
+
+
+class JournalEntryChange(db.Model):
+    """Registro modifiche FB02: solo campi non contabili (testi e
+    riferimento). Importi, conti e date non si modificano mai: si storna."""
+    __tablename__ = "journal_entry_changes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    entry_id = db.Column(db.Integer, db.ForeignKey("journal_entries.id"), nullable=False, index=True)
+    field = db.Column(db.String(40), nullable=False)
+    old_value = db.Column(db.String(255))
+    new_value = db.Column(db.String(255))
+    changed_by_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    changed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    entry = db.relationship("JournalEntry", backref=db.backref("changes", order_by="JournalEntryChange.changed_at"))
+    changed_by = db.relationship("User")
 
 
 class JournalLine(db.Model):

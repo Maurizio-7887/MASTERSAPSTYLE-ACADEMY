@@ -47,7 +47,7 @@ def test_tcode_redirects(login):
 
 
 def test_planned_and_unknown_tcodes_go_to_list_with_message(login):
-    resp = login.get("/tcode/vai?cmd=F.01", follow_redirects=True)
+    resp = login.get("/tcode/vai?cmd=KP06", follow_redirects=True)
     assert "prevista" in resp.get_data(as_text=True)
     resp = login.get("/tcode/vai?cmd=ZZ99", follow_redirects=True)
     assert "non esiste" in resp.get_data(as_text=True)

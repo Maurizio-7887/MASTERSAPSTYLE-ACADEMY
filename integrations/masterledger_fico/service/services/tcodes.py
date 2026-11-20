@@ -121,21 +121,28 @@ TCODES = {
     "PC00_M99_CIPE": ("HR", "Registrazione risultati paghe in FI", "payroll.index", None),
 }
 
+# Codici della Fase 2 (bilanci, IVA, chiusure)
+TCODES.update({
+    "FB02": ("FI-GL", "Modifica documento (solo testi)", "chiusure.cerca_documento", None),
+    "S_ALR_87012277": ("FI-GL", "Bilancio di verifica", "chiusure.bilancio_verifica", None),
+    "F.08": ("FI-GL", "Bilancio di verifica", "chiusure.bilancio_verifica", None),
+    "F.01": ("FI-GL", "Bilancio (Stato patrimoniale e Conto economico)", "chiusure.bilancio", None),
+    "S_ALR_87012357": ("FI-GL", "Registri IVA", "chiusure.registri_iva", None),
+    "F.12": ("FI-GL", "Liquidazione IVA", "chiusure.liquidazione_iva", None),
+    "FAGLGVTR": ("FI-GL", "Chiusura e riporto saldi a nuovo esercizio", "chiusure.esercizio", None),
+    "F.16": ("FI-GL", "Chiusura e riporto saldi a nuovo esercizio", "chiusure.esercizio", None),
+    "FBS1": ("FI-GL", "Registrazione ratei e risconti", "chiusure.ratei_risconti", None),
+    "F.81": ("FI-GL", "Storno ratei e risconti", "chiusure.ratei_risconti", None),
+    "F-32": ("FI-AR", "Pareggio cliente (nota di credito con fatture)", "chiusure.pareggio", None),
+    "F-44": ("FI-AP", "Pareggio fornitore (nota di credito con fatture)", "chiusure.pareggio", None),
+})
+
+# Parametri dell'URL per i codici che aprono la stessa pagina in modalità diverse
+TCODE_ARGS = {"F-32": {"lato": "clienti"}, "F-44": {"lato": "fornitori"}}
+
 # Codici riconosciuti ma non ancora realizzati: codice -> (modulo, descrizione, fase)
 PREVISTI = {
-    "FB02": ("FI-GL", "Modifica documento", "Fase 2"),
-    "F-03": ("FI-GL", "Pareggio conto Co.Ge.", "Fase 2"),
-    "F-32": ("FI-AR", "Pareggio cliente", "Fase 2"),
-    "F-44": ("FI-AP", "Pareggio fornitore", "Fase 2"),
-    "FBS1": ("FI-GL", "Registrazione ratei e risconti", "Fase 2"),
-    "F.81": ("FI-GL", "Storno ratei e risconti", "Fase 2"),
-    "S_ALR_87012277": ("FI-GL", "Bilancio di verifica", "Fase 2"),
-    "F.08": ("FI-GL", "Bilancio di verifica", "Fase 2"),
-    "F.01": ("FI-GL", "Bilancio (Stato patrimoniale e Conto economico)", "Fase 2"),
-    "S_ALR_87012357": ("FI-GL", "Registri IVA", "Fase 2"),
-    "F.12": ("FI-GL", "Liquidazione IVA", "Fase 2"),
-    "FAGLGVTR": ("FI-GL", "Riporto saldi a nuovo esercizio", "Fase 2"),
-    "F.16": ("FI-GL", "Riporto saldi a nuovo esercizio", "Fase 2"),
+    "F-03": ("FI-GL", "Pareggio conto Co.Ge. (partite aperte su conti generali)", "Fase 3"),
     "KP06": ("CO", "Pianificazione costi (budget)", "Fase 3"),
     "KO01": ("CO", "Creazione ordine interno", "Fase 3"),
     "KE51": ("CO", "Creazione centro di profitto", "Fase 3"),
@@ -145,7 +152,7 @@ PREVISTI = {
 }
 
 # Blueprint riservati al portale Ledger (stessa regola di app.py)
-LEDGER_ONLY_BLUEPRINTS = {"gl", "ap", "ar", "assets", "costs", "payroll"}
+LEDGER_ONLY_BLUEPRINTS = {"gl", "ap", "ar", "assets", "costs", "payroll", "chiusure"}
 
 
 def parse_command(raw):

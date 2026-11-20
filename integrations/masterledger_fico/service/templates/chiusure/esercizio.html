@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Chiusura e riapertura esercizio{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Chiusura e riapertura esercizio <span class="tx-code">FAGLGVTR / F.16</span></div>
+  <div class="card-body">
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group"><label>Esercizio</label><input type="number" name="anno" value="{{ anno }}" style="width:100px;"></div>
+      <button class="btn btn-primary" type="submit">Mostra</button>
+      <a class="btn btn-ghost" href="{{ url_for('chiusure.bilancio_verifica', dal=anno ~ '-01-01', al=anno ~ '-12-31') }}">Bilancio di verifica {{ anno }}</a>
+    </form>
+
+    <div class="info-box">La chiusura registra tre documenti:
+      <strong>1.</strong> epilogo al 31/12/{{ anno }}: costi e ricavi al Conto economico, risultato a Utile o Perdita d'esercizio;
+      <strong>2.</strong> chiusura al 31/12/{{ anno }}: attività e passività allo Stato patrimoniale finale;
+      <strong>3.</strong> riapertura al 01/01/{{ anno + 1 }}: attività e passività riaperte dallo Stato patrimoniale iniziale.
+      Prima di chiudere registra ammortamenti, ratei e risconti, rimanenze e liquidazione IVA di dicembre.</div>
+
+    {% if st.epilogo or st.chiusura %}
+      <div class="alert alert-success">Esercizio {{ anno }} chiuso.
+        {% for nome, d in [('Epilogo', st.epilogo), ('Chiusura', st.chiusura), ('Riapertura', st.riapertura)] %}{% if d %}
+        {{ nome }}: <a href="{{ url_for('gl.entry_detail', entry_id=d.id) }}">{{ d.doc_number }}</a>.{% endif %}{% endfor %}</div>
+      {% if current_user.is_commercialista %}
+      <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="anno" value="{{ anno }}"><input type="hidden" name="azione" value="annulla">
+        <button class="btn btn-danger" type="submit">Annulla chiusura {{ anno }} (storno con le stesse date)</button></form>
+      {% endif %}
+    {% else %}
+      <h3>Anteprima</h3>
+      <table class="masterledger-table" style="max-width:640px;"><tbody>
+        <tr><td>Totale costi</td><td class="mono" style="text-align:right;">{{ prev.costi|euro }}</td></tr>
+        <tr><td>Totale ricavi</td><td class="mono" style="text-align:right;">{{ prev.ricavi|euro }}</td></tr>
+        <tr style="font-weight:700;"><td>{{ "Utile" if prev.risultato >= 0 else "Perdita" }} d'esercizio</td>
+          <td class="mono" style="text-align:right;">{{ prev.risultato|euro }}</td></tr>
+        <tr><td>Conti economici da epilogare</td><td class="mono" style="text-align:right;">{{ prev.ce|length }}</td></tr>
+        <tr><td>Conti patrimoniali da chiudere e riaprire</td><td class="mono" style="text-align:right;">{{ prev.sp|length }}</td></tr>
+        <tr><td>Bilancio di verifica</td><td style="text-align:right;">{{ "quadra" if prev.bv.quadra else "NON quadra" }}</td></tr>
+      </tbody></table>
+      {% if prev.bv.risultato_non_riportato %}
+      <div class="alert alert-warning">Ci sono risultati di esercizi precedenti non chiusi: chiudi prima l'esercizio {{ anno - 1 }}.</div>
+      {% endif %}
+      {% if current_user.is_commercialista %}
+      <form method="post" style="margin-top:14px;"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="anno" value="{{ anno }}">
+        <button class="btn btn-primary" type="submit">Chiudi l'esercizio {{ anno }} e riapri al 01/01/{{ anno + 1 }}</button></form>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

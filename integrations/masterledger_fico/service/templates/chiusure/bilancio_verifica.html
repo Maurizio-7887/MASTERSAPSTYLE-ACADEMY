@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Bilancio di verifica{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Bilancio di verifica <span class="tx-code">S_ALR_87012277 / F.08</span></div>
+  <div class="card-body">
+    <form method="get" class="btn-row" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">
+      <div class="form-group"><label>Dal</label><input type="date" name="dal" value="{{ bv.date_from.isoformat() }}"></div>
+      <div class="form-group"><label>Al</label><input type="date" name="al" value="{{ bv.date_to.isoformat() }}"></div>
+      <div class="form-group"><label>Scritture di chiusura nel periodo</label>
+        <select name="includi_chiusure"><option value="0">Escluse (saldi prima della chiusura)</option>
+          <option value="1" {{ 'selected' if includi }}>Incluse</option></select></div>
+      <button class="btn btn-primary" type="submit">Esegui</button>
+    </form>
+
+    {% if bv.quadra %}
+    <div class="alert alert-success">Il bilancio di verifica quadra: totale Dare = totale Avere = {{ bv.totali.dare|euro }} €.</div>
+    {% else %}
+    <div class="alert alert-danger">Il bilancio di verifica NON quadra: differenza {{ bv.differenza|euro }} €.</div>
+    {% endif %}
+
+    <table class="masterledger-table">
+      <thead><tr><th>Conto</th><th>Descrizione</th><th style="text-align:right;">Saldo iniziale</th>
+        <th style="text-align:right;">Dare periodo</th><th style="text-align:right;">Avere periodo</th>
+        <th style="text-align:right;">Saldo Dare</th><th style="text-align:right;">Saldo Avere</th></tr></thead>
+      <tbody>
+      {% for r in bv.righe %}
+        <tr>
+          <td class="mono"><a href="{{ url_for('gl.mastrino_conto', account_id=r.account.id) }}">{{ r.account.code }}</a></td>
+          <td>{{ r.account.name }}</td>
+          <td class="mono" style="text-align:right;">{{ r.iniziale|euro }}</td>
+          <td class="mono" style="text-align:right;">{{ r.dare|euro }}</td>
+          <td class="mono" style="text-align:right;">{{ r.avere|euro }}</td>
+          <td class="mono" style="text-align:right;">{{ r.finale|euro if r.finale > 0 else '' }}</td>
+          <td class="mono" style="text-align:right;">{{ (-r.finale)|euro if r.finale < 0 else '' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7">Nessun movimento nel periodo.</td></tr>
+      {% endfor %}
+      {% if bv.risultato_non_riportato %}
+        <tr><td></td><td>Risultato di esercizi precedenti non chiusi</td><td colspan="3"></td>
+          <td class="mono" style="text-align:right;">{{ bv.risultato_non_riportato|euro if bv.risultato_non_riportato > 0 else '' }}</td>
+          <td class="mono" style="text-align:right;">{{ (-bv.risultato_non_riportato)|euro if bv.risultato_non_riportato < 0 else '' }}</td></tr>
+      {% endif %}
+      </tbody>
+      <tfoot><tr style="font-weight:700;"><td></td><td>Totali</td><td></td>
+        <td class="mono" style="text-align:right;">{{ bv.totali.dare|euro }}</td>
+        <td class="mono" style="text-align:right;">{{ bv.totali.avere|euro }}</td>
+        <td class="mono" style="text-align:right;">{{ (bv.totali.finale_dare + (bv.risultato_non_riportato if bv.risultato_non_riportato > 0 else 0))|euro }}</td>
+        <td class="mono" style="text-align:right;">{{ (bv.totali.finale_avere - (bv.risultato_non_riportato if bv.risultato_non_riportato < 0 else 0))|euro }}</td></tr></tfoot>
+    </table>
+    <p style="margin-top:10px;"><small>I conti patrimoniali partono dal saldo riportato; i conti economici dal 1° gennaio dell'anno della data di inizio.</small></p>
+  </div>
+</div>
+{% endblock %}

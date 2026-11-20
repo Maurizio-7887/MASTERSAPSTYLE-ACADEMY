@@ -40,6 +40,11 @@ DOC_TYPE_LABELS = {
     "GR": "Entrata Merci",
     "RFQ": "Richiesta d'Offerta",
     "PG": "Paghe (accantonamento/F24/pagamento)",
+    "DG": "Nota di credito cliente",
+    "LI": "Liquidazione IVA",
+    "CH": "Epilogo e chiusura esercizio",
+    "RA": "Riapertura esercizio",
+    "RR": "Ratei e risconti",
 }
 
 

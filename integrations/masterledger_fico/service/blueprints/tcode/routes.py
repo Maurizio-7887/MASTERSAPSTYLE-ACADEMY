@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
-from services.tcodes import (TCODES, PREVISTI, LEDGER_ONLY_BLUEPRINTS,
+from services.tcodes import (TCODES, TCODE_ARGS, PREVISTI, LEDGER_ONLY_BLUEPRINTS,
                              parse_command, catalogo_per_modulo)
 
 tcode_bp = Blueprint("tcode", __name__)
@@ -40,7 +40,7 @@ def vai():
             return redirect(_home())
         if nota:
             flash(f"{codice} {descrizione}: {nota}", "info")
-        return redirect(url_for(endpoint))
+        return redirect(url_for(endpoint, **TCODE_ARGS.get(codice, {})))
     if codice in PREVISTI:
         _mod, descrizione, fase = PREVISTI[codice]
         flash(f"{codice} {descrizione}: transazione prevista ({fase}), non ancora disponibile.", "warning")

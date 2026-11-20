@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Liquidazione IVA{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Liquidazione periodica IVA <span class="tx-code">F.12</span></div>
+  <div class="card-body">
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group"><label>Anno</label><input type="number" name="anno" value="{{ anno }}" style="width:100px;"></div>
+      <div class="form-group"><label>{{ 'Trimestre' if tipo == 'trimestrale' else 'Mese' }}</label>
+        <input type="number" name="numero" value="{{ numero }}" min="1" max="{{ 4 if tipo == 'trimestrale' else 12 }}" style="width:80px;"></div>
+      <button class="btn btn-primary" type="submit">Calcola</button>
+      <a class="btn btn-ghost" href="{{ url_for('chiusure.registri_iva') }}">Registri IVA</a>
+    </form>
+    <div class="info-box">Periodicità: <strong>{{ tipo }}</strong> (si cambia in Configurazione fiscale, parametro iva_periodicita).</div>
+
+    {% if calc %}
+    <h3>{{ calc.etichetta|capitalize }}: dal {{ calc.inizio.strftime('%d/%m/%Y') }} al {{ calc.fine.strftime('%d/%m/%Y') }}</h3>
+    <table class="masterledger-table" style="max-width:640px;">
+      <tbody>
+        <tr><td>IVA a debito del periodo (vendite)</td><td class="mono" style="text-align:right;">{{ calc.iva_debito|euro }}</td></tr>
+        <tr><td>IVA a credito del periodo (acquisti)</td><td class="mono" style="text-align:right;">{{ calc.iva_credito|euro }}</td></tr>
+        <tr><td>Credito dei periodi precedenti</td><td class="mono" style="text-align:right;">{{ calc.credito_precedente|euro }}</td></tr>
+        <tr><td>Credito precedente utilizzato</td><td class="mono" style="text-align:right;">{{ calc.compensato|euro }}</td></tr>
+        <tr style="font-weight:700;"><td>IVA da versare</td><td class="mono" style="text-align:right;">{{ calc.da_versare|euro }}</td></tr>
+        <tr style="font-weight:700;"><td>Credito IVA del periodo da riportare</td><td class="mono" style="text-align:right;">{{ calc.credito_periodo|euro }}</td></tr>
+        {% if tipo == 'trimestrale' %}
+        <tr><td>Interessi 1% per liquidazione trimestrale (da aggiungere al versamento, non registrati qui)</td>
+          <td class="mono" style="text-align:right;">{{ calc.interessi_trimestrali|euro }}</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    {% if calc.registrata %}
+      <div class="alert alert-success" style="margin-top:14px;">Liquidazione registrata:
+        <a href="{{ url_for('gl.entry_detail', entry_id=calc.registrata.id) }}">documento {{ calc.registrata.doc_number }}</a>.</div>
+      {% if current_user.is_commercialista %}
+      <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="anno" value="{{ anno }}"><input type="hidden" name="numero" value="{{ numero }}">
+        <input type="hidden" name="azione" value="annulla">
+        <button class="btn btn-danger" type="submit">Annulla liquidazione (storno con la stessa data)</button></form>
+      {% endif %}
+    {% elif current_user.is_commercialista %}
+      <form method="post" style="margin-top:14px;"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="anno" value="{{ anno }}"><input type="hidden" name="numero" value="{{ numero }}">
+        <button class="btn btn-primary" type="submit">Registra il giroconto di liquidazione al {{ calc.fine.strftime('%d/%m/%Y') }}</button></form>
+      <p><small>Scrittura: Dare IVA a debito, Avere IVA a credito, saldo su Erario c/IVA a debito oppure a credito.</small></p>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

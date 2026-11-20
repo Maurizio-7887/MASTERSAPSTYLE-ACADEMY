@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Pareggio partite {{ lato }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Pareggio partite {{ lato }} <span class="tx-code">{{ 'F-32' if lato == 'clienti' else 'F-44' }}</span></div>
+  <div class="card-body">
+    <div class="info-box">Compensa una nota di credito con le fatture aperte dello stesso {{ 'cliente' if lato == 'clienti' else 'fornitore' }},
+      senza movimento di cassa. Non serve una scrittura: fattura e nota sono già sullo stesso conto e si annullano.
+      La nota di credito si usa per intero.
+      <a href="{{ url_for('chiusure.pareggio', lato='fornitori' if lato == 'clienti' else 'clienti') }}">Vai al pareggio {{ 'fornitori (F-44)' if lato == 'clienti' else 'clienti (F-32)' }}</a></div>
+
+    <h3>Note di credito aperte</h3>
+    <table class="masterledger-table">
+      <thead><tr><th>Data</th><th>Documento</th><th>Riferimento</th><th>Soggetto</th><th style="text-align:right;">Importo</th><th></th></tr></thead>
+      <tbody>{% for n in note %}
+        <tr {{ 'style="background:var(--ml-surface2);"' if nota and n.id == nota.id }}><td>{{ n.doc_date.strftime('%d/%m/%Y') }}</td>
+          <td class="mono">{{ n.doc_number }}</td><td>{{ n.reference or '' }}</td><td>{{ n.party.name if n.party else '' }}</td>
+          <td class="mono" style="text-align:right;">{{ importo_nota(n)|euro }}</td>
+          <td><a class="btn btn-ghost" href="{{ url_for('chiusure.pareggio', lato=lato, nota_id=n.id) }}">Pareggia</a></td></tr>
+      {% else %}<tr><td colspan="6">Nessuna nota di credito aperta.</td></tr>{% endfor %}</tbody>
+    </table>
+
+    {% if nota %}
+    <h3 style="margin-top:20px;">Rate aperte di {{ nota.party.name if nota.party else '' }}: da compensare {{ importo_nota(nota)|euro }} €</h3>
+    {% if rate %}
+    <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="nota_id" value="{{ nota.id }}">
+      <table class="masterledger-table">
+        <thead><tr><th>Fattura</th><th>Riferimento</th><th>Rata</th><th>Scadenza</th><th style="text-align:right;">Residuo</th><th>Importo da compensare €</th></tr></thead>
+        <tbody>{% for r in rate %}
+          <tr><td class="mono">{{ r.entry.doc_number }}</td><td>{{ r.entry.reference or '' }}</td><td>{{ r.numero_rata }}</td>
+            <td>{{ r.due_date.strftime('%d/%m/%Y') }}</td><td class="mono" style="text-align:right;">{{ r.residual_amount|euro }}</td>
+            <td><input type="number" step="0.01" min="0" max="{{ r.residual_amount }}" name="rata_{{ r.id }}"></td></tr>
+        {% endfor %}</tbody>
+      </table>
+      <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary" type="submit">Esegui pareggio</button></div>
+    </form>
+    {% else %}<p>Nessuna rata aperta per questo soggetto.</p>{% endif %}
+    {% endif %}
+
+    {% if pareggiate %}
+    <h3 style="margin-top:22px;">Note di credito già pareggiate</h3>
+    <table class="masterledger-table"><tbody>{% for n in pareggiate %}
+      <tr><td class="mono">{{ n.doc_number }}</td><td>{{ n.party.name if n.party else '' }}</td>
+        <td class="mono" style="text-align:right;">{{ importo_nota(n)|euro }}</td>
+        <td><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="nota_id" value="{{ n.id }}"><input type="hidden" name="azione" value="annulla">
+          <button class="btn btn-danger" type="submit">Annulla pareggio</button></form></td></tr>{% endfor %}</tbody></table>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

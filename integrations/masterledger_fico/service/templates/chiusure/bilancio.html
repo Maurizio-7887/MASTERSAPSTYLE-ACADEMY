@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Bilancio{% endblock %}
+{% macro sezione(titolo, righe, totale) %}
+  <h3 style="margin-top:14px;">{{ titolo }}</h3>
+  <table class="masterledger-table">
+    <tbody>
+    {% for x in righe %}
+      <tr><td class="mono" style="width:90px;">{{ x.account.code }}</td><td>{{ x.account.name }}</td>
+        <td class="mono" style="text-align:right;">{{ x.importo|euro }}</td></tr>
+    {% else %}<tr><td colspan="3">Nessun saldo.</td></tr>{% endfor %}
+    </tbody>
+    <tfoot><tr style="font-weight:700;"><td></td><td>Totale</td><td class="mono" style="text-align:right;">{{ totale|euro }}</td></tr></tfoot>
+  </table>
+{% endmacro %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Stato patrimoniale e Conto economico <span class="tx-code">F.01</span></div>
+  <div class="card-body">
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group"><label>Alla data</label><input type="date" name="al" value="{{ b.al.isoformat() }}"></div>
+      <button class="btn btn-primary" type="submit">Esegui</button>
+    </form>
+    <div class="info-box">Bilancio a sezioni contrapposte per natura del conto, al {{ b.al.strftime('%d/%m/%Y') }}.
+      Conto economico dal {{ b.date_from.strftime('%d/%m/%Y') }}. Non è lo schema civilistico art. 2424-2425 c.c.:
+      per quello serve il collegamento dei conti alle voci di bilancio.</div>
+    {% if b.quadra %}
+    <div class="alert alert-success">Attivo = Passivo + risultato: il bilancio quadra.</div>
+    {% else %}
+    <div class="alert alert-danger">Il bilancio non quadra: differenza {{ b.differenza|euro }} €.</div>
+    {% endif %}
+
+    <h2>Stato patrimoniale</h2>
+    <div class="form-grid">
+      <div>{{ sezione("Attività", b.sezioni.patrimoniale_attivo, b.totali.patrimoniale_attivo) }}</div>
+      <div>{{ sezione("Passività e patrimonio netto", b.sezioni.patrimoniale_passivo, b.totali.patrimoniale_passivo) }}
+        <table class="masterledger-table" style="margin-top:8px;"><tbody>
+          {% if b.risultato_precedente %}<tr><td>Risultato esercizi precedenti non chiusi</td>
+            <td class="mono" style="text-align:right;">{{ b.risultato_precedente|euro }}</td></tr>{% endif %}
+          <tr><td>{{ "Utile" if b.risultato >= 0 else "Perdita" }} dell'esercizio</td>
+            <td class="mono" style="text-align:right;">{{ b.risultato|euro }}</td></tr>
+          <tr style="font-weight:700;"><td>Totale a pareggio</td>
+            <td class="mono" style="text-align:right;">{{ (b.totali.patrimoniale_passivo + b.risultato + b.risultato_precedente)|euro }}</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <h2 style="margin-top:22px;">Conto economico</h2>
+    <div class="form-grid">
+      <div>{{ sezione("Costi", b.sezioni.costo, b.totali.costo) }}</div>
+      <div>{{ sezione("Ricavi", b.sezioni.ricavo, b.totali.ricavo) }}</div>
+    </div>
+    <div class="alert {{ 'alert-success' if b.risultato >= 0 else 'alert-warning' }}" style="margin-top:12px;">
+      {{ "Utile" if b.risultato >= 0 else "Perdita" }} dell'esercizio: {{ b.risultato|euro }} €
+      (ricavi {{ b.totali.ricavo|euro }} €, costi {{ b.totali.costo|euro }} €).</div>
+  </div>
+</div>
+{% endblock %}
