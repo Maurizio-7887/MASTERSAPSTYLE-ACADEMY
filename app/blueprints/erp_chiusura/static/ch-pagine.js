@@ -6,7 +6,11 @@
   if (!radice) return;
   var e = L.esc, eur = L.eur, fd = L.fd, S = function () { return N.S; };
   var anno = function () { var a = (S().avviato || '2027').slice(0, 4), ch = S().chiusure || {}; while (ch[a]) a = String(+a + 1); return a; };
-  var tabCE = function (ce) { return L.tabella(['Conto', 'Descrizione', 'Costi›', 'Ricavi›'], ce.righe.map(function (x) { return [x.conto, e(x.nome), x.saldo > 0 ? eur(x.saldo) : '', x.saldo < 0 ? eur(-x.saldo) : '']; }).concat([{cls: 'tot', celle: ['', 'Totali', eur(ce.costi), eur(ce.ricavi)]}, {cls: 'tot', celle: ['', ce.risultato >= 0 ? 'Utile' : 'Perdita', '', eur(Math.abs(ce.risultato))]}]), 'Nessun costo o ricavo.'); };
+  var tabCE = function (ce) { return L.tabella(['Conto', 'Descrizione', 'Costi›', 'Ricavi›'], ce.righe.map(function (x) {
+    // Colonna per NATURA del conto, come i totali di CH4.contoEconomico: uno sconto su vendite (47, ricavo con saldo Dare)
+    // va tra i ricavi con il segno meno, non tra i costi; così la somma di ogni colonna è uguale al suo totale.
+    var costo = x.tipo === 'COSTO' || (x.tipo !== 'RICAVO' && x.saldo > 0);
+    return [x.conto, e(x.nome), costo ? eur(x.saldo) : '', costo ? '' : eur(-x.saldo)]; }).concat([{cls: 'tot', celle: ['', 'Totali', eur(ce.costi), eur(ce.ricavi)]}, {cls: 'tot', celle: ['', ce.risultato >= 0 ? 'Utile' : 'Perdita', '', eur(Math.abs(ce.risultato))]}]), 'Nessun costo o ricavo.'); };
   var tabSP = function (sp) { var n = Math.max(sp.attivo.length, sp.passivo.length), righe = [];
     for (var i = 0; i < n; i++) { var a = sp.attivo[i], p = sp.passivo[i]; righe.push([a ? a.conto + ' ' + e(a.nome) : '', a ? eur(a.saldo) : '', p ? p.conto + ' ' + e(p.nome) : '', p ? eur(p.saldo) : '']); }
     righe.push({cls: 'tot', celle: ['Totale attivo', eur(sp.totaleAttivo), 'Totale passivo e netto', eur(sp.totalePassivo)]});
