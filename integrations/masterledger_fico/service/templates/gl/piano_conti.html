@@ -13,6 +13,10 @@
       <a href="{{ url_for('gl.libro_mastro') }}">Libro Mastro</a>.
     </div>
 
+    {% if current_user.is_commercialista %}
+    <div style="margin-bottom:14px;"><a class="btn btn-primary" href="{{ url_for('gl.fs00') }}">Crea o modifica conto (FS00)</a></div>
+    {% endif %}
+
     <div style="margin-bottom:18px;">
       <label style="font-weight:600;">🔍 Vai subito al Mastrino di un conto</label>
       <input type="text" id="mastrino-search" placeholder="Digita codice o nome conto (es. 180000, Banca)..."
@@ -23,7 +27,7 @@
     {% if gruppi.get(tipo) %}
     <h3 style="margin-top:22px;">{{ etichette_tipo[tipo] }} <span class="tx-code">{{ gruppi[tipo]|length }}</span></h3>
     <table class="masterledger-table">
-      <thead><tr><th>Codice</th><th>Nome</th><th>CO</th><th>Stato</th></tr></thead>
+      <thead><tr><th>Codice</th><th>Nome</th><th>CO</th><th>Stato</th>{% if current_user.is_commercialista %}<th></th>{% endif %}</tr></thead>
       <tbody>
         {% for a in gruppi[tipo] %}
         <tr class="conto-row" data-search="{{ a.code|lower }} {{ a.name|lower }}" {{ 'style="opacity:.5;"' if not a.active }}>
@@ -31,6 +35,7 @@
           <td><a href="{{ url_for('gl.mastrino_conto', account_id=a.id) }}">{{ a.name }}</a></td>
           <td>{% if a.cost_relevant %}<span class="status-badge status-paid">{{ a.cost_relevant_type }}</span>{% else %}—{% endif %}</td>
           <td>{% if a.active %}<span class="status-badge status-paid">Attivo</span>{% else %}<span class="status-badge status-open">Disattivo</span>{% endif %}</td>
+          {% if current_user.is_commercialista %}<td><a class="btn btn-ghost" href="{{ url_for('gl.fs00', conto=a.code) }}">Modifica</a></td>{% endif %}
         </tr>
         {% endfor %}
       </tbody>

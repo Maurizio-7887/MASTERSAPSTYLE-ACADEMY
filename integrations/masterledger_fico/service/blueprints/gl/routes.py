@@ -180,6 +180,51 @@ def piano_conti():
                            etichette_tipo=etichette_tipo, totale=len(accounts))
 
 
+@gl_bp.route("/fs00", methods=["GET", "POST"])
+@login_required
+@commercialista_required
+def fs00():
+    """FS00 — crea o modifica un conto Co.Ge. Si cerca per numero conto:
+    se esiste si apre in modifica, altrimenti in creazione."""
+    from services.gl_accounts import (TIPI_CONTO, AccountMasterError, crea_conto, modifica_conto,
+                                      normalizza_codice, ha_movimenti, usato_in_mapping)
+
+    if request.method == "POST":
+        account_id = request.form.get("account_id", type=int)
+        name = request.form.get("name", "")
+        account_type = request.form.get("account_type", "")
+        cost_relevant = request.form.get("cost_relevant") == "1"
+        try:
+            if account_id:
+                acc = db.session.get(Account, account_id)
+                if acc is None:
+                    flash("Conto non trovato.", "danger")
+                    return redirect(url_for("gl.fs00"))
+                modifica_conto(acc, name, account_type, cost_relevant,
+                               active=request.form.get("active") == "1")
+                flash(f"Conto {acc.code} modificato.", "success")
+            else:
+                acc = crea_conto(request.form.get("code", ""), name, account_type, cost_relevant)
+                flash(f"Conto {acc.code} creato.", "success")
+            return redirect(url_for("gl.fs00", conto=acc.code))
+        except AccountMasterError as exc:
+            db.session.rollback()
+            flash(str(exc), "danger")
+            code = normalizza_codice(request.form.get("code", ""))
+            if account_id:
+                acc = db.session.get(Account, account_id)
+                code = acc.code if acc else code
+            return redirect(url_for("gl.fs00", conto=code) if code else url_for("gl.fs00"))
+
+    code = normalizza_codice(request.args.get("conto"))
+    account = Account.query.filter_by(code=code).first() if code else None
+    info = None
+    if account:
+        mapping = usato_in_mapping(account)
+        info = {"movimenti": ha_movimenti(account), "mapping": mapping.label if mapping else None}
+    return render_template("gl/fs00.html", code=code, account=account, info=info, tipi=TIPI_CONTO)
+
+
 @gl_bp.route("/periods", methods=["GET"])
 @login_required
 @commercialista_required

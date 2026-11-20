@@ -24,6 +24,13 @@
     </select>
   </form>
   {% endif %}
+  <form method="get" action="{{ url_for('tcode.vai') }}" id="tcode-form" style="margin-left:20px;display:flex;align-items:center;gap:6px;"
+        onsubmit="var v=this.cmd.value.trim().toLowerCase();this.target=(v.indexOf('/o')===0)?'_blank':'_self';">
+    <input type="text" name="cmd" id="tcode-input" autocomplete="off" spellcheck="false" placeholder="Comando (es. FB50)"
+           aria-label="Codice transazione"
+           style="width:170px;background:#fff;color:#10151d;border:1px solid #2c3a4d;border-radius:4px;padding:4px 8px;font-size:12.5px;font-family:monospace;text-transform:uppercase;">
+    <a href="{{ url_for('tcode.elenco') }}" style="color:#cde3ff;font-size:12px;">Codici</a>
+  </form>
   <div class="spacer"></div>
   <div class="user-info">
     <div>{{ current_user.full_name }}</div>

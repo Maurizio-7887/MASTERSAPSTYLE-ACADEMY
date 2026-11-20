@@ -21,7 +21,10 @@ from extensions import db, migrate, login_manager, csrf
 
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    # root_path esplicito: caricato dal loader del portale (modulo
+    # "masterledger_fico_entry", non presente in sys.modules) Flask non
+    # ricaverebbe la cartella del servizio e non troverebbe templates/ e static/.
+    app = Flask(__name__, root_path=os.path.dirname(os.path.abspath(__file__)))
     app.config.from_object(config_class)
 
     # ── Estensioni ──────────────────────────────────────────────
@@ -53,8 +56,10 @@ def create_app(config_class=Config):
     from blueprints.parties.routes import parties_bp
     from blueprints.payroll.routes import payroll_bp
     from blueprints.bank_advances.routes import bank_advances_bp
+    from blueprints.tcode.routes import tcode_bp
 
     app.register_blueprint(academy_bp, url_prefix="/academy-fico")
+    app.register_blueprint(tcode_bp, url_prefix="/tcode")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(dashboard_bp, url_prefix="/")
     app.register_blueprint(gl_bp, url_prefix="/gl")
@@ -250,7 +255,14 @@ def create_app(config_class=Config):
     return app
 
 
-app = create_app()
+# Istanza a livello di modulo per `flask --app app` e gunicorn (servizio
+# autonomo). NON viene creata quando il file è caricato dal loader del
+# portale Firenze (integrations/masterledger_fico/loader.py, modulo
+# "masterledger_fico_entry"): lì Config leggerebbe il DATABASE_URL di
+# Firenze e il bootstrap qui sopra scriverebbe conti e utenti nel database
+# sbagliato. Il loader crea l'app da sé, con la configurazione FI/CO.
+if __name__ != "masterledger_fico_entry":
+    app = create_app()
 
 if __name__ == "__main__":
     app.run(debug=True)

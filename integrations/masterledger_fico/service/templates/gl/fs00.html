@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}FS00 Anagrafica conto Co.Ge.{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Anagrafica conto Co.Ge. <span class="tx-code">FS00</span></div>
+  <div class="card-body">
+    <form method="get" action="{{ url_for('gl.fs00') }}" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:18px;">
+      <div class="form-group" style="flex:0 0 220px;">
+        <label for="conto">Numero conto</label>
+        <input type="text" id="conto" name="conto" value="{{ code }}" maxlength="10" placeholder="Es. 610100" style="text-transform:uppercase;">
+      </div>
+      <button type="submit" class="btn btn-ghost">Cerca</button>
+      <a class="btn btn-ghost" href="{{ url_for('gl.piano_conti') }}">Piano dei conti</a>
+    </form>
+
+    {% if account %}
+    <div class="info-box">
+      Modifica del conto <strong class="mono">{{ account.code }}</strong>. Il numero conto non si cambia.
+      {% if info.movimenti %}<br>Il conto ha movimenti: la natura del conto è bloccata.
+      <a href="{{ url_for('gl.mastrino_conto', account_id=account.id) }}">Apri il mastrino</a>{% endif %}
+      {% if info.mapping %}<br>Il conto è usato nella determinazione automatica ({{ info.mapping }}): non si può disattivare.{% endif %}
+    </div>
+    {% elif code %}
+    <div class="info-box">Il conto <strong class="mono">{{ code }}</strong> non esiste: compila i dati per crearlo.</div>
+    {% else %}
+    <div class="info-box">Inserisci un numero conto: se esiste si apre in modifica, altrimenti in creazione.</div>
+    {% endif %}
+
+    {% if code %}
+    <form method="post" action="{{ url_for('gl.fs00') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if account %}<input type="hidden" name="account_id" value="{{ account.id }}">{% endif %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Numero conto <span class="req">*</span></label>
+          <input type="text" name="code" value="{{ account.code if account else code }}" {{ 'readonly' if account }} maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <label>Descrizione <span class="req">*</span></label>
+          <input type="text" name="name" value="{{ account.name if account else '' }}" maxlength="120" required>
+        </div>
+        <div class="form-group">
+          <label>Natura del conto <span class="req">*</span></label>
+          {% set tipo_attuale = account.account_type if account else '' %}
+          {% if account and info.movimenti %}
+          <input type="hidden" name="account_type" value="{{ tipo_attuale }}">
+          <input type="text" value="{{ tipi[tipo_attuale] }}" readonly>
+          {% else %}
+          <select name="account_type" required>
+            <option value="">Seleziona</option>
+            {% for k, v in tipi.items() %}<option value="{{ k }}" {{ 'selected' if k == tipo_attuale }}>{{ v }}</option>{% endfor %}
+          </select>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Rilevanza CO (solo costi e ricavi)</label>
+          <select name="cost_relevant">
+            <option value="0">No</option>
+            <option value="1" {{ 'selected' if account and account.cost_relevant }}>Sì, richiede centro di costo</option>
+          </select>
+        </div>
+        {% if account %}
+        <div class="form-group">
+          <label>Stato</label>
+          <select name="active">
+            <option value="1" {{ 'selected' if account.active }}>Attivo</option>
+            <option value="0" {{ 'selected' if not account.active }}>Disattivo (bloccato per registrazioni)</option>
+          </select>
+        </div>
+        {% endif %}
+      </div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="submit" class="btn btn-primary">{{ 'Salva modifiche' if account else 'Crea conto' }}</button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

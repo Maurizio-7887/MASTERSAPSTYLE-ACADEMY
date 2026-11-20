@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Codici transazione{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Codici transazione <span class="tx-code">SAP Easy Access</span></div>
+  <div class="card-body">
+    <div class="info-box">
+      Digita il codice nel campo <strong>Comando</strong> in alto e premi Invio, come in SAP GUI.
+      <strong>/n</strong> davanti al codice apre la transazione nella stessa finestra, <strong>/o</strong> in una nuova finestra.
+      Solo <strong>/n</strong> riporta alla pagina iniziale.
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <label style="font-weight:600;" for="filtro-tcode">Cerca codice o descrizione</label>
+      <input type="text" id="filtro-tcode" placeholder="Es. FB50, fattura, cespite" style="width:100%; margin-top:6px;"
+             oninput="filtraCodici(this.value)">
+    </div>
+
+    {% for g in gruppi %}
+    <h3 class="tcode-gruppo" style="margin-top:22px;">{{ g.modulo }} {{ g.etichetta }}</h3>
+    <table class="masterledger-table">
+      <thead><tr><th style="width:150px;">Codice</th><th>Transazione</th><th>Stato</th></tr></thead>
+      <tbody>
+        {% for codice, descrizione, endpoint, nota in g.attivi %}
+        <tr class="tcode-row" data-search="{{ codice|lower }} {{ descrizione|lower }}">
+          <td class="mono"><a href="{{ url_for('tcode.vai', cmd=codice) }}">{{ codice }}</a></td>
+          <td><a href="{{ url_for('tcode.vai', cmd=codice) }}">{{ descrizione }}</a>{% if nota %}<br><small>{{ nota }}</small>{% endif %}</td>
+          <td><span class="status-badge status-paid">Disponibile</span></td>
+        </tr>
+        {% endfor %}
+        {% for codice, descrizione, fase in g.previsti %}
+        <tr class="tcode-row" data-search="{{ codice|lower }} {{ descrizione|lower }}" style="opacity:.6;">
+          <td class="mono">{{ codice }}</td>
+          <td>{{ descrizione }}</td>
+          <td><span class="status-badge status-open">Previsto, {{ fase }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endfor %}
+  </div>
+</div>
+<script>
+function filtraCodici(testo) {
+  const q = testo.trim().toLowerCase();
+  document.querySelectorAll('.tcode-row').forEach(function (row) {
+    row.style.display = (!q || row.dataset.search.includes(q)) ? '' : 'none';
+  });
+  document.querySelectorAll('.tcode-gruppo').forEach(function (h3) {
+    const table = h3.nextElementSibling;
+    const visibili = table.querySelectorAll('.tcode-row:not([style*="display: none"])').length;
+    h3.style.display = table.style.display = (q && visibili === 0) ? 'none' : '';
+  });
+}
+</script>
+{% endblock %}
