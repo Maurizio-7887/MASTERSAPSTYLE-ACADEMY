@@ -775,6 +775,14 @@
     var fineMese = passi.findIndex(function(p){return p.titolo==='KO88: chiudi i due ordini indipendenti';});
     passi.splice.apply(passi,[fineMese,0].concat(cpm.passiRiconciliazione));
   }
+  // Prima nota libera (F0718): il tipo documento è sempre SA ed è l'unico in
+  // elenco. Lo diciamo esplicitamente, così nessuno prova a cambiarlo.
+  passi.forEach(function(p){
+    if (!p.dove || p.dove.ep !== F+'prima_nota' || !p.contabile || !p.campi) return;
+    if (p.campi.some(function(c){return /^Tipo documento/.test(c[0]);})) return;
+    var i = p.campi.findIndex(function(c){return /^Data documento/.test(c[0]);});
+    p.campi.splice(i >= 0 ? i + 1 : 0, 0, ['Tipo documento','SA · Contabilità generale: è già impostato ed è l’unico possibile nella prima nota libera. Non va cambiato, nemmeno per scontrini, note spese o compensi: il tipo di operazione lo dicono i conti e il testo.']);
+  });
   // Dalle fatture in poi, mostra sempre istruzioni operative anche per i
   // passi privi di un tutor contestuale specifico. Non modificare la sequenza,
   // gli ID, i controlli automatici né il lavoro già salvato dagli allievi.
