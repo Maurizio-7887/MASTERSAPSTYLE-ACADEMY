@@ -1,0 +1,32 @@
+name: MasterLedger FI/CO integration checks
+on:
+  push:
+    branches: [feature/masterledger-fico-evoluzione]
+  pull_request:
+    paths:
+      - 'integrations/masterledger_fico/**'
+      - 'tests/test_masterledger_*.py'
+      - 'wsgi.py'
+      - 'requirements.txt'
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      MASTERLEDGER_FICO_ENABLED: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install application dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Check Python syntax
+        run: python -m compileall -q integrations/masterledger_fico tests
+      - name: Verify dispatcher and fail-closed loader
+        run: python -m unittest discover -s tests -p 'test_masterledger_*.py' -v
+      - name: Check imported service is present
+        run: |
+          test -f integrations/masterledger_fico/service/app.py || {
+            echo "MasterLedger source not imported yet; do not enable FI/CO"
+            exit 1
+          }

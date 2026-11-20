@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Termini di Pagamento{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">📅 Nuovo Termine di Pagamento</div>
+  <div class="card-body">
+    <div class="info-box">
+      Es. "Ri.Ba. 60/90 gg df fm" = 2 rate, 50% a 60gg e 50% a 90gg dalla data fattura, arrotondate a fine mese.
+      Le percentuali di tutte le rate devono sommare esattamente a 100.
+    </div>
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group"><label>Codice <span class="req">*</span></label><input type="text" name="code" placeholder="es. RIBA6090" required></div>
+        <div class="form-group"><label>Descrizione <span class="req">*</span></label><input type="text" name="description" placeholder="es. Ri.Ba. 60/90 gg df fm" required></div>
+        <div class="form-group"><label>Tipo pagamento (informativo)</label><input type="text" name="payment_type" placeholder="es. RIBA, BONIFICO, RID"></div>
+      </div>
+      <table class="masterledger-table" style="margin-bottom:12px;">
+        <thead><tr><th>Rata</th><th>% del totale</th><th>Giorni da data fattura</th><th>Fine mese</th></tr></thead>
+        <tbody>
+          {% for i in range(1, 5) %}
+          <tr>
+            <td class="mono">{{ i }}<input type="hidden" name="rata_numero[]" value="{{ i }}"></td>
+            <td><input type="number" step="0.01" name="rata_percentuale[]" style="width:90px;" placeholder="{{ '100' if i == 1 else '' }}"></td>
+            <td><input type="number" name="rata_giorni[]" style="width:90px;" placeholder="{{ '30' if i == 1 else '' }}"></td>
+            <td><input type="checkbox" name="rata_fine_mese[]" value="{{ i - 1 }}"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Crea Termine</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Termini di Pagamento esistenti</div>
+  <div class="card-body">
+    {% if terms %}
+    <table class="masterledger-table">
+      <thead><tr><th>Codice</th><th>Descrizione</th><th>Tipo</th><th>Rate</th><th></th></tr></thead>
+      <tbody>
+        {% for t in terms %}
+        <tr>
+          <td class="mono fw-bold">{{ t.code }}</td>
+          <td>{{ t.description }}</td>
+          <td>{{ t.payment_type or '—' }}</td>
+          <td>
+            {% for inst in t.installments %}
+              <span class="tx-code">{{ '%.0f'|format(inst.percentuale) }}% @ {{ inst.giorni }}gg{{ ' fm' if inst.fine_mese }}</span>
+            {% endfor %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('parties.payment_term_delete', term_id=t.id) }}" style="display:inline;" onsubmit="return confirm('Eliminare questo termine di pagamento?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px; color:var(--ml-red);">🗑️ Elimina</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessun termine di pagamento configurato — i clienti/fornitori senza termine strutturato continuano a usare una rata unica a 30 giorni.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

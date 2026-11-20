@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "sd/_lines_form.html" import lines_form %}
+{% block title %}Ordini d'Acquisto{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">📦 Nuovo Ordine d'Acquisto
+    {% if azienda %}<span class="tx-code" style="background:var(--ml-blue-dark);">{{ azienda.name }}</span>{% endif %}
+    <span class="tx-code">ME21N</span></div>
+  <div class="card-body">
+    {% if not azienda %}
+    <div class="info-box" style="margin-bottom:14px;">Nessuna azienda selezionata dal menu — questo ordine non verrà
+      taggato per nessuna azienda specifica. Torna alla home e scegli "Ordini d'acquisto" sotto Iron Segnaletica o Iron Wood.</div>
+    {% endif %}
+    <div class="info-box" style="margin-bottom:14px;">
+      Ogni articolo va classificato in <strong>Anagrafica Articoli</strong> con la sua <em>Destinazione acquisto</em>:
+      materie prime per l'officina interna (ferro, filo di saldatura, DPI...) vanno a <strong>IronProduction</strong>,
+      prodotti finiti da rivendere così come sono (es. cartelli stradali) vanno a <strong>MasterLogistic-WMS</strong>.
+      Un articolo non ancora classificato blocca l'Entrata Merci con un errore, apposta per non instradare a caso.
+    </div>
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="company_id" value="{{ azienda.id if azienda else '' }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Fornitore <span class="req">*</span></label>
+          <select name="vendor_id" required>
+            <option value="">—</option>
+            {% for v in vendors %}<option value="{{ v.id }}">{{ v.code }} — {{ v.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label>Data</label><input type="date" name="doc_date"></div>
+      </div>
+      {{ lines_form(materials, 'standard_cost') }}
+      <div class="form-group" style="margin-top:12px;"><label>Note</label><input type="text" name="note"></div>
+      {% if castelletto_bloccato %}
+      <div class="form-group">
+        <label style="color:var(--ml-red);"><input type="checkbox" name="conferma_castelletto" value="1"> Confermo di voler procedere oltre il castelletto del fornitore</label>
+      </div>
+      {% endif %}
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Crea Ordine d'Acquisto</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Elenco Ordini d'Acquisto — con avanzamento del match {% if azienda %}— {{ azienda.name }}{% endif %}</div>
+  <div class="card-body">
+    {% if pos %}
+    <table class="masterledger-table">
+      <thead><tr><th>Numero</th><th>Data</th><th>Fornitore</th>{% if not azienda %}<th>Azienda</th>{% endif %}<th class="td-num">Totale netto €</th><th class="td-num">Ordinato</th><th class="td-num">Ricevuto</th><th class="td-num">Fatturato</th><th>Stato</th><th></th></tr></thead>
+      <tbody>
+        {% for p in pos %}
+        <tr>
+          <td class="mono fw-bold">{{ p.doc_number }}</td>
+          <td>{{ p.doc_date.strftime('%d/%m/%Y') }}</td>
+          <td>{{ p.party.name }}</td>
+          {% if not azienda %}<td>{{ p.company.name if p.company else '—' }}</td>{% endif %}
+          <td class="td-num">{{ '%.2f'|format(p.total_net) }}</td>
+          <td class="td-num">{{ '%.0f'|format(p.lines|sum(attribute='qty')) }}</td>
+          <td class="td-num">{{ '%.0f'|format(p.lines|sum(attribute='qty_received')) }}</td>
+          <td class="td-num">{{ '%.0f'|format(p.lines|sum(attribute='qty_invoiced')) }}</td>
+          <td>
+            {% if p.status == 'fatturato' %}<span class="status-badge status-paid">FATTURATO</span>
+            {% elif p.status == 'ricevuto' %}<span class="status-badge" style="background:rgba(30,111,165,.25);color:#9ecbff;">RICEVUTO</span>
+            {% elif p.status == 'parz. ricevuto' %}<span class="status-badge status-open">PARZ. RICEVUTO</span>
+            {% else %}<span class="status-badge status-open">APERTO</span>{% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('mm.purchase_order_elimina', po_id=p.id) }}" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo ordine d\'acquisto?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px; color:var(--ml-red);">🗑️ Elimina</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessun ordine d'acquisto.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

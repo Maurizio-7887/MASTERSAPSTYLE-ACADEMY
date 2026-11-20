@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block guest_content %}
+<div style="max-width:380px; margin:80px auto; padding:0 20px;">
+  <div style="text-align:center; margin-bottom:24px;">
+    <span style="background:var(--ml-header); color:#fff; font-weight:900; padding:4px 12px; border-radius:4px;">MasterLedger</span>
+    <div style="margin-top:10px; font-size:18px; font-weight:700;">MasterLedger — {{ company_name }}</div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Utente</label>
+          <input type="text" name="username" required autofocus>
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>Password</label>
+          <input type="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;">Accedi</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

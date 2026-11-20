@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "sd/_lines_form.html" import lines_form %}
+{% block title %}Ordini Cliente{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">🧾 Nuovo Ordine Cliente (senza preventivo)
+    {% if azienda %}<span class="tx-code" style="background:var(--ml-blue-dark);">{{ azienda.name }}</span>{% endif %}
+    <span class="tx-code">VA01</span></div>
+  <div class="card-body">
+    {% if not azienda %}
+    <div class="info-box" style="margin-bottom:14px;">Nessuna azienda selezionata dal menu — questo ordine non verrà
+      taggato per nessuna azienda specifica. Torna alla home e scegli "Ordini cliente" sotto Iron Segnaletica o Iron Wood.</div>
+    {% endif %}
+    <div class="info-box">Gli ordini nati da un preventivo si creano dalla pagina <a href="{{ url_for('sd.quotations', azienda=azienda_code) if azienda_code else url_for('sd.quotations') }}">Preventivi</a> con "→ Crea Ordine" (copy control SAP). Qui crei un ordine diretto.</div>
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="company_id" value="{{ azienda.id if azienda else '' }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label>Cliente <span class="req">*</span></label>
+          <select name="customer_id" required>
+            <option value="">—</option>
+            {% for c in customers %}<option value="{{ c.id }}">{{ c.code }} — {{ c.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label>Note</label><input type="text" name="note"></div>
+      </div>
+      {{ lines_form(materials, 'sales_price') }}
+      {% if castelletto_bloccato %}
+      <div class="form-group">
+        <label style="color:var(--ml-red);"><input type="checkbox" name="conferma_disponibilita" value="1"> Confermo di voler procedere nonostante la disponibilità insufficiente</label><br>
+        <label style="color:var(--ml-red);"><input type="checkbox" name="conferma_castelletto" value="1"> Confermo di voler procedere oltre il castelletto del cliente</label>
+      </div>
+      {% endif %}
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Crea Ordine</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Elenco Ordini Cliente {% if azienda %}— {{ azienda.name }}{% endif %}</div>
+  <div class="card-body">
+    {% if orders %}
+    <table class="masterledger-table">
+      <thead><tr><th>Numero</th><th>Data</th><th>Cliente</th>{% if not azienda %}<th>Azienda</th>{% endif %}<th>Da preventivo</th><th class="td-num">Totale netto €</th><th class="td-num">Consegnato</th><th>Stato</th><th></th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="mono fw-bold">{{ o.doc_number }}</td>
+          <td>{{ o.doc_date.strftime('%d/%m/%Y') }}</td>
+          <td>{{ o.party.name }}</td>
+          {% if not azienda %}<td>{{ o.company.name if o.company else '—' }}</td>{% endif %}
+          <td class="mono">{{ o.quotation.doc_number if o.quotation else '—' }}</td>
+          <td class="td-num">{{ '%.2f'|format(o.total_net) }}</td>
+          <td class="td-num">{{ '%.0f'|format(o.qty_delivered_total) }} pz</td>
+          <td>{% if o.status == 'consegnato' %}<span class="status-badge status-paid">CONSEGNATO</span>{% else %}<span class="status-badge status-open">APERTO</span>{% endif %}</td>
+          <td>
+            <a class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px;" href="{{ url_for('sd.order_confirmation', order_id=o.id) }}" target="_blank">📄 Conferma</a>
+            <form method="POST" action="{{ url_for('sd.order_elimina', order_id=o.id) }}" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questo ordine?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px; color:var(--ml-red);">🗑️ Elimina</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessun ordine cliente.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

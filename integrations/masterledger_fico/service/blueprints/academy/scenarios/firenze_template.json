@@ -1,0 +1,155 @@
+{
+  "id": "firenze-fico-template-v1",
+  "title": "Firenze — percorso professionale FI/CO",
+  "status": "TEMPLATE_DA_ALLINEARE",
+  "version": 1,
+  "notice": "Traccia di predisposizione: NON rappresenta i 162 passi originali di Firenze. Importare la consegna originale verificata prima di attivare una prova certificata.",
+  "company": {
+    "code": "FT01",
+    "name": "Ferro & Transenne Srl",
+    "mode": "didattica_non_contabilizzata"
+  },
+  "assessment": {
+    "max_score": 100,
+    "indicators": [
+      {
+        "name": "Registrazioni FI",
+        "max_points": 25
+      },
+      {
+        "name": "Clienti, fornitori e cespiti",
+        "max_points": 25
+      },
+      {
+        "name": "Controlling e pianificazione",
+        "max_points": 25
+      },
+      {
+        "name": "Chiusura, controlli e reporting",
+        "max_points": 25
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "PREP-01",
+      "sequence": 1,
+      "area": "FI",
+      "title": "Verifica piano dei conti e saldi iniziali",
+      "instruction": "Controlla conti e saldi iniziali prima di registrare.",
+      "module": "gl",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-02",
+      "sequence": 2,
+      "area": "AR",
+      "title": "Fattura cliente",
+      "instruction": "Registra la fattura cliente secondo la consegna originale.",
+      "module": "ar",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-03",
+      "sequence": 3,
+      "area": "AP",
+      "title": "Fattura fornitore",
+      "instruction": "Registra la fattura fornitore secondo la consegna originale.",
+      "module": "ap",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-04",
+      "sequence": 4,
+      "area": "FI",
+      "title": "Prima nota e quadratura",
+      "instruction": "Verifica la quadratura Dare/Avere della registrazione.",
+      "module": "gl",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-05",
+      "sequence": 5,
+      "area": "AR",
+      "title": "Incasso e partite aperte",
+      "instruction": "Controlla il documento di incasso e la compensazione.",
+      "module": "ar",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-06",
+      "sequence": 6,
+      "area": "AP",
+      "title": "Pagamento e partite aperte",
+      "instruction": "Controlla il documento di pagamento e la compensazione.",
+      "module": "ap",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-07",
+      "sequence": 7,
+      "area": "AA",
+      "title": "Cespiti e ammortamenti",
+      "instruction": "Verifica anagrafica cespite e quota di ammortamento.",
+      "module": "assets",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-08",
+      "sequence": 8,
+      "area": "CO",
+      "title": "Centri di costo",
+      "instruction": "Attribuisci correttamente le voci ai centri di costo.",
+      "module": "costs",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-09",
+      "sequence": 9,
+      "area": "CO",
+      "title": "Budget e scostamenti",
+      "instruction": "Confronta piano e consuntivo con perimetro coerente.",
+      "module": "costs",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-10",
+      "sequence": 10,
+      "area": "FI",
+      "title": "Riconciliazione bancaria",
+      "instruction": "Confronta saldo contabile e movimenti bancari.",
+      "module": "gl",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-11",
+      "sequence": 11,
+      "area": "FI",
+      "title": "Assestamenti e chiusura",
+      "instruction": "Controlla ratei, risconti, ammortamenti e bilancio.",
+      "module": "gl",
+      "expected": {},
+      "verified_against_firenze": false
+    },
+    {
+      "id": "PREP-12",
+      "sequence": 12,
+      "area": "ESAME",
+      "title": "Relazione finale",
+      "instruction": "Produci la relazione finale per la direzione.",
+      "module": "dashboard",
+      "expected": {},
+      "verified_against_firenze": false
+    }
+  ]
+}

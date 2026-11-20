@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><span>🧾</span> Prima nota — Registrazione Prima Nota
+    {% if azienda_corrente %}<span class="tx-code" style="background:var(--ml-blue-dark);">{{ azienda_corrente.name }}</span>{% endif %}
+    <span class="tx-code">Prima nota</span></div>
+  <div class="card-body">
+    {% if not azienda_corrente %}
+    <div class="info-box" style="border-color:var(--ml-orange);">⚠️ Nessuna azienda selezionata in alto — questa scrittura non verrà taggata per nessuna azienda specifica.</div>
+    {% endif %}
+    <div class="info-box">
+      Registrazione manuale sul General Ledger. Ogni riga va assegnata a Dare (40) o Avere (50).
+      Il documento viene accettato solo se <strong>Dare = Avere</strong>. Per elementi di costo/ricavo CO il <strong>Centro di costo è obbligatorio</strong> — nessun costo effettivo resta non assegnato.
+    </div>
+
+    <div class="info-box" id="ai-box" style="background:#f4f0ff; border-color:#b39ddb;">
+      <strong>🤖 Suggerisci con AI</strong> — descrivi l'operazione in linguaggio naturale
+      e/o carica un documento PDF (es. una fattura): l'AI propone le righe, ma
+      <strong>non registra nulla da sola</strong> — controlli e confermi tu premendo "Registra Documento".
+      <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+        <input type="text" id="ai-descrizione" placeholder="Descrivi l'operazione (facoltativo se carichi un PDF)..." style="flex:1; min-width:220px;">
+        <select id="ai-tipo-documento">
+          <option value="">Documento generico</option>
+          <option value="busta_paga">Busta paga</option>
+          <option value="f24">F24</option>
+          <option value="notula_professionista">Notula professionista</option>
+          <option value="utenza">Bolletta/utenza (telefono, energia...)</option>
+          <option value="rimborso_spese">Rimborso spese vive</option>
+        </select>
+        <input type="file" id="ai-pdf" accept="application/pdf">
+        <button type="button" class="btn btn-ghost" id="ai-btn" onclick="suggerisciAI()">✨ Suggerisci</button>
+      </div>
+      <div id="ai-esito" style="margin-top:8px; font-size:13px;"></div>
+    </div>
+
+    <form method="POST" id="journal_entry-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data Documento</label>
+          <input type="date" name="doc_date" value="{{ '' }}">
+        </div>
+        <div class="form-group">
+          <label>Testo</label>
+          <input type="text" name="description" placeholder="Es. Rettifica ratei attivi">
+        </div>
+      </div>
+
+      <table class="masterledger-table" style="margin-top:16px;" id="lines-table">
+        <thead>
+          <tr><th>Conto</th><th>PK</th><th>Centro di costo</th><th class="td-num">Importo €</th><th></th></tr>
+        </thead>
+        <tbody id="lines-tbody">
+          <!-- righe aggiunte via JS -->
+        </tbody>
+      </table>
+
+      <div style="margin-top:8px;">
+        <button type="button" class="btn btn-ghost" onclick="addLine()">➕ Aggiungi Riga</button>
+      </div>
+
+      <div style="margin-top:14px; font-size:13px;">
+        <strong>Totale Dare:</strong> <span id="tot-dare">0,00</span> € &nbsp;|&nbsp;
+        <strong>Totale Avere:</strong> <span id="tot-avere">0,00</span> € &nbsp;|&nbsp;
+        <span id="balance-status" style="font-weight:700;"></span>
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn btn-primary">✅ Registra Documento (Enter)</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const ACCOUNTS = [
+  {% for a in accounts %}{ id: {{ a.id }}, code: "{{ a.code }}", name: "{{ a.name|e }}", costRelevant: {{ "true" if a.cost_relevant else "false" }} },{% endfor %}
+];
+const COST_CENTERS = [
+  {% for c in cost_centers %}{ id: {{ c.id }}, code: "{{ c.code }}", name: "{{ c.name|e }}" },{% endfor %}
+];
+
+function accountOptions() {
+  return '<option value="">-- Conto --</option>' + ACCOUNTS.map(a => `<option value="${a.id}">${a.code} — ${a.name}${a.costRelevant ? ' [CO]' : ''}</option>`).join('');
+}
+function costCenterOptions() {
+  return '<option value="">--</option>' + COST_CENTERS.map(c => `<option value="${c.id}">${c.code}</option>`).join('');
+}
+
+function addLine() {
+  const tbody = document.getElementById('lines-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><select name="account_id[]" class="acct-sel" onchange="updateCOLabel(this)">${accountOptions()}</select></td>
+    <td><select name="pk[]" class="pk-sel" onchange="recalc()">
+          <option value="40">40 — Dare</option>
+          <option value="50">50 — Avere</option>
+        </select></td>
+    <td><select name="cost_center_id[]" class="cc-sel">${costCenterOptions()}</select><small class="co-hint"></small></td>
+    <td><input type="number" step="0.01" name="amount[]" class="amt-input" oninput="recalc()" style="width:110px; text-align:right;"></td>
+    <td><span onclick="this.closest('tr').remove(); recalc();" style="cursor:pointer; color:var(--ml-red);">✕</span></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function updateCOLabel(accountSelect) {
+  const row = accountSelect.closest('tr');
+  const account = ACCOUNTS.find(a => String(a.id) === accountSelect.value);
+  const cc = row.querySelector('.cc-sel');
+  const hint = row.querySelector('.co-hint');
+  if (account && account.costRelevant) {
+    cc.required = true;
+    hint.textContent = ' CdC obbligatorio';
+    hint.style.color = 'var(--ml-red)';
+  } else {
+    cc.required = false;
+    hint.textContent = '';
+  }
+}
+
+function recalc() {
+  let dare = 0, avere = 0;
+  document.querySelectorAll('#lines-tbody tr').forEach(tr => {
+    const pk = tr.querySelector('.pk-sel').value;
+    const amt = parseFloat(tr.querySelector('.amt-input').value) || 0;
+    if (pk === '40') dare += amt; else avere += amt;
+  });
+  document.getElementById('tot-dare').textContent = dare.toFixed(2);
+  document.getElementById('tot-avere').textContent = avere.toFixed(2);
+  const statusEl = document.getElementById('balance-status');
+  if (Math.abs(dare - avere) < 0.01 && dare > 0) {
+    statusEl.textContent = '✅ Bilanciato'; statusEl.style.color = 'var(--ml-green)';
+  } else {
+    statusEl.textContent = '⚠️ Non bilanciato'; statusEl.style.color = 'var(--ml-red)';
+  }
+}
+
+// due righe iniziali di cortesia
+addLine(); addLine();
+
+async function suggerisciAI() {
+  const testo = document.getElementById('ai-descrizione').value.trim();
+  const fileInput = document.getElementById('ai-pdf');
+  const file = fileInput.files[0];
+  const tipoDocumento = document.getElementById('ai-tipo-documento').value;
+  const esito = document.getElementById('ai-esito');
+  const btn = document.getElementById('ai-btn');
+
+  if (!testo && !file) {
+    esito.innerHTML = '<span style="color:var(--ml-red);">Scrivi una descrizione oppure carica un PDF.</span>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = file ? '⏳ Leggo il documento...' : '⏳ Un attimo...';
+  esito.innerHTML = '';
+  try {
+    const csrfToken = document.querySelector('input[name=csrf_token]').value;
+    let resp;
+    if (file) {
+      const formData = new FormData();
+      formData.append('descrizione', testo);
+      formData.append('tipo_documento', tipoDocumento);
+      formData.append('documento', file);
+      resp = await fetch('/gl/ai/suggerisci', { method: 'POST', headers: { 'X-CSRFToken': csrfToken }, body: formData });
+    } else {
+      resp = await fetch('/gl/ai/suggerisci', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ descrizione: testo, tipo_documento: tipoDocumento })
+      });
+    }
+    const data = await resp.json();
+    if (!resp.ok) {
+      esito.innerHTML = `<span style="color:var(--ml-red);">⚠️ ${data.error || 'Errore sconosciuto.'}</span>`;
+      return;
+    }
+
+    // Svuota le righe attuali e ricrea quelle suggerite dall'AI
+    document.getElementById('lines-tbody').innerHTML = '';
+    data.lines.forEach(line => {
+      addLine();
+      const tr = document.getElementById('lines-tbody').lastElementChild;
+      tr.querySelector('.acct-sel').value = line.account_id;
+      updateCOLabel(tr.querySelector('.acct-sel'));
+      tr.querySelector('.pk-sel').value = line.pk;
+      tr.querySelector('.amt-input').value = line.amount.toFixed(2);
+    });
+    recalc();
+
+    const descInput = document.querySelector('input[name="description"]');
+    if (descInput && !descInput.value) descInput.value = data.description;
+
+    let msg;
+    if (data.contatta_commercialista) {
+      msg = '<span style="color:var(--ml-red);">⚠️ CONTATTA IL COMMERCIALISTA prima di registrare.</span>';
+      if (data.motivo_alert) msg += `<br><em>${data.motivo_alert}</em>`;
+    } else {
+      msg = '<span style="color:var(--ml-green);">✅ Righe proposte — controllale prima di registrare.</span>';
+    }
+    if (data.classe_operazione) msg += `<br><strong>Classe riconosciuta:</strong> ${data.classe_operazione}`;
+    if (data.note) msg += `<br><em>Nota AI: ${data.note}</em>`;
+    if (data.avvisi && data.avvisi.length) msg += `<br><span style="color:#b8860b;">${data.avvisi.join('<br>')}</span>`;
+    esito.innerHTML = msg;
+  } catch (e) {
+    esito.innerHTML = `<span style="color:var(--ml-red);">⚠️ Errore di rete: ${e}</span>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Suggerisci';
+  }
+}
+</script>
+{% endblock %}

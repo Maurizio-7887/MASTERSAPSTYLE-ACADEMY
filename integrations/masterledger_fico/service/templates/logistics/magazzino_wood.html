@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Magazzino Iron Wood{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">🪵 Magazzino Iron Wood <span class="tx-code">letto da IronProduction</span></div>
+  <div class="card-body">
+    <div class="theory-note">Diverso dal Magazzino di Iron Segnaletica qui accanto: questo legge in tempo reale
+      il magazzino di <strong>IronProduction</strong> (modulo Wood), che è il magazzino VERO della società Iron Wood —
+      non un'officina interna. Impegnato/Ordinato/Disponibile/Fabbisogno li calcola già IronProduction da solo, sola
+      lettura, MasterLedger non li ricalcola. Sola consultazione: eventuali rettifiche vanno fatte dentro IronProduction.</div>
+
+    {% if errore %}
+    <div class="info-box" style="border-color:var(--ml-red);">⚠️ {{ errore }} — verifica che <span class="mono">IRONPRODUCTION_URL</span> sia configurato e che IronProduction sia raggiungibile.</div>
+    {% endif %}
+
+    <form method="GET" style="margin-bottom:14px;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Cerca per codice o descrizione..."
+             style="padding:6px 12px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:6px;width:280px;">
+      <button class="btn" type="submit">Cerca</button>
+    </form>
+
+    {% if righe %}
+    <table class="masterledger-table">
+      <thead>
+        <tr>
+          <th>Codice</th><th>Descrizione</th>
+          <th style="width:90px;">Giacenza</th>
+          <th style="width:110px;">Impegnato</th>
+          <th style="width:110px;">Ordinato</th>
+          <th style="width:130px;">Disponibile</th>
+          <th style="width:120px;">Scorta Minima</th>
+          <th style="width:110px;">Fabbisogno</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in righe %}
+        <tr>
+          <td class="mono fw-bold">{{ r.codice }}</td>
+          <td>{{ r.descrizione or '—' }}</td>
+          <td>{{ "%.0f"|format(r.quantita or 0) }} {{ r.unita_misura or '' }}</td>
+          <td>{{ "%.0f"|format(r.impegnato or 0) }}</td>
+          <td>{{ "%.0f"|format(r.ordinato or 0) }}</td>
+          <td><b>{{ "%.0f"|format(r.disponibile_contabile or 0) }}</b></td>
+          <td>{{ "%.0f"|format(r.scorta_minima or 0) }}</td>
+          <td>
+            {% if r.fabbisogno and r.fabbisogno > 0 %}
+              <span class="status-badge status-open">{{ "%.0f"|format(r.fabbisogno) }} da ordinare</span>
+            {% else %}
+              <span class="status-badge status-paid">✔ OK</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% elif not errore %}
+    <div class="empty-state">Nessun articolo trovato.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

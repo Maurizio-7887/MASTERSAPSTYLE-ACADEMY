@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MasterLedger{% endblock %} — {{ company_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% if current_user.is_authenticated %}
+<div id="shell-bar">
+  <div class="logo"><span class="box">ML</span>MasterLedger — {{ company_name }}</div>
+  {% if current_user.is_ledger %}
+  <form method="post" action="{{ url_for('dashboard.imposta_azienda_corrente') }}" id="azienda-corrente-form" style="margin-left:20px;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ request.full_path }}">
+    <select name="company_id" onchange="document.getElementById('azienda-corrente-form').submit();"
+            style="background:var(--ml-header);color:#cde3ff;border:1px solid #2c3a4d;border-radius:4px;padding:4px 8px;font-size:12.5px;">
+      <option value="">🏢 Tutte le aziende</option>
+      {% for c in aziende_ledger %}
+      <option value="{{ c.id }}" {{ 'selected' if azienda_corrente and azienda_corrente.id == c.id }}>🏢 {{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% endif %}
+  <div class="spacer"></div>
+  <div class="user-info">
+    <div>{{ current_user.full_name }}</div>
+    <div class="role">{{ current_user.role|capitalize }} · {{ 'Desk' if current_user.is_desk else 'Ledger' }} · <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline;"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button type="submit" style="background:none;border:0;padding:0;color:#cde3ff;text-decoration:underline;cursor:pointer;">Esci</button></form></div>
+  </div>
+</div>
+
+<div id="layout">
+  <nav id="sidebar">
+    {% if current_user.is_desk %}
+    <div class="sidebar-title">Desk</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='dashboard.desk_home' }}" href="{{ url_for('dashboard.desk_home') }}">🏠 Home</a>
+
+    <div class="sidebar-company-box">
+      <div class="sidebar-company-title">🏢 Iron Segnaletica</div>
+      <div class="sidebar-subtitle">Ciclo Attivo — AR (SD)</div>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.quotations' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('sd.quotations', azienda='IRSE') }}">📝 Preventivi</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.orders' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('sd.orders', azienda='IRSE') }}">🧾 Ordini cliente</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.deliveries' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('sd.deliveries', azienda='IRSE') }}">🚚 DDT / Uscita merci</a>
+      <div class="sidebar-subtitle">Ciclo Passivo — AP (MM)</div>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.rfqs' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('mm.rfqs', azienda='IRSE') }}">📨 Richieste di preventivo (RFQ)</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.purchase_orders' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('mm.purchase_orders', azienda='IRSE') }}">📦 Ordini d'acquisto</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.goods_receipts' and request.args.get('azienda')=='IRSE' }}" href="{{ url_for('mm.goods_receipts', azienda='IRSE') }}">📥 EM — Entrata merci</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.magazzino' }}" href="{{ url_for('logistics.magazzino') }}">📦 Magazzino (MasterLogistic-WMS)</a>
+    </div>
+
+    <div class="sidebar-company-box wood">
+      <div class="sidebar-company-title">🏢 Iron Wood</div>
+      <div class="sidebar-subtitle">Ciclo Attivo — AR (SD)</div>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.quotations' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('sd.quotations', azienda='IRWD') }}">📝 Preventivi</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.orders' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('sd.orders', azienda='IRWD') }}">🧾 Ordini cliente</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='sd.deliveries' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('sd.deliveries', azienda='IRWD') }}">🚚 DDT / Uscita merci</a>
+      <div class="sidebar-subtitle">Ciclo Passivo — AP (MM)</div>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.rfqs' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('mm.rfqs', azienda='IRWD') }}">📨 Richieste di preventivo (RFQ)</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.purchase_orders' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('mm.purchase_orders', azienda='IRWD') }}">📦 Ordini d'acquisto</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='mm.goods_receipts' and request.args.get('azienda')=='IRWD' }}" href="{{ url_for('mm.goods_receipts', azienda='IRWD') }}">📥 EM — Entrata merci</a>
+      <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.magazzino_wood' }}" href="{{ url_for('logistics.magazzino_wood') }}">🪵 Magazzino (IronProduction)</a>
+    </div>
+
+    <div class="sidebar-title">Cruscotti Magazzino (stile MasterLogistic)</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.ordini_clienti' }}" href="{{ url_for('logistics.ordini_clienti') }}">🧾 Ordini Cliente — Falegnameria/Stelle/Conto Lavoro</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.ordini_fornitori' }}" href="{{ url_for('logistics.ordini_fornitori') }}">📥 Ordini Fornitore — Officina Interna</a>
+
+    {% else %}
+    <div class="sidebar-title">Formazione</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint and request.endpoint.startswith('academy.') }}" href="{{ url_for('academy.index') }}">🎓 Academy SAP FI/CO (8 blocchi)</a>
+    <div class="sidebar-title">Generale</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='dashboard.ledger_home' }}" href="{{ url_for('dashboard.ledger_home') }}">🏠 Home</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='gl.journal_list' }}" href="{{ url_for('gl.journal_list') }}">📖 Giornale (Libro)</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='gl.piano_conti' }}" href="{{ url_for('gl.piano_conti') }}">📋 Piano dei Conti / Mastrini</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='gl.libro_mastro' }}" href="{{ url_for('gl.libro_mastro') }}">📚 Libro Mastro (tutti)</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint in ['gl.cost_centers_list', 'gl.cost_center_ledger'] }}" href="{{ url_for('gl.cost_centers_list') }}">🏷️ Centri di Costo/Ricavo</a>
+
+    <div class="sidebar-title">Contabilità Generale</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='gl.journal_entry' }}" href="{{ url_for('gl.journal_entry') }}">🧾 Prima nota</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint in ['gl.scadenzario', 'gl.scadenzario_paga'] }}" href="{{ url_for('gl.scadenzario') }}">📅 Scadenzario</a>
+
+    <div class="sidebar-title">Vendite e Spedizione (VS) — dal Preventivo</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.quotations' }}" href="{{ url_for('sd.quotations') }}">📝 Preventivi</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.orders' }}" href="{{ url_for('sd.orders') }}">🧾 Ordini cliente</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.deliveries' }}" href="{{ url_for('sd.deliveries') }}">🚚 DDT / Uscita merci</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.billing' }}" href="{{ url_for('sd.billing') }}">💶 Fatturazione DDT</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.fatture_da_emettere' }}" href="{{ url_for('sd.fatture_da_emettere') }}">🧮 Fatture da Emettere</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='sd.margini' }}" href="{{ url_for('sd.margini') }}">📊 Margini (Costo del Venduto)</a>
+
+    <div class="sidebar-title">Cruscotti Magazzino (stile MasterLogistic)</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.magazzino' }}" href="{{ url_for('logistics.magazzino') }}">📦 Magazzino / Fabbisogno</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.ordini_clienti' }}" href="{{ url_for('logistics.ordini_clienti') }}">🧾 Ordini Cliente — Falegnameria/Stelle/Conto Lavoro</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='logistics.ordini_fornitori' }}" href="{{ url_for('logistics.ordini_fornitori') }}">📥 Ordini Fornitore — Officina Interna</a>
+
+    <div class="sidebar-title">Acquisti e Magazzino (AM) — Verifica a Tre Vie</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='mm.rfqs' }}" href="{{ url_for('mm.rfqs') }}">📨 Richieste di preventivo (RFQ)</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='mm.purchase_orders' }}" href="{{ url_for('mm.purchase_orders') }}">📦 Ordini d'acquisto</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='mm.goods_receipts' }}" href="{{ url_for('mm.goods_receipts') }}">📥 EM — Entrata merci</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='mm.invoice_verification' }}" href="{{ url_for('mm.invoice_verification') }}">🔍 VF — Verifica fattura <span class="badge">verifica a 3 vie</span></a>
+
+    <div class="sidebar-title">Anagrafiche</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='parties.party_list' }}" href="{{ url_for('parties.party_list') }}">🤝 Soggetti Economici</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='parties.payment_term_list' }}" href="{{ url_for('parties.payment_term_list') }}">📅 Termini di Pagamento</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='materials.material_list' }}" href="{{ url_for('materials.material_list') }}">🏷️ Articoli</a>
+
+    <div class="sidebar-title">Ciclo Fornitore (AP)</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ap.supplier_invoice' }}" href="{{ url_for('ap.supplier_invoice') }}">📥 Fatture fornitore</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ap.supplier_invoice_import' }}" href="{{ url_for('ap.supplier_invoice_import') }}">📩 Import XML Fattura Ricevuta</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ap.supplier_payment' }}" href="{{ url_for('ap.supplier_payment') }}">💳 Pagamenti fornitori</a>
+
+    <div class="sidebar-title">Ciclo Cliente (AR)</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ar.customer_invoice' }}" href="{{ url_for('ar.customer_invoice') }}">📤 Fatture clienti</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ar.customer_advance_invoice' }}" href="{{ url_for('ar.customer_advance_invoice') }}">💶 Fattura Acconto</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ar.customer_credit_note' }}" href="{{ url_for('ar.customer_credit_note') }}">↩️ Note di credito</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='ar.customer_payment' }}" href="{{ url_for('ar.customer_payment') }}">💰 Incassi clienti</a>
+
+    <div class="sidebar-title">Banche</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint and request.endpoint.startswith('bank_advances.') }}" href="{{ url_for('bank_advances.lista') }}">🏦 RiBa s.b.f. / Anticipo Fatture</a>
+
+    <div class="sidebar-title">Cespiti</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='assets.asset_list' }}" href="{{ url_for('assets.asset_list') }}">🏭 Anagrafica Cespiti</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='assets.asset_create' }}" href="{{ url_for('assets.asset_create') }}">➕ Nuovo cespite</a>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='assets.depreciation' }}" href="{{ url_for('assets.depreciation') }}">📉 Ammortamenti</a>
+
+    <div class="sidebar-title">Paghe</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint and request.endpoint.startswith('payroll.') }}" href="{{ url_for('payroll.index') }}">👥 Import Paghe / F24</a>
+
+    <div class="sidebar-title">Controllo costi</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='costs.report' }}" href="{{ url_for('costs.report') }}">📊 Report Costi</a>
+
+    {% if current_user.is_commercialista %}
+    <div class="sidebar-title">Area Riservata</div>
+    <a class="sidebar-link {{ 'active' if request.endpoint=='dashboard.config_fiscale' }}" href="{{ url_for('dashboard.config_fiscale') }}">⚙️ Configurazione Fiscale</a>
+    {% endif %}
+    {% endif %}
+  </nav>
+
+  <main id="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% else %}
+  {% block guest_content %}{% endblock %}
+{% endif %}
+
+  {% block scripts %}{% endblock %}
+<script src="{{ url_for('static', filename='js/material-autocomplete.js') }}"></script>
+</body>
+</html>

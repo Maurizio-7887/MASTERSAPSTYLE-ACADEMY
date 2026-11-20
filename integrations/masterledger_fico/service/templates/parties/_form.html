@@ -1,0 +1,36 @@
+<div class="form-grid">
+  <div class="form-group"><label>Codice <span class="req">*</span></label><input name="code" required value="{{ party.code if party else '' }}" placeholder="es. SE-001"></div>
+  <div class="form-group"><label>Denominazione <span class="req">*</span></label><input name="name" required value="{{ party.name if party else '' }}"></div>
+  <div class="form-group"><label>Tipo</label><select name="subject_type"><option value="azienda" {{ 'selected' if not party or party.subject_type == 'azienda' }}>Azienda</option><option value="persona" {{ 'selected' if party and party.subject_type == 'persona' }}>Persona fisica</option></select></div>
+  <div class="form-group"><label>Ruoli <span class="req">*</span></label><label><input type="checkbox" name="is_customer" {{ 'checked' if party and party.is_customer }}> Cliente</label> &nbsp; <label><input type="checkbox" name="is_supplier" {{ 'checked' if party and party.is_supplier }}> Fornitore</label></div>
+  <div class="form-group"><label>Partita IVA</label><input name="piva" maxlength="20" value="{{ party.piva if party else '' }}"></div>
+  <div class="form-group"><label>Codice fiscale</label><input name="codice_fiscale" maxlength="16" value="{{ party.codice_fiscale if party else '' }}"></div>
+  <div class="form-group"><label>Indirizzo</label><input name="indirizzo" value="{{ party.indirizzo if party else '' }}"></div>
+  <div class="form-group"><label>CAP</label><input name="cap" maxlength="10" value="{{ party.cap if party else '' }}"></div>
+  <div class="form-group"><label>Comune</label><input name="comune" value="{{ party.comune if party else '' }}"></div>
+  <div class="form-group"><label>Provincia</label><input name="provincia" maxlength="2" value="{{ party.provincia if party else '' }}"></div>
+  <div class="form-group"><label>Nazione</label><input name="nazione" maxlength="2" value="{{ party.nazione if party else 'IT' }}"></div>
+  <div class="form-group"><label>Telefono</label><input name="telefono" value="{{ party.telefono if party else '' }}"></div>
+  <div class="form-group"><label>Email</label><input type="email" name="email" value="{{ party.email if party else '' }}"></div>
+  <div class="form-group"><label>PEC</label><input type="email" name="pec" value="{{ party.pec if party else '' }}"></div>
+  <div class="form-group"><label>Codice destinatario</label><input name="codice_destinatario" maxlength="7" value="{{ party.codice_destinatario if party else '0000000' }}"></div>
+  <div class="form-group"><label>Condizioni di pagamento (etichetta libera)</label><input name="payment_terms" value="{{ party.payment_terms if party else 'Netto 30gg' }}"></div>
+  <div class="form-group"><label>Termine di pagamento strutturato</label>
+    <select name="payment_term_id">
+      <option value="">— nessuno (una rata unica a 30 giorni) —</option>
+      {% for t in payment_terms %}
+      <option value="{{ t.id }}" {{ 'selected' if party and party.payment_term_id == t.id }}>{{ t.code }} — {{ t.description }}</option>
+      {% endfor %}
+    </select>
+    <small>Se impostato, calcola DAVVERO le rate/scadenze alla fattura — altrimenti resta una rata unica a 30gg come oggi. Gestisci i termini in <a href="{{ url_for('parties.payment_term_list') }}">Termini di Pagamento</a>.</small>
+  </div>
+  <div class="form-group"><label>IBAN</label><input name="iban" maxlength="34" value="{{ party.iban if party else '' }}"></div>
+  <div class="form-group"><label>Castelletto (limite di esposizione €)</label>
+    <input type="number" step="0.01" name="credit_limit" value="{{ party.credit_limit if party and party.credit_limit is not none else '' }}" placeholder="lascia vuoto per nessun limite">
+    <small>Confrontato con l'esposizione totale (ordini aperti + fatture non pagate/incassate) alla creazione di un nuovo ordine.</small>
+  </div>
+  <div class="form-group"><label><input type="checkbox" name="split_payment" {{ 'checked' if party and party.split_payment }}> Soggetto a Split Payment (Pubblica Amministrazione)</label>
+    <small>Comuni ed enti pubblici — paga solo il netto, versa l'IVA direttamente all'Erario. Cambia il codice di esigibilità IVA nella Fattura Elettronica.</small>
+  </div>
+  <div class="form-group"><label><input type="checkbox" name="active" {{ 'checked' if not party or party.active }}> Attivo</label></div>
+</div>
