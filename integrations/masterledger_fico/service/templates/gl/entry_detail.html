@@ -12,6 +12,7 @@
       <div><strong>Riferimento:</strong> {{ entry.reference or '—' }}</div>
       <div><strong>Descrizione:</strong> {{ entry.description }}</div>
     </div>
+    <div style="margin-bottom:14px;"><a class="btn btn-ghost" href="{{ url_for('chiusure.modifica_documento', entry_id=entry.id) }}">Modifica testi (FB02)</a></div>
 
     {% if entry.is_reversed %}
       <div class="alert alert-warning">Questo documento è stato <strong>stornato</strong> dal documento

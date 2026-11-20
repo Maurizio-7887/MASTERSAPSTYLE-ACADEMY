@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Ratei e risconti{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Ratei e risconti <span class="tx-code">FBS1 / F.81</span></div>
+  <div class="card-body">
+    <div class="info-box">
+      <strong>Rateo attivo</strong>: Ratei attivi a Ricavo (ricavo maturato, incasso futuro).
+      <strong>Rateo passivo</strong>: Costo a Ratei passivi (costo maturato, pagamento futuro).
+      <strong>Risconto attivo</strong>: Risconti attivi a Costo (costo già registrato di competenza futura).
+      <strong>Risconto passivo</strong>: Ricavo a Risconti passivi (ricavo già registrato di competenza futura).
+      Lo storno automatico si genera con F.81 alla data di storno.
+    </div>
+
+    <h3>Calcolo per giorni</h3>
+    <form method="post" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:6px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="azione" value="calcola">
+      <div class="form-group"><label>Tipo</label><select name="tipo">
+        {% for k, v in tipi.items() %}<option value="{{ k }}" {{ 'selected' if form.get('tipo') == k }}>{{ v[0] }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Importo totale €</label><input type="number" step="0.01" name="totale" value="{{ form.get('totale', '') }}"></div>
+      <div class="form-group"><label>Periodo dal</label><input type="date" name="periodo_dal" value="{{ form.get('periodo_dal', '') }}"></div>
+      <div class="form-group"><label>Periodo al</label><input type="date" name="periodo_al" value="{{ form.get('periodo_al', '') }}"></div>
+      <div class="form-group"><label>Competenza al</label><input type="date" name="competenza_al" value="{{ form.get('competenza_al', oggi.year ~ '-12-31') }}"></div>
+      <button class="btn btn-ghost" type="submit">Calcola</button>
+    </form>
+    {% if calcolo %}
+    <div class="alert alert-info">Quota: {{ calcolo[0]|euro }} € ({{ calcolo[1] }} giorni su {{ calcolo[2] }}).</div>
+    {% endif %}
+
+    <h3 style="margin-top:18px;">Registrazione</h3>
+    <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid">
+        <div class="form-group"><label>Tipo <span class="req">*</span></label><select name="tipo" required>
+          {% for k, v in tipi.items() %}<option value="{{ k }}" {{ 'selected' if form.get('tipo') == k }}>{{ v[0] }}</option>{% endfor %}</select></div>
+        <div class="form-group"><label>Conto di costo o ricavo <span class="req">*</span></label><select name="account_id" required>
+          <option value="">Seleziona</option>
+          {% for a in conti %}<option value="{{ a.id }}">{{ a.code }} {{ a.name }} ({{ a.account_type }})</option>{% endfor %}</select></div>
+        <div class="form-group"><label>Importo € <span class="req">*</span></label>
+          <input type="number" step="0.01" min="0.01" name="importo" value="{{ calcolo[0] if calcolo else '' }}" required></div>
+        <div class="form-group"><label>Centro di costo (se il conto è rilevante CO)</label><select name="cost_center_id">
+          <option value="">Nessuno</option>
+          {% for c in centri %}<option value="{{ c.id }}">{{ c.code }} {{ c.name }}</option>{% endfor %}</select></div>
+        <div class="form-group"><label>Data registrazione <span class="req">*</span></label>
+          <input type="date" name="data" value="{{ oggi.year ~ '-12-31' }}" required></div>
+        <div class="form-group"><label>Data storno automatico <span class="req">*</span></label>
+          <input type="date" name="data_storno" value="{{ (oggi.year + 1) ~ '-01-01' }}" required></div>
+        <div class="form-group" style="grid-column: span 2;"><label>Descrizione <span class="req">*</span></label>
+          <input type="text" name="descrizione" maxlength="200" required placeholder="Es. Affitto ottobre-marzo, quota gennaio-marzo"></div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary" type="submit">Registra</button></div>
+    </form>
+
+    <h3 style="margin-top:22px;">Storno automatico F.81</h3>
+    <form method="post" action="{{ url_for('chiusure.ratei_storni') }}" style="display:flex;gap:10px;align-items:flex-end;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group"><label>Storna fino al</label><input type="date" name="fino_al" value="{{ oggi.isoformat() }}"></div>
+      <button class="btn btn-primary" type="submit">Esegui storni</button>
+      <span>Da stornare a oggi: <strong>{{ in_scadenza }}</strong></span>
+    </form>
+
+    <h3 style="margin-top:22px;">Registrati</h3>
+    <table class="masterledger-table">
+      <thead><tr><th>Data</th><th>Documento</th><th>Descrizione</th><th style="text-align:right;">Importo</th><th>Storno</th></tr></thead>
+      <tbody>{% for e in registrati %}
+        <tr><td>{{ e.posting_date.strftime('%d/%m/%Y') }}</td>
+          <td class="mono"><a href="{{ url_for('gl.entry_detail', entry_id=e.id) }}">{{ e.doc_number }}</a></td>
+          <td>{{ e.description }}</td><td class="mono" style="text-align:right;">{{ e.total_dare|euro }}</td>
+          <td>{% if e.is_reversed %}Stornato{% elif e.reversal_date %}Previsto il {{ e.reversal_date.strftime('%d/%m/%Y') }}{% endif %}</td></tr>
+      {% else %}<tr><td colspan="5">Nessun rateo o risconto registrato.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

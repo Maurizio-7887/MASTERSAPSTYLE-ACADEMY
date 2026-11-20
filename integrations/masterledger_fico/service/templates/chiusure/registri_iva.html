@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Registri IVA{% endblock %}
+{% macro registro(titolo, righe, tot) %}
+  <h3 style="margin-top:18px;">{{ titolo }}</h3>
+  <table class="masterledger-table">
+    <thead><tr><th>Data reg.</th><th>Documento</th><th>Riferimento</th><th>Soggetto</th>
+      <th style="text-align:right;">Imponibile</th><th style="text-align:right;">Aliquota</th>
+      <th style="text-align:right;">Imposta</th><th style="text-align:right;">Totale</th></tr></thead>
+    <tbody>
+    {% for r in righe %}
+      <tr><td>{{ r.entry.posting_date.strftime('%d/%m/%Y') }}</td>
+        <td class="mono"><a href="{{ url_for('gl.entry_detail', entry_id=r.entry.id) }}">{{ r.entry.doc_number }}</a> {{ r.entry.doc_type }}</td>
+        <td>{{ r.entry.reference or '' }}</td><td>{{ r.soggetto }}</td>
+        <td class="mono" style="text-align:right;">{{ r.imponibile|euro }}</td>
+        <td class="mono" style="text-align:right;">{% if r.aliquota is not none %}{{ r.aliquota }}%{% endif %}{% if r.natura %} {{ r.natura }}{% endif %}</td>
+        <td class="mono" style="text-align:right;">{{ r.imposta|euro }}</td>
+        <td class="mono" style="text-align:right;">{{ r.totale|euro }}</td></tr>
+    {% else %}<tr><td colspan="8">Nessun documento nel periodo.</td></tr>{% endfor %}
+    </tbody>
+    <tfoot><tr style="font-weight:700;"><td colspan="4">Totale</td>
+      <td class="mono" style="text-align:right;">{{ tot.imponibile|euro }}</td><td></td>
+      <td class="mono" style="text-align:right;">{{ tot.imposta|euro }}</td><td></td></tr></tfoot>
+  </table>
+{% endmacro %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Registri IVA <span class="tx-code">S_ALR_87012357</span></div>
+  <div class="card-body">
+    <form method="get" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group"><label>Dal</label><input type="date" name="dal" value="{{ dal.isoformat() }}"></div>
+      <div class="form-group"><label>Al</label><input type="date" name="al" value="{{ al.isoformat() }}"></div>
+      <button class="btn btn-primary" type="submit">Esegui</button>
+      <a class="btn btn-ghost" href="{{ url_for('chiusure.liquidazione_iva') }}">Liquidazione IVA (F.12)</a>
+    </form>
+    {% if r %}
+      {{ registro("Registro IVA vendite", r.vendite, r.tot_vendite) }}
+      {{ registro("Registro IVA acquisti", r.acquisti, r.tot_acquisti) }}
+      {% if r.altre %}
+      <h3 style="margin-top:18px;">Altre registrazioni sui conti IVA</h3>
+      <table class="masterledger-table">
+        <thead><tr><th>Data reg.</th><th>Documento</th><th>Descrizione</th>
+          <th style="text-align:right;">IVA a debito</th><th style="text-align:right;">IVA a credito</th></tr></thead>
+        <tbody>{% for x in r.altre %}
+          <tr><td>{{ x.entry.posting_date.strftime('%d/%m/%Y') }}</td>
+            <td class="mono"><a href="{{ url_for('gl.entry_detail', entry_id=x.entry.id) }}">{{ x.entry.doc_number }}</a> {{ x.entry.doc_type }}</td>
+            <td>{{ x.entry.description or '' }}</td>
+            <td class="mono" style="text-align:right;">{{ x.iva_debito|euro }}</td>
+            <td class="mono" style="text-align:right;">{{ x.iva_credito|euro }}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+      <p><small>Queste registrazioni muovono i conti IVA e quindi entrano nella liquidazione.</small></p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

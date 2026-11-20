@@ -213,7 +213,8 @@ def _reverse_gl_only(original, created_by_id=None):
         "cost_center_id": line.cost_center_id,
     } for line in original.lines]
 
-    sequence = DocumentSequence.query.filter_by(doc_type=original.doc_type).first()
+    sequence = (DocumentSequence.query.filter_by(doc_type=original.doc_type, company_id=original.company_id).first()
+                or DocumentSequence.query.filter_by(doc_type=original.doc_type).first())
     if sequence is None:
         raise ValueError(f"Sequenza documentale {original.doc_type} non trovata.")
 
@@ -228,6 +229,10 @@ def _reverse_gl_only(original, created_by_id=None):
         created_by_id=created_by_id,
         commit=False,
         allow_inactive_accounts=True,
+        # Lo storno appartiene alla stessa azienda del documento originale:
+        # senza, i prospetti filtrati per azienda vedrebbero la fattura ma
+        # non il suo storno.
+        company_id=original.company_id,
     )
     original.is_reversed = True
     original.reversed_by_id = new_entry.id

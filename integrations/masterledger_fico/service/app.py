@@ -57,9 +57,19 @@ def create_app(config_class=Config):
     from blueprints.payroll.routes import payroll_bp
     from blueprints.bank_advances.routes import bank_advances_bp
     from blueprints.tcode.routes import tcode_bp
+    from blueprints.chiusure.routes import chiusure_bp
 
     app.register_blueprint(academy_bp, url_prefix="/academy-fico")
     app.register_blueprint(tcode_bp, url_prefix="/tcode")
+    app.register_blueprint(chiusure_bp, url_prefix="/chiusure")
+
+    @app.template_filter("euro")
+    def euro(value):
+        """Importo in formato italiano: 1.234,56 (vuoto se None)."""
+        if value is None or value == "":
+            return ""
+        s = f"{float(value):,.2f}"
+        return s.replace(",", "X").replace(".", ",").replace("X", ".")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(dashboard_bp, url_prefix="/")
     app.register_blueprint(gl_bp, url_prefix="/gl")
@@ -236,7 +246,7 @@ def create_app(config_class=Config):
     # nemmeno digitando l'URL a mano: l'isolamento richiesto non è solo
     # nella sidebar. Un utente 'ledger' (amministrazione) non ha invece
     # restrizioni — può consultare anche le viste operative se serve.
-    LEDGER_ONLY_BLUEPRINTS = {"gl", "ap", "ar", "assets", "costs", "payroll"}
+    LEDGER_ONLY_BLUEPRINTS = {"gl", "ap", "ar", "assets", "costs", "payroll", "chiusure"}
 
     @app.before_request
     def _restrict_desk_from_ledger():

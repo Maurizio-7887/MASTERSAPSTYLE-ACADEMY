@@ -97,6 +97,13 @@ ACCOUNTS = [
     ("302000", "Utili Portati a Nuovo",                        "patrimoniale_passivo",  False, None),
     ("303000", "Utile d'Esercizio",                             "patrimoniale_passivo",  False, None),
     ("304000", "Perdita d'Esercizio",                           "patrimoniale_attivo",   False, None),
+    # Fase 2 FI: liquidazione IVA, ratei e risconti, chiusura e riapertura
+    ("193000", "Ratei Attivi",                                 "patrimoniale_attivo",   False, None),
+    ("230000", "Debiti v/Erario c/IVA (liquidazione)",         "patrimoniale_passivo",  False, None),
+    ("231000", "Risconti Passivi",                             "patrimoniale_passivo",  False, None),
+    ("998000", "Conto Economico (epilogo di fine esercizio)",  "patrimoniale_passivo",  False, None),
+    ("999000", "Stato Patrimoniale Finale (chiusura)",         "patrimoniale_passivo",  False, None),
+    ("999100", "Stato Patrimoniale Iniziale (riapertura)",     "patrimoniale_passivo",  False, None),
 
     ("610000", "Costi per Lavorazioni e Subappalti",            "costo",                 True,  "COST"),
     ("645000", "Costi Telefonici e Trasmissione Dati",           "costo",                 True,  "COST"),
@@ -217,6 +224,7 @@ def run_seed():
         ("DZ", "16"), ("Cespiti", "20"), ("AF", "21"),
         ("QT", "30"), ("OR", "31"), ("DL", "32"), ("OA", "33"), ("GR", "34"),
         ("RFQ", "35"), ("PG", "22"),
+        ("LI", "23"), ("CH", "24"), ("RA", "25"), ("RR", "26"),
     ]
     for doc_type, prefix in sequences:
         if not DocumentSequence.query.filter_by(doc_type=doc_type).first():
@@ -335,6 +343,17 @@ def run_seed():
         ("ritenute_professionisti", "221000", "Debiti v/Erario c/Ritenute su Compensi Professionali", "iva"),
         ("abbuoni_attivi",          "652000", "Abbuoni Attivi Concessi a Clienti",       "pagamenti"),
         ("abbuoni_passivi",         "452000", "Abbuoni Passivi Ottenuti da Fornitori",   "pagamenti"),
+        ("erario_iva_debito",       "230000", "Erario c/IVA a debito (liquidazione)",    "iva"),
+        ("erario_iva_credito",      "190000", "Erario c/IVA a credito (da riportare)",   "iva"),
+        ("ratei_attivi",            "193000", "Ratei attivi",                            "chiusura"),
+        ("ratei_passivi",           "227000", "Ratei passivi",                           "chiusura"),
+        ("risconti_attivi",         "191000", "Risconti attivi",                         "chiusura"),
+        ("risconti_passivi",        "231000", "Risconti passivi",                        "chiusura"),
+        ("utile_esercizio",         "303000", "Utile d'esercizio",                       "chiusura"),
+        ("perdita_esercizio",       "304000", "Perdita d'esercizio",                     "chiusura"),
+        ("conto_economico_epilogo", "998000", "Conto economico (epilogo)",               "chiusura"),
+        ("stato_patrimoniale_finale", "999000", "Stato patrimoniale finale",             "chiusura"),
+        ("stato_patrimoniale_iniziale", "999100", "Stato patrimoniale iniziale",         "chiusura"),
     ]
     for concept_key, code, label, category in ACCOUNT_MAPPING_DEFAULTS:
         if not AccountMapping.query.filter_by(concept_key=concept_key).first():

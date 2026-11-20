@@ -68,6 +68,7 @@ FISCAL_PARAM_DEFAULTS = [
     ("crediti_svalutazione_forfettaria", "0.5", "% svalutazione forfettaria crediti (default civilistico)", "crediti"),
     ("iva_aliquota_ordinaria", "22", "Aliquota IVA ordinaria %", "iva"),
     ("iva_split_payment_attivo", "no", "Split payment attivo per PA (si/no)", "iva"),
+    ("iva_periodicita", "mensile", "Periodicità liquidazione IVA (mensile / trimestrale)", "iva"),
 
     # ── Dati Cedente/Prestatore per la generazione dell'XML FatturaPA
     # (services/fatturapa.py). Vanno compilati una sola volta: da qui in
