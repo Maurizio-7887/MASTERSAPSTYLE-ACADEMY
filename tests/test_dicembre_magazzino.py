@@ -90,7 +90,10 @@ assert len(att) == 15 and not any(k.startswith(('dc_rimanenze', 'dc_utile', 'dc_
 stato = (Path(__file__).parent / 'fixtures' / 'dicembre-magazzino-finale.json').read_text()
 risultato = Lavoro(json.loads(stato)).confronto('dicembre-magazzino')
 assert all(r['ok'] for r in risultato), [r for r in risultato if not r['ok']]
-assert attesi_esercizio('dicembre-magazzino', json.loads(stato)) == att
+# inventario periodico con l'ammanco di 12 kg di ferro: cambia solo la giacenza del ferro, più l'indicatore dei kg
+a2 = attesi_esercizio('dicembre-magazzino', json.loads(stato))
+assert [x for x in a2 if x[0] not in ('dc_scorte', 'dc_ammanco_ferro')] == [x for x in att if x[0] != 'dc_scorte']
+assert {k: v for k, _, v, _ in a2}['dc_scorte'] == '728/19/0' and {k: v for k, _, v, _ in a2}['dc_ammanco_ferro'] == 12
 
 with app.app_context():
     u = Utente(username='prova.dicembre.mag', nome='Prova Dicembre Magazzino', deve_cambiare_password=False)
@@ -111,7 +114,7 @@ with app.app_context():
 # Firenze 30 ore: numeri di controllo dell'essenziale
 stato30 = (Path(__file__).parent / 'fixtures' / 'dicembre-magazzino-30-finale.json').read_text()
 r30 = Lavoro(json.loads(stato30)).confronto('dicembre-magazzino-30')
-assert len(r30) == 14 and all(r['ok'] for r in r30), [r for r in r30 if not r['ok']]
+assert len(r30) == 15 and all(r["ok"] for r in r30), [r for r in r30 if not r['ok']]
 fh30 = a.get('/area/consegna?esercizio=dicembre-magazzino-30').get_data(as_text=True)
 assert 'value="dicembre-magazzino-30" selected' in fh30
 

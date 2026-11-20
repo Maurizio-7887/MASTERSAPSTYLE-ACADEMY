@@ -1,0 +1,610 @@
+import io
+import re
+from datetime import datetime
+from decimal import Decimal, ROUND_HALF_UP
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask_login import login_required, current_user
+
+from extensions import db
+from models import Account, AccountMapping, CostCenter, EconomicSubject, JournalEntry, InvoiceLine, InvoiceInstallment, SalesOrder, CustomerAdvanceInvoice
+from services.payments import create_installments_for_invoice, schedule_da_termine, allocate_payment, PaymentAllocationError
+from services.posting import post_journal_entry, UnbalancedEntryError
+from services.fatturapa import build_fatturapa_xml, FatturaPAConfigError
+from services.azienda_corrente import get_azienda_corrente
+
+ar_bp = Blueprint("ar", __name__, template_folder="../../templates/ar")
+
+
+def _residuo_fattura(inv):
+    """Residuo REALE da incassare per questo documento — MAI il lordo
+    originale a occhi chiusi: se la fattura è già stata parzialmente
+    incassata dallo Scadenzario granulare (/gl/scadenzario/paga), le rate
+    hanno un residuo inferiore al lordo. Usare gross_amount qui
+    incasserebbe di nuovo la parte già chiusa. Nessuna rata trovata (nota
+    di credito DG, o dato legacy) → il lordo resta corretto, perché
+    equivale a "mai stato toccato".
+    """
+    installments = InvoiceInstallment.query.filter_by(entry_id=inv.id).all()
+    if not installments:
+        return Decimal(str(inv.gross_amount or 0))
+    return sum((Decimal(str(i.residual_amount or 0)) for i in installments), Decimal("0"))
+
+
+# Codici Natura ammessi dal tracciato FatturaPA (tipo NaturaType dell'XSD
+# ufficiale, Allegato A vers. 1.9). I codici generici N2, N3 e N6 non sono
+# più validi dal 2021: vanno usate le sotto-codifiche.
+# Le specifiche SdI impongono la Natura quando AliquotaIVA = 0 (controlli
+# 00400/00429) e la VIETANO quando AliquotaIVA > 0 (controllo 00430).
+NATURA_CODES = {
+    "N1":   "N1 — Escluse ex art. 15",
+    "N2.1": "N2.1 — Non soggette (artt. 7–7-septies)",
+    "N2.2": "N2.2 — Non soggette (altri casi)",
+    "N3.1": "N3.1 — Non imponibili: esportazioni",
+    "N3.2": "N3.2 — Non imponibili: cessioni intracomunitarie",
+    "N3.3": "N3.3 — Non imponibili: cessioni verso San Marino",
+    "N3.4": "N3.4 — Non imponibili: operazioni assimilate",
+    "N3.5": "N3.5 — Non imponibili: a seguito di dichiarazioni d'intento",
+    "N3.6": "N3.6 — Non imponibili: altre operazioni",
+    "N4":   "N4 — Esenti (art. 10)",
+    "N5":   "N5 — Regime del margine / IVA non esposta",
+    "N6.1": "N6.1 — Inversione contabile: rottami",
+    "N6.2": "N6.2 — Inversione contabile: oro e argento",
+    "N6.3": "N6.3 — Inversione contabile: subappalto edile",
+    "N6.4": "N6.4 — Inversione contabile: cessione fabbricati",
+    "N6.5": "N6.5 — Inversione contabile: telefoni cellulari",
+    "N6.6": "N6.6 — Inversione contabile: prodotti elettronici",
+    "N6.7": "N6.7 — Inversione contabile: comparto edile e settori connessi",
+    "N6.8": "N6.8 — Inversione contabile: settore energetico",
+    "N6.9": "N6.9 — Inversione contabile: altri casi",
+    "N7":   "N7 — IVA assolta in altro stato UE",
+}
+
+
+def _round_half_up_2(value):
+    """
+    Arrotondamento alla seconda cifra decimale come richiesto dalle
+    specifiche SdI (controllo 00421): "per difetto se la terza cifra
+    decimale è inferiore a 5, per eccesso se uguale o superiore a 5".
+    Il round() nativo di Python usa il banker's rounding (half-even) su
+    float — NON è conforme: round(2.675, 2) = 2.67 invece di 2.68.
+    """
+    return Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+def _get_account_by_code(code):
+    acc = Account.query.filter_by(code=code).first()
+    if acc is None:
+        raise ValueError(f"Conto {code} non trovato nel Piano dei Conti. Esegui 'flask seed' prima di continuare.")
+    return acc
+
+
+def _parse_invoice_lines(form):
+    """
+    Legge le righe fattura dal form (array paralleli line_*[]) e le valida
+    secondo il tracciato FatturaPA. Ritorna (righe, errori) dove ogni riga è
+    un dict {description, amount(Decimal), vat_rate(Decimal), natura, account_id}.
+    """
+    descs = form.getlist("line_description[]")
+    nets = form.getlist("line_net[]")
+    rates = form.getlist("line_vat_rate[]")
+    naturas = form.getlist("line_natura[]")
+    accounts = form.getlist("line_account_id[]")
+    centers = form.getlist("line_cost_center_id[]")
+
+    rows, errors = [], []
+    if not (len(descs) == len(nets) == len(rates) == len(naturas) == len(accounts)):
+        return [], ["Righe fattura incomplete o alterate."]
+    for i in range(len(descs)):
+        desc = (descs[i] or "").strip()
+        net_raw = (nets[i] or "").strip() if i < len(nets) else ""
+        if not desc and not net_raw:
+            continue  # riga completamente vuota: la ignoriamo
+        try:
+            amount = _round_half_up_2(Decimal(net_raw.replace(",", ".")))
+        except Exception:
+            errors.append(f"Riga {i+1}: imponibile '{net_raw}' non valido.")
+            continue
+        if amount <= 0:
+            errors.append(f"Riga {i+1}: l'imponibile deve essere maggiore di zero.")
+            continue
+        if not desc:
+            errors.append(f"Riga {i+1}: la descrizione è obbligatoria (elemento <Descrizione> del tracciato).")
+            continue
+        try:
+            rate = Decimal((rates[i] or "0").strip())
+            if not rate.is_finite() or rate < 0 or rate > 100:
+                raise ValueError
+        except (ArithmeticError, ValueError):
+            errors.append(f"Riga {i+1}: aliquota non valida (ammessa da 0 a 100).")
+            continue
+        natura = (naturas[i] or "").strip() if i < len(naturas) else ""
+        natura = natura or None
+        # Natura obbligatoria con aliquota 0 (00400/00429), vietata altrimenti (00430)
+        if rate == 0:
+            if not natura or natura not in NATURA_CODES:
+                errors.append(f"Riga {i+1}: con aliquota 0% serve un codice Natura valido "
+                              "(es. N4) — scarto SdI 00400/00429.")
+                continue
+        else:
+            natura = None
+        try:
+            account_id = int(accounts[i])
+            account = db.session.get(Account, account_id)
+            if account is None or not account.active or account.account_type != "ricavo":
+                raise ValueError
+        except (TypeError, ValueError):
+            errors.append(f"Riga {i+1}: seleziona un conto di ricavo attivo.")
+            continue
+        cost_center_id = None
+        if i < len(centers) and (centers[i] or "").strip():
+            try:
+                cost_center_id = int(centers[i])
+            except ValueError:
+                cost_center_id = None
+        rows.append({"description": desc, "amount": amount, "vat_rate": rate,
+                     "natura": natura, "account_id": account_id, "cost_center_id": cost_center_id})
+
+    if not rows and not errors:
+        errors.append("Inserisci almeno una riga fattura.")
+    return rows, errors
+
+
+def _vat_summary(rows):
+    """
+    Raggruppa le righe per coppia (aliquota, natura) e calcola l'imposta
+    come da specifiche SdI (controlli 00421/00422): per ogni gruppo,
+    ImponibileImporto = somma dei PrezzoTotale, Imposta = arrotondamento
+    HALF_UP di (aliquota * imponibile / 100). L'IVA si calcola sul TOTALE
+    del gruppo, non riga per riga — è la regola del tracciato.
+    Ritorna lista di dict {vat_rate, natura, imponibile, imposta}.
+    """
+    groups = {}
+    for r in rows:
+        key = (r["vat_rate"], r["natura"])
+        groups.setdefault(key, Decimal("0"))
+        groups[key] += r["amount"]
+    summary = []
+    for (rate, natura), imponibile in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1] or "")):
+        imposta = _round_half_up_2(imponibile * rate / Decimal("100"))
+        summary.append({"vat_rate": rate, "natura": natura,
+                        "imponibile": imponibile, "imposta": imposta})
+    return summary
+
+
+def _register_ar_document(doc_type, prefix, form, customers, template, extra_ctx=None):
+    """
+    Logica condivisa Fattura cliente (fattura, DR/TD01) e Nota di credito cliente (nota di credito, DG/TD04).
+    Per la NOTA DI CREDITO la scrittura contabile è speculare alla fattura:
+        Dare  Ricavi (rettifica) + IVA a Debito (storno)
+        Avere Crediti v/Clienti
+    Gli importi nell'XML restano POSITIVI: è il TipoDocumento TD04 a
+    qualificare il segno del documento, come da prassi del tracciato.
+    """
+    revenue_accounts = Account.query.filter_by(account_type="ricavo", active=True).order_by(Account.code).all()
+    cost_centers = CostCenter.query.filter_by(active=True).order_by(CostCenter.code).all()
+    ctx = {"customers": customers, "revenue_accounts": revenue_accounts,
+           "natura_codes": NATURA_CODES, "cost_centers": cost_centers}
+    if extra_ctx:
+        ctx.update(extra_ctx)
+
+    customer_id = form.get("customer_id", type=int)
+    invoice_number = form.get("invoice_number", "").strip()
+    invoice_date_str = form.get("invoice_date")
+    description = form.get("description", "").strip()
+    linked_invoice_id = form.get("linked_invoice_id", type=int)  # solo Nota di credito cliente
+
+    customer = db.session.get(EconomicSubject, customer_id) if customer_id else None
+    if customer is None or not customer.active or not customer.is_customer:
+        flash("Seleziona un cliente attivo e valido.", "danger")
+        return render_template(template, **ctx)
+
+    rows, errors = _parse_invoice_lines(form)
+    if errors:
+        for e in errors:
+            flash(e, "danger")
+        return render_template(template, **ctx)
+
+    summary = _vat_summary(rows)
+    total_net = sum(g["imponibile"] for g in summary)
+    total_vat = sum(g["imposta"] for g in summary)
+    gross = total_net + total_vat
+
+    try:
+        ar_account = AccountMapping.get_or_error("crediti_clienti")
+        vat_account = AccountMapping.get_or_error("iva_debito")
+
+        if doc_type == "DR":
+            # Fattura: Dare Crediti — Avere Ricavi (per riga) + IVA
+            journal_lines = [{"account_id": ar_account.id, "dare": gross, "avere": 0}]
+            for r in rows:
+                journal_lines.append({"account_id": r["account_id"], "dare": 0,
+                                      "avere": r["amount"], "description": r["description"],
+                                      "cost_center_id": r.get("cost_center_id")})
+            if total_vat:
+                journal_lines.append({"account_id": vat_account.id, "dare": 0, "avere": total_vat})
+            doc_label = "Fattura Cliente"
+        else:
+            # Nota di credito: Dare Ricavi (per riga) + IVA — Avere Crediti
+            journal_lines = []
+            for r in rows:
+                journal_lines.append({"account_id": r["account_id"], "dare": r["amount"],
+                                      "avere": 0, "description": r["description"],
+                                      "cost_center_id": r.get("cost_center_id")})
+            if total_vat:
+                journal_lines.append({"account_id": vat_account.id, "dare": total_vat, "avere": 0})
+            journal_lines.append({"account_id": ar_account.id, "dare": 0, "avere": gross})
+            doc_label = "Nota di Credito Cliente"
+
+        invoice_date = datetime.strptime(invoice_date_str, "%Y-%m-%d").date() if invoice_date_str else None
+        azienda = get_azienda_corrente()
+        entry = post_journal_entry(
+            doc_type=doc_type, prefix=prefix,
+            doc_date=invoice_date, description=description or f"{doc_label} {invoice_number}",
+            lines=journal_lines, source_module="LEDGER", reference=invoice_number,
+            created_by_id=current_user.id, economic_subject_id=customer_id, gross_amount=gross,
+            commit=False, company_id=azienda.id if azienda else None,
+        )
+        if doc_type == "DR":
+            # Solo la fattura genera rate/scadenzario — la nota di credito (DG)
+            # si compensa in blocco contro fatture aperte dello stesso cliente,
+            # come già fa customer_payment: una rata a importo "negativo" non
+            # avrebbe senso in questo modello.
+            create_installments_for_invoice(
+                entry, schedule=schedule_da_termine(customer.payment_term if customer else None,
+                                                    entry.doc_date, entry.gross_amount)
+            )
+
+        # Righe commerciali (alimentano DettaglioLinee/DatiRiepilogo dell'XML)
+        for n, r in enumerate(rows, start=1):
+            db.session.add(InvoiceLine(entry_id=entry.id, line_number=n,
+                                       description=r["description"], amount=r["amount"],
+                                       vat_rate=r["vat_rate"], natura=r["natura"],
+                                       account_id=r["account_id"]))
+        if doc_type == "DG" and linked_invoice_id:
+            linked = JournalEntry.query.get(linked_invoice_id)
+            if linked and linked.doc_type == "DR" and linked.economic_subject_id == customer_id:
+                entry.linked_invoice_id = linked.id
+        db.session.commit()
+
+        flash(f"{doc_label} registrata: Doc. {entry.doc_number} — Totale {gross:.2f} € "
+              f"({len(rows)} righe, {len(summary)} aliquote).", "success")
+        return redirect(url_for("gl.entry_detail", entry_id=entry.id))
+    except (UnbalancedEntryError, ValueError) as e:
+        db.session.rollback()
+        flash(str(e), "danger")
+    return render_template(template, **ctx)
+
+
+@ar_bp.route("/customer_invoice", methods=["GET", "POST"])
+@login_required
+def customer_invoice():
+    """Fattura cliente — Registrazione Fattura Cliente (multi-riga, multi-aliquota)."""
+    customers = EconomicSubject.query.filter_by(active=True, is_customer=True).order_by(EconomicSubject.name).all()
+
+    if request.method == "POST":
+        return _register_ar_document("DR", "14", request.form, customers, "ar/customer_invoice.html")
+
+    revenue_accounts = Account.query.filter_by(account_type="ricavo", active=True).order_by(Account.code).all()
+    cost_centers = CostCenter.query.filter_by(active=True).order_by(CostCenter.code).all()
+    return render_template("ar/customer_invoice.html", customers=customers,
+                           revenue_accounts=revenue_accounts, natura_codes=NATURA_CODES,
+                           cost_centers=cost_centers)
+
+
+@ar_bp.route("/customer_credit_note", methods=["GET", "POST"])
+@login_required
+def customer_credit_note():
+    """
+    Nota di credito cliente — Nota di Credito Cliente (TD04), multi-riga. Rettifica una
+    fattura già emessa: la scrittura contabile è speculare alla fattura e
+    l'XML esce con TipoDocumento TD04 e — se indicata — la fattura
+    originale nel blocco <DatiFattureCollegate>.
+    """
+    customers = EconomicSubject.query.filter_by(active=True, is_customer=True).order_by(EconomicSubject.name).all()
+    dr_invoices = (JournalEntry.query
+                   .filter_by(doc_type="DR", is_reversed=False)
+                   .order_by(JournalEntry.doc_date.desc())
+                   .limit(200).all())
+
+    if request.method == "POST":
+        return _register_ar_document("DG", "17", request.form, customers, "ar/customer_credit_note.html",
+                                     extra_ctx={"dr_invoices": dr_invoices})
+
+    revenue_accounts = Account.query.filter_by(account_type="ricavo", active=True).order_by(Account.code).all()
+    cost_centers = CostCenter.query.filter_by(active=True).order_by(CostCenter.code).all()
+    return render_template("ar/customer_credit_note.html", customers=customers,
+                           revenue_accounts=revenue_accounts, natura_codes=NATURA_CODES,
+                           dr_invoices=dr_invoices, cost_centers=cost_centers)
+
+
+@ar_bp.route("/customer_payment", methods=["GET", "POST"])
+@login_required
+def customer_payment():
+    """Incasso cliente — Incasso Cliente su fatture aperte (compensazione semplificata)."""
+    azienda = get_azienda_corrente()
+    open_invoices_query = JournalEntry.query.filter(
+        JournalEntry.doc_type.in_(("DR", "DG")),
+        JournalEntry.is_paid.is_(False), JournalEntry.is_reversed.is_(False)
+    )
+    if azienda:
+        open_invoices_query = open_invoices_query.filter(JournalEntry.company_id == azienda.id)
+    open_invoices = open_invoices_query.order_by(JournalEntry.doc_date).all()
+
+    if request.method == "POST":
+        raw_ids = request.form.getlist("invoice_ids[]")
+        try:
+            selected_ids = {int(value) for value in raw_ids}
+        except (TypeError, ValueError):
+            selected_ids = set()
+        if not selected_ids:
+            flash("Seleziona almeno una fattura da incassare.", "warning")
+            return redirect(url_for("ar.customer_payment"))
+
+        try:
+            invoices = (JournalEntry.query
+                        .filter(JournalEntry.id.in_(selected_ids), JournalEntry.doc_type.in_(("DR", "DG")),
+                                JournalEntry.is_paid.is_(False), JournalEntry.is_reversed.is_(False))
+                        .all())
+            if len(invoices) != len(selected_ids):
+                raise ValueError("La selezione contiene documenti non validi, già chiusi o stornati.")
+            subject_ids = {inv.economic_subject_id for inv in invoices}
+            if None in subject_ids or len(subject_ids) != 1:
+                raise ValueError("Compensare in un unico incasso solo documenti dello stesso cliente.")
+            company_ids = {inv.company_id for inv in invoices}
+            if len(company_ids) != 1:
+                raise ValueError("Compensare in un unico incasso solo documenti della stessa azienda.")
+            payment_company_id = next(iter(company_ids))
+
+            ar_account = AccountMapping.get_or_error("crediti_clienti")
+            bank_account = AccountMapping.get_or_error("banca_principale")
+            total = sum(((Decimal("-1") if inv.doc_type == "DG" else Decimal("1")) *
+                         _residuo_fattura(inv) for inv in invoices), Decimal("0"))
+            if total <= 0:
+                raise ValueError("Il totale da incassare deve essere positivo.")
+            refs = [inv.doc_number for inv in invoices]
+            economic_subject_id = next(iter(subject_ids))
+            payment_entry = post_journal_entry(
+                doc_type="DZ", prefix="14", doc_date=None,
+                description=f"Incasso cliente — {', '.join(refs)}",
+                lines=[
+                    {"account_id": bank_account.id, "dare": total, "avere": 0},
+                    {"account_id": ar_account.id, "dare": 0, "avere": total},
+                ],
+                source_module="LEDGER", reference=", ".join(refs),
+                created_by_id=current_user.id, economic_subject_id=economic_subject_id,
+                gross_amount=total, commit=False, company_id=payment_company_id,
+            )
+            for inv in invoices:
+                inv.is_paid = True
+                inv.paid_by_entry_id = payment_entry.id
+                if inv.doc_type == "DR":
+                    for inst in InvoiceInstallment.query.filter_by(entry_id=inv.id).all():
+                        inst.residual_amount = 0
+            db.session.commit()
+            flash(f"Incasso registrato: Doc. {payment_entry.doc_number} — Totale {total:.2f} €. "
+                  f"{len(invoices)} documenti compensati.", "success")
+            return redirect(url_for("gl.entry_detail", entry_id=payment_entry.id))
+        except (UnbalancedEntryError, ValueError) as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+
+    return render_template("ar/customer_payment.html", open_invoices=open_invoices)
+
+
+# ══════════════════════════════════════════════════════════════════════
+# FATTURAZIONE ELETTRONICA — generazione XML FatturaPA per una fattura Fattura cliente
+#
+# Il flusso resta: 1) registri la fattura con Fattura cliente (come sempre) — 2) da
+# qui scarichi l'XML già pronto — 3) l'unico passo manuale che resta è
+# caricarlo sul pannello del tuo intermediario (es. Aruba Fatturazione
+# Elettronica, sezione "Carica Fatture") per firma e invio allo SdI.
+# Questa app NON firma né trasmette nulla: genera solo il file conforme.
+# ══════════════════════════════════════════════════════════════════════
+@ar_bp.route("/customer_invoice/<int:entry_id>/xml")
+@ar_bp.route("/documento/<int:entry_id>/xml")
+@login_required
+def invoice_xml(entry_id):
+    entry = JournalEntry.query.get_or_404(entry_id)
+    try:
+        filename, xml_bytes = build_fatturapa_xml(entry)
+    except (FatturaPAConfigError, ValueError) as e:
+        flash(str(e), "danger")
+        return redirect(url_for("gl.entry_detail", entry_id=entry_id))
+
+    return send_file(
+        io.BytesIO(xml_bytes),
+        mimetype="application/xml",
+        as_attachment=True,
+        download_name=filename,
+    )
+
+
+@ar_bp.route("/customer_invoice/<int:entry_id>/cortesia")
+@ar_bp.route("/documento/<int:entry_id>/cortesia")
+@login_required
+def invoice_cortesia(entry_id):
+    """
+    Fattura di Cortesia — documento stampabile NON FISCALE, da mandare al
+    cliente per comodità/anticipazione (es. prima o al posto della vera
+    fattura elettronica via SdI). Rilegge i dati della fattura già registrata
+    (JournalEntry + InvoiceLine), non genera nessun nuovo documento fiscale e
+    non ha nessun valore ai fini IVA — va sempre etichettata chiaramente come
+    tale per non essere confusa con la Fattura Elettronica vera.
+    """
+    entry = JournalEntry.query.get_or_404(entry_id)
+    righe = InvoiceLine.query.filter_by(entry_id=entry.id).order_by(InvoiceLine.line_number).all()
+    return render_template("ar/invoice_cortesia.html", entry=entry, righe=righe)
+
+
+@ar_bp.route("/customers/<int:customer_id>/dati-fiscali", methods=["GET", "POST"])
+@login_required
+def customer_fiscali(customer_id):
+    """
+    Anagrafica minima necessaria per generare l'XML FatturaPA per questo
+    cliente (CessionarioCommittente): P.IVA/CF, indirizzo, e Codice
+    Destinatario oppure PEC per il recapito tramite SdI.
+    """
+    customer = EconomicSubject.query.get_or_404(customer_id)
+
+    if request.method == "POST":
+        piva = request.form.get("piva", "").strip() or None
+        codice_fiscale = request.form.get("codice_fiscale", "").strip().upper() or None
+        indirizzo = request.form.get("indirizzo", "").strip() or None
+        cap = request.form.get("cap", "").strip() or None
+        comune = request.form.get("comune", "").strip() or None
+        provincia = request.form.get("provincia", "").strip().upper() or None
+        nazione = request.form.get("nazione", "IT").strip().upper() or "IT"
+        codice_dest = request.form.get("codice_destinatario", "").strip().upper() or "0000000"
+        pec = request.form.get("pec_destinatario", "").strip() or None
+
+        # ── Validazioni conformi al tracciato FatturaPA (Allegato A v1.9) ──
+        errors = []
+        # 00417: né IdFiscaleIVA né CodiceFiscale → scarto
+        if not piva and not codice_fiscale:
+            errors.append("Serve almeno uno tra Partita IVA e Codice Fiscale "
+                          "(altrimenti lo SdI scarta con errore 00417).")
+        if piva and nazione == "IT" and not re.fullmatch(r"\d{11}", piva):
+            errors.append("La Partita IVA italiana deve essere di 11 cifre numeriche.")
+        if codice_fiscale and not re.fullmatch(r"[A-Z0-9]{11,16}", codice_fiscale):
+            errors.append("Il Codice Fiscale deve avere da 11 a 16 caratteri alfanumerici.")
+        # CAPType nell'XSD: esattamente 5 cifre numeriche
+        if cap and not re.fullmatch(r"\d{5}", cap):
+            errors.append("Il CAP deve essere di 5 cifre numeriche (formato CAPType del tracciato).")
+        # CodiceDestinatario: esattamente 7 caratteri alfanumerici per FPR12
+        # ("XXXXXXX" è il valore per i soggetti esteri)
+        if not re.fullmatch(r"[A-Z0-9]{7}", codice_dest):
+            errors.append("Il Codice Destinatario deve essere di esattamente 7 caratteri "
+                          "alfanumerici (usa 0000000 se il cliente non lo ha comunicato).")
+        if indirizzo and len(indirizzo) > 60:
+            errors.append("L'Indirizzo può avere al massimo 60 caratteri (tracciato SdI).")
+        if comune and len(comune) > 60:
+            errors.append("Il Comune può avere al massimo 60 caratteri (tracciato SdI).")
+
+        if errors:
+            for e in errors:
+                flash(e, "danger")
+            return render_template("ar/customer_fiscali.html", customer=customer)
+
+        customer.piva = piva
+        customer.codice_fiscale = codice_fiscale
+        customer.indirizzo = indirizzo
+        customer.cap = cap
+        customer.comune = comune
+        customer.provincia = provincia
+        customer.nazione = nazione
+        customer.codice_destinatario = codice_dest
+        customer.pec_destinatario = pec
+        db.session.commit()
+        flash(f"Dati fiscali di {customer.name} aggiornati.", "success")
+        return redirect(url_for("ar.customer_invoice"))
+
+    return render_template("ar/customer_fiscali.html", customer=customer)
+
+
+def _acc(code):
+    """Recupera un conto per codice, sollevando un errore chiaro se manca
+    dal piano dei conti (non dovrebbe succedere: è tra quelli seminati)."""
+    acc = Account.query.filter_by(code=code).first()
+    if acc is None:
+        raise ValueError(f"Conto {code} non trovato nel piano dei conti — verifica il seed iniziale.")
+    return acc
+
+
+@ar_bp.route("/customer_advance_invoice", methods=["GET", "POST"])
+@login_required
+def customer_advance_invoice():
+    """
+    Fattura d'Anticipo/Acconto (TD02) — su un Ordine Cliente aperto,
+    PRIMA della consegna: per le commesse custom (cartelli/transenne su
+    misura) dove si chiede un anticipo prima di iniziare.
+
+    Contabilmente l'acconto è una PASSIVITÀ, non un ricavo — il cliente ha
+    pagato in anticipo una prestazione non ancora eseguita:
+        Dare  Crediti v/Clienti      (netto + IVA)
+        Avere Acconti da Clienti     (netto, conto 166000)
+        Avere IVA a Debito           (IVA)
+    Il ricavo si riconosce solo alla consegna vera (DDT/PGI), non qui.
+
+    LIMITE NOTO: la deduzione automatica dell'acconto dalla fattura finale
+    (quella generata da billing() a partire dal DDT) non è ancora
+    implementata — l'operatore deve tenerne conto a mano quando fattura
+    il saldo. SalesOrder.acconto_fatturato_netto mostra quanto è già
+    stato fatturato in acconto, come promemoria.
+    """
+    open_orders = SalesOrder.query.filter_by(status="aperto").order_by(SalesOrder.id.desc()).all()
+
+    if request.method == "POST":
+        order_id = request.form.get("order_id", type=int)
+        order = SalesOrder.query.get(order_id) if order_id else None
+        if order is None or order.status != "aperto":
+            flash("Seleziona un ordine cliente aperto.", "danger")
+            return redirect(url_for("ar.customer_advance_invoice"))
+
+        invoice_number = request.form.get("invoice_number", "").strip()
+        invoice_date_str = request.form.get("invoice_date")
+        try:
+            net = Decimal(request.form.get("net_amount", "0").replace(",", "."))
+            vat_rate = Decimal(request.form.get("vat_rate", "22").replace(",", "."))
+        except Exception:
+            flash("Importo o aliquota IVA non validi.", "danger")
+            return redirect(url_for("ar.customer_advance_invoice"))
+
+        if net <= 0:
+            flash("L'importo dell'acconto deve essere positivo.", "danger")
+            return redirect(url_for("ar.customer_advance_invoice"))
+
+        # Non si può fatturare in acconto più del residuo dell'ordine (al
+        # netto di quanto già fatturato in acconto in precedenza) — un
+        # acconto non può mai superare il valore di quello che deve
+        # ancora essere consegnato.
+        gia_fatturato = Decimal(str(order.acconto_fatturato_netto))
+        residuo_fatturabile = Decimal(str(order.total_net)) - gia_fatturato
+        if net > residuo_fatturabile:
+            flash(f"L'acconto richiesto ({net:.2f} €) supera il residuo fatturabile "
+                  f"sull'ordine {order.doc_number} — totale ordine {order.total_net:.2f} €, "
+                  f"già fatturato in acconto {gia_fatturato:.2f} €, residuo {residuo_fatturabile:.2f} €.",
+                  "danger")
+            return redirect(url_for("ar.customer_advance_invoice"))
+
+        vat = (net * vat_rate / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        gross = net + vat
+
+        try:
+            ar_account = AccountMapping.get_or_error("crediti_clienti")
+            vat_account = AccountMapping.get_or_error("iva_debito")
+            acconti_account = _acc("166000")
+
+            journal_lines = [
+                {"account_id": ar_account.id, "dare": gross, "avere": 0},
+                {"account_id": acconti_account.id, "dare": 0, "avere": net,
+                 "description": f"Acconto su Ordine {order.doc_number}"},
+                {"account_id": vat_account.id, "dare": 0, "avere": vat},
+            ]
+            invoice_date = datetime.strptime(invoice_date_str, "%Y-%m-%d").date() if invoice_date_str else None
+            entry = post_journal_entry(
+                doc_type="DR", prefix="14", doc_date=invoice_date,
+                description=f"Fattura Acconto su Ordine {order.doc_number}"
+                            + (f" — {order.party.name}" if order.party else ""),
+                lines=journal_lines, source_module="LEDGER", reference=invoice_number,
+                created_by_id=current_user.id, economic_subject_id=order.economic_subject_id,
+                gross_amount=gross, commit=False, company_id=order.company_id,
+            )
+            entry.is_advance_invoice = True
+            create_installments_for_invoice(entry)
+
+            db.session.add(InvoiceLine(entry_id=entry.id, line_number=1,
+                                       description=f"Acconto su Ordine {order.doc_number}",
+                                       amount=net, vat_rate=vat_rate, account_id=acconti_account.id))
+            db.session.add(CustomerAdvanceInvoice(sales_order_id=order.id, entry_id=entry.id,
+                                                   net_amount=net, vat_amount=vat,
+                                                   created_by_id=current_user.id))
+            db.session.commit()
+            flash(f"Fattura Acconto registrata: Doc. {entry.doc_number} — {gross:.2f} € "
+                  f"su Ordine {order.doc_number}.", "success")
+            return redirect(url_for("gl.entry_detail", entry_id=entry.id))
+        except (UnbalancedEntryError, ValueError) as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+            return redirect(url_for("ar.customer_advance_invoice"))
+
+    return render_template("ar/customer_advance_invoice.html", open_orders=open_orders)

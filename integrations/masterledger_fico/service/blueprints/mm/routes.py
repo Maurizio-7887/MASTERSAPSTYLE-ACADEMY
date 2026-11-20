@@ -1,0 +1,855 @@
+"""
+blueprints/mm/routes.py — Ciclo passivo in stile SAP MM, con THREE-WAY MATCH.
+
+Flusso:
+    Ordine d'Acquisto (ME21N)
+        → Entrata Merci (MIGO 101):  Dare Magazzino / Avere EM-RF (165000)
+                                     al prezzo ordine + carico giacenza
+        → Verifica Fattura (MIRO):   Dare EM-RF + IVA a Credito / Avere Fornitore
+                                     SOLO se il three-way match passa:
+                                       · Quantità fatturata ≤ quantità RICEVUTA
+                                       · Prezzo fattura entro tolleranza dal prezzo ORDINE
+                                     Altrimenti la fattura è BLOCCATA (come il
+                                     blocco pagamento "R" di SAP) e non si registra.
+
+Il conto transitorio EM/RF (in SAP: GR/IR clearing, WRX) garantisce che il
+costo entri a magazzino al ricevimento merci, e che il debito verso il
+fornitore nasca solo alla verifica fattura — mai doppie registrazioni.
+"""
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
+
+from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask_login import login_required, current_user
+
+from extensions import db
+from models import (
+    Account, CostCenter, Company, EconomicSubject, Material, PurchaseOrder, PurchaseOrderLine,
+    GoodsReceipt, GoodsReceiptLine, InvoiceVerificationLine, JournalEntry, JournalLine,
+    InvoiceInstallment, PaymentAllocation,
+)
+from services.posting import post_journal_entry, UnbalancedEntryError
+from services.co import validate_co_assignment, COValidationError
+from services.reversals import reverse_goods_receipt, ReversalError
+from services.logistic_client import get_fabbisogni_acquisto, LogisticError
+from services.castelletto import esposizione_fornitore
+from services.ironproduction_client import carica_magazzino_produzione, IronProductionError
+from services.mm_invoice_quantities import (
+    actual_invoiced_qty, reconcile_invoiced_qty, has_untracked_active_invoice,
+    lock_po_lines, has_tracked_active_invoice,
+)
+from services.payments import create_installments_for_invoice, schedule_da_termine
+
+mm_bp = Blueprint("mm", __name__, template_folder="../../templates/mm")
+
+PRICE_TOLERANCE_PCT = Decimal("2.0")   # tolleranza prezzo del three-way match
+
+
+def _acc(code):
+    a = Account.query.filter_by(code=code).first()
+    if a is None:
+        raise ValueError(f"Conto {code} mancante nel Piano dei Conti — lancia il seed.")
+    return a
+
+
+def _form_date(name, label):
+    """Legge una data HTML obbligatoria senza sostituirla silenziosamente con oggi."""
+    raw = (request.form.get(name) or "").strip()
+    if not raw:
+        raise ValueError(f"{label}: data obbligatoria.")
+    try:
+        return datetime.strptime(raw, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError(f"{label}: data non valida.")
+
+
+def _form_decimal(name, label, default=None):
+    """Legge un Decimal finito; il default vale solo per un campo davvero vuoto."""
+    raw = request.form.get(name)
+    if raw is None or not raw.strip():
+        if default is None:
+            raise ValueError(f"{label}: valore obbligatorio.")
+        return Decimal(str(default))
+    try:
+        value = Decimal(raw.strip().replace(",", "."))
+    except (InvalidOperation, ValueError):
+        raise ValueError(f"{label}: valore numerico non valido.")
+    if not value.is_finite():
+        raise ValueError(f"{label}: il valore deve essere finito.")
+    return value
+
+
+# ══════════════════════════════════════════════════════════════
+# ORDINI D'ACQUISTO (ME21N)
+# ══════════════════════════════════════════════════════════════
+@mm_bp.route("/purchase-orders", methods=["GET", "POST"])
+@login_required
+def purchase_orders():
+    vendors = EconomicSubject.query.filter_by(active=True, is_supplier=True).order_by(EconomicSubject.name).all()
+    materials = Material.query.filter_by(active=True).order_by(Material.code).all()
+    azienda_code = request.args.get("azienda")
+    azienda = Company.query.filter_by(code=azienda_code, active=True).first() if azienda_code else None
+    aziende = Company.query.filter_by(active=True).order_by(Company.name).all()
+
+    if request.method == "POST":
+        vendor_id = request.form.get("vendor_id", type=int)
+        if not vendor_id:
+            flash("Seleziona il fornitore.", "danger")
+        else:
+            mat_by_id = {m.id: m for m in materials}
+            rows, errors = [], []
+            for i in range(1, 21):
+                mid = request.form.get(f"material_id_{i}", type=int)
+                if not mid:
+                    continue
+                qty = request.form.get(f"qty_{i}", type=float) or 0
+                price = request.form.get(f"price_{i}", type=float)
+                mat = mat_by_id.get(mid)
+                if mat is None:
+                    errors.append(f"Riga {i}: articolo non valido.")
+                    continue
+                if qty <= 0:
+                    errors.append(f"Riga {i} ({mat.code}): quantità deve essere > 0.")
+                    continue
+                if price is None:
+                    price = float(mat.standard_cost)
+                rows.append({"material": mat, "qty": Decimal(str(qty)), "price": Decimal(str(price))})
+            if not rows and not errors:
+                errors.append("Inserisci almeno una riga articolo.")
+            for e in errors:
+                flash(e, "danger")
+            if rows and not errors:
+                vendor = EconomicSubject.query.get(vendor_id)
+                nuovo_ordine_valore = sum((r["qty"] * r["price"] for r in rows), Decimal("0"))
+                # Doppio controllo automatico stile SAP: qui solo il castelletto
+                # (la disponibilità non c'entra, stiamo comprando noi). Blocco
+                # soft: serve una conferma esplicita (checkbox) per procedere
+                # oltre il limite — non basta ripremere invio. Esposizione
+                # calcolata SOLO sugli ordini di QUESTA azienda: sono due
+                # libri contabili separati (Iron Segnaletica/Iron Wood).
+                if vendor and vendor.credit_limit is not None:
+                    esposizione_attuale = esposizione_fornitore(vendor_id, company_id=azienda.id if azienda else None)
+                    esposizione_dopo = esposizione_attuale + nuovo_ordine_valore
+                    if esposizione_dopo > vendor.credit_limit and not request.form.get("conferma_castelletto"):
+                        flash(f"Castelletto superato per {vendor.name}"
+                              f"{' (' + azienda.name + ')' if azienda else ''}: esposizione attuale "
+                              f"{esposizione_attuale:.2f} € + questo ordine {nuovo_ordine_valore:.2f} € = "
+                              f"{esposizione_dopo:.2f} €, oltre il limite di {vendor.credit_limit:.2f} €. "
+                              f"Conferma per procedere comunque, oppure valuta un altro fornitore.", "warning")
+                        return render_template("mm/purchase_orders.html", pos=PurchaseOrder.query.order_by(PurchaseOrder.id.desc()).all(),
+                                               vendors=vendors, materials=materials,
+                                               castelletto_bloccato=True,
+                                               aziende=aziende, azienda=azienda, azienda_code=azienda_code)
+                from models import DocumentSequence
+                po = PurchaseOrder(
+                    doc_number=DocumentSequence.next_number("OA", "33", company_id=request.form.get("company_id", type=int)),
+                    doc_date=datetime.strptime(request.form.get("doc_date"), "%Y-%m-%d").date()
+                    if request.form.get("doc_date") else datetime.utcnow().date(),
+                    economic_subject_id=vendor_id,
+                    company_id=request.form.get("company_id", type=int),
+                    note=request.form.get("note", "").strip(),
+                    created_by_id=current_user.id,
+                )
+                db.session.add(po)
+                db.session.flush()
+                for r in rows:
+                    db.session.add(PurchaseOrderLine(po_id=po.id, material_id=r["material"].id,
+                                                     qty=r["qty"], price=r["price"]))
+                db.session.commit()
+                flash(f"Ordine d'acquisto {po.doc_number} creato — "
+                      f"totale {po.total_net:.2f} € netto.", "success")
+                return redirect(url_for("mm.purchase_orders", azienda=azienda_code) if azienda_code else url_for("mm.purchase_orders"))
+
+    pos_query = PurchaseOrder.query.order_by(PurchaseOrder.id.desc())
+    if azienda:
+        pos_query = pos_query.filter_by(company_id=azienda.id)
+    pos = pos_query.all()
+    return render_template("mm/purchase_orders.html", pos=pos,
+                           vendors=vendors, materials=materials,
+                           aziende=aziende, azienda=azienda, azienda_code=azienda_code)
+
+
+# ══════════════════════════════════════════════════════════════
+# ENTRATA MERCI (MIGO 101) — Dare Magazzino / Avere EM-RF
+# ══════════════════════════════════════════════════════════════
+@mm_bp.route("/goods-receipts", methods=["GET", "POST"])
+@login_required
+def goods_receipts():
+    azienda_code = request.args.get("azienda")
+    azienda = Company.query.filter_by(code=azienda_code, active=True).first() if azienda_code else None
+    aziende = Company.query.filter_by(active=True).order_by(Company.name).all()
+    open_pos = [p for p in PurchaseOrder.query.order_by(PurchaseOrder.id.desc()).all()
+                if p.status in ("aperto", "parz. ricevuto") and (not azienda or p.company_id == azienda.id)]
+
+    if request.method == "POST":
+        po_ids = request.form.getlist("po_ids[]", type=int)
+        if not po_ids:
+            flash("Seleziona almeno un ordine d'acquisto.", "danger")
+            return redirect(url_for("mm.goods_receipts", azienda=azienda_code) if azienda_code else url_for("mm.goods_receipts"))
+        pos = PurchaseOrder.query.filter(PurchaseOrder.id.in_(po_ids)).all()
+        if len(pos) != len(po_ids):
+            flash("Uno o più ordini d'acquisto selezionati non sono stati trovati.", "danger")
+            return redirect(url_for("mm.goods_receipts", azienda=azienda_code) if azienda_code else url_for("mm.goods_receipts"))
+        vendor_ids = {p.economic_subject_id for p in pos}
+        if len(vendor_ids) > 1:
+            flash("Gli ordini selezionati appartengono a fornitori diversi — un'Entrata Merci "
+                  "corrisponde a un solo DDT ricevuto da UN fornitore.", "danger")
+            return redirect(url_for("mm.goods_receipts", azienda=azienda_code) if azienda_code else url_for("mm.goods_receipts"))
+        company_ids = {p.company_id for p in pos}
+        if len(company_ids) > 1:
+            flash("Gli ordini selezionati appartengono ad aziende diverse — un'Entrata Merci è di UN'azienda sola.", "danger")
+            return redirect(url_for("mm.goods_receipts", azienda=azienda_code) if azienda_code else url_for("mm.goods_receipts"))
+        company_id_em = next(iter(company_ids)) if company_ids else None
+        # Righe di TUTTI gli ordini selezionati, non solo del primo — un DDT
+        # può evadere più OA aperti dello stesso fornitore in un colpo solo.
+        tutte_le_righe = [l for po in pos for l in po.lines]
+
+        try:
+            ddt_date = _form_date("ddt_date", "Data DDT/entrata merci")
+            posting_date = _form_date("posting_date", "Data registrazione MIGO")
+            emrf_acc = _acc("165000")
+            from models import DocumentSequence
+            gr = GoodsReceipt(
+                doc_number=DocumentSequence.next_number("GR", "34", company_id=company_id_em),
+                doc_date=ddt_date,
+                po_id=pos[0].id,  # primo ordine, solo per riferimento legacy — la fonte di verità è gr.pos
+                company_id=company_id_em,
+                ddt_vendor_ref=request.form.get("ddt_vendor_ref", "").strip(),
+                created_by_id=current_user.id,
+            )
+            db.session.add(gr)
+            db.session.flush()
+
+            journal_lines = []
+            total = Decimal("0")
+            received_any = False
+            carichi_iron_production = []  # [(codice, qty)] da notificare a IronProduction DOPO il commit
+            for l in tutte_le_righe:
+                residual = Decimal(str(l.qty)) - Decimal(str(l.qty_received or 0))
+                qty = _form_decimal(
+                    f"recv_qty_{l.id}",
+                    f"{l.material.code}: quantità ricevuta",
+                    default=residual,
+                )
+                if qty < 0:
+                    raise ValueError(f"{l.material.code}: la quantità ricevuta non può essere negativa.")
+                if qty == 0:
+                    continue
+                residual = Decimal(str(l.qty)) - Decimal(str(l.qty_received or 0))
+                if qty > residual:
+                    raise ValueError(f"{l.material.code}: ricevi {float(qty):.0f} ma il residuo "
+                                     f"ordine è {float(residual):.0f}. Non si riceve più dell'ordinato.")
+                if l.material.purchase_destination not in Material.PURCHASE_DESTINATIONS:
+                    raise ValueError(
+                        f"{l.material.code}: destinazione acquisto non classificata. "
+                        f"Vai in Anagrafica Articoli e imposta 'MasterLogistic-WMS' o 'IronProduction' "
+                        f"prima di registrare l'Entrata Merci per questo articolo."
+                    )
+                value = (qty * Decimal(str(l.price))).quantize(Decimal("0.01"))
+                inv_acc = _acc(l.material.inventory_account_code)
+                journal_lines.append({"account_id": inv_acc.id, "dare": value, "avere": 0,
+                                      "description": f"Carico {l.material.code} × {float(qty):.0f}"})
+                total += value
+                db.session.add(GoodsReceiptLine(receipt_id=gr.id, po_line_id=l.id, qty=qty))
+                # Nessun magazzino interno: il carico fisico avviene su
+                # MasterLogistic-WMS (fuori da MasterLedger, non ancora
+                # scritto da qui — solo letto, vedi services/logistic_client.py)
+                # oppure su IronProduction (officina interna), notificato
+                # DOPO il commit di questa scrittura — vedi sotto.
+                if l.material.purchase_destination == "iron_production":
+                    carichi_iron_production.append((l.material.code, qty))
+                l.qty_received = Decimal(str(l.qty_received or 0)) + qty
+                received_any = True
+
+            if not received_any:
+                raise ValueError("Nessuna quantità da ricevere.")
+
+            oa_numeri = ", ".join(p.doc_number for p in pos)
+            journal_lines.append({"account_id": emrf_acc.id, "dare": 0, "avere": total,
+                                  "description": f"EM/RF ordine/i {oa_numeri}"})
+            entry = post_journal_entry(
+                doc_type="SA", prefix="10", doc_date=ddt_date, posting_date=posting_date,
+                description=f"Entrata Merci {gr.doc_number} su OA {oa_numeri}"
+                            + (f" — DDT forn. {gr.ddt_vendor_ref}" if gr.ddt_vendor_ref else ""),
+                lines=journal_lines, source_module="MAGAZZINO",
+                reference=gr.doc_number, created_by_id=current_user.id, commit=False,
+            )
+            gr.journal_entry_id = entry.id
+            db.session.commit()
+
+            # Notifica a IronProduction DOPO il commit: la scrittura contabile
+            # (fonte di verità legale) resta registrata anche se IronProduction
+            # non risponde — un problema di rete qui non deve far perdere
+            # un'Entrata Merci già contabilizzata. Se fallisce, l'utente viene
+            # avvisato chiaramente per sistemare a mano: non ritentiamo da
+            # soli, perché l'endpoint di IronProduction non è idempotente
+            # (un retry alla cieca rischierebbe di caricare la merce due volte).
+            errori_iron_production = []
+            for codice, qty in carichi_iron_production:
+                try:
+                    carica_magazzino_produzione(
+                        sku=codice, quantita=float(qty),
+                        doc_riferimento=gr.doc_number,
+                        note=f"Entrata Merci {gr.doc_number} su OA {oa_numeri}",
+                    )
+                except IronProductionError as e:
+                    errori_iron_production.append(f"{codice}: {e}")
+            if errori_iron_production:
+                flash("Entrata Merci registrata in contabilità, ma il carico su IronProduction "
+                      "NON è andato a buon fine per: " + "; ".join(errori_iron_production) +
+                      ". Verifica manualmente su IronProduction prima di considerare la merce disponibile "
+                      "in officina.", "warning")
+
+            flash(f"Entrata Merci {gr.doc_number} registrata — carico magazzino "
+                  f"{float(total):.2f} € (conto transitorio EM/RF).", "success")
+        except (UnbalancedEntryError, ValueError) as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+        return redirect(url_for("mm.goods_receipts", azienda=azienda_code) if azienda_code else url_for("mm.goods_receipts"))
+
+    receipts_query = GoodsReceipt.query.order_by(GoodsReceipt.id.desc())
+    if azienda:
+        receipts_query = receipts_query.filter_by(company_id=azienda.id)
+    receipts = receipts_query.all()
+    return render_template("mm/goods_receipts.html", receipts=receipts, open_pos=open_pos,
+                           today=datetime.utcnow().date().isoformat(),
+                           aziende=aziende, azienda=azienda, azienda_code=azienda_code)
+
+
+@mm_bp.route("/goods-receipts/<int:receipt_id>/reverse", methods=["POST"])
+@login_required
+def goods_receipts_reverse(receipt_id):
+    """Fase 4 (progettazione parti mancanti, punto 4) — storno di dominio."""
+    reason = (request.form.get("reason") or "").strip()
+    try:
+        reverse_goods_receipt(receipt_id, reason, created_by_id=current_user.id)
+        flash("Entrata Merci stornata: quantità ordine ripristinate e scrittura contabile contro-mossa.", "success")
+    except ReversalError as e:
+        flash(str(e), "danger")
+    return redirect(url_for("mm.goods_receipts"))
+
+
+# ══════════════════════════════════════════════════════════════
+# VERIFICA FATTURA (MIRO) — THREE-WAY MATCH
+# ══════════════════════════════════════════════════════════════
+@mm_bp.route("/invoice-verification", methods=["GET", "POST"])
+@login_required
+def invoice_verification():
+    # qty_invoiced è solo una cache: per mostrare gli ordini ancora fatturabili
+    # usiamo sempre la quantità reale ricostruita dalle fatture MM attive.
+    actual_qty_by_line = {}
+    pos = []
+    for p in PurchaseOrder.query.order_by(PurchaseOrder.id.desc()).all():
+        has_open_qty = False
+        for l in p.lines:
+            actual = actual_invoiced_qty(l.id)
+            actual_qty_by_line[l.id] = actual
+            if Decimal(str(l.qty_received or 0)) > actual:
+                has_open_qty = True
+        if has_open_qty:
+            pos.append(p)
+    verified = (JournalEntry.query.filter_by(source_module="ACQUISTI", doc_type="KR", is_reversed=False)
+               .order_by(JournalEntry.id.desc()).limit(30).all())
+
+    if request.method == "POST":
+        po_id = request.form.get("po_id", type=int)
+        po = PurchaseOrder.query.get(po_id)
+        if po is None:
+            flash("Ordine d'acquisto non trovato.", "danger")
+            return redirect(url_for("mm.invoice_verification"))
+
+        invoice_ref = request.form.get("invoice_ref", "").strip()
+
+        try:
+            if not invoice_ref:
+                raise ValueError("Riferimento fattura fornitore obbligatorio.")
+            invoice_date = _form_date("invoice_date", "Data fattura")
+            posting_date = _form_date("posting_date", "Data registrazione MIRO")
+            vat_rate = _form_decimal("vat_rate", "Aliquota IVA", default=22)
+            if vat_rate < 0 or vat_rate > 100:
+                raise ValueError("Aliquota IVA: indicare un valore tra 0 e 100.")
+
+            duplicate = JournalEntry.query.filter_by(
+                source_module="ACQUISTI", doc_type="KR", is_reversed=False,
+                economic_subject_id=po.economic_subject_id, reference=invoice_ref,
+            ).first()
+            if duplicate:
+                raise ValueError(
+                    f"La fattura {invoice_ref} risulta già registrata per questo fornitore "
+                    f"({duplicate.doc_number})."
+                )
+
+            # Serializza fatturazioni/eliminazioni/storni concorrenti sullo
+            # stesso OA; dopo il lock le quantità vengono rilette da zero.
+            locked_lines = lock_po_lines(po.id)
+
+            # Un KR legacy reale ma senza InvoiceVerificationLine non consente
+            # di attribuire quantità affidabili alle singole righe: meglio
+            # fermarsi e riconciliarlo che rischiare una doppia fatturazione.
+            if has_untracked_active_invoice(po):
+                raise ValueError(
+                    f"L'ordine {po.doc_number} ha una Verifica Fattura MM attiva non tracciata "
+                    "per riga. Riconcilia il documento prima di registrare un'altra fattura."
+                )
+
+            # ── THREE-WAY MATCH: Ordinato vs Ricevuto vs Fatturato ──
+            blocked = []
+            match_rows = []
+            for l in locked_lines:
+                actual_invoiced = actual_invoiced_qty(l.id)
+                open_qty = Decimal(str(l.qty_received or 0)) - actual_invoiced
+                qty = _form_decimal(
+                    f"inv_qty_{l.id}", f"{l.material.code}: quantità fattura",
+                    default=open_qty,
+                )
+                price = _form_decimal(
+                    f"inv_price_{l.id}", f"{l.material.code}: prezzo fattura",
+                    default=l.price,
+                )
+                if qty < 0:
+                    raise ValueError(f"{l.material.code}: la quantità fattura non può essere negativa.")
+                if price < 0:
+                    raise ValueError(f"{l.material.code}: il prezzo fattura non può essere negativo.")
+                if qty == 0:
+                    continue
+
+                open_qty = Decimal(str(l.qty_received or 0)) - actual_invoiced
+                # Regola 1 — quantità: non si fattura più del RICEVUTO
+                if qty > open_qty:
+                    blocked.append(f"{l.material.code}: fatturati {float(qty):.0f} ma ricevuti "
+                                   f"non ancora fatturati {float(open_qty):.0f} "
+                                   f"(ordinati {float(l.qty):.0f}, ricevuti {float(l.qty_received):.0f}).")
+                # Regola 2 — prezzo: scostamento dal prezzo ORDINE entro tolleranza
+                po_price = Decimal(str(l.price))
+                if po_price > 0:
+                    diff_pct = abs(price - po_price) / po_price * 100
+                    if diff_pct > PRICE_TOLERANCE_PCT:
+                        blocked.append(f"{l.material.code}: prezzo fattura {float(price):.4f} € vs "
+                                       f"prezzo ordine {float(po_price):.4f} € — scostamento "
+                                       f"{float(diff_pct):.1f}% oltre tolleranza {float(PRICE_TOLERANCE_PCT):.0f}%.")
+                match_rows.append({"line": l, "qty": qty, "price": price,
+                                   "actual_invoiced": actual_invoiced,
+                                   "cost_center_id": request.form.get(f"cost_center_id_{l.id}", type=int)})
+
+            if not match_rows:
+                raise ValueError("Nessuna quantità da fatturare.")
+            if blocked:
+                flash("FATTURA BLOCCATA — three-way match fallito:", "danger")
+                for b in blocked:
+                    flash(f"⛔ {b}", "danger")
+                return redirect(url_for("mm.invoice_verification"))
+
+            # Il centro di costo/ricavo serve SOLO per le righe che hanno una
+            # varianza prezzo (conto 460000, cost_relevant) — è per RIGA, non
+            # unico per l'intera Verifica Fattura: due materiali della stessa
+            # fattura possono appartenere a commesse/centri diversi.
+
+            # ── Registrazione: Dare EM-RF (al prezzo ORDINE, per chiuderlo esattamente)
+            # + Dare/Avere Varianza Prezzo Materiali (differenza vs prezzo FATTURA)
+            # + Dare IVA / Avere Fornitore (al prezzo FATTURA, quello davvero dovuto) ──
+            emrf_acc = _acc("165000")
+            vat_acc = _acc("154000")
+            ap_acc = _acc("210000")
+            variance_acc = _acc("460000")
+
+            total_net_invoice = Decimal("0")
+            journal_lines = []
+            for r in match_rows:
+                l = r["line"]
+                net_gr = (r["qty"] * Decimal(str(l.price))).quantize(Decimal("0.01"))       # prezzo ORDINE, quanto è stato accreditato in EM/RF all'entrata merci
+                net_invoice = (r["qty"] * r["price"]).quantize(Decimal("0.01"))              # prezzo FATTURA, quanto è davvero dovuto al fornitore
+                total_net_invoice += net_invoice
+
+                journal_lines.append({"account_id": emrf_acc.id, "dare": net_gr, "avere": 0,
+                                      "description": f"Chiusura EM/RF {l.material.code}"})
+
+                varianza = net_invoice - net_gr
+                if varianza != 0:
+                    _, riga_cost_center = validate_co_assignment(variance_acc.id, r["cost_center_id"])
+                if varianza > 0:
+                    journal_lines.append({"account_id": variance_acc.id, "dare": varianza, "avere": 0,
+                                          "description": f"Varianza prezzo sfavorevole {l.material.code} "
+                                                          f"(fattura {float(r['price']):.4f}€ vs ordine {float(l.price):.4f}€)",
+                                          "cost_center_id": riga_cost_center.id if riga_cost_center else None})
+                elif varianza < 0:
+                    journal_lines.append({"account_id": variance_acc.id, "dare": 0, "avere": -varianza,
+                                          "description": f"Varianza prezzo favorevole {l.material.code} "
+                                                          f"(fattura {float(r['price']):.4f}€ vs ordine {float(l.price):.4f}€)",
+                                          "cost_center_id": riga_cost_center.id if riga_cost_center else None})
+
+                # Riallinea anche la cache: non propagare un eventuale valore
+                # storico stale nel nuovo totale.
+                l.qty_invoiced = r["actual_invoiced"] + r["qty"]
+            total_vat = (total_net_invoice * vat_rate / 100).quantize(Decimal("0.01"))
+            gross = total_net_invoice + total_vat
+            if total_vat:
+                journal_lines.append({"account_id": vat_acc.id, "dare": total_vat, "avere": 0,
+                                      "description": f"IVA a credito {float(vat_rate):.0f}%"})
+            journal_lines.append({"account_id": ap_acc.id, "dare": 0, "avere": gross})
+
+            entry = post_journal_entry(
+                doc_type="KR", prefix="19", doc_date=invoice_date, posting_date=posting_date,
+                description=f"Verifica fattura {invoice_ref} su OA {po.doc_number} "
+                            f"(three-way match OK)",
+                lines=journal_lines, source_module="ACQUISTI",
+                reference=invoice_ref, created_by_id=current_user.id,
+                economic_subject_id=po.economic_subject_id, gross_amount=gross, commit=False,
+            )
+            # Traccia riga per riga cosa è stato fatturato — indispensabile
+            # per poter eliminare/stornare in sicurezza in futuro, ripristinando
+            # esattamente le quantità giuste su ogni riga ordine.
+            for r in match_rows:
+                db.session.add(InvoiceVerificationLine(entry_id=entry.id, po_line_id=r["line"].id, qty=r["qty"]))
+            # Come ogni altra fattura fornitore (AP manuale, import XML): senza
+            # questa chiamata la fattura non compare mai nello Scadenzario e non
+            # può essere pagata parzialmente da lì — restava un'incoerenza tra
+            # come nasce una KR qui vs altrove (la pulizia dati di prova più giù,
+            # _elimina_pagamenti_orfani_mm, gestiva già le rate: la creazione era
+            # l'unico pezzo mancante).
+            create_installments_for_invoice(
+                entry, schedule=schedule_da_termine(po.party.payment_term, entry.doc_date, entry.gross_amount)
+            )
+            db.session.commit()
+            flash(f"✅ Three-way match superato. Fattura {entry.doc_number} registrata — "
+                  f"{float(gross):.2f} € (imponibile {float(total_net_invoice):.2f} + IVA {float(total_vat):.2f}). "
+                  f"Debito v/{po.party.name} aperto in Pagamenti fornitori.", "success")
+            return redirect(url_for("gl.entry_detail", entry_id=entry.id))
+        except (UnbalancedEntryError, ValueError) as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+        return redirect(url_for("mm.invoice_verification"))
+
+    return render_template("mm/invoice_verification.html", pos=pos,
+                           actual_qty_by_line=actual_qty_by_line,
+                           tolerance=float(PRICE_TOLERANCE_PCT),
+                           cost_centers=CostCenter.query.filter_by(active=True).order_by(CostCenter.code).all(),
+                           verified=verified, today=datetime.utcnow().date().isoformat())
+
+
+# ══════════════════════════════════════════════════════════════
+# ELIMINAZIONE (dati di prova) — stesso schema già collaudato per SD:
+# ogni livello blocca da solo se c'è ancora qualcosa collegato sopra,
+# gestendo con cautela eventuali pagamenti fornitore misti.
+# ══════════════════════════════════════════════════════════════
+def _elimina_pagamenti_orfani_mm(entry_ids_da_eliminare):
+    """Stessa logica già corretta e collaudata in blueprints/sd/routes.py,
+    qui per il lato fornitori (KZ invece di DZ)."""
+    installment_ids = [i.id for i in InvoiceInstallment.query.filter(
+        InvoiceInstallment.entry_id.in_(entry_ids_da_eliminare)).all()]
+    payment_entry_ids = set()
+    if installment_ids:
+        for pa in PaymentAllocation.query.filter(PaymentAllocation.installment_id.in_(installment_ids)).all():
+            payment_entry_ids.add(pa.payment_entry_id)
+            db.session.delete(pa)
+    for e in JournalEntry.query.filter(JournalEntry.id.in_(entry_ids_da_eliminare)).all():
+        if e.paid_by_entry_id:
+            payment_entry_ids.add(e.paid_by_entry_id)
+    db.session.flush()
+
+    for peid in payment_entry_ids:
+        ancora_usato = PaymentAllocation.query.filter_by(payment_entry_id=peid).first() is not None
+        ancora_paga_altro = JournalEntry.query.filter(
+            JournalEntry.paid_by_entry_id == peid,
+            ~JournalEntry.id.in_(entry_ids_da_eliminare)
+        ).first() is not None
+        if not ancora_usato and not ancora_paga_altro:
+            # Scollega PRIMA i riferimenti dalle fatture che stiamo per
+            # eliminare — senza questo, Postgres rifiuta la cancellazione
+            # per il vincolo di chiave esterna (lezione imparata da SD).
+            JournalEntry.query.filter(
+                JournalEntry.id.in_(entry_ids_da_eliminare),
+                JournalEntry.paid_by_entry_id == peid
+            ).update({"paid_by_entry_id": None}, synchronize_session=False)
+            db.session.flush()
+            JournalLine.query.filter_by(entry_id=peid).delete(synchronize_session=False)
+            JournalEntry.query.filter_by(id=peid).delete(synchronize_session=False)
+
+
+def _elimina_scrittura_mm(entry_id):
+    """Elimina una scrittura MM (Verifica Fattura o Entrata Merci) e tutto
+    ciò che ne dipende, gestendo con cautela eventuali pagamenti."""
+    entry = JournalEntry.query.get(entry_id)
+    if entry is None:
+        return
+    if entry.is_reversed or entry.reversed_by_id or entry.reverses_id:
+        raise ValueError(
+            f"Il documento {entry.doc_number} è collegato a uno storno — non eliminabile da qui."
+        )
+    _elimina_pagamenti_orfani_mm([entry_id])
+    # Le rate di QUESTA fattura (create da create_installments_for_invoice)
+    # vanno eliminate esplicitamente: _elimina_pagamenti_orfani_mm ha già
+    # ripulito le allocazioni/pagamenti che le referenziavano, ma non le
+    # righe InvoiceInstallment stesse — senza questo, l'eliminazione della
+    # JournalEntry fallirebbe per il vincolo di chiave esterna.
+    InvoiceInstallment.query.filter_by(entry_id=entry_id).delete(synchronize_session=False)
+    InvoiceVerificationLine.query.filter_by(entry_id=entry_id).delete(synchronize_session=False)
+    JournalLine.query.filter_by(entry_id=entry_id).delete(synchronize_session=False)
+    JournalEntry.query.filter_by(id=entry_id).delete(synchronize_session=False)
+
+
+@mm_bp.route("/invoice-verification/<int:entry_id>/elimina", methods=["POST"])
+@login_required
+def invoice_verification_elimina(entry_id):
+    """Elimina una Verifica Fattura — ripristina le quantità fatturate
+    sull'ordine usando InvoiceVerificationLine (traccia esatta di cosa
+    era stato fatturato, riga per riga)."""
+    entry = JournalEntry.query.get_or_404(entry_id)
+    if entry.source_module != "ACQUISTI" or entry.doc_type != "KR":
+        flash("Questa fattura non è stata generata dalla Verifica Fattura MM — non eliminabile da qui.", "danger")
+        return redirect(url_for("mm.invoice_verification"))
+    doc_number = entry.doc_number
+    tracked_rows = InvoiceVerificationLine.query.filter_by(entry_id=entry.id).all()
+    affected_line_ids = sorted({r.po_line_id for r in tracked_rows})
+    affected_po_ids = sorted({r.po_line.po_id for r in tracked_rows})
+    for po_id in affected_po_ids:
+        lock_po_lines(po_id)
+    try:
+        _elimina_scrittura_mm(entry.id)
+        db.session.flush()
+        # Ricalcolo post-cancellazione dalla fonte autorevole: sottrarre dalla
+        # cache propagherebbe un eventuale valore stale preesistente.
+        for line_id in affected_line_ids:
+            po_line = db.session.get(PurchaseOrderLine, line_id)
+            if po_line is not None:
+                reconcile_invoiced_qty(po_line)
+    except ValueError as e:
+        db.session.rollback()
+        flash(str(e), "danger")
+        return redirect(url_for("mm.invoice_verification"))
+    db.session.commit()
+    flash(f"Verifica Fattura {doc_number} eliminata. Le quantità fatturate sull'ordine sono state ripristinate.", "success")
+    return redirect(url_for("mm.invoice_verification"))
+
+
+@mm_bp.route("/goods-receipts/<int:receipt_id>/elimina", methods=["POST"])
+@login_required
+def goods_receipt_elimina(receipt_id):
+    """Elimina un'Entrata Merci — blocca se una sua riga risulta già
+    fatturata oltre quanto resterebbe ricevuto dopo l'eliminazione."""
+    gr = GoodsReceipt.query.get_or_404(receipt_id)
+    po_ids_coinvolti = sorted({gr_line.po_line.po_id for gr_line in gr.lines})
+    locked_by_id = {}
+    for po_id in po_ids_coinvolti:
+        for line in lock_po_lines(po_id):
+            locked_by_id[line.id] = line
+    for po_id in po_ids_coinvolti:
+        po = PurchaseOrder.query.get(po_id)
+        if has_untracked_active_invoice(po):
+            flash(
+                f"L'ordine {po.doc_number} ha una Verifica Fattura MM attiva non tracciata per riga: "
+                "impossibile verificare con sicurezza le quantità. Riconcilia prima il documento.",
+                "danger",
+            )
+            return redirect(url_for("mm.goods_receipts"))
+
+    for gr_line in gr.lines:
+        po_line = locked_by_id[gr_line.po_line_id]
+        # Non fidarsi del contatore cache: lo ricalcoliamo dalle fatture MM
+        # attive prima di decidere se l'eliminazione è davvero bloccata.
+        actual_invoiced = reconcile_invoiced_qty(po_line)
+        residual_after = Decimal(str(po_line.qty_received or 0)) - Decimal(str(gr_line.qty))
+        if actual_invoiced > residual_after:
+            flash(f"{po_line.material.code}: già fatturati {float(actual_invoiced):.0f}, ma dopo "
+                  f"l'eliminazione resterebbero ricevuti solo {float(residual_after):.0f} — elimina prima "
+                  f"la Verifica Fattura collegata.", "danger")
+            return redirect(url_for("mm.goods_receipts"))
+
+    doc_number = gr.doc_number
+    entry_id = gr.journal_entry_id
+    gr.journal_entry_id = None  # scollega PRIMA di eliminare la scrittura (vincolo FK)
+    for gr_line in gr.lines:
+        po_line = locked_by_id[gr_line.po_line_id]
+        po_line.qty_received = Decimal(str(po_line.qty_received or 0)) - Decimal(str(gr_line.qty))
+    db.session.flush()
+    if entry_id:
+        try:
+            _elimina_scrittura_mm(entry_id)
+        except ValueError as e:
+            db.session.rollback()
+            flash(str(e), "danger")
+            return redirect(url_for("mm.goods_receipts"))
+    db.session.delete(gr)  # le righe (GoodsReceiptLine) cascade
+    db.session.commit()
+    flash(f"Entrata Merci {doc_number} eliminata. Le quantità sull'ordine sono state ripristinate.", "success")
+    return redirect(url_for("mm.goods_receipts"))
+
+
+@mm_bp.route("/purchase-orders/<int:po_id>/elimina", methods=["POST"])
+@login_required
+def purchase_order_elimina(po_id):
+    """Elimina un ordine d'acquisto — blocca se ha già Entrate Merci collegate."""
+    po = PurchaseOrder.query.get_or_404(po_id)
+    lock_po_lines(po.id)
+    if po.receipts:
+        flash(f"L'ordine {po.doc_number} ha già Entrate Merci collegate — eliminale prima.", "danger")
+        return redirect(url_for("mm.purchase_orders"))
+    if has_tracked_active_invoice(po.id) or has_untracked_active_invoice(po):
+        flash(f"L'ordine {po.doc_number} ha una Verifica Fattura MM attiva collegata — eliminala prima.", "danger")
+        return redirect(url_for("mm.purchase_orders"))
+    doc_number = po.doc_number
+    db.session.delete(po)  # le righe (PurchaseOrderLine) cascade
+    db.session.commit()
+    flash(f"Ordine d'acquisto {doc_number} eliminato.", "success")
+    return redirect(url_for("mm.purchase_orders"))
+
+
+# ══════════════════════════════════════════════════════════════
+# RFQ — richiesta d'offerta → confronto → flag selezione → OA
+# ══════════════════════════════════════════════════════════════
+@mm_bp.route('/rfq', methods=['GET', 'POST'])
+@login_required
+def rfqs():
+    from models import RequestForQuotation, DocumentSequence
+    vendors = EconomicSubject.query.filter_by(active=True, is_supplier=True).order_by(EconomicSubject.name).all()
+    materials = Material.query.filter_by(active=True).order_by(Material.code).all()
+    azienda_code = request.args.get("azienda")
+    azienda = Company.query.filter_by(code=azienda_code, active=True).first() if azienda_code else None
+    aziende = Company.query.filter_by(active=True).order_by(Company.name).all()
+    if request.method == 'POST':
+        try:
+            mat = Material.query.get(request.form.get('material_id', type=int))
+            qty = Decimal(str(request.form.get('qty', '0')).replace(',', '.'))
+            if not mat or qty <= 0: raise ValueError('Seleziona un articolo e una quantità positiva.')
+            required = request.form.get('required_date')
+            rfq = RequestForQuotation(rfq_number=DocumentSequence.next_number('RFQ','35', company_id=request.form.get('company_id', type=int)), material_id=mat.id, qty=qty,
+                company_id=request.form.get('company_id', type=int),
+                required_date=datetime.strptime(required,'%Y-%m-%d').date() if required else None,
+                notes=request.form.get('notes','').strip(), created_by_id=current_user.id)
+            db.session.add(rfq); db.session.commit(); flash(f'Richiesta d’offerta {rfq.rfq_number} creata.', 'success')
+        except (ValueError, InvalidOperation) as e:
+            db.session.rollback(); flash(str(e),'danger')
+        return redirect(url_for('mm.rfqs', azienda=azienda_code) if azienda_code else url_for('mm.rfqs'))
+    wms_error = None
+    try:
+        wms_needs = get_fabbisogni_acquisto()
+    except LogisticError as e:
+        wms_needs = []
+        wms_error = str(e)
+    material_by_code = {m.code.strip().upper(): m for m in materials}
+    for row in wms_needs:
+        row['material'] = material_by_code.get(str(row['sku']).strip().upper())
+    rfq_query = RequestForQuotation.query.order_by(RequestForQuotation.id.desc())
+    if azienda:
+        rfq_query = rfq_query.filter_by(company_id=azienda.id)
+    return render_template('mm/rfqs.html', rfqs=rfq_query.all(),
+                           vendors=vendors, materials=materials, wms_needs=wms_needs, wms_error=wms_error,
+                           aziende=aziende, azienda=azienda, azienda_code=azienda_code)
+
+
+@mm_bp.route('/rfq/<int:rfq_id>/elimina', methods=['POST'])
+@login_required
+def rfq_elimina(rfq_id):
+    """Elimina una Richiesta di Preventivo — blocca se una delle offerte
+    ricevute è già stata trasformata in Ordine d'acquisto: elimina prima
+    quell'ordine (le altre offerte non selezionate si eliminano insieme
+    alla RFQ, in automatico)."""
+    from models import RequestForQuotation
+    rfq = RequestForQuotation.query.get_or_404(rfq_id)
+    if any(o.purchase_order_id is not None for o in rfq.offers):
+        flash(f"La RFQ {rfq.rfq_number} ha già un'offerta trasformata in Ordine d'acquisto — "
+              f"elimina prima quell'ordine.", "danger")
+        return redirect(url_for('mm.rfqs'))
+    rfq_number = rfq.rfq_number
+    db.session.delete(rfq)  # le offerte (SupplierQuotation) cascade
+    db.session.commit()
+    flash(f"Richiesta d'offerta {rfq_number} eliminata.", "success")
+    return redirect(url_for('mm.rfqs'))
+
+@mm_bp.route('/rfq/da-fabbisogni', methods=['POST'])
+@login_required
+def rfq_from_wms_needs():
+    """Crea RFQ dai fabbisogni correnti WMS e le inoltra ai fornitori selezionati."""
+    from models import RequestForQuotation, RfqDelivery, DocumentSequence
+    from services.rfq_delivery import send_rfq_email, RfqDeliveryError
+    vendor_ids = request.form.getlist('vendor_ids', type=int)
+    requested = request.form.getlist('sku')
+    quantities = request.form
+    if not requested:
+        flash('Seleziona almeno un fabbisogno WMS.', 'danger'); return redirect(url_for('mm.rfqs'))
+    if not vendor_ids:
+        flash('Seleziona almeno un fornitore destinatario.', 'danger'); return redirect(url_for('mm.rfqs'))
+    vendors = EconomicSubject.query.filter(EconomicSubject.id.in_(vendor_ids), EconomicSubject.active.is_(True), EconomicSubject.is_supplier.is_(True)).all()
+    if not vendors:
+        flash('I fornitori selezionati non sono validi.', 'danger'); return redirect(url_for('mm.rfqs'))
+    try:
+        current = {str(x['sku']): x for x in get_fabbisogni_acquisto()}
+    except LogisticError as e:
+        flash(f"MasterLogistic-WMS non raggiungibile: {e}", "danger")
+        return redirect(url_for('mm.rfqs'))
+    materials = {m.code.strip().upper(): m for m in Material.query.filter_by(active=True).all()}
+    created, sent, failed, skipped = [], 0, [], []
+    try:
+        for sku in requested:
+            row = current.get(sku)
+            mat = materials.get(str(sku).strip().upper())
+            if not row or not mat:
+                skipped.append(sku); continue
+            qty = Decimal(str(quantities.get('qty_' + sku, row['fabbisogno_netto'])).replace(',', '.'))
+            if qty <= 0: continue
+            # Deriva dal fabbisogno di MasterLogistic-WMS, che è specifico di
+            # Iron Segnaletica (vedi decisione già presa in Fase 2 per il
+            # pulsante 'RFQ da fabbisogni') — numerazione sotto la sua
+            # sequenza, non "nessuna azienda".
+            azienda_irse = Company.query.filter_by(code='IRSE', active=True).first()
+            rfq = RequestForQuotation(
+                rfq_number=DocumentSequence.next_number('RFQ', '35', company_id=azienda_irse.id if azienda_irse else None),
+                material_id=mat.id, qty=qty, company_id=azienda_irse.id if azienda_irse else None,
+                notes=(f'Generata dal fabbisogno: giacenza {row.get("stock", 0)}, '
+                      f'impegnato su ordini {row.get("impegnato", 0)}, in arrivo {row.get("in_arrivo", 0)}.'),
+                created_by_id=current_user.id)
+            db.session.add(rfq); db.session.flush(); created.append(rfq)
+            successful = False
+            for vendor in vendors:
+                try:
+                    recipient = send_rfq_email(rfq, vendor)
+                    db.session.add(RfqDelivery(rfq_id=rfq.id, economic_subject_id=vendor.id, recipient_email=recipient, status='inviata', sent_by_id=current_user.id))
+                    sent += 1; successful = True
+                except RfqDeliveryError as exc:
+                    db.session.add(RfqDelivery(rfq_id=rfq.id, economic_subject_id=vendor.id, recipient_email=(vendor.email or vendor.pec or ''), status='errore', error_message=str(exc)[:500], sent_by_id=current_user.id))
+                    failed.append(f'{rfq.rfq_number}/{vendor.name}')
+            rfq.status = 'inviata' if successful else 'da_inviare'
+        db.session.commit()
+    except (InvalidOperation, ValueError) as exc:
+        db.session.rollback(); flash(f'RFQ non create: {exc}', 'danger'); return redirect(url_for('mm.rfqs'))
+    if created: flash(f'Create {len(created)} RFQ dal fabbisogno WMS; inoltri riusciti: {sent}.', 'success')
+    if skipped: flash('Articoli WMS senza anagrafica MasterLedger: ' + ', '.join(skipped), 'warning')
+    if failed: flash('Inoltro da riesaminare: ' + ', '.join(failed), 'warning')
+    return redirect(url_for('mm.rfqs'))
+
+@mm_bp.route('/rfq/<int:rfq_id>/offerta', methods=['POST'])
+@login_required
+def rfq_offer(rfq_id):
+    from models import RequestForQuotation, SupplierQuotation
+    r = RequestForQuotation.query.get_or_404(rfq_id)
+    try:
+        vendor = EconomicSubject.query.get(request.form.get('vendor_id',type=int)); price=Decimal(str(request.form.get('unit_price','0')).replace(',','.'))
+        if not vendor or price < 0: raise ValueError('Fornitore e prezzo non negativo sono obbligatori.')
+        valid=request.form.get('valid_until')
+        db.session.add(SupplierQuotation(rfq_id=r.id,economic_subject_id=vendor.id,offer_ref=request.form.get('offer_ref','').strip(),unit_price=price,
+            lead_days=request.form.get('lead_days',type=int),valid_until=datetime.strptime(valid,'%Y-%m-%d').date() if valid else None))
+        db.session.commit(); flash('Offerta fornitore registrata.', 'success')
+    except (ValueError,InvalidOperation) as e: db.session.rollback(); flash(str(e),'danger')
+    return redirect(url_for('mm.rfqs'))
+
+@mm_bp.route('/rfq/offerta/<int:offer_id>/seleziona', methods=['POST'])
+@login_required
+def rfq_select(offer_id):
+    from models import SupplierQuotation
+    offer=SupplierQuotation.query.get_or_404(offer_id); r=offer.rfq
+    if r.status == 'ordinata': flash('RFQ già convertita in ordine: non è più modificabile.','warning'); return redirect(url_for('mm.rfqs'))
+    for other in r.offers: other.selected=False
+    offer.selected=True; r.status='aggiudicata'; db.session.commit(); flash(f'Offerta {offer.supplier.name} selezionata: pronta per l’ordine.', 'success')
+    return redirect(url_for('mm.rfqs'))
+
+@mm_bp.route('/rfq/offerta/<int:offer_id>/ordine', methods=['POST'])
+@login_required
+def rfq_to_po(offer_id):
+    from models import SupplierQuotation, PurchaseOrder, PurchaseOrderLine, DocumentSequence
+    offer=SupplierQuotation.query.get_or_404(offer_id); r=offer.rfq
+    if not offer.selected: flash('Prima seleziona l’offerta con il flag di aggiudicazione.','danger'); return redirect(url_for('mm.rfqs'))
+    if offer.purchase_order_id: flash('Questa offerta è già stata convertita in ordine.','warning'); return redirect(url_for('mm.rfqs'))
+    po=PurchaseOrder(doc_number=DocumentSequence.next_number('OA','33'),economic_subject_id=offer.economic_subject_id,
+      note=f'Da RFQ {r.rfq_number}; offerta {offer.offer_ref or "s.n."}',created_by_id=current_user.id)
+    db.session.add(po); db.session.flush(); db.session.add(PurchaseOrderLine(po_id=po.id,material_id=r.material_id,qty=r.qty,price=offer.unit_price))
+    offer.purchase_order_id=po.id; r.status='ordinata'; db.session.commit(); flash(f'Ordine {po.doc_number} creato dall’offerta selezionata. Pronto per Entrata Merci (MIGO).','success')
+    return redirect(url_for('mm.purchase_orders'))

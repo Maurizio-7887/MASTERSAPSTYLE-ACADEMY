@@ -14,7 +14,7 @@ MATERIALI = [
     {"file": "Esercitazione_Completa_FORMAS.md", "titolo": "Esercitazione completa — sorgente modificabile",
      "testo": "Testo modificabile della stessa esercitazione, generato dalle guide del programma."},
     {"file": "Esercitazione_Dicembre_2026.docx", "titolo": "Dicembre 2026: dalla costituzione alla riapertura (Word)",
-     "testo": "Gli stessi passi della finestra «Esercizio passo passo»: ciclo CO, BPC, semaforo di disponibilità, chiusura e riapertura di gennaio."},
+     "testo": "Gli stessi 199 passi della finestra «Esercizio passo passo»: ciclo CO, BPC, semaforo di disponibilità, chiusura e riapertura di gennaio, partitari, amministratore e scontrini, estero. I 21 passi nuovi sono segnati «NUOVO»."},
     {"file": "Esercitazione_Dicembre_2026.pdf", "titolo": "Dicembre 2026: dalla costituzione alla riapertura (PDF)",
      "testo": "Versione stampabile del testo Word."},
     {"file": "Esercitazione_Dicembre_Magazzino.docx", "titolo": "Dicembre in magazzino — per magazzinieri, senza ragioneria (Word)",

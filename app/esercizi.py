@@ -476,7 +476,46 @@ def attesi_esercizio(codice, stato=None):
         attesi = [(k, *_DICEMBRE_SPESE_ATTESI[k], tol) if k in _DICEMBRE_SPESE_ATTESI
                   else (k, label, round(v + _DICEMBRE_SPESE_BANCA, 2), tol) if k == "dc_banca_31_12"
                   else (k, label, v, tol) for k, label, v, tol in attesi] + _DICEMBRE_SPESE_NUOVI
+    if codice == "dicembre-wms" and stato is not None and _dicembre_con_ammanco_ferro(stato):
+        attesi = [_ammanco_ferro(*a) for a in attesi] + _DICEMBRE_AMMANCO_NUOVI
+    if codice in ("dicembre-magazzino", "dicembre-magazzino-30") and stato is not None and _dicembre_con_ammanco_ferro(stato):
+        # stessi 12 kg nel corso magazzino: cambia solo la giacenza del ferro (niente imposte né utile)
+        attesi = [(k, label.replace("ferro kg", "ferro kg (dopo l'ammanco di 12)"), "728/" + v[4:], tol)
+                  if k == "dc_scorte" and isinstance(v, str) and v.startswith("740/") else (k, label, v, tol)
+                  for k, label, v, tol in attesi] + _DICEMBRE_AMMANCO_NUOVI
     return attesi
+
+
+# Inventario periodico di fine anno (dal 20/11/2026): si contano ferro, semilavorati e prodotti finiti in tutte le
+# loro ubicazioni. Nel fascio della colata COL-1206 mancano 12 kg (buono di prelievo BP-2912 mai registrato):
+# rettifica 711 D 65 / A 12 per 12 × 0,95 = 11,40. Ferro 740 → 728 kg; costo in più 11,40, quindi IRES −2,74
+# (24%), IRAP −0,44 (3,9%), utile −8,22. Banca e IVA non cambiano. I lavori salvati senza l'ammanco restano corretti.
+_DICEMBRE_AMMANCO_KG = 12
+_DICEMBRE_AMMANCO_VALORE = 11.40
+_DICEMBRE_AMMANCO_DELTA = {"dc_rimanenze": -11.40, "dc_differenza_inventario": 11.40,
+                           "dc_ires": -2.74, "dc_irap": -0.44, "dc_utile": -8.22}
+_DICEMBRE_AMMANCO_NUOVI = [
+    ("dc_ammanco_ferro", "Ammanco di ferro all'inventario (kg, colata COL-1206)", 12, 0),
+]
+
+
+def _dicembre_con_ammanco_ferro(stato):
+    return any((r or {}).get("tipo") == "DIFFERENZA_INVENTARIO"
+               and any((x or {}).get("conto") == "12" for x in ((r or {}).get("righe") or []))
+               for r in ((stato or {}).get("registrazioni") or []))
+
+
+def _ammanco_ferro(k, label, v, tol):
+    if k == "dc_scorte" and isinstance(v, str) and v.startswith("740/"):
+        return (k, label.replace("ferro kg", "ferro kg (dopo l'ammanco di 12)"), "728/" + v[4:], tol)
+    if k == "dc_differenza_inventario":
+        return (k, "Differenze inventariali (1 kit SL-TAGLIO 14,60 + 12 kg di ferro 11,40)",
+                round(v + _DICEMBRE_AMMANCO_VALORE, 2), tol)
+    if k == "dc_rimanenze":
+        return (k, label.replace("ferro 703", "ferro 691,60"), round(v + _DICEMBRE_AMMANCO_DELTA[k], 2), tol)
+    if k in _DICEMBRE_AMMANCO_DELTA:
+        return (k, label, round(v + _DICEMBRE_AMMANCO_DELTA[k], 2), tol)
+    return (k, label, v, tol)
 
 
 def _addizionali_trattenute_a_dicembre(stato):

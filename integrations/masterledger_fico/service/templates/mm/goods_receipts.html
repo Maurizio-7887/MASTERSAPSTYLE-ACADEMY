@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Entrata Merci{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">📥 MIGO — Entrata Merci su Ordine d'Acquisto
+    {% if azienda %}<span class="tx-code" style="background:var(--ml-blue-dark);">{{ azienda.name }}</span>{% endif %}
+    <span class="tx-code">MIGO 101</span></div>
+  <div class="card-body">
+    {% if not azienda %}
+    <div class="info-box" style="margin-bottom:14px;">Nessuna azienda selezionata dal menu — questa Entrata Merci non verrà
+      taggata per nessuna azienda specifica. Torna alla home e scegli "EM — Entrata merci" sotto Iron Segnaletica o Iron Wood.</div>
+    {% endif %}
+    <div class="info-box">
+      Alla ricezione del DDT registra subito
+      <span class="mono">Dare Magazzino / Avere 165000 Ricevimenti da fatturare (EM/RF)</span>
+      al <strong>prezzo ordine</strong>. IVA e debito fornitore nasceranno solo con la MIRO.<br>
+      Questa operazione aggiorna la contabilità, il ricevuto sull'OA e carica davvero la giacenza nel magazzino interno.
+    </div>
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="company_id" value="{{ azienda.id if azienda else '' }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Ordini d'acquisto <span class="req">*</span> <small>(seleziona uno o più — stesso fornitore: un DDT può evadere più OA aperti insieme)</small></label>
+          <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            {% for p in open_pos %}
+            <label style="display:inline-flex; align-items:center; gap:5px; border:1px solid var(--ml-border); border-radius:4px; padding:4px 10px;">
+              <input type="checkbox" name="po_ids[]" value="{{ p.id }}" class="migo-po-check" data-vendor-id="{{ p.economic_subject_id }}" onchange="showMigoLines()">
+              {{ p.doc_number }} — {{ p.party.name }} ({{ p.status }})
+            </label>
+            {% endfor %}
+          </div>
+          <small id="migo-vendor-warning" style="color:var(--ml-red); display:none;">Seleziona ordini dello stesso fornitore — un'Entrata Merci corrisponde a un solo DDT ricevuto.</small>
+        </div>
+        <div class="form-group"><label>N. DDT del fornitore</label><input type="text" name="ddt_vendor_ref" placeholder="es. 458/2026"></div>
+        <div class="form-group"><label>Data DDT / entrata merci <span class="req">*</span></label><input type="date" name="ddt_date" value="{{ today }}" required></div>
+        <div class="form-group"><label>Data registrazione contabile <span class="req">*</span></label><input type="date" name="posting_date" value="{{ today }}" required></div>
+      </div>
+
+      {% for p in open_pos %}
+      <div class="migo-lines" data-po-id="{{ p.id }}" style="display:none; margin-bottom:12px;">
+        <div class="theory-note" style="margin-bottom:4px;">OA {{ p.doc_number }} — {{ p.party.name }}</div>
+        <table class="masterledger-table">
+          <thead><tr><th>Articolo</th><th class="td-num">Ordinato</th><th class="td-num">Già ricevuto</th><th class="td-num">Residuo</th><th style="width:150px;">Quantità del DDT</th></tr></thead>
+          <tbody>
+          {% for l in p.lines %}
+            {% set residual = l.qty - (l.qty_received or 0) %}
+            {% if residual > 0 %}
+            <tr>
+              <td>{{ l.material.code }} — {{ l.material.description }}</td>
+              <td class="td-num">{{ '%.3f'|format(l.qty) }}</td>
+              <td class="td-num">{{ '%.3f'|format(l.qty_received or 0) }}</td>
+              <td class="td-num">{{ '%.3f'|format(residual) }}</td>
+              <td><input type="number" step="0.001" min="0" max="{{ residual }}" name="recv_qty_{{ l.id }}" value="{{ '%.3f'|format(residual) }}" style="width:100%;"></td>
+            </tr>
+            {% endif %}
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+
+      <div class="theory-note" style="margin-bottom:12px;">Puoi registrare tutto il residuo oppure indicare quantità parziali riga per riga. Le quantità a zero non vengono ricevute.</div>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Registra MIGO / Entrata Merci</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Entrate Merci registrate {% if azienda %}— {{ azienda.name }}{% endif %}</div>
+  <div class="card-body">
+    {% if receipts %}
+    <table class="masterledger-table">
+      <thead><tr><th>Numero</th><th>Data</th><th>OA</th><th>Fornitore</th>{% if not azienda %}<th>Azienda</th>{% endif %}<th>DDT fornitore</th><th>Scrittura</th><th>Storno</th></tr></thead>
+      <tbody>
+        {% for g in receipts %}
+        <tr>
+          <td class="mono fw-bold">{{ g.doc_number }}</td>
+          <td>{{ g.doc_date.strftime('%d/%m/%Y') }}</td>
+          <td class="mono">{{ g.po.doc_number }}</td>
+          <td>{{ g.po.party.name }}</td>
+          {% if not azienda %}<td>{{ g.company.name if g.company else '—' }}</td>{% endif %}
+          <td>{{ g.ddt_vendor_ref or '—' }}</td>
+          <td>{% if g.journal_entry %}<a class="mono" href="{{ url_for('gl.entry_detail', entry_id=g.journal_entry_id) }}">{{ g.journal_entry.doc_number }}</a>{% else %}—{% endif %}</td>
+          <td>
+            {% if g.is_reversed %}<span class="status-badge" style="background: rgba(229,83,75,.2); color: var(--ml-red);">Stornata</span>
+            {% else %}
+            <details style="display:inline-block;">
+              <summary class="btn btn-ghost" style="display:inline;">Storna</summary>
+              <form method="post" action="{{ url_for('mm.goods_receipts_reverse', receipt_id=g.id) }}" style="margin-top:8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="reason" placeholder="Motivo (obbligatorio)" required style="width:200px;">
+                <button type="submit" class="btn">Conferma</button>
+              </form>
+            </details>
+            <form method="POST" action="{{ url_for('mm.goods_receipt_elimina', receipt_id=g.id) }}" style="display:inline;" onsubmit="return confirm('Eliminare definitivamente questa Entrata Merci? Le quantità sull\'ordine torneranno disponibili.');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px; color:var(--ml-red);">🗑️ Elimina</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessuna entrata merci.</div>{% endif %}
+  </div>
+</div>
+<script>
+function showMigoLines() {
+  const checks = document.querySelectorAll('.migo-po-check:checked');
+  const selectedIds = Array.from(checks).map(c => c.value);
+  document.querySelectorAll('.migo-lines').forEach(function (box) {
+    box.style.display = selectedIds.includes(box.dataset.poId) ? 'block' : 'none';
+  });
+  const vendorIds = new Set(Array.from(checks).map(c => c.dataset.vendorId));
+  document.getElementById('migo-vendor-warning').style.display = vendorIds.size > 1 ? 'block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', showMigoLines);
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}FB02 Modifica documento{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">Modifica documento <span class="tx-code">FB02</span></div>
+  <div class="card-body">
+    <form method="get" action="{{ url_for('chiusure.cerca_documento') }}" style="display:flex;gap:10px;align-items:flex-end;margin-bottom:16px;">
+      <div class="form-group"><label>Numero documento</label>
+        <input type="text" name="numero" value="{{ entry.doc_number if entry else '' }}" placeholder="Es. 1000000001"></div>
+      <button class="btn btn-ghost" type="submit">Apri</button>
+    </form>
+    <div class="info-box">Si modificano solo i testi. Importi, conti e date non si toccano: per correggerli si storna il documento e lo si registra di nuovo.
+      Il riferimento delle fatture è il numero del documento fiscale e resta bloccato.</div>
+
+    {% if entry %}
+    <p><strong class="mono">{{ entry.doc_number }}</strong> {{ entry.doc_type }} del {{ entry.doc_date.strftime('%d/%m/%Y') }},
+      registrato il {{ entry.posting_date.strftime('%d/%m/%Y') }}.
+      <a href="{{ url_for('gl.entry_detail', entry_id=entry.id) }}">Visualizza (FB03)</a></p>
+    <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid">
+        <div class="form-group"><label>Testo testata</label><input type="text" name="description" maxlength="255" value="{{ entry.description or '' }}"></div>
+        <div class="form-group"><label>Riferimento</label><input type="text" name="reference" maxlength="80" value="{{ entry.reference or '' }}" {{ 'readonly' if rif_bloccato }}></div>
+      </div>
+      <table class="masterledger-table" style="margin-top:14px;">
+        <thead><tr><th>Conto</th><th style="text-align:right;">Dare</th><th style="text-align:right;">Avere</th><th>Testo riga</th></tr></thead>
+        <tbody>{% for l in entry.lines %}
+          <tr><td class="mono">{{ l.account.code }} {{ l.account.name }}</td>
+            <td class="mono" style="text-align:right;">{{ l.dare|euro if l.dare else '' }}</td>
+            <td class="mono" style="text-align:right;">{{ l.avere|euro if l.avere else '' }}</td>
+            <td><input type="text" name="riga_{{ l.id }}" maxlength="255" value="{{ l.description or '' }}" style="width:100%;"></td></tr>
+        {% endfor %}</tbody>
+      </table>
+      <div class="btn-row" style="margin-top:14px;"><button class="btn btn-primary" type="submit">Salva modifiche</button></div>
+    </form>
+
+    {% if entry.changes %}
+    <h3 style="margin-top:22px;">Modifiche registrate</h3>
+    <table class="masterledger-table">
+      <thead><tr><th>Data e ora</th><th>Utente</th><th>Campo</th><th>Prima</th><th>Dopo</th></tr></thead>
+      <tbody>{% for c in entry.changes %}
+        <tr><td>{{ c.changed_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ c.changed_by.full_name if c.changed_by else '' }}</td>
+          <td>{{ c.field }}</td><td>{{ c.old_value }}</td><td>{{ c.new_value }}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{# Macro riutilizzabile: righe articolo con prezzo proposto dall'anagrafica #}
+{% macro lines_form(materials, price_field) %}
+<table class="masterledger-table" id="lines-table">
+  <thead><tr><th>Articolo</th><th style="width:110px;">Quantità</th><th style="width:130px;">Prezzo unit. €</th></tr></thead>
+  <tbody>
+    {% for i in range(1, 6) %}
+    <tr>
+      <td>
+        <div class="material-autocomplete" data-row="{{ i }}" data-price-field="{{ price_field }}">
+          <input type="text" class="ma-search" placeholder="Cerca per codice o descrizione..." autocomplete="off"
+                 style="width:100%;padding:6px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;">
+          <input type="hidden" class="ma-value" name="material_id_{{ i }}">
+        </div>
+      </td>
+      <td><input type="number" step="0.001" min="0" name="qty_{{ i }}" style="width:100%;padding:6px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;"></td>
+      <td><input type="number" step="0.0001" min="0" name="price_{{ i }}" id="price_{{ i }}" style="width:100%;padding:6px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;"></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<script>
+document.getElementById('lines-table').addEventListener('material-selected', function (e) {
+  var container = e.target.closest('.material-autocomplete');
+  var row = container.dataset.row;
+  var priceField = container.dataset.priceField;
+  var price = priceField === 'sales_price' ? e.detail.sales_price : e.detail.standard_cost;
+  var priceInput = document.getElementById('price_' + row);
+  if (priceInput) priceInput.value = price.toFixed(4);
+});
+</script>
+{% endmacro %}

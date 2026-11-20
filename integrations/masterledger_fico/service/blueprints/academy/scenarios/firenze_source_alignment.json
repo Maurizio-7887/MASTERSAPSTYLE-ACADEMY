@@ -1,0 +1,87 @@
+{
+  "id": "firenze-source-alignment-v1",
+  "status": "PARZIALE_DA_VERIFICARE",
+  "source": {
+    "repository": "Maurizio-7887/MASTERSAPSTYLE-ACADEMY",
+    "file": "README.md",
+    "url": "https://github.com/Maurizio-7887/MASTERSAPSTYLE-ACADEMY/blob/main/README.md",
+    "inspected": "2026-11-19"
+  },
+  "critical_distinction": "dicembre-wms e il percorso integrato con ragioneria; dicembre-magazzino-30 e dicembre-magazzino sono percorsi magazzinieri distinti. Non importare i passi di magazzino come prova FI/CO.",
+  "original_step_count_verified": false,
+  "original_step_count": null,
+  "grading_enabled": false,
+  "posting_enabled": false,
+  "source_findings": [
+    {
+      "id": "f01",
+      "process": "Azienda, costituzione e dati iniziali",
+      "original_reference": "Ferro & Transenne nasce il 01/12/2026",
+      "target": "Anagrafiche e contabilità generale",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f02",
+      "process": "Vendite e crediti",
+      "original_reference": "SD, fatture e incassi nel sistema integrato",
+      "target": "AR, SD",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f03",
+      "process": "Acquisti e fornitori",
+      "original_reference": "MM, MIRO, pagamenti nel sistema integrato",
+      "target": "AP, MM",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f04",
+      "process": "Produzione e magazzino",
+      "original_reference": "PP e WMS con impatti contabili",
+      "target": "CO, magazzino",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f05",
+      "process": "Personale e finanza",
+      "original_reference": "paghe, tesoreria, valute nel sistema integrato",
+      "target": "payroll, tesoreria",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f06",
+      "process": "Cespiti e ammortamenti",
+      "original_reference": "cespiti nella versione con ragioneria",
+      "target": "cespiti",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f07",
+      "process": "IVA e rettifiche",
+      "original_reference": "IVA, ratei, chiusura nella versione con ragioneria",
+      "target": "FI, rettifiche",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f08",
+      "process": "Chiusura e riapertura",
+      "original_reference": "dicembre-wms: chiusura/riapertura e libro giornale",
+      "target": "GL, reporting",
+      "status": "DA_MAPPARE"
+    },
+    {
+      "id": "f09",
+      "process": "Controllo di gestione",
+      "original_reference": "CO nel sistema integrato",
+      "target": "CO, budget, scostamenti",
+      "status": "DA_MAPPARE"
+    }
+  ],
+  "blocking_requirements": [
+    "Recuperare file originale con tutti i passi della guida contabile",
+    "Verificare identificativi, date, importi, saldi e numeri di controllo",
+    "Allineare ogni passo al comando ERP disponibile",
+    "Isolare le aziende didattiche per allievo",
+    "Eseguire test end-to-end prima di abilitare voti"
+  ]
+}

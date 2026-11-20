@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Copertura FI/CO{% endblock %}
+{% block content %}
+<h1>Mappa FI/CO: cosa è presente e cosa manca</h1><p>Verifica preliminare sul codice dello ZIP. «Da sviluppare» non significa che l'intera funzione sia assente: richiede confronto funzionale e test.</p>
+<table style="width:100%;border-collapse:collapse"><thead><tr><th>Blocco</th><th>Già presente in MasterLedger</th><th>Da sviluppare / approfondire</th></tr></thead><tbody>
+{% set existing=['Anagrafiche e piano conti, multi-azienda','Prima nota, libro giornale, mastrini, periodi','Fatture, incassi, pagamenti, partite aperte','Cespiti e ammortamenti','Centri di costo, costi standard, report','Report costi e dati consuntivi','Periodi, storni, riconciliazione bancaria','Flussi FI, AP, AR, AA, costi'] %}
+{% set missing=['Tutor di configurazione SAP e ruoli','Simulatore SAP GUI con transazioni e validazione','Percorso guidato di compensazione SAP','Classi e aree FI-AA SAP, run e log didattico','Ordini interni, profit center, allocazioni CO','Budget versionato, forecast 9+3, analisi scostamenti','Checklist completa chiusura, ratei/risconti, bilancio','Scenario integrato valutato automaticamente 4 × 25'] %}
+{% for c in chapters %}<tr style="border-bottom:1px solid #ccd"><td style="padding:12px"><a href="{{ url_for('academy.chapter',number=c.number) }}">{{ c.number }}. {{ c.title }}</a></td><td>{{ existing[loop.index0] }}</td><td>{{ missing[loop.index0] }}</td></tr>{% endfor %}</tbody></table>
+<p><strong>Nota:</strong> questa integrazione aggiunge l'Academy senza cambiare i motori contabili. Le funzioni elencate come mancanti sono una roadmap, non funzionalità già implementate.</p>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><span>🖥️</span> Portale Desk — Panoramica</div>
+  <div class="card-body">
+    <div class="form-grid" style="margin-bottom:10px;">
+      <div>
+        <div style="font-size:11px; color:var(--ml-label); text-transform:uppercase;">Preventivi aperti</div>
+        <div style="font-size:22px; font-weight:700; color:var(--ml-blue-dark);">{{ preventivi_aperti }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--ml-label); text-transform:uppercase;">Ordini Cliente aperti</div>
+        <div style="font-size:22px; font-weight:700; color:var(--ml-blue-dark);">{{ ordini_cliente_aperti }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--ml-label); text-transform:uppercase;">Ordini Fornitore aperti</div>
+        <div style="font-size:22px; font-weight:700; color:var(--ml-blue-dark);">{{ ordini_fornitore_aperti }}</div>
+      </div>
+      <div>
+        <div style="font-size:11px; color:var(--ml-label); text-transform:uppercase;">Richieste Offerta (RFQ) aperte</div>
+        <div style="font-size:22px; font-weight:700; color:var(--ml-blue-dark);">{{ rfq_aperte }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span>⚡</span> Scorciatoie</div>
+  <div class="card-body">
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <a class="btn btn-primary" href="{{ url_for('sd.quotations') }}">🧾 Nuovo preventivo</a>
+      <a class="btn btn-primary" href="{{ url_for('sd.orders') }}">📦 Ordini cliente</a>
+      <a class="btn btn-primary" href="{{ url_for('sd.deliveries') }}">🚚 DDT in uscita</a>
+      <a class="btn btn-primary" href="{{ url_for('mm.rfqs') }}">📨 Richieste di preventivo</a>
+      <a class="btn btn-primary" href="{{ url_for('mm.purchase_orders') }}">📥 Ordini fornitore</a>
+      <a class="btn btn-primary" href="{{ url_for('mm.goods_receipts') }}">📦 Entrata merci (DDT ricevuti)</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

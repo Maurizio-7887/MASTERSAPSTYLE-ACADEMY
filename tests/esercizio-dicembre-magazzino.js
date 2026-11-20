@@ -194,15 +194,15 @@ p = apri('erp_spedizione', 'trasporti'); bene(p.fai('pt', {trasporto: tr, data: 
 ok(p.S().giacenze['TR-STD'] === 0, 'transenne spedite'); quadra('Spedizione');
 ok(!(p.S().fatture || []).length, 'nessuna fattura di vendita: la fa l’amministrazione');
 // 10 · inventario e deposito esterno
-p = apri('erp_inventario', 'documenti'); bene(p.fai('in', {tipo: 'ubicazioni', selezione: 'F-02, 03-05-2', tolleranza: '10', data: '2026-12-31'}), 'LI01N'); fino('ubicazioni occupate');
+p = apri('erp_inventario', 'documenti'); bene(p.fai('in', {tipo: 'ubicazioni', selezione: 'F-01, F-02, 01-04-1, 03-05-2, 01-01-1, 01-01-2, 01-02-1, 01-02-2, 01-03-1, 01-03-2, 03-04-1', tolleranza: '10', data: '2026-12-31'}), 'LI01N'); fino('inventario periodico di fine anno'); ok(p.S().wm.inventari[0].righe.length === 12, 'inventario periodico: 12 posizioni');
 p = apri('erp_inventario', 'documenti'); p.fai('ia', {data: '2026-12-31'}); fino('Attiva l’inventario');
 p = apri('erp_magazzino', 'rf'); scheda(p, 'inventario'); invio(p, 'rf-inv', 'F-02');
-{ const d = p.S().wm.inventari[0]; d.righe.forEach((r, k) => { const c = p.lab.querySelector('#rf-c' + k); if (c) c.value = String(r.libro); }); p.lab.querySelector('#rf-conta').click(); memoria = p.w.localStorage.getItem(CHIAVE); } fino('RF Inventario');
-p = apri('erp_inventario', 'documenti'); { const d = p.S().wm.inventari[0], v = {contatore: 'Allieva'}; d.righe.forEach((r, k) => { if (r.ubic === '03-05-2') v['r' + k] = '19'; }); p.fai('ic', v); } fino('LI11N');
-p = apri('erp_inventario', 'documenti'); { const d = p.S().wm.inventari[0], v = {}; d.righe.forEach((r, k) => { if (r.riconta) v['r' + k] = '19'; }); p.fai('ic', v); } fino('LI14');
+{ const d = p.S().wm.inventari[0]; d.righe.forEach((r, k) => { const c = p.lab.querySelector('#rf-c' + k); if (c) c.value = String(r.libro === 500 ? 488 : r.libro); }); p.lab.querySelector('#rf-conta').click(); memoria = p.w.localStorage.getItem(CHIAVE); } fino('RF Inventario');
+p = apri('erp_inventario', 'documenti'); { const d = p.S().wm.inventari[0], v = {contatore: 'Allieva'}; d.righe.forEach((r, k) => { if (r.ubic === '03-05-2') v['r' + k] = '19'; else if (!r.mat) v['r' + k] = '0'; }); p.fai('ic', v); ok(p.S().wm.inventari[0].righe.filter(r => r.riconta).length === 2, 'riconta: ferro e kit'); } fino('LI11N');
+p = apri('erp_inventario', 'documenti'); { const d = p.S().wm.inventari[0], v = {}; d.righe.forEach((r, k) => { if (r.riconta) v['r' + k] = r.ubic === 'F-02' ? '488' : '19'; }); p.fai('ic', v); } fino('LI14');
 p = apri('erp_inventario', 'documenti'); p.fai('ix', {data: '2026-12-31'}); fino('LI20');
-p = apri('erp_inventario', 'differenze'); bene(p.fai('rg', {data: '2026-12-31'}), 'LI21 / 711'); fino('LI21'); ok(p.S().giacenze['SL-TAGLIO'] === 19, '19 kit dopo l’inventario'); quadra('Inventario');
-{ const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); vicino(v.fifo, 780, 'FIFO'); vicino(v.lifo, 740, 'LIFO'); vicino(v.cmp, 748.97, 'costo medio'); }
+p = apri('erp_inventario', 'differenze'); bene(p.fai('rg', {data: '2026-12-31'}), 'LI21 / 711'); fino('LI21'); ok(p.S().giacenze['SL-TAGLIO'] === 19, '19 kit dopo l’inventario'); ok(p.S().giacenze.FERRO === 728, '728 kg di ferro dopo l’inventario'); quadra('Inventario');
+{ const v = p.w.IV4.valuta(p.w.IV4.movimentiDi('FERRO'), 0.95); vicino(v.fifo, 768, 'FIFO'); vicino(v.lifo, 728, 'LIFO'); vicino(v.cmp, 736.82, 'costo medio'); }
 completo(() => {
 p = apri('erp_magazzino', 'scorte'); bene(p.fai('sm', {materiale: 'FERRO', minimo: '1000', massimo: '3000'}), 'scorta minima'); fino('Scorta minima');
 p = apri('erp_magazzino', 'depositi'); bene(p.fai('ub', {da: 'W100', materiale: 'SL-TAGLIO', qta: '10', data: '2026-12-31', consegna: '2027-01-02'}), 'trasferimento UB'); fino('10 kit al deposito');
@@ -220,10 +220,10 @@ ok(codaMax === 0, 'in tutto l’esercizio nessuna domanda di ragioneria');
 completo(() => {
   p = apri('erp_magazzino', 'giornale');
   const n = p.S().registrazioni.length, schede = p.lab.querySelectorAll('.gm-scrittura');
-  ok(n === 15 && schede.length === 15, 'libro giornale: 15 scritture mostrate (' + schede.length + ')');
+  ok(n === 16 && schede.length === 16, 'libro giornale: 16 scritture mostrate, due 711 dell’inventario (' + schede.length + ')');
   ok([...schede].every(x => /Perché:/.test(x.textContent) && x.querySelector('table')), 'ogni scrittura ha conti, importi e spiegazione');
   ok(/✅ uguali/.test(p.testo()), 'totale Dare = totale Avere');
-  ok(/Rimanenze di magazzino: 980,40/.test(p.testo()), 'rimanenze 980,40 nei saldi finali: ' + (p.testo().match(/Rimanenze di magazzino: [\d.,]+/) || [])[0]);
+  ok(/Rimanenze di magazzino: 969,00/.test(p.testo()), 'rimanenze 969,00 nei saldi finali (ferro 691,60 dopo l’ammanco): ' + (p.testo().match(/Rimanenze di magazzino: [\d.,]+/) || [])[0]);
   ok(/NON scrivono niente/.test(p.testo()), 'elenco di ciò che non scrive');
   const tipi = [...schede].map(x => x.dataset.tipo);
   ['COSTITUZIONE', 'ENTRATA_ACQUISTO', 'ROTTAMAZIONE', 'PRELIEVO_261', 'CONFERMA', 'ENTRATA_PRODUZIONE', 'USCITA_MERCI', 'DIFFERENZA_INVENTARIO'].forEach(t => ok(tipi.includes(t), 'scrittura spiegata: ' + t));

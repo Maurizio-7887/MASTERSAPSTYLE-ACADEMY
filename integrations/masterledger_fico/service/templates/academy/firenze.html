@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Firenze FI/CO — ambiente professionale{% endblock %}
+{% block content %}
+<style>
+.fz-shell{max-width:1280px;margin:auto;font-family:system-ui;color:#183653}.fz-grid{display:grid;grid-template-columns:260px minmax(300px,1fr) 290px;gap:14px}.fz-panel{border:1px solid #cddbea;border-radius:10px;padding:16px;background:#fff}.fz-step{display:block;width:100%;text-align:left;background:#edf4fa;border:1px solid #cddbea;padding:11px;margin-bottom:7px;border-radius:7px;cursor:pointer;color:#183653}.fz-step.active{background:#d4e9ff;border-color:#1267ae;font-weight:700}.fz-tag{background:#fff1b4;padding:4px 9px;border-radius:6px;font-weight:700}.fz-small{color:#576b7c;font-size:13px}.fz-panel h2{margin-top:0}.fz-ctrl{background:#0e568b;color:white;border:0;border-radius:7px;padding:10px 13px;cursor:pointer}.fz-ctrl:disabled{opacity:.5}.fz-value{padding:12px;background:#eef5fc;border-radius:8px;margin:12px 0}@media(max-width:960px){.fz-grid{grid-template-columns:1fr}}
+</style>
+<div class="fz-shell"><h1>Laboratorio Firenze — FI/CO professionale</h1>
+<p><span class="fz-tag">TRACCIA PREPARATORIA</span> <strong>{{ scenario.title }}</strong></p>
+<p>{{ scenario.notice }}</p>
+<p class="fz-small"><strong>Confronto con la repository Firenze:</strong> disponibile una <a href="{{ url_for('academy.firenze_alignment') }}">matrice preliminare dei processi FI/CO</a> derivata dal README originale. Non contiene ancora i singoli passi verificati e non abilita voti.</p>
+<div class="fz-grid">
+<section class="fz-panel"><h2>Sequenza operativa</h2><p class="fz-small">{{ scenario.steps|length }} attività preparatorie, non i 162 passi originali.</p>
+{% for step in scenario.steps %}<button type="button" class="fz-step" data-step="{{ loop.index0 }}" onclick="showFz({{ loop.index0 }})">{{ '%02d'|format(step.sequence) }} · {{ step.title }}</button>{% endfor %}</section>
+<section class="fz-panel"><h2 id="fz-title">Attività</h2><p id="fz-instruction"></p><div class="fz-value"><strong>Ambito:</strong> <span id="fz-area"></span><br><strong>Modulo:</strong> <span id="fz-module"></span></div>
+<p id="fz-nav" class="fz-value"><strong>Apri modulo ERP:</strong> <span id="fz-link">Caricamento…</span></p>
+<p class="fz-small">Aprendo il modulo, eventuali registrazioni sono operazioni ERP effettive: lavora soltanto nell’azienda didattica autorizzata. Il laboratorio non verifica automaticamente queste operazioni.</p>
+<p class="fz-small">Questo laboratorio non scrive nella contabilità dell'ERP. I dati della prova Firenze devono ancora essere importati e verificati.</p>
+<label for="fz-notes">Appunti e numero documento restituito dal gestionale</label><textarea id="fz-notes" style="display:block;width:100%;min-height:110px;margin:10px 0" placeholder="Annota i risultati osservati; non inserire password o dati personali"></textarea>
+<button type="button" class="fz-ctrl" onclick="saveFz()">Salva appunti nel browser</button> <button type="button" class="fz-ctrl" onclick="nextFz()">Passo successivo</button><p id="fz-message" role="status"></p></section>
+<aside class="fz-panel"><h2>Tutor e valutazione</h2><p>1. Leggi la consegna.</p><p>2. Apri il modulo ERP pertinente.</p><p>3. Esegui solo nell'azienda didattica assegnata.</p><p>4. Controlla la quadratura e annota il documento.</p><p>5. Prosegui al passo seguente.</p>
+<h3>Quattro indicatori</h3>{% for item in scenario.assessment.indicators %}<p>{{ item.name }} — <b>25 punti</b></p>{% endfor %}
+<p class="fz-small">Punteggio non ancora attribuibile: mancano le consegne Firenze originali e i risultati attesi certificati.</p><p><a href="{{ url_for('academy.index') }}">Torna agli otto blocchi</a></p></aside>
+</div></div>
+<script>
+const fzSteps={{ scenario.steps|tojson }};const fzKey='ml_firenze_prep_v1';let fzCurrent=0;
+function fzRead(){try{return JSON.parse(localStorage.getItem(fzKey)||'{}')}catch(_){return {}}}
+let fzNav={};fetch({{ url_for('academy.firenze_navigation')|tojson }},{credentials:'same-origin'}).then(r=>{if(!r.ok)throw Error('Navigazione non disponibile');return r.json()}).then(d=>{fzNav=Object.fromEntries(d.steps.map(s=>[s.id,s]));showFz(fzCurrent)}).catch(()=>{document.getElementById('fz-link').textContent='Navigazione non disponibile';});
+function showFz(i){if(i<0||i>=fzSteps.length)return;fzCurrent=i;const s=fzSteps[i];document.getElementById('fz-title').textContent=s.sequence+'. '+s.title;document.getElementById('fz-instruction').textContent=s.instruction;document.getElementById('fz-area').textContent=s.area;document.getElementById('fz-module').textContent=s.module;const nav=fzNav[s.id],holder=document.getElementById('fz-link');holder.replaceChildren();if(nav){const a=document.createElement('a');a.href=nav.url;a.textContent=nav.label;a.target='_blank';a.rel='noopener noreferrer';holder.appendChild(a)}else{holder.textContent='Nessun collegamento disponibile';}document.getElementById('fz-notes').value=fzRead()[s.id]||'';document.getElementById('fz-message').textContent='';document.querySelectorAll('.fz-step').forEach((b,j)=>b.classList.toggle('active',i===j));}
+function saveFz(){const d=fzRead();d[fzSteps[fzCurrent].id]=document.getElementById('fz-notes').value;localStorage.setItem(fzKey,JSON.stringify(d));document.getElementById('fz-message').textContent='Appunti salvati su questo browser. Nessuna registrazione contabile effettuata.'}
+function nextFz(){saveFz();showFz(Math.min(fzCurrent+1,fzSteps.length-1))}showFz(0);
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}FI/CO Blocco {{ ch.number }}{% endblock %}
+{% block content %}
+<style>
+.ac-grid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px;max-width:1300px;margin:auto}.ac-paper{background:#fff;border:1px solid #d6e1eb;padding:24px;border-radius:9px;white-space:pre-wrap;font:16px/1.65 system-ui;max-height:68vh;overflow:auto}.ac-side{background:#edf4fc;border-radius:10px;padding:18px;align-self:start}.ac-btn{display:inline-block;border:0;background:#174f82;color:#fff;padding:11px 14px;border-radius:6px;cursor:pointer;margin:4px}.ac-btn:disabled{opacity:.4}.ac-muted{color:#566879}@media(max-width:800px){.ac-grid{grid-template-columns:1fr}.ac-paper{max-height:none}}
+</style>
+<p><a href="{{ url_for('academy.index') }}">← Torna agli otto blocchi</a></p>
+<h1>Blocco {{ ch.number }} — {{ ch.title }}</h1>
+<p class="ac-muted">Testo integrale del manuale originale. L'applicazione non esegue automaticamente operazioni contabili.</p>
+<div class="ac-grid"><section><div id="ac-paper" class="ac-paper"></div><p><button class="ac-btn" id="prev" onclick="go(-1)">← Pagina precedente</button><button class="ac-btn" id="next" onclick="go(1)">Pagina successiva →</button></p></section>
+<aside class="ac-side"><h3>Il tutor ti accompagna</h3><p id="counter"></p><p>1. Leggi la pagina e individua l'obiettivo.</p><p>2. Confronta la spiegazione con il programma.</p><p>3. Esegui soltanto le operazioni autorizzate, senza copiare codici fittizi in produzione.</p><p>4. Verifica il risultato, quindi passa alla pagina successiva.</p>
+<p><a href="{{ url_for(ch.endpoint) }}" class="ac-btn">Apri: {{ ch.module }}</a></p><p class="ac-muted">Questo collegamento apre una funzione già esistente di MasterLedger; non simula SAP.</p>
+<label><input type="checkbox" id="done"> Pagina studiata</label><p id="progress"></p><p><a href="{{ url_for('academy.coverage') }}">Funzioni mancanti e disponibili</a></p>
+</aside></div>
+<script>
+const pages={{ ch.pages|tojson }}, block={{ ch.number }};let page=0;
+const key='academy_fico_progress_v1_'+block;
+let done={};try{done=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){done={}}
+function go(delta){page=Math.max(0,Math.min(pages.length-1,page+delta));show()}
+function show(){document.getElementById('ac-paper').textContent=pages[page];document.getElementById('counter').textContent='Pagina '+(page+1)+' di '+pages.length;document.getElementById('prev').disabled=page===0;document.getElementById('next').disabled=page===pages.length-1;document.getElementById('done').checked=!!done[page];document.getElementById('progress').textContent='Pagine studiate: '+Object.values(done).filter(Boolean).length+' / '+pages.length}
+document.getElementById('done').addEventListener('change',e=>{done[page]=e.target.checked;localStorage.setItem(key,JSON.stringify(done));show()});show();
+</script>
+{% endblock %}

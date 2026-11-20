@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Academy SAP FI/CO{% endblock %}
+{% block content %}
+<div style="max-width:1100px;margin:auto;font-family:system-ui">
+<h1>Academy SAP FI/CO — 8 blocchi</h1>
+<p>Formazione su <strong>Ferro &amp; Transenne Srl</strong>. Il manuale è integrale e consultabile per pagina. L'Academy è di sola lettura: non altera la contabilità aziendale.</p>
+<p><a href="{{ url_for('academy.coverage') }}">Consulta la mappa delle funzionalità esistenti e mancanti</a></p>
+<p><a href="{{ url_for('academy.firenze') }}" style="display:inline-block;background:#173d64;color:white;padding:12px 17px;border-radius:8px;text-decoration:none;font-weight:700">Apri laboratorio Firenze FI/CO (predisposizione)</a></p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px">
+{% for c in chapters %}
+<a href="{{ url_for('academy.chapter',number=c.number) }}" style="text-decoration:none;color:#18395b;background:#f0f5fc;border:1px solid #cad9ea;border-radius:10px;padding:20px">
+<strong>Blocco {{ c.number }}</strong><h3 style="margin:9px 0">{{ c.title }}</h3><small>{{ c.pages_count }} pagine · Apri il tutor</small></a>
+{% endfor %}
+</div></div>
+{% endblock %}
