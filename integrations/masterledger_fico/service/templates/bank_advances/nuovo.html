@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><span>🏦</span> Nuova Distinta — RiBa s.b.f. / Anticipo Fatture <span class="tx-code">Banche</span></div>
+  <div class="card-body">
+    <div class="info-box">Seleziona le rate cliente da anticipare (l'importo di default è l'intero residuo, modificabile per un anticipo
+      parziale). Genera: <strong>Dare</strong> Banca c/c (netto) + <strong>Dare</strong> Oneri Finanziari (se presenti),
+      <strong>Avere</strong> Banca c/anticipi SBF / Debiti v/Banche per Anticipi Fatture (lordo). Il credito verso il cliente resta aperto.</div>
+    {% if rate_disponibili %}
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div style="display:flex; gap:20px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap;">
+        <div>
+          <label>Tipo di anticipo</label><br>
+          <select name="tipo" required>
+            <option value="riba_sbf">RiBa "salvo buon fine"</option>
+            <option value="anticipo_fatture">Anticipo Fatture</option>
+          </select>
+        </div>
+        <div>
+          <label>Oneri bancari (commissioni + interessi, addebitati subito)</label><br>
+          <input type="text" name="bank_charges_amount" value="0.00" style="width:120px;">
+        </div>
+      </div>
+      <table class="masterledger-table">
+        <thead><tr><th></th><th>Fattura</th><th>Cliente</th><th>Scadenza</th><th class="td-num">Residuo</th><th class="td-num">Importo da anticipare</th></tr></thead>
+        <tbody>
+          {% for r in rate_disponibili %}
+          <tr>
+            <td><input type="checkbox" name="installment_ids[]" value="{{ r.id }}"></td>
+            <td class="mono">{{ r.entry.doc_number }} (rata {{ r.numero_rata }})</td>
+            <td>{{ r.entry.party.name if r.entry.party else '—' }}</td>
+            <td>{{ r.due_date.strftime('%d/%m/%Y') }}{% if r.is_overdue %} <span class="status-badge status-open">scaduta</span>{% endif %}</td>
+            <td class="td-num">{{ "%.2f"|format(r.residual_amount or 0) }} €</td>
+            <td class="td-num"><input type="text" name="amount_{{ r.id }}" placeholder="{{ '%.2f'|format(r.residual_amount or 0) }}" style="width:100px;"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="btn-row"><button type="submit" class="btn btn-success">🏦 Presenta in Banca</button></div>
+    </form>
+    {% else %}
+    <div class="empty-state">Nessuna rata cliente aperta e disponibile da anticipare (tutte già in una distinta in corso, o nessuna fattura aperta).</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

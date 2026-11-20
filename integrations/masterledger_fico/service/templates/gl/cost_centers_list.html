@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><span>🏷️</span> Centri di Costo/Ricavo</div>
+  <div class="card-body">
+    <div class="info-box">
+      Un'unica dimensione usata sia per i costi (obbligatoria sui conti di costo) sia per i ricavi
+      (facoltativa) — come il Centro di Profitto in SAP: permette di vedere quanto rende un
+      reparto/commessa, non solo quanto costa. Clicca un centro per vederne il mastrino completo.
+      Per un'analisi CO più ricca (filtri per data/conto/tipo), vedi anche il
+      <a href="{{ url_for('costs.report') }}">Report Centri di Costo</a>.
+    </div>
+
+    <form method="POST" action="{{ url_for('costs.cost_center_new') }}" style="margin-bottom:18px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="next" value="{{ url_for('gl.cost_centers_list') }}">
+      <div class="form-grid">
+        <div class="form-group"><label>Codice</label><input type="text" name="code" placeholder="es. CC-LOG-01" required></div>
+        <div class="form-group"><label>Nome</label><input type="text" name="name" placeholder="es. Logistica" required></div>
+        <div class="form-group">
+          <label>Conto ricavi (solo se è un'ASA su cui si vende)</label>
+          <select name="revenue_account_id">
+            <option value="">— nessuno (centro di solo costo) —</option>
+            {% for acc in revenue_accounts %}
+            <option value="{{ acc.id }}">{{ acc.code }} — {{ acc.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="btn-row"><button type="submit" class="btn btn-primary">➕ Crea Centro di Costo/Ricavo</button></div>
+    </form>
+    <table class="masterledger-table">
+      <thead><tr><th>Codice</th><th>Nome</th><th class="td-num">Movimenti</th><th class="td-num">Costi €</th><th class="td-num">Ricavi €</th><th class="td-num">Margine €</th><th style="width:260px;">Conto ricavi (ASA)</th><th></th></tr></thead>
+      <tbody>
+        {% for c in centers %}
+        <tr>
+          <td class="mono"><a href="{{ url_for('gl.cost_center_ledger', center_id=c.id) }}">{{ c.code }}</a></td>
+          <td><a href="{{ url_for('gl.cost_center_ledger', center_id=c.id) }}">{{ c.name }}</a></td>
+          <td class="td-num">{{ totali[c.id].n_movimenti }}</td>
+          <td class="td-num">{{ "%.2f"|format(totali[c.id].totale_costi) }}</td>
+          <td class="td-num">{{ "%.2f"|format(totali[c.id].totale_ricavi) }}</td>
+          <td class="td-num"><strong>{{ "%.2f"|format(totali[c.id].totale_ricavi - totali[c.id].totale_costi) }}</strong></td>
+          <form method="POST" action="{{ url_for('costs.cost_center_revenue_account', cc_id=c.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="next" value="{{ url_for('gl.cost_centers_list') }}">
+            <td>
+              <select name="revenue_account_id" style="padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;">
+                <option value="" {{ 'selected' if not c.revenue_account_id }}>— nessuno —</option>
+                {% for acc in revenue_accounts %}
+                <option value="{{ acc.id }}" {{ 'selected' if c.revenue_account_id == acc.id }}>{{ acc.code }} — {{ acc.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px;">💾</button></td>
+          </form>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">Nessun centro di costo/ricavo definito.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

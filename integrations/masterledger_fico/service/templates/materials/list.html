@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Anagrafica Articoli{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">🏷️ Nuovo Articolo <span class="tx-code">MM01</span></div>
+  <div class="card-body">
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group"><label>Codice <span class="req">*</span></label><input type="text" name="code" required placeholder="es. SEGN-001"></div>
+        <div class="form-group"><label>Descrizione <span class="req">*</span></label><input type="text" name="description" required></div>
+        <div class="form-group">
+          <label>Tipo articolo</label>
+          <select name="material_type">
+            <option value="FERT">FERT — Prodotto Finito (mag. 160000)</option>
+            <option value="ROH">ROH — Materia Prima (mag. 150000)</option>
+            <option value="HALB">HALB — Semilavorato (mag. 155000)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Unità di misura</label><input type="text" name="uom" value="PZ"></div>
+        <div class="form-group"><label>Costo standard € <span class="req">*</span></label><input type="number" step="0.0001" name="standard_cost" required></div>
+        <div class="form-group"><label>Prezzo vendita €</label><input type="number" step="0.0001" name="sales_price"></div>
+        <div class="form-group"><label>Aliquota IVA %</label><input type="number" step="0.01" name="vat_rate" value="22"></div>
+        <div class="form-group">
+          <label><input type="checkbox" name="is_carpenteria_propria" value="1"> Passa dalla carpenteria propria (taglio/foratura/saldatura)</label>
+        </div>
+        <div class="form-group">
+          <label>Destinazione acquisto</label>
+          <select name="purchase_destination">
+            <option value="">— non ancora classificato —</option>
+            <option value="wms">MasterLogistic-WMS (rivendita così com'è)</option>
+            <option value="iron_production">IronProduction (officina interna — ferro lavorazioni, filo saldatura, DPI...)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ASA (per la vendita)</label>
+          <select name="revenue_center_id">
+            <option value="">— non ancora classificata —</option>
+            {% for cc in revenue_centers %}
+            <option value="{{ cc.id }}">{{ cc.name }} ({{ cc.revenue_account.code }} — {{ cc.revenue_account.name }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Voce di Costo (override, opzionale)</label>
+          <select name="custom_cost_account_id">
+            <option value="">— automatico per tipo articolo —</option>
+            {% for acc in cost_accounts %}
+            <option value="{{ acc.id }}">{{ acc.code }} — {{ acc.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="theory-note">Il <strong>costo standard</strong> è il cuore del sistema: è il valore che diventa <strong>Costo del Venduto</strong> a ogni uscita merci (DDT) e il prezzo proposto negli ordini d'acquisto. La <strong>destinazione acquisto</strong> decide dove va il carico in Entrata Merci — obbligatoria per gli articoli che compri. L'<strong>ASA</strong> decide il conto ricavi e il centro di ricavo in Fatturazione DDT — obbligatoria per gli articoli/servizi che vendi. La <strong>Voce di Costo</strong> normalmente resta vuota (il conto è già automatico in base al tipo articolo) — impostala solo se questo specifico articolo deve andare su un conto diverso da quello automatico.</div>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Crea Articolo</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Articoli</div>
+  <div class="card-body">
+    {% if materials %}
+    <table class="masterledger-table">
+      <thead><tr><th>Codice</th><th>Descrizione</th><th>Tipo</th><th class="td-num" style="width:120px;">Costo std €</th><th class="td-num" style="width:120px;">Prezzo €</th><th class="td-num" style="width:90px;">IVA %</th><th style="width:70px;">Carp.<br>propria</th><th style="width:130px;">Destinazione acquisto</th><th style="width:150px;">ASA</th><th style="width:150px;">Voce di Costo</th><th></th></tr></thead>
+      <tbody>
+        {% for m in materials %}
+        <tr>
+          <td class="mono fw-bold">{{ m.code }}</td>
+          <td>{{ m.description }}</td>
+          <td>{{ m.type_label }}</td>
+          <form method="POST" action="{{ url_for('materials.material_update', mat_id=m.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <td class="td-num"><input type="number" step="0.0001" name="standard_cost" value="{{ '%.4f'|format(m.standard_cost) }}" style="width:100px;padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;text-align:right;"></td>
+            <td class="td-num"><input type="number" step="0.0001" name="sales_price" value="{{ '%.4f'|format(m.sales_price) }}" style="width:100px;padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;text-align:right;"></td>
+            <td class="td-num"><input type="number" step="0.01" name="vat_rate" value="{{ '%.2f'|format(m.vat_rate) }}" style="width:70px;padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;text-align:right;"></td>
+            <td style="text-align:center;"><input type="checkbox" name="is_carpenteria_propria" value="1" {{ 'checked' if m.is_carpenteria_propria }}></td>
+            <td>
+              <select name="purchase_destination" style="padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;">
+                <option value="" {{ 'selected' if not m.purchase_destination }}>— non class. —</option>
+                <option value="wms" {{ 'selected' if m.purchase_destination == 'wms' }}>WMS (rivendita)</option>
+                <option value="iron_production" {{ 'selected' if m.purchase_destination == 'iron_production' }}>IronProduction</option>
+              </select>
+            </td>
+            <td>
+              <select name="revenue_center_id" style="padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;">
+                <option value="" {{ 'selected' if not m.revenue_center_id }}>— non class. —</option>
+                {% for cc in revenue_centers %}
+                <option value="{{ cc.id }}" {{ 'selected' if m.revenue_center_id == cc.id }}>{{ cc.name }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <select name="custom_cost_account_id" style="padding:4px;background:var(--ml-bg);color:var(--ml-text);border:1px solid var(--ml-border);border-radius:4px;">
+                <option value="" {{ 'selected' if not m.custom_cost_account_id }}>— automatico —</option>
+                {% for acc in cost_accounts %}
+                <option value="{{ acc.id }}" {{ 'selected' if m.custom_cost_account_id == acc.id }}>{{ acc.code }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px;">💾</button></td>
+          </form>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessun articolo — crea il primo per far partire i cicli SD e MM.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

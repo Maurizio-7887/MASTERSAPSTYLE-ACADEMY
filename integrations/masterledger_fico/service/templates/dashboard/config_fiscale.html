@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-header"><span>⚙️</span> Configurazione Fiscale <span class="tx-code">Solo Commercialista</span></div>
+  <div class="card-body">
+    <div class="info-box">
+      Qui imposti i parametri di <strong>giudizio professionale</strong> (aliquote, metodi di valutazione, soglie) —
+      il software li applica automaticamente da ora in poi in tutte le registrazioni. Ogni volta che cambia un caso reale,
+      aggiorna qui: non serve toccare il codice dell'applicazione.
+    </div>
+
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% for category, params in params_by_category.items() %}
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--ml-label); margin-bottom:8px; border-bottom:1px solid var(--ml-border); padding-bottom:4px;">
+            {{ category|capitalize }}
+          </div>
+          {% for p in params %}
+          <div class="form-group" style="margin-bottom:12px;">
+            <label>{{ p.description }}</label>
+            <input type="text" name="{{ p.key }}" value="{{ p.value }}">
+          </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">💾 Salva Parametri</button>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">🧪 Ambiente di Test SdI <span class="tx-code">COLLAUDO</span></div>
+  <div class="card-body">
+    <div class="info-box">
+      Prepara con un click tutto il necessario per <strong>collaudare l'XML FatturaPA</strong> con il
+      software di controllo dell'Agenzia delle Entrate: un <strong>cliente finto</strong> (CLIENTE TEST SRL,
+      P.IVA 99999999990 con checksum valido, SDI 0000000), un <strong>prodotto finto</strong> (SEGN-TEST,
+      giacenza 999) e — solo se i campi sono ancora vuoti — un <strong>cedente di prova</strong>
+      (P.IVA 12345678903). I dati reali già inseriti NON vengono toccati.
+    </div>
+    <form method="POST" action="{{ url_for('dashboard.ambiente_test') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-primary" type="submit">🧪 Prepara ambiente di test</button>
+    </form>
+    <div class="theory-note" style="margin-top:12px;">
+      Percorso di collaudo: <strong>Ciclo Cliente → Fattura cliente</strong> →
+      CLIENTE TEST SRL, riga "Cartello di prova SEGN-TEST", imponibile 250, IVA 22 → registra →
+      <strong>scarica XML</strong> dal dettaglio → carica il file su
+      <span class="mono">fatturapa.gov.it → Controlla la Fattura</span>.
+      Il file di collaudo non va mai firmato né trasmesso allo SdI.
+    </div>
+  </div>
+</div>
+{% endblock %}

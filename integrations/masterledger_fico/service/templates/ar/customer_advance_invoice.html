@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Fattura Acconto{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">💶 Fattura d'Anticipo/Acconto <span class="tx-code">TD02</span></div>
+  <div class="card-body">
+    <div class="info-box">
+      Per le commesse custom (cartelli/transenne su misura) dove si chiede un anticipo prima di iniziare.
+      L'acconto è contabilmente una <strong>passività</strong> (166000 Acconti da Clienti), non un ricavo —
+      il ricavo si riconosce solo alla consegna vera (DDT).
+    </div>
+    <div class="info-box" style="border-color:var(--ml-orange);">
+      ⚠️ <strong>Limite noto</strong>: la deduzione automatica dell'acconto dalla fattura finale non è ancora
+      implementata — quando fatturi il saldo da DDT, tieni conto a mano di quanto già incassato in acconto
+      (vedi colonna "Già fatturato in acconto" qui sotto).
+    </div>
+    <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label>Ordine cliente <span class="req">*</span></label>
+          <select name="order_id" required>
+            <option value="">—</option>
+            {% for o in open_orders %}
+            <option value="{{ o.id }}">{{ o.doc_number }} — {{ o.party.name if o.party else '?' }}
+              (totale {{ '%.2f'|format(o.total_net) }} €, già in acconto {{ '%.2f'|format(o.acconto_fatturato_netto) }} €)</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label>Numero fattura</label><input type="text" name="invoice_number"></div>
+        <div class="form-group"><label>Data</label><input type="date" name="invoice_date"></div>
+        <div class="form-group"><label>Importo acconto (imponibile) €</label><input type="number" step="0.01" name="net_amount" required></div>
+        <div class="form-group"><label>Aliquota IVA %</label><input type="number" step="0.01" name="vat_rate" value="22"></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" type="submit">Registra Fattura Acconto</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Ordini con acconti in corso</div>
+  <div class="card-body">
+    {% if open_orders %}
+    <table class="masterledger-table">
+      <thead><tr><th>Ordine</th><th>Cliente</th><th class="td-num">Totale ordine €</th><th class="td-num">Già fatturato in acconto €</th><th class="td-num">Residuo fatturabile €</th></tr></thead>
+      <tbody>
+        {% for o in open_orders %}
+        <tr>
+          <td class="mono">{{ o.doc_number }}</td>
+          <td>{{ o.party.name if o.party else '—' }}</td>
+          <td class="td-num">{{ '%.2f'|format(o.total_net) }}</td>
+          <td class="td-num">{{ '%.2f'|format(o.acconto_fatturato_netto) }}</td>
+          <td class="td-num">{{ '%.2f'|format(o.total_net - o.acconto_fatturato_netto) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty-state">Nessun ordine cliente aperto.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,403 @@
+"""MasterLedgerLight: rimozione magazzino interno e costing di produzione
+
+Rimuove SOLO ciò che il refactor MasterLedgerLight ha davvero tolto da
+models.py: il magazzino interno (sedi/aree/ubicazioni/movimenti — la
+giacenza vive ora su MasterLogistic-WMS) e il costing di produzione
+(BOM/Routing/Centri di Lavoro/Costi Standard/varianze/commesse — vive ora
+su IronProduction). Clienti e fornitori (EconomicSubject) NON sono toccati.
+
+Nota: l'autogenerate di Alembic segnalava anche il drop delle vecchie
+tabelle 'vendors'/'customers' e delle colonne journal_entries.customer_id/
+vendor_id — drift preesistente e indipendente da questo refactor (lasciato
+dalla migration d4e5f6a7b8c9 del 18/07/2026 che unificò tutto in
+economic_subjects). Escluso di proposito da questa migration: va gestito
+a parte, non mischiato a un refactor mirato.
+
+Revision ID: fdc29926441f
+Revises: v0w1x2y3z4a5
+Create Date: 2026-08-17 15:05:23.740847
+
+"""
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision = 'fdc29926441f'
+down_revision = 'v0w1x2y3z4a5'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    # ── Costing di produzione (ora in IronProduction) ──
+    # Ordine dei DROP scelto per rispettare le foreign key: ogni tabella
+    # "figlia" (quella che referenzia un'altra con una FK) va tolta PRIMA
+    # della tabella "genitore" che referenzia — altrimenti Postgres
+    # rifiuta il DROP con "constraint ... depends on table ...".
+    # (Su SQLite, usato in test/sviluppo, questo vincolo non viene
+    # imposto: l'ordine sbagliato passava lì senza errori, ed è per
+    # questo che il problema non era emerso prima di un vero deploy su
+    # Postgres — lezione per le prossime migration: testarle anche lì.)
+    op.drop_table('production_material_issues')      # FK -> production_orders
+    op.drop_table('production_cost_absorptions')      # FK -> production_orders
+
+    op.drop_table('production_entries')               # FK -> standard_costs
+
+    op.drop_table('bom_components')                   # FK -> bill_of_materials
+
+    op.drop_table('routing_operations')                # FK -> routings, work_centers
+
+    with op.batch_alter_table('production_overhead_items', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_production_overhead_items_work_center_id'))
+    op.drop_table('production_overhead_items')          # FK -> work_centers
+
+    op.drop_table('overhead_adjustments')
+
+    with op.batch_alter_table('product_cost_targets', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_product_cost_targets_effective_date'))
+        batch_op.drop_index(batch_op.f('ix_product_cost_targets_material_id'))
+    op.drop_table('product_cost_targets')
+
+    op.drop_table('standard_costs')                     # ora libera (production_entries già tolta)
+
+    with op.batch_alter_table('bill_of_materials', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_bill_of_materials_parent_material_id'))
+    op.drop_table('bill_of_materials')                  # ora libera (bom_components già tolta)
+
+    with op.batch_alter_table('routings', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_routings_parent_material_id'))
+    op.drop_table('routings')                           # ora libera (routing_operations già tolta)
+
+    op.drop_table('production_orders')                  # ora libera (le due FK verso di lei già tolte)
+    op.drop_table('work_centers')                       # ora libera (routing_operations/production_overhead_items già tolte)
+
+    # ── Magazzino interno (ora su MasterLogistic-WMS) ──
+    with op.batch_alter_table('material_location_stocks', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_material_location_stocks_material_id'))
+        batch_op.drop_index(batch_op.f('ix_material_location_stocks_storage_location_id'))
+    op.drop_table('material_location_stocks')            # FK -> storage_locations
+
+    with op.batch_alter_table('stock_movements', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_stock_movements_material_id'))
+    op.drop_table('stock_movements')                     # FK -> warehouse_areas
+
+    with op.batch_alter_table('storage_locations', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_storage_locations_warehouse_area_id'))
+    op.drop_table('storage_locations')                   # ora libera (material_location_stocks già tolta); FK -> warehouse_areas
+
+    op.drop_table('warehouse_areas')                     # ora libera (storage_locations/stock_movements già tolte); FK -> operating_sites
+    op.drop_table('operating_sites')                     # ora libera (warehouse_areas già tolta)
+
+    with op.batch_alter_table('materials', schema=None) as batch_op:
+        batch_op.drop_column('qty_on_hand')
+
+    # ### end Alembic commands ###
+
+
+def downgrade():
+    # ### commands auto generated by Alembic - please adjust! ###
+    with op.batch_alter_table('materials', schema=None) as batch_op:
+        batch_op.add_column(sa.Column('qty_on_hand', sa.NUMERIC(precision=14, scale=3), server_default=sa.text("'0'"), nullable=False))
+
+    op.create_table('operating_sites',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('code', sa.VARCHAR(length=4), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=120), nullable=False),
+    sa.Column('city', sa.VARCHAR(length=80), nullable=True),
+    sa.Column('region', sa.VARCHAR(length=80), nullable=True),
+    sa.Column('company_code', sa.VARCHAR(length=4), nullable=True),
+    sa.Column('active', sa.BOOLEAN(), nullable=True),
+    sa.Column('floor_plan_image', sa.BLOB(), nullable=True),
+    sa.Column('floor_plan_mimetype', sa.VARCHAR(length=50), nullable=True),
+    sa.Column('floor_plan_width', sa.FLOAT(), nullable=True),
+    sa.Column('floor_plan_height', sa.FLOAT(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('code')
+    )
+    op.create_table('warehouse_areas',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('site_id', sa.INTEGER(), nullable=False),
+    sa.Column('code', sa.VARCHAR(length=4), nullable=False),
+    sa.Column('name', sa.VARCHAR(length=120), nullable=False),
+    sa.Column('area_type', sa.VARCHAR(length=10), nullable=False),
+    sa.Column('account_id', sa.INTEGER(), nullable=True),
+    sa.Column('active', sa.BOOLEAN(), nullable=True),
+    sa.Column('pos_x', sa.FLOAT(), nullable=True),
+    sa.Column('pos_y', sa.FLOAT(), nullable=True),
+    sa.Column('dim_x', sa.FLOAT(), nullable=True),
+    sa.Column('dim_y', sa.FLOAT(), nullable=True),
+    sa.Column('usa_corsie', sa.BOOLEAN(), server_default=sa.text('1'), nullable=False),
+    sa.Column('usa_scaffali', sa.BOOLEAN(), server_default=sa.text('1'), nullable=False),
+    sa.Column('usa_ripiani', sa.BOOLEAN(), server_default=sa.text('1'), nullable=False),
+    sa.Column('usa_cassette', sa.BOOLEAN(), server_default=sa.text('0'), nullable=False),
+    sa.Column('usa_cantilever', sa.BOOLEAN(), server_default=sa.text('0'), nullable=False),
+    sa.Column('area_a_terra', sa.BOOLEAN(), server_default=sa.text('0'), nullable=False),
+    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+    sa.ForeignKeyConstraint(['site_id'], ['operating_sites.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('site_id', 'code', name=op.f('uq_site_sloc_code'))
+    )
+    op.create_table('storage_locations',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('warehouse_area_id', sa.INTEGER(), nullable=False),
+    sa.Column('codice', sa.VARCHAR(length=40), nullable=False),
+    sa.Column('corridoio', sa.VARCHAR(length=10), nullable=True),
+    sa.Column('scaffale', sa.VARCHAR(length=10), nullable=True),
+    sa.Column('ripiano', sa.VARCHAR(length=10), nullable=True),
+    sa.Column('cassetta', sa.VARCHAR(length=10), nullable=True),
+    sa.Column('tipo_stoccaggio', sa.VARCHAR(length=20), server_default=sa.text("'SCAFFALE'"), nullable=False),
+    sa.Column('stato', sa.VARCHAR(length=20), server_default=sa.text("'libero'"), nullable=False),
+    sa.Column('pos_x', sa.FLOAT(), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('pos_y', sa.FLOAT(), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('dim_x', sa.FLOAT(), server_default=sa.text("'100'"), nullable=False),
+    sa.Column('dim_y', sa.FLOAT(), server_default=sa.text("'100'"), nullable=False),
+    sa.Column('peso_max_kg', sa.FLOAT(), nullable=True),
+    sa.Column('note', sa.VARCHAR(length=255), nullable=True),
+    sa.Column('active', sa.BOOLEAN(), server_default=sa.text('1'), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['warehouse_area_id'], ['warehouse_areas.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('warehouse_area_id', 'codice', name=op.f('uq_storage_location_codice'))
+    )
+    with op.batch_alter_table('storage_locations', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_storage_locations_warehouse_area_id'), ['warehouse_area_id'], unique=False)
+
+    op.create_table('stock_movements',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('warehouse_area_id', sa.INTEGER(), nullable=True),
+    sa.Column('qty', sa.NUMERIC(precision=14, scale=3), nullable=False),
+    sa.Column('unit_cost', sa.NUMERIC(precision=14, scale=4), nullable=True),
+    sa.Column('movement_type', sa.VARCHAR(length=20), nullable=False),
+    sa.Column('source_type', sa.VARCHAR(length=30), nullable=True),
+    sa.Column('source_id', sa.INTEGER(), nullable=True),
+    sa.Column('doc_date', sa.DATE(), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=255), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.ForeignKeyConstraint(['warehouse_area_id'], ['warehouse_areas.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('stock_movements', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_stock_movements_material_id'), ['material_id'], unique=False)
+
+    op.create_table('material_location_stocks',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('storage_location_id', sa.INTEGER(), nullable=False),
+    sa.Column('qty', sa.NUMERIC(precision=14, scale=3), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('updated_at', sa.DATETIME(), nullable=True),
+    sa.Column('updated_by_id', sa.INTEGER(), nullable=True),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.ForeignKeyConstraint(['storage_location_id'], ['storage_locations.id'], ),
+    sa.ForeignKeyConstraint(['updated_by_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('material_id', 'storage_location_id', name=op.f('uq_material_location'))
+    )
+    with op.batch_alter_table('material_location_stocks', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_material_location_stocks_storage_location_id'), ['storage_location_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_material_location_stocks_material_id'), ['material_id'], unique=False)
+
+    op.create_table('work_centers',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('code', sa.VARCHAR(length=20), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=120), nullable=False),
+    sa.Column('cost_center_id', sa.INTEGER(), nullable=True),
+    sa.Column('capacity_hours_month', sa.NUMERIC(precision=10, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('hourly_rate_labor', sa.NUMERIC(precision=10, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('active', sa.BOOLEAN(), server_default=sa.text('1'), nullable=True),
+    sa.ForeignKeyConstraint(['cost_center_id'], ['cost_centers.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('code', name=op.f('uq_work_centers_code'))
+    )
+    op.create_table('standard_costs',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('year', sa.INTEGER(), nullable=False),
+    sa.Column('month', sa.INTEGER(), nullable=False),
+    sa.Column('standard_material_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('standard_labor_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('standard_overhead_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=300), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('bill_of_materials',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('parent_material_id', sa.INTEGER(), nullable=False),
+    sa.Column('version', sa.VARCHAR(length=10), server_default=sa.text("'1'"), nullable=False),
+    sa.Column('active', sa.BOOLEAN(), server_default=sa.text('1'), nullable=True),
+    sa.Column('notes', sa.VARCHAR(length=255), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['parent_material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('parent_material_id', 'version', name=op.f('uq_bom_parent_version'))
+    )
+    with op.batch_alter_table('bill_of_materials', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_bill_of_materials_parent_material_id'), ['parent_material_id'], unique=False)
+
+    op.create_table('bom_components',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('bom_id', sa.INTEGER(), nullable=False),
+    sa.Column('component_material_id', sa.INTEGER(), nullable=False),
+    sa.Column('qty_per', sa.NUMERIC(precision=14, scale=4), nullable=False),
+    sa.Column('scrap_pct', sa.NUMERIC(precision=5, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['bom_id'], ['bill_of_materials.id'], ),
+    sa.ForeignKeyConstraint(['component_material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('bom_id', 'component_material_id', name=op.f('uq_bom_component'))
+    )
+    op.create_table('routings',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('parent_material_id', sa.INTEGER(), nullable=False),
+    sa.Column('version', sa.VARCHAR(length=10), server_default=sa.text("'1'"), nullable=False),
+    sa.Column('active', sa.BOOLEAN(), server_default=sa.text('1'), nullable=True),
+    sa.Column('notes', sa.VARCHAR(length=255), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['parent_material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('parent_material_id', 'version', name=op.f('uq_routing_parent_version'))
+    )
+    with op.batch_alter_table('routings', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_routings_parent_material_id'), ['parent_material_id'], unique=False)
+
+    op.create_table('routing_operations',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('routing_id', sa.INTEGER(), nullable=False),
+    sa.Column('seq', sa.INTEGER(), server_default=sa.text("'10'"), nullable=False),
+    sa.Column('work_center_id', sa.INTEGER(), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=200), nullable=True),
+    sa.Column('machine_time_min', sa.NUMERIC(precision=10, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('labor_time_min', sa.NUMERIC(precision=10, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.ForeignKeyConstraint(['routing_id'], ['routings.id'], ),
+    sa.ForeignKeyConstraint(['work_center_id'], ['work_centers.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('routing_id', 'seq', name=op.f('uq_routing_operation_seq'))
+    )
+    op.create_table('product_cost_targets',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('effective_date', sa.DATE(), nullable=False),
+    sa.Column('target_material_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('target_labor_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('target_overhead_cost', sa.NUMERIC(precision=14, scale=4), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=300), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('material_id', 'effective_date', name=op.f('uq_product_cost_target_material_date'))
+    )
+    with op.batch_alter_table('product_cost_targets', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_product_cost_targets_material_id'), ['material_id'], unique=False)
+        batch_op.create_index(batch_op.f('ix_product_cost_targets_effective_date'), ['effective_date'], unique=False)
+
+    op.create_table('production_overhead_items',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('year', sa.INTEGER(), nullable=False),
+    sa.Column('month', sa.INTEGER(), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=200), nullable=False),
+    sa.Column('amount', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.Column('work_center_id', sa.INTEGER(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['work_center_id'], ['work_centers.id'], name=op.f('fk_production_overhead_items_work_center_id')),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('production_overhead_items', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_production_overhead_items_work_center_id'), ['work_center_id'], unique=False)
+
+    op.create_table('overhead_adjustments',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('year', sa.INTEGER(), nullable=False),
+    sa.Column('month', sa.INTEGER(), nullable=False),
+    sa.Column('description', sa.VARCHAR(length=200), nullable=False),
+    sa.Column('amount', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('production_entries',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('doc_number', sa.VARCHAR(length=20), nullable=False),
+    sa.Column('doc_date', sa.DATE(), nullable=False),
+    sa.Column('period_label', sa.VARCHAR(length=30), nullable=True),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('qty_produced', sa.NUMERIC(precision=14, scale=3), nullable=False),
+    sa.Column('raw_material_cost', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('direct_labor_cost', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('overhead_cost', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=300), nullable=True),
+    sa.Column('journal_entry_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.Column('standard_cost_id', sa.INTEGER(), nullable=True),
+    sa.Column('variance_materiali', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('variance_manodopera', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.Column('variance_overhead', sa.NUMERIC(precision=14, scale=2), server_default=sa.text("'0'"), nullable=False),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['journal_entry_id'], ['journal_entries.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.ForeignKeyConstraint(['standard_cost_id'], ['standard_costs.id'], name=op.f('fk_production_entries_standard_cost_id')),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('doc_number')
+    )
+    op.create_table('production_orders',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('order_number', sa.VARCHAR(length=30), nullable=False),
+    sa.Column('order_date', sa.DATE(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('qty_planned', sa.NUMERIC(precision=14, scale=3), nullable=False),
+    sa.Column('status', sa.VARCHAR(length=20), server_default=sa.text("'rilasciata'"), nullable=False),
+    sa.Column('cost_center_id', sa.INTEGER(), nullable=True),
+    sa.Column('notes', sa.VARCHAR(length=300), nullable=True),
+    sa.Column('created_by_id', sa.INTEGER(), nullable=True),
+    sa.Column('created_at', sa.DATETIME(), nullable=True),
+    sa.ForeignKeyConstraint(['cost_center_id'], ['cost_centers.id'], ),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('order_number')
+    )
+    op.create_table('production_cost_absorptions',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('production_order_id', sa.INTEGER(), nullable=False),
+    sa.Column('cost_type', sa.VARCHAR(length=15), nullable=False),
+    sa.Column('amount', sa.NUMERIC(precision=14, scale=2), nullable=False),
+    sa.Column('journal_entry_id', sa.INTEGER(), nullable=False),
+    sa.Column('posting_date', sa.DATE(), nullable=False),
+    sa.Column('notes', sa.VARCHAR(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['journal_entry_id'], ['journal_entries.id'], ),
+    sa.ForeignKeyConstraint(['production_order_id'], ['production_orders.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('production_material_issues',
+    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('production_order_id', sa.INTEGER(), nullable=False),
+    sa.Column('material_id', sa.INTEGER(), nullable=False),
+    sa.Column('qty', sa.NUMERIC(precision=14, scale=3), nullable=False),
+    sa.Column('unit_cost', sa.NUMERIC(precision=14, scale=4), nullable=False),
+    sa.Column('journal_entry_id', sa.INTEGER(), nullable=False),
+    sa.Column('issue_date', sa.DATE(), nullable=False),
+    sa.ForeignKeyConstraint(['journal_entry_id'], ['journal_entries.id'], ),
+    sa.ForeignKeyConstraint(['material_id'], ['materials.id'], ),
+    sa.ForeignKeyConstraint(['production_order_id'], ['production_orders.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    # ### end Alembic commands ###
