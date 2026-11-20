@@ -271,6 +271,9 @@ class Lavoro:
                 "dc_rimanenze": round(s26("12") + s26("07") + s26("13"), 2),
                 "dc_colli": len((s.get("sped") or {}).get("colli") or []),
                 "dc_rottamazione": s26("69"), "dc_differenza_inventario": s26("65"),
+                # inventario periodico di fine anno: kg di ferro mancanti rettificati (movimento 711)
+                "dc_ammanco_ferro": round(-sum((x.get("qta") or 0) for x in ((s.get("wm") or {}).get("registrazioni") or [])
+                                               if x.get("mat") == "FERRO" and (x.get("data") or "") <= "2026-12-31"), 2),
                 "dc_plusvalenza": -s26("45"), "dc_minusvalenza": s26("46"), "dc_sopravvenienza": -s26("84"),
                 "dc_risconto": s26("06"), "dc_rateo": -s26("39"), "dc_ammortamenti": s26("50"),
                 "dc_credito_iva": s26("14") + max(s26("25"), 0), "dc_ires": -s26("23"), "dc_irap": -s26("35"),
