@@ -436,7 +436,7 @@ function pnLibera(data, testo, rif, righe, m) {
   ok(/registrato nel libro giornale/.test(p.lab.querySelector('#fi-free-msg').textContent), m+': '+p.lab.querySelector('#fi-free-msg').textContent);
 }
 const spunta = pezzo => { const x = p.w.MSA_ESERCIZIO.passi.find(y => y.titolo.indexOf(pezzo) >= 0); ok(!!x && x.nuovo, 'passo nuovo «'+pezzo+'»'); };
-ok(p.w.MSA_ESERCIZIO.passi.filter(x=>x.nuovo).length===18, '18 passi nuovi'); ok(/UNDER CONSTRUCTION/.test(p.w.MSA_ESERCIZIO.annuncio),'annuncio under construction');
+ok(p.w.MSA_ESERCIZIO.passi.filter(x=>x.nuovo).length===50, '50 passi nuovi'); ok(/UNDER CONSTRUCTION/.test(p.w.MSA_ESERCIZIO.annuncio),'annuncio under construction');
 pnLibera('2027-01-25','prelievo per la cassa contanti','CASSA-2027-01',[['10.50','DARE',200],['10','AVERE',200]],'prelievo cassa'); fino('per la cassa contanti');
 pnLibera('2027-01-25','dischi da taglio e guanti - documento commerciale Ferramenta Mori','DC-0125-118',[['54.60','DARE',48.80],['10.50','AVERE',48.80]],'scontrino ferramenta'); fino('Scontrino della ferramenta');
 vicinoS('10.50',151.20,'cassa dopo lo scontrino');
@@ -458,8 +458,60 @@ p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C510',importo:'2500
 { p = apri('erp_valute','regolazioni'); const z = p.w.FX4.V().documenti.find(d=>d.partner==='C500'&&d.importo===3000&&d.data==='2027-01-27'); bene(p.fai('rg',{documento:z.numero,data:'2027-01-29'}),'incasso USD Zeta'); fino('Incassa Zeta Barriers in dollari'); }
 vicinoS('67',15.51,'perdita su cambi Gamma'); vicinoS('66',-38.76,'utile su cambi Zeta'); vicinoS('54.60',1048.80,'materiali di consumo'); vicinoS('44',-(1000+2500+2764.98),'ricavi per servizi (noleggio Edil Sigma + Bau Alpen + Zeta)','2027-12-31');
 controlla('Estero e amministratore');
+// 16d · NUOVO: vendita di 100 transenne all'estero (Germania art. 41, USA art. 8) con il magazzino
+const LOG = (...x) => { if (process.env.LOGEXP) console.log(...x); };
+p = apri('erp_vendite','ordini');
+bene(p.fai('va',{cliente:'C520',materiale:'TR-STD',qta:'60',rif:'KRAUS-60',data:'2027-02-01',consegna:'2027-02-10'}),'VA01 Kraus'); fino('Kraus Bau ordina');
+bene(p.fai('va',{cliente:'C530',materiale:'TR-STD',qta:'40',rif:'LIBERTY-40',data:'2027-02-01',consegna:'2027-02-10'}),'VA01 Liberty'); fino('Liberty Barriers ordina');
+const oK = p.S().ordini.find(o=>o.cliente==='C520'), oL = p.S().ordini.find(o=>o.cliente==='C530');
+LOG('PREZZI KRAUS', JSON.stringify(oK.prezzi)); LOG('PREZZI LIBERTY', JSON.stringify(oL.prezzi));
+ok(oK.prezzi.iva===0 && oL.prezzi.iva===0,'ordini esteri senza IVA');
+p = apri('erp_acquisti','ordini'); bene(p.fai('me',{fornitore:'F100',materiale:'FERRO',qta:'1000',prezzo:'1',data:'2027-02-01'}),'ME21N 1000 kg'); fino('ordina 1.000 kg di ferro');
+const oa3 = p.S().acquisti[p.S().acquisti.length-1].numero;
+p = apri('erp_acquisti','entrate'); bene(p.fai('mi',{ordine:oa3,ddt:'DDT-AU-0203',lotto:'COL-0203',data:'2027-02-02'}),'MIGO 1000 kg'); fino('ricevi i 1.000 kg');
+rfTutti('2027-02-02','PUTAWAY',1); fino('metti a dimora il fascio di febbraio');
+p = apri('erp_acquisti','fatture'); bene(p.fai('mr',{ordine:oa3,rif:'FR-2027-061',data:'2027-02-02'}),'MIRO febbraio'); fino('fattura del ferro di febbraio');
+p = apri('erp_produzione','ordini'); bene(p.fai('co',{materiale:'TR-STD',qta:'100',data:'2027-02-03',fine:'2027-02-05'}),'CO01 100 TR-STD'); fino('un ordine per 100 transenne');
+const op2 = p.S().produzione.filter(o=>o.materiale==='TR-STD').slice(-1)[0].numero; LOG('ORDINE', op2);
+p = apri('erp_magazzino','compiti'); bene(p.fai('sg',{ordine:op2,data:'2027-02-03'}),'staging 800 kg'); fino('porta alla linea gli 800 kg');
+LOG('STAGING', JSON.stringify(p.w.WM4.aperti().map(t=>[t.tipo,t.da,t.udc,t.qta,t.a])));
+rfTutti('2027-02-03','STAGING'); fino('conferma l’approvvigionamento di febbraio');
+p = apri('erp_produzione','avanzamento'); bene(p.fai('pr',{ordine:op2,kg:'800',data:'2027-02-03'}),'261 800 kg'); fino('consuma 800 kg');
+for (const [fase,ore,data,tit] of [['Taglio',25,'2027-02-03','Taglio 25 ore'],['Piegatura',20,'2027-02-04','Piegatura 20 ore'],['Saldatura',40,'2027-02-05','Saldatura 40 ore']]) {
+  p=apri('erp_produzione','avanzamento'); bene(p.fai('cf',{ordine:op2,fase,attrezzaggio:'0',ore:String(ore),qta:'100',data}),'CO11N '+fase+' feb'); fino(tit); }
+p=apri('erp_produzione','avanzamento'); bene(p.fai('en',{ordine:op2,data:'2027-02-05'}),'101 100 TR-STD'); fino('carica a magazzino le 100');
+LOG('PUTAWAY', JSON.stringify(p.w.WM4.aperti().map(t=>[t.tipo,t.da,t.udc,t.qta,t.a])));
+rfTutti('2027-02-05','PUTAWAY'); fino('metti a scaffale i 2 pallet');
+p = apri('erp_vendite','consegne');
+bene(p.fai('vl',{ordine:oK.numero,data:'2027-02-08'}),'consegna Kraus'); fino('VL01N: consegna per Kraus');
+bene(p.fai('vl',{ordine:oL.numero,data:'2027-02-08'}),'consegna Liberty'); fino('VL01N: consegna per Liberty');
+p = apri('erp_innovazione','ondate'); bene(p.fai('on',{data:'2027-02-08'}),'ONDA-2'); fino('Rilascia l’ondata di febbraio');
+LOG('PICK', JSON.stringify(p.w.WM4.aperti().map(t=>[t.tipo,t.da,t.udc,t.qta,t.a])));
+rfTutti('2027-02-08','PICK'); fino('preleva le transenne per l’estero');
+const cK = p.S().consegne.find(c=>c.ordine===oK.numero).numero, cL = p.S().consegne.find(c=>c.ordine===oL.numero).numero;
+p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cK,imballo:'EUR',perCollo:'30',data:'2027-02-08'}),'imballo Kraus'); fino('Imballa Kraus');
+p = apri('erp_spedizione','imballo'); bene(p.fai('im',{consegna:cL,imballo:'EUR',perCollo:'40',data:'2027-02-08'}),'imballo Liberty'); fino('Imballa Liberty');
+p = apri('erp_spedizione','trasporti'); bene(p.fai('vt',{consegne:cK,vettore:'V10',targa:'DE-M-4711',autista:'Klaus Weber',porto:'franco',data:'2027-02-09'}),'trasporto Kraus'); fino('Trasporto per Kraus');
+const tK = p.S().sped.trasporti.slice(-1)[0].numero;
+p = apri('erp_spedizione','trasporti'); bene(p.fai('vt',{consegne:cL,vettore:'V10',targa:'LI-123AB',autista:'Spedizioni Labronica',porto:'franco',data:'2027-02-09'}),'trasporto Liberty'); fino('Trasporto per Liberty');
+const tL = p.S().sped.trasporti.slice(-1)[0].numero;
+p = apri('erp_innovazione','rfid'); bene(p.fai('rf',{trasporto:tK,data:'2027-02-09'}),'RFID Kraus'); bene(p.fai('rf',{trasporto:tL,data:'2027-02-09'}),'RFID Liberty'); fino('Varco RFID: carica i colli per l’estero');
+p = apri('erp_spedizione','trasporti'); bene(p.fai('pt',{trasporto:tK,data:'2027-02-09'}),'partenza Kraus'); fino('Partenza per la Germania');
+p = apri('erp_spedizione','trasporti'); bene(p.fai('pt',{trasporto:tL,data:'2027-02-09'}),'partenza Liberty'); fino('Partenza per il porto di Livorno');
+ok(p.S().giacenze['TR-STD']===0,'transenne estere spedite');
+p = apri('erp_vendite','fatture'); bene(p.fai('vf',{consegna:cK,data:'2027-02-09'}),'fattura Kraus'); fino('VF01: fattura Kraus');
+p = apri('erp_vendite','fatture'); bene(p.fai('vf',{consegna:cL,data:'2027-02-09'}),'fattura Liberty'); fino('VF01: fattura Liberty');
+const fK = p.S().fatture.find(f=>f.cliente==='C520'), fL = p.S().fatture.find(f=>f.cliente==='C530');
+LOG('FATTURE', JSON.stringify([fK.totale,fK.iva,fK.natura,fL.totale,fL.iva,fL.natura]));
+ok(fK.iva===0 && fK.natura==='N3.2' && fL.iva===0 && fL.natura==='N3.1','fatture non imponibili con natura N3.2 e N3.1');
+for (const f of [fK,fL]) { p = apri('erp_fi','sdi'); bene(p.fai('sd',{fattura:f.numero,data:'2027-02-09'}),'SdI '+f.numero); }
+fino('Trasmetti le fatture estere allo SdI');
+p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C520',importo:String(fK.totale),rif:'BONIFICO KRAUS',data:'2027-02-12'}),'incasso Kraus'); fino('incassa Kraus');
+p = apri('erp_vendite','incassi'); bene(p.fai('in',{cliente:'C530',importo:String(fL.totale),rif:'BONIFICO LIBERTY',data:'2027-02-12'}),'incasso Liberty'); fino('incassa Liberty');
+LOG('BANCA', p.S().registrazioni.filter(r=>!['epilogo','stato patrimoniale','riapertura'].includes(r.chiusura)).reduce((t,r)=>t+r.righe.filter(x=>x.conto==='10').reduce((a,x)=>a+(x.dareAvere==='DARE'?x.importo:-x.importo),0),0).toFixed(2), 'FERRO', p.S().giacenze['FERRO']);
+controlla('Vendite di merci all’estero');
 p = apri('erp_chiusura','riapertura'); bene(p.fai('du',{legale:'5',data:'2027-04-30'}),'destinazione utile'); fino('destina l’utile');
-vicinoS('33',-30.46,'riserva legale'); vicinoS('10',70161.78,'banca finale'); vicinoS('10.50',151.20,'cassa contanti finale'); vicinoS('28',-700.60,'INPS amministratore da versare a febbraio'); vicinoS('29',-406.29,'ritenute amministratore da versare a febbraio'); vicinoS('09.20',3000,'cauzione ancora aperta'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
+vicinoS('33',-30.46,'riserva legale'); vicinoS('10',76161.78,'banca finale'); vicinoS('20',-1220,'debito ferro di febbraio aperto'); ok(p.S().giacenze['FERRO']===928,'928 kg di ferro'); vicinoS('10.50',151.20,'cassa contanti finale'); vicinoS('28',-700.60,'INPS amministratore da versare a febbraio'); vicinoS('29',-406.29,'ritenute amministratore da versare a febbraio'); vicinoS('09.20',3000,'cauzione ancora aperta'); vicinoS('38',0,'anticipo chiuso'); vicinoS('11',0,'clienti incassati');
 controlla('Fine');
 ok(p.w.WM4.aperti().length===0,'nessun compito aperto');
 const S = p.S();
