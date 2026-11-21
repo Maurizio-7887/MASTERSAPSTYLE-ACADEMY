@@ -171,6 +171,17 @@ def post_journal_entry(doc_type, prefix, doc_date, description, lines, source_mo
         normalized_vat_rate = None
 
     doc_number = DocumentSequence.next_number(doc_type, prefix, company_id=company_id)
+    # Tipi diversi possono condividere lo stesso prefisso (es. DR e DZ con «14»)
+    # ma hanno sequenze separate: con un'azienda valorizzata il numero potrebbe
+    # già esistere e violare il vincolo (doc_number, company_id). Si avanza la
+    # sequenza fino al primo numero libero, senza cambiare i prefissi in uso.
+    for _ in range(10000):
+        clash = JournalEntry.query.filter(JournalEntry.doc_number == doc_number,
+                                          JournalEntry.company_id.is_(None) if company_id is None
+                                          else JournalEntry.company_id == company_id).first()
+        if clash is None:
+            break
+        doc_number = DocumentSequence.next_number(doc_type, prefix, company_id=company_id)
     entry = JournalEntry(
         doc_number=doc_number,
         doc_type=doc_type,

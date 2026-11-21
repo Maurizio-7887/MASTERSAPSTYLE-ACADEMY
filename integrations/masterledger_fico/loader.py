@@ -51,4 +51,21 @@ def mount_masterledger(firenze_app):
         BOOTSTRAP_DEMO_USERS = False
 
     ledger = module.create_app(FicoConfig)
+
+    # Nel deploy unico (gunicorn wsgi:app) non passa da service/start.sh, quindi
+    # lo schema FI/CO non verrebbe mai aggiornato. Si applicano le migrazioni
+    # all'avvio, solo sul database FI/CO dedicato. Disattivabile con
+    # MASTERLEDGER_FICO_AUTO_UPGRADE=0. NON si esegue il seed: crea utenti demo
+    # con password note e non va mai lanciato automaticamente su un sito pubblico.
+    if os.getenv("MASTERLEDGER_FICO_AUTO_UPGRADE", "1") != "0":
+        from flask_migrate import upgrade
+        try:
+            with ledger.app_context():
+                upgrade(directory=str(root / "migrations"))
+        except Exception as exc:  # il portale Firenze deve restare online comunque
+            import logging
+            logging.getLogger(__name__).exception(
+                "Migrazioni MasterLedger FI/CO non applicate: %s. Il portale resta attivo; "
+                "verificare lo schema del database FI/CO prima di usare /fico.", exc)
+
     return build_combined_app(firenze_app, ledger)

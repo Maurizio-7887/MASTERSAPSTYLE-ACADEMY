@@ -13,7 +13,7 @@
 <label><input type="checkbox" id="done"> Pagina studiata</label><p id="progress"></p><p><a href="{{ url_for('academy.coverage') }}">Funzioni mancanti e disponibili</a></p>
 </aside></div>
 <script>
-const pages={{ ch.pages|tojson }}, block={{ ch.number }};let page=0;
+const pages={{ ch.pages|tojson }}, block={{ ch.number }};let page=0;{const m=/^#p(\d+)$/.exec(location.hash);if(m)page=Math.max(0,parseInt(m[1],10)-1);}
 const key='academy_fico_progress_v1_'+block;
 let done={};try{done=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){done={}}
 function go(delta){page=Math.max(0,Math.min(pages.length-1,page+delta));show()}
