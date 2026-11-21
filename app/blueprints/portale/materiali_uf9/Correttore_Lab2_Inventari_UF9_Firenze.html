@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Correttore docente · Laboratorio 2 Inventari · caso Firenze</title>
+<title>Correttore docente · UF 9 Inventari · Pistoia</title>
 <style>
 :root{--navy:#142e43;--ink:#1d2b36;--grey:#5d6b77;--line:#c9d2da;--red:#a3302f;--green:#1d6b3a;--teal:#087e80;--bg:#f5f7f9}
 *{box-sizing:border-box}body{margin:0;font:14px/1.45 'Segoe UI',Arial,sans-serif;color:var(--ink);background:var(--bg)}
@@ -16,15 +16,18 @@ button{font:inherit;padding:8px 14px;border-radius:4px;border:1px solid var(--na
 .small{font-size:12px;color:var(--grey)}.warn{background:#fff8e6;border:1px solid #e3b44a;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:13px}
 @media print{header,.noprint,.drop{display:none!important}body{background:#fff}main{padding:0}.box{border:0;padding:0}}
 </style></head><body>
-<header><h1>Correttore docente · Laboratorio 2 «Inventari» · UF 9 · caso Firenze</h1><p>Inventario periodico di fine anno di Ferro &amp; Transenne · confronta il dossier JSON dell’allievo con la soluzione · tutto offline</p></header>
+<header><h1>Correttore docente · UF 9 «Inventari fisici e contabili» · Pistoia</h1><p>Laboratorio 2 · inventario di fine anno di Ferro &amp; Transenne · confronta il dossier JSON dell’allievo con la soluzione · tutto offline</p></header>
 <main>
 <div class="box noprint"><h2>1 · Carica i dossier degli allievi</h2>
 <div class="drop" id="drop" onclick="document.getElementById('file').click()"><b>Trascina qui i file «Inventari_Lab2_….json»</b><br><span class="small">oppure clicca per sceglierli · anche più file insieme</span></div>
 <input id="file" type="file" multiple accept=".json,application/json" style="display:none" onchange="carica(this.files)">
 <p class="small">Il dossier si scarica dal laboratorio: scheda «Relazione da consegnare» → «Esporta dossier JSON». Il PDF della relazione non contiene i dati strutturati.</p></div>
+<div class="box noprint"><h2>Impostazioni della valutazione</h2>
+<label>Soglia di superamento: <input id="soglia" type="number" min="0" max="100" step="1" style="width:80px;padding:4px 6px;border:1px solid var(--line);border-radius:4px"> /100</label>
+<span class="small">Lascia vuoto se l’ente non indica una soglia: allora non compare né «superato» né «non superato». La scelta resta salvata in questo browser.</span></div>
 <div class="box" id="classe" style="display:none"><h2>2 · Riepilogo della classe</h2><div id="tab-classe"></div>
 <button class="sec noprint" onclick="esportaCSV()">⬇ Esporta riepilogo (CSV per Excel)</button>
-<p class="small">Voto in centesimi su 4 indicatori, ognuno da 1 a 25 (1-5 insufficiente, 6-10 parzialmente sufficiente, 11-15 sufficiente, 16-20 buono, 21-25 ottimo), come nella prova di fine modulo della UF 9. Soglia proposta 60/100, da confermare con l’ente: il programma della UF 9 non la indica. I testi liberi ricevono punti solo per completezza e riferimenti: la qualità la valuti tu leggendo.</p></div>
+<p class="small">Voto in centesimi su 4 indicatori, ognuno da 1 a 25 (1-5 insufficiente, 6-10 parzialmente sufficiente, 11-15 sufficiente, 16-20 buono, 21-25 ottimo), come nella prova di fine modulo della UF 9. Il correttore <b>propone</b> i punti di ogni indicatore; nel dettaglio dell’allievo puoi confermarli o cambiarli (da 1 a 25) scrivendo il motivo: la scala Likert resta un giudizio del docente. I testi liberi ricevono punti solo per completezza e riferimenti: la qualità la valuti tu leggendo.</p></div>
 <div id="dettaglio"></div>
 </main>
 <script>
@@ -205,14 +208,24 @@ const IND=[
 const LIV=p=>p<=5?'insufficiente':p<=10?'parzialmente sufficiente':p<=15?'sufficiente':p<=20?'buono':'ottimo';
 const RIF_CAUSALE=[['COL-1206',/col.?1206/i],['riconteggio',/riconta|riconteg/i],['BP-2912',/bp.?2912/i],['AUT-2026-12',/aut.?2026.?12/i]];
 const allievi=[];let corrente=-1;
+const LS_SOGLIA='mc_corr_uf9_soglia',LS_DOC='mc_corr_uf9_docente';
+const lsG=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},lsS=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let SOGLIA=(()=>{const v=lsG(LS_SOGLIA);return v===null?60:v})();
+const DOCENTE=lsG(LS_DOC)||{};   // chiave allievo → {p:[4 punti o null], motivo:[4 testi]}
+const chiave=a=>(a.sessione||'')+'|'+a.nome;
+function punti(a){const d=DOCENTE[chiave(a)]||{};return a.ind.map((x,i)=>{const v=d.p&&Number.isInteger(d.p[i])?d.p[i]:null;return {...x,proposto:x.p,p:v??x.p,mod:v!=null&&v!==x.p,motivo:(d.motivo||[])[i]||''}})}
+const totale=a=>punti(a).reduce((s,x)=>s+x.p,0);
+const sopra=a=>SOGLIA===''||SOGLIA==null?null:totale(a)>=SOGLIA;
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const num=raw=>{const s=String(raw??'').trim().replace('−','-');if(!/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(s))return NaN;return Number(s.replace(',','.'))};
+const num=raw=>{let s=String(raw??'').trim().replace(/[−–]/g,'-').replace(/€|kg|\s/gi,'');if(/^[+-]?\d{1,3}(\.\d{3})+(,\d+)?$/.test(s))s=s.replace(/\./g,'');if(!/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(s))return NaN;return Number(s.replace(',','.'))};
 const fmt=(t,id)=>{const v=t.answers[id];if(typeof v!=='number')return v;return (t.dec||[]).includes(id)?v.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}):String(v)};
 const pts=x=>String(Math.round(x*10)/10).replace('.',',');
 const drop=document.getElementById('drop');
 ['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
 ['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
 drop.addEventListener('drop',ev=>carica(ev.dataTransfer.files));
+const sog=document.getElementById('soglia');sog.value=SOGLIA===''?'':SOGLIA;
+sog.addEventListener('input',()=>{const v=sog.value.trim();SOGLIA=v===''?'':Math.max(0,Math.min(100,Math.round(Number(v))));lsS(LS_SOGLIA,SOGLIA);allievi.forEach(a=>{if(!a.errore)a.risposta=risposta(a)});renderClasse();if(corrente>=0)mostra(corrente)});
 async function carica(files){for(const f of files){try{allievi.push(analizza(JSON.parse(await f.text()),f.name))}catch(e){allievi.push({file:f.name,nome:f.name,errore:e.message})}}document.getElementById('file').value='';renderClasse();if(corrente<0&&allievi.length)mostra(0)}
 function analizza(d,file){
  if(!d||d.type!=='MC_INVENTARI_LAB2')throw Error('Non è un dossier del Laboratorio 2.');
@@ -238,20 +251,21 @@ function analizza(d,file){
  a.risposta=risposta(a);return a;
 }
 function risposta(a){
- const nome=(a.nome||'').split(' ')[0];const ko=a.righe.filter(x=>!x.ok);
- let t=`Ciao ${nome},\n\nho corretto il tuo Laboratorio 2 «Inventari» (UF 9, caso Firenze, ${a.modo.toLowerCase()}): ${a.tot}/100 (soglia proposta 60/100).\n\n${a.ind.map((x,i)=>`${i+1}. ${x.n}: ${x.p}/25 · ${x.liv}`).join('\n')}\n`;
+ const nome=(a.nome||'').split(' ')[0];const ko=a.righe.filter(x=>!x.ok),P=punti(a),s=sopra(a);
+ let t=`Ciao ${nome},\n\nho corretto il tuo Laboratorio 2 «Inventari» (UF 9, ${a.modo.toLowerCase()}): ${totale(a)}/100${s===null?'':(s?' · prova superata (soglia '+SOGLIA+'/100)':' · prova non superata (soglia '+SOGLIA+'/100)')}.\n\n${P.map((x,i)=>`${i+1}. ${x.n}: ${x.p}/25 · ${LIV(x.p)}${x.motivo?' · '+x.motivo:''}`).join('\n')}\n`;
  if(!ko.length)return t+'\nTutti gli incarichi sono corretti: perimetro, conta, differenze, riconta, rettifica autorizzata, scrittura (conto 65 26,00), valorizzazione (FIFO 768, LIFO 728, medio 736,82, standard 691,60), merci in viaggio, rimanenze 969,00, inventario inframese e assestamento (+538,00). Brava/o!\n\nHo letto anche la relazione finale.\n';
  t+='\nDA RIVEDERE:\n';
  ko.forEach((x,i)=>{t+=`${i+1}) ${x.t.id} · ${x.t.title} (${Math.round(x.fr*100)}% corretto)\n`;x.campi.filter(c=>!c.ok).forEach(c=>{t+=c.type==='text'||c.type==='textarea'?`   - ${c.label}: hai scritto «${c.r||'niente'}»; ${c.note?c.note+'.':''}\n`:`   - ${c.label}: hai scritto «${c.r||'niente'}», doveva essere ${c.att}.\n`;if(x.t.err&&x.t.err[c.id])t+=`     ${x.t.err[c.id]}\n`})});
  const nc=a.righe.filter(x=>!x.conf).map(x=>x.t.id);if(nc.length)t+=`\nAttenzione: questi incarichi non risultano confermati con «Controlla operazione» sulle risposte attuali: ${nc.join(', ')}.\n`;
  return t+'\nCorreggi nel laboratorio, poi esporta di nuovo il dossier JSON e rimandamelo.\n';
 }
-const esito=a=>a.righe.every(x=>x.ok)?'<span class="pill g">COMPLETO</span>':a.tot>=60?'<span class="pill">DA CORREGGERE</span>':'<span class="pill r">DA RIFARE</span>';
+const esito=a=>{const s=sopra(a);return (a.righe.every(x=>x.ok)?'<span class="pill g">TUTTO CORRETTO</span>':'<span class="pill">DA RIVEDERE: '+a.righe.filter(x=>!x.ok).length+' incarichi</span>')+(s===null?'':s?' <span class="pill g">SUPERATA</span>':' <span class="pill r">NON SUPERATA</span>')};
+const coloreVoto=a=>{const s=sopra(a);return s===null?'':s?'ok':'ko'};
 function renderClasse(){
  document.getElementById('classe').style.display=allievi.length?'':'none';
  const rows=allievi.map((a,i)=>a.errore?`<tr class="clic${i===corrente?' sel':''}" onclick="mostra(${i})"><td>${esc(a.nome)}</td><td colspan="6" class="ko">${esc(a.errore)}</td></tr>`:
-  `<tr class="clic${i===corrente?' sel':''}" onclick="mostra(${i})"><td><b>${esc(a.nome)}</b><br><span class="small">${esc(a.file)}</span></td><td>${esc(a.corso||'—')}<br><span class="small">${esc(a.modo)}</span></td><td>${esito(a)}</td><td>${a.ind.map(x=>x.p).join(' · ')}</td><td class="voto ${a.tot>=60?'ok':'ko'}">${a.tot}/100</td><td>${a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(', ')||'<span class="ok">—</span>'}</td><td>${a.aiuti} spiegazioni · ${a.tentativi} controlli</td></tr>`).join('');
- document.getElementById('tab-classe').innerHTML=`<table><thead><tr><th>Allievo</th><th>Corso · modalità</th><th>Esito</th><th>Indicatori 1 · 2 · 3 · 4 (su 25)</th><th>Voto</th><th>Incarichi da rivedere</th><th>Uso degli aiuti</th></tr></thead><tbody>${rows}</tbody></table>`;
+  `<tr class="clic${i===corrente?' sel':''}" onclick="mostra(${i})"><td><b>${esc(a.nome)}</b><br><span class="small">${esc(a.file)}</span></td><td>${esc(a.corso||'—')}<br><span class="small">${esc(a.modo)}</span></td><td>${esito(a)}</td><td>${punti(a).map(x=>x.mod?'<b title="modificato dal docente">'+x.p+'*</b>':x.p).join(' · ')}</td><td class="voto ${coloreVoto(a)}">${totale(a)}/100</td><td>${a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(', ')||'<span class="ok">—</span>'}</td><td>${a.aiuti} spiegazioni · ${a.tentativi} controlli</td></tr>`).join('');
+ document.getElementById('tab-classe').innerHTML=`<table><thead><tr><th>Allievo</th><th>Corso · modalità</th><th>Esito</th><th>Indicatori 1 · 2 · 3 · 4 (su 25, * = cambiato dal docente)</th><th>Voto</th><th>Incarichi da rivedere</th><th>Uso degli aiuti</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function mostra(i){
  corrente=i;renderClasse();const a=allievi[i],box=document.getElementById('dettaglio');
@@ -259,19 +273,31 @@ function mostra(i){
  const righe=a.righe.map(x=>x.campi.map((c,k)=>`<tr>${k===0?`<td rowspan="${x.campi.length}"><b>${x.t.id}</b><br>${esc(x.t.title)}<br><span class="small">${x.conf?'confermato':'NON confermato'} · ${x.tent} controlli</span></td>`:''}<td>${esc(c.label)}</td><td>${esc(c.att)}</td><td>${esc(c.r||'—')}${c.note?'<br><span class="small">'+esc(c.note)+'</span>':''}</td><td class="${c.ok?'ok':c.fr>0?'part':'ko'}">${c.ok?'✔':c.fr>0?'◐':'✘'}</td>${k===0?`<td rowspan="${x.campi.length}" class="${x.ok?'ok':'ko'}">${Math.round(x.fr*100)}%</td>`:''}</tr>`).join('')).join('');
  const txt=a.righe.find(x=>x.t.id==='I15');
  box.innerHTML=`<div class="box"><h2>3 · Dettaglio · ${esc(a.nome)}</h2>
- <p><b>Corso:</b> ${esc(a.corso||'—')} · <b>Modalità:</b> ${esc(a.modo)} · <b>Esportato:</b> ${esc(a.export?new Date(a.export).toLocaleString('it-IT'):'—')} · <b>Voto:</b> <span class="voto ${a.tot>=60?'ok':'ko'}">${a.tot}/100</span> · ${esito(a)}</p><table style="margin:8px 0 14px"><thead><tr><th>Indicatore</th><th>Incarichi</th><th>Punti</th><th>Livello</th></tr></thead><tbody>${a.ind.map((x,i)=>`<tr><td>${i+1}. ${esc(x.n)}</td><td>${x.ids.join(', ')}</td><td class="${x.p>=11?'ok':'ko'}">${x.p}/25</td><td>${x.liv}</td></tr>`).join('')}</tbody></table>
+ <p><b>Corso:</b> ${esc(a.corso||'—')} · <b>Modalità:</b> ${esc(a.modo)} · <b>Esportato:</b> ${esc(a.export?new Date(a.export).toLocaleString('it-IT'):'—')} · <b>Voto:</b> <span class="voto ${coloreVoto(a)}" id="totDoc">${totale(a)}/100</span> · <span id="esitoDoc">${esito(a)}</span></p>
+ <table style="margin:8px 0 14px"><thead><tr><th>Indicatore</th><th>Incarichi</th><th>Proposta del correttore</th><th>Punti del docente (1-25)</th><th>Livello</th><th>Motivo se cambi i punti</th></tr></thead><tbody>${punti(a).map((x,i)=>`<tr><td>${i+1}. ${esc(x.n)}</td><td>${x.ids.join(', ')}</td><td>${x.proposto}/25 · ${LIV(x.proposto)}</td><td><input class="pdoc" data-i="${i}" type="number" min="1" max="25" step="1" value="${x.p}" style="width:70px;padding:4px 6px;border:1px solid var(--line);border-radius:4px"></td><td class="liv" data-i="${i}">${LIV(x.p)}</td><td><input class="mdoc" data-i="${i}" value="${esc(x.motivo)}" placeholder="es. relazione completa e ben argomentata" style="width:100%;padding:4px 6px;border:1px solid var(--line);border-radius:4px"></td></tr>`).join('')}</tbody></table>
+ <p class="small noprint" id="msgDoc">Le modifiche si salvano da sole in questo browser e passano nella lettera e nel CSV. <button class="sec" id="ripristina" style="padding:3px 8px">Ripristina le proposte</button></p>
  ${a.modo==='Allenamento'?'<div class="warn">Compito svolto in <b>allenamento</b>: la guida mostra calcoli e valori. Per una valutazione d’esame chiedi la prova autonoma.</div>':''}
  <table><thead><tr><th>Incarico</th><th>Campo</th><th>Soluzione</th><th>Risposta dell’allievo</th><th>Esito</th><th>Corretto</th></tr></thead><tbody>${righe}</tbody></table></div>
  <div class="box"><h2>4 · Relazione finale da leggere (I15)</h2>${txt.campi.map(c=>`<p><b>${esc(c.label)}</b><br>${esc(c.r||'—').replace(/\n/g,'<br>')}</p>`).join('')}</div>
  <div class="box"><h2>5 · Risposta da inviare all’allievo</h2><textarea id="risp">${esc(a.risposta)}</textarea>
  <div class="noprint"><button onclick="copia()">📋 Copia testo</button><button class="sec" onclick="scaricaRisp()">⬇ Scarica .txt</button><button class="sec" onclick="window.print()">🖨 Stampa correzione</button></div></div>`;
  document.getElementById('risp').addEventListener('input',e=>{a.risposta=e.target.value});
+ const aggiorna=()=>{const k=chiave(a),d=DOCENTE[k]||{p:[null,null,null,null],motivo:['','','','']};let errore='';
+  box.querySelectorAll('.pdoc').forEach(el=>{const i=+el.dataset.i,v=Number(el.value);if(!Number.isInteger(v)||v<1||v>25){errore='Ogni indicatore va da 1 a 25 punti, numeri interi.';el.style.borderColor='var(--red)';return}el.style.borderColor='';d.p[i]=v===a.ind[i].p?null:v;box.querySelector('.liv[data-i="'+i+'"]').textContent=LIV(v)});
+  box.querySelectorAll('.mdoc').forEach(el=>{d.motivo[+el.dataset.i]=el.value});
+  DOCENTE[k]=d;lsS(LS_DOC,DOCENTE);
+  const mancaMotivo=punti(a).some(x=>x.mod&&!x.motivo.trim());
+  document.getElementById('msgDoc').firstChild.textContent=errore||(mancaMotivo?'Hai cambiato dei punti: scrivi anche il motivo. ':'Le modifiche si salvano da sole in questo browser e passano nella lettera e nel CSV. ');
+  const tv=document.getElementById('totDoc');tv.textContent=totale(a)+'/100';tv.className='voto '+coloreVoto(a);document.getElementById('esitoDoc').innerHTML=esito(a);
+  a.risposta=risposta(a);document.getElementById('risp').value=a.risposta;renderClasse()};
+ box.querySelectorAll('.pdoc,.mdoc').forEach(el=>el.addEventListener('input',aggiorna));
+ document.getElementById('ripristina').onclick=()=>{delete DOCENTE[chiave(a)];lsS(LS_DOC,DOCENTE);a.risposta=risposta(a);mostra(i)};
 }
 function copia(){const t=document.getElementById('risp');t.select();try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand('copy')}}
 function scarica(nome,testo,tipo){const b=new Blob([testo],{type:tipo}),u=URL.createObjectURL(b),x=document.createElement('a');x.href=u;x.download=nome;x.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function scaricaRisp(){const a=allievi[corrente];scarica('correzione-lab2-'+(a.nome||'allievo').replace(/[^\w-]+/g,'_')+'.txt',document.getElementById('risp').value,'text/plain;charset=utf-8')}
 function esportaCSV(){const cell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
- const head=['Allievo','Corso','Modalità',...IND.map((x,i)=>'Indicatore '+(i+1)),'Voto /100',...tasks.map(t=>t.id+' %'),'Incarichi da rivedere','File'];
- const rows=allievi.filter(a=>!a.errore).map(a=>[a.nome,a.corso,a.modo,...a.ind.map(x=>x.p),a.tot,...a.righe.map(x=>Math.round(x.fr*100)),a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(' '),a.file]);
- scarica('riepilogo-lab2-inventari.csv','﻿'+[head,...rows].map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv;charset=utf-8')}
+ const head=['Allievo','Corso','Modalità',...IND.map((x,i)=>'Indicatore '+(i+1)+' proposto'),...IND.map((x,i)=>'Indicatore '+(i+1)+' docente'),'Voto /100','Esito soglia','Motivi delle modifiche',...tasks.map(t=>t.id+' %'),'Incarichi da rivedere','File'];
+ const rows=allievi.filter(a=>!a.errore).map(a=>[a.nome,a.corso,a.modo,...a.ind.map(x=>x.p),...punti(a).map(x=>x.p),totale(a),sopra(a)===null?'':sopra(a)?'superata':'non superata',punti(a).filter(x=>x.motivo).map((x,i)=>x.n+': '+x.motivo).join(' | '),...a.righe.map(x=>Math.round(x.fr*100)),a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(' '),a.file]);
+ scarica('riepilogo-uf9-inventari.csv','﻿'+[head,...rows].map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv;charset=utf-8')}
 </script></body></html>
