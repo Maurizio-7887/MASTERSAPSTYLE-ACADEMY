@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Avanzamento classe{% endblock %}
+{% block content %}
+<div style="max-width:1000px;margin:auto;font-family:system-ui,Segoe UI,Arial,sans-serif">
+  <h1>Avanzamento della classe (sola lettura)</h1>
+  <table class="masterledger-table" id="classe">
+    <thead><tr><th>Persona</th><th>Percorso</th><th>Azienda</th><th>Modalità</th><th>Passi verificati</th><th>Prossimo</th><th>Ultima attività</th></tr></thead>
+    <tbody>{% for x in righe %}<tr><td>{{ x.s.user.full_name }}</td><td>{{ x.s.scenario_id }} v{{ x.s.scenario_version }}</td><td>{{ x.s.company.code if x.s.company else '—' }}</td><td>{{ x.s.mode }}</td><td><b>{{ x.c.verificati }} / {{ x.c.totale }} — {{ x.c.percentuale }}%</b></td><td>{{ x.c.prossimo or 'completato' }}</td><td>{{ x.s.updated_at.strftime('%d/%m %H:%M') if x.s.updated_at else '—' }}</td></tr>{% else %}<tr><td colspan="7">Nessuna sessione attiva.</td></tr>{% endfor %}</tbody>
+  </table>
+  <p style="font-size:13px;color:#4d6b88">La pagina si aggiorna da sola ogni 60 secondi.</p>
+</div>
+{% endblock %}
+{% block scripts %}<script>setTimeout(()=>location.reload(),60000)</script>{% endblock %}

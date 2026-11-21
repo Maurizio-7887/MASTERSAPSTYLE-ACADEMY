@@ -493,6 +493,17 @@ def scadenzario_paga():
     payment_company_id = next(iter(company_ids))
     is_supplier_side = doc_types == {"KR"}
 
+    # Data di registrazione facoltativa: senza, resta la data odierna (comportamento
+    # storico). Serve ai casi didattici con date simulate (es. 10/09/2028).
+    payment_date = None
+    raw_date = (request.form.get("doc_date") or "").strip()
+    if raw_date:
+        try:
+            payment_date = datetime.strptime(raw_date, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Data di registrazione non valida.", "danger")
+            return redirect(url_for("gl.scadenzario"))
+
     try:
         allocations = []
         total_cash = Decimal("0")
@@ -530,7 +541,7 @@ def scadenzario_paga():
                 abbuono_account = AccountMapping.get_or_error("abbuoni_passivi")
                 lines.append({"account_id": abbuono_account.id, "dare": 0, "avere": total_abbuono})
             payment_entry = post_journal_entry(
-                doc_type="KZ", prefix="15", doc_date=None,
+                doc_type="KZ", prefix="15", doc_date=payment_date,
                 description=f"Pagamento parziale fornitore — rate {', '.join(refs)}",
                 lines=lines, source_module="LEDGER", reference=", ".join(refs),
                 created_by_id=current_user.id, economic_subject_id=economic_subject_id,
@@ -547,7 +558,7 @@ def scadenzario_paga():
                 abbuono_account = AccountMapping.get_or_error("abbuoni_attivi")
                 lines.append({"account_id": abbuono_account.id, "dare": total_abbuono, "avere": 0})
             payment_entry = post_journal_entry(
-                doc_type="DZ", prefix="14", doc_date=None,
+                doc_type="DZ", prefix="14", doc_date=payment_date,
                 description=f"Incasso parziale cliente — rate {', '.join(refs)}",
                 lines=lines, source_module="LEDGER", reference=", ".join(refs),
                 created_by_id=current_user.id, economic_subject_id=economic_subject_id,

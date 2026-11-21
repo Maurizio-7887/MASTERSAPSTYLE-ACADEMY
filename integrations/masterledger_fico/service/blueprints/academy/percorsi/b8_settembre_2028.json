@@ -1,0 +1,1014 @@
+{
+ "id": "B8-SET2028",
+ "versione": "1",
+ "titolo": "Blocco 8 — Caso aziendale integrato: settembre 2028",
+ "azienda_nome": "Ferro & Transenne Srl (didattica)",
+ "periodo": {
+  "anno": 2028,
+  "mese": 9
+ },
+ "avviso": "Simulazione didattica ispirata ai processi FI/CO: non è software SAP e non attesta competenze su un'istanza SAP reale. Caso senza IVA per esplicita semplificazione didattica.",
+ "ruoli": {
+  "banca": [
+   "concept:banca_principale"
+  ],
+  "crediti": [
+   "concept:crediti_clienti"
+  ],
+  "debiti": [
+   "concept:debiti_fornitori"
+  ],
+  "impianti": [
+   "concept:cespiti_impianti"
+  ],
+  "fondo": [
+   "concept:fondo_ammortamento"
+  ],
+  "apertura": [
+   "999100"
+  ],
+  "pn": [
+   "300100"
+  ],
+  "ricavi": [
+   "400100"
+  ],
+  "acquisti": [
+   "500100"
+  ],
+  "servizi": [
+   "510100"
+  ],
+  "personale": [
+   "520100"
+  ],
+  "ammortamenti": [
+   "530100",
+   "concept:ammortamenti_costo"
+  ],
+  "utenze": [
+   "540100"
+  ]
+ },
+ "conti_didattici": [
+  [
+   "300100",
+   "Patrimonio netto e riserve (B8)",
+   "patrimoniale_passivo",
+   false
+  ],
+  [
+   "400100",
+   "Ricavi vendite (B8)",
+   "ricavo",
+   false
+  ],
+  [
+   "500100",
+   "Acquisti materiali (B8)",
+   "costo",
+   true
+  ],
+  [
+   "510100",
+   "Servizi esterni (B8)",
+   "costo",
+   true
+  ],
+  [
+   "520100",
+   "Costo personale (B8)",
+   "costo",
+   true
+  ],
+  [
+   "530100",
+   "Ammortamenti (B8)",
+   "costo",
+   true
+  ],
+  [
+   "540100",
+   "Utenze (B8)",
+   "costo",
+   true
+  ],
+  [
+   "999100",
+   "Stato Patrimoniale Iniziale (riapertura)",
+   "patrimoniale_passivo",
+   false
+  ]
+ ],
+ "centri": [
+  [
+   "CC-PROD",
+   "Produzione (B8)"
+  ],
+  [
+   "CC-AMM",
+   "Amministrazione (B8)"
+  ]
+ ],
+ "soggetti": [
+  [
+   "B8-ALFA",
+   "Alfa Srl (didattico)",
+   "cliente"
+  ],
+  [
+   "B8-BETA",
+   "Beta Spa (didattico)",
+   "fornitore"
+  ],
+  [
+   "B8-GAMMA",
+   "Gamma Servizi Srl (didattico)",
+   "fornitore"
+  ],
+  [
+   "B8-CLIINI",
+   "Clienti preesistenti — saldo iniziale (didattico)",
+   "cliente"
+  ],
+  [
+   "B8-FORINI",
+   "Fornitori preesistenti — saldo iniziale (didattico)",
+   "fornitore"
+  ]
+ ],
+ "apertura": {
+  "data": "2028-09-01",
+  "banca": 50000,
+  "crediti": 20000,
+  "impianti": 30000,
+  "fondo": 6000,
+  "debiti": 14000,
+  "pn": 80000
+ },
+ "passi": [
+  {
+   "id": "B8-01",
+   "titolo": "Controllo dell'ambiente di lavoro",
+   "tipo": "controllo",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     5
+    ]
+   },
+   "obiettivo": "Verificare di lavorare nella TUA azienda didattica, nel periodo 09/2028, con il bilancio di apertura caricato.",
+   "prerequisiti": [
+    "Sessione «Percorso Blocco 8» avviata"
+   ],
+   "funzione": {
+    "tcode": "FB03",
+    "endpoint": "gl.journal_list",
+    "menu": "Contabilità generale → Libro giornale"
+   },
+   "cosa_cliccare": "In alto controlla che il selettore azienda mostri la tua azienda didattica; poi apri il Libro giornale.",
+   "cosa_scrivere": [
+    {
+     "campo": "Azienda corrente",
+     "valore": "la tua azienda didattica (codice AC…)"
+    },
+    {
+     "campo": "Documenti da trovare",
+     "valore": "le 3 scritture di apertura con riferimento B8-APERTURA"
+    }
+   ],
+   "prima_di_confermare": [
+    "Società giusta, non «Tutte le aziende»",
+    "Apertura: attività nette 94.000 = passività e patrimonio netto 94.000",
+    "Non ricreare i saldi di apertura: sono già presenti"
+   ],
+   "risultato_atteso": "Azienda corrente = azienda didattica; apertura quadrata a 94.000.",
+   "se_sbaglio": "Se l'azienda corrente è diversa, torna al percorso e premi «Riprendi»: il programma la reimposta.",
+   "dipende_da": [],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 5
+   },
+   "validator": {
+    "tipo": "ambiente"
+   }
+  },
+  {
+   "id": "B8-02",
+   "titolo": "Fattura di vendita al cliente Alfa — 18.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     6
+    ]
+   },
+   "obiettivo": "Registrare il credito verso Alfa e il ricavo del mese.",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB70",
+    "endpoint": "ar.customer_invoice",
+    "menu": "Clienti → Fattura cliente"
+   },
+   "cosa_cliccare": "Compila la testata e UNA riga, poi «Registra». Al termine annota il numero documento.",
+   "cosa_scrivere": [
+    {
+     "campo": "Cliente",
+     "valore": "B8-ALFA · Alfa Srl"
+    },
+    {
+     "campo": "Data fattura",
+     "valore": "03/09/2028"
+    },
+    {
+     "campo": "Numero fattura",
+     "valore": "B8-V01"
+    },
+    {
+     "campo": "Riga: conto ricavi",
+     "valore": "400100 Ricavi vendite (B8)"
+    },
+    {
+     "campo": "Riga: imponibile",
+     "valore": "18000"
+    },
+    {
+     "campo": "Riga: IVA",
+     "valore": "esente/non imponibile (natura N2.2) — caso didattico SENZA IVA"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare Crediti clienti 18.000",
+    "Avere Ricavi vendite 18.000",
+    "Nessuna riga IVA: il caso è senza IVA per semplificazione didattica"
+   ],
+   "risultato_atteso": "Documento DR con Dare Crediti 18.000 / Avere 400100 18.000; partita aperta Alfa 18.000.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 6
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "DR"
+    ],
+    "soggetto": "B8-ALFA",
+    "data": "2028-09-03",
+    "righe": [
+     {
+      "ruolo": "crediti",
+      "lato": "dare",
+      "importo": 18000
+     },
+     {
+      "ruolo": "ricavi",
+      "lato": "avere",
+      "importo": 18000
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-03",
+   "titolo": "Fattura fornitore Beta — materiali 7.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     6
+    ]
+   },
+   "obiettivo": "Registrare il debito verso Beta e il costo dei materiali sul centro Produzione.",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB60",
+    "endpoint": "ap.supplier_invoice",
+    "menu": "Fornitori → Fattura fornitore"
+   },
+   "cosa_cliccare": "Compila testata e riga con conto di costo e centro di costo, poi registra.",
+   "cosa_scrivere": [
+    {
+     "campo": "Fornitore",
+     "valore": "B8-BETA · Beta Spa"
+    },
+    {
+     "campo": "Data fattura",
+     "valore": "05/09/2028"
+    },
+    {
+     "campo": "Numero",
+     "valore": "B8-A01"
+    },
+    {
+     "campo": "Riga: conto di costo",
+     "valore": "500100 Acquisti materiali (B8)"
+    },
+    {
+     "campo": "Centro di costo",
+     "valore": "CC-PROD"
+    },
+    {
+     "campo": "Imponibile",
+     "valore": "7000"
+    },
+    {
+     "campo": "IVA",
+     "valore": "0 — caso didattico senza IVA"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare 500100 7.000 su CC-PROD",
+    "Avere Debiti fornitori 7.000"
+   ],
+   "risultato_atteso": "Documento KR Beta 7.000 con costo su CC-PROD.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 6
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "KR"
+    ],
+    "soggetto": "B8-BETA",
+    "data": "2028-09-05",
+    "righe": [
+     {
+      "ruolo": "acquisti",
+      "lato": "dare",
+      "importo": 7000,
+      "centro": "CC-PROD"
+     },
+     {
+      "ruolo": "debiti",
+      "lato": "avere",
+      "importo": 7000
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-04",
+   "titolo": "Fattura fornitore Gamma — servizi 2.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     6
+    ]
+   },
+   "obiettivo": "Registrare i servizi esterni sul centro Amministrazione.",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB60",
+    "endpoint": "ap.supplier_invoice",
+    "menu": "Fornitori → Fattura fornitore"
+   },
+   "cosa_cliccare": "Come il passo precedente, con fornitore, conto e centro diversi.",
+   "cosa_scrivere": [
+    {
+     "campo": "Fornitore",
+     "valore": "B8-GAMMA · Gamma Servizi Srl"
+    },
+    {
+     "campo": "Data fattura",
+     "valore": "07/09/2028"
+    },
+    {
+     "campo": "Numero",
+     "valore": "B8-A02"
+    },
+    {
+     "campo": "Riga: conto di costo",
+     "valore": "510100 Servizi esterni (B8)"
+    },
+    {
+     "campo": "Centro di costo",
+     "valore": "CC-AMM"
+    },
+    {
+     "campo": "Imponibile",
+     "valore": "2000"
+    },
+    {
+     "campo": "IVA",
+     "valore": "0"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare 510100 2.000 su CC-AMM",
+    "Avere Debiti fornitori 2.000"
+   ],
+   "risultato_atteso": "Documento KR Gamma 2.000 con costo su CC-AMM.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 6
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "KR"
+    ],
+    "soggetto": "B8-GAMMA",
+    "data": "2028-09-07",
+    "righe": [
+     {
+      "ruolo": "servizi",
+      "lato": "dare",
+      "importo": 2000,
+      "centro": "CC-AMM"
+     },
+     {
+      "ruolo": "debiti",
+      "lato": "avere",
+      "importo": 2000
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-05",
+   "titolo": "Incasso parziale da Alfa — 12.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     7
+    ]
+   },
+   "obiettivo": "Incassare 12.000 sulla fattura Alfa da 18.000 e lasciare aperto il residuo di 6.000.",
+   "prerequisiti": [
+    "B8-02 verificato"
+   ],
+   "funzione": {
+    "tcode": "F-28",
+    "endpoint": "gl.scadenzario",
+    "menu": "Contabilità generale → Scadenzario (incasso parziale)"
+   },
+   "cosa_cliccare": "Nello Scadenzario filtra il soggetto Alfa, seleziona la rata della fattura B8-V01 (NON quella dei clienti preesistenti) e premi «Paga/Incassa». La schermata F-28 standard chiude solo fatture intere: per il parziale usa lo Scadenzario.",
+   "cosa_scrivere": [
+    {
+     "campo": "Rata",
+     "valore": "fattura B8-V01, residuo 18.000"
+    },
+    {
+     "campo": "Contanti",
+     "valore": "12000"
+    },
+    {
+     "campo": "Abbuono",
+     "valore": "0"
+    },
+    {
+     "campo": "Data di registrazione",
+     "valore": "10/09/2028"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare Banca 12.000 / Avere Crediti clienti 12.000",
+    "Un solo invio: non premere due volte Conferma"
+   ],
+   "risultato_atteso": "Documento DZ 12.000 collegato alla fattura Alfa; residuo della fattura 6.000.",
+   "se_sbaglio": "Se hai incassato l'importo sbagliato o sulla fattura sbagliata, storna il documento di incasso (FB08): le rate vengono ripristinate. Poi ripeti l'incasso.",
+   "dipende_da": [
+    "B8-02"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 7
+   },
+   "validator": {
+    "tipo": "pagamento",
+    "doc_types": [
+     "DZ"
+    ],
+    "soggetto": "B8-ALFA",
+    "data": "2028-09-10",
+    "righe": [
+     {
+      "ruolo": "banca",
+      "lato": "dare",
+      "importo": 12000
+     },
+     {
+      "ruolo": "crediti",
+      "lato": "avere",
+      "importo": 12000
+     }
+    ],
+    "fattura_passo": "B8-02",
+    "residuo_atteso": 6000
+   }
+  },
+  {
+   "id": "B8-06",
+   "titolo": "Pagamento parziale a Beta — 5.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     7
+    ]
+   },
+   "obiettivo": "Pagare 5.000 sulla fattura Beta da 7.000 e lasciare un residuo di 2.000.",
+   "prerequisiti": [
+    "B8-03 verificato"
+   ],
+   "funzione": {
+    "tcode": "F-53",
+    "endpoint": "gl.scadenzario",
+    "menu": "Contabilità generale → Scadenzario (pagamento parziale)"
+   },
+   "cosa_cliccare": "Nello Scadenzario seleziona la rata della fattura Beta B8-A01 e premi «Paga/Incassa».",
+   "cosa_scrivere": [
+    {
+     "campo": "Rata",
+     "valore": "fattura B8-A01, residuo 7.000"
+    },
+    {
+     "campo": "Contanti",
+     "valore": "5000"
+    },
+    {
+     "campo": "Abbuono",
+     "valore": "0"
+    },
+    {
+     "campo": "Data di registrazione",
+     "valore": "12/09/2028"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare Debiti fornitori 5.000 / Avere Banca 5.000"
+   ],
+   "risultato_atteso": "Documento KZ 5.000 collegato alla fattura Beta; residuo 2.000.",
+   "se_sbaglio": "Storna il documento di pagamento errato e ripeti.",
+   "dipende_da": [
+    "B8-03"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 7
+   },
+   "validator": {
+    "tipo": "pagamento",
+    "doc_types": [
+     "KZ"
+    ],
+    "soggetto": "B8-BETA",
+    "data": "2028-09-12",
+    "righe": [
+     {
+      "ruolo": "debiti",
+      "lato": "dare",
+      "importo": 5000
+     },
+     {
+      "ruolo": "banca",
+      "lato": "avere",
+      "importo": 5000
+     }
+    ],
+    "fattura_passo": "B8-03",
+    "residuo_atteso": 2000
+   }
+  },
+  {
+   "id": "B8-07",
+   "titolo": "Costo del personale pagato da banca — 6.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     7
+    ]
+   },
+   "obiettivo": "Registrare il costo del personale sul centro Produzione (modello semplificato).",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB50",
+    "endpoint": "gl.journal_entry",
+    "menu": "Contabilità generale → Prima nota"
+   },
+   "cosa_cliccare": "Due righe: chiave 40 (Dare) e chiave 50 (Avere). Poi «Registra documento».",
+   "cosa_scrivere": [
+    {
+     "campo": "Data",
+     "valore": "18/09/2028"
+    },
+    {
+     "campo": "Riga 1",
+     "valore": "40 · 520100 Costo personale (B8) · 6000 · CC-PROD"
+    },
+    {
+     "campo": "Riga 2",
+     "valore": "50 · Banca c/c · 6000 · nessun centro"
+    },
+    {
+     "campo": "Descrizione",
+     "valore": "Personale settembre 2028"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare 520100 6.000 su CC-PROD",
+    "Avere Banca 6.000"
+   ],
+   "risultato_atteso": "Documento SA 6.000 con costo su CC-PROD.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 7
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "SA"
+    ],
+    "data": "2028-09-18",
+    "righe": [
+     {
+      "ruolo": "personale",
+      "lato": "dare",
+      "importo": 6000,
+      "centro": "CC-PROD"
+     },
+     {
+      "ruolo": "banca",
+      "lato": "avere",
+      "importo": 6000
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-08",
+   "titolo": "Utenze amministrative pagate da banca — 1.000",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     7
+    ]
+   },
+   "obiettivo": "Registrare le utenze sul centro Amministrazione.",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB50",
+    "endpoint": "gl.journal_entry",
+    "menu": "Contabilità generale → Prima nota"
+   },
+   "cosa_cliccare": "Due righe in Prima nota, poi registra.",
+   "cosa_scrivere": [
+    {
+     "campo": "Data",
+     "valore": "24/09/2028"
+    },
+    {
+     "campo": "Riga 1",
+     "valore": "40 · 540100 Utenze (B8) · 1000 · CC-AMM"
+    },
+    {
+     "campo": "Riga 2",
+     "valore": "50 · Banca c/c · 1000"
+    },
+    {
+     "campo": "Descrizione",
+     "valore": "Utenze settembre 2028"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare 540100 1.000 su CC-AMM",
+    "Avere Banca 1.000"
+   ],
+   "risultato_atteso": "Documento SA 1.000 con costo su CC-AMM.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 7
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "SA"
+    ],
+    "data": "2028-09-24",
+    "righe": [
+     {
+      "ruolo": "utenze",
+      "lato": "dare",
+      "importo": 1000,
+      "centro": "CC-AMM"
+     },
+     {
+      "ruolo": "banca",
+      "lato": "avere",
+      "importo": 1000
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-09",
+   "titolo": "Quota di ammortamento del mese — 500",
+   "tipo": "operazione",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     8
+    ]
+   },
+   "obiettivo": "Contabilizzare la quota approvata di 500 senza alterare vita utile o costo storico.",
+   "prerequisiti": [
+    "B8-01 verificato"
+   ],
+   "funzione": {
+    "tcode": "FB50",
+    "endpoint": "gl.journal_entry",
+    "menu": "Contabilità generale → Prima nota"
+   },
+   "cosa_cliccare": "Quota prestabilita dalla traccia: registrala in Prima nota.",
+   "cosa_scrivere": [
+    {
+     "campo": "Data",
+     "valore": "30/09/2028"
+    },
+    {
+     "campo": "Riga 1",
+     "valore": "40 · 530100 Ammortamenti (B8) · 500 · CC-PROD"
+    },
+    {
+     "campo": "Riga 2",
+     "valore": "50 · Fondo ammortamento · 500"
+    },
+    {
+     "campo": "Descrizione",
+     "valore": "Ammortamento impianti settembre 2028"
+    }
+   ],
+   "prima_di_confermare": [
+    "Dare Ammortamenti 500 su CC-PROD",
+    "Avere Fondo ammortamento 500",
+    "Una sola quota per il mese"
+   ],
+   "risultato_atteso": "Documento SA 500; impianti netti 30.000 − 6.500 = 23.500.",
+   "se_sbaglio": "Non registrare un secondo documento: apri il documento sbagliato dal Libro giornale (FB03) e usa «Storna» (FB08), poi registra quello corretto. Il controllo considera solo i documenti non stornati.",
+   "dipende_da": [
+    "B8-01"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 8
+   },
+   "validator": {
+    "tipo": "documento",
+    "doc_types": [
+     "SA"
+    ],
+    "data": "2028-09-30",
+    "righe": [
+     {
+      "ruolo": "ammortamenti",
+      "lato": "dare",
+      "importo": 500,
+      "centro": "CC-PROD"
+     },
+     {
+      "ruolo": "fondo",
+      "lato": "avere",
+      "importo": 500
+     }
+    ]
+   }
+  },
+  {
+   "id": "B8-10",
+   "titolo": "Riconciliazione banca, clienti, fornitori e cespiti",
+   "tipo": "controllo",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     7,
+     8
+    ]
+   },
+   "obiettivo": "Controllare che i saldi dei mastri coincidano con quelli attesi.",
+   "prerequisiti": [
+    "B8-02…B8-09 verificati"
+   ],
+   "funzione": {
+    "tcode": "FS10N",
+    "endpoint": "gl.libro_mastro",
+    "menu": "Contabilità generale → Libro mastro"
+   },
+   "cosa_cliccare": "Apri il mastrino di Banca, Crediti clienti, Debiti fornitori, Impianti e Fondo; leggi i saldi al 30/09/2028.",
+   "cosa_scrivere": [
+    {
+     "campo": "Banca",
+     "valore": "50.000 Dare"
+    },
+    {
+     "campo": "Crediti clienti",
+     "valore": "26.000 Dare"
+    },
+    {
+     "campo": "Debiti fornitori",
+     "valore": "18.000 Avere"
+    },
+    {
+     "campo": "Impianti netti",
+     "valore": "30.000 − 6.500 = 23.500"
+    }
+   ],
+   "prima_di_confermare": [
+    "Distingui partite nuove (Alfa 6.000, Beta 2.000, Gamma 2.000) dai saldi iniziali"
+   ],
+   "risultato_atteso": "Saldi coincidenti: il programma li ricalcola dai tuoi documenti.",
+   "se_sbaglio": "Se un saldo non torna, il controllo indica quale: cerca registrazioni mancanti, doppie o su conto sbagliato.",
+   "dipende_da": [
+    "B8-02",
+    "B8-03",
+    "B8-04",
+    "B8-05",
+    "B8-06",
+    "B8-07",
+    "B8-08",
+    "B8-09"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 7
+   },
+   "validator": {
+    "tipo": "saldi",
+    "saldi": {
+     "banca": 50000,
+     "crediti": 26000,
+     "debiti": -18000,
+     "impianti_netti": 23500
+    },
+    "residui": {
+     "B8-02": 6000,
+     "B8-03": 2000,
+     "B8-04": 2000
+    }
+   }
+  },
+  {
+   "id": "B8-11",
+   "titolo": "Controlling: costi per centro e scostamenti",
+   "tipo": "controllo",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     8,
+     9
+    ]
+   },
+   "obiettivo": "Leggere i costi per centro e calcolare lo scostamento dal budget (consuntivo − budget).",
+   "prerequisiti": [
+    "B8-02…B8-09 verificati"
+   ],
+   "funzione": {
+    "tcode": "S_ALR_87013611",
+    "endpoint": "costs.report",
+    "menu": "Controlling → Report centri di costo"
+   },
+   "cosa_cliccare": "Apri il report centri di costo nella tua azienda e confronta con il budget di settembre.",
+   "cosa_scrivere": [
+    {
+     "campo": "CC-PROD",
+     "valore": "13.500 (budget 13.000 → +500 sfavorevole)"
+    },
+    {
+     "campo": "CC-AMM",
+     "valore": "3.000 (budget 3.500 → −500 favorevole)"
+    },
+    {
+     "campo": "Totale",
+     "valore": "16.500 = budget 16.500"
+    }
+   ],
+   "prima_di_confermare": [
+    "Uno scostamento totale pari a zero non esclude criticità nei singoli centri"
+   ],
+   "risultato_atteso": "CC-PROD 13.500, CC-AMM 3.000, totale 16.500.",
+   "se_sbaglio": "Se un centro non torna, controlla i centri di costo sulle righe di costo dei documenti B8-03, 04, 07, 08, 09.",
+   "dipende_da": [
+    "B8-03",
+    "B8-04",
+    "B8-07",
+    "B8-08",
+    "B8-09"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 8
+   },
+   "validator": {
+    "tipo": "centri",
+    "centri": {
+     "CC-PROD": 13500,
+     "CC-AMM": 3000
+    },
+    "budget": {
+     "CC-PROD": 13000,
+     "CC-AMM": 3500
+    }
+   }
+  },
+  {
+   "id": "B8-12",
+   "titolo": "Bilancio di verifica e risultato del mese",
+   "tipo": "controllo",
+   "obbligatorio": true,
+   "fonte": {
+    "blocco": 8,
+    "pagine": [
+     10
+    ]
+   },
+   "obiettivo": "Verificare quadratura dei movimenti del mese, risultato e situazione patrimoniale.",
+   "prerequisiti": [
+    "B8-10 e B8-11 verificati"
+   ],
+   "funzione": {
+    "tcode": "F.08",
+    "endpoint": "chiusure.bilancio_verifica",
+    "menu": "Chiusure → Bilancio di verifica"
+   },
+   "cosa_cliccare": "Genera il bilancio di verifica della tua azienda fino al 30/09/2028.",
+   "cosa_scrivere": [
+    {
+     "campo": "Movimenti del mese",
+     "valore": "Dare 51.500 = Avere 51.500 (esclusa l'apertura)"
+    },
+    {
+     "campo": "Risultato",
+     "valore": "18.000 − 16.500 = 1.500 (margine 8,33%)"
+    },
+    {
+     "campo": "Totale patrimoniale",
+     "valore": "99.500 = 99.500"
+    }
+   ],
+   "prima_di_confermare": [
+    "La quadratura formale non basta: i passi precedenti hanno già controllato conti, soggetti e centri"
+   ],
+   "risultato_atteso": "Movimenti 51.500, risultato 1.500, totale 99.500.",
+   "se_sbaglio": "Se i movimenti superano 51.500, hai registrazioni in più non stornate.",
+   "dipende_da": [
+    "B8-10",
+    "B8-11"
+   ],
+   "approfondimento": {
+    "blocco": 8,
+    "pagina": 10
+   },
+   "validator": {
+    "tipo": "quadratura",
+    "movimenti_mese": 51500,
+    "risultato": 1500,
+    "totale_patrimoniale": 99500
+   }
+  }
+ ]
+}

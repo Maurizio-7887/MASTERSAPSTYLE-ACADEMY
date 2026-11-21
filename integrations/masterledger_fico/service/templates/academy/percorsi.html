@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}La mia esercitazione FI/CO{% endblock %}
+{% block content %}
+<div style="max-width:1000px;margin:auto;font-family:system-ui,Segoe UI,Arial,sans-serif;color:#17324a">
+  <div style="background:#fff4d6;border:1px solid #e0b64a;color:#6b4a00;padding:8px 14px;border-radius:8px;font-weight:700">AMBIENTE FORMATIVO — DATI SIMULATI</div>
+  <h1>La mia esercitazione — percorsi pratici verificati</h1>
+  <p>Ogni esercitazione usa una <b>azienda didattica personale</b>: le tue registrazioni non toccano quelle degli altri. L'avanzamento è salvato sul server: puoi chiudere il browser e riprendere da un altro dispositivo.</p>
+  {% for v in voci %}
+  <div style="background:#fff;border:1px solid #cddbea;border-radius:12px;padding:20px;margin:14px 0">
+    <h2 style="margin-top:0">{{ v.sc.titolo }}</h2>
+    <p style="font-size:14px;color:#4d6b88">{{ v.sc.passi|length }} passi obbligatori · versione {{ v.sc.versione }} · {{ v.sc.avviso }}</p>
+    {% if v.sessione %}
+      <p>Sessione in corso nell'azienda <b>{{ v.sessione.company.code }}</b>: <b>{{ v.contatore.verificati }} / {{ v.contatore.totale }} — {{ v.contatore.percentuale }}%</b></p>
+      <form method="post" action="{{ url_for('academy.percorso_riprendi', session_id=v.sessione.id) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" style="background:#0f7b52;color:#fff;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer">Riprendi dall'ultimo passo verificato</button>
+      </form>
+    {% endif %}
+    <form method="post" action="{{ url_for('academy.percorso_avvia') }}" style="display:inline-flex;gap:8px;align-items:center;margin-left:8px"
+          onsubmit="return {{ 'confirm(\'Avviare una NUOVA esercitazione? La sessione attuale resta archiviata ma non sarà più quella attiva.\')' if v.sessione else 'true' }};">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="scenario_id" value="{{ v.sc.id }}">
+      <select name="mode"><option value="studio">Studio guidato</option><option value="allenamento">Allenamento</option><option value="prova">Prova autonoma</option></select>
+      <button type="submit" style="background:#173d64;color:#fff;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer">{{ 'Nuova esercitazione' if v.sessione else 'Inizia' }}</button>
+    </form>
+  </div>
+  {% endfor %}
+  {% if current_user.is_commercialista %}<p><a href="{{ url_for('academy.percorso_classe') }}">Vista docente: avanzamento della classe</a></p>{% endif %}
+</div>
+{% endblock %}

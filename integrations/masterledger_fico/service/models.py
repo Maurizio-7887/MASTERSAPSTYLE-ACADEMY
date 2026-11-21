@@ -1461,3 +1461,44 @@ class SupplierQuotation(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     supplier = db.relationship("EconomicSubject")
     purchase_order = db.relationship("PurchaseOrder")
+
+
+# ══════════════════════════════════════════════════════════════════════
+# ACADEMY — percorsi pratici verificati (STYLESAPFICO, Fase C)
+#
+# Ogni sessione di pratica appartiene a UNA persona e ha una propria azienda
+# didattica (Company): tutte le registrazioni dell'esercizio portano quel
+# company_id, così due allievi non si vedono né si modificano i dati.
+# L'avanzamento vive nel database e viene deciso dal server leggendo i
+# documenti registrati, mai da uno stato inviato dal browser.
+# ══════════════════════════════════════════════════════════════════════
+class AcademySession(db.Model):
+    __tablename__ = "academy_sessions"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    scenario_id = db.Column(db.String(40), nullable=False)
+    scenario_version = db.Column(db.String(10), nullable=False)
+    company_id = db.Column(db.Integer, db.ForeignKey("companies.id"), nullable=True)
+    mode = db.Column(db.String(12), nullable=False, default="studio")  # studio | allenamento | prova
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User")
+    company = db.relationship("Company")
+    results = db.relationship("AcademyStepResult", backref="session", lazy="dynamic",
+                              cascade="all, delete-orphan")
+
+
+class AcademyStepResult(db.Model):
+    __tablename__ = "academy_step_results"
+    __table_args__ = (db.UniqueConstraint("session_id", "step_id", name="uq_academy_step_session"),)
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("academy_sessions.id"), nullable=False, index=True)
+    step_id = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(12), nullable=False, default="da_fare")  # verificato | da_rivedere | invalidato
+    evidence = db.Column(db.Text)          # JSON: documenti e valori osservati sul server
+    message = db.Column(db.String(500))
+    attempts = db.Column(db.Integer, nullable=False, default=0)
+    verified_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)

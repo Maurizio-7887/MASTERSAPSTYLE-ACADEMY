@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ sc.titolo }}{% endblock %}
+{% block content %}
+<style>
+.pc-wrap{max-width:1150px;margin:auto;font-family:system-ui,Segoe UI,Arial,sans-serif;color:#17324a}
+.pc-banner{background:#fff4d6;border:1px solid #e0b64a;color:#6b4a00;padding:8px 14px;border-radius:8px;font-weight:700;letter-spacing:.02em;margin-bottom:12px}
+.pc-head{background:#173d64;color:#fff;border-radius:12px;padding:18px 22px;display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+.pc-head h1{margin:0;font-size:22px}.pc-head small{color:#cfe0f2}
+.pc-count{font-size:28px;font-weight:800}.pc-bar{height:10px;background:#2f5d88;border-radius:9px;overflow:hidden;min-width:260px;margin-top:6px}.pc-bar div{height:100%;background:#5fd39b}
+.pc-warn{background:#fdecec;border:1px solid #e3a3a3;color:#7d1d1d;padding:12px 15px;border-radius:8px;margin:12px 0}
+.pc-step{background:#fff;border:1px solid #cddbea;border-radius:11px;margin:12px 0;overflow:hidden}
+.pc-step>summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;gap:12px;align-items:center;font-weight:700}
+.pc-step>summary::-webkit-details-marker{display:none}
+.pc-badge{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:700;white-space:nowrap}
+.st-verificato{background:#dcf5e7;color:#145c35}.st-da_rivedere{background:#fde7e4;color:#8a2216}.st-invalidato{background:#fff1d6;color:#7a4a00}.st-da_fare{background:#e9eff6;color:#3b5570}
+.pc-body{padding:4px 22px 20px;border-top:1px solid #e3ebf4}
+.pc-body h4{margin:16px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:#4d6b88}
+.pc-body table{border-collapse:collapse;width:100%;font-size:14px}.pc-body td{border:1px solid #e1e9f2;padding:6px 9px}.pc-body td:first-child{width:34%;color:#4d6b88}
+.pc-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.pc-btn{border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+.pc-open{background:#e9f0f8;color:#173d64}.pc-verify{background:#0f7b52;color:#fff}
+.pc-esito{margin-top:12px;padding:11px 14px;border-radius:8px;font-size:14px;white-space:pre-wrap}
+.pc-esito.ok{background:#dcf5e7;color:#145c35}.pc-esito.ko{background:#fde7e4;color:#8a2216}
+.pc-tcode{font-family:ui-monospace,Consolas,monospace;background:#eef3f8;border-radius:5px;padding:1px 6px}
+</style>
+<div class="pc-wrap">
+  <div class="pc-banner">AMBIENTE FORMATIVO — DATI SIMULATI · {{ sc.avviso }}</div>
+  <div class="pc-head">
+    <div>
+      <h1>{{ sc.titolo }}</h1>
+      <small>Azienda didattica <b>{{ s.company.code if s.company else '—' }}</b> · modalità {{ s.mode }} · versione {{ s.scenario_version }} · ultimo salvataggio {{ s.updated_at.strftime('%d/%m/%Y %H:%M') if s.updated_at else '—' }}</small>
+    </div>
+    <div>
+      <div>Passi obbligatori verificati: <span class="pc-count" id="cont">{{ cont.verificati }} / {{ cont.totale }} — {{ cont.percentuale }}%</span></div>
+      <div class="pc-bar"><div id="contbar" style="width:{{ cont.percentuale }}%"></div></div>
+      <small id="prossimo">{% if cont.prossimo %}Prossimo passo: {{ cont.prossimo }}{% else %}Percorso completato{% endif %}</small>
+    </div>
+  </div>
+
+  {% if not azienda_ok %}
+  <div class="pc-warn"><b>Attenzione:</b> l'azienda selezionata in alto non è la tua azienda didattica: quello che registri finirebbe altrove.
+    <form method="post" action="{{ url_for('academy.percorso_riprendi', session_id=s.id) }}" style="display:inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="pc-btn pc-open" type="submit">Riprendi nella mia azienda</button></form></div>
+  {% endif %}
+
+  <p style="font-size:14px;color:#4d6b88">Ogni passo: leggi, premi <b>Apri la funzione</b> (si apre in una seconda scheda, così questa guida resta ferma), registra, poi torna qui e premi <b>Verifica il mio passo</b>. Il controllo legge i documenti salvati nella tua azienda: non basta scrivere una cifra.</p>
+
+  {% for p in sc.passi %}
+  {% set r = risultati.get(p.id) %}
+  {% set st = r.status if r else 'da_fare' %}
+  <details class="pc-step" id="passo-{{ p.id }}" {{ 'open' if p.id == cont.prossimo }}>
+    <summary><span class="pc-badge st-{{ st }}" id="badge-{{ p.id }}">{{ {'verificato':'✓ Verificato','da_rivedere':'✗ Da rivedere','invalidato':'⚠ Non più valido','da_fare':'Da fare'}[st] }}</span>
+      <span>{{ p.id }} · {{ p.titolo }}</span></summary>
+    <div class="pc-body">
+      <h4>1 · Obiettivo</h4><div>{{ p.obiettivo }}</div>
+      <h4>2 · Prerequisiti</h4><div>{{ p.prerequisiti|join(' · ') }}</div>
+      <h4>3 · Dove andare</h4><div><span class="pc-tcode">{{ p.funzione.tcode }}</span> · {{ p.funzione.menu }}</div>
+      {% if s.mode != 'prova' %}
+      <h4>4 · Cosa cliccare</h4><div>{{ p.cosa_cliccare }}</div>
+      <h4>5 · Cosa scrivere</h4>
+      <table>{% for c in p.cosa_scrivere %}<tr><td>{{ c.campo }}</td><td><b>{{ c.valore }}</b></td></tr>{% endfor %}</table>
+      <h4>6 · Prima di confermare</h4><ul style="margin:4px 0">{% for c in p.prima_di_confermare %}<li>{{ c }}</li>{% endfor %}</ul>
+      <h4>7 · Risultato atteso</h4><div>{{ p.risultato_atteso }}</div>
+      <h4>9 · Se sbaglio</h4><div>{{ p.se_sbaglio }}</div>
+      {% else %}
+      <p><i>Prova autonoma: istruzioni e risultati attesi nascosti.</i></p>
+      {% endif %}
+      <h4>10 · Approfondimento</h4><div><a href="{{ url_for('academy.chapter', number=p.approfondimento.blocco) }}#p{{ p.approfondimento.pagina }}" target="fico_manuale">Blocco {{ p.fonte.blocco }}, pagine {{ p.fonte.pagine|join(', ') }}</a></div>
+      <div class="pc-actions">
+        {% if link[p.id] %}<a class="pc-btn pc-open" href="{{ link[p.id] }}" target="fico_lavoro">Apri la funzione {{ p.funzione.tcode }} ↗</a>{% endif %}
+        <button class="pc-btn pc-verify" type="button" data-step="{{ p.id }}">8 · Verifica il mio passo</button>
+      </div>
+      <div class="pc-esito {{ 'ok' if st == 'verificato' else ('ko' if r else '') }}" id="esito-{{ p.id }}" {{ '' if r else 'hidden' }}>{{ r.message if r else '' }}</div>
+    </div>
+  </details>
+  {% endfor %}
+  <p style="font-size:12px;color:#6b8299">Il 100% dei passi non equivale a un voto né a una certificazione: la valutazione didattica resta separata.</p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  const token = "{{ csrf_token() }}";
+  const labels = {verificato:'✓ Verificato', da_rivedere:'✗ Da rivedere', invalidato:'⚠ Non più valido', da_fare:'Da fare'};
+  document.querySelectorAll('.pc-verify').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.dataset.step, box = document.getElementById('esito-' + id);
+    btn.disabled = true; btn.textContent = 'Verifica in corso…';
+    try {
+      const res = await fetch("{{ url_for('academy.percorso_verifica', session_id=s.id, step_id='STEP') }}".replace('STEP', encodeURIComponent(id)),
+        {method:'POST', headers:{'X-CSRFToken': token, 'Accept':'application/json'}, credentials:'same-origin'});
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      box.hidden = false; box.textContent = d.messaggio;
+      box.className = 'pc-esito ' + (d.stato === 'verificato' ? 'ok' : 'ko');
+      const b = document.getElementById('badge-' + id); b.className = 'pc-badge st-' + d.stato; b.textContent = labels[d.stato] || d.stato;
+      const c = d.contatore;
+      document.getElementById('cont').textContent = c.verificati + ' / ' + c.totale + ' — ' + c.percentuale + '%';
+      document.getElementById('contbar').style.width = c.percentuale + '%';
+      document.getElementById('prossimo').textContent = c.prossimo ? 'Prossimo passo: ' + c.prossimo : 'Percorso completato';
+    } catch (e) {
+      box.hidden = false; box.className = 'pc-esito ko';
+      box.textContent = 'Verifica NON salvata (' + e.message + '). Ricarica la pagina e riprova: nessuna spunta è stata assegnata.';
+    } finally { btn.disabled = false; btn.textContent = '8 · Verifica il mio passo'; }
+  }));
+})();
+</script>
+{% endblock %}
