@@ -37,3 +37,14 @@ def set_azienda_corrente(company_id):
         session[SESSION_KEY] = int(company_id)
     else:
         session.pop(SESSION_KEY, None)
+
+
+def filtra_per_azienda(query):
+    """Applica il filtro dell'azienda corrente a una query che contiene già
+    JournalEntry (join). Nessuna azienda scelta = 'Tutte le aziende' = query
+    invariata, come sempre."""
+    from models import JournalEntry
+    azienda = get_azienda_corrente()
+    if azienda:
+        query = query.filter(JournalEntry.company_id == azienda.id)
+    return query

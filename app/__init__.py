@@ -34,6 +34,7 @@ from .blueprints.erp_finanza import bp as erp_finanza
 from .blueprints.erp_valute import bp as erp_valute
 from .blueprints.erp_vendite import bp as erp_vendite
 from .blueprints.formazione import bp as formazione
+from .blueprints.fico_ponte import bp as fico_ponte
 from .blueprints.guida import bp as guida
 from .blueprints.impostazioni import bp as impostazioni
 from .blueprints.personale import bp as personale
@@ -54,7 +55,7 @@ BLUEPRINT = [executive_api, portale, privati, public_stats, accessi, sincronia, 
              impostazioni, pianificazione, contabilita, controllo, personale,
              vendite_acquisti, produzione, reportistica, alta_varieta, ripetitiva, formazione,
              erp_dati, erp_vendite, erp_acquisti, erp_produzione, erp_controllo, erp_costi, erp_bpc, erp_magazzino, erp_inventario, erp_spedizione, erp_innovazione, erp_tesoreria, erp_finanza, erp_valute, erp_paghe, erp_copa, erp_fi, erp_cespiti, erp_chiusura,
-             ragioneria_quiz]
+             ragioneria_quiz, fico_ponte]
 
 
 def create_app():
@@ -79,7 +80,8 @@ def create_app():
 
     @app.context_processor
     def comuni():
-        return {"utente_corrente": accesso.utente_corrente, "csrf_token": accesso.csrf_token,
+        from .blueprints.fico_ponte import fico_attivo
+        return {"utente_corrente": accesso.utente_corrente, "csrf_token": accesso.csrf_token, "fico_attivo": fico_attivo(),
                 "durata": accesso.durata, "ora_italiana": ora_italiana}
 
     @app.template_filter("ore")

@@ -2,7 +2,7 @@
 from datetime import timedelta
 from urllib.parse import urlparse
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, make_response, redirect, render_template, request, session, url_for
 
 from ...accesso import apri_sessione, csrf_token, csrf_valido, utente_corrente
 from ...db import Utente, adesso, db
@@ -70,7 +70,11 @@ def accesso():
 @bp.route("/esci", methods=["POST"])
 def esci():
     session.clear()
-    return render_template("accessi/uscita.html")
+    resp = make_response(render_template("accessi/uscita.html"))
+    # Uscita coordinata: chiude anche la sessione del programma FI/CO (/fico)
+    for nome in ("masterledger_fico_session", "masterledger_fico_remember"):
+        resp.delete_cookie(nome, path="/fico")
+    return resp
 
 
 @bp.route("/password", methods=["GET", "POST"])

@@ -1502,3 +1502,12 @@ class AcademyStepResult(db.Model):
     attempts = db.Column(db.Integer, nullable=False, default=0)
     verified_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class AcademyBridgeTicket(db.Model):
+    """Biglietti di accesso dal portale già usati: ogni biglietto vale una volta sola."""
+    __tablename__ = "academy_bridge_tickets"
+    id = db.Column(db.Integer, primary_key=True)
+    nonce = db.Column(db.String(64), unique=True, nullable=False)
+    portal_user_id = db.Column(db.Integer, nullable=False)
+    used_at = db.Column(db.DateTime, default=datetime.utcnow)

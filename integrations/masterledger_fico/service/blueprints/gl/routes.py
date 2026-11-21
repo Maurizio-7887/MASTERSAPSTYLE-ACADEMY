@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from extensions import db
 from models import Account, AccountMapping, CostCenter, JournalEntry, JournalLine, EconomicSubject
 from services.posting import post_journal_entry, reverse_journal_entry, UnbalancedEntryError, PeriodClosedError
-from services.azienda_corrente import get_azienda_corrente
+from services.azienda_corrente import get_azienda_corrente, filtra_per_azienda
 from services.co import validate_co_assignment, COValidationError
 from services.ai_posting import suggerisci_scrittura, estrai_testo_pdf, AISuggestionError
 from services.classificazione_operazioni import classifica, guida_per_classe, CLASSI_OPERAZIONE
@@ -144,7 +144,7 @@ def libro_mastro():
         parsed_from = parsed_to = None
         date_from = date_to = None
 
-    query = JournalLine.query.join(JournalEntry)
+    query = filtra_per_azienda(JournalLine.query.join(JournalEntry))
     if parsed_from:
         query = query.filter(JournalEntry.doc_date >= parsed_from)
     if parsed_to:
@@ -635,7 +635,7 @@ def cost_center_ledger(center_id):
     date_from = request.args.get("date_from") or None
     date_to = request.args.get("date_to") or None
 
-    query = (JournalLine.query.join(JournalEntry)
+    query = filtra_per_azienda(JournalLine.query.join(JournalEntry)
             .filter(JournalLine.cost_center_id == center_id, JournalEntry.is_reversed.is_(False)))
     if date_from:
         try:
@@ -676,8 +676,8 @@ def mastrino_conto(account_id):
         parsed_from = parsed_to = None
         date_from = date_to = None
 
-    base_query = (JournalLine.query.join(JournalEntry)
-                  .filter(JournalLine.account_id == account_id))
+    base_query = filtra_per_azienda(JournalLine.query.join(JournalEntry)
+                                    .filter(JournalLine.account_id == account_id))
     saldo_iniziale = Decimal("0")
     if parsed_from:
         prior = base_query.filter(JournalEntry.doc_date < parsed_from).all()
@@ -719,8 +719,8 @@ def partitario(economic_subject_id):
     """
     party = EconomicSubject.query.get_or_404(economic_subject_id)
 
-    entries = (JournalEntry.query
-               .filter(JournalEntry.economic_subject_id == economic_subject_id)
+    entries = (filtra_per_azienda(JournalEntry.query
+                                  .filter(JournalEntry.economic_subject_id == economic_subject_id))
                .order_by(JournalEntry.doc_date.asc(), JournalEntry.id.asc())
                .all())
 
