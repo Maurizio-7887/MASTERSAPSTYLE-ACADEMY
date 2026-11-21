@@ -79,12 +79,24 @@ S("C17", "N17-03", 2, "1/1: riapri il conto Merci, chiuso al 31/12 con 3.000 €
   [([("Variazione rimanenze merci", "D", 3000), ("Merci", "A", 3000)], "Questa è la seconda scrittura del 1/1 (giro a costo): prima si riapre il conto."),
    ([("Stato patrimoniale iniziale", "D", 3000), ("Merci", "A", 3000)], "Un'attività si riapre in Dare, con il suo saldo dare.")],
   "Riapertura: giro opposto alla chiusura, poi le rimanenze iniziali tornano a costo.")
-T("C17", "N17-04", 3, "Ferro: carichi dell'anno 2.800 kg a 1,00 €/kg e 500 kg a 1,08 €/kg; in magazzino restano 740 kg. Valore delle rimanenze a costo medio ponderato?",
-  "748,97 €",
-  [("740,00 €", "È il LIFO: restano i lotti più vecchi, a 1,00 €/kg."),
-   ("780,00 €", "È il FIFO: restano i lotti più recenti (500 × 1,08 + 240 × 1,00)."),
-   ("703,00 €", "È il costo standard del gestionale SAP (0,95 €/kg), non il costo medio ponderato.")],
-  "Costo medio = (2.800 + 540) ÷ 3.300 = 1,0121 €/kg; 740 × 1,0121 = 748,97 €.", area="applicazione")
+T("C17", "N17-04", 3, "Ferro: carichi dell'anno 2.800 kg a 1,00 €/kg e 500 kg a 1,08 €/kg; a sistema restano 740 kg, ma l'inventario fisico ne conta 728. Valore delle rimanenze a costo medio ponderato?",
+  "736,82 €",
+  [("748,97 €", "Sono i 740 kg a sistema: in bilancio va la quantità contata, 728 kg."),
+   ("768,00 €", "È il FIFO: restano i lotti più recenti (500 × 1,08 + 228 × 1,00)."),
+   ("691,60 €", "È il costo standard del gestionale SAP (728 × 0,95), non il costo medio ponderato.")],
+  "Costo medio = (2.800 + 540) ÷ 3.300 = 1,0121 €/kg; 728 × 1,0121 = 736,82 €.", area="applicazione")
+T("C17", "N17-05", 2, "Inventario del 31/12: una colata di ferro risulta 500 kg a sistema e 488 kg alla bilancia; costo 0,95 €/kg, tolleranza 10 € per posizione. Che cosa si fa?",
+  "Differenza −11,40 €, oltre la tolleranza: riconta e ricerca dei documenti prima della rettifica",
+  [("Si rettifica subito di −12 kg", "Sopra la tolleranza la differenza va prima ricontata da un'altra persona e spiegata con un documento."),
+   ("Si accetta: 12 kg sono pochi", "Conta il valore, non i chili: 12 × 0,95 = 11,40 € supera la soglia di 10 €."),
+   ("Si ripesa finché torna 500", "La conta non si piega al sistema: la differenza si verifica e, se confermata, si rettifica con autorizzazione.")],
+  "Differenza = contato − contabile = −12 kg; × 0,95 = −11,40 €, sopra i 10 €: riconta, causa documentata (qui il buono BP-2912), poi rettifica 711 autorizzata.", area="applicazione")
+T("C17", "N17-06", 2, "Al 31/12 un fascio di ferro da 1.000 € è in viaggio verso di noi con resa DAP (franco destino). Va nelle nostre rimanenze?",
+  "No: con resa DAP i rischi passano all'arrivo, al 31/12 la merce è ancora del fornitore",
+  [("Sì, se la fattura è già pagata", "Il pagamento non conta: conta chi ha rischi e benefici alla data."),
+   ("Sì, sommandola al peso della catasta", "La merce in viaggio non è in catasta: anche quando è nostra si indica a parte."),
+   ("Sì, al costo più il trasporto", "Così si valorizza la merce in viaggio già nostra, cioè con resa franco partenza (EXW, FCA).")],
+  "Resa franco destino (DAP, DPU, DDP): rischi al venditore fino all'arrivo, si esclude. Franco partenza (EXW, FCA, FOB): si include al costo più oneri accessori.")
 
 S("C20", "N20-01", 2, "31/12: chiudi il risconto attivo di 900 € sul premio assicurativo.",
   [("Stato patrimoniale finale", "D", 900), ("Risconti attivi", "A", 900)],

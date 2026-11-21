@@ -76,3 +76,22 @@ assert "PISTOIA · 80 ORE" not in firenze_html
 # La pagina avvio ha la barra compatta soltanto una volta.
 assert pistoia_html.count('aria-label="Strumenti del corso di magazzino"') == 1
 assert firenze_html.count('aria-label="Strumenti del corso di magazzino"') == 1
+
+# Laboratorio 2 Inventari: materiali di preparazione; il correttore (con le soluzioni) solo al docente.
+for nome in ["laboratorio-2", "teoria-slide", "teoria-manualetto", "correttore"]:
+    assert c.get("/vuoto/uf9-pistoia/materiali/" + nome).status_code == 200, nome
+assert c.get("/vuoto/uf9-pistoia/materiali/inesistente").status_code == 404
+assert "uf9-pistoia/materiali/laboratorio-2" in exam and "Laboratorio 2 Inventari" in exam
+assert "INV-LAB2-2026-FIRENZE" in c.get("/vuoto/uf9-pistoia/materiali/laboratorio-2").get_data(as_text=True)
+from tests._client import entra
+from app.db import Utente, db
+from wsgi import app
+with app.app_context():
+    if not Utente.query.filter_by(username="allievo-uf9").first():
+        u = Utente(username="allievo-uf9", nome="Allievo UF9", ruolo="allievo", deve_cambiare_password=False)
+        u.imposta_password("password-allievo-uf9")
+        db.session.add(u); db.session.commit()
+a = entra("allievo-uf9", "password-allievo-uf9")
+assert a.get("/vuoto/uf9-pistoia/materiali/laboratorio-2").status_code == 200
+assert a.get("/vuoto/uf9-pistoia/materiali/correttore").status_code == 403
+print("OK Laboratorio 2: materiali in pagina, correttore riservato al docente")

@@ -180,19 +180,27 @@ TEORIA_PROFESSIONALE = {
       ],
       [
         "Procedura e separazione delle responsabilità",
-        "Il documento inventariale delimita quali posizioni contare e quando. La conta cieca non mostra preventivamente la quantità teorica all'operatore e riduce il rischio di adeguare la misura al numero atteso. La riconta interviene dove gli scostamenti richiedono conferma, eventualmente con un secondo addetto. La rettifica deve essere autorizzata e tracciabile; non sostituisce l'analisi delle cause, che possono includere prelievi non confermati, resi, scarti, trasferimenti o unità di misura non coerenti."
+        "Il documento inventariale delimita quali posizioni contare e quando. La conta cieca non mostra preventivamente la quantità teorica all'operatore e riduce il rischio di adeguare la misura al numero atteso. La differenza si calcola sempre come contato meno contabile e si valorizza al costo: si confronta, posizione per posizione e mai sul totale, con la tolleranza fissata dall'azienda. La riconta interviene dove gli scostamenti superano la soglia, con un secondo addetto diverso da chi ha contato. La rettifica deve essere autorizzata e tracciabile; non sostituisce l'analisi delle cause, che possono includere prelievi non confermati, resi, scarti, trasferimenti o unità di misura non coerenti."
+      ],
+      [
+        "Perimetro, cut-off e posizioni",
+        "Prima di contare si decide che cosa, dove e da quando. Il perimetro comprende solo i beni dell'azienda, anche se si trovano presso terzi, ed esclude i beni di terzi in deposito, la merce già venduta in attesa di ritiro e i materiali di consumo. Il cut-off fissa data e ora oltre le quali nessun movimento entra nel conteggio: si annotano l'ultimo DDT d'entrata e d'uscita e la merce che arriva dopo resta separata. Il documento inventariale elenca le posizioni: una posizione è un articolo, o un lotto, in un'ubicazione. Una catasta con due colate vale due posizioni; un'ubicazione vuota vale una posizione da confermare a zero, perché potrebbe contenere merce non registrata."
+      ],
+      [
+        "Causa documentata e causale della rettifica",
+        "Le cause più frequenti di una differenza sono prelievi non registrati, errori di registrazione, unità di misura sbagliate, cut-off non rispettato, cali e scarti. Il furto si ipotizza solo dopo aver escluso le altre cause e non lo decide chi conta. Una causa si dimostra con un documento; se il documento non c'è, si scrive che la differenza è un ammanco verificato con riconta. La causale della rettifica deve permettere a chiunque di ricostruire il fatto: articolo e lotto, conferma del riconteggio, documento trovato e numero dell'autorizzazione. Nell'esercizio di dicembre: COL-1206 −12 kg, buono BP-2912, AUT-2026-12."
       ],
       [
         "Inventario rotativo e classificazione ABC",
-        "L'inventario annuale verifica una situazione a una data. Le conte cicliche distribuiscono il controllo nel corso dell'anno e possono concentrarsi sugli articoli più critici o a più alta rotazione. L'analisi ABC classifica gli articoli in funzione del criterio adottato, per esempio valore di consumo. Articoli di classe A richiedono spesso un presidio più frequente, ma la frequenza dipende anche da rischio, criticità e caratteristiche del processo."
+        "L'inventario annuale verifica una situazione a una data. Le conte inframese di controllo bloccano solo le posizioni contate, non comportano scritture di assestamento e, se tornano, restringono il periodo in cui cercare una differenza successiva. Le conte cicliche distribuiscono il controllo nel corso dell'anno e possono concentrarsi sugli articoli più critici o a più alta rotazione. L'analisi ABC classifica gli articoli in funzione del criterio adottato, per esempio valore di consumo. Articoli di classe A richiedono spesso un presidio più frequente, ma la frequenza dipende anche da rischio, criticità e caratteristiche del processo."
       ],
       [
         "Dalla quantità al valore",
-        "Una differenza di -12 kg non significa automaticamente un valore economico uguale a -12 euro. Occorre applicare un criterio di valorizzazione delle scorte. Per questo la funzione inventariale dialoga con la contabilità di magazzino, pur non richiedendo al magazziniere di registrare mutui, stipendi o imposte. La rettifica deve avere un fondamento documentale e un responsabile."
+        "Una differenza di -12 kg non significa automaticamente un valore economico uguale a -12 euro. Occorre applicare un criterio di valorizzazione delle scorte: al costo standard di 0,95 euro al kg i 12 kg valgono 11,40 euro, il kit mancante 14,60 euro. Nel gestionale il movimento 711 porta i 26,00 euro al conto delle differenze inventariali. Per questo la funzione inventariale dialoga con la contabilità di magazzino, pur non richiedendo al magazziniere di registrare mutui, stipendi o imposte. La rettifica deve avere un fondamento documentale e un responsabile."
       ],
       [
         "Applicazione",
-        "Il tutor prevede LI01N per creare il documento, RF per la conta, LI14 per la riconta e LI20/LI21 per la chiusura e registrazione della differenza. Far annotare per F-01 e F-02 quantità teorica, quantità contata, differenza e motivazione, senza procedere alla rettifica finché non siano state eseguite le verifiche previste."
+        "Il tutor prevede LI01N per creare il documento, RF per la conta, LI14 per la riconta e LI20/LI21 per la chiusura e registrazione della differenza. Nell'esercizio di dicembre si contano F-02 (COL-1204 240 kg, COL-1206 488 kg), il cassone 03-05-2 (19 kit) e le nove ubicazioni vuote. Far annotare per ogni posizione quantità teorica, quantità contata, differenza, valore e motivazione, senza procedere alla rettifica finché non siano state eseguite le verifiche previste. Per allenarsi alla prova si usa il Laboratorio 2 Inventari."
       ]
     ],
     "kpi": "Accuratezza inventariale, numero differenze per ubicazione, valore delle rettifiche, percentuale conte completate.",
@@ -219,11 +227,38 @@ TEORIA_PROFESSIONALE = {
       ],
       [
         "Applicazione nel simulatore",
-        "La prova comprende una rimanenza di ferro di 438 kg e un costo standard didattico di 0,95 euro/kg: il valore teorico standard è 416,10 euro. Prima di compilare un prospetto, verificare quale quantità sia effettivamente registrata e se i movimenti siano tutti presenti. Non inventare un secondo acquisto per ottenere valori FIFO e LIFO differenti: il confronto a due lotti si può svolgere su carta come esercizio separato."
+        "Nell'esercizio di dicembre restano 728 kg di ferro dopo l'inventario, da acquisti di 2.800 kg a 1,00 euro e 500 kg a 1,08 euro: FIFO 768,00, LIFO 728,00, costo medio 1,0121 euro/kg cioè 736,82, costo standard 691,60 euro. La prova UF 9 del portale usa invece una rimanenza di ferro di 438 kg allo standard di 0,95 euro/kg: 416,10 euro. Prima di compilare un prospetto, verificare quale quantità sia effettivamente registrata e se i movimenti siano tutti presenti. Non inventare un secondo acquisto per ottenere valori FIFO e LIFO differenti: il confronto a due lotti si può svolgere su carta come esercizio separato."
       ]
     ],
     "kpi": "Valore rimanenze, costo medio, differenze prezzo-standard, coerenza tra quantità e valore.",
     "error": "Confondere valore a magazzino e prezzo vendita, presentare LIFO come metodo universalmente consentito, variare quantità per modificare il valore."
+  },
+  "chiusura": {
+    "ob": "Decidere se la merce in viaggio entra nelle rimanenze e a che valore, usare l'inventario inframese come controllo, portare in bilancio rimanenze riconciliate con le scritture corrette.",
+    "sections": [
+      [
+        "Rischi e benefici: la resa decide",
+        "Il criterio del principio contabile OIC 13 è il passaggio dei rischi e dei benefici, che il contratto esprime con la resa, di solito un Incoterm 2020. Con le rese franco partenza (EXW, FCA, FOB) l'acquirente sopporta il rischio dalla consegna al vettore: per lui la merce in viaggio è già una rimanenza. Con le rese franco destino (DAP, DPU, DDP) il rischio resta al venditore fino all'arrivo: l'acquirente non la include. Non contano né la presenza fisica né il pagamento: una merce pagata ma con resa DAP resta fuori, una merce non ancora pagata ma con resa EXW è dentro."
+      ],
+      [
+        "Il valore della merce in viaggio",
+        "La merce in viaggio già nostra si valorizza al costo d'acquisto più gli oneri accessori a nostro carico: trasporto, assicurazione, dazi. Si registra a parte come merce in viaggio e non si aggiunge al conteggio delle ubicazioni, che deve restare la fotografia vera degli scaffali. All'arrivo la merce si carica a magazzino e la voce si chiude. Tra due depositi della stessa azienda la merce in transito è sempre nostra: il totale della rete resta uguale, cambia solo la posizione, come nel trasferimento da W100 a D200."
+      ],
+      [
+        "L'inventario inframese come controllo",
+        "L'inventario inframese conta durante il mese i materiali di più valore o più a rischio. Blocca solo le posizioni contate e per il tempo necessario, confronta conta e sistema e, se serve, rettifica; non comporta scritture di assestamento, che sono solo di fine anno. Il suo valore aggiunto è restringere la ricerca delle cause: nell'esercizio di dicembre la conta del 15/12 dava COL-1204 900 kg e COL-1206 500 kg, uguali al sistema, quindi i 12 kg mancanti al 31/12 sono spariti dopo il 15/12, e il buono BP-2912 è del 29/12."
+      ],
+      [
+        "Rimanenze in bilancio: permanente e metodo italiano",
+        "Con il magazzino permanente del gestionale ogni movimento è già a valore sui conti di magazzino: a fine anno si registrano solo le differenze inventariali con il movimento 711 e il saldo dei conti è la rimanenza (ferro 691,60, semilavorati 277,40, totale 969,00 euro). Nel metodo italiano il magazzino entra nei conti solo a fine anno: il 1° gennaio, dopo la riapertura, le rimanenze iniziali si girano a costo (Variazione rimanenze in Dare, Rimanenze in Avere); il 31 dicembre si rilevano le finali dall'inventario (Rimanenze in Dare, Variazione rimanenze in Avere) e la variazione si chiude nel Conto economico."
+      ],
+      [
+        "Applicazione",
+        "Far risolvere agli allievi il caso del fascio di ferro da 1.000 euro spedito il 30/12: con resa DAP si esclude, con resa EXW e 30 euro di trasporto pagati da noi entra a 1.030 euro. Poi far confrontare la conta inframese del 15/12 con l'inventario del 31/12 e far calcolare le rimanenze finali materiale per materiale. Nel Laboratorio 2 Inventari sono gli incarichi I09, I10, I13 e I14; l'incarico I14 rifà le rimanenze con il metodo italiano: iniziali 431,00, finali 969,00, variazione +538,00 euro."
+      ]
+    ],
+    "kpi": "Merce in viaggio classificata secondo la resa, differenze trovate dalle conte inframese, rimanenze riconciliate con movimenti e rettifiche.",
+    "error": "Includere la merce perché è già pagata, sommarla al conteggio degli scaffali, fare scritture di assestamento dopo una conta inframese."
   },
   "qualita": {
     "ob": "Gestire resi, quarantena, blocchi, identificazione delle non conformità e ricostruzione della filiera.",

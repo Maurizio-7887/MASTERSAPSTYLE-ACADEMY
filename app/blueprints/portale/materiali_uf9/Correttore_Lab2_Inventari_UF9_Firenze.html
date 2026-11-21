@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correttore docente · Laboratorio 2 Inventari · caso Firenze</title>
+<style>
+:root{--navy:#142e43;--ink:#1d2b36;--grey:#5d6b77;--line:#c9d2da;--red:#a3302f;--green:#1d6b3a;--teal:#087e80;--bg:#f5f7f9}
+*{box-sizing:border-box}body{margin:0;font:14px/1.45 'Segoe UI',Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:linear-gradient(110deg,#122c43,#126979);color:#fff;padding:18px 28px}header h1{margin:0;font-size:21px}header p{margin:4px 0 0;opacity:.88;font-size:13px}
+main{max-width:1250px;margin:0 auto;padding:20px 24px 60px}.box{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:18px}
+h2{font-size:16px;margin:0 0 10px;color:var(--navy)}.drop{border:2px dashed #8aa3bb;border-radius:8px;padding:26px;text-align:center;background:#fbfdff;cursor:pointer}.drop.over{background:#e8f1fa}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:#edf3f8}
+tr.clic{cursor:pointer}tr.clic:hover td{background:#f3f8fc}tr.sel td{background:#e6f0f9!important}
+.ok{color:var(--green);font-weight:700}.ko{color:var(--red);font-weight:700}.part{color:#9c6a12;font-weight:700}.voto{font-size:15px;font-weight:800}
+.pill{display:inline-block;border-radius:10px;padding:1px 8px;font-size:12px;font-weight:700;background:#eef1f4}.pill.r{background:#fbecec;color:var(--red)}.pill.g{background:#e8f4ec;color:var(--green)}
+textarea{width:100%;min-height:280px;font:13px/1.45 Consolas,monospace;border:1px solid var(--line);border-radius:4px;padding:10px}
+button{font:inherit;padding:8px 14px;border-radius:4px;border:1px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;margin:4px 6px 4px 0}button.sec{background:#fff;color:var(--navy)}
+.small{font-size:12px;color:var(--grey)}.warn{background:#fff8e6;border:1px solid #e3b44a;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:13px}
+@media print{header,.noprint,.drop{display:none!important}body{background:#fff}main{padding:0}.box{border:0;padding:0}}
+</style></head><body>
+<header><h1>Correttore docente · Laboratorio 2 «Inventari» · UF 9 · caso Firenze</h1><p>Inventario periodico di fine anno di Ferro &amp; Transenne · confronta il dossier JSON dell’allievo con la soluzione · tutto offline</p></header>
+<main>
+<div class="box noprint"><h2>1 · Carica i dossier degli allievi</h2>
+<div class="drop" id="drop" onclick="document.getElementById('file').click()"><b>Trascina qui i file «Inventari_Lab2_….json»</b><br><span class="small">oppure clicca per sceglierli · anche più file insieme</span></div>
+<input id="file" type="file" multiple accept=".json,application/json" style="display:none" onchange="carica(this.files)">
+<p class="small">Il dossier si scarica dal laboratorio: scheda «Relazione da consegnare» → «Esporta dossier JSON». Il PDF della relazione non contiene i dati strutturati.</p></div>
+<div class="box" id="classe" style="display:none"><h2>2 · Riepilogo della classe</h2><div id="tab-classe"></div>
+<button class="sec noprint" onclick="esportaCSV()">⬇ Esporta riepilogo (CSV per Excel)</button>
+<p class="small">Voto in centesimi su 4 indicatori, ognuno da 1 a 25 (1-5 insufficiente, 6-10 parzialmente sufficiente, 11-15 sufficiente, 16-20 buono, 21-25 ottimo), come nella prova di fine modulo della UF 9. Soglia proposta 60/100, da confermare con l’ente: il programma della UF 9 non la indica. I testi liberi ricevono punti solo per completezza e riferimenti: la qualità la valuti tu leggendo.</p></div>
+<div id="dettaglio"></div>
+</main>
+<script>
+'use strict';
+const tasks=[
+{id:'I01',title:'Perimetro, cut-off e documento d’inventario',group:0,
+ da:'magazzino al 31/12/2026, movimenti sospesi',a:'documento con 11 ubicazioni e 12 posizioni',
+ desc:'Il 31/12/2026 Ferro & Transenne S.r.l. fa l’inventario periodico di fine anno. Si contano solo le scorte che vanno in bilancio: ferro, semilavorati e prodotti finiti. In F-02 ci sono due colate di ferro (COL-1204 e COL-1206), in 03-05-2 un cassone di kit SL-TAGLIO; le altre 9 ubicazioni risultano vuote a sistema e vanno confermate a zero.',
+ data:[['Cut-off','31/12/2026 ore 18:00: da quel momento nessun movimento'],['Materiali','FERRO (ferro in barre), SL-TAGLIO (kit tagliati, semilavorato), TR-STD (transenna, prodotto finito)'],['Ubicazioni del documento','F-01, F-02 (ferro) · 01-04-1, 03-05-2 (semilavorati) · 01-01-1, 01-01-2, 01-02-1, 01-02-2, 01-03-1, 01-03-2, 03-04-1 (prodotti finiti)'],['Posizioni a sistema','F-02: COL-1204 e COL-1206 · 03-05-2: SL-TAGLIO · tutte le altre vuote'],['Tolleranza per posizione','10 €']],
+ steps:['Conta le ubicazioni dell’elenco.','Conta le posizioni: ogni colata o materiale in un’ubicazione è una posizione; ogni ubicazione vuota è una posizione da confermare a zero.','Scegli il perimetro corretto.'],
+ fields:[['perim','Perimetro dell’inventario','select',['Seleziona','Ferro, semilavorati SL-TAGLIO e prodotti finiti TR-STD','Tutto il magazzino, compresi attrezzi e materiali di consumo','Solo il ferro']],['nubic','Ubicazioni nel documento','number'],['npos','Posizioni da contare','number'],['nvuote','Posizioni vuote da confermare a zero','number']],
+ answers:{perim:'Ferro, semilavorati SL-TAGLIO e prodotti finiti TR-STD',nubic:11,npos:12,nvuote:9},
+ px:{perim:'Che cosa si conta: solo le scorte che finiscono in bilancio.',nubic:'Quante ubicazioni ci sono nell’elenco del documento.',npos:'Ogni colata o materiale in un’ubicazione è una posizione; anche un’ubicazione vuota è una posizione.',nvuote:'Le ubicazioni vuote a sistema, da confermare a zero.'},
+ how:{nubic:'2 del ferro + 2 dei semilavorati + 7 dei prodotti finiti',npos:'F-02 due colate (2) + 03-05-2 un cassone (1) + 9 vuote',nvuote:'F-01, 01-04-1 e le sette dei prodotti finiti'},
+ hint:'11 ubicazioni. Posizioni: 2 in F-02 + 1 in 03-05-2 + 9 vuote = 12. Vuote: 9.',why:'Decidere prima che cosa si conta, dove e da quando: perimetro e cut-off.',
+ err:{perim:'Si contano solo le scorte che vanno in bilancio: ferro, semilavorati e prodotti finiti.',nubic:'Conta gli elementi dell’elenco: 2 + 2 + 7 = 11.',npos:'F-02 ha due posizioni (due colate), 03-05-2 una, più le 9 vuote: 12.',nvuote:'Vuote a sistema: F-01, 01-04-1 e le sette dei prodotti finiti = 9.'}},
+{id:'I02',title:'Giacenza contabile del ferro',group:0,
+ da:'i movimenti di dicembre del ferro',a:'giacenza contabile: 740 kg',
+ desc:'Ricostruisci quanto ferro dovrebbe esserci secondo il gestionale al 31/12, colata per colata. Tutti i prelievi alla produzione di dicembre sono stati presi dalla colata più vecchia, COL-1204.',
+ data:[['Giacenza al 01/12','0 kg'],['04/12 entrata COL-1204','3.000 kg a 1,00 €/kg, di cui 200 kg schiacciati: messi in quarantena e rottamati con il movimento 555, quindi in giacenza restano 2.800 kg'],['05/12 entrata COL-1206','500 kg a 1,08 €/kg (riordino urgente)'],['Dicembre, prelievi 261 alla produzione','2.560 kg, tutti della COL-1204']],
+ steps:['Somma le entrate e togli i prelievi.','Calcola quanto resta della COL-1204.','La COL-1206 non è mai stata toccata.'],
+ fields:[['qty','Giacenza contabile del ferro (kg)','number'],['r1204','Di cui colata COL-1204 (kg)','number'],['r1206','Di cui colata COL-1206 (kg)','number']],
+ answers:{qty:740,r1204:240,r1206:500},
+ px:{qty:'Il ferro che il gestionale dovrebbe avere al 31/12.',r1204:'Quanto resta della colata più vecchia.',r1206:'Quanto resta della colata arrivata il 5/12.'},
+ how:{qty:'0 + 2.800 buoni + 500 − 2.560',r1204:'2.800 − 2.560',r1206:'500, nessun prelievo'},
+ hint:'0 + 2.800 + 500 − 2.560 = 740 kg. COL-1204: 2.800 − 2.560 = 240 kg. COL-1206: 500 kg.',why:'Sapere quanto dovrebbe esserci prima di contare.',
+ err:{qty:'Giacenza = iniziale + entrate − prelievi: 0 + 2.800 + 500 − 2.560 = 740 kg.',r1204:'Della COL-1204 restano 2.800 − 2.560 = 240 kg.',r1206:'La COL-1206 non ha prelievi: 500 kg.'}},
+{id:'I03',title:'Lista di conta: ferro, kit e ubicazioni vuote',group:0,
+ da:'documento attivato: 11 ubicazioni bloccate',a:'conteggio registrato: 728 kg di ferro e 19 kit',
+ desc:'La lista di conta è «cieca»: non mostra la quantità del gestionale, per non influenzare chi conta. Riporta le quantità rilevate.',
+ data:[['F-02, colata COL-1204','pesata con la bilancia della gru: 240 kg'],['F-02, colata COL-1206','pesata con la bilancia della gru: 488 kg'],['03-05-2, cassone SL-TAGLIO','19 kit contati uno per uno'],['F-01, 01-04-1 e le 7 ubicazioni dei prodotti finiti','vuote: tutte le transenne sono state spedite']],
+ steps:['Riporta il peso di ogni colata.','Somma il ferro contato.','Riporta i kit e le ubicazioni confermate a zero.'],
+ fields:[['c1204','Contato COL-1204 (kg)','number'],['c1206','Contato COL-1206 (kg)','number'],['cferro','Ferro contato in totale (kg)','number'],['ckit','Kit SL-TAGLIO contati','number'],['czero','Ubicazioni confermate a zero','number']],
+ answers:{c1204:240,c1206:488,cferro:728,ckit:19,czero:9},
+ px:{c1204:'Il peso rilevato della colata COL-1204.',c1206:'Il peso rilevato della colata COL-1206.',cferro:'Tutto il ferro contato in F-02.',ckit:'I kit trovati nel cassone 03-05-2.',czero:'Le ubicazioni trovate vuote e confermate a zero.'},
+ how:{cferro:'240 + 488'},
+ hint:'240 + 488 = 728 kg di ferro; 19 kit; 9 ubicazioni a zero.',why:'Registrare un conteggio tracciabile, posizione per posizione.',
+ err:{c1204:'La bilancia indica 240 kg.',c1206:'La bilancia indica 488 kg: è qui la differenza.',cferro:'Somma le due colate: 240 + 488 = 728 kg.',ckit:'Nel cassone ci sono 19 kit.',czero:'Le ubicazioni vuote confermate sono 9.'}},
+{id:'I04',title:'Differenze e tolleranza',group:1,
+ da:'contabile 740 kg e 20 kit; contato 728 kg e 19 kit',a:'due differenze oltre tolleranza: riconta',
+ desc:'Calcola le differenze (contato meno contabile) e il loro valore al costo standard. Ogni posizione con una differenza di valore superiore alla tolleranza va in riconta.',
+ data:[['Ferro COL-1206','contabile 500 kg, contato 488 kg'],['Kit SL-TAGLIO','contabile 20 kit, contato 19'],['Costo standard','ferro 0,95 €/kg · kit 14,60 €/kit'],['Tolleranza','10 € per posizione']],
+ steps:['Differenza = contato − contabile (con il segno).','Valore = differenza × costo standard.','Confronta il valore con la tolleranza di 10 €.'],
+ fields:[['dferro','Differenza ferro COL-1206 (kg, con segno)','number'],['vferro','Valore differenza ferro (€, con segno)','number'],['dkit','Differenza kit (con segno)','number'],['vkit','Valore differenza kit (€, con segno)','number'],['esito','Esito','select',['Seleziona','Entrambe oltre tolleranza: il documento va in riconta','Solo il kit va in riconta','Nessuna riconta: le differenze sono piccole']]],
+ answers:{dferro:-12,vferro:-11.40,dkit:-1,vkit:-14.60,esito:'Entrambe oltre tolleranza: il documento va in riconta'},dec:['vferro','vkit'],
+ px:{dferro:'Quanti kg mancano nella COL-1206.',vferro:'Quanto vale la differenza del ferro al costo standard.',dkit:'Quanti kit mancano.',vkit:'Quanto vale la differenza dei kit.',esito:'Che cosa succede quando il valore supera la tolleranza.'},
+ how:{dferro:'488 − 500',vferro:'−12 × 0,95',dkit:'19 − 20',vkit:'−1 × 14,60'},
+ hint:'Ferro: 488 − 500 = −12 kg, × 0,95 = −11,40 €. Kit: 19 − 20 = −1, × 14,60 = −14,60 €. Tutte e due superano 10 €: riconta.',why:'Non correggere subito: prima si misura la differenza e si confronta con la tolleranza.',
+ err:{dferro:'Contato meno contabile: 488 − 500 = −12 kg (ammanco).',vferro:'−12 kg × 0,95 €/kg = −11,40 €.',dkit:'19 − 20 = −1 kit.',vkit:'−1 × 14,60 = −14,60 €.',esito:'11,40 € e 14,60 € superano entrambi la tolleranza di 10 €: riconta.'}},
+{id:'I05',title:'Riconteggio e ricerca della causa',group:1,
+ da:'due posizioni in riconta',a:'differenze confermate e causa documentata',
+ desc:'Un collega diverso riconta il fascio COL-1206 e il cassone 03-05-2 (LI14). Poi si cercano i documenti che spiegano le differenze.',
+ data:[['Riconteggio','COL-1206: 488 kg · cassone 03-05-2: 19 kit · differenze confermate'],['Documento trovato per il ferro','buono di prelievo BP-2912 del 29/12/2026, firmato dal capo manutenzione: 12 kg di barre COL-1206 presi per due staffe della rastrelliera, mai registrati nel gestionale'],['Documento per il kit','nessuno']],
+ steps:['Scegli come si verifica una differenza.','Indica la causa del ferro in base al documento.','Indica come si tratta il kit senza documenti.'],
+ fields:[['recount','Davanti a una differenza oltre tolleranza','select',['Seleziona','Riconteggio indipendente e controllo dei documenti prima della rettifica','Rettifica immediata senza controlli','Si cambia il conteggio per farlo coincidere']],['causaf','Causa della differenza del ferro','select',['Seleziona','Buono BP-2912 del 29/12: 12 kg presi dalla manutenzione e mai registrati','Errore della bilancia: si ripesa finché torna','Furto: si denuncia subito']],['causak','Trattamento del kit','select',['Seleziona','Nessun documento: ammanco verificato con riconta, la causa non si inventa','Il kit era sicuramente rotto: si elimina','Si scrive 20 per far quadrare']]],
+ answers:{recount:'Riconteggio indipendente e controllo dei documenti prima della rettifica',causaf:'Buono BP-2912 del 29/12: 12 kg presi dalla manutenzione e mai registrati',causak:'Nessun documento: ammanco verificato con riconta, la causa non si inventa'},
+ px:{recount:'La regola prima di qualsiasi rettifica.',causaf:'La causa scritta deve venire da un documento.',causak:'Che cosa si fa quando non c’è nessun documento.'},
+ hint:'Prima riconta e documenti. Il ferro è spiegato dal buono BP-2912. Per il kit non c’è documento: si scrive «ammanco verificato con riconta», senza inventare.',why:'Una causa si documenta, non si suppone.',
+ err:{recount:'Prima si riconta con un collega diverso e si cercano i documenti.',causaf:'Il buono BP-2912 spiega i 12 kg: è la causa documentata.',causak:'Senza documenti non si inventa una causa: ammanco verificato con riconta.'}},
+{id:'I06',title:'Rettifica autorizzata (LI20 e LI21, movimento 711)',group:2,
+ da:'differenze confermate: −12 kg e −1 kit',a:'giacenze corrette: 728 kg e 19 kit',
+ desc:'Il responsabile di magazzino firma l’autorizzazione AUT-2026-12 per le due differenze del documento. Con LI20 il WMS chiude l’inventario e porta le differenze nella zona 999; con LI21 il movimento 711 allinea anche il gestionale. Scrivi la rettifica e la causale.',
+ data:[['Autorizzazione','AUT-2026-12 del responsabile di magazzino'],['Ferro COL-1206','contabile 740 kg in totale, contato 728 kg'],['Kit SL-TAGLIO','contabile 20, contato 19'],['Causale','cita articolo e colata, riconteggio, documento BP-2912 e autorizzazione AUT-2026-12']],
+ steps:['Rettifica = differenza confermata, con il segno.','Nuovo saldo = contabile + rettifica.','Scrivi la causale con tutti i riferimenti.'],
+ fields:[['adjf','Rettifica ferro (kg, con segno)','number'],['balf','Nuova giacenza ferro (kg)','number'],['adjk','Rettifica kit (con segno)','number'],['balk','Nuova giacenza kit','number'],['reason','Causale: articolo, riconteggio, documento e autorizzazione','text']],
+ answers:{adjf:-12,balf:728,adjk:-1,balk:19},reason:true,
+ px:{adjf:'Di quanto si corregge il ferro.',balf:'Il ferro dopo la rettifica.',adjk:'Di quanto si correggono i kit.',balk:'I kit dopo la rettifica.',reason:'La motivazione scritta della rettifica.'},
+ how:{adjf:'la differenza confermata',balf:'740 − 12',adjk:'la differenza confermata',balk:'20 − 1'},
+ example:{reason:'FERRO COL-1206 −12 kg: riconteggio confermato, buono BP-2912 del 29/12 non registrato; kit SL-TAGLIO −1: ammanco verificato con riconta. Autorizzazione AUT-2026-12.'},
+ hint:'Ferro −12, nuovo saldo 728 kg. Kit −1, nuovo saldo 19. Causale con COL-1206, riconteggio, BP-2912 e AUT-2026-12.',why:'Ogni rettifica ha segno, saldo, documento e autorizzazione.',
+ err:{adjf:'La rettifica riduce il ferro di 12 kg: −12.',balf:'740 + (−12) = 728 kg.',adjk:'La rettifica riduce i kit di 1: −1.',balk:'20 + (−1) = 19 kit.',reason:'Causale troppo breve: cita COL-1206, riconteggio, BP-2912 e AUT-2026-12.'}},
+{id:'I07',title:'La scrittura contabile della differenza',group:2,
+ da:'due movimenti 711 al costo standard',a:'conto 65 Differenze inventariali: 26,00 €',
+ desc:'I due movimenti 711 generano le scritture al costo standard: il valore delle merci mancanti esce dal magazzino e diventa un costo.',
+ data:[['Documento 1, ferro','Dare 65 Differenze inventariali / Avere 12 Magazzino ferro'],['Documento 2, kit','Dare 65 Differenze inventariali / Avere 07 Magazzino semilavorati'],['Valori','ferro 12 kg × 0,95 · kit 1 × 14,60']],
+ steps:['Calcola l’Avere del magazzino ferro.','Calcola l’Avere del magazzino semilavorati.','Somma i due importi nel Dare del conto 65.'],
+ fields:[['a12','Avere 12 Magazzino ferro (€)','number'],['a07','Avere 07 Magazzino semilavorati (€)','number'],['d65','Dare 65 Differenze inventariali, totale (€)','number']],
+ answers:{a12:11.40,a07:14.60,d65:26.00},dec:['a12','a07','d65'],
+ px:{a12:'Il valore del ferro che esce dal magazzino.',a07:'Il valore del kit che esce dal magazzino.',d65:'Il costo totale delle differenze inventariali.'},
+ how:{a12:'12 × 0,95',a07:'1 × 14,60',d65:'11,40 + 14,60'},
+ hint:'Avere 12: 11,40. Avere 07: 14,60. Dare 65: 26,00.',why:'Collegare l’inventario fisico alla contabilità.',
+ err:{a12:'12 kg × 0,95 = 11,40 €.',a07:'1 kit × 14,60 = 14,60 €.',d65:'11,40 + 14,60 = 26,00 €.'}},
+{id:'I08',title:'FIFO, LIFO, costo medio e standard sul ferro',group:1,
+ da:'728 kg di ferro dopo la rettifica',a:'quattro valori dello stesso ferro',
+ desc:'Valorizza i 728 kg che restano con i tre metodi del manualetto e al costo standard usato in bilancio.',
+ data:[['Acquisti di dicembre','COL-1204: 2.800 kg a 1,00 €/kg · COL-1206: 500 kg a 1,08 €/kg (totale 3.300 kg)'],['Restano','728 kg'],['Costo standard','0,95 €/kg']],
+ steps:['FIFO: restano gli acquisti più recenti (prima i 500 kg a 1,08).','LIFO: restano i più vecchi (tutti a 1,00).','Costo medio: valore totale degli acquisti ÷ kg acquistati, × 728.','Standard: 728 × 0,95.'],
+ fields:[['fifo','Rimanenza FIFO (€)','number'],['lifo','Rimanenza LIFO (€)','number'],['cmp','Rimanenza al costo medio ponderato (€)','number'],['std','Rimanenza al costo standard (€)','number']],
+ answers:{fifo:768,lifo:728,cmp:736.82,std:691.60},dec:['fifo','lifo','cmp','std'],tol:{cmp:0.02},
+ px:{fifo:'Valore se restano gli acquisti più recenti.',lifo:'Valore se restano gli acquisti più vecchi.',cmp:'Valore al prezzo medio di tutti gli acquisti.',std:'Valore al costo standard: è quello del bilancio.'},
+ how:{fifo:'500 × 1,08 + 228 × 1,00',lifo:'728 × 1,00',cmp:'(2.800 × 1,00 + 500 × 1,08) ÷ 3.300 = 1,0121; × 728',std:'728 × 0,95'},
+ hint:'FIFO 500 × 1,08 + 228 × 1,00 = 768,00. LIFO 728 × 1,00 = 728,00. Medio 3.340 ÷ 3.300 = 1,0121 €/kg × 728 = 736,82. Standard 728 × 0,95 = 691,60.',why:'Stessi kg, valori diversi: il metodo cambia il valore delle rimanenze.',
+ err:{fifo:'FIFO: restano i 500 kg a 1,08 (540) e 228 kg a 1,00 (228) = 768,00.',lifo:'LIFO: restano 728 kg a 1,00 = 728,00.',cmp:'(2.800 + 540) ÷ 3.300 = 1,0121 €/kg; × 728 = 736,82.',std:'728 × 0,95 = 691,60.'}},
+{id:'I09',title:'Merci in viaggio: includere o escludere, e a che valore',group:1,
+ da:'un fascio di ferro in viaggio al 31/12',a:'caso A escluso; caso B incluso a 1.030,00 €',
+ desc:'Il 30/12/2026 un fornitore spedisce via ferrovia un fascio di ferro per Ferro & Transenne. Al 31/12 è in viaggio. Chi ha la merce in bilancio dipende dalla resa scritta nel contratto. Risolvi due casi: A è quello vero di Ferro & Transenne, B è lo stesso fascio con una resa diversa, per capire come si valorizza una merce in viaggio che è già nostra.',
+ data:[['Merce','1 fascio di ferro, 1.000 kg a 1,00 €/kg'],['Caso A (vero)','resa DAP magazzino Ferro & Transenne (franco destino): rischi e benefici passano all’acquirente all’arrivo, previsto a febbraio 2027'],['Caso B (confronto)','resa EXW (franco partenza): rischi e benefici passano all’acquirente alla consegna al vettore, il 30/12; il trasporto lo paga Ferro & Transenne, fattura del vettore 30,00 €'],['Regola di valorizzazione','merce in viaggio già nostra = costo d’acquisto + oneri accessori (trasporto); si registra a parte, non nel conteggio delle ubicazioni']],
+ steps:['Calcola il valore d’acquisto del fascio.','Caso A: leggi la resa e scegli il trattamento.','Caso B: aggiungi il trasporto al costo d’acquisto.','Caso B: scegli il trattamento.'],
+ fields:[['value','Costo d’acquisto del fascio (€)','number'],['choice','Caso A, resa DAP: trattamento al 31/12/2026','select',['Seleziona','Escludere dalle rimanenze: rischi ancora del fornitore','Includere nelle rimanenze: è già pagata','Aggiungerla al conteggio di F-02']],['valB','Caso B, resa EXW: valore della merce in viaggio (€)','number'],['choiceB','Caso B, resa EXW: trattamento al 31/12/2026','select',['Seleziona','Includere tra le rimanenze come merce in viaggio, registrata a parte','Escludere: non è ancora arrivata','Aggiungerla al conteggio di F-02 come se fosse in magazzino']]],
+ answers:{value:1000,choice:'Escludere dalle rimanenze: rischi ancora del fornitore',valB:1030,choiceB:'Includere tra le rimanenze come merce in viaggio, registrata a parte'},dec:['value','valB'],
+ px:{value:'Quanto costa il fascio, senza trasporto.',choice:'Caso A: con resa DAP il fascio va o non va nelle rimanenze 2026?',valB:'Caso B: il valore a cui il fascio entra nelle rimanenze, compreso il trasporto pagato da noi.',choiceB:'Caso B: con resa EXW dove va il fascio al 31/12?'},
+ how:{value:'1.000 × 1,00',valB:'1.000,00 + 30,00 di trasporto'},
+ hint:'Costo 1.000 × 1,00 = 1.000 €. Caso A (DAP): i rischi passano all’arrivo, si esclude. Caso B (EXW): è già nostra dal 30/12, si include a 1.000 + 30 = 1.030 €, registrata a parte come merce in viaggio.',why:'Contano rischi e benefici alla data, non la presenza fisica e non il pagamento; il valore è il costo più gli oneri accessori.',
+ err:{value:'1.000 kg × 1,00 €/kg = 1.000 €.',choice:'Con resa DAP i rischi restano al fornitore fino all’arrivo: si esclude dalle rimanenze 2026.',valB:'Costo d’acquisto 1.000,00 + trasporto 30,00 = 1.030,00 €: gli oneri accessori fanno parte del costo.',choiceB:'Con resa EXW la merce è nostra dalla consegna al vettore: va nelle rimanenze come merce in viaggio, ma non si aggiunge al conteggio di F-02.'}},
+{id:'I10',title:'Rimanenze finali in bilancio',group:2,
+ da:'728 kg di ferro, 19 kit, 0 transenne',a:'rimanenze di magazzino: 969,00 €',
+ desc:'Calcola il valore delle rimanenze al costo standard, materiale per materiale, e il totale da portare in bilancio. Prima della chiusura si riconciliano movimenti, conteggi e rettifiche.',
+ data:[['Ferro','728 kg × 0,95 €/kg'],['Kit SL-TAGLIO','19 × 14,60 €'],['Transenne TR-STD','0 pezzi (tutte spedite)'],['Merce in viaggio','il fascio vero è in resa DAP (caso A di I09): non entra']],
+ steps:['Valorizza il ferro.','Valorizza i kit.','Somma con le transenne.'],
+ fields:[['rimf','Rimanenza ferro (€)','number'],['rimk','Rimanenza kit (€)','number'],['rimt','Rimanenza transenne (€)','number'],['rimtot','Rimanenze di magazzino in bilancio (€)','number'],['check','Prima della chiusura','select',['Seleziona','Riconciliare movimenti, conteggi e rettifiche','Ignorare le rettifiche','Considerare solo gli acquisti']]],
+ answers:{rimf:691.60,rimk:277.40,rimt:0,rimtot:969.00,check:'Riconciliare movimenti, conteggi e rettifiche'},dec:['rimf','rimk','rimt','rimtot'],
+ px:{rimf:'Il ferro al costo standard.',rimk:'I kit al costo standard.',rimt:'Le transenne rimaste.',rimtot:'Il totale delle rimanenze in bilancio.',check:'Il controllo prima della chiusura.'},
+ how:{rimf:'728 × 0,95',rimk:'19 × 14,60',rimt:'0 pezzi',rimtot:'691,60 + 277,40 + 0'},
+ hint:'Ferro 691,60 + kit 277,40 + transenne 0 = 969,00 €.',why:'Chiudere l’inventario con un valore riconciliato.',
+ err:{rimf:'728 × 0,95 = 691,60 €.',rimk:'19 × 14,60 = 277,40 €.',rimt:'Non ci sono transenne: 0.',rimtot:'691,60 + 277,40 = 969,00 €.',check:'Prima della chiusura si riconciliano movimenti, conteggi e rettifiche.'}},
+{id:'I11',title:'Distinta di carico',group:3,
+ da:'distinta CAR-2612 del 14/12: 7 pallet',a:'spedizione non completa: 1 pallet mancante',
+ desc:'Il 14/12 parte il camion con le transenne per i clienti Verdi e Comune di Perugia. Prima della partenza si contano i pallet sul mezzo.',
+ data:[['Distinta CAR-2612','7 pallet di transenne TR-STD'],['Contati sul mezzo','6 pallet']],
+ steps:['Calcola i pallet mancanti.','Decidi se la spedizione si può attestare completa.'],
+ fields:[['missing','Pallet mancanti','number'],['complete','Spedizione completa?','select',['Seleziona','Sì','No']]],
+ answers:{missing:1,complete:'No'},
+ px:{missing:'Quanti pallet della distinta non sono sul camion.',complete:'Si può firmare come completa?'},
+ how:{missing:'7 − 6'},
+ hint:'7 − 6 = 1 pallet mancante: la spedizione non è completa.',why:'Verificare la corrispondenza tra pallet caricati e distinta.',
+ err:{missing:'7 previsti − 6 caricati = 1 pallet.',complete:'Con un pallet mancante non si attesta la spedizione completa.'}},
+{id:'I12',title:'Spedizione per cliente',group:3,
+ da:'6 pallet caricati su 7',a:'cliente con il pallet mancante individuato',
+ desc:'Controlla ogni DDT separatamente: il totale del mezzo non basta.',
+ data:[['DDT 2026/301, Verdi','4 pallet previsti, 4 caricati'],['DDT 2026/302, Comune di Perugia','3 pallet previsti, 2 caricati']],
+ steps:['Confronta previsti e caricati per ogni DDT.','Indica il cliente con l’anomalia e i pallet mancanti.'],
+ fields:[['customer','Cliente con anomalia','select',['Seleziona','Verdi','Comune di Perugia','Nessuno']],['cmiss','Pallet mancanti per il cliente','number']],
+ answers:{customer:'Comune di Perugia',cmiss:1},
+ px:{customer:'A quale cliente manca merce.',cmiss:'Quanti pallet mancano a quel cliente.'},
+ how:{cmiss:'3 − 2'},
+ hint:'Verdi 4 su 4. Comune di Perugia 2 su 3: manca 1 pallet.',why:'Ogni DDT si controlla da solo.',
+ err:{customer:'Verdi ha 4 pallet su 4; al Comune di Perugia ne mancano.',cmiss:'3 previsti − 2 caricati = 1 pallet.'}},
+{id:'I13',title:'Inventario inframese del 15 dicembre',group:1,
+ da:'conta di controllo del ferro al 15/12',a:'nessuna differenza al 15/12: l’ammanco è nato dopo',
+ desc:'Oltre all’inventario di fine anno, Ferro & Transenne fa un inventario inframese: una conta di controllo a metà mese sul materiale che vale di più, il ferro. Non si fermano tutti i movimenti e non si fanno scritture di assestamento: si confrontano conta e gestionale e, se serve, si rettifica. Il responsabile recupera la conta del 15/12 per capire quando è nato l’ammanco di 12 kg.',
+ data:[['Giacenza al 01/12','0 kg'],['04/12 entrata COL-1204','2.800 kg buoni'],['05/12 entrata COL-1206','500 kg'],['Prelievi 261 dal 01/12 al 15/12','1.900 kg, tutti della COL-1204'],['Conta del 15/12, ore 18','COL-1204: 900 kg · COL-1206: 500 kg'],['Fine anno (I04 e I05)','COL-1206 contata 488 kg contro 500; buono BP-2912 del 29/12']],
+ steps:['Calcola la giacenza contabile di ogni colata al 15/12.','Calcola la differenza totale al 15/12 (contato − contabile).','Decidi quando è nato l’ammanco.','Scegli che cosa distingue l’inventario inframese da quello di fine anno.'],
+ fields:[['m1204','Contabile COL-1204 al 15/12 (kg)','number'],['m1206','Contabile COL-1206 al 15/12 (kg)','number'],['mdiff','Differenza totale al 15/12 (kg, con segno)','number'],['mquando','Quando è nato l’ammanco di 12 kg','select',['Seleziona','Dopo il 15/12: si cerca nei movimenti dal 16 al 31/12, e lì c’è il BP-2912 del 29/12','Prima del 15/12: la conta inframese era sbagliata','Non si può sapere']],['mtipo','Inventario inframese e di fine anno','select',['Seleziona','L’inframese è un controllo con eventuale rettifica; le scritture di assestamento delle rimanenze si fanno solo a fine anno','Sono identici: anche a metà mese si fanno le scritture di assestamento','L’inframese sostituisce l’inventario di fine anno']]],
+ answers:{m1204:900,m1206:500,mdiff:0,mquando:'Dopo il 15/12: si cerca nei movimenti dal 16 al 31/12, e lì c’è il BP-2912 del 29/12',mtipo:'L’inframese è un controllo con eventuale rettifica; le scritture di assestamento delle rimanenze si fanno solo a fine anno'},
+ px:{m1204:'Quanto doveva esserci della COL-1204 al 15/12 secondo il gestionale.',m1206:'Quanto doveva esserci della COL-1206 al 15/12.',mdiff:'Contato meno contabile, sommando le due colate.',mquando:'Se al 15/12 tornava tutto, l’ammanco è nato dopo.',mtipo:'Che cosa cambia tra conta di metà mese e inventario di fine anno.'},
+ how:{m1204:'2.800 − 1.900',m1206:'500, nessun prelievo',mdiff:'(900 + 500) − (900 + 500)'},
+ hint:'COL-1204: 2.800 − 1.900 = 900 kg. COL-1206: 500 kg. Contati 900 e 500: differenza 0. L’ammanco è nato dopo il 15/12, e il BP-2912 del 29/12 lo spiega. L’inframese è un controllo: niente scritture di assestamento.',why:'Le conte inframese restringono il periodo in cui cercare la causa di una differenza.',
+ err:{m1204:'2.800 entrati − 1.900 prelevati entro il 15/12 = 900 kg.',m1206:'La COL-1206 non è mai stata toccata: 500 kg.',mdiff:'Contato 900 + 500 = 1.400; contabile 1.400: differenza 0.',mquando:'Al 15/12 tutto tornava: l’ammanco è successivo, ed è il BP-2912 del 29/12.',mtipo:'L’inframese controlla e, se serve, rettifica; le scritture di assestamento sono solo di fine anno.'}},
+{id:'I14',title:'Scritture di assestamento delle rimanenze',group:2,
+ da:'rimanenze iniziali 431,00 € e finali 969,00 €',a:'variazione delle rimanenze: +538,00 €',
+ desc:'Molte PMI non tengono il magazzino in contabilità durante l’anno (metodo italiano, periodico): le rimanenze entrano nei conti solo a fine anno, dal valore dell’inventario. Il 01/01 le rimanenze iniziali, appena riaperte, sono state girate a costo; il 31/12 si rilevano le rimanenze finali e la variazione si chiude nel Conto economico. Rifai le rimanenze di Ferro & Transenne con questo metodo, come nel manuale di ragioneria del corso.',
+ data:[['Rimanenze iniziali al 01/01/2026 (bilancio 2025)','ferro 300 kg × 0,95 = 285,00 € · kit SL-TAGLIO 10 × 14,60 = 146,00 € · totale 431,00 €'],['Rimanenze finali al 31/12/2026 (I10)','969,00 €'],['Conti','Rimanenze di magazzino (Stato patrimoniale: materie prime e semilavorati) · Variazione delle rimanenze (Conto economico)'],['01/01/2026, giro a costo delle iniziali (dopo la riapertura)','Dare Variazione delle rimanenze / Avere Rimanenze di magazzino'],['31/12/2026, rilevazione delle finali','Dare Rimanenze di magazzino / Avere Variazione delle rimanenze'],['31/12/2026, epilogo','il saldo della Variazione delle rimanenze si chiude nel Conto economico']],
+ steps:['Scegli la scrittura con cui, il 01/01, le rimanenze iniziali sono diventate costo.','Scrivi l’importo del giro a costo.','Scrivi l’importo della rilevazione delle finali al 31/12.','Calcola il saldo della Variazione delle rimanenze: finali − iniziali.','Scegli l’effetto sul risultato.'],
+ fields:[['ascr','Giro a costo delle rimanenze iniziali (01/01/2026)','select',['Seleziona','Dare Variazione delle rimanenze / Avere Rimanenze di magazzino','Dare Rimanenze di magazzino / Avere Variazione delle rimanenze','Dare 65 Differenze inventariali / Avere 12 Magazzino ferro']],['astorno','Importo del giro a costo delle iniziali (€)','number'],['afinali','Importo della rilevazione delle finali al 31/12 (€)','number'],['avar','Saldo della Variazione delle rimanenze (€, con segno)','number'],['aeff','Effetto sul risultato dell’esercizio','select',['Seleziona','Le rimanenze aumentano di 538,00 €: il risultato migliora di 538,00 €','Le rimanenze aumentano: il risultato peggiora','Nessun effetto: le rimanenze stanno solo nello Stato patrimoniale']]],
+ answers:{ascr:'Dare Variazione delle rimanenze / Avere Rimanenze di magazzino',astorno:431.00,afinali:969.00,avar:538.00,aeff:'Le rimanenze aumentano di 538,00 €: il risultato migliora di 538,00 €'},dec:['astorno','afinali','avar'],
+ px:{ascr:'La scrittura del 01/01: le rimanenze iniziali escono dallo Stato patrimoniale e diventano costo del nuovo anno.',astorno:'Il valore delle rimanenze iniziali.',afinali:'Il valore delle rimanenze finali calcolato in I10.',avar:'Il saldo del conto Variazione delle rimanenze: iniziali in Dare, finali in Avere.',aeff:'Che cosa fa la variazione al risultato.'},
+ how:{astorno:'285,00 + 146,00',afinali:'il totale di I10',avar:'969,00 − 431,00'},
+ hint:'01/01: Dare Variazione delle rimanenze / Avere Rimanenze di magazzino 431,00. 31/12: Dare Rimanenze di magazzino / Avere Variazione delle rimanenze 969,00. Saldo 969,00 − 431,00 = +538,00 € (avere): meno costi, risultato migliore di 538,00 €.',why:'Collegare l’inventario fisico al bilancio con le scritture di fine anno del metodo italiano.',
+ err:{ascr:'Il 01/01 le iniziali diventano costo: Dare Variazione delle rimanenze, Avere Rimanenze di magazzino.',astorno:'285,00 + 146,00 = 431,00 €.',afinali:'Le finali sono il totale di I10: 969,00 €.',avar:'Iniziali 431,00 in Dare, finali 969,00 in Avere: saldo +538,00 €.',aeff:'Rimanenze finali maggiori delle iniziali: la variazione positiva riduce i costi e migliora il risultato di 538,00 €.'}},
+{id:'I15',title:'Relazione operativa finale',group:2,
+ da:'tutto il lavoro da I01 a I14',a:'una relazione che un collega può ricostruire',
+ desc:'Scrivi la sintesi dell’inventario: metodo e documenti usati; risultati, differenze e valori; azioni, autorizzazioni e limiti. Descrivi ciò che hai svolto nel simulatore. Almeno 30 caratteri per campo.',
+ data:[['Numeri da citare','740 kg contabili · 728 kg contati · −12 kg (−11,40 €) e −1 kit (−14,60 €) · conto 65 26,00 € · FIFO 768, LIFO 728, medio 736,82, standard 691,60 · rimanenze 969,00 € · inframese 15/12 senza differenze · variazione delle rimanenze +538,00 €'],['Documenti da citare','lista di conta, riconteggio LI14, buono BP-2912, autorizzazione AUT-2026-12, movimenti 711, distinta CAR-2612, DDT 2026/301 e 302']],
+ steps:['Metodo: perimetro, cut-off, conta cieca, riconta, confronto con la conta inframese.','Risultati: differenze, valori, merci in viaggio escluse, spedizione incompleta.','Azioni: rettifica autorizzata, scrittura, pallet mancante da spedire; limiti della simulazione.'],
+ fields:[['method','Metodo di conteggio e documenti consultati','textarea'],['findings','Risultati, anomalie, quantità e valori','textarea'],['actions','Azioni, autorizzazioni e limiti della verifica','textarea']],
+ answers:{},manual:true,
+ px:{method:'Come hai contato e con quali documenti.',findings:'Che cosa hai trovato, con i numeri.',actions:'Che cosa si è fatto, chi ha autorizzato e che cosa non hai potuto verificare.'},
+ example:{method:'Perimetro: ferro, kit e transenne; cut-off 31/12 ore 18; lista di conta cieca; riconteggio LI14 di COL-1206 e cassone.',findings:'Contabile 740 kg, contato 728: −12 kg (−11,40 €); kit −1 (−14,60 €). Rimanenze 969,00 €. Fascio in viaggio escluso (DAP). Al 15/12 nessuna differenza. Variazione delle rimanenze +538,00 €.',actions:'Rettifica 711 autorizzata AUT-2026-12, D 65 26,00. Pallet mancante del Comune di Perugia da spedire. Non ho osservato un magazzino reale.'},
+ hint:'Percorso: perimetro e cut-off → contabile → conta cieca → differenze e tolleranza → riconta e documenti → rettifica autorizzata → scrittura → valorizzazione → rimanenze. Dichiara i limiti.',why:'Permettere a chi legge di ricostruire dati, ragionamento e azioni.',err:{}}
+];
+
+const TRACE='INV-LAB2-2026-FIRENZE';
+const IND=[
+ {n:'Conta, giacenze e controllo di colli e documenti',ids:['I01','I02','I03','I11','I12']},
+ {n:'Differenze, riconta, rettifiche e scritture d’inventario',ids:['I04','I05','I06','I07']},
+ {n:'Valorizzazione (FIFO, LIFO, costo medio) e merci in viaggio',ids:['I08','I09','I10']},
+ {n:'Inventario inframese, scritture di assestamento e relazione',ids:['I13','I14','I15']}];
+const LIV=p=>p<=5?'insufficiente':p<=10?'parzialmente sufficiente':p<=15?'sufficiente':p<=20?'buono':'ottimo';
+const RIF_CAUSALE=[['COL-1206',/col.?1206/i],['riconteggio',/riconta|riconteg/i],['BP-2912',/bp.?2912/i],['AUT-2026-12',/aut.?2026.?12/i]];
+const allievi=[];let corrente=-1;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=raw=>{const s=String(raw??'').trim().replace('−','-');if(!/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(s))return NaN;return Number(s.replace(',','.'))};
+const fmt=(t,id)=>{const v=t.answers[id];if(typeof v!=='number')return v;return (t.dec||[]).includes(id)?v.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}):String(v)};
+const pts=x=>String(Math.round(x*10)/10).replace('.',',');
+const drop=document.getElementById('drop');
+['dragenter','dragover'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(e=>drop.addEventListener(e,ev=>{ev.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',ev=>carica(ev.dataTransfer.files));
+async function carica(files){for(const f of files){try{allievi.push(analizza(JSON.parse(await f.text()),f.name))}catch(e){allievi.push({file:f.name,nome:f.name,errore:e.message})}}document.getElementById('file').value='';renderClasse();if(corrente<0&&allievi.length)mostra(0)}
+function analizza(d,file){
+ if(!d||d.type!=='MC_INVENTARI_LAB2')throw Error('Non è un dossier del Laboratorio 2.');
+ if(d.traceId!==TRACE||d.schemaVersion!==3)throw Error('Dossier di una versione diversa (serve la versione 3, caso Firenze).');
+ const s=d.state||{},inp=s.inputs||{},sub=s.submissions||{};
+ const righe=tasks.map(t=>{
+  const v=inp[t.id]||{},campi=[];
+  for(const [id,label,type] of t.fields){
+   const r=v[id];let ok=false,fr=0,note='';
+   if(r==null||String(r).trim()===''||r==='Seleziona'){note='non compilato'}
+   else if(type==='number'){const n=num(r);ok=Number.isFinite(n)&&Math.abs(n-t.answers[id])<=((t.tol||{})[id]??0.005);fr=ok?1:0}
+   else if(type==='select'){ok=r===t.answers[id];fr=ok?1:0}
+   else if(t.id==='I06'){const hit=RIF_CAUSALE.filter(([,re])=>re.test(r));fr=String(r).trim().length>=15?hit.length/RIF_CAUSALE.length:0;ok=fr===1;note=hit.length<RIF_CAUSALE.length?'mancano: '+RIF_CAUSALE.filter(([,re])=>!re.test(r)).map(([k])=>k).join(', '):''}
+   else{const L=String(r).trim().length;fr=L>=30?1:L/30;ok=L>=30;note=L+' caratteri · da leggere'}
+   campi.push({id,label,type,r:r??'',ok,fr,note,att:t.answers[id]!==undefined?fmt(t,id):(type==='text'?'cita COL-1206, riconteggio, BP-2912, AUT-2026-12':'almeno 30 caratteri, da valutare')});
+  }
+  const fr=campi.reduce((a,c)=>a+c.fr,0)/campi.length,ind=IND.find(x=>x.ids.includes(t.id)),max=25/ind.ids.length,p=max*fr;
+  const conf=!!sub[t.id]&&t.fields.every(([id])=>String((sub[t.id].values||{})[id]??'')===String(v[id]??''));
+  return {t,campi,p,max,fr,ok:fr===1,conf,tent:(s.attempts||{})[t.id]||0};
+ });
+ const ind=IND.map(x=>{const r=righe.filter(y=>x.ids.includes(y.t.id)),f=r.reduce((a,y)=>a+y.fr,0)/r.length,p=Math.max(1,Math.round(f*25));return {n:x.n,ids:x.ids,p,liv:LIV(p)}});const tot=ind.reduce((a,x)=>a+x.p,0);
+ const a={file,nome:s.student||file,corso:s.course||'',modo:s.mode==='exam'?'Prova autonoma':'Allenamento',righe,ind,tot,voto:Math.round(tot/100*20)/2,aiuti:(s.hintViews||[]).length,tentativi:Object.values(s.attempts||{}).reduce((x,y)=>x+y,0),export:d.exportedAt,sessione:s.sessionId};
+ a.risposta=risposta(a);return a;
+}
+function risposta(a){
+ const nome=(a.nome||'').split(' ')[0];const ko=a.righe.filter(x=>!x.ok);
+ let t=`Ciao ${nome},\n\nho corretto il tuo Laboratorio 2 «Inventari» (UF 9, caso Firenze, ${a.modo.toLowerCase()}): ${a.tot}/100 (soglia proposta 60/100).\n\n${a.ind.map((x,i)=>`${i+1}. ${x.n}: ${x.p}/25 · ${x.liv}`).join('\n')}\n`;
+ if(!ko.length)return t+'\nTutti gli incarichi sono corretti: perimetro, conta, differenze, riconta, rettifica autorizzata, scrittura (conto 65 26,00), valorizzazione (FIFO 768, LIFO 728, medio 736,82, standard 691,60), merci in viaggio, rimanenze 969,00, inventario inframese e assestamento (+538,00). Brava/o!\n\nHo letto anche la relazione finale.\n';
+ t+='\nDA RIVEDERE:\n';
+ ko.forEach((x,i)=>{t+=`${i+1}) ${x.t.id} · ${x.t.title} (${Math.round(x.fr*100)}% corretto)\n`;x.campi.filter(c=>!c.ok).forEach(c=>{t+=c.type==='text'||c.type==='textarea'?`   - ${c.label}: hai scritto «${c.r||'niente'}»; ${c.note?c.note+'.':''}\n`:`   - ${c.label}: hai scritto «${c.r||'niente'}», doveva essere ${c.att}.\n`;if(x.t.err&&x.t.err[c.id])t+=`     ${x.t.err[c.id]}\n`})});
+ const nc=a.righe.filter(x=>!x.conf).map(x=>x.t.id);if(nc.length)t+=`\nAttenzione: questi incarichi non risultano confermati con «Controlla operazione» sulle risposte attuali: ${nc.join(', ')}.\n`;
+ return t+'\nCorreggi nel laboratorio, poi esporta di nuovo il dossier JSON e rimandamelo.\n';
+}
+const esito=a=>a.righe.every(x=>x.ok)?'<span class="pill g">COMPLETO</span>':a.tot>=60?'<span class="pill">DA CORREGGERE</span>':'<span class="pill r">DA RIFARE</span>';
+function renderClasse(){
+ document.getElementById('classe').style.display=allievi.length?'':'none';
+ const rows=allievi.map((a,i)=>a.errore?`<tr class="clic${i===corrente?' sel':''}" onclick="mostra(${i})"><td>${esc(a.nome)}</td><td colspan="6" class="ko">${esc(a.errore)}</td></tr>`:
+  `<tr class="clic${i===corrente?' sel':''}" onclick="mostra(${i})"><td><b>${esc(a.nome)}</b><br><span class="small">${esc(a.file)}</span></td><td>${esc(a.corso||'—')}<br><span class="small">${esc(a.modo)}</span></td><td>${esito(a)}</td><td>${a.ind.map(x=>x.p).join(' · ')}</td><td class="voto ${a.tot>=60?'ok':'ko'}">${a.tot}/100</td><td>${a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(', ')||'<span class="ok">—</span>'}</td><td>${a.aiuti} spiegazioni · ${a.tentativi} controlli</td></tr>`).join('');
+ document.getElementById('tab-classe').innerHTML=`<table><thead><tr><th>Allievo</th><th>Corso · modalità</th><th>Esito</th><th>Indicatori 1 · 2 · 3 · 4 (su 25)</th><th>Voto</th><th>Incarichi da rivedere</th><th>Uso degli aiuti</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function mostra(i){
+ corrente=i;renderClasse();const a=allievi[i],box=document.getElementById('dettaglio');
+ if(a.errore){box.innerHTML=`<div class="box"><h2>${esc(a.nome)}</h2><p class="ko">${esc(a.errore)}</p></div>`;return}
+ const righe=a.righe.map(x=>x.campi.map((c,k)=>`<tr>${k===0?`<td rowspan="${x.campi.length}"><b>${x.t.id}</b><br>${esc(x.t.title)}<br><span class="small">${x.conf?'confermato':'NON confermato'} · ${x.tent} controlli</span></td>`:''}<td>${esc(c.label)}</td><td>${esc(c.att)}</td><td>${esc(c.r||'—')}${c.note?'<br><span class="small">'+esc(c.note)+'</span>':''}</td><td class="${c.ok?'ok':c.fr>0?'part':'ko'}">${c.ok?'✔':c.fr>0?'◐':'✘'}</td>${k===0?`<td rowspan="${x.campi.length}" class="${x.ok?'ok':'ko'}">${Math.round(x.fr*100)}%</td>`:''}</tr>`).join('')).join('');
+ const txt=a.righe.find(x=>x.t.id==='I15');
+ box.innerHTML=`<div class="box"><h2>3 · Dettaglio · ${esc(a.nome)}</h2>
+ <p><b>Corso:</b> ${esc(a.corso||'—')} · <b>Modalità:</b> ${esc(a.modo)} · <b>Esportato:</b> ${esc(a.export?new Date(a.export).toLocaleString('it-IT'):'—')} · <b>Voto:</b> <span class="voto ${a.tot>=60?'ok':'ko'}">${a.tot}/100</span> · ${esito(a)}</p><table style="margin:8px 0 14px"><thead><tr><th>Indicatore</th><th>Incarichi</th><th>Punti</th><th>Livello</th></tr></thead><tbody>${a.ind.map((x,i)=>`<tr><td>${i+1}. ${esc(x.n)}</td><td>${x.ids.join(', ')}</td><td class="${x.p>=11?'ok':'ko'}">${x.p}/25</td><td>${x.liv}</td></tr>`).join('')}</tbody></table>
+ ${a.modo==='Allenamento'?'<div class="warn">Compito svolto in <b>allenamento</b>: la guida mostra calcoli e valori. Per una valutazione d’esame chiedi la prova autonoma.</div>':''}
+ <table><thead><tr><th>Incarico</th><th>Campo</th><th>Soluzione</th><th>Risposta dell’allievo</th><th>Esito</th><th>Corretto</th></tr></thead><tbody>${righe}</tbody></table></div>
+ <div class="box"><h2>4 · Relazione finale da leggere (I15)</h2>${txt.campi.map(c=>`<p><b>${esc(c.label)}</b><br>${esc(c.r||'—').replace(/\n/g,'<br>')}</p>`).join('')}</div>
+ <div class="box"><h2>5 · Risposta da inviare all’allievo</h2><textarea id="risp">${esc(a.risposta)}</textarea>
+ <div class="noprint"><button onclick="copia()">📋 Copia testo</button><button class="sec" onclick="scaricaRisp()">⬇ Scarica .txt</button><button class="sec" onclick="window.print()">🖨 Stampa correzione</button></div></div>`;
+ document.getElementById('risp').addEventListener('input',e=>{a.risposta=e.target.value});
+}
+function copia(){const t=document.getElementById('risp');t.select();try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand('copy')}}
+function scarica(nome,testo,tipo){const b=new Blob([testo],{type:tipo}),u=URL.createObjectURL(b),x=document.createElement('a');x.href=u;x.download=nome;x.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function scaricaRisp(){const a=allievi[corrente];scarica('correzione-lab2-'+(a.nome||'allievo').replace(/[^\w-]+/g,'_')+'.txt',document.getElementById('risp').value,'text/plain;charset=utf-8')}
+function esportaCSV(){const cell=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ const head=['Allievo','Corso','Modalità',...IND.map((x,i)=>'Indicatore '+(i+1)),'Voto /100',...tasks.map(t=>t.id+' %'),'Incarichi da rivedere','File'];
+ const rows=allievi.filter(a=>!a.errore).map(a=>[a.nome,a.corso,a.modo,...a.ind.map(x=>x.p),a.tot,...a.righe.map(x=>Math.round(x.fr*100)),a.righe.filter(x=>!x.ok).map(x=>x.t.id).join(' '),a.file]);
+ scarica('riepilogo-lab2-inventari.csv','﻿'+[head,...rows].map(r=>r.map(cell).join(';')).join('\r\n'),'text/csv;charset=utf-8')}
+</script></body></html>

@@ -139,6 +139,32 @@ def uf9_laboratorio(versione):
                   "calcoli": CALCOLI, "trasferimento": TRASFERIMENTO})
 
 
+# Laboratorio 2 Inventari (UF 9): allenamento per la prova, stesso inventario dell'esercizio di dicembre.
+# nome → (file, solo docente, da scaricare)
+MATERIALI_UF9 = {
+    "laboratorio-2": ("Laboratorio_2_Inventari_UF9_Firenze.html", False, False),
+    "teoria-slide": ("Teoria_Laboratorio_2_Inventari_UF9.pptx", False, True),
+    "teoria-manualetto": ("Manualetto_Teoria_Laboratorio_2_Inventari_UF9.docx", False, True),
+    "correttore": ("Correttore_Lab2_Inventari_UF9_Firenze.html", True, False),
+}
+
+
+@bp.route("/<versione>/uf9-pistoia/materiali/<nome>")
+def uf9_materiale(versione, nome):
+    """File del Laboratorio 2; il correttore contiene le soluzioni ed è riservato al docente."""
+    from pathlib import Path
+    from ...accesso import utente_corrente
+    voce = MATERIALI_UF9.get(nome)
+    if versione not in VERSIONI or voce is None:
+        abort(404)
+    file, riservato, scarica = voce
+    if riservato:
+        u = utente_corrente()
+        if u is None or not u.docente:
+            abort(403)
+    return send_from_directory(Path(__file__).resolve().parent / "materiali_uf9", file, as_attachment=scarica)
+
+
 @bp.route("/<versione>/tutto")
 def tutto(versione):
     """Tutte le schede in una pagina, come il file originale: serve ai test e a chi preferisce le linguette."""

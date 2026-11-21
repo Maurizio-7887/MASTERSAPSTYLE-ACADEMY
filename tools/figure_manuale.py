@@ -129,13 +129,13 @@ def sap_inventario():
         s = campo(16, 135, "Documento d'inventario", "100000001", 200) + campo(232, 135, "Data di conteggio", "31.12.2026", 200)
         s += campo(448, 135, "Magazzino", "1000 / 0001", 200) + campo(664, 135, "Movimento differenze", "711", 100, True)
         tab, y = tabella(16, 200, ["Materiale", "A sistema", "Contato", "Differenza", "Valore"],
-                         [["SL-TAGLIO kit", "20 PZ", "19 PZ", "-1 PZ", "-14,60"], ["FERRO tubolare", "740 KG", "740 KG", "0", "0,00"]],
+                         [["FERRO COL-1206", "500 KG", "488 KG", "-12 KG", "-11,40"], ["SL-TAGLIO kit", "20 PZ", "19 PZ", "-1 PZ", "-14,60"]],
                          [260, 150, 150, 150, 158], acc, num=(1, 2, 3, 4))
         s += tab + t(16, y + 30, "Documento contabile della differenza (MI07)", 13, acc, "bold")
         tab2, y2 = tabella(16, y + 40, ["Conto", "Descrizione", "Dare", "Avere"],
-                           [["65", "Differenze inventariali", "14,60", ""], ["07", "Magazzino semilavorati", "", "14,60"]], [80, 470, 157, 161], acc, num=(2, 3))
+                           [["65", "Differenze inventariali", "26,00", ""], ["12", "Magazzino ferro", "", "11,40"], ["07", "Magazzino semilavorati", "", "14,60"]], [80, 470, 157, 161], acc, num=(2, 3))
         return s + tab2
-    schermata("sap_inventario", "sap", "Logistica › Inventario fisico › MI01 · MI04 · MI07", "Inventario di fine anno e differenze", c, 470,
+    schermata("sap_inventario", "sap", "Logistica › Inventario fisico › MI01 · MI04 · MI07", "Inventario di fine anno e differenze", c, 500,
               "Nel metodo permanente la conta corregge i conti di magazzino; nel metodo italiano la conta dà il valore delle rimanenze finali.")
 
 
@@ -145,8 +145,8 @@ def sap_chiusura():
         s += campo(448, 135, "Conto bilancio di chiusura", "91", 200, True) + campo(664, 135, "Conto bilancio di apertura", "92", 200, True)
         s += campo(16, 190, "1ª esecuzione", "Conti economici → utile (90 → 32)", 416) + campo(448, 190, "2ª esecuzione", "Conti patrimoniali: chiusura 31.12 e apertura 01.01", 416)
         tab, y = tabella(16, 260, ["Data", "Conto", "Descrizione", "Dare", "Avere"],
-                         [["31.12.2026", "12", "Magazzino ferro → 91", "", "703,00"], ["31.12.2026", "07", "Magazzino semilavorati → 91", "", "277,40"],
-                          ["01.01.2027", "12", "Magazzino ferro ← 92", "703,00", ""], ["01.01.2027", "07", "Magazzino semilavorati ← 92", "277,40", ""]],
+                         [["31.12.2026", "12", "Magazzino ferro → 91", "", "691,60"], ["31.12.2026", "07", "Magazzino semilavorati → 91", "", "277,40"],
+                          ["01.01.2027", "12", "Magazzino ferro ← 92", "691,60", ""], ["01.01.2027", "07", "Magazzino semilavorati ← 92", "277,40", ""]],
                          [120, 70, 380, 149, 149], acc, num=(3, 4))
         return s + tab + bottone(W - 166, y + 14, "Esegui", acc)
     schermata("sap_chiusura", "sap", "Contabilità generale › Chiusura › FAGL_IT_01 Registrazioni di chiusura e apertura (Italia)", "Chiusura e riapertura dei conti", c, 470,
@@ -242,8 +242,8 @@ def ahr_inventario():
         s = campo(16, 135, "Data valutazione", "31/12/2026", 200) + campo(232, 135, "Metodo valorizzazione", "Costo medio ponderato", 260, True)
         s += campo(508, 135, "Magazzino", "Principale", 200)
         tab, y = tabella(16, 200, ["Codice", "Descrizione", "Giacenza", "Costo (€)", "Valore (€)"],
-                         [["FERRO", "Ferro tubolare (materia prima)", "740 kg", "1,0121", "748,97"], ["SL-TAGLIO", "Kit tagliato (semilavorato)", "19 pz", "14,60", "277,40"],
-                          ["TR-STD", "Transenna standard (prodotto finito)", "0 pz", "31,40", "0,00"], ["", "Totale rimanenze finali", "", "", "1.026,37"]],
+                         [["FERRO", "Ferro tubolare (materia prima)", "728 kg", "1,0121", "736,82"], ["SL-TAGLIO", "Kit tagliato (semilavorato)", "19 pz", "14,60", "277,40"],
+                          ["TR-STD", "Transenna standard (prodotto finito)", "0 pz", "31,40", "0,00"], ["", "Totale rimanenze finali", "", "", "1.014,22"]],
                          [130, 340, 130, 130, 138], acc, num=(2, 3, 4))
         return s + tab + t(16, y + 30, "Ferro: (2.800 kg × 1,00 + 500 kg × 1,08) ÷ 3.300 kg = 1,0121 €/kg · semilavorato al costo di produzione", 12, acc, "bold") + bottone(W - 196, y + 44, "Stampa inventario", acc, 180)
     schermata("ahr_inventario", "ahr", "GESINV · Stampa Inventario Valorizzato", "Inventario valorizzato al 31 dicembre", c, 470,
@@ -255,8 +255,8 @@ def ahr_rimanenze():
         s = campo(16, 135, "Data reg.", "31/12/2026", 150) + campo(182, 135, "Causale contabile", "Assestamento — rimanenze finali", 300, True)
         s += campo(498, 135, "Note", "Da inventario valorizzato al 31/12", 386)
         tab, y = tabella(16, 205, ["Rigo", "Conto", "Descrizione", "Dare (€)", "Avere (€)"],
-                         [["10", "Rim. MP", "Rimanenze materie prime", "748,97", ""], ["20", "Rim. SL", "Rimanenze semilavorati", "277,40", ""],
-                          ["30", "Var. MP", "Variazione rimanenze materie prime", "", "748,97"], ["40", "Var. SL", "Variazione rimanenze semilavorati", "", "277,40"]],
+                         [["10", "Rim. MP", "Rimanenze materie prime", "736,82", ""], ["20", "Rim. SL", "Rimanenze semilavorati", "277,40", ""],
+                          ["30", "Var. MP", "Variazione rimanenze materie prime", "", "736,82"], ["40", "Var. SL", "Variazione rimanenze semilavorati", "", "277,40"]],
                          [60, 130, 400, 139, 139], acc, num=(3, 4))
         return s + tab + _quadra(y + 14, acc, "Al 1° gennaio, dopo la riapertura, la scrittura opposta riporta le rimanenze iniziali a costo.")
     schermata("ahr_rimanenze", "ahr", "GESCON · Prima Nota Contabile", "Rimanenze finali in Prima Nota", c, 470,
