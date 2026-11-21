@@ -52,6 +52,9 @@
       <p class="rp-nota">Si apre «Avvio del sistema» con la guida dell’esercizio scelto, pronta al primo passo.</p>
     </div>
   </div>
+  {% if fico_attivo %}
+  <p style="margin-top:20px"><a class="rp-btn verde" href="{{ url_for('fico_ponte.entra') }}" style="background:#173d64">📘 SAP FI/CO — percorso pratico verificato (Blocco 8)</a></p>
+  {% endif %}
   <p style="margin-top:20px;font-size:16px">📂 <a href="{{ url_for('allievo.area') }}">La mia area</a>: consegne, tempi e risposte del docente.</p>
 </div>
 <script>

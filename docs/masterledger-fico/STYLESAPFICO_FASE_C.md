@@ -33,10 +33,27 @@ Controllato sul codice reale del repository (non sull'archivio zip):
 ## 4. Per andare online
 1. Su Railway: database PostgreSQL dedicato e variabili `MASTERLEDGER_FICO_ENABLED=1`, `MASTERLEDGER_FICO_DATABASE_URL`, `MASTERLEDGER_FICO_SECRET_KEY` (diverse da quelle del portale).
 2. Primo avvio: le migrazioni partono da sole. Una volta sola, creare piano dei conti e mappature (`flask --app app seed` dalla shell del servizio) e **cambiare subito le password degli utenti demo** o disattivarli.
-3. Creare gli utenti allievi nel FI/CO (accesso coordinato con il portale: Fase B, da fare).
+3. Gli utenti allievi NON si creano a mano: entrano dal portale (Fase B, sotto).
 
 ## 5. Prossime fasi (dal piano)
-- Fase B: accesso unico portale → /fico, utenti allievi, CSRF/logout coordinati.
 - Fase D: blocchi 1–4 (OX02/OB62 didattici, F-02, storni nel periodo, aging/DSO, cespiti con run simulato e dismissioni).
 - Fase E: blocchi 5–6 (profit center, ordini interni, ripartizioni, versioni di budget, forecast 9+3) riusando la logica BPC del portale.
 - Fase F: blocchi 7–8 completi (checklist di chiusura per sessione, varianti con errori intenzionali, variante 800).
+
+## 6. Fase B — accesso unico dal portale (realizzata)
+- **Portale** (`app/blueprints/fico_ponte`): rotta `/fico-accesso`. Chi è già entrato nel portale riceve un biglietto firmato con `MASTERLEDGER_FICO_SECRET_KEY`, valido 2 minuti e **monouso**, e viene portato su `/fico/academy-fico/ponte`.
+- **Pulsanti**: «SAP FI/CO — percorso pratico verificato» nella home dell'allievo (`/riprendi/`) e nel pannello docente. Compaiono solo con il FI/CO attivo.
+- **FI/CO** (`services/ponte_portale.py`): crea o aggiorna l'utente `portale-<id>`, senza password utilizzabile. Docente del portale → `commercialista`; allievo → `operatore`.
+- **Confinamento allievi** (before_request `guardia_allievi`):
+  - l'azienda corrente è sempre la propria azienda didattica, anche se la sessione viene manomessa;
+  - sono aperte solo le pagine del percorso (FB70, FB60, Scadenzario, Prima nota, Giornale, documento, storno, mastri, partitari, centri, report CO, bilancio di verifica, codici transazione); configurazione, periodi, OBYC, MM/SD, paghe, AI e integrazioni rispondono 403;
+  - un documento o una rata di un'altra azienda risponde 404 (anche cambiando il numero nell'URL);
+  - il selettore in alto mostra solo le proprie aziende didattiche.
+- **Filtri per azienda aggiunti** (valgono per tutti, «Tutte le aziende» invariato): Libro mastro, mastrino conto, partitario, partite del centro di costo, report CO.
+- **Uscita coordinata**: «Esci» dal portale cancella anche i cookie del FI/CO.
+- **Biglietti usati** registrati nella tabella `academy_bridge_tickets` (migrazione `x2y3z4a5b6c7`).
+
+### Test Fase B
+- `cd integrations/masterledger_fico/service && pytest -q` → 108 passati (5 nuovi sul ponte e sul confinamento).
+- `python tests/test_fico_ponte.py` → accesso dal portale, biglietto monouso, docente, uscita coordinata nel servizio unico.
+- `python tests/test_rotte.py` → 367 rotte del portale invariate.

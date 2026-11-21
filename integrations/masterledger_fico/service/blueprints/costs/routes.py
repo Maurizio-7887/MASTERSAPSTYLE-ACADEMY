@@ -6,6 +6,7 @@ from sqlalchemy import and_
 
 from extensions import db
 from models import CostCenter, JournalEntry, JournalLine, Account
+from services.azienda_corrente import filtra_per_azienda
 
 costs_bp = Blueprint("costs", __name__, template_folder="../../templates/costs")
 
@@ -101,8 +102,8 @@ def report():
         flash(str(exc), "danger")
         date_from = date_to = None
 
-    query = (JournalLine.query.join(Account).join(JournalEntry)
-             .filter(Account.cost_relevant == True))  # noqa: E712
+    query = filtra_per_azienda(JournalLine.query.join(Account).join(JournalEntry)
+                               .filter(Account.cost_relevant == True))  # noqa: E712
     if date_from:
         query = query.filter(JournalEntry.doc_date >= date_from)
     if date_to:

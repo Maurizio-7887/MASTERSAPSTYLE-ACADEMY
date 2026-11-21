@@ -1,7 +1,7 @@
 """Percorso formativo aggiuntivo: non registra né modifica dati contabili."""
 import json
 from pathlib import Path
-from flask import Blueprint, render_template, abort, request, jsonify, url_for
+from flask import Blueprint, render_template, abort, request, jsonify, url_for, session
 from flask_login import login_required
 from blueprints.decorators import ledger_required
 
@@ -196,3 +196,22 @@ def percorso_classe():
     sessioni = AcademySession.query.filter_by(is_active=True).order_by(AcademySession.updated_at.desc()).all()
     righe = [{'s': x, 'c': contatore(x)} for x in sessioni]
     return render_template('academy/percorso_classe.html', righe=righe)
+
+
+# ── Accesso unico dal portale (Fase B) ───────────────────────────────
+@academy_bp.get('/ponte')
+def ponte():
+    """Entrata dal portale MASTERSAPSTYLE con biglietto firmato e monouso."""
+    from flask_login import login_user, logout_user
+    from services.ponte_portale import leggi_biglietto, utente_da_portale
+    from extensions import db
+    try:
+        data = leggi_biglietto(request.args.get('t', ''))
+    except ValueError as e:
+        db.session.rollback()
+        return render_template('academy/ponte_errore.html', messaggio=str(e)), 400
+    u = utente_da_portale(data)   # salva anche il biglietto usato
+    logout_user()
+    session.clear()
+    login_user(u, remember=False)
+    return redirect(url_for('academy.percorsi'))

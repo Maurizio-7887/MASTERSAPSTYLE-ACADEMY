@@ -3,6 +3,9 @@
 {% block contenuto %}
 <h1>Pannello docente</h1>
 {% include "docente/_menu.html" %}
+{% if fico_attivo %}
+<p><a href="{{ url_for('fico_ponte.entra') }}" style="display:inline-block;background:#173d64;color:#fff;padding:10px 15px;border-radius:8px;text-decoration:none;font-weight:700">📘 SAP FI/CO — la mia esercitazione e avanzamento della classe</a></p>
+{% endif %}
 <div class="msa-kpis">
   <div class="msa-card"><div class="l">Allievi</div><div class="v">{{ righe | length }}</div></div>
   <div class="msa-card"><div class="l">Collegati ora (ultimi 5 min)</div><div class="v">{{ collegati }}</div></div>

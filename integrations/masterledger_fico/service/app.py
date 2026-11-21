@@ -86,6 +86,10 @@ def create_app(config_class=Config):
     app.register_blueprint(bank_advances_bp, url_prefix="/banche")
 
     # ── Variabili disponibili in ogni template ──────────────────
+    # Allievi entrati dal portale: confinati nella propria azienda didattica.
+    from services.ponte_portale import guardia_allievi
+    app.before_request(guardia_allievi)
+
     @app.context_processor
     def inject_globals():
         from flask_login import current_user
@@ -93,7 +97,8 @@ def create_app(config_class=Config):
         from services.azienda_corrente import get_azienda_corrente
         ctx = {"company_name": app.config["COMPANY_NAME"]}
         if current_user.is_authenticated and getattr(current_user, "is_ledger", False):
-            ctx["aziende_ledger"] = Company.query.filter_by(active=True).order_by(Company.name).all()
+            from services.ponte_portale import aziende_visibili
+            ctx["aziende_ledger"] = aziende_visibili(current_user)
             ctx["azienda_corrente"] = get_azienda_corrente()
         return ctx
 
