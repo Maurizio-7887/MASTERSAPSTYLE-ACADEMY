@@ -3,8 +3,8 @@ from tests._client import docente
 from app.blueprints.portale.lezioni_magazzino_contenuti import LEZIONI, PERCORSI, PISTOIA_APPROFONDIMENTI
 from app.blueprints.portale.lezioni_magazzino_professionali import TEORIA_PROFESSIONALE
 
-assert len(PERCORSI["firenze"]["ordine"]) == 7
-assert len(PERCORSI["pistoia"]["ordine"]) == 11
+assert len(PERCORSI["firenze"]["ordine"]) == 8
+assert len(PERCORSI["pistoia"]["ordine"]) == 12
 assert PERCORSI["firenze"]["esercizio"] == "dicembre-magazzino-30"   # dal 12/11/2026: essenziale
 assert PERCORSI["pistoia"]["esercizio"] == "dicembre-magazzino"      # dal 12/11/2026: completo
 assert "flussi" in PERCORSI["firenze"]["ordine"]
@@ -43,4 +43,4 @@ for tipo, programma in PERCORSI.items():
         assert '<div class="msa-sim">' not in html
 assert c.get("/vuoto/lezioni-magazzino/inesistente").status_code == 404
 assert c.get("/vuoto/lezioni-magazzino/firenze?lezione=qualita").status_code == 404
-print("OK: 7 lezioni Firenze, 11 lezioni Pistoia, ogni pagina collegata al rispettivo tutor")
+print("OK: 8 lezioni Firenze, 12 lezioni Pistoia, ogni pagina collegata al rispettivo tutor")

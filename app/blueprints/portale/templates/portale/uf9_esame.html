@@ -49,6 +49,8 @@
 <a class="uf9-primary" href="{{ url_for('erp_dati.avvio', versione=versione, esercizio_guida='dicembre-magazzino') }}" target="_blank" rel="noopener">🎯 Apri / riprendi il gestionale Pistoia ↗</a>
 <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='inventario') }}" target="_blank" rel="noopener">📖 Teoria inventari ↗</a>
 <a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='valori') }}" target="_blank" rel="noopener">📖 FIFO, LIFO, valore ↗</a>
+<a href="{{ url_for('portale.lezioni_magazzino', versione=versione, percorso='pistoia', lezione='chiusura') }}" target="_blank" rel="noopener">📖 Merci in viaggio e fine anno ↗</a>
+<a href="{{ url_for('portale.uf9_materiale', versione=versione, nome='laboratorio-2') }}" target="_blank" rel="noopener">🧭 Laboratorio 2 · allenamento guidato ↗</a>
 <button type="button" onclick="window.print()">🖨️ Stampa scheda esame</button>
 </div>
 <section class="uf9-box" aria-labelledby="obiettivi">
@@ -104,6 +106,15 @@
 <label class="uf9-field">Giudizio motivato del docente<textarea rows="3" id="uf9-giudizio" placeholder="Motiva punti di forza, carenze e eventuali recuperi"></textarea></label>
 <div class="uf9-grid"><label class="uf9-field">Docente / valutatore<input id="uf9-docente"></label><label class="uf9-field">Firma docente<input placeholder="Da firmare sul foglio stampato"></label></div>
 <p class="uf9-after"><strong>Attenzione:</strong> la scala dell'ente definisce i livelli per ciascun indicatore. Non è stata indicata una soglia di superamento complessiva: <strong>nessun esito promosso/bocciato è dedotto automaticamente</strong>.</p>
+</section>
+<section class="uf9-box" id="laboratorio-2">
+<h2>Preparazione · Laboratorio 2 Inventari (inventario di fine anno di Ferro &amp; Transenne)</h2>
+<p>Per allenarsi alla prova gli allievi svolgono il <strong>Laboratorio 2</strong>: 15 incarichi sullo stesso inventario del 31/12 dell'esercizio «Dicembre in magazzino» (ferro 740 kg a sistema e 728 contati, buono BP-2912, kit 19 su 20, rimanenze 969,00 €). Ogni incarico indica da che cosa si parte, che cosa si ottiene e contiene tutti i dati. Prima si lavora in <strong>Allenamento</strong>, con la guida luminosa che indica il campo e spiega il calcolo; poi in <strong>Prova autonoma</strong>. Il dossier JSON esportato si carica nel correttore, che propone il voto in centesimi sui quattro indicatori.</p>
+<ul>
+<li><a href="{{ url_for('portale.uf9_materiale', versione=versione, nome='laboratorio-2') }}" target="_blank" rel="noopener">Laboratorio 2 Inventari</a> · si apre nel browser, funziona anche offline</li>
+<li><a href="{{ url_for('portale.uf9_materiale', versione=versione, nome='teoria-slide') }}">Slide di teoria UF 9</a> (PowerPoint) · <a href="{{ url_for('portale.uf9_materiale', versione=versione, nome='teoria-manualetto') }}">Manualetto di teoria</a> (Word)</li>
+<li><a href="{{ url_for('portale.uf9_materiale', versione=versione, nome='correttore') }}" target="_blank" rel="noopener">Correttore del docente</a> · riservato al docente: contiene le soluzioni</li>
+</ul>
 </section>
 <section class="uf9-box">
 <h2>5 · Dalla pratica alla prova, senza azzerare nulla</h2>

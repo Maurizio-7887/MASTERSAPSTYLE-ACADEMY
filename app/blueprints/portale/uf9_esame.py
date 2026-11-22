@@ -26,7 +26,7 @@ PROGRAMMA_ORE = [
      "attivita": "Articolo, UdC, ubicazioni, movimenti 101/261/555, estrazione e lettura saldi e documenti."},
     {"ore": 6, "titolo": "FIFO, LIFO e costo medio", "lezione": "valori", "passi": "77",
      "attivita": "Scheda a lotti con prezzi diversi; determinazione costo degli scarichi e rimanenze, confronto con costo standard."},
-    {"ore": 4, "titolo": "Merce in viaggio e valorizzazione", "lezione": "valori", "passi": "72–76",
+    {"ore": 4, "titolo": "Merce in viaggio e valorizzazione", "lezione": "chiusura", "passi": "72–76",
      "attivita": "Trasferimento W100 → D200, uscita 351, merce in viaggio, entrata 101; verifica che 200 + 100 = 300 TR-PED."},
     {"ore": 5, "titolo": "Inventario inframese e di fine anno", "lezione": "inventario", "passi": "64–66",
      "attivita": "Programmare inventari ciclici e di chiusura: data di cut-off, stampa conta cieca, movimenti aperti, scorte bloccate."},

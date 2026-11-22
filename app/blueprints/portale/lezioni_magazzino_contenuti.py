@@ -67,19 +67,28 @@ LEZIONI = {
     "id": "inventario",
     "uf": "UF 9",
     "titolo": "Inventari fisici, contabili, conte cieche e rettifiche",
-    "teoria": "L'inventario fisico conta ciò che è realmente sugli scaffali. L'inventario contabile di magazzino ricostruisce il saldo da carichi e scarichi. Le differenze si cercano con documenti, ubicazioni e riconta, non con un'aggiunta arbitraria di quantità. La conta cieca evita che l'operatore copi il saldo previsto. Il documento inventariale definisce cosa contare, la riconta verifica gli scostamenti e la rettifica autorizzata corregge il sistema. L'inventario ABC concentra la frequenza di controllo sugli articoli più rilevanti.",
-    "esempio": "Se un'ubicazione contiene 12 kg meno del saldo registrato, si esegue una riconta e si ricerca la causa prima di confermare una differenza negativa.",
-    "operativo": "Apri Inventario → Documento LI01N; avvia la conta; registra la quantità; effettua la riconta LI14 se richiesta; verifica la differenza; registra la rettifica una sola volta.",
-    "quiz": "Perché la conta cieca è preferibile quando possibile?|Perché evita che la quantità prevista influenzi la misurazione reale."
+    "teoria": "L'inventario fisico conta, pesa o misura ciò che è davvero sugli scaffali; l'inventario contabile ricostruisce il saldo dai movimenti: giacenza iniziale + entrate − uscite. La procedura ha sempre gli stessi passi. Il perimetro dice che cosa si conta: solo la merce dell'azienda, anche fuori sede, non i beni di terzi né la merce già venduta in attesa di ritiro. Il cut-off ferma il tempo: da una certa ora nessun movimento. Il documento inventariale elenca le posizioni: una posizione è un articolo o un lotto in un'ubicazione, quindi una catasta con due colate fa due posizioni e un'ubicazione vuota è una posizione da confermare a zero. La conta cieca evita che l'operatore copi il saldo previsto. La differenza è sempre contato meno contabile e si valorizza al costo; se supera la tolleranza della singola posizione si riconta con un'altra persona e si cerca la causa nei documenti. Una causa si dimostra, non si inventa. Solo dopo, con l'autorizzazione del responsabile, si registra la rettifica, una volta sola. Oltre all'inventario di fine anno esistono le conte inframese di controllo, che non fermano tutto il magazzino.",
+    "esempio": "Al 31/12 il ferro a sistema è 740 kg: COL-1204 240 kg e COL-1206 500 kg. La bilancia trova 240 e 488 kg: −12 kg × 0,95 = −11,40 €, oltre la tolleranza di 10 €. La riconta conferma e salta fuori il buono BP-2912 del 29/12: 12 kg presi dalla manutenzione e mai registrati. Nel cassone dei kit se ne contano 19 su 20, senza documenti: si scrive «ammanco verificato con riconta». Il responsabile autorizza con AUT-2026-12.",
+    "operativo": "Prepara perimetro e cut-off; crea il documento LI01N e attivalo; conta con la pistola RF colata per colata e conferma a zero le ubicazioni vuote; registra la conta (LI11N); se il sistema segnala differenze oltre tolleranza esegui la riconta LI14 e cerca il documento; chiudi nel WMS con LI20 e allinea il gestionale con LI21 (movimento 711), una sola volta.",
+    "quiz": "Una catasta con due colate di ferro quante posizioni d'inventario sono?|Due: ogni colata in un'ubicazione è una posizione, e anche un'ubicazione vuota è una posizione da confermare a zero."
   },
   "valori": {
     "id": "valori",
     "uf": "UF 8 / UF 9",
     "titolo": "Contabilità di magazzino: FIFO, LIFO, medio, standard",
-    "teoria": "La contabilità DI magazzino non coincide con la contabilità generale: risponde a due domande, quanti materiali ci sono e quanto valgono. FIFO attribuisce agli scarichi prima i costi dei lotti più vecchi; LIFO, usato qui come confronto didattico, parte dai lotti più recenti; il costo medio ponderato utilizza il rapporto fra valore e quantità complessiva; il costo standard è prefissato e può differire dal prezzo effettivo. Questi metodi non cambiano il numero di pezzi: cambiano il costo associato ai movimenti e alla rimanenza. La corretta applicazione in bilancio dei diversi criteri dipende dai principi contabili vigenti.",
-    "esempio": "Compro 100 kg a 1,00 € e 100 kg a 1,20 €. Escono 120 kg, restano 80. FIFO rimanenza 96 €; LIFO 80 €; costo medio 88 €. Nel simulatore il ferro può essere valorizzato allo standard di 0,95 €/kg: 438 kg valgono 416,10 €.",
-    "operativo": "Apri Inventario → Valorizzazione; leggi quantità e costo del ferro; svolgi su carta il confronto tra due lotti; confronta FIFO, LIFO, medio e standard, senza creare una seconda fattura.",
+    "teoria": "La contabilità DI magazzino non coincide con la contabilità generale: risponde a due domande, quanti materiali ci sono e quanto valgono. Le rimanenze si valutano al costo (codice civile art. 2426 e principio OIC 13): prezzo d'acquisto più oneri accessori come il trasporto, oppure al valore di realizzo se è più basso. Quando lo stesso materiale è stato comprato a prezzi diversi serve un metodo. FIFO attribuisce agli scarichi prima i costi dei lotti più vecchi, quindi in magazzino restano i più recenti; LIFO, ammesso dal codice civile ma non dagli IFRS, parte dai lotti più recenti e lascia in magazzino i più vecchi; il costo medio ponderato divide il valore di tutti i carichi per la quantità caricata, pesando con i chili e non facendo la media dei prezzi; il costo standard è predeterminato dall'azienda e serve al controllo. Il metodo cambia il valore dei chili che restano, non i chili. Si valorizza sempre la quantità contata all'inventario, non quella a sistema.",
+    "esempio": "Compro 100 kg a 1,00 € e 100 kg a 1,20 €. Escono 120 kg, restano 80. FIFO rimanenza 96 €; LIFO 80 €; costo medio 88 €. Nell'esercizio di dicembre restano 728 kg di ferro dopo l'inventario (acquisti 2.800 kg a 1,00 e 500 kg a 1,08): FIFO 768 €, LIFO 728 €, costo medio 3.340 ÷ 3.300 = 1,0121 €/kg × 728 = 736,82 €, costo standard 0,95 €/kg = 691,60 €.",
+    "operativo": "Apri Inventario → Valorizzazione; leggi quantità e costo del ferro; controlla di usare la quantità dopo la rettifica d'inventario; svolgi su carta il confronto FIFO, LIFO, medio e standard, senza creare una seconda fattura.",
     "quiz": "Perché con FIFO e LIFO il valore finale cambia pur con 80 kg in entrambi i casi?|Perché gli 80 kg residui sono attribuiti a lotti con costi unitari differenti."
+  },
+  "chiusura": {
+    "id": "chiusura",
+    "uf": "UF 9",
+    "titolo": "Merci in viaggio, inventario inframese e rimanenze di fine anno",
+    "teoria": "Una merce che il 31/12 è in viaggio appartiene a chi ne ha i rischi e i benefici in quel momento, non a chi la ha in mano né a chi l'ha già pagata. Dal fornitore lo dice la resa: franco partenza (EXW, FCA, FOB) i rischi passano all'acquirente alla consegna al vettore, quindi la merce è già nostra; franco destino (DAP, DPU, DDP) passano all'arrivo, quindi è ancora del fornitore e si esclude. Tra due depositi della stessa azienda la merce in transito è sempre nostra: esce da un deposito ma non è ancora entrata nell'altro. La merce in viaggio già nostra si valorizza al costo d'acquisto più gli oneri accessori a nostro carico e si indica a parte, senza sommarla al conteggio delle ubicazioni. L'inventario inframese è una conta di controllo durante il mese su materiali di valore: blocca solo le posizioni contate e non comporta scritture di assestamento, ma se torna restringe il periodo in cui cercare una differenza futura. A fine anno le rimanenze riconciliate vanno in bilancio: nel gestionale con magazzino permanente basta il movimento 711 delle differenze; nel metodo italiano le rimanenze iniziali si girano a costo il 1° gennaio e le finali si rilevano il 31 dicembre.",
+    "esempio": "Un fascio di ferro da 1.000 € spedito il 30/12 con resa DAP si esclude; con resa EXW e 30 € di trasporto pagati da noi entrerebbe a 1.030 €. Al 15/12 la conta inframese del ferro tornava (COL-1204 900 kg, COL-1206 500 kg): i 12 kg mancanti al 31/12 sono spariti dopo, e infatti il buono BP-2912 è del 29/12. Rimanenze finali: ferro 728 × 0,95 = 691,60 € + kit 19 × 14,60 = 277,40 € = 969,00 €.",
+    "operativo": "Per ogni merce in viaggio leggi resa e data di spedizione e decidi se è nostra; se lo è, somma al costo gli oneri accessori; confronta la conta inframese con quella di fine anno; prima di chiudere verifica che movimenti, conte, riconte e rettifiche siano tutti registrati; calcola le rimanenze materiale per materiale.",
+    "quiz": "Con resa DAP una merce in viaggio il 31/12 va nelle nostre rimanenze?|No: i rischi passano all'arrivo, al 31/12 è ancora del fornitore."
   },
   "innovazione": {
     "id": "innovazione",
@@ -132,7 +141,7 @@ LEZIONI["flussi"] = {
 PERCORSI = {
   "firenze": {
     "titolo": "Firenze · Innovazione digitale del magazzino · 30 ore",
-    "descrizione": "Sette lezioni introduttive compatte, concentrate su digitalizzazione, mappa, RF, interoperabilità SD/MM/PP, spedizioni smart, valorizzazione essenziale e innovazione. Nessun quiz Dare/Avere.",
+    "descrizione": "Otto lezioni introduttive compatte, concentrate su digitalizzazione, mappa, RF, interoperabilità SD/MM/PP, spedizioni smart, inventario, valorizzazione essenziale e innovazione. Nessun quiz Dare/Avere.",
     "esercizio": "dicembre-magazzino-30",   # Dicembre in magazzino · essenziale (chi aveva iniziato firenze-30 lo continua)
     "ordine": [
       "fondamenti",
@@ -140,6 +149,7 @@ PERCORSI = {
       "rf",
       "flussi",
       "spedizioni",
+      "inventario",
       "valori",
       "innovazione"
     ]
@@ -158,6 +168,7 @@ PERCORSI = {
       "spedizioni",
       "inventario",
       "valori",
+      "chiusura",
       "qualita",
       "innovazione"
     ]
@@ -196,11 +207,16 @@ PISTOIA_APPROFONDIMENTI = {
  ],
  "inventario": [
   "Approfondimento UF 9: il documento inventariale seleziona ciò che deve essere contato e delimita la procedura. La conta cieca separa la misura effettiva dal valore atteso. Una riconta non è un modo per forzare il numero del gestionale: serve a verificare l'osservazione iniziale e a identificare la causa dello scarto.",
-  "Svolgere alla lavagna un semplice esempio: 500 unità iniziali + 120 entrate - 200 uscite = 420 unità contabili. La conta fisica ne trova 418. La differenza è -2, ma prima della rettifica si cercano DDT non registrati, trasferimenti errati, scarti e unità di misura. Il valore economico della differenza dipenderà dal criterio di valorizzazione adottato."
+  "Svolgere alla lavagna un semplice esempio: 500 unità iniziali + 120 entrate - 200 uscite = 420 unità contabili. La conta fisica ne trova 418. La differenza è -2, ma prima della rettifica si cercano DDT non registrati, trasferimenti errati, scarti e unità di misura. Il valore economico della differenza dipenderà dal criterio di valorizzazione adottato.",
+  "Tolleranza: si confronta il valore della differenza di ogni singola posizione, mai il totale. Nell'esercizio di dicembre la COL-1206 vale −12 × 0,95 = −11,40 € e il kit −14,60 €: con una soglia di 10 € vanno ricontate entrambe. Far scrivere agli allievi la causale completa: articolo e colata, riconteggio confermato, buono BP-2912, autorizzazione AUT-2026-12. Per preparare la prova si usa il Laboratorio 2 Inventari, con la guida luminosa."
  ],
  "valori": [
   "Approfondimento UF 8 e 9: impostare una tabella con quantità, prezzo unitario, valore per ogni lotto. Nel caso 100 kg a 1,00 euro e 100 kg a 1,20 euro, il valore totale è 220 euro. Dopo l'uscita di 120 kg rimangono 80 kg: FIFO 96 euro, LIFO 80 euro e media ponderata 88 euro. La differenza non è un errore aritmetico: dipende dal criterio di imputazione dei costi.",
   "Per costo standard, valorizzare 438 kg di ferro a 0,95 euro al kg significa 416,10 euro. Un prezzo d'acquisto superiore allo standard non obbliga il magazziniere a inventare un nuovo prezzo in giacenza; i movimenti e le differenze vanno letti secondo le regole del gestionale. Saper spiegare questi risultati è contabilità di magazzino. Non significa registrare mutui, stipendi o versamenti F24."
+ ],
+ "chiusura": [
+  "Approfondimento UF 9: chiedere agli allievi, per ogni merce in viaggio, chi perde la merce se il treno deraglia il 31/12. La risposta è nella resa. Mostrare che il pagamento non cambia nulla: una merce pagata ma con resa DAP resta fuori dalle nostre rimanenze; una merce non ancora pagata ma con resa EXW è già nostra e si valorizza al costo più il trasporto.",
+  "Collegare il trasferimento tra depositi (uscita da W100, merce in transito, entrata in D200) al concetto di merce in viaggio: il totale della rete non cambia, cambia solo dove si trova la merce. Poi far confrontare la conta inframese del 15/12 con l'inventario del 31/12 e far dire in quale periodo va cercata la causa dei 12 kg mancanti."
  ],
  "qualita": [
   "Approfondimento qualità: per un reso si controllano il documento originario, la quantità rientrata, l'unità di carico e la causa. L'operatore deve verificare se la merce è rivendibile, richiede ricondizionamento oppure deve essere isolata. Uno stesso articolo può avere scorte libere e bloccate: solo le prime devono soddisfare automaticamente la domanda.",

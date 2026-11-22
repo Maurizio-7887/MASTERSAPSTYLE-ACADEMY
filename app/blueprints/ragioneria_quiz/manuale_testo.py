@@ -344,6 +344,26 @@ PARTI = [
 <p>Il magazzino si misura in <b>quantità</b> e in <b>valore</b>: quantità × costo unitario. Un trasferimento tra depositi cambia l'ubicazione, non il valore totale. Le differenze tra inventario fisico e giacenza a sistema si rettificano: prevale la conta fisica.</p>
 <p class="rq-man-formula">120 pezzi × 5,50 € = 660 €; mancano 5 pezzi da 4 € → differenza inventariale 20 €</p>
 """, []),
+("L'inventario fisico di fine anno: la procedura", """
+<p>L'<b>inventario fisico</b> conta, pesa o misura ciò che c'è davvero; l'<b>inventario contabile</b> (giacenza a sistema) si calcola dai movimenti: <b>giacenza iniziale + entrate − uscite</b>. Il codice civile (art. 2217) obbliga a redigere l'inventario ogni anno. La procedura ha sempre gli stessi passi:</p>
+<ol><li><b>Perimetro</b>: si contano solo i beni dell'azienda, ovunque siano (anche presso terzisti); non i beni di terzi in deposito né la merce già venduta in attesa di ritiro.</li>
+<li><b>Cut-off</b>: data e ora oltre le quali nessun movimento entra nel conteggio (31/12 ore 18:00); si annotano l'ultimo DDT d'entrata e d'uscita.</li>
+<li><b>Documento d'inventario</b>: l'elenco delle <b>posizioni</b> da contare. Una posizione è un articolo (o un lotto) in un'ubicazione: una catasta con due colate fa due posizioni; un'ubicazione vuota è una posizione da confermare a zero.</li>
+<li><b>Conta cieca</b>: la lista non riporta la quantità a sistema, così chi conta non è influenzato.</li>
+<li><b>Differenza = contato − contabile</b>, valorizzata al costo del magazzino. Si confronta, <b>posizione per posizione</b>, con la <b>tolleranza</b> fissata dall'azienda: sopra la soglia si riconta.</li>
+<li><b>Riconta</b> da parte di un'altra persona e <b>ricerca della causa</b> nei documenti. Una causa si dimostra con un documento: se non c'è, si scrive «ammanco verificato con riconta».</li>
+<li><b>Rettifica autorizzata</b> dal responsabile, con una causale che cita articolo, riconteggio, documento e autorizzazione.</li></ol>
+<p>Nell'esercitazione «Dicembre», al 31/12 il ferro a sistema è 740 kg (colata COL-1204 240 kg, COL-1206 500 kg) ma la bilancia ne trova 728: nella COL-1206 ci sono 488 kg. La riconta lo conferma e salta fuori il buono di prelievo <b>BP-2912</b> del 29/12: 12 kg presi dalla manutenzione e mai registrati. Nel cassone dei kit SL-TAGLIO se ne contano 19 invece di 20, senza documenti. Tolleranza 10 € per posizione: −12 × 0,95 = −11,40 € e −1 × 14,60 = −14,60 €, entrambe da ricontare. Il responsabile autorizza con <b>AUT-2026-12</b>.</p>
+<p class="rq-man-formula">Ferro: 728 − 740 = −12 kg × 0,95 = −11,40 € · Kit: 19 − 20 = −1 × 14,60 = −14,60 € · totale differenze 26,00 €</p>
+""", []),
+("Le differenze inventariali in contabilità", """
+<p><b>Metodo italiano (periodico)</b>: la differenza non ha una scrittura propria. L'inventario fisico dà direttamente il valore delle rimanenze finali: se manca merce, le rimanenze sono più basse e il costo del venduto più alto.</p>
+<p><b>Gestionale (permanente)</b>: il magazzino è già nei conti, quindi la differenza va registrata. Il movimento <b>711</b> scarica il magazzino al costo standard e porta il costo al conto <b>65 Differenze inventariali</b>:</p>
+<table class="rq-man-tab"><tr><th>Documento</th><th>Dare</th><th>Avere</th><th>Importo</th></tr>
+<tr><td>711 ferro, 12 kg × 0,95</td><td>65 Differenze inventariali</td><td>12 Magazzino ferro</td><td>11,40</td></tr>
+<tr><td>711 kit SL-TAGLIO, 1 × 14,60</td><td>65 Differenze inventariali</td><td>07 Magazzino semilavorati</td><td>14,60</td></tr></table>
+<p>Un'<b>eccedenza</b> (merce trovata in più) fa il contrario: Magazzino in Dare, differenze inventariali positive in Avere. In ogni caso la rettifica si registra <b>dopo</b> riconta e autorizzazione, una volta sola.</p>
+""", []),
 ("Due modi di tenere il magazzino in contabilità", """
 <table class="rq-man-tab"><tr><th></th><th>Metodo italiano (periodico) · quello dei quiz</th><th>Gestionale SAP (permanente) · quello dell'esercitazione</th></tr>
 <tr><td>Acquisto</td><td>Merci c/acquisti (costo) in Dare</td><td>MIGO 101: 12 Magazzino ferro (attività) in Dare</td></tr>
@@ -379,10 +399,26 @@ PARTI = [
       "Q15-02"]),
 ("Il valore delle rimanenze: costo medio ponderato", """
 <p>In questo manuale, e nel Simulatore ad hoc del corso, le rimanenze si valorizzano al <b>costo medio ponderato</b> (OIC 13): si sommano i valori di tutti i carichi del periodo, rimanenza iniziale compresa, e si dividono per le quantità caricate.</p>
-<p class="rq-man-formula">Ferro: (2.800 kg × 1,00 + 500 kg × 1,08) ÷ 3.300 kg = 1,0121 €/kg → 740 kg × 1,0121 = 748,97 €</p>
-<p>I 200 kg rottamati non si contano: non sono più in magazzino. Il kit tagliato, fatto da noi, vale il suo <b>costo di produzione</b> (19 × 14,60 = 277,40). Rimanenze finali totali: <b>1.026,37 €</b>.</p>
-<p>Altri metodi ammessi: <b>FIFO</b> (restano i lotti più recenti: 240 × 1,00 + 500 × 1,08 = 780) e <b>LIFO</b> (restano i più vecchi: 740). Il gestionale SAP dell'esercitazione usa invece il <b>costo standard</b> (0,95 €/kg: 703 €) e mette la differenza con il prezzo pagato nel conto 63 «Differenze prezzo», già a costo: per questo il suo magazzino vale 45,97 € meno e il suo utile è più basso della stessa cifra. Business Central, con il metodo di costo «Medio» sull'articolo, arriva allo stesso valore del costo medio ponderato.</p>
+<p class="rq-man-formula">Ferro: (2.800 kg × 1,00 + 500 kg × 1,08) ÷ 3.300 kg = 1,0121 €/kg → 728 kg × 1,0121 = 736,82 €</p>
+<p>Si valorizzano i <b>728 kg contati</b>, non i 740 a sistema: la conta fisica prevale. I 200 kg rottamati non si contano: non sono più in magazzino. Attenzione: la media si pesa con le quantità, non si fa (1,00 + 1,08) ÷ 2. Il kit tagliato, fatto da noi, vale il suo <b>costo di produzione</b> (19 × 14,60 = 277,40). Rimanenze finali totali: <b>1.014,22 €</b>.</p>
+<p>Altri metodi ammessi: <b>FIFO</b> (restano i lotti più recenti: 500 × 1,08 + 228 × 1,00 = 768) e <b>LIFO</b> (restano i più vecchi: 728 × 1,00 = 728). Il gestionale SAP dell'esercitazione usa invece il <b>costo standard</b> (0,95 €/kg: 728 × 0,95 = 691,60 €) e mette la differenza con il prezzo pagato nel conto 63 «Differenze prezzo», già a costo: per questo il suo magazzino vale 45,22 € meno e il suo utile ante imposte è più basso della stessa cifra. Business Central, con il metodo di costo «Medio» sull'articolo, arriva allo stesso valore del costo medio ponderato.</p>
+<table class="rq-man-tab"><tr><th>Metodo</th><th>Che cosa resta in magazzino</th><th>Ferro, 728 kg</th></tr>
+<tr><td>FIFO</td><td>i lotti più recenti</td><td>768,00</td></tr>
+<tr><td>Costo medio ponderato</td><td>tutto al costo medio 1,0121</td><td>736,82</td></tr>
+<tr><td>LIFO</td><td>i lotti più vecchi</td><td>728,00</td></tr>
+<tr><td>Costo standard (gestionale)</td><td>tutto a 0,95</td><td>691,60</td></tr></table>
 <p>Chi sceglie il metodo lo indica in nota integrativa e lo mantiene negli anni; se il valore di mercato è più basso del costo, le rimanenze si svalutano al minore.</p>
+""", []),
+("Le merci in viaggio al 31 dicembre", """
+<p>Una merce che al 31/12 è in viaggio appartiene a chi ne ha i <b>rischi e i benefici</b> in quel momento (OIC 13), non a chi la ha fisicamente né a chi l'ha già pagata. Lo dice la <b>resa</b> del contratto:</p>
+<ul><li><b>franco partenza</b> (EXW, FCA, FOB): i rischi passano all'acquirente alla consegna al vettore. Per l'acquirente la merce in viaggio è sua: va tra le rimanenze;</li>
+<li><b>franco destino</b> (DAP, DPU, DDP): i rischi passano all'arrivo. Al 31/12 la merce è ancora del venditore: l'acquirente la esclude.</li></ul>
+<p>Se la merce in viaggio è già nostra si valorizza al <b>costo d'acquisto più gli oneri accessori</b> a nostro carico (trasporto, assicurazione, dazi), si indica a parte e <b>non</b> si somma al conteggio delle ubicazioni.</p>
+<p class="rq-man-formula">Fascio da 1.000 kg a 1,00 €/kg spedito il 30/12: resa DAP → escluso · resa EXW con trasporto nostro di 30 € → incluso a 1.000 + 30 = 1.030 €</p>
+""", []),
+("L'inventario inframese", """
+<p>Oltre all'inventario di fine anno si possono fare <b>conte di controllo durante il mese</b> sui materiali di più valore o più a rischio: si bloccano solo le posizioni contate, si confronta conta e sistema e, se serve, si rettifica. <b>Non</b> si fanno scritture di assestamento: quelle sono solo di fine anno.</p>
+<p>Una conta inframese che torna restringe il periodo in cui cercare una differenza futura. Al 15/12 la COL-1204 doveva avere 2.800 − 1.900 = 900 kg e la COL-1206 500 kg, e la conta ha trovato proprio questo: i 12 kg mancanti al 31/12 sono spariti dopo il 15/12, e infatti il buono BP-2912 è del 29/12.</p>
 """, []),
 ("Nel gestionale SAP: il magazzino a valore, movimento per movimento", """
 <p>Nell'esercitazione «Dicembre» il gestionale registra <b>ogni movimento di magazzino a valore</b> (metodo permanente, al costo standard):</p>
@@ -394,7 +430,7 @@ PARTI = [
 <tr><td>Transenne finite a magazzino</td><td>MIGO 101 da produzione</td><td>13 Magazzino prodotti finiti</td><td>73 Output di produzione</td></tr>
 <tr><td>Consegna al cliente</td><td>uscita merci 601</td><td>41 Costo del venduto</td><td>13 Magazzino prodotti finiti</td></tr>
 <tr><td>Rottamazione / differenza inventariale</td><td>555 / 711</td><td>69 Rottamazioni · 65 Differenze inventariali</td><td>12 o 07 Magazzino</td></tr></table>
-<p>Per questo al 31/12 <b>non si fa</b> la scrittura «Merci / Variazione rimanenze»: il saldo dei conti 12, 07 e 13 è già la rimanenza, a costo standard (ferro 703 €, semilavorati 277,40 €). Si chiudono nello Stato patrimoniale finale (91) e il 1/1 si riaprono dallo Stato patrimoniale iniziale (92), senza giro a costo: il costo nascerà al prossimo 261 o alla prossima consegna. Le scritture complete sono nel riquadro «Nel gestionale SAP» qui sotto.</p>
+<p>Per questo al 31/12 <b>non si fa</b> la scrittura «Merci / Variazione rimanenze»: il saldo dei conti 12, 07 e 13 è già la rimanenza, a costo standard (ferro 728 kg = 691,60 €, semilavorati 277,40 €), dopo le due differenze inventariali 711. Si chiudono nello Stato patrimoniale finale (91) e il 1/1 si riaprono dallo Stato patrimoniale iniziale (92), senza giro a costo: il costo nascerà al prossimo 261 o alla prossima consegna. Le scritture complete sono nel riquadro «Nel gestionale SAP» qui sotto.</p>
 """, []),
 ]},
 ]},
