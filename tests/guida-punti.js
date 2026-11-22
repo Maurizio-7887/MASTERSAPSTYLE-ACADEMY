@@ -31,7 +31,7 @@ giro(); giro();
 ok(w.document.querySelector('.msa-g-av').disabled, 'CPM: il tasto Avanti è disabilitato prima delle registrazioni effettive');
 let b = brilla(); ok(b.length === 1, 'un solo punto brilla (' + b.length + ')'); ok(b[0].id === 'kp06-k80', 'brilla la casella 80 del centro 4210, non ' + (b[0] && b[0].id));
 
-let card = w.document.querySelector('.msa-g-ora'); ok(card && /ORA TOCCA A TE/.test(card.textContent) && /36000/.test(card.textContent) && /A cosa serve/.test(card.textContent), 'riquadro con cosa scrivere e a cosa serve');
+let card = w.document.querySelector('.msa-g-ora'); ok(card && /ORA TOCCA A TE/.test(card.textContent) && /36000/.test(card.textContent) && /(A cosa serve|Perché lo fai)/.test(card.textContent), 'riquadro con cosa scrivere e perché');
 const bolla = w.document.getElementById('msa-g-bolla'); ok(!bolla.hidden && /36000/.test(bolla.textContent), 'fumetto accanto alla casella');
 // reparto già proposto dal programma: si controlla, poi si salva
 w.document.querySelector('.msa-g-letto').click(); giro();
@@ -80,7 +80,8 @@ ok(cp.modello().piano['0']['4200']['86'] === 12000 && cp.modello().piano['0']['4
 ok(/TUTTI|Tabella del piano/.test(w.document.querySelector('.msa-g-ora').textContent), 'ultimo punto: leggere la tabella di controllo');
 w.document.querySelector('.msa-g-letto').click(); giro();
 ok(/TUTTI I PUNTI FATTI/.test(w.document.querySelector('.msa-g-ora').textContent) && brilla().length === 0, 'tutti i punti fatti: nessun bordo che brilla');
-ok(passo.fatto({S:n.S}) && !w.document.querySelector('.msa-g-av').disabled, 'CPM: salvataggi verificati, avanzamento consentito');
+// SD4.N viene sostituito al salvataggio: si legge lo stato corrente. Con un solo passo «Avanti» resta spento (è l'ultimo): conta la spunta.
+ok(passo.fatto({S:w.SD4.N.S}) && w.MSA_GUIDA_API.stati()[0] === 'auto', 'CPM: salvataggi verificati, passo spuntato in automatico');
 // ogni passo del budget ha i punti e i selettori dei campi esistono nelle pagine
 ['cpm-attivazione', 'cpm-budget', 'cpm-paghe', 'cpm-kp26', 'cpm-ciclo', 'cpm-standard-tr', 'cpm-standard-halb', 'bpc-modello', 'bpc-input', 'bpc-processo', 'cpm-kspi', 'cpm-tariffe', 'cpm-calcolo', 'cpm-rilascio'].forEach(id => {
   const q = w.MSA_CPM_FORMAS.passiPreparazione.find(p => p.id === id); ok(q && q.punti && q.punti.length, 'punti guidati nel passo ' + id);
