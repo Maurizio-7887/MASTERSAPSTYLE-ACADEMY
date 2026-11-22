@@ -20,6 +20,8 @@
 {% if guida.esercizio == 'dicembre-magazzino-30' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-magazzino.js') }}"></script>{% endif %}
 <script src="{{ url_for('guida.static', filename='esercizi/' ~ guida.esercizio ~ '.js') }}"></script>
 {% if guida.esercizio == 'dicembre-wms' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
+{# luce su OGNI passo: dove l'esercizio non ha i punti scritti a mano, li crea dai campi del passo #}
+<script src="{{ url_for('guida.static', filename='esercizi/luce-automatica.js') }}"></script>
 <script src="{{ url_for('guida.static', filename='ragioneria.js') }}"></script>
 <script src="{{ url_for('guida.static', filename='pannello.js') }}"></script>
 {% endif %}
