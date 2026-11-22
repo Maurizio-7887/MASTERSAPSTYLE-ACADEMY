@@ -55,7 +55,8 @@ p.click('.msa-q-continua');
 ok(p.S().msaRagioneria.esiti.length===1,'esito conservato');
 ok(p.S().msaRagioneria.esiti[0].tentativi===3,'solo i tre tentativi completi conservati; clic vuoto non valutabile');
 ok(p.w.MSA_GUIDA_API.passo()===2,'dopo conferma riprende attivazione WMS');
-ok(!p.w.document.querySelector('.msa-g-av').disabled,'guida riabilitata');
+// fuori dal quiz la navigazione torna libera; «Avanti» resta spento finché l'attivazione WMS non è fatta
+ok(!p.w.document.querySelector('.msa-g-ind').disabled && p.w.document.querySelector('.msa-g-av').disabled,'guida riabilitata');
 p.N.salva();p.N.salva();ok(!p.S().msaRagioneria.coda.length,'salvataggi ripetuti non duplicano domande');
 p.N.S.registrazioni[0].righe[0].pareggio='compensata';p.N.salva();
 ok(!p.S().msaRagioneria.coda.length,'compensazione non ripropone vecchia scrittura');
@@ -105,7 +106,7 @@ post(h.N,'dopo reset');h.N.salva();ok(h.S().msaRagioneria.coda.length===1,'cattu
  ok(u.body().querySelector('.msa-q-continua'),'dopo la soluzione si può proseguire');
  u.click('.msa-q-continua');
  ok(!u.S().msaRagioneria.coda.length && u.S().msaRagioneria.esiti[0].conAiuto,'quiz chiuso con aiuto e registrato');
- ok(!u.w.document.querySelector('.msa-g-av').disabled,'la guida riparte');
+ ok(!u.w.document.querySelector('.msa-g-ind').disabled,'la guida riparte (navigazione non più bloccata dal quiz)');
  u.w.close();
 }
 [p,h].forEach(p=>p.w.close());

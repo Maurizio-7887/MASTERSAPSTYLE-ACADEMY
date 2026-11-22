@@ -158,6 +158,13 @@ window.CH4 = (function () {
     if (ivaNonLiq.length) out.push('IVA non ancora liquidata per ' + ivaNonLiq.length + ' documenti (il primo del ' + L.fd(ivaNonLiq[0].data) + '): fai le liquidazioni del periodo.');
     if (!X().imposte.some(function (x) { return x.anno === anno; })) out.push('Imposte ' + anno + ' (IRES e IRAP) non registrate.');
     if (window.WM4 && s.wm && s.wm.attivo && window.WM4.aperti().length) out.push('Ci sono ' + window.WM4.aperti().length + ' compiti di magazzino aperti.');
+    // CO-PA: se si è iniziato ad assegnare i materiali ai centri di profitto, nessun ricavo dell'anno può restare «NON-ASSEGNATO»
+    if (window.COPA && s.copaProfit && Object.keys(s.copaProfit.materiale || {}).length) {
+      var senzaPC = {};
+      (s.copa || []).forEach(function (r) { if (String(r.data || '').slice(0, 4) === anno && window.COPA.profitCenter(s, r) === 'NON-ASSEGNATO') senzaPC[r.materiale || '—'] = 1; });
+      var lista = Object.keys(senzaPC);
+      if (lista.length) out.push('CO-PA: ricavi ' + anno + ' senza centro di profitto per ' + lista.join(', ') + ' (CO-PA → KE30 → Configurazione centri di profitto).');
+    }
     return out;
   }
   function chiudi(i) {

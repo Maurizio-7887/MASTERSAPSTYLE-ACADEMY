@@ -26,10 +26,16 @@ prima('CO11N: Saldatura','101: carica a magazzino le 300');prima('101: carica a 
 prima('CO11N: conferma 5 ore','Confronta budget, attività');prima('Registra le paghe','KSB1: leggi i costi effettivi');
 prima('KSB1: leggi i costi effettivi','KO88:');prima('compra il carrello','Vendi il carrello');prima('compra una sega','Vendi la sega');
 prima('compra la taglierina','AFAB:');
-let previous='';
+// Date: crescenti dentro ogni blocco; un blocco non comincia prima dell'inizio del blocco precedente.
+// Due blocchi tematici possono stare nella stessa settimana (16b amministratore e 16c estero): il giornale ordina per data.
+let previous='',blocco='',inizioBlocco='',inizioPrec='';
 for(const p of ps){
  ok(p.dove&&p.dove.ep&&p.campi&&p.campi.length,'Destinazione e campi '+p.titolo);
- if(p.data){const d=p.data.split('/').reverse().join('-');ok(!previous||d>=previous,'Data coerente '+p.titolo);previous=d;}
+ if(!p.data)continue;
+ const d=p.data.split('/').reverse().join('-');
+ if(p.g!==blocco){blocco=p.g;inizioPrec=inizioBlocco;inizioBlocco=d;ok(!inizioPrec||d>=inizioPrec,'Blocco in ordine di calendario: '+p.g);}
+ else ok(!previous||d>=previous,'Data coerente '+p.titolo);
+ previous=d;
 }
 const intro=JSON.stringify(ps[0]);ok(intro.includes('RICOMINCIA DA ZERO')&&intro.includes('copia di sicurezza')&&intro.includes('conferma con OK')&&intro.includes('autorizzazione del docente'),'Ripartenza solo su conferma, con copia di sicurezza e autorizzazione del docente');
 ok(!intro.includes('premi «Azzera'),'Nessun reset diretto prescritto');
@@ -87,7 +93,8 @@ pagina('erp_costi','copc-pagine.js','calcolo');
 for(const mat of ['TR-STD','SL-TAGLIO'])fai('ck',{materiale:mat,data:'2026-12-01'});
 fai('cr',{data:'2026-12-01'},'marca');fai('cr',{data:'2026-12-01',sostituisciBootstrap:'SOSTITUISCI'});
 ok(JSON.stringify(S.registrazioni)===fiPrima,'CPM e rilascio su stock vuoto non duplicano FI');
-for(const p of ps.filter(p=>p.id&&p.id.startsWith('cpm-')&&p.fatto))ok(p.fatto({S}),'Spunta automatica CPM '+p.id);
+// solo i passi CPM della preparazione (01/12): quelli di fine mese, come i profit center in CO-PA, arrivano dopo
+for(const p of ps.filter(p=>p.id&&p.id.startsWith('cpm-')&&p.fatto&&p.data==='01/12/2026'))ok(p.fatto({S}),'Spunta automatica CPM '+p.id);
 const report=win.PC4.cpm.report(2026);
 for(const c of report.centri){ok(c.tariffa===28&&c.budget===42000,'Tariffa derivata '+c.centro);}
 ok(report.centri.map(c=>c.oreRichieste).join('/')==='300/240/480','Volume annuo distinto da ordine 300');

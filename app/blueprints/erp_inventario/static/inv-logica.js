@@ -111,12 +111,16 @@ window.IV4 = (function () {
     if (!mats.length) throw Error('Nessuna differenza da registrare nella zona 999.');
     mats.forEach(function (m) {
       var q = per[m], val = r2(Math.abs(q) * std(m)), perdita = q > 0;
-      n.movimento(m, -q, data, perdita ? '711' : '712', 'differenze inventariali');
+      // da quale documento d'inventario e da quale ubicazione viene la differenza (rif della zona 999: «inventario N ubicazione»)
+      var origini = WM().inUbic('DIFF').filter(function (x) { return x.mat === m && Math.abs(x.qta) > 1e-9; })
+        .map(function (x) { return String(x.rif || '').replace(/^inventario /, 'doc. '); }).filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+      var rifOrig = origini.length ? ' · origine: ' + origini.join(', ') : '';
+      n.movimento(m, -q, data, perdita ? '711' : '712', 'differenze inventariali' + rifOrig);
       WM().inUbic('DIFF').filter(function (x) { return x.mat === m; }).forEach(function (x) { x.qta = 0; });
-      var r = n.post({data: data, tipo: 'DIFFERENZA_INVENTARIO', rif: 'LI21', descrizione: 'Differenza inventariale ' + m + ': ' + (perdita ? 'mancano ' : 'in più ') + L.n0(Math.abs(q)) + ' ' + (n.materiale(m).um || '') + ' × ' + L.eur(std(m)) + ' (movimento ' + (perdita ? '711' : '712') + ')',
-        righe: perdita ? [{conto: '65', dareAvere: 'DARE', importo: val, testo: m}, {conto: conto(m), dareAvere: 'AVERE', importo: val}]
-                       : [{conto: conto(m), dareAvere: 'DARE', importo: val}, {conto: '65', dareAvere: 'AVERE', importo: val, testo: m}]});
-      W().registrazioni.push({data: data, mat: m, qta: -q, valore: perdita ? -val : val, contabile: r.numero});
+      var r = n.post({data: data, tipo: 'DIFFERENZA_INVENTARIO', rif: 'LI21', descrizione: 'Differenza inventariale ' + m + ': ' + (perdita ? 'mancano ' : 'in più ') + L.n0(Math.abs(q)) + ' ' + (n.materiale(m).um || '') + ' × ' + L.eur(std(m)) + ' (movimento ' + (perdita ? '711' : '712') + ')' + rifOrig,
+        righe: perdita ? [{conto: '65', dareAvere: 'DARE', importo: val, testo: m + rifOrig}, {conto: conto(m), dareAvere: 'AVERE', importo: val}]
+                       : [{conto: conto(m), dareAvere: 'DARE', importo: val}, {conto: '65', dareAvere: 'AVERE', importo: val, testo: m + rifOrig}]});
+      W().registrazioni.push({data: data, mat: m, qta: -q, valore: perdita ? -val : val, contabile: r.numero, origini: origini});
       regs.push(r);
     });
     n.salva(); return regs;

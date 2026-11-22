@@ -49,10 +49,11 @@ cp.eseguiKSPI({data: '2026-12-01'}); near(cp.tariffe().Taglio.tariffa, 28, 'tari
 const rev = cp.modello().revisione, fi = JSON.stringify(n.S.registrazioni);
 t = pagina('processo'); field('retract-conferma', 'TRASFERISCI');
 ok(click('retract', 'retract').classList.contains('ok'), 'retraction eseguita');
-ok(cp.modello().revisione === rev + 1, 'nuova revisione del piano');
+// stessi costi del KP06 (18.000): la revisione non cambia e le tariffe calcolate restano valide
+ok(cp.modello().revisione === rev, 'stessi costi: revisione del piano invariata');
 near(cp.modello().piano['0']['4200']['86'], 12000, 'KP06 v0 aggiornato dal BPC');
 near(cp.modello().generale.produttivi, 18000, 'costi comuni 12.000 + 6.000');
-assert.throws(() => w.PC4.calcola({materiale: 'TR-STD', data: '2026-12-01'}), /KSPI/); checks++;
+near(cp.tariffe().Taglio.tariffa, 28, 'tariffa ancora valida dopo il retract a costi invariati');
 ok(JSON.stringify(n.S.registrazioni) === fi, 'BPC senza scritture FI');
 // consuntivo da S/4 e forecast 11+1
 n.post({data: '2026-12-31', tipo: 'ASSESTAMENTO', descrizione: 'fitto', righe: [{conto: '86', dareAvere: 'DARE', importo: 1033.33}, {conto: '39', dareAvere: 'AVERE', importo: 1033.33}]}); n.salva();

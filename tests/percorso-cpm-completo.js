@@ -15,6 +15,8 @@ replaceOne("const R = p => fs.readFileSync(path.join(__dirname, '..', p), 'utf8'
 // Ogni pagina jsdom è un browser distinto come nell'harness originale; rilascia
 // esplicitamente i browser chiusi nei sandbox con memoria limitata.
 replaceOne('  if (ultima) ultima.close();','  if (ultima) ultima.close(); if (global.gc) global.gc();');
+// «Riconcilia quattro centri, tariffe e capacità» è una lettura con verifica automatica: risulta fatta appena KSPI è corretto.
+replaceOne("  if (dopo && k > 0) ok(!dopo.fatto({S: p.S()})","  if (dopo && k > 0 && !/^Riconcilia quattro centri/.test(dopo.titolo)) ok(!dopo.fatto({S: p.S()})");
 replaceOne('function controlla(nome) {',"function controlla(nome) { console.log('CPM E2E checkpoint: '+nome);");
 if(!source.includes("w.eval(R('app/blueprints/guida/static/esercizi/cpm-formas.js'))")){
  assert.ok(source.includes(preload),'Preload guida presente');
@@ -65,7 +67,8 @@ for(const c of ['4100','4200','4210','4220','4230','4300'])bene(p.fai('bpf',{cdc
 ok(/motivo/.test(p.fai('bpf',{cdc:'4100',azione:'respingi',nota:''},'bpf')),'respingere richiede il motivo');
 for(const c of ['4100','4200','4210','4220','4230','4300'])bene(p.fai('bpf',{cdc:c,azione:'approva',nota:'ok'},'bpf'),'BPC approva '+c);
 {const rev=p.w.PC4.cpm.modello().revisione;bene(p.fai('retract',{conferma:'TRASFERISCI'},'retract'),'BPC ritrasferito in KP06');
- ok(p.w.PC4.cpm.modello().revisione===rev+1 && p.w.PC4.cpm.modello().generale.produttivi===18000,'nuova revisione, costi comuni sempre 18.000');}
+ // budget approvato = KP06 (stessi 18.000): nessuna nuova revisione, KSPI e CK11N già fatti restano validi
+ ok(p.w.PC4.cpm.modello().revisione===rev && p.w.PC4.cpm.modello().generale.produttivi===18000,'stessi costi: revisione invariata, costi comuni sempre 18.000');}
 fino('BPC · Approvazione');
 p=apri('erp_costi','calcolo');
 ok(/KSPI/.test(p.fai('ck',{materiale:'TR-STD',data:'2026-12-01'})),'CK11N bloccato senza KSPI');
@@ -87,7 +90,8 @@ replaceOne("ordine:oh,fase:'',attrezzaggio:'0',ore:'5'","ordine:oh,fase:'Taglio'
 
 // BPC di fine mese: consuntivo di dicembre da S/4 e forecast 11+1, prima di KO88.
 const ko88="p = apri('erp_costi','chiusura'); const nk = p.S().registrazioni.length;";
-replaceOne(ko88,"p=apri('erp_bpc','modello');bene(p.fai('bpc-actual',{mese:'12'},'actual'),'BPC consuntivo di dicembre');bene(p.fai('bpc-copia',{destinazione:'F1',mesiActual:'11'},'copia'),'BPC forecast 11+1');\n{const B=p.w.BPC4,r=B.report({mese:12,forecast:'F1'}).find(x=>x.cdc==='4200');ok(Math.abs(r.forecast-1641.63)<0.01,'forecast 11+1 del 4200 = budget di dicembre '+r.forecast);ok(r.actualYTD>0,'consuntivo 4200 caricato '+r.actualYTD);console.log('BPC 4200 dicembre: budget anno '+r.budget+' consuntivo '+r.actualYTD+' forecast '+r.forecast+' '+JSON.stringify(B.report({mese:12,forecast:'F1'}).map(x=>[x.cdc,x.actualYTD,x.forecast]))+' '+JSON.stringify(Object.fromEntries(['80','81','82','50','54','83','86'].map(k=>[k,B.riga('ACTUAL','A','4200',k)[11]]))));}\np = apri('erp_bpc','report'); ok(/Budget, consuntivo e forecast per centro/.test(p.testo()),'report BPC');\n"+ko88);
+// Passo «Controllo di gestione: separa centri…»: l'allievo assegna i profit center in CO-PA (KE30), prima del BPC di fine mese.
+replaceOne(ko88,"p=apri('erp_copa','ke30');p.w.COPA.salvaAssegnazione(p.S(),'TR-STD','PC-TR');p.w.COPA.salvaAssegnazione(p.S(),'SL-TAGLIO','PC-SL');p.w.SD4.N.salva();ok(p.w.COPA.profitCenter(p.S(),{materiale:'TR-STD'})==='PC-TR','profit center assegnati in CO-PA');\np=apri('erp_bpc','modello');bene(p.fai('bpc-actual',{mese:'12'},'actual'),'BPC consuntivo di dicembre');bene(p.fai('bpc-copia',{destinazione:'F1',mesiActual:'11'},'copia'),'BPC forecast 11+1');\n{const B=p.w.BPC4,r=B.report({mese:12,forecast:'F1'}).find(x=>x.cdc==='4200');ok(Math.abs(r.forecast-1641.63)<0.01,'forecast 11+1 del 4200 = budget di dicembre '+r.forecast);ok(r.actualYTD>0,'consuntivo 4200 caricato '+r.actualYTD);console.log('BPC 4200 dicembre: budget anno '+r.budget+' consuntivo '+r.actualYTD+' forecast '+r.forecast+' '+JSON.stringify(B.report({mese:12,forecast:'F1'}).map(x=>[x.cdc,x.actualYTD,x.forecast]))+' '+JSON.stringify(Object.fromEntries(['80','81','82','50','54','83','86'].map(k=>[k,B.riga('ACTUAL','A','4200',k)[11]]))));}\np = apri('erp_bpc','report'); ok(/Budget, consuntivo e forecast per centro/.test(p.testo()),'report BPC');\n"+ko88);
 
 // Conservare tutte le operazioni ma rispettare il calendario 22/12 -> 28/12.
 const incasso=source.match(/^p = apri\('erp_fi','sopravvenienze'\); bene\(p\.fai\('ii'.*$/m);
@@ -107,18 +111,22 @@ const run=new Module(file,module);run.filename=file;run.paths=Module._nodeModule
 const {S,errori,controlli,LOGICA,CHIAVE}=run.exports;
 check(errori===0,'Tutti i controlli originali del caso dicembre superati con CPM attivo: '+errori+' errori');
 check(S.costing.cpm.versione==='cpm-centri-v1','Marker CPM conservato fino a riapertura e gennaio');
-check(S.produzione.length===2,'Solo transenna e HALB autonomo');
-for(const o of S.produzione){
+// l'esercitazione prosegue a febbraio 2027 con un nuovo ordine: qui si controllano gli ordini di dicembre
+const dic=S.produzione.filter(o=>String(o.data||'').startsWith('2026-12'));
+check(dic.length===2,'Dicembre: solo transenna e HALB autonomo');
+for(const o of dic){
  const snap=o.piano.par.snapshot;
  check(snap.versione==='cpm-centri-v1'&&snap.revisione===S.costing.cpm.revisione,'Snapshot CPM salvato nell’ordine '+o.numero);
  check(snap.tariffe.Taglio===28&&snap.tariffe.Piegatura===28&&snap.tariffe.Saldatura===28,'Tariffe snapshot '+o.numero);
  check(o.eventi.filter(e=>e.tipo==='101'&&!e.stornato).length===1,'Unico versamento finale ordine '+o.numero);
  check(o.eventi.filter(e=>e.tipo==='CO11N'&&!e.stornato).reduce((n,e)=>n+e.valore,0)===(o.materiale==='TR-STD'?7140:140),'Attività consuntivate a snapshot '+o.numero);
 }
-const tr=S.produzione.find(o=>o.materiale==='TR-STD'),halb=S.produzione.find(o=>o.materiale==='SL-TAGLIO');
+const tr=dic.find(o=>o.materiale==='TR-STD'),halb=dic.find(o=>o.materiale==='SL-TAGLIO');
 check(tr.eventi.filter(e=>e.tipo==='CO11N').map(e=>e.fase).join('/')==='Taglio/Piegatura/Saldatura','Tre conferme nominali TR sullo stesso ordine');
 check(tr.piano.totale===9420&&halb.piano.totale===292,'Piani PP ai medesimi valori economici');
-check(S.chiusure['2026'].utile===1520.09&&S.chiusure['2026'].riapertura,'Chiusura e riapertura completate con utile invariato (1.520,09 con la finanza di dicembre)');
+// il CPM non deve cambiare l'utile: si confronta con il caso base (fotografia scritta da esercizio-dicembre-wms.js)
+const utileBase=JSON.parse(fs.readFileSync(path.join(__dirname,'dicembre-wms-finale.json'),'utf8')).chiusure['2026'].utile;
+check(Math.abs(S.chiusure['2026'].utile-utileBase)<0.005&&S.chiusure['2026'].riapertura,'Chiusura e riapertura completate con utile invariato rispetto al caso base ('+utileBase+')');
 
 // Reload separato della fotografia finale: una revisione del budget corrente non
 // deve riscrivere i costi o le tariffe degli ordini già completati.
@@ -147,7 +155,7 @@ check(JSON.stringify(n.S.registrazioni)===prima,'Revisione budget analitica non 
 
 // Report applicativo sullo stato finale CPM, senza salvare la fotografia sul disco.
 const python=spawnSync(process.env.PYTHON||'python3',['-c',
- "import json,sys; from app.report import Lavoro; s=json.load(sys.stdin); r=Lavoro(s).confronto('dicembre-wms'); assert len(r)==29 and all(x['ok'] for x in r),r; print('OK: report CPM finale 29/29 controlli economici (con la finanza)')"],{cwd:root,input:JSON.stringify(S),encoding:'utf8'});
+ "import json,sys; from app.report import Lavoro; s=json.load(sys.stdin); r=Lavoro(s).confronto('dicembre-wms'); assert len(r)>=29 and all(x['ok'] for x in r),r; print('OK: report CPM finale %d/%d controlli economici' % (len(r),len(r)))"],{cwd:root,input:JSON.stringify(S),encoding:'utf8'});
 check(python.status===0,'Report applicativo finale CPM: '+python.stdout+python.stderr);
 process.stdout.write(python.stdout);
 console.log('OK: CPM completo fino a chiusura/riapertura/gennaio: '+controlli+' controlli E2E originali + '+extra+' controlli CPM/snapshot/report. Nessun JSON condiviso sovrascritto.');

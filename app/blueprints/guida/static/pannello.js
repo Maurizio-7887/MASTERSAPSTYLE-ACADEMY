@@ -70,6 +70,8 @@
         return nota.giudizio === 'ok' ? 'docente' : '';
       }
       if (m[p.titolo] && !(guidata && p.fatto)) return 'mano';
+      // lettura già coperta da una lezione «Che situazione hai?» (il copione ha preparato la situazione oltre questo passo)
+      if (!p.fatto && (S.msaLetturePreparate || []).some(function (t) { return t && p.titolo.indexOf(t) === 0; })) return 'mano';
       if (p.fatto) {
         try { if (p.fatto(h)) return 'auto'; } catch (e) { /* dato storico */ }
         return nota.giudizio === 'ok' ? 'docente' : '';

@@ -238,11 +238,14 @@
   // esegue il copione fino al passo che comincia con «finoA» (escluso); senza «finoA» lo esegue tutto
   function esegui(copione, modulo, finoA) {
     modulo.M.azzera();
+    var letture = [];
     for (var i = 0; i < copione.length; i++) {
       var voce = copione[i];
       if (finoA && voce[0].indexOf(finoA) === 0) break;
-      if (voce[1]) voce[1](modulo);
+      if (voce[1]) voce[1](modulo); else letture.push(voce[0]);
     }
+    // le letture già superate dalla lezione preparata valgono come confermate nella finestra guidata
+    modulo.M.S.msaLetturePreparate = letture;
     modulo.M.salva();
     return modulo.M.S;
   }

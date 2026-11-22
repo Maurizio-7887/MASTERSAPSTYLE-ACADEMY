@@ -86,6 +86,74 @@ class LoaderSafetyTest(unittest.TestCase):
             self.assertIn("OK", res.stdout)
             self.assertFalse(firenze_db.exists(), "il servizio FI/CO ha aperto il database di Firenze")
 
+    def _esegui(self, corpo, tmp):
+        firenze_db = Path(tmp) / "firenze_non_toccare.db"
+        fico_db = Path(tmp) / "fico.db"
+        script = textwrap.dedent(f"""
+            import os, sys
+            sys.path.insert(0, {str(ROOT)!r})
+            os.environ.update({{
+                "MASTERLEDGER_FICO_ENABLED": "1",
+                "DATABASE_URL": "sqlite:///{firenze_db}",
+                "SECRET_KEY": "firenze-" + "x" * 40,
+                "MASTERLEDGER_FICO_DATABASE_URL": "sqlite:///{fico_db}",
+                "MASTERLEDGER_FICO_SECRET_KEY": "fico-" + "y" * 40,
+            }})
+            from flask import Flask
+            from werkzeug.test import Client
+            from integrations.masterledger_fico.loader import mount_masterledger
+            firenze = Flask("firenze")
+            firenze.add_url_rule("/", "home", lambda: "FIRENZE")
+        """) + textwrap.dedent(corpo)
+        return subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, cwd=tmp, timeout=120)
+
+    def test_migrazione_fallita_mette_fico_in_manutenzione(self):
+        """L02: se le migrazioni falliscono, il portale resta su ma /fico risponde 503 (niente schema vecchio)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            res = self._esegui("""
+                import flask_migrate
+                def rotta(**k): raise RuntimeError("migrazione di prova fallita")
+                flask_migrate.upgrade = rotta
+                c = Client(mount_masterledger(firenze))
+                assert c.get("/").get_data(as_text=True) == "FIRENZE"
+                r = c.get("/fico/auth/login")
+                assert r.status_code == 503, r.status_code
+                assert "manutenzione" in r.get_data(as_text=True)
+                print("OK")
+            """, tmp)
+            self.assertEqual(res.returncode, 0, res.stderr[-2000:])
+            self.assertIn("OK", res.stdout)
+
+    def test_cartella_servizio_in_coda_dopo_il_caricamento(self):
+        """L01: dopo il montaggio la cartella del servizio non oscura più i moduli di Firenze."""
+        with tempfile.TemporaryDirectory() as tmp:
+            res = self._esegui("""
+                c = Client(mount_masterledger(firenze))
+                servizio = os.path.join(%r, "integrations", "masterledger_fico", "service")
+                assert sys.path[-1] == servizio and sys.path.count(servizio) == 1, sys.path
+                assert sys.modules["config"].__file__.startswith(servizio)
+                assert c.get("/fico/auth/login").status_code == 200
+                print("OK")
+            """ % str(ROOT), tmp)
+            self.assertEqual(res.returncode, 0, res.stderr[-2000:])
+            self.assertIn("OK", res.stdout)
+
+    def test_collisione_di_moduli_blocca_l_avvio(self):
+        """L01: un modulo 'config' già importato da un'altra cartella ferma il caricamento con un errore chiaro."""
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "config.py").write_text("X = 1\n")
+            res = self._esegui("""
+                sys.path.insert(0, os.getcwd())
+                import config
+                try:
+                    mount_masterledger(firenze)
+                except RuntimeError as e:
+                    assert "Collisione di moduli" in str(e), e
+                    print("OK")
+            """, tmp)
+            self.assertEqual(res.returncode, 0, res.stderr[-2000:])
+            self.assertIn("OK", res.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

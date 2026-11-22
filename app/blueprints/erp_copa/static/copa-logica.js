@@ -57,5 +57,38 @@ window.COPA = (function () {
     var tot = {chiave: 'Totale'}; CAMPI.forEach(function (c) { tot[c] = r2(righe.reduce(function (t, x) { return t + x[c]; }, 0)); });
     return {righe: righe, totale: margini(tot)};
   }
-  return {DIMENSIONI: DIMENSIONI, CAMPI: CAMPI, report: report, margini: margini, impianto: impianto, profitCenter: profitCenter, salvaAssegnazione: salvaAssegnazione};
+  // Conto economico per centro di profitto letto dalle RIGHE FI (non da CO-PA): ricavi e costo del venduto
+  // ereditano il materiale dal documento d'origine (fattura, consegna, reso, nota di credito) e da lì il centro.
+  // Serve a riconciliare FI con KE30 per centro di profitto: le due viste devono dare gli stessi margini.
+  var CONTI_PC = {'40': 'ricaviLordi', '47': 'sconti', '48': 'trasporti', '49': 'abbuoni', '41': 'costoVenduto', '42': 'diffPrezzo', '57': 'provvigioni'};
+  function materialeDi(S, r) {
+    var rif = String(r.rif || '');
+    var doc = ['fatture', 'consegne', 'ordini', 'noteCredito'].reduce(function (x, k) { return x || (S[k] || []).find(function (d) { return d.numero === rif; }); }, null);
+    if (doc && doc.materiale) return doc.materiale;
+    var m = /\bpz ([A-Z][A-Z0-9-]+)/.exec(String(r.descrizione || ''));
+    return m && (S.materiali || {})[m[1]] ? m[1] : '';
+  }
+  function fiPerProfitCenter(S, anno) {
+    var gruppi = {};
+    (S.registrazioni || []).forEach(function (r) {
+      if (r.chiusura || r.stornato || (anno && String(r.data).slice(0, 4) !== String(anno))) return;
+      var mat = null;
+      r.righe.forEach(function (x) {
+        var campo = CONTI_PC[String(x.conto)]; if (!campo) return;
+        if (mat === null) mat = materialeDi(S, r);
+        var pc = mat ? profitCenter(S, {materiale: mat}) : 'NON-ASSEGNATO';
+        var g = gruppi[pc] = gruppi[pc] || {chiave: pc, ricaviLordi: 0, sconti: 0, trasporti: 0, abbuoni: 0, costoVenduto: 0, diffPrezzo: 0, provvigioni: 0};
+        var v = (x.dareAvere === 'DARE' ? 1 : -1) * x.importo;
+        g[campo] = r2(g[campo] + (campo === 'ricaviLordi' || campo === 'trasporti' || campo === 'abbuoni' ? -v : v));
+      });
+    });
+    return Object.keys(gruppi).sort().map(function (k) {
+      var g = gruppi[k];
+      g.ricaviNetti = r2(g.ricaviLordi - g.sconti + g.trasporti + g.abbuoni);
+      g.mdc1 = r2(g.ricaviNetti - g.costoVenduto - g.diffPrezzo); g.mdc2 = r2(g.mdc1 - g.provvigioni);
+      return g;
+    });
+  }
+  return {DIMENSIONI: DIMENSIONI, CAMPI: CAMPI, report: report, margini: margini, impianto: impianto, profitCenter: profitCenter, salvaAssegnazione: salvaAssegnazione,
+          fiPerProfitCenter: fiPerProfitCenter, materialeDi: materialeDi};
 })();

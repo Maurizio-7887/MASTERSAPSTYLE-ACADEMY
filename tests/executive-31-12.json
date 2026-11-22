@@ -380,6 +380,16 @@
       "tipo": "ATTIVO"
     },
     {
+      "codice": "09.20",
+      "nome": "Depositi cauzionali attivi",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "09.30",
+      "nome": "Crediti verso il locatore (imposta di registro da rimborsare)",
+      "tipo": "ATTIVO"
+    },
+    {
       "codice": "84",
       "nome": "Sopravvenienze attive",
       "tipo": "RICAVO"
@@ -468,6 +478,66 @@
       "codice": "62",
       "nome": "Perdite su crediti",
       "tipo": "COSTO"
+    },
+    {
+      "codice": "54.10",
+      "nome": "Spese telefoniche",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "54.20",
+      "nome": "Manutenzioni e riparazioni",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "54.30",
+      "nome": "Carburanti e lubrificanti (auto a uso promiscuo)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "54.40",
+      "nome": "Viaggi e soggiorni (alberghi)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "54.50",
+      "nome": "Spese di rappresentanza",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "57.10",
+      "nome": "Trasporti su vendite (corrieri)",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "87.10",
+      "nome": "Imposta di registro",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "10.50",
+      "nome": "Cassa contanti",
+      "tipo": "ATTIVO"
+    },
+    {
+      "codice": "54.60",
+      "nome": "Materiali di consumo",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "80.40",
+      "nome": "Compensi amministratori",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "81.40",
+      "nome": "Contributi INPS su compensi amministratori",
+      "tipo": "COSTO"
+    },
+    {
+      "codice": "27.10",
+      "nome": "Debiti verso amministratori (compensi netti e rimborsi spese)",
+      "tipo": "PASSIVO"
     },
     {
       "codice": "74",
@@ -5876,6 +5946,7 @@
       },
       "accontoDedotto": 0,
       "iva": 660,
+      "natura": "",
       "totale": 3660,
       "aperto": 3660,
       "resi": 0,
@@ -5930,6 +6001,7 @@
       },
       "accontoDedotto": 0,
       "iva": 131.12,
+      "natura": "",
       "totale": 727.12,
       "aperto": 727.12,
       "resi": 0,
@@ -5984,6 +6056,7 @@
       },
       "accontoDedotto": 0,
       "iva": 12.32,
+      "natura": "",
       "totale": 68.32,
       "aperto": 68.32,
       "resi": 0,
@@ -6038,6 +6111,7 @@
       },
       "accontoDedotto": 0,
       "iva": 124.74,
+      "natura": "",
       "totale": 691.74,
       "aperto": 691.74,
       "resi": 0,
@@ -6092,6 +6166,7 @@
       },
       "accontoDedotto": 0,
       "iva": 29.7,
+      "natura": "",
       "totale": 164.7,
       "aperto": 164.7,
       "resi": 0,
@@ -6146,6 +6221,7 @@
       },
       "accontoDedotto": 0,
       "iva": 1650,
+      "natura": "",
       "totale": 9150,
       "aperto": 9150,
       "resi": 0,
@@ -6200,6 +6276,7 @@
       },
       "accontoDedotto": 0,
       "iva": 262.24,
+      "natura": "",
       "totale": 1454.24,
       "aperto": 1454.24,
       "resi": 0,
@@ -6254,6 +6331,7 @@
       },
       "accontoDedotto": 0,
       "iva": 1320,
+      "natura": "",
       "totale": 7320,
       "aperto": 7320,
       "resi": 0,
@@ -6308,6 +6386,7 @@
       },
       "accontoDedotto": 0,
       "iva": 249.48,
+      "natura": "",
       "totale": 1383.48,
       "aperto": 1383.48,
       "resi": 0,
@@ -6362,6 +6441,7 @@
       },
       "accontoDedotto": 0,
       "iva": 1980,
+      "natura": "",
       "totale": 10980,
       "aperto": 10980,
       "resi": 0,
@@ -6416,6 +6496,7 @@
       },
       "accontoDedotto": 0,
       "iva": 77,
+      "natura": "",
       "totale": 427,
       "aperto": 427,
       "resi": 0,
@@ -6470,6 +6551,7 @@
       },
       "accontoDedotto": 0,
       "iva": 1980,
+      "natura": "",
       "totale": 10980,
       "aperto": 10980,
       "resi": 0,
@@ -6524,6 +6606,7 @@
       },
       "accontoDedotto": 0,
       "iva": 393.36,
+      "natura": "",
       "totale": 2181.36,
       "aperto": 2181.36,
       "resi": 0,
@@ -6578,6 +6661,7 @@
       },
       "accontoDedotto": 0,
       "iva": 2475,
+      "natura": "",
       "totale": 13725,
       "aperto": 13725,
       "resi": 0,
@@ -6632,6 +6716,7 @@
       },
       "accontoDedotto": 0,
       "iva": 249.48,
+      "natura": "",
       "totale": 1383.48,
       "aperto": 1383.48,
       "resi": 0,
@@ -6686,6 +6771,7 @@
       },
       "accontoDedotto": 0,
       "iva": 2475,
+      "natura": "",
       "totale": 13725,
       "aperto": 13725,
       "resi": 0,
@@ -6740,6 +6826,7 @@
       },
       "accontoDedotto": 0,
       "iva": 79.2,
+      "natura": "",
       "totale": 439.2,
       "aperto": 439.2,
       "resi": 0,
@@ -7825,10 +7912,10 @@
               "dare": 3000000,
               "avere": 3000000
             },
-            "inviatoIl": "2026-11-06T09:37:29.131Z"
+            "inviatoIl": "2026-11-22T09:29:55.481Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:29.178Z"
+        "completatoIl": "2026-11-22T09:29:55.511Z"
       },
       {
         "chiave": "[2,\"100000002\",\"2026-09-01\",\"VERSAMENTO_SOCI\",\"Versamento dei soci sul conto corrente della società: 30.000,00 € del capitale sottoscritto\",[[\"10\",\"DARE\",30000,\"\"],[\"08\",\"AVERE\",30000,\"\"]]]",
@@ -7874,10 +7961,10 @@
               "dare": 3000000,
               "avere": 3000000
             },
-            "inviatoIl": "2026-11-06T09:37:29.344Z"
+            "inviatoIl": "2026-11-22T09:29:55.666Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:29.368Z"
+        "completatoIl": "2026-11-22T09:29:55.694Z"
       },
       {
         "chiave": "[3,\"100000003\",\"2026-09-01\",\"FATTURA_CESPITE\",\"F-90 acquisto cespite CE-0001 «Banco, scaffali e vetrine del negozio» da Arredo Negozi Srl — fattura AN-2026-088\",[[\"01\",\"DARE\",6000,\"\"],[\"14\",\"DARE\",1320,\"\"],[\"20\",\"AVERE\",7320,\"F700\"]]]",
@@ -7934,10 +8021,10 @@
               "dare": 732000,
               "avere": 732000
             },
-            "inviatoIl": "2026-11-06T09:37:29.672Z"
+            "inviatoIl": "2026-11-22T09:29:55.968Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:29.740Z"
+        "completatoIl": "2026-11-22T09:29:55.997Z"
       },
       {
         "chiave": "[4,\"100000004\",\"2026-09-01\",\"FATTURA_CESPITE\",\"F-90 acquisto cespite CE-0002 «PC e registratore di cassa telematico per il banco» da Distribuzione PC Italia Spa — fattura DPC-2026-1490\",[[\"03\",\"DARE\",1500,\"\"],[\"14\",\"DARE\",330,\"\"],[\"20\",\"AVERE\",1830,\"F100\"]]]",
@@ -7994,10 +8081,10 @@
               "dare": 183000,
               "avere": 183000
             },
-            "inviatoIl": "2026-11-06T09:37:29.881Z"
+            "inviatoIl": "2026-11-22T09:29:56.108Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:29.914Z"
+        "completatoIl": "2026-11-22T09:29:56.136Z"
       },
       {
         "chiave": "[5,\"100000005\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000001 — entrata 10 pz PC-UFF lotto L4500000001 da ordine 4500000001\",[[\"13\",\"DARE\",4500,\"\"],[\"22\",\"AVERE\",4500,\"F100\"]]]",
@@ -8043,10 +8130,10 @@
               "dare": 450000,
               "avere": 450000
             },
-            "inviatoIl": "2026-11-06T09:37:30.303Z"
+            "inviatoIl": "2026-11-22T09:29:56.504Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:30.328Z"
+        "completatoIl": "2026-11-22T09:29:56.532Z"
       },
       {
         "chiave": "[6,\"100000006\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000002 — entrata 6 pz STAMP-LAS lotto L4500000002 da ordine 4500000002\",[[\"13\",\"DARE\",720,\"\"],[\"22\",\"AVERE\",720,\"F200\"]]]",
@@ -8092,10 +8179,10 @@
               "dare": 72000,
               "avere": 72000
             },
-            "inviatoIl": "2026-11-06T09:37:30.448Z"
+            "inviatoIl": "2026-11-22T09:29:56.663Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:30.473Z"
+        "completatoIl": "2026-11-22T09:29:56.690Z"
       },
       {
         "chiave": "[7,\"100000007\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000003 — entrata 10 pz MON-24 lotto L4500000003 da ordine 4500000003\",[[\"13\",\"DARE\",950,\"\"],[\"22\",\"AVERE\",950,\"F300\"]]]",
@@ -8141,10 +8228,10 @@
               "dare": 95000,
               "avere": 95000
             },
-            "inviatoIl": "2026-11-06T09:37:30.612Z"
+            "inviatoIl": "2026-11-22T09:29:56.846Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:30.647Z"
+        "completatoIl": "2026-11-22T09:29:56.869Z"
       },
       {
         "chiave": "[8,\"100000008\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000004 — entrata 30 pz MOUSE lotto L4500000004 da ordine 4500000004\",[[\"13\",\"DARE\",180,\"\"],[\"22\",\"AVERE\",180,\"F400\"]]]",
@@ -8190,10 +8277,10 @@
               "dare": 18000,
               "avere": 18000
             },
-            "inviatoIl": "2026-11-06T09:37:30.776Z"
+            "inviatoIl": "2026-11-22T09:29:56.970Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:30.799Z"
+        "completatoIl": "2026-11-22T09:29:56.993Z"
       },
       {
         "chiave": "[9,\"100000009\",\"2026-09-04\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000005 — entrata 40 pz CAVO-HDMI lotto L4500000005 da ordine 4500000005\",[[\"13\",\"DARE\",120,\"\"],[\"22\",\"AVERE\",120,\"F400\"]]]",
@@ -8239,10 +8326,10 @@
               "dare": 12000,
               "avere": 12000
             },
-            "inviatoIl": "2026-11-06T09:37:30.906Z"
+            "inviatoIl": "2026-11-22T09:29:57.102Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:30.931Z"
+        "completatoIl": "2026-11-22T09:29:57.125Z"
       },
       {
         "chiave": "[10,\"100000010\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600001 — fattura DPC-2026-1520 di Distribuzione PC Italia Spa su ordine 4500000001\",[[\"22\",\"DARE\",4500,\"F100\"],[\"14\",\"DARE\",990,\"\"],[\"20\",\"AVERE\",5490,\"F100\"]]]",
@@ -8299,10 +8386,10 @@
               "dare": 549000,
               "avere": 549000
             },
-            "inviatoIl": "2026-11-06T09:37:31.131Z"
+            "inviatoIl": "2026-11-22T09:29:57.335Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:31.161Z"
+        "completatoIl": "2026-11-22T09:29:57.364Z"
       },
       {
         "chiave": "[11,\"100000011\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600002 — fattura SF-0931 di Stampa Facile Srl su ordine 4500000002\",[[\"22\",\"DARE\",720,\"F200\"],[\"14\",\"DARE\",158.4,\"\"],[\"20\",\"AVERE\",878.4,\"F200\"]]]",
@@ -8359,10 +8446,10 @@
               "dare": 87840,
               "avere": 87840
             },
-            "inviatoIl": "2026-11-06T09:37:31.273Z"
+            "inviatoIl": "2026-11-22T09:29:57.466Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:31.304Z"
+        "completatoIl": "2026-11-22T09:29:57.495Z"
       },
       {
         "chiave": "[12,\"100000012\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600003 — fattura VS-4410 di Video Schermi Srl su ordine 4500000003\",[[\"22\",\"DARE\",950,\"F300\"],[\"14\",\"DARE\",209,\"\"],[\"20\",\"AVERE\",1159,\"F300\"]]]",
@@ -8419,10 +8506,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:31.410Z"
+            "inviatoIl": "2026-11-22T09:29:57.609Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:31.442Z"
+        "completatoIl": "2026-11-22T09:29:57.641Z"
       },
       {
         "chiave": "[13,\"100000013\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600004 — fattura AD-301 di Accessori Digitali Srl su ordine 4500000004\",[[\"22\",\"DARE\",180,\"F400\"],[\"14\",\"DARE\",39.6,\"\"],[\"20\",\"AVERE\",219.6,\"F400\"]]]",
@@ -8479,10 +8566,10 @@
               "dare": 21960,
               "avere": 21960
             },
-            "inviatoIl": "2026-11-06T09:37:31.551Z"
+            "inviatoIl": "2026-11-22T09:29:57.828Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:31.582Z"
+        "completatoIl": "2026-11-22T09:29:57.873Z"
       },
       {
         "chiave": "[14,\"100000014\",\"2026-09-07\",\"FATTURA_FORNITORE\",\"MIRO 5105600005 — fattura AD-302 di Accessori Digitali Srl su ordine 4500000005\",[[\"22\",\"DARE\",120,\"F400\"],[\"14\",\"DARE\",26.4,\"\"],[\"20\",\"AVERE\",146.4,\"F400\"]]]",
@@ -8539,10 +8626,10 @@
               "dare": 14640,
               "avere": 14640
             },
-            "inviatoIl": "2026-11-06T09:37:31.697Z"
+            "inviatoIl": "2026-11-22T09:29:57.997Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:31.726Z"
+        "completatoIl": "2026-11-22T09:29:58.037Z"
       },
       {
         "chiave": "[15,\"100000015\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000001 — uscita merci 601 4 pz PC-UFF dalla zona di spedizione (ordine 10000001)\",[[\"41\",\"DARE\",1800,\"\"],[\"13\",\"AVERE\",1800,\"\"]]]",
@@ -8588,10 +8675,10 @@
               "dare": 180000,
               "avere": 180000
             },
-            "inviatoIl": "2026-11-06T09:37:32.460Z"
+            "inviatoIl": "2026-11-22T09:29:58.703Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:32.484Z"
+        "completatoIl": "2026-11-22T09:29:58.731Z"
       },
       {
         "chiave": "[16,\"100000016\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000002 — uscita merci 601 4 pz MON-24 dalla zona di spedizione (ordine 10000002)\",[[\"41\",\"DARE\",380,\"\"],[\"13\",\"AVERE\",380,\"\"]]]",
@@ -8637,10 +8724,10 @@
               "dare": 38000,
               "avere": 38000
             },
-            "inviatoIl": "2026-11-06T09:37:32.593Z"
+            "inviatoIl": "2026-11-22T09:29:58.834Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:32.617Z"
+        "completatoIl": "2026-11-22T09:29:58.857Z"
       },
       {
         "chiave": "[17,\"100000017\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000003 — uscita merci 601 4 pz MOUSE dalla zona di spedizione (ordine 10000003)\",[[\"41\",\"DARE\",24,\"\"],[\"13\",\"AVERE\",24,\"\"]]]",
@@ -8686,10 +8773,10 @@
               "dare": 2400,
               "avere": 2400
             },
-            "inviatoIl": "2026-11-06T09:37:32.737Z"
+            "inviatoIl": "2026-11-22T09:29:58.988Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:32.757Z"
+        "completatoIl": "2026-11-22T09:29:59.016Z"
       },
       {
         "chiave": "[18,\"100000018\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000004 — uscita merci 601 3 pz STAMP-LAS dalla zona di spedizione (ordine 10000004)\",[[\"41\",\"DARE\",360,\"\"],[\"13\",\"AVERE\",360,\"\"]]]",
@@ -8735,10 +8822,10 @@
               "dare": 36000,
               "avere": 36000
             },
-            "inviatoIl": "2026-11-06T09:37:32.880Z"
+            "inviatoIl": "2026-11-22T09:29:59.119Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:32.897Z"
+        "completatoIl": "2026-11-22T09:29:59.137Z"
       },
       {
         "chiave": "[19,\"100000019\",\"2026-09-14\",\"USCITA_MERCI\",\"Consegna 80000005 — uscita merci 601 15 pz CAVO-HDMI dalla zona di spedizione (ordine 10000005)\",[[\"41\",\"DARE\",45,\"\"],[\"13\",\"AVERE\",45,\"\"]]]",
@@ -8784,10 +8871,10 @@
               "dare": 4500,
               "avere": 4500
             },
-            "inviatoIl": "2026-11-06T09:37:33.000Z"
+            "inviatoIl": "2026-11-22T09:29:59.268Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.026Z"
+        "completatoIl": "2026-11-22T09:29:59.292Z"
       },
       {
         "chiave": "[20,\"100000020\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000001 (F2) — Studio Commerciale Aurora — 4 pz PC-UFF\",[[\"11\",\"DARE\",3660,\"C100\"],[\"40\",\"AVERE\",3000,\"\"],[\"21\",\"AVERE\",660,\"\"]]]",
@@ -8844,10 +8931,10 @@
               "dare": 366000,
               "avere": 366000
             },
-            "inviatoIl": "2026-11-06T09:37:33.139Z"
+            "inviatoIl": "2026-11-22T09:29:59.407Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.171Z"
+        "completatoIl": "2026-11-22T09:29:59.441Z"
       },
       {
         "chiave": "[21,\"100000021\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000002 (F2) — Studio Commerciale Aurora — 4 pz MON-24\",[[\"11\",\"DARE\",727.12,\"C100\"],[\"40\",\"AVERE\",596,\"\"],[\"21\",\"AVERE\",131.12,\"\"]]]",
@@ -8904,10 +8991,10 @@
               "dare": 72712,
               "avere": 72712
             },
-            "inviatoIl": "2026-11-06T09:37:33.285Z"
+            "inviatoIl": "2026-11-22T09:29:59.561Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.317Z"
+        "completatoIl": "2026-11-22T09:29:59.598Z"
       },
       {
         "chiave": "[22,\"100000022\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000003 (F2) — Studio Commerciale Aurora — 4 pz MOUSE\",[[\"11\",\"DARE\",68.32,\"C100\"],[\"40\",\"AVERE\",56,\"\"],[\"21\",\"AVERE\",12.32,\"\"]]]",
@@ -8964,10 +9051,10 @@
               "dare": 6832,
               "avere": 6832
             },
-            "inviatoIl": "2026-11-06T09:37:33.435Z"
+            "inviatoIl": "2026-11-22T09:29:59.708Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.467Z"
+        "completatoIl": "2026-11-22T09:29:59.738Z"
       },
       {
         "chiave": "[23,\"100000023\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000004 (F2) — Agenzia Viaggi Girasole Srl — 3 pz STAMP-LAS\",[[\"11\",\"DARE\",691.74,\"C200\"],[\"40\",\"AVERE\",567,\"\"],[\"21\",\"AVERE\",124.74,\"\"]]]",
@@ -9024,10 +9111,10 @@
               "dare": 69174,
               "avere": 69174
             },
-            "inviatoIl": "2026-11-06T09:37:33.575Z"
+            "inviatoIl": "2026-11-22T09:29:59.848Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.604Z"
+        "completatoIl": "2026-11-22T09:29:59.880Z"
       },
       {
         "chiave": "[24,\"100000024\",\"2026-09-15\",\"FATTURA\",\"Fattura 90000005 (F2) — Agenzia Viaggi Girasole Srl — 15 pz CAVO-HDMI\",[[\"11\",\"DARE\",164.7,\"C200\"],[\"40\",\"AVERE\",135,\"\"],[\"21\",\"AVERE\",29.7,\"\"]]]",
@@ -9084,10 +9171,10 @@
               "dare": 16470,
               "avere": 16470
             },
-            "inviatoIl": "2026-11-06T09:37:33.740Z"
+            "inviatoIl": "2026-11-22T09:30:00.019Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:33.773Z"
+        "completatoIl": "2026-11-22T09:30:00.051Z"
       },
       {
         "chiave": "[25,\"100000025\",\"2026-09-30\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-09 — 1 dipendenti\",[[\"80\",\"DARE\",1800,\"\"],[\"81\",\"DARE\",559.44,\"\"],[\"82\",\"DARE\",133.33,\"\"],[\"27\",\"AVERE\",1552.62,\"\"],[\"28\",\"AVERE\",706.86,\"\"],[\"24\",\"AVERE\",27,\"\"],[\"29\",\"AVERE\",81.96,\"\"],[\"31\",\"AVERE\",124.33,\"\"]]]",
@@ -9199,10 +9286,10 @@
               "dare": 249277,
               "avere": 249277
             },
-            "inviatoIl": "2026-11-06T09:37:34.259Z"
+            "inviatoIl": "2026-11-22T09:30:00.484Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.328Z"
+        "completatoIl": "2026-11-22T09:30:00.548Z"
       },
       {
         "chiave": "[26,\"100000026\",\"2026-09-30\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-09 (1 dipendenti)\",[[\"27\",\"DARE\",1552.62,\"\"],[\"10\",\"AVERE\",1552.62,\"\"]]]",
@@ -9248,10 +9335,10 @@
               "dare": 155262,
               "avere": 155262
             },
-            "inviatoIl": "2026-11-06T09:37:34.435Z"
+            "inviatoIl": "2026-11-22T09:30:00.640Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.463Z"
+        "completatoIl": "2026-11-22T09:30:00.663Z"
       },
       {
         "chiave": "[27,\"100000027\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 7320,00 €\",[[\"20\",\"DARE\",7320,\"F100\"],[\"10\",\"AVERE\",7320,\"\"]]]",
@@ -9297,10 +9384,10 @@
               "dare": 732000,
               "avere": 732000
             },
-            "inviatoIl": "2026-11-06T09:37:34.573Z"
+            "inviatoIl": "2026-11-22T09:30:00.761Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.606Z"
+        "completatoIl": "2026-11-22T09:30:00.792Z"
       },
       {
         "chiave": "[28,\"100000028\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Stampa Facile Srl: 878,40 €\",[[\"20\",\"DARE\",878.4,\"F200\"],[\"10\",\"AVERE\",878.4,\"\"]]]",
@@ -9346,10 +9433,10 @@
               "dare": 87840,
               "avere": 87840
             },
-            "inviatoIl": "2026-11-06T09:37:34.713Z"
+            "inviatoIl": "2026-11-22T09:30:00.903Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.744Z"
+        "completatoIl": "2026-11-22T09:30:00.932Z"
       },
       {
         "chiave": "[29,\"100000029\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Video Schermi Srl: 1159,00 €\",[[\"20\",\"DARE\",1159,\"F300\"],[\"10\",\"AVERE\",1159,\"\"]]]",
@@ -9395,10 +9482,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:34.847Z"
+            "inviatoIl": "2026-11-22T09:30:01.058Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.871Z"
+        "completatoIl": "2026-11-22T09:30:01.104Z"
       },
       {
         "chiave": "[30,\"100000030\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Accessori Digitali Srl: 366,00 €\",[[\"20\",\"DARE\",366,\"F400\"],[\"10\",\"AVERE\",366,\"\"]]]",
@@ -9444,10 +9531,10 @@
               "dare": 36600,
               "avere": 36600
             },
-            "inviatoIl": "2026-11-06T09:37:34.964Z"
+            "inviatoIl": "2026-11-22T09:30:01.236Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:34.995Z"
+        "completatoIl": "2026-11-22T09:30:01.269Z"
       },
       {
         "chiave": "[31,\"100000031\",\"2026-09-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Arredo Negozi Srl: 7320,00 €\",[[\"20\",\"DARE\",7320,\"F700\"],[\"10\",\"AVERE\",7320,\"\"]]]",
@@ -9493,10 +9580,10 @@
               "dare": 732000,
               "avere": 732000
             },
-            "inviatoIl": "2026-11-06T09:37:35.090Z"
+            "inviatoIl": "2026-11-22T09:30:01.372Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.120Z"
+        "completatoIl": "2026-11-22T09:30:01.404Z"
       },
       {
         "chiave": "[32,\"100000032\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO C100 2026-09-30\",[[\"10\",\"DARE\",4455.44,\"\"],[\"11\",\"AVERE\",4455.44,\"C100\"]]]",
@@ -9542,10 +9629,10 @@
               "dare": 445544,
               "avere": 445544
             },
-            "inviatoIl": "2026-11-06T09:37:35.215Z"
+            "inviatoIl": "2026-11-22T09:30:01.522Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.240Z"
+        "completatoIl": "2026-11-22T09:30:01.541Z"
       },
       {
         "chiave": "[33,\"100000033\",\"2026-09-30\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO C200 2026-09-30\",[[\"10\",\"DARE\",856.44,\"\"],[\"11\",\"AVERE\",856.44,\"C200\"]]]",
@@ -9591,10 +9678,10 @@
               "dare": 85644,
               "avere": 85644
             },
-            "inviatoIl": "2026-11-06T09:37:35.342Z"
+            "inviatoIl": "2026-11-22T09:30:01.656Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.361Z"
+        "completatoIl": "2026-11-22T09:30:01.677Z"
       },
       {
         "chiave": "[34,\"100000034\",\"2026-09-30\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-09: a debito 957,88, a credito 3073,40 → credito da riportare 2115,52\",[[\"21\",\"DARE\",957.88,\"\"],[\"14\",\"AVERE\",3073.4,\"\"],[\"25\",\"DARE\",2115.52,\"\"]]]",
@@ -9651,10 +9738,10 @@
               "dare": 307340,
               "avere": 307340
             },
-            "inviatoIl": "2026-11-06T09:37:35.486Z"
+            "inviatoIl": "2026-11-22T09:30:01.814Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.520Z"
+        "completatoIl": "2026-11-22T09:30:01.843Z"
       },
       {
         "chiave": "[35,\"100000035\",\"2026-10-01\",\"FATTURA_PASSIVA\",\"FB60 fattura POL-DF-5521 di Assicurazioni Delfino Spa: premio annuo polizza incendio e furto del negozio (competenza 01/10/2026 – 30/09/2027) — esente IVA\",[[\"83\",\"DARE\",960,\"\"],[\"20\",\"AVERE\",960,\"F600\"]]]",
@@ -9700,10 +9787,10 @@
               "dare": 96000,
               "avere": 96000
             },
-            "inviatoIl": "2026-11-06T09:37:35.624Z"
+            "inviatoIl": "2026-11-22T09:30:01.943Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.650Z"
+        "completatoIl": "2026-11-22T09:30:01.975Z"
       },
       {
         "chiave": "[36,\"100000036\",\"2026-10-01\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Assicurazioni Delfino Spa per la fattura POL-DF-5521: 960,00 €\",[[\"20\",\"DARE\",960,\"F600\"],[\"10\",\"AVERE\",960,\"\"]]]",
@@ -9749,10 +9836,10 @@
               "dare": 96000,
               "avere": 96000
             },
-            "inviatoIl": "2026-11-06T09:37:35.751Z"
+            "inviatoIl": "2026-11-22T09:30:02.098Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:35.779Z"
+        "completatoIl": "2026-11-22T09:30:02.137Z"
       },
       {
         "chiave": "[37,\"100000037\",\"2026-10-06\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000006 — entrata 20 pz PC-UFF lotto L4500000006 da ordine 4500000006\",[[\"13\",\"DARE\",9000,\"\"],[\"22\",\"AVERE\",9000,\"F100\"]]]",
@@ -9798,10 +9885,10 @@
               "dare": 900000,
               "avere": 900000
             },
-            "inviatoIl": "2026-11-06T09:37:36.060Z"
+            "inviatoIl": "2026-11-22T09:30:02.473Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.088Z"
+        "completatoIl": "2026-11-22T09:30:02.498Z"
       },
       {
         "chiave": "[38,\"100000038\",\"2026-10-06\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000007 — entrata 10 pz MON-24 lotto L4500000007 da ordine 4500000007\",[[\"13\",\"DARE\",950,\"\"],[\"22\",\"AVERE\",950,\"F300\"]]]",
@@ -9847,10 +9934,10 @@
               "dare": 95000,
               "avere": 95000
             },
-            "inviatoIl": "2026-11-06T09:37:36.242Z"
+            "inviatoIl": "2026-11-22T09:30:02.608Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.273Z"
+        "completatoIl": "2026-11-22T09:30:02.634Z"
       },
       {
         "chiave": "[39,\"100000039\",\"2026-10-06\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000008 — entrata 6 pz STAMP-LAS lotto L4500000008 da ordine 4500000008\",[[\"13\",\"DARE\",720,\"\"],[\"22\",\"AVERE\",720,\"F200\"]]]",
@@ -9896,10 +9983,10 @@
               "dare": 72000,
               "avere": 72000
             },
-            "inviatoIl": "2026-11-06T09:37:36.391Z"
+            "inviatoIl": "2026-11-22T09:30:02.756Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.418Z"
+        "completatoIl": "2026-11-22T09:30:02.783Z"
       },
       {
         "chiave": "[40,\"100000040\",\"2026-10-08\",\"FATTURA_FORNITORE\",\"MIRO 5105600006 — fattura DPC-2026-1688 di Distribuzione PC Italia Spa su ordine 4500000006\",[[\"22\",\"DARE\",9000,\"F100\"],[\"14\",\"DARE\",1980,\"\"],[\"20\",\"AVERE\",10980,\"F100\"]]]",
@@ -9956,10 +10043,10 @@
               "dare": 1098000,
               "avere": 1098000
             },
-            "inviatoIl": "2026-11-06T09:37:36.599Z"
+            "inviatoIl": "2026-11-22T09:30:03.281Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.631Z"
+        "completatoIl": "2026-11-22T09:30:03.358Z"
       },
       {
         "chiave": "[41,\"100000041\",\"2026-10-08\",\"FATTURA_FORNITORE\",\"MIRO 5105600007 — fattura VS-4502 di Video Schermi Srl su ordine 4500000007\",[[\"22\",\"DARE\",950,\"F300\"],[\"14\",\"DARE\",209,\"\"],[\"20\",\"AVERE\",1159,\"F300\"]]]",
@@ -10016,10 +10103,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:36.749Z"
+            "inviatoIl": "2026-11-22T09:30:03.477Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.782Z"
+        "completatoIl": "2026-11-22T09:30:03.508Z"
       },
       {
         "chiave": "[42,\"100000042\",\"2026-10-08\",\"FATTURA_FORNITORE\",\"MIRO 5105600008 — fattura SF-1017 di Stampa Facile Srl su ordine 4500000008\",[[\"22\",\"DARE\",720,\"F200\"],[\"14\",\"DARE\",158.4,\"\"],[\"20\",\"AVERE\",878.4,\"F200\"]]]",
@@ -10076,10 +10163,10 @@
               "dare": 87840,
               "avere": 87840
             },
-            "inviatoIl": "2026-11-06T09:37:36.907Z"
+            "inviatoIl": "2026-11-22T09:30:03.624Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:36.940Z"
+        "completatoIl": "2026-11-22T09:30:03.655Z"
       },
       {
         "chiave": "[43,\"100000043\",\"2026-10-16\",\"F24\",\"F24 del 16/10/2026 per le paghe di 2026-09: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86\",[[\"29\",\"DARE\",81.96,\"\"],[\"28\",\"DARE\",706.86,\"\"],[\"10\",\"AVERE\",788.82,\"\"]]]",
@@ -10136,10 +10223,10 @@
               "dare": 78882,
               "avere": 78882
             },
-            "inviatoIl": "2026-11-06T09:37:37.056Z"
+            "inviatoIl": "2026-11-22T09:30:03.776Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:37.089Z"
+        "completatoIl": "2026-11-22T09:30:03.806Z"
       },
       {
         "chiave": "[44,\"100000044\",\"2026-10-15\",\"USCITA_MERCI\",\"Consegna 80000006 — uscita merci 601 10 pz PC-UFF dalla zona di spedizione (ordine 10000006)\",[[\"41\",\"DARE\",4500,\"\"],[\"13\",\"AVERE\",4500,\"\"]]]",
@@ -10185,10 +10272,10 @@
               "dare": 450000,
               "avere": 450000
             },
-            "inviatoIl": "2026-11-06T09:37:38.103Z"
+            "inviatoIl": "2026-11-22T09:30:04.410Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.139Z"
+        "completatoIl": "2026-11-22T09:30:04.435Z"
       },
       {
         "chiave": "[45,\"100000045\",\"2026-10-15\",\"USCITA_MERCI\",\"Consegna 80000007 — uscita merci 601 8 pz MON-24 dalla zona di spedizione (ordine 10000007)\",[[\"41\",\"DARE\",760,\"\"],[\"13\",\"AVERE\",760,\"\"]]]",
@@ -10234,10 +10321,10 @@
               "dare": 76000,
               "avere": 76000
             },
-            "inviatoIl": "2026-11-06T09:37:38.258Z"
+            "inviatoIl": "2026-11-22T09:30:04.532Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.285Z"
+        "completatoIl": "2026-11-22T09:30:04.556Z"
       },
       {
         "chiave": "[46,\"100000046\",\"2026-10-15\",\"USCITA_MERCI\",\"Consegna 80000008 — uscita merci 601 8 pz PC-UFF dalla zona di spedizione (ordine 10000008)\",[[\"41\",\"DARE\",3600,\"\"],[\"13\",\"AVERE\",3600,\"\"]]]",
@@ -10283,10 +10370,10 @@
               "dare": 360000,
               "avere": 360000
             },
-            "inviatoIl": "2026-11-06T09:37:38.403Z"
+            "inviatoIl": "2026-11-22T09:30:04.653Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.431Z"
+        "completatoIl": "2026-11-22T09:30:04.678Z"
       },
       {
         "chiave": "[47,\"100000047\",\"2026-10-15\",\"USCITA_MERCI\",\"Consegna 80000009 — uscita merci 601 6 pz STAMP-LAS dalla zona di spedizione (ordine 10000009)\",[[\"41\",\"DARE\",720,\"\"],[\"13\",\"AVERE\",720,\"\"]]]",
@@ -10332,10 +10419,10 @@
               "dare": 72000,
               "avere": 72000
             },
-            "inviatoIl": "2026-11-06T09:37:38.545Z"
+            "inviatoIl": "2026-11-22T09:30:04.785Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.572Z"
+        "completatoIl": "2026-11-22T09:30:04.810Z"
       },
       {
         "chiave": "[48,\"100000048\",\"2026-10-16\",\"FATTURA\",\"Fattura 90000006 (F2) — Studio Commerciale Aurora — 10 pz PC-UFF\",[[\"11\",\"DARE\",9150,\"C100\"],[\"40\",\"AVERE\",7500,\"\"],[\"21\",\"AVERE\",1650,\"\"]]]",
@@ -10392,10 +10479,10 @@
               "dare": 915000,
               "avere": 915000
             },
-            "inviatoIl": "2026-11-06T09:37:38.686Z"
+            "inviatoIl": "2026-11-22T09:30:04.927Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.719Z"
+        "completatoIl": "2026-11-22T09:30:04.962Z"
       },
       {
         "chiave": "[49,\"100000049\",\"2026-10-16\",\"FATTURA\",\"Fattura 90000007 (F2) — Studio Commerciale Aurora — 8 pz MON-24\",[[\"11\",\"DARE\",1454.24,\"C100\"],[\"40\",\"AVERE\",1192,\"\"],[\"21\",\"AVERE\",262.24,\"\"]]]",
@@ -10452,10 +10539,10 @@
               "dare": 145424,
               "avere": 145424
             },
-            "inviatoIl": "2026-11-06T09:37:38.835Z"
+            "inviatoIl": "2026-11-22T09:30:05.093Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:38.868Z"
+        "completatoIl": "2026-11-22T09:30:05.126Z"
       },
       {
         "chiave": "[50,\"100000050\",\"2026-10-16\",\"FATTURA\",\"Fattura 90000008 (F2) — Agenzia Viaggi Girasole Srl — 8 pz PC-UFF\",[[\"11\",\"DARE\",7320,\"C200\"],[\"40\",\"AVERE\",6000,\"\"],[\"21\",\"AVERE\",1320,\"\"]]]",
@@ -10512,10 +10599,10 @@
               "dare": 732000,
               "avere": 732000
             },
-            "inviatoIl": "2026-11-06T09:37:38.992Z"
+            "inviatoIl": "2026-11-22T09:30:05.259Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:39.025Z"
+        "completatoIl": "2026-11-22T09:30:05.295Z"
       },
       {
         "chiave": "[51,\"100000051\",\"2026-10-16\",\"FATTURA\",\"Fattura 90000009 (F2) — Agenzia Viaggi Girasole Srl — 6 pz STAMP-LAS\",[[\"11\",\"DARE\",1383.48,\"C200\"],[\"40\",\"AVERE\",1134,\"\"],[\"21\",\"AVERE\",249.48,\"\"]]]",
@@ -10572,10 +10659,10 @@
               "dare": 138348,
               "avere": 138348
             },
-            "inviatoIl": "2026-11-06T09:37:39.146Z"
+            "inviatoIl": "2026-11-22T09:30:05.427Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:39.179Z"
+        "completatoIl": "2026-11-22T09:30:05.469Z"
       },
       {
         "chiave": "[52,\"100000052\",\"2026-10-30\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-10 — 1 dipendenti\",[[\"80\",\"DARE\",1800,\"\"],[\"81\",\"DARE\",559.44,\"\"],[\"82\",\"DARE\",133.33,\"\"],[\"27\",\"AVERE\",1552.62,\"\"],[\"28\",\"AVERE\",706.86,\"\"],[\"24\",\"AVERE\",27,\"\"],[\"29\",\"AVERE\",81.96,\"\"],[\"31\",\"AVERE\",124.33,\"\"]]]",
@@ -10687,10 +10774,10 @@
               "dare": 249277,
               "avere": 249277
             },
-            "inviatoIl": "2026-11-06T09:37:39.621Z"
+            "inviatoIl": "2026-11-22T09:30:05.904Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:39.691Z"
+        "completatoIl": "2026-11-22T09:30:05.985Z"
       },
       {
         "chiave": "[53,\"100000053\",\"2026-10-30\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-10 (1 dipendenti)\",[[\"27\",\"DARE\",1552.62,\"\"],[\"10\",\"AVERE\",1552.62,\"\"]]]",
@@ -10736,10 +10823,10 @@
               "dare": 155262,
               "avere": 155262
             },
-            "inviatoIl": "2026-11-06T09:37:39.799Z"
+            "inviatoIl": "2026-11-22T09:30:06.105Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:39.828Z"
+        "completatoIl": "2026-11-22T09:30:06.130Z"
       },
       {
         "chiave": "[54,\"100000054\",\"2026-10-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 10.980,00 €\",[[\"20\",\"DARE\",10980,\"F100\"],[\"10\",\"AVERE\",10980,\"\"]]]",
@@ -10785,10 +10872,10 @@
               "dare": 1098000,
               "avere": 1098000
             },
-            "inviatoIl": "2026-11-06T09:37:39.933Z"
+            "inviatoIl": "2026-11-22T09:30:06.253Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:39.965Z"
+        "completatoIl": "2026-11-22T09:30:06.287Z"
       },
       {
         "chiave": "[55,\"100000055\",\"2026-10-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Stampa Facile Srl: 878,40 €\",[[\"20\",\"DARE\",878.4,\"F200\"],[\"10\",\"AVERE\",878.4,\"\"]]]",
@@ -10834,10 +10921,10 @@
               "dare": 87840,
               "avere": 87840
             },
-            "inviatoIl": "2026-11-06T09:37:40.072Z"
+            "inviatoIl": "2026-11-22T09:30:06.407Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:40.104Z"
+        "completatoIl": "2026-11-22T09:30:06.440Z"
       },
       {
         "chiave": "[56,\"100000056\",\"2026-10-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Video Schermi Srl: 1159,00 €\",[[\"20\",\"DARE\",1159,\"F300\"],[\"10\",\"AVERE\",1159,\"\"]]]",
@@ -10883,10 +10970,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:40.207Z"
+            "inviatoIl": "2026-11-22T09:30:06.558Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:40.241Z"
+        "completatoIl": "2026-11-22T09:30:06.597Z"
       },
       {
         "chiave": "[57,\"100000057\",\"2026-10-30\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO C100 2026-10-30\",[[\"10\",\"DARE\",10604.24,\"\"],[\"11\",\"AVERE\",10604.24,\"C100\"]]]",
@@ -10932,10 +11019,10 @@
               "dare": 1060424,
               "avere": 1060424
             },
-            "inviatoIl": "2026-11-06T09:37:40.334Z"
+            "inviatoIl": "2026-11-22T09:30:06.719Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:40.360Z"
+        "completatoIl": "2026-11-22T09:30:06.753Z"
       },
       {
         "chiave": "[58,\"100000058\",\"2026-10-30\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO C200 2026-10-30\",[[\"10\",\"DARE\",8703.48,\"\"],[\"11\",\"AVERE\",8703.48,\"C200\"]]]",
@@ -10981,10 +11068,10 @@
               "dare": 870348,
               "avere": 870348
             },
-            "inviatoIl": "2026-11-06T09:37:40.461Z"
+            "inviatoIl": "2026-11-22T09:30:06.867Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:40.486Z"
+        "completatoIl": "2026-11-22T09:30:06.893Z"
       },
       {
         "chiave": "[59,\"100000059\",\"2026-10-31\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-10: a debito 3481,72, a credito 2347,40, credito riportato 2115,52 → credito da riportare 981,20\",[[\"21\",\"DARE\",3481.72,\"\"],[\"14\",\"AVERE\",2347.4,\"\"],[\"25\",\"AVERE\",1134.32,\"\"]]]",
@@ -11041,10 +11128,10 @@
               "dare": 348172,
               "avere": 348172
             },
-            "inviatoIl": "2026-11-06T09:37:40.603Z"
+            "inviatoIl": "2026-11-22T09:30:07.021Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:40.634Z"
+        "completatoIl": "2026-11-22T09:30:07.053Z"
       },
       {
         "chiave": "[60,\"100000060\",\"2026-11-05\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000009 — entrata 25 pz PC-UFF lotto L4500000009 da ordine 4500000009\",[[\"13\",\"DARE\",11250,\"\"],[\"22\",\"AVERE\",11250,\"F100\"]]]",
@@ -11090,10 +11177,10 @@
               "dare": 1125000,
               "avere": 1125000
             },
-            "inviatoIl": "2026-11-06T09:37:41.003Z"
+            "inviatoIl": "2026-11-22T09:30:07.421Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.031Z"
+        "completatoIl": "2026-11-22T09:30:07.450Z"
       },
       {
         "chiave": "[61,\"100000061\",\"2026-11-05\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000010 — entrata 10 pz MON-24 lotto L4500000010 da ordine 4500000010\",[[\"13\",\"DARE\",950,\"\"],[\"22\",\"AVERE\",950,\"F300\"]]]",
@@ -11139,10 +11226,10 @@
               "dare": 95000,
               "avere": 95000
             },
-            "inviatoIl": "2026-11-06T09:37:41.166Z"
+            "inviatoIl": "2026-11-22T09:30:07.587Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.186Z"
+        "completatoIl": "2026-11-22T09:30:07.617Z"
       },
       {
         "chiave": "[62,\"100000062\",\"2026-11-05\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000011 — entrata 30 pz MOUSE lotto L4500000011 da ordine 4500000011\",[[\"13\",\"DARE\",180,\"\"],[\"22\",\"AVERE\",180,\"F400\"]]]",
@@ -11188,10 +11275,10 @@
               "dare": 18000,
               "avere": 18000
             },
-            "inviatoIl": "2026-11-06T09:37:41.315Z"
+            "inviatoIl": "2026-11-22T09:30:07.743Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.344Z"
+        "completatoIl": "2026-11-22T09:30:07.773Z"
       },
       {
         "chiave": "[63,\"100000063\",\"2026-11-06\",\"FATTURA_FORNITORE\",\"MIRO 5105600009 — fattura DPC-2026-1802 di Distribuzione PC Italia Spa su ordine 4500000009\",[[\"22\",\"DARE\",11250,\"F100\"],[\"14\",\"DARE\",2475,\"\"],[\"20\",\"AVERE\",13725,\"F100\"]]]",
@@ -11248,10 +11335,10 @@
               "dare": 1372500,
               "avere": 1372500
             },
-            "inviatoIl": "2026-11-06T09:37:41.550Z"
+            "inviatoIl": "2026-11-22T09:30:07.955Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.588Z"
+        "completatoIl": "2026-11-22T09:30:07.986Z"
       },
       {
         "chiave": "[64,\"100000064\",\"2026-11-06\",\"FATTURA_FORNITORE\",\"MIRO 5105600010 — fattura VS-4633 di Video Schermi Srl su ordine 4500000010\",[[\"22\",\"DARE\",950,\"F300\"],[\"14\",\"DARE\",209,\"\"],[\"20\",\"AVERE\",1159,\"F300\"]]]",
@@ -11308,10 +11395,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:41.721Z"
+            "inviatoIl": "2026-11-22T09:30:08.100Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.757Z"
+        "completatoIl": "2026-11-22T09:30:08.131Z"
       },
       {
         "chiave": "[65,\"100000065\",\"2026-11-06\",\"FATTURA_FORNITORE\",\"MIRO 5105600011 — fattura AD-388 di Accessori Digitali Srl su ordine 4500000011\",[[\"22\",\"DARE\",180,\"F400\"],[\"14\",\"DARE\",39.6,\"\"],[\"20\",\"AVERE\",219.6,\"F400\"]]]",
@@ -11368,10 +11455,10 @@
               "dare": 21960,
               "avere": 21960
             },
-            "inviatoIl": "2026-11-06T09:37:41.882Z"
+            "inviatoIl": "2026-11-22T09:30:08.256Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:41.919Z"
+        "completatoIl": "2026-11-22T09:30:08.288Z"
       },
       {
         "chiave": "[66,\"100000066\",\"2026-11-16\",\"F24\",\"F24 del 16/11/2026 per le paghe di 2026-10: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86\",[[\"29\",\"DARE\",81.96,\"\"],[\"28\",\"DARE\",706.86,\"\"],[\"10\",\"AVERE\",788.82,\"\"]]]",
@@ -11428,10 +11515,10 @@
               "dare": 78882,
               "avere": 78882
             },
-            "inviatoIl": "2026-11-06T09:37:42.057Z"
+            "inviatoIl": "2026-11-22T09:30:08.431Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:42.096Z"
+        "completatoIl": "2026-11-22T09:30:08.463Z"
       },
       {
         "chiave": "[67,\"100000067\",\"2026-11-13\",\"USCITA_MERCI\",\"Consegna 80000010 — uscita merci 601 12 pz PC-UFF dalla zona di spedizione (ordine 10000010)\",[[\"41\",\"DARE\",5400,\"\"],[\"13\",\"AVERE\",5400,\"\"]]]",
@@ -11477,10 +11564,10 @@
               "dare": 540000,
               "avere": 540000
             },
-            "inviatoIl": "2026-11-06T09:37:42.799Z"
+            "inviatoIl": "2026-11-22T09:30:09.124Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:42.828Z"
+        "completatoIl": "2026-11-22T09:30:09.155Z"
       },
       {
         "chiave": "[68,\"100000068\",\"2026-11-13\",\"USCITA_MERCI\",\"Consegna 80000011 — uscita merci 601 25 pz MOUSE dalla zona di spedizione (ordine 10000011)\",[[\"41\",\"DARE\",150,\"\"],[\"13\",\"AVERE\",150,\"\"]]]",
@@ -11526,10 +11613,10 @@
               "dare": 15000,
               "avere": 15000
             },
-            "inviatoIl": "2026-11-06T09:37:42.951Z"
+            "inviatoIl": "2026-11-22T09:30:09.275Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:42.980Z"
+        "completatoIl": "2026-11-22T09:30:09.304Z"
       },
       {
         "chiave": "[69,\"100000069\",\"2026-11-13\",\"USCITA_MERCI\",\"Consegna 80000012 — uscita merci 601 12 pz PC-UFF dalla zona di spedizione (ordine 10000012)\",[[\"41\",\"DARE\",5400,\"\"],[\"13\",\"AVERE\",5400,\"\"]]]",
@@ -11575,10 +11662,10 @@
               "dare": 540000,
               "avere": 540000
             },
-            "inviatoIl": "2026-11-06T09:37:43.110Z"
+            "inviatoIl": "2026-11-22T09:30:09.429Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.147Z"
+        "completatoIl": "2026-11-22T09:30:09.458Z"
       },
       {
         "chiave": "[70,\"100000070\",\"2026-11-13\",\"USCITA_MERCI\",\"Consegna 80000013 — uscita merci 601 12 pz MON-24 dalla zona di spedizione (ordine 10000013)\",[[\"41\",\"DARE\",1140,\"\"],[\"13\",\"AVERE\",1140,\"\"]]]",
@@ -11624,10 +11711,10 @@
               "dare": 114000,
               "avere": 114000
             },
-            "inviatoIl": "2026-11-06T09:37:43.271Z"
+            "inviatoIl": "2026-11-22T09:30:09.577Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.300Z"
+        "completatoIl": "2026-11-22T09:30:09.606Z"
       },
       {
         "chiave": "[71,\"100000071\",\"2026-11-16\",\"FATTURA\",\"Fattura 90000010 (F2) — Studio Commerciale Aurora — 12 pz PC-UFF\",[[\"11\",\"DARE\",10980,\"C100\"],[\"40\",\"AVERE\",9000,\"\"],[\"21\",\"AVERE\",1980,\"\"]]]",
@@ -11684,10 +11771,10 @@
               "dare": 1098000,
               "avere": 1098000
             },
-            "inviatoIl": "2026-11-06T09:37:43.430Z"
+            "inviatoIl": "2026-11-22T09:30:09.736Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.467Z"
+        "completatoIl": "2026-11-22T09:30:09.770Z"
       },
       {
         "chiave": "[72,\"100000072\",\"2026-11-16\",\"FATTURA\",\"Fattura 90000011 (F2) — Studio Commerciale Aurora — 25 pz MOUSE\",[[\"11\",\"DARE\",427,\"C100\"],[\"40\",\"AVERE\",350,\"\"],[\"21\",\"AVERE\",77,\"\"]]]",
@@ -11744,10 +11831,10 @@
               "dare": 42700,
               "avere": 42700
             },
-            "inviatoIl": "2026-11-06T09:37:43.613Z"
+            "inviatoIl": "2026-11-22T09:30:09.909Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.649Z"
+        "completatoIl": "2026-11-22T09:30:09.943Z"
       },
       {
         "chiave": "[73,\"100000073\",\"2026-11-16\",\"FATTURA\",\"Fattura 90000012 (F2) — Agenzia Viaggi Girasole Srl — 12 pz PC-UFF\",[[\"11\",\"DARE\",10980,\"C200\"],[\"40\",\"AVERE\",9000,\"\"],[\"21\",\"AVERE\",1980,\"\"]]]",
@@ -11804,10 +11891,10 @@
               "dare": 1098000,
               "avere": 1098000
             },
-            "inviatoIl": "2026-11-06T09:37:43.772Z"
+            "inviatoIl": "2026-11-22T09:30:10.078Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.807Z"
+        "completatoIl": "2026-11-22T09:30:10.112Z"
       },
       {
         "chiave": "[74,\"100000074\",\"2026-11-16\",\"FATTURA\",\"Fattura 90000013 (F2) — Agenzia Viaggi Girasole Srl — 12 pz MON-24\",[[\"11\",\"DARE\",2181.36,\"C200\"],[\"40\",\"AVERE\",1788,\"\"],[\"21\",\"AVERE\",393.36,\"\"]]]",
@@ -11864,10 +11951,10 @@
               "dare": 218136,
               "avere": 218136
             },
-            "inviatoIl": "2026-11-06T09:37:43.941Z"
+            "inviatoIl": "2026-11-22T09:30:10.248Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:43.978Z"
+        "completatoIl": "2026-11-22T09:30:10.286Z"
       },
       {
         "chiave": "[75,\"100000075\",\"2026-11-30\",\"FATTURA_PASSIVA\",\"FB60 fattura FITTO-2026-T1 di Immobiliare Corso Srl: affitto del negozio settembre-novembre (trimestre posticipato) (competenza 01/09/2026 – 30/11/2026) — esente IVA\",[[\"86\",\"DARE\",2700,\"\"],[\"20\",\"AVERE\",2700,\"F500\"]]]",
@@ -11913,10 +12000,10 @@
               "dare": 270000,
               "avere": 270000
             },
-            "inviatoIl": "2026-11-06T09:37:44.270Z"
+            "inviatoIl": "2026-11-22T09:30:10.626Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:44.303Z"
+        "completatoIl": "2026-11-22T09:30:10.661Z"
       },
       {
         "chiave": "[76,\"100000076\",\"2026-11-30\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-11 — 1 dipendenti\",[[\"80\",\"DARE\",1800,\"\"],[\"81\",\"DARE\",559.44,\"\"],[\"82\",\"DARE\",133.33,\"\"],[\"27\",\"AVERE\",1552.62,\"\"],[\"28\",\"AVERE\",706.86,\"\"],[\"24\",\"AVERE\",27,\"\"],[\"29\",\"AVERE\",81.96,\"\"],[\"31\",\"AVERE\",124.33,\"\"]]]",
@@ -12028,10 +12115,10 @@
               "dare": 249277,
               "avere": 249277
             },
-            "inviatoIl": "2026-11-06T09:37:44.542Z"
+            "inviatoIl": "2026-11-22T09:30:10.914Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:44.619Z"
+        "completatoIl": "2026-11-22T09:30:10.992Z"
       },
       {
         "chiave": "[77,\"100000077\",\"2026-11-30\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-11 (1 dipendenti)\",[[\"27\",\"DARE\",1552.62,\"\"],[\"10\",\"AVERE\",1552.62,\"\"]]]",
@@ -12077,10 +12164,10 @@
               "dare": 155262,
               "avere": 155262
             },
-            "inviatoIl": "2026-11-06T09:37:44.735Z"
+            "inviatoIl": "2026-11-22T09:30:11.107Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:44.765Z"
+        "completatoIl": "2026-11-22T09:30:11.135Z"
       },
       {
         "chiave": "[78,\"100000078\",\"2026-11-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 13.725,00 €\",[[\"20\",\"DARE\",13725,\"F100\"],[\"10\",\"AVERE\",13725,\"\"]]]",
@@ -12126,10 +12213,10 @@
               "dare": 1372500,
               "avere": 1372500
             },
-            "inviatoIl": "2026-11-06T09:37:44.878Z"
+            "inviatoIl": "2026-11-22T09:30:11.245Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:44.913Z"
+        "completatoIl": "2026-11-22T09:30:11.283Z"
       },
       {
         "chiave": "[79,\"100000079\",\"2026-11-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Video Schermi Srl: 1159,00 €\",[[\"20\",\"DARE\",1159,\"F300\"],[\"10\",\"AVERE\",1159,\"\"]]]",
@@ -12175,10 +12262,10 @@
               "dare": 115900,
               "avere": 115900
             },
-            "inviatoIl": "2026-11-06T09:37:45.023Z"
+            "inviatoIl": "2026-11-22T09:30:11.394Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.058Z"
+        "completatoIl": "2026-11-22T09:30:11.431Z"
       },
       {
         "chiave": "[80,\"100000080\",\"2026-11-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Accessori Digitali Srl: 219,60 €\",[[\"20\",\"DARE\",219.6,\"F400\"],[\"10\",\"AVERE\",219.6,\"\"]]]",
@@ -12224,10 +12311,10 @@
               "dare": 21960,
               "avere": 21960
             },
-            "inviatoIl": "2026-11-06T09:37:45.173Z"
+            "inviatoIl": "2026-11-22T09:30:11.544Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.209Z"
+        "completatoIl": "2026-11-22T09:30:11.578Z"
       },
       {
         "chiave": "[81,\"100000081\",\"2026-11-30\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Immobiliare Corso Srl: 2700,00 €\",[[\"20\",\"DARE\",2700,\"F500\"],[\"10\",\"AVERE\",2700,\"\"]]]",
@@ -12273,10 +12360,10 @@
               "dare": 270000,
               "avere": 270000
             },
-            "inviatoIl": "2026-11-06T09:37:45.321Z"
+            "inviatoIl": "2026-11-22T09:30:11.683Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.357Z"
+        "completatoIl": "2026-11-22T09:30:11.723Z"
       },
       {
         "chiave": "[82,\"100000082\",\"2026-11-30\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO C100 2026-11-30\",[[\"10\",\"DARE\",11407,\"\"],[\"11\",\"AVERE\",11407,\"C100\"]]]",
@@ -12322,10 +12409,10 @@
               "dare": 1140700,
               "avere": 1140700
             },
-            "inviatoIl": "2026-11-06T09:37:45.467Z"
+            "inviatoIl": "2026-11-22T09:30:11.870Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.497Z"
+        "completatoIl": "2026-11-22T09:30:11.894Z"
       },
       {
         "chiave": "[83,\"100000083\",\"2026-11-30\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO C200 2026-11-30\",[[\"10\",\"DARE\",13161.36,\"\"],[\"11\",\"AVERE\",13161.36,\"C200\"]]]",
@@ -12371,10 +12458,10 @@
               "dare": 1316136,
               "avere": 1316136
             },
-            "inviatoIl": "2026-11-06T09:37:45.606Z"
+            "inviatoIl": "2026-11-22T09:30:12.025Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.628Z"
+        "completatoIl": "2026-11-22T09:30:12.049Z"
       },
       {
         "chiave": "[84,\"100000084\",\"2026-11-30\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-11: a debito 4430,36, a credito 2723,60, credito riportato 981,20 → da versare 725,56 entro il 16/12/2026\",[[\"21\",\"DARE\",4430.36,\"\"],[\"14\",\"AVERE\",2723.6,\"\"],[\"25\",\"AVERE\",1706.76,\"\"]]]",
@@ -12431,10 +12518,10 @@
               "dare": 443036,
               "avere": 443036
             },
-            "inviatoIl": "2026-11-06T09:37:45.767Z"
+            "inviatoIl": "2026-11-22T09:30:12.195Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:45.803Z"
+        "completatoIl": "2026-11-22T09:30:12.238Z"
       },
       {
         "chiave": "[85,\"100000085\",\"2026-12-03\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000012 — entrata 30 pz PC-UFF lotto L4500000012 da ordine 4500000012\",[[\"13\",\"DARE\",13500,\"\"],[\"22\",\"AVERE\",13500,\"F100\"]]]",
@@ -12480,10 +12567,10 @@
               "dare": 1350000,
               "avere": 1350000
             },
-            "inviatoIl": "2026-11-06T09:37:46.244Z"
+            "inviatoIl": "2026-11-22T09:30:12.676Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:46.274Z"
+        "completatoIl": "2026-11-22T09:30:12.697Z"
       },
       {
         "chiave": "[86,\"100000086\",\"2026-12-03\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000013 — entrata 8 pz STAMP-LAS lotto L4500000013 da ordine 4500000013\",[[\"13\",\"DARE\",960,\"\"],[\"22\",\"AVERE\",960,\"F200\"]]]",
@@ -12529,10 +12616,10 @@
               "dare": 96000,
               "avere": 96000
             },
-            "inviatoIl": "2026-11-06T09:37:46.412Z"
+            "inviatoIl": "2026-11-22T09:30:12.834Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:46.445Z"
+        "completatoIl": "2026-11-22T09:30:12.866Z"
       },
       {
         "chiave": "[87,\"100000087\",\"2026-12-03\",\"ENTRATA_ACQUISTO\",\"MIGO 101 doc. 5000000014 — entrata 40 pz CAVO-HDMI lotto L4500000014 da ordine 4500000014\",[[\"13\",\"DARE\",120,\"\"],[\"22\",\"AVERE\",120,\"F400\"]]]",
@@ -12578,10 +12665,10 @@
               "dare": 12000,
               "avere": 12000
             },
-            "inviatoIl": "2026-11-06T09:37:46.577Z"
+            "inviatoIl": "2026-11-22T09:30:13.010Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:46.606Z"
+        "completatoIl": "2026-11-22T09:30:13.040Z"
       },
       {
         "chiave": "[88,\"100000088\",\"2026-12-04\",\"FATTURA_FORNITORE\",\"MIRO 5105600012 — fattura DPC-2026-1955 di Distribuzione PC Italia Spa su ordine 4500000012\",[[\"22\",\"DARE\",13500,\"F100\"],[\"14\",\"DARE\",2970,\"\"],[\"20\",\"AVERE\",16470,\"F100\"]]]",
@@ -12638,10 +12725,10 @@
               "dare": 1647000,
               "avere": 1647000
             },
-            "inviatoIl": "2026-11-06T09:37:47.462Z"
+            "inviatoIl": "2026-11-22T09:30:13.270Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:47.587Z"
+        "completatoIl": "2026-11-22T09:30:13.304Z"
       },
       {
         "chiave": "[89,\"100000089\",\"2026-12-04\",\"FATTURA_FORNITORE\",\"MIRO 5105600013 — fattura SF-1123 di Stampa Facile Srl su ordine 4500000013\",[[\"22\",\"DARE\",960,\"F200\"],[\"14\",\"DARE\",211.2,\"\"],[\"20\",\"AVERE\",1171.2,\"F200\"]]]",
@@ -12698,10 +12785,10 @@
               "dare": 117120,
               "avere": 117120
             },
-            "inviatoIl": "2026-11-06T09:37:47.738Z"
+            "inviatoIl": "2026-11-22T09:30:13.446Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:47.773Z"
+        "completatoIl": "2026-11-22T09:30:13.486Z"
       },
       {
         "chiave": "[90,\"100000090\",\"2026-12-04\",\"FATTURA_FORNITORE\",\"MIRO 5105600014 — fattura AD-452 di Accessori Digitali Srl su ordine 4500000014\",[[\"22\",\"DARE\",120,\"F400\"],[\"14\",\"DARE\",26.4,\"\"],[\"20\",\"AVERE\",146.4,\"F400\"]]]",
@@ -12758,10 +12845,10 @@
               "dare": 14640,
               "avere": 14640
             },
-            "inviatoIl": "2026-11-06T09:37:47.907Z"
+            "inviatoIl": "2026-11-22T09:30:13.627Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:47.942Z"
+        "completatoIl": "2026-11-22T09:30:13.664Z"
       },
       {
         "chiave": "[91,\"100000091\",\"2026-12-10\",\"USCITA_MERCI\",\"Consegna 80000014 — uscita merci 601 15 pz PC-UFF dalla zona di spedizione (ordine 10000014)\",[[\"41\",\"DARE\",6750,\"\"],[\"13\",\"AVERE\",6750,\"\"]]]",
@@ -12807,10 +12894,10 @@
               "dare": 675000,
               "avere": 675000
             },
-            "inviatoIl": "2026-11-06T09:37:48.691Z"
+            "inviatoIl": "2026-11-22T09:30:14.411Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:48.720Z"
+        "completatoIl": "2026-11-22T09:30:14.443Z"
       },
       {
         "chiave": "[92,\"100000092\",\"2026-12-10\",\"USCITA_MERCI\",\"Consegna 80000015 — uscita merci 601 6 pz STAMP-LAS dalla zona di spedizione (ordine 10000015)\",[[\"41\",\"DARE\",720,\"\"],[\"13\",\"AVERE\",720,\"\"]]]",
@@ -12856,10 +12943,10 @@
               "dare": 72000,
               "avere": 72000
             },
-            "inviatoIl": "2026-11-06T09:37:48.853Z"
+            "inviatoIl": "2026-11-22T09:30:14.579Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:48.887Z"
+        "completatoIl": "2026-11-22T09:30:14.611Z"
       },
       {
         "chiave": "[93,\"100000093\",\"2026-12-10\",\"USCITA_MERCI\",\"Consegna 80000016 — uscita merci 601 15 pz PC-UFF dalla zona di spedizione (ordine 10000016)\",[[\"41\",\"DARE\",6750,\"\"],[\"13\",\"AVERE\",6750,\"\"]]]",
@@ -12905,10 +12992,10 @@
               "dare": 675000,
               "avere": 675000
             },
-            "inviatoIl": "2026-11-06T09:37:49.012Z"
+            "inviatoIl": "2026-11-22T09:30:14.736Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.041Z"
+        "completatoIl": "2026-11-22T09:30:14.767Z"
       },
       {
         "chiave": "[94,\"100000094\",\"2026-12-10\",\"USCITA_MERCI\",\"Consegna 80000017 — uscita merci 601 40 pz CAVO-HDMI dalla zona di spedizione (ordine 10000017)\",[[\"41\",\"DARE\",120,\"\"],[\"13\",\"AVERE\",120,\"\"]]]",
@@ -12954,10 +13041,10 @@
               "dare": 12000,
               "avere": 12000
             },
-            "inviatoIl": "2026-11-06T09:37:49.162Z"
+            "inviatoIl": "2026-11-22T09:30:14.900Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.191Z"
+        "completatoIl": "2026-11-22T09:30:14.932Z"
       },
       {
         "chiave": "[95,\"100000095\",\"2026-12-11\",\"FATTURA\",\"Fattura 90000014 (F2) — Studio Commerciale Aurora — 15 pz PC-UFF\",[[\"11\",\"DARE\",13725,\"C100\"],[\"40\",\"AVERE\",11250,\"\"],[\"21\",\"AVERE\",2475,\"\"]]]",
@@ -13014,10 +13101,10 @@
               "dare": 1372500,
               "avere": 1372500
             },
-            "inviatoIl": "2026-11-06T09:37:49.328Z"
+            "inviatoIl": "2026-11-22T09:30:15.077Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.364Z"
+        "completatoIl": "2026-11-22T09:30:15.115Z"
       },
       {
         "chiave": "[96,\"100000096\",\"2026-12-11\",\"FATTURA\",\"Fattura 90000015 (F2) — Studio Commerciale Aurora — 6 pz STAMP-LAS\",[[\"11\",\"DARE\",1383.48,\"C100\"],[\"40\",\"AVERE\",1134,\"\"],[\"21\",\"AVERE\",249.48,\"\"]]]",
@@ -13074,10 +13161,10 @@
               "dare": 138348,
               "avere": 138348
             },
-            "inviatoIl": "2026-11-06T09:37:49.497Z"
+            "inviatoIl": "2026-11-22T09:30:15.268Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.533Z"
+        "completatoIl": "2026-11-22T09:30:15.310Z"
       },
       {
         "chiave": "[97,\"100000097\",\"2026-12-11\",\"FATTURA\",\"Fattura 90000016 (F2) — Agenzia Viaggi Girasole Srl — 15 pz PC-UFF\",[[\"11\",\"DARE\",13725,\"C200\"],[\"40\",\"AVERE\",11250,\"\"],[\"21\",\"AVERE\",2475,\"\"]]]",
@@ -13134,10 +13221,10 @@
               "dare": 1372500,
               "avere": 1372500
             },
-            "inviatoIl": "2026-11-06T09:37:49.674Z"
+            "inviatoIl": "2026-11-22T09:30:15.473Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.710Z"
+        "completatoIl": "2026-11-22T09:30:15.513Z"
       },
       {
         "chiave": "[98,\"100000098\",\"2026-12-11\",\"FATTURA\",\"Fattura 90000017 (F2) — Agenzia Viaggi Girasole Srl — 40 pz CAVO-HDMI\",[[\"11\",\"DARE\",439.2,\"C200\"],[\"40\",\"AVERE\",360,\"\"],[\"21\",\"AVERE\",79.2,\"\"]]]",
@@ -13194,10 +13281,10 @@
               "dare": 43920,
               "avere": 43920
             },
-            "inviatoIl": "2026-11-06T09:37:49.851Z"
+            "inviatoIl": "2026-11-22T09:30:15.688Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:49.886Z"
+        "completatoIl": "2026-11-22T09:30:15.733Z"
       },
       {
         "chiave": "[99,\"100000099\",\"2026-12-16\",\"F24\",\"F24 del 16/12/2026 per le paghe di 2026-11: Erario 81,96 (1001 IRPEF 81,96) · INPS (DM10) 706,86\",[[\"29\",\"DARE\",81.96,\"\"],[\"28\",\"DARE\",706.86,\"\"],[\"10\",\"AVERE\",788.82,\"\"]]]",
@@ -13254,10 +13341,10 @@
               "dare": 78882,
               "avere": 78882
             },
-            "inviatoIl": "2026-11-06T09:37:50.219Z"
+            "inviatoIl": "2026-11-22T09:30:16.122Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:50.255Z"
+        "completatoIl": "2026-11-22T09:30:16.166Z"
       },
       {
         "chiave": "[100,\"100000100\",\"2026-12-16\",\"F24_IVA\",\"Versamento F24 IVA 2026-11 (scadenza 16/12/2026)\",[[\"25\",\"DARE\",725.56,\"\"],[\"10\",\"AVERE\",725.56,\"\"]]]",
@@ -13303,10 +13390,10 @@
               "dare": 72556,
               "avere": 72556
             },
-            "inviatoIl": "2026-11-06T09:37:50.370Z"
+            "inviatoIl": "2026-11-22T09:30:17.013Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:50.401Z"
+        "completatoIl": "2026-11-22T09:30:17.081Z"
       },
       {
         "chiave": "[101,\"100000101\",\"2026-12-31\",\"PAGHE\",\"PC00_M99_CIPE: paga di 2026-12 — 1 dipendenti\",[[\"80\",\"DARE\",2400,\"\"],[\"81\",\"DARE\",745.92,\"\"],[\"82\",\"DARE\",177.78,\"\"],[\"27\",\"AVERE\",1563.53,\"\"],[\"28\",\"AVERE\",942.48,\"\"],[\"24\",\"AVERE\",36,\"\"],[\"29\",\"AVERE\",615.91,\"\"],[\"31\",\"AVERE\",165.78,\"\"]]]",
@@ -13418,10 +13505,10 @@
               "dare": 332370,
               "avere": 332370
             },
-            "inviatoIl": "2026-11-06T09:37:50.678Z"
+            "inviatoIl": "2026-11-22T09:30:17.553Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:50.755Z"
+        "completatoIl": "2026-11-22T09:30:17.647Z"
       },
       {
         "chiave": "[102,\"100000102\",\"2026-12-31\",\"PAGAMENTO_STIPENDI\",\"Bonifici degli stipendi di 2026-12 (1 dipendenti)\",[[\"27\",\"DARE\",1563.53,\"\"],[\"10\",\"AVERE\",1563.53,\"\"]]]",
@@ -13467,10 +13554,10 @@
               "dare": 156353,
               "avere": 156353
             },
-            "inviatoIl": "2026-11-06T09:37:50.874Z"
+            "inviatoIl": "2026-11-22T09:30:17.791Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:50.904Z"
+        "completatoIl": "2026-11-22T09:30:17.823Z"
       },
       {
         "chiave": "[103,\"100000103\",\"2026-12-31\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Distribuzione PC Italia Spa: 16.470,00 €\",[[\"20\",\"DARE\",16470,\"F100\"],[\"10\",\"AVERE\",16470,\"\"]]]",
@@ -13516,10 +13603,10 @@
               "dare": 1647000,
               "avere": 1647000
             },
-            "inviatoIl": "2026-11-06T09:37:51.016Z"
+            "inviatoIl": "2026-11-22T09:30:17.948Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.053Z"
+        "completatoIl": "2026-11-22T09:30:17.986Z"
       },
       {
         "chiave": "[104,\"100000104\",\"2026-12-31\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Stampa Facile Srl: 1171,20 €\",[[\"20\",\"DARE\",1171.2,\"F200\"],[\"10\",\"AVERE\",1171.2,\"\"]]]",
@@ -13565,10 +13652,10 @@
               "dare": 117120,
               "avere": 117120
             },
-            "inviatoIl": "2026-11-06T09:37:51.173Z"
+            "inviatoIl": "2026-11-22T09:30:18.107Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.208Z"
+        "completatoIl": "2026-11-22T09:30:18.146Z"
       },
       {
         "chiave": "[105,\"100000105\",\"2026-12-31\",\"PAGAMENTO_FORNITORE\",\"F-53 bonifico a Accessori Digitali Srl: 146,40 €\",[[\"20\",\"DARE\",146.4,\"F400\"],[\"10\",\"AVERE\",146.4,\"\"]]]",
@@ -13614,10 +13701,10 @@
               "dare": 14640,
               "avere": 14640
             },
-            "inviatoIl": "2026-11-06T09:37:51.318Z"
+            "inviatoIl": "2026-11-22T09:30:18.274Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.353Z"
+        "completatoIl": "2026-11-22T09:30:18.317Z"
       },
       {
         "chiave": "[106,\"100000106\",\"2026-12-31\",\"INCASSO\",\"Incasso (F-28) Studio Commerciale Aurora — SALDO C100 2026-12-31\",[[\"10\",\"DARE\",15108.48,\"\"],[\"11\",\"AVERE\",15108.48,\"C100\"]]]",
@@ -13663,10 +13750,10 @@
               "dare": 1510848,
               "avere": 1510848
             },
-            "inviatoIl": "2026-11-06T09:37:51.468Z"
+            "inviatoIl": "2026-11-22T09:30:18.433Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.496Z"
+        "completatoIl": "2026-11-22T09:30:18.464Z"
       },
       {
         "chiave": "[107,\"100000107\",\"2026-12-31\",\"INCASSO\",\"Incasso (F-28) Agenzia Viaggi Girasole Srl — SALDO C200 2026-12-31\",[[\"10\",\"DARE\",14164.2,\"\"],[\"11\",\"AVERE\",14164.2,\"C200\"]]]",
@@ -13712,10 +13799,10 @@
               "dare": 1416420,
               "avere": 1416420
             },
-            "inviatoIl": "2026-11-06T09:37:51.606Z"
+            "inviatoIl": "2026-11-22T09:30:18.578Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.635Z"
+        "completatoIl": "2026-11-22T09:30:18.608Z"
       },
       {
         "chiave": "[108,\"100000108\",\"2026-12-31\",\"LIQUIDAZIONE_IVA\",\"Liquidazione IVA 2026-12: a debito 5278,68, a credito 3207,60 → da versare 2071,08 entro il 18/01/2027\",[[\"21\",\"DARE\",5278.68,\"\"],[\"14\",\"AVERE\",3207.6,\"\"],[\"25\",\"AVERE\",2071.08,\"\"]]]",
@@ -13772,10 +13859,10 @@
               "dare": 527868,
               "avere": 527868
             },
-            "inviatoIl": "2026-11-06T09:37:51.762Z"
+            "inviatoIl": "2026-11-22T09:30:18.745Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.799Z"
+        "completatoIl": "2026-11-22T09:30:18.781Z"
       },
       {
         "chiave": "[109,\"100000109\",\"2026-12-31\",\"ASSESTAMENTO\",\"Risconto attivo al 31/12/2026 — polizza POL-DF-5521 (ott 2026 - set 2027): 960,00 × 273 / 365 giorni = 718,03 (periodo 01/10/2026 – 30/09/2027)\",[[\"06\",\"DARE\",718.03,\"\"],[\"83\",\"AVERE\",718.03,\"\"]]]",
@@ -13821,10 +13908,10 @@
               "dare": 71803,
               "avere": 71803
             },
-            "inviatoIl": "2026-11-06T09:37:51.934Z"
+            "inviatoIl": "2026-11-22T09:30:18.925Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:51.965Z"
+        "completatoIl": "2026-11-22T09:30:18.947Z"
       },
       {
         "chiave": "[110,\"100000110\",\"2026-12-31\",\"ASSESTAMENTO\",\"Rateo passivo al 31/12/2026 — affitto dicembre (trimestre dic-feb pagato a fine febbraio): 2700,00 × 31 / 90 giorni = 930,00 (periodo 01/12/2026 – 28/02/2027)\",[[\"86\",\"DARE\",930,\"\"],[\"39\",\"AVERE\",930,\"\"]]]",
@@ -13870,10 +13957,10 @@
               "dare": 93000,
               "avere": 93000
             },
-            "inviatoIl": "2026-11-06T09:37:52.087Z"
+            "inviatoIl": "2026-11-22T09:30:19.087Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:52.118Z"
+        "completatoIl": "2026-11-22T09:30:19.127Z"
       },
       {
         "chiave": "[111,\"100000111\",\"2026-12-31\",\"AMMORTAMENTO\",\"AFAB ammortamento cespiti fino al 31/12/2026: CE-0001 300,00 · CE-0002 100,00\",[[\"50\",\"DARE\",300,\"\"],[\"02\",\"AVERE\",300,\"\"],[\"50\",\"DARE\",100,\"\"],[\"04\",\"AVERE\",100,\"\"]]]",
@@ -13941,10 +14028,10 @@
               "dare": 40000,
               "avere": 40000
             },
-            "inviatoIl": "2026-11-06T09:37:52.274Z"
+            "inviatoIl": "2026-11-22T09:30:19.305Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:52.316Z"
+        "completatoIl": "2026-11-22T09:30:19.359Z"
       },
       {
         "chiave": "[112,\"100000112\",\"2026-12-31\",\"IMPOSTE\",\"Imposte 2026: IRES 24% su 10.619,02 = 2548,56 · IRAP 3.9% su 10.619,02 = 414,14\",[[\"56\",\"DARE\",2548.56,\"\"],[\"23\",\"AVERE\",2548.56,\"\"],[\"52\",\"DARE\",414.14,\"\"],[\"35\",\"AVERE\",414.14,\"\"]]]",
@@ -14012,10 +14099,10 @@
               "dare": 296270,
               "avere": 296270
             },
-            "inviatoIl": "2026-11-06T09:37:52.534Z"
+            "inviatoIl": "2026-11-22T09:30:19.562Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:52.573Z"
+        "completatoIl": "2026-11-22T09:30:19.613Z"
       },
       {
         "chiave": "[113,\"100000113\",\"2026-12-31\",\"EPILOGO\",\"Epilogo 2026: costi e ricavi chiusi nel Conto economico (90)\",[[\"40\",\"DARE\",64312,\"\"],[\"41\",\"AVERE\",38619,\"\"],[\"50\",\"AVERE\",400,\"\"],[\"52\",\"AVERE\",414.14,\"\"],[\"56\",\"AVERE\",2548.56,\"\"],[\"80\",\"AVERE\",7800,\"\"],[\"81\",\"AVERE\",2424.24,\"\"],[\"82\",\"AVERE\",577.77,\"\"],[\"83\",\"AVERE\",241.97,\"\"],[\"86\",\"AVERE\",3630,\"\"],[\"90\",\"AVERE\",7656.32,\"\"]]]",
@@ -14160,10 +14247,10 @@
               "dare": 6431200,
               "avere": 6431200
             },
-            "inviatoIl": "2026-11-06T09:37:52.827Z"
+            "inviatoIl": "2026-11-22T09:30:19.884Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:52.938Z"
+        "completatoIl": "2026-11-22T09:30:19.992Z"
       },
       {
         "chiave": "[114,\"100000114\",\"2026-12-31\",\"RISULTATO\",\"Utile d'esercizio 2026: 7656,32\",[[\"90\",\"DARE\",7656.32,\"\"],[\"32\",\"AVERE\",7656.32,\"\"]]]",
@@ -14209,10 +14296,10 @@
               "dare": 765632,
               "avere": 765632
             },
-            "inviatoIl": "2026-11-06T09:37:52.974Z"
+            "inviatoIl": "2026-11-22T09:30:20.031Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:53.008Z"
+        "completatoIl": "2026-11-22T09:30:20.063Z"
       },
       {
         "chiave": "[115,\"100000115\",\"2026-12-31\",\"CHIUSURA_SP\",\"Chiusura 2026: attività e passività nello Stato patrimoniale finale (91)\",[[\"01\",\"AVERE\",6000,\"\"],[\"02\",\"DARE\",300,\"\"],[\"03\",\"AVERE\",1500,\"\"],[\"04\",\"DARE\",100,\"\"],[\"06\",\"AVERE\",718.03,\"\"],[\"10\",\"AVERE\",32535.23,\"\"],[\"13\",\"AVERE\",5481,\"\"],[\"23\",\"DARE\",2548.56,\"\"],[\"24\",\"DARE\",117,\"\"],[\"25\",\"DARE\",2071.08,\"\"],[\"28\",\"DARE\",942.48,\"\"],[\"29\",\"DARE\",615.91,\"\"],[\"30\",\"DARE\",30000,\"\"],[\"31\",\"DARE\",538.77,\"\"],[\"32\",\"DARE\",7656.32,\"\"],[\"35\",\"DARE\",414.14,\"\"],[\"39\",\"DARE\",930,\"\"],[\"91\",\"DARE\",46234.26,\"\"],[\"91\",\"AVERE\",46234.26,\"\"]]]",
@@ -14445,10 +14532,10 @@
               "dare": 9246852,
               "avere": 9246852
             },
-            "inviatoIl": "2026-11-06T09:37:53.149Z"
+            "inviatoIl": "2026-11-22T09:30:20.265Z"
           }
         ],
-        "completatoIl": "2026-11-06T09:37:53.308Z"
+        "completatoIl": "2026-11-22T09:30:20.431Z"
       }
     ]
   },
@@ -16340,6 +16427,8 @@
       "conto": "83",
       "imponibile": 960,
       "iva": 0,
+      "ivaIndetraibile": 0,
+      "detraibile": 100,
       "totale": 960,
       "testo": "premio annuo polizza incendio e furto del negozio",
       "scadenza": "2026-10-01",
@@ -16354,6 +16443,8 @@
       "conto": "86",
       "imponibile": 2700,
       "iva": 0,
+      "ivaIndetraibile": 0,
+      "detraibile": 100,
       "totale": 2700,
       "testo": "affitto del negozio settembre-novembre (trimestre posticipato)",
       "scadenza": "2026-11-30",
@@ -16362,6 +16453,18 @@
       "contabile": "100000075"
     }
   ],
+  "fin": {
+    "cambiali": [],
+    "assegni": [],
+    "mutui": [],
+    "leasing": [],
+    "parcelle": [],
+    "f24": [],
+    "bolli": [],
+    "svalutazioni": [],
+    "perdite": [],
+    "intra": []
+  },
   "chiusura": {
     "iva": [
       {
@@ -16590,17 +16693,5 @@
       ],
       "avvertenze": []
     }
-  },
-  "fin": {
-    "cambiali": [],
-    "assegni": [],
-    "mutui": [],
-    "leasing": [],
-    "parcelle": [],
-    "f24": [],
-    "bolli": [],
-    "svalutazioni": [],
-    "perdite": [],
-    "intra": []
   }
 }

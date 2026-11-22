@@ -164,6 +164,7 @@ vicino(T.ricaviRettificati, 44773, 'CO-PA ricavi netti dopo rettifiche'); vicino
 const beta = rep.righe.find(x => x.chiave === 'C100'); vicino(beta.mdc2, 6037.36, 'CO-PA MdC II Beta');
 vicino(p.w.COPA.report(S, 'regione').righe.find(x => x.chiave === 'Lazio').trasporti, 225, 'CO-PA per regione: trasporti Lazio');
 p = apri('erp_copa', 'ke30'); ok(/19\.946,00/.test(p.testo()) && /18\.593,81/.test(p.testo()), 'KE30 mostra MdC I e II');
+{ const t = p.testo(); const m = (t.match(/(✓ FI e CO-PA[^.]*|⚠️ FI e CO-PA[^.]*|Nessun ricavo in FI[^.]*)/) || [''])[0]; ok(/Lo stesso margine letto nelle righe FI/.test(t) && /✓ FI e CO-PA/.test(t), 'KE30: margine per centro di profitto letto anche in FI e riconciliato (anche con resi e abbuoni) → ' + m); }
 p.lab.querySelector('#dim').value = 'materiale'; p.lab.querySelector('#dim').dispatchEvent(new p.w.Event('change'));
 ok(/TR-ALTA/.test(p.testo()), 'KE30 per materiale');
 ok(apri('erp_copa', 'ke24').lab.querySelectorAll('tr').length === 7, 'KE24: 6 righe CO-PA');
@@ -261,7 +262,7 @@ p.fai('at', {data: '2027-03-01'}); ok(p.S().wm && p.S().wm.attivo === '2027-03-0
 ok(p.S().wm.carico.length === 14, 'carico iniziale: 14 unità di carico (' + p.S().wm.carico.length + ')');
 p = apri('erp_magazzino', 'mappa'); ok(/01-01-2/.test(p.testo()) && p.lab.querySelectorAll('.ubic[data-u]').length === 41, 'mappa con 41 ubicazioni (con la quarantena Q-ZONE)');
 p.lab.querySelector('[data-u="01-01-2"]').click(); ok(/Ubicazione 01-01-2/.test(p.testo()) && /1000002/.test(p.testo()), 'dettaglio ubicazione 01-01-2');
-p = apri('erp_magazzino', 'etichette'); ok(p.lab.querySelectorAll('.s4-et').length === 41 && p.lab.querySelector('.s4-et svg'), 'etichette con barcode');
+p = apri('erp_magazzino', 'etichette'); ok(p.lab.querySelectorAll('.s4-et').length === 1 && p.lab.querySelector('.s4-et svg') && p.lab.querySelectorAll('#et-codice option').length === 41, 'etichette con barcode: una alla volta, scelta tra 41 ubicazioni');
 p = apri('erp_acquisti', 'ordini'); bene(p.fai('me', {fornitore: 'F100', materiale: 'FERRO', qta: '5000', prezzo: '0,98', data: '2027-03-02'}), 'ME21N marzo');
 p = apri('erp_acquisti', 'entrate'); bene(p.fai('mi', {ordine: x => x, data: '2027-03-03'}), 'MIGO 101 marzo');
 ok(p.S().wm.compiti.filter(t => t.tipo === 'PUTAWAY').map(t => t.a).join() === 'F-02,F-03,F-03,F-04,F-04', 'strategia aggiunta a scorta: ' + p.S().wm.compiti.map(t => t.a).join());

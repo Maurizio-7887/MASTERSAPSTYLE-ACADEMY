@@ -8,6 +8,20 @@
   var etichetta = function (dim, k) { return dim === 'cliente' ? k + ' ' + e(U.nome(S(), k)) : dim === 'profitCenter' && k !== 'NON-ASSEGNATO' ? k + ' ' + e((K.impianto(S()).centri.find(function(c){return c.codice === k;}) || {}).nome || '') : e(k); };
   var PAGINE = {
     ke30: function () {
+      // stesso margine per centro di profitto letto dalle righe FI: deve coincidere con CO-PA (KE30)
+      var fiPc = function () {
+        var anni = {}; S().copa.forEach(function (r) { anni[r.data.slice(0, 4)] = 1; });
+        var anno = per ? per.slice(0, 4) : (Object.keys(anni).sort().pop() || '');
+        var fi = K.fiPerProfitCenter(S(), anno), co = K.report(S(), 'profitCenter', anno ? {dal: anno + '-01-01', al: anno + '-12-31'} : {}).righe;
+        if (!fi.length) return '<p class="lab-nota">Nessun ricavo in FI per l’anno ' + e(anno) + '.</p>';
+        var tornano = fi.every(function (g) { var c = co.find(function (x) { return x.chiave === g.chiave; }) || {mdc2: 0, ricaviRettificati: 0, costoVenduto: 0};
+          return Math.abs(g.ricaviNetti - c.ricaviRettificati) < 0.005 && Math.abs(g.costoVenduto - c.costoVenduto) < 0.005 && Math.abs(g.mdc2 - c.mdc2) < 0.005; });
+        return '<p><b>Lo stesso margine letto nelle righe FI ' + e(anno) + '</b> (ricavi, sconti, trasporti, resi, costo del venduto, differenze di prezzo e provvigioni: il materiale viene dalla fattura o dalla consegna d’origine).</p>' +
+          '<table class="lab-tabella"><thead><tr><th>Centro di profitto</th><th>Ricavi lordi (conto 40)</th><th>Ricavi netti dopo resi e abbuoni</th><th>Costo del venduto</th><th>MdC I</th><th>MdC II</th></tr></thead><tbody>' +
+          fi.map(function (g) { return '<tr><td>' + e(g.chiave) + '</td><td>' + eur(g.ricaviLordi) + '</td><td>' + eur(g.ricaviNetti) + '</td><td>' + eur(g.costoVenduto) + '</td><td>' + eur(g.mdc1) + '</td><td>' + eur(g.mdc2) + '</td></tr>'; }).join('') +
+          '</tbody></table><p class="lab-esito ' + (tornano ? 'ok' : 'ko') + '">' + (tornano ? '✓ FI e CO-PA danno gli stessi ricavi netti, costo del venduto e margini per centro di profitto.' : '⚠️ FI e CO-PA non coincidono per centro di profitto: controlla fatture, consegne e note di credito dell’anno.') + '</p>' +
+          '<p class="lab-nota">I ricavi lordi possono differire da KE30: in FI un reso va sul conto 49 «Resi e abbuoni», in CO-PA riduce i ricavi lordi. I ricavi netti dopo resi e abbuoni e i margini devono invece coincidere. I costi di periodo (personale, affitto, ammortamenti, spese generali) restano sui centri di costo e non sono attribuiti ai centri di profitto: il MdC II non è l’utile.</p>';
+      };
       var dim = radice.dataset.dim || 'cliente', per = radice.dataset.per || '';
       var mesi = [], viste = {};
       S().copa.forEach(function (r) { var m = r.data.slice(0, 7); if (!viste[m]) { viste[m] = 1; mesi.push(m); } });
@@ -20,7 +34,7 @@
         mpc.map(function(m){return '<tr><td>'+e(m)+'</td><td><select data-pc-materiale="'+e(m)+'"><option value="">Non assegnato</option>'+
           pc.centri.map(function(c){return '<option value="'+e(c.codice)+'"'+(pc.materiale[m] === c.codice?' selected':'')+'>'+e(c.codice+' · '+c.nome)+'</option>';}).join('')+
           '</select></td></tr>';}).join('')+'</tbody></table>'+
-        '<p class="lab-nota"><b>Limite contabile:</b> questa è una prima dimensione CO-PA per ricavi e costo del venduto. L’imputazione dei costi FI primari, dei ribaltamenti CO e la riconciliazione completa per profit center devono ancora essere integrate nel giornale universale.</p></details>';
+        fiPc() + '</details>';
       var riga = function (nomeR, campo, segno, cls) { return {cls: cls || '', celle: [nomeR].concat(col.map(function (x) { return (segno && x[campo] ? '−' : '') + eur(Math.abs(x[campo]) * (segno ? 1 : Math.sign(x[campo]) || 1)); }))}; };
       var righe = [riga('Quantità (pz)', 'qta'), riga('Ricavi lordi (PR00)', 'ricaviLordi'), riga('Sconti quantità (ZSCA)', 'scontiQuantita', true), riga('Sconti cliente (K007)', 'scontiCliente', true),
         riga('Trasporti addebitati (KF00)', 'trasporti'), riga('= Ricavi netti', 'ricaviNetti', false, 'tot'), riga('Resi e abbuoni (G2)', 'abbuoni'), riga('= Ricavi netti dopo rettifiche', 'ricaviRettificati', false, 'tot'),

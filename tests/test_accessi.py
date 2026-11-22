@@ -189,7 +189,7 @@ ok(r.status_code == 302 and sync(d.get("/vuoto/contabilita/moduli").get_data(as_
 ok(a.get("/docente/passa").status_code == 403, "l'allievo non può passare lavori")
 html = a.get("/vuoto/contabilita/fi-gl").get_data(as_text=True)
 ok("guidato-dic-2026.js" in html and "pannello.js" in html, "finestra «Esercizio passo passo» nelle pagine del simulatore")
-ok("pannello.js" in a.get("/completo/").get_data(as_text=True), "finestra anche nella versione completa")
+ok("pannello.js" in a.get("/completo/contabilita/fi-gl").get_data(as_text=True) and "pannello.js" not in a.get("/completo/").get_data(as_text=True), "finestra anche nella versione completa, non sul Launchpad")
 
 # ── laboratori: lavoro salvato nel proprio slot, consegna e report ──
 for slot, es, file, attesi in [("lab-hmlv", "hmlv-disaccoppiamento", "lab-hmlv-finale.json", 8), ("lab-rem", "rem-trattore", "lab-rem-finale.json", 8),

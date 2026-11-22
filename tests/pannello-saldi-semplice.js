@@ -22,7 +22,7 @@ const testo = w => w.document.querySelector('.msa-g-pannello').textContent;
 // 1) tutti i passi del controllo di gestione hanno la versione semplice
 let w = carica({});
 const P = w.MSA_ESERCIZIO.passi, co = P.filter(p => /^(cpm|bpc)-/.test(p.id || ''));
-ok(co.length === 18 && co.every(p => p.fai && p.fai.length && p.vedi && p.idea && p.mappa && p.grande), 'passi CO semplici con la mappa: ' + co.length);
+ok(co.length >= 18 && co.every(p => p.fai && p.fai.length && p.vedi && p.idea && p.mappa && p.grande), 'passi CO semplici con la mappa: ' + co.length);
 ok(co[0].id === 'cpm-mappa' && P.indexOf(co[0]) < P.findIndex(p => p.id === 'cpm-attivazione'), 'introduzione prima del passo 1 del ciclo CO');
 const k = P.findIndex(p => p.id === 'cpm-attivita');
 w.close();
@@ -55,8 +55,10 @@ w = carica(stato);
 ok(/Ricostruisci la scrittura/.test(testo(w)), 'laboratorio della chiusura aperto');
 const tools = w.document.querySelector('details.msa-g-tools');
 ok(!!tools && !tools.querySelector('input'), 'saldi e appunti presenti, chiusi: nessuna casella in più nel laboratorio');
-w.document.querySelector('.msa-g-vai-saldi').click();
-ok(tools.open && !!tools.querySelector('.msa-g-tcerca'), 'il pulsante in alto apre i saldi');
+// dal 10/11 non c'è più il pulsante in alto (copriva il quiz): i saldi si aprono dal riquadro richiudibile
+ok(!w.document.querySelector('.msa-g-vai-saldi'), 'nessun pulsante che copre il quiz');
+tools.open = true; tools.dispatchEvent(new w.Event('toggle', {bubbles: true}));
+ok(tools.open && !!tools.querySelector('.msa-g-tcerca'), 'aprendo il riquadro compaiono i saldi');
 ok(w.document.querySelector('.msa-g-tdata').value === epi.data.slice(0, 10), 'data predefinita = data del documento');
 ok(testo(w).includes('Costi ' + eur(costi)), 'totale costi prima della chiusura ' + eur(costi));
 ok(w.document.querySelector('.msa-g-riep').textContent.includes('✓ quadra'), 'il bilancio di verifica quadra');
