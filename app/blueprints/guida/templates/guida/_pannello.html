@@ -20,6 +20,10 @@
 {% if guida.esercizio == 'dicembre-magazzino-30' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-magazzino.js') }}"></script>{% endif %}
 <script src="{{ url_for('guida.static', filename='esercizi/' ~ guida.esercizio ~ '.js') }}"></script>
 {% if guida.esercizio == 'dicembre-wms' %}<script src="{{ url_for('guida.static', filename='esercizi/dicembre-wms-semplice.js') }}"></script>{% endif %}
+{# «cosa stiamo facendo»: spiegazione scritta a mano per ogni passo degli esercizi che non l'avevano #}
+{% set spieg = {'s4-integrato':'s4-integrato','guidato-dic-2026':'guidato-dic-2026','executive-assistant':'executive-assistant','hmlv-disaccoppiamento':'laboratori-produzione','rem-trattore':'laboratori-produzione','pianificazione-forecast':'pianificazione-forecast'} %}
+{% if guida.esercizio in spieg %}<script src="{{ url_for('guida.static', filename='esercizi/spiegazioni/' ~ spieg[guida.esercizio] ~ '.js') }}"></script>
+<script src="{{ url_for('guida.static', filename='esercizi/spiegazioni/applica.js') }}"></script>{% endif %}
 {# luce su OGNI passo: dove l'esercizio non ha i punti scritti a mano, li crea dai campi del passo #}
 <script src="{{ url_for('guida.static', filename='esercizi/luce-automatica.js') }}"></script>
 <script src="{{ url_for('guida.static', filename='ragioneria.js') }}"></script>
