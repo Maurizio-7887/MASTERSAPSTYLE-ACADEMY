@@ -52,19 +52,18 @@ f('kp06-k86').value = '1200'; f('kp06-k86').dispatchEvent(new w.Event('input', {
 ok(brilla()[0].id === 'kp06-k86', 'valore sbagliato: la casella continua a brillare');
 f('kp06-k86').value = '12.000,00'; f('kp06-k86').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
 ok(brilla()[0].id === 'kp06-k50', 'formato italiano 12.000,00 riconosciuto: brilla la classe 50');
-// la nuvoletta sparisce subito quando si scrive nel punto, e quella del punto successivo non compare all'istante
+// la nuvoletta RESTA mentre si scrive (ripete il suggeritore: cosa stiamo facendo, valore, perché) e passa da sola al punto dopo
 {
   const bl = w.document.getElementById('msa-g-bolla');
   ok(!bl.hidden && /2900/.test(bl.textContent), 'nuvoletta del punto 50 visibile');
-  f('kp06-k50').value = '29'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true}));
-  ok(bl.hidden, 'appena scrivo nel punto la nuvoletta sparisce (anche se il valore non è ancora giusto)');
-  giro(); ok(bl.hidden && brilla()[0].id === 'kp06-k50', 'resta nascosta per quel punto, il bordo continua a brillare');
-  f('kp06-k50').value = '2900'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true}));
-  ok(bl.hidden, 'valore giusto: la nuvoletta non ricompare e il punto successivo parte con ritardo (' + (brilla()[0] && brilla()[0].id) + ')');
+  ok(/COSA STIAMO FACENDO/.test(bl.textContent) && /ORA TOCCA A TE/.test(bl.textContent), 'la nuvoletta ripete il suggeritore e dice cosa stiamo facendo');
+  f('kp06-k50').value = '29'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
+  ok(!bl.hidden && /2900/.test(bl.textContent) && brilla()[0].id === 'kp06-k50', 'mentre scrivo la nuvoletta resta e la casella continua a brillare');
+  f('kp06-k50').value = '2900'; f('kp06-k50').dispatchEvent(new w.Event('input', {bubbles: true})); giro();
   f('kp06-k54').value = ''; giro();
-  ok(!bl.hidden && /3100/.test(bl.textContent), 'dopo un attimo compare la nuvoletta del punto 54');
+  ok(!bl.hidden && /3100/.test(bl.textContent), 'valore giusto: la nuvoletta passa al punto 54');
   f('kp06-k54').dispatchEvent(new w.KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
-  ok(bl.hidden, 'Invio: la nuvoletta sparisce subito');
+  ok(!bl.hidden, 'Invio: la nuvoletta resta accanto alla casella');
   // suggeritore spento dal pulsante: niente bordo, niente nuvoletta, e si riaccende
   w.document.querySelector('.msa-g-sugg-off').click(); giro();
   ok(brilla().length === 0 && bl.hidden && w.localStorage.getItem('msa-g-suggeritore') === 'no' && w.document.querySelector('.msa-g-sugg-on'), 'suggeritore spento: nessun bordo né nuvoletta, pulsante per riaccenderlo');

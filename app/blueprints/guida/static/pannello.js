@@ -858,10 +858,27 @@
   var firmaPunti = '', ultimoPunto = '', bolla = document.createElement('div');
   // Suggeritore giallo: acceso di default; chi non ne ha bisogno lo spegne (resta spento finché non lo riaccende).
   var SUGG = 'msa-g-suggeritore', suggSpento = function () { return ls(SUGG) === 'no'; };
-  // la nuvoletta sparisce appena l'allievo scrive nel punto indicato (o preme Invio/Tab/il pulsante) e non ricompare per quel punto;
-  // quella del punto successivo arriva dopo un attimo, per non coprire subito gli altri campi
-  var soppressa = '', mostraDopo = 0, chiaveCorrente = '';
-  function nascondiBolla() { soppressa = chiaveCorrente; bolla.hidden = true; }
+  // La nuvoletta RESTA accanto alla casella che brilla anche mentre l'allievo scrive (non la copre: si sposta sopra,
+  // sotto o di lato). Quella del punto successivo arriva dopo un attimo, il tempo che la pagina scorra sul nuovo punto.
+  var mostraDopo = 0, chiaveCorrente = '', soppressa = '';   // soppressa: non più usata per nascondere, resta per compatibilità
+  function nascondiBolla() { if (tickPunti.el) posizionaBolla(tickPunti.el); }   // compatibilità: ora la si riposiziona soltanto
+  // Contenuto della nuvoletta = COPIA del suggeritore «Ora tocca a te» del pannello, con in testa che cosa stiamo facendo.
+  function cortoB(t, n) { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; t = t.slice(0, n - 1); return t.replace(/\s+\S*$/, '') + '…'; }
+  function contenutoBolla(p, box) {
+    var stiamo = p.grande && !GENERICO.test(p.grande) ? p.grande : (p.perche || p.attesa || '');
+    var h = '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · PASSO ' + (pos + 1) + ' DI ' + N + '</span><b>' + esc(p.titolo || '') + '</b>' +
+      (stiamo ? '<em>' + esc(cortoB(stiamo, 260)) + '</em>' : '') + '</div>';
+    if (box) {
+      var cl = box.cloneNode(true);
+      [].forEach.call(cl.querySelectorAll('.msa-g-sugg-off,details,.msa-g-letto,.msa-g-salta'), function (x) { x.parentNode.removeChild(x); });
+      [].forEach.call(cl.querySelectorAll('button'), function (b) {   // nella nuvoletta i pulsanti non servono: il valore diventa testo evidenziato
+        var s = document.createElement('code'); s.className = 'msa-gb-val'; s.textContent = b.textContent; b.parentNode.replaceChild(s, b);
+      });
+      [].forEach.call(cl.querySelectorAll('[id]'), function (x) { x.removeAttribute('id'); });
+      h += '<div class="msa-gb-ora">' + cl.innerHTML + '</div>';
+    }
+    return h;
+  }
   bolla.id = 'msa-g-bolla'; bolla.hidden = true; (document.body || document.documentElement).appendChild(bolla);
   var salta = {}, clic = {};
   function chiaveP(p, k) { return E.codice + '|' + (p.id || p.titolo) + '|' + k; }
@@ -1007,15 +1024,24 @@
     var a = document.querySelectorAll('.msa-g-brilla'); for (var i = 0; i < a.length; i++) a[i].classList.remove('msa-g-brilla');
     bolla.hidden = true; ultimoPunto = '';
   }
+  // Posizione della nuvoletta: sotto la casella, altrimenti sopra, altrimenti a destra o a sinistra: MAI sopra la casella che brilla
+  // e mai sotto il pannello della guida. Se proprio non c'è spazio va in basso nello schermo.
   function posizionaBolla(el) {
     if (!el || !document.body.contains(el) || bolla.hidden) return;
-    var r = el.getBoundingClientRect(), bw = Math.min(330, window.innerWidth - 16), bh = bolla.offsetHeight || 70;
+    var W = window.innerWidth, H = window.innerHeight, limite = W - (pannello.hidden ? 8 : 400);
+    var bw = Math.max(240, Math.min(380, limite - 8, W - 16));
     bolla.style.width = bw + 'px';
-    var sotto = r.bottom + bh + 20 < window.innerHeight, sopra = !sotto && r.top - bh - 12 > 56, top = sopra ? r.top - bh - 12 : Math.min(r.bottom + 12, window.innerHeight - bh - 8);
-    var maxL = window.innerWidth - bw - (pannello.hidden ? 8 : 400);
-    bolla.style.top = Math.max(8, top) + 'px'; bolla.style.left = Math.max(8, Math.min(r.left, maxL)) + 'px';
-    bolla.className = sopra ? 'sopra' : (sotto ? 'sotto' : '');
-    bolla.style.setProperty('--freccia', Math.max(14, Math.min(bw - 24, r.left + r.width / 2 - parseFloat(bolla.style.left))) + 'px');
+    var r = el.getBoundingClientRect(), bh = bolla.offsetHeight || 140, gap = 12, top, left, verso;
+    var dentroV = function (t) { return Math.max(8, Math.min(t, H - bh - 8)); };
+    if (r.bottom + gap + bh <= H - 8) { verso = 'sotto'; top = r.bottom + gap; left = Math.max(8, Math.min(r.left, limite - bw)); }
+    else if (r.top - gap - bh >= 8) { verso = 'sopra'; top = r.top - gap - bh; left = Math.max(8, Math.min(r.left, limite - bw)); }
+    else if (r.right + gap + bw <= limite) { verso = 'destra'; left = r.right + gap; top = dentroV(r.top + r.height / 2 - bh / 2); }
+    else if (r.left - gap - bw >= 8) { verso = 'sinistra'; left = r.left - gap - bw; top = dentroV(r.top + r.height / 2 - bh / 2); }
+    else { verso = ''; left = Math.max(8, Math.min(r.left, limite - bw)); top = dentroV(H - bh - 8); }
+    bolla.style.top = top + 'px'; bolla.style.left = left + 'px';
+    ['sopra', 'sotto', 'destra', 'sinistra'].forEach(function (v) { bolla.classList.toggle(v, v === verso); });   // non toccare «velata»
+    bolla.style.setProperty('--freccia', Math.max(14, Math.min(bw - 24, r.left + r.width / 2 - left)) + 'px');
+    bolla.style.setProperty('--frecciaY', Math.max(12, Math.min(bh - 24, r.top + r.height / 2 - top - 8)) + 'px');
   }
   function segnaGruppiSalvati(elenco) {
     var salvatoDopo = false;
@@ -1126,14 +1152,16 @@
     }
     // evidenziazione sulla pagina
     var chiave = pos + '|' + (ora ? ora.k : 'fine');
-    if (chiave !== chiaveCorrente) { chiaveCorrente = chiave; mostraDopo = Date.now() + 900; }
+    if (chiave !== chiaveCorrente) { chiaveCorrente = chiave; mostraDopo = Date.now() + 350; }
     var vecchi = document.querySelectorAll('.msa-g-brilla');
     for (var j = 0; j < vecchi.length; j++) if (!ora || vecchi[j] !== ora.el) vecchi[j].classList.remove('msa-g-brilla');
     if (ora && ora.el) {
       ora.el.classList.add('msa-g-brilla');
-      var d2 = ora.d, breve = d2.breve || (function (t) { var f = t.split(/(?<=[.!?])\s/)[0]; return f.length > 130 ? f.slice(0, 127).replace(/\s+\S*$/, '') + '…' : f; })(d2.serve || '');
-      bolla.innerHTML = '<b>' + tipoLabel(d2) + (d2.valore !== undefined && d2.t !== 'pulsante' ? ' <code>' + esc(vis(d2)) + '</code>' : (d2.nome ? ' «' + esc(d2.nome) + '»' : '')) + '</b><span>' + esc(breve) + '</span>';
-      bolla.hidden = soppressa === chiave || Date.now() < mostraDopo;
+      var d2 = ora.d;
+      // la nuvoletta ripete il suggeritore «Ora tocca a te» (azione, valore, perché, attenzione, correzioni) + che cosa stiamo facendo
+      var htmlB = contenutoBolla(p, c.querySelector('.msa-g-ora'));
+      if (htmlB !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlB; bolla.setAttribute('data-firma', htmlB); }
+      bolla.hidden = Date.now() < mostraDopo;
       if (chiave !== ultimoPunto || forza) {
         ultimoPunto = chiave;
         try { ora.el.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch (e) { /* vecchio browser */ }
@@ -1179,6 +1207,12 @@
   document.addEventListener('mousedown', function (e) {
     if (tickPunti.el && !radice.contains(e.target) && tickPunti.el.contains && tickPunti.el.contains(e.target)) nascondiBolla();   // clic sul punto che brilla (pulsante o campo)
   }, true);
+  // la nuvoletta non deve mai nascondere niente: se il mouse ci passa sopra, o l'allievo entra in una casella che sta sotto,
+  // diventa quasi trasparente (e i clic la attraversano sempre: pointer-events none)
+  function sottoBolla(r) { if (bolla.hidden) return false; var b = bolla.getBoundingClientRect(); return r.left < b.right && r.right > b.left && r.top < b.bottom && r.bottom > b.top; }
+  function velaBolla(si) { bolla.classList.toggle('velata', !!si); }
+  document.addEventListener('mousemove', function (e) { if (!bolla.hidden) velaBolla(sottoBolla({left: e.clientX, right: e.clientX + 1, top: e.clientY, bottom: e.clientY + 1})); }, true);
+  document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.getBoundingClientRect && !radice.contains(t) && t !== tickPunti.el) velaBolla(sottoBolla(t.getBoundingClientRect())); else velaBolla(false); }, true);
   window.addEventListener('scroll', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); }, true);
   window.addEventListener('resize', function () { if (tickPunti.el) posizionaBolla(tickPunti.el); });
   setInterval(function () { tickPunti(); }, 450);

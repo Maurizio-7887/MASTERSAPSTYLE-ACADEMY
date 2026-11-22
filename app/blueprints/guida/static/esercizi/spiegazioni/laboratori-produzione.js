@@ -1,0 +1,62 @@
+/* «Cosa stiamo facendo e perché» per i laboratori di produzione:
+   «Alta varietà — semilavorati a scorta e disaccoppiamento» (36 passi) e «Produzione ripetitiva — modello trattore» (17 passi). */
+(function () {
+  var SP = window.MSA_SPIEGAZIONI = window.MSA_SPIEGAZIONI || {};
+  SP['hmlv-disaccoppiamento'] = {
+    'Guarda le tre transenne e il telaio comune': 'CAPIAMO L’IDEA DEL LABORATORIO. Tre transenne diverse hanno lo stesso telaio: se il telaio lo teniamo pronto a scaffale, ogni transenna si assembla in poco tempo quando arriva l’ordine.',
+    'Entrata del ferro': 'ARRIVA IL FERRO PER TUTTO IL MESE. 5.500 kg entrano a magazzino a costo standard: sarà il materiale dei telai.',
+    'Prova: il telaio non si produce senza un ordine sopra': 'VEDIAMO LA REGOLA DI PARTENZA. Così com’è, il telaio si produce solo se lo chiede un ordine del livello sopra: il sistema rifiuta. Va cambiata la strategia.',
+    'Strategie: telaio a scorta (70), transenne su ordine (50)': 'CAMBIAMO STRATEGIA: TELAIO A SCORTA, TRANSENNA SU ORDINE. Il telaio si prepara in anticipo (strategia 70); la transenna finita si assembla solo quando un cliente la chiede (strategia 50).',
+    'Prova: la transenna non si assembla senza cliente': 'VERIFICHIAMO LA NUOVA REGOLA. Senza ordine cliente la transenna non si assembla: è proprio quello che volevamo.',
+    'CO01: 600 telai SL-PIEGA a scorta': 'PRODUCIAMO I TELAI A SCORTA. 600 telai a 20,20 € l’uno: ora è permesso, perché la strategia del telaio è «a scorta».',
+    'CO01: 600 SL-TAGLIO per il telaio': 'IL TELAIO CHIEDE I PEZZI TAGLIATI. Il taglio resta «su fabbisogno»: nasce perché lo chiede l’ordine del telaio.',
+    '261: 4.800 kg di ferro al taglio': 'PRELEVIAMO IL FERRO PER IL TAGLIO. 4.800 kg diventano costo dell’ordine di taglio.',
+    'CO11N: taglio 160 h (standard 150)': 'DICHIARIAMO LE ORE VERE DEL TAGLIO. 160 ore invece di 150: 10 ore in più diventeranno una varianza.',
+    '101: 600 SL-TAGLIO a magazzino': 'I PEZZI TAGLIATI ENTRANO A MAGAZZINO. L’ordine di taglio è completato.',
+    '261: 600 SL-TAGLIO al telaio': 'I PEZZI TAGLIATI PASSANO ALLA PIEGATURA. Il loro valore si sposta sull’ordine del telaio.',
+    'CO11N: piegatura 115 h (standard 120)': 'ORE DELLA PIEGATURA: 115 invece di 120. Qui abbiamo risparmiato: sarà una varianza favorevole.',
+    '101 parziale: 400 telai': 'ENTRANO I PRIMI 400 TELAI. Gli altri 200 sono ancora in lavorazione: l’ordine è consegnato solo in parte.',
+    'CO88: chiusura di novembre': 'CHIUDIAMO NOVEMBRE. Il telaio non è finito: il suo costo non ancora consegnato resta come semilavorato (WIP 3.900 €). Il taglio è finito: la sua varianza (+280 €) va a conto economico.',
+    'Confronto: la stessa produzione come «commessa lunga»': 'CONFRONTIAMO CON UNA COMMESSA LUNGA. Producendo per livelli il WIP resta piccolo; con una commessa unica i costi resterebbero fermi mesi in attesa dei clienti.',
+    '101: gli ultimi 200 telai': 'ENTRANO GLI ULTIMI 200 TELAI. Ora 600 telai sono pronti a scaffale, in attesa degli ordini.',
+    'VA01: tre ordini cliente': 'ARRIVANO TRE ORDINI DIVERSI. Beta, Delta e il Comune chiedono tre transenne diverse: grazie ai telai pronti le assembleremo in pochi giorni.',
+    'CO01: ordine di assemblaggio TR-STD': 'ASSEMBLIAMO LA TRANSENNA STANDARD. Ora il sistema lo accetta: c’è un ordine cliente dietro.',
+    '261: preleva 300 SL-PIEGA dallo scaffale': 'PRENDIAMO I TELAI GIÀ PRONTI. 300 telai passano dallo scaffale all’ordine di assemblaggio.',
+    'CO11N: saldatura 126 h': 'SALDATURA DELLA TR-STD: 126 ore invece di 120, una piccola inefficienza.',
+    '101: entrata 300 TR-STD': 'LE 300 TRANSENNE STANDARD SONO FINITE e pronte per Beta.',
+    'CO01: ordine di assemblaggio TR-ALTA': 'ASSEMBLIAMO LA TRANSENNA ALTA per Delta.',
+    '261: preleva 150 SL-PIEGA dallo scaffale e 300 kg di ferro': 'TELAIO PIÙ FERRO PER LA PROLUNGA. La transenna alta usa il telaio comune e in più 2 kg di ferro a pezzo.',
+    'CO11N: saldatura 75 h': 'SALDATURA DELLA TR-ALTA: esattamente lo standard, nessuna varianza.',
+    '101: entrata 150 TR-ALTA': 'LE 150 TRANSENNE ALTE SONO FINITE.',
+    'CO01: ordine di assemblaggio TR-PED': 'ASSEMBLIAMO LA TRANSENNA PEDONALE per il Comune.',
+    '261: preleva 100 SL-PIEGA dallo scaffale e 100 kg di ferro': 'TELAIO PIÙ 1 KG DI FERRO A PEZZO per la transenna pedonale.',
+    'CO11N: saldatura 28 h': 'SALDATURA DELLA TR-PED: 28 ore invece di 30, un risparmio.',
+    '101: entrata 100 TR-PED': 'LE 100 TRANSENNE PEDONALI SONO FINITE.',
+    '601: consegna ai tre clienti': 'CONSEGNIAMO AI TRE CLIENTI. Esce la merce e nasce il costo del venduto. Guarda il lead time: dall’ordine alla consegna in pochi giorni, grazie ai telai a scorta.',
+    'TECO degli ordini completati': 'CHIUDIAMO TECNICAMENTE GLI ORDINI FINITI: non riceveranno più costi.',
+    'CO88: chiusura di dicembre': 'CHIUDIAMO DICEMBRE. Il WIP di novembre si storna (il telaio ora è finito) e le varianze di ogni ordine vanno a conto economico: 252 € in tutto.',
+    'Cruscotto: anzianità, WIP in giorni, copertura': 'LEGGIAMO I NUMERI DELLA PRODUZIONE. Nessun ordine aperto, 50 telai rimasti, varianze leggibili ordine per ordine.',
+    'Buffer DDMRP del telaio': 'CALCOLIAMO LA SCORTA GIUSTA DEL TELAIO. Il buffer DDMRP ha tre zone (rossa, gialla, verde): con 50 telai siamo in rosso, bisogna riordinare.',
+    'CO01: rifornisci il buffer con 675 telai': 'RIFORNIAMO LA SCORTA. Con 675 telai in produzione il buffer torna verde: siamo pronti per i prossimi ordini.',
+    'Consegna il laboratorio al docente': 'CONSEGNIAMO IL LABORATORIO di alta varietà al docente.'
+  };
+  SP['rem-trattore'] = {
+    'Perché la «ripetitiva»': 'CAPIAMO LA PRODUZIONE RIPETITIVA. Come per i trattori: pochi modelli, grandi volumi, una linea sempre uguale. Non si controlla ordine per ordine, ma mese per mese.',
+    'Budget 2027: 4.000 transenne': 'PIANIFICHIAMO L’ANNO: 4.000 transenne divise tra i tre modelli. Il piano mensile dice alla linea quanto produrre ogni mese.',
+    'Versioni di produzione sulla linea L1': 'DICIAMO COME E DOVE SI PRODUCE OGNI MODELLO. Linea L1, profilo ripetitivo, punto di conteggio alla piegatura. È anagrafica: nessuna scrittura.',
+    'Tre collettori costi di prodotto (KKF6N)': 'CREIAMO I «SECCHI» DEI COSTI. Invece di un ordine per ogni lotto, un collettore per prodotto raccoglie tutti i costi del mese. Si crea una volta e resta aperto.',
+    'Entrata del ferro di gennaio': 'ARRIVA IL FERRO DI GENNAIO: 3.500 kg a magazzino.',
+    'MFBF del 15/01: 80 TR-STD · 50 TR-ALTA · 30 TR-PED': 'DICHIARIAMO LA PRODUZIONE A CONSUNTIVO. Con una sola conferma il sistema scarica ferro e ore e carica le transenne finite: niente ordini, niente prelievi separati.',
+    'MFBF del 31/01: 85 TR-STD · 48 TR-ALTA · 37 TR-PED': 'SECONDA CONFERMA DI GENNAIO. Stesso gesto: il collettore raccoglie consumi e ore del periodo.',
+    '20 TR-STD fermi al punto di conteggio': 'A FINE MESE 20 TRANSENNE SONO A METÀ LINEA. Confermiamo fino alla piegatura: ferro e ore sono consumati, ma il prodotto finito ancora non c’è. Resteranno come WIP.',
+    'Scarto: 3 TR-STD rovinati in saldatura': 'REGISTRIAMO LO SCARTO. Materiale e ore consumati senza prodotto: 94,20 € resteranno come varianza del mese.',
+    'Sfrido: 40 kg di ferro in più sulle prolunghe': 'REGISTRIAMO LO SFRIDO. 40 kg di ferro in più sulle transenne alte: anche questo diventerà varianza.',
+    'Chiusura di gennaio: WIP al target e varianze di periodo': 'CHIUDIAMO GENNAIO. I 20 telai a metà diventano WIP (404 €); scarto e sfrido diventano varianze di periodo.',
+    'Entrata del ferro di febbraio': 'ARRIVA IL FERRO DI FEBBRAIO: 3.000 kg.',
+    'Completa i 20 telai fermi in linea': 'FINIAMO LE 20 TRANSENNE RIMASTE A METÀ. Serve solo la saldatura: entrano a magazzino come prodotto finito.',
+    'MFBF del 20/02: 150 TR-STD · 90 TR-ALTA · 60 TR-PED': 'DICHIARIAMO LA PRODUZIONE DI FEBBRAIO, tutta in una volta.',
+    'Chiusura di febbraio': 'CHIUDIAMO FEBBRAIO. Il WIP di gennaio si storna e le varianze sono a zero: un mese senza sprechi.',
+    'Cruscotto: trattori contro alta varietà': 'CONFRONTIAMO I DUE MODI DI PRODURRE. Con pochi modelli la ripetitiva dà varianze stabili e confrontabili; con migliaia di codici i collettori sarebbero quasi vuoti.',
+    'Consegna il laboratorio al docente': 'CONSEGNIAMO IL LABORATORIO di produzione ripetitiva.'
+  };
+})();
