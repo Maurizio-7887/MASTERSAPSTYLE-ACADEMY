@@ -66,7 +66,7 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 | 3 | Laboratorio 0 e Blocco 2 (file HTML Firenze) | ✅ | Luce, nuvoletta, pannello docente | — | — | — |
 | 4 | MasterExecutive (`MASTEREXECUTIVE-ASSISTANT`) | 🟡 | Laboratorio documenti commerciali: luce + nuvoletta fatte (PR #11). Virgilio dice cosa fare | 9 simulatori (fattura, protocollo, prima nota, agenda, email, verbale, evento, accessi, documenti commerciali) senza passi: vanno scritti i passi per ogni caso; in modalità esame la guida deve restare spenta | 1–2 sessioni | **1** (allievi Regione Umbria) |
 | 5 | MasterPayroll UF4 (`MASTERPAYROLL-ACADEMY`) | 🟡 | 2 esercizi guidati, 75 passi con caselle (`passi` con `campi`) | Luce + nuvoletta + spiegazioni | 1 sessione | **2** |
-| 6 | MasterSupplyChain (`MASTERSUPPLYCHAIN-ACADEMY`) | 🟡 | Esercitazione «30 giorni» con finestrella guida (`app/scm/guida.py`, ~20 passi) | Luce + nuvoletta; passi dentro le pagine del simulatore | 1 sessione | **3** |
+| 6 | MasterSupplyChain (`MASTERSUPPLYCHAIN-ACADEMY`) | ✅ | Esercitazione «30 giorni», 20 passi: «cosa stiamo facendo» + azione che brilla una alla volta + nuvoletta (PR #4) | Merge e controllo del deploy | — | — |
 | 7 | MASTER-PROJECT (`MASTER-PROJECT`) | ✅ | Tutor con 19 passi: luce automatica + nuvoletta + spiegazioni (PR #11, pubblicato) | — | — | — |
 | 8 | MasterLedger Academy (`MasterLedger-Academy`) | 🔴 | 299 blocchi in 16 percorsi; esercizio 2026/2027; laboratori automotive (14 pagine), BPC (9), chiusura (7), libro (7), qualità (5), autoimpiego, prova | Guida passo passo da scrivere; partire da ragioneria base e avanzato | 3–4 sessioni | **5** |
 | 9 | MASTER-ACADEMY (`MASTER-ACADEMY`) | 🔴 | 5 schede di esercitazione (mese di Ferro & Transenne) su 5 programmi collegati | Passi con luce dentro i 5 programmi | 2 sessioni | 6 |
@@ -93,8 +93,9 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 - [ ] Prova del robot · test · deploy
 
 ### 6 · MasterSupplyChain
-- [ ] Luce + nuvoletta sui passi di `app/scm/guida.py`
-- [ ] Prova del robot · test · deploy
+- [x] Luce + nuvoletta sui passi di `app/scm/guida.py` (pulsanti dalle parole tra «…»; azioni una alla volta)
+- [x] Test (334 passano) · prova nel browser passi 1–6
+- [ ] Merge della PR #4 e controllo del deploy
 
 ### 7 · MASTER-PROJECT
 - [x] Luce automatica (prima solo con «Mostrami dove») + nuvoletta sui 19 passi
