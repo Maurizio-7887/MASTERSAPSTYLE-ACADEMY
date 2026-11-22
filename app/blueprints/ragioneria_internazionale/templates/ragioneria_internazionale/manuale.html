@@ -1,0 +1,14 @@
+{% extends "ragioneria_internazionale/_modulo.html" %}
+{% block pagina %}
+<section class="ri-card ri-man">
+<h2>Manuale — Modulo {{ n }}</h2>
+<p class="ri-nd">Testo della seconda edizione riveduta e ampliata del manuale (100 ore). Le figure restano nel documento Word.</p>
+{% for b in blocchi %}
+  {% if b.type == 'h' %}<h3>{{ b.text }}</h3>
+  {% elif b.type == 'table' %}<table>{% for riga in b.rows %}<tr>{% for c in riga %}<td{% if loop.index0 > 0 and c and (c[0] in '0123456789−-+') %} class="n"{% endif %}>{{ c }}</td>{% endfor %}</tr>{% endfor %}</table>
+  {% else %}<p>{% for riga in b.text.split('\n') %}{{ riga }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
+{% endfor %}
+<p><a class="msa-btn" href="{{ url_for('ragioneria_internazionale.laboratorio', n=n) }}">Passa al laboratorio →</a></p>
+</section>
+{% endblock %}
+{% block tutor %}<ol><li>Studia definizioni, scritture e tabelle.</li><li>I numeri del laboratorio e del giornale sono quelli del manuale.</li><li>Quando hai capito, passa al laboratorio.</li></ol>{% endblock %}

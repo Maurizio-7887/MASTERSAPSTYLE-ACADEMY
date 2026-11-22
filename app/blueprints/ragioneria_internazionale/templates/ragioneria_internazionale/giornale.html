@@ -1,0 +1,38 @@
+{% extends "ragioneria_internazionale/_modulo.html" %}
+{% block pagina %}
+<section class="ri-card">
+<h2>Libro giornale — registra le scritture del modulo</h2>
+<p>Scritture del manuale da registrare in questo modulo: <b>{{ r.scritture_tot }}</b> · già riconosciute: <b>{{ r.scritture }}</b>. Il server confronta conti, lati Dare/Avere, importi e ledger. Non registra nulla su SAP né nel simulatore ERP.</p>
+<form method="post">
+<input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<div class="ri-campi">
+<div><label>Data registrazione</label><input type="date" name="data" value="2027-12-31"></div>
+<div><label>Ledger</label><select name="ledger" style="width:100%;padding:8px;border:1px solid #c6d5e0;border-radius:8px"><option value="0L">0L — OIC</option><option value="2L">2L — IFRS</option></select></div>
+<div><label>Riferimento documento</label><input name="riferimento" placeholder="es. DOC-001" maxlength="40"></div>
+<div><label>Testo documento</label><input name="testo" placeholder="es. Interessi 2027" maxlength="160"></div>
+</div>
+<h3>Righe contabili</h3>
+{% for i in range(8) %}
+<div class="ri-riga">
+<select name="conto{{ i }}" aria-label="Conto riga {{ i + 1 }}"><option value="">— Conto {{ i + 1 }}: scegli dal piano dei conti —</option>{% for c in sv.CONTI %}<option>{{ c }}</option>{% endfor %}</select>
+<input name="dare{{ i }}" placeholder="Dare €" inputmode="decimal" aria-label="Dare riga {{ i + 1 }}">
+<input name="avere{{ i }}" placeholder="Avere €" inputmode="decimal" aria-label="Avere riga {{ i + 1 }}">
+</div>
+{% endfor %}
+<p><button class="msa-btn">Registra il documento</button></p>
+</form>
+</section>
+<section class="ri-card">
+<h2>Documenti registrati ({{ docs | length }})</h2>
+{% if docs %}
+<div class="msa-scroll"><table class="ri-tab"><tr><th>Data</th><th>Ledger</th><th>Rif.</th><th>Testo</th><th>Righe</th><th>Totale</th><th>Esito</th><th></th></tr>
+{% for d in docs %}<tr><td>{{ d.data }}</td><td>{{ d.ledger }}</td><td>{{ d.riferimento }}</td><td>{{ d.testo }}</td>
+<td><small>{% for x in righe_di(d) %}{{ x.conto }} {{ 'D' if x.dare else 'A' }} {{ ((x.dare or x.avere) / 100) | euro }}<br>{% endfor %}</small></td>
+<td class="n">{{ (d.totale_cent / 100) | euro }}</td><td class="{{ 'ri-ok' if d.ok else 'ri-ko' }}"><small>{{ d.esito }}</small></td>
+<td><form method="post" action="{{ url_for('ragioneria_internazionale.elimina', n=n, did=d.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="msa-btn sec">Elimina</button></form></td></tr>{% endfor %}
+</table></div>
+{% else %}<p class="ri-nd">Nessun documento ancora registrato.</p>{% endif %}
+</section>
+{% endblock %}
+{% block tutor %}<ol><li>Scegli data, ledger e riferimento.</li><li>Per ogni riga scegli il conto e scrivi l'importo in Dare oppure in Avere.</li><li>Dare e Avere devono coincidere. Le scritture solo IFRS vanno nel ledger 2L, quelle solo OIC nel 0L.</li></ol>
+<div class="ri-hint">Il messaggio ti dice se la scrittura è quella del manuale, se è giusta ma nel ledger sbagliato, o se non corrisponde.</div>{% endblock %}

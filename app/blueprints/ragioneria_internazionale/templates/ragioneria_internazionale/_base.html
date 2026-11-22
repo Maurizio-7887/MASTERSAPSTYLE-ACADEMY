@@ -1,0 +1,12 @@
+{% extends "academy/base.html" %}
+{% block testa %}<link rel="stylesheet" href="{{ url_for('ragioneria_internazionale.static', filename='ri.css') }}">{% endblock %}
+{% block contenuto %}
+<div class="ri-banner">AMBIENTE FORMATIVO — DATI SIMULATI · Firenze · Amministrazione · Terzo passo: Ragioneria internazionale IFRS e OIC (dopo l'esercizio ERP e la ragioneria OIC)</div>
+<nav class="msa-pagine" aria-label="Ragioneria internazionale">
+  <a href="{{ url_for('ragioneria_internazionale.indice') }}" class="{{ 'attivo' if request.endpoint == 'ragioneria_internazionale.indice' }}">🌍 I 12 moduli</a>
+  {% if utente_corrente().docente %}<a href="{{ url_for('ragioneria_internazionale.docente') }}" class="{{ 'attivo' if request.endpoint.startswith('ragioneria_internazionale.docente') }}">🎓 Lavoro della classe</a>{% endif %}
+  <a href="{{ url_for('portale.home') }}">⬅ Torna ai corsi</a>
+</nav>
+{% block ri %}{% endblock %}
+<p class="ri-nd" style="margin-top:18px">Il corso non crea fatture, scritture o movimenti nel simulatore ERP. Le transazioni e le app SAP citate dipendono da release, ruoli e configurazione: programma didattico indipendente, non è SAP.</p>
+{% endblock %}

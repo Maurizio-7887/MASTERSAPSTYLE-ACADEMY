@@ -1,0 +1,4382 @@
+{
+"moduli": [
+{
+"id": 1,
+"title": "FI-GL e Universal Journal",
+"hours": 8,
+"tasks": [
+"Contabilizza la fattura fornitore di 1.220 € (servizi 1.000 €, IVA 220 €)",
+"Contabilizza la fattura cliente di 2.440 € (ricavo 2.000 €, IVA 440 €), l'incasso e il pagamento",
+"Verifica libro giornale e mastrini",
+"Spiega la quadratura Dare/Avere"
+]
+},
+{
+"id": 2,
+"title": "Ledger paralleli OIC / IFRS",
+"hours": 12,
+"tasks": [
+"Seleziona 0L e 2L",
+"Calcola ammortamento OIC 24.000 € e IFRS 30.000 €",
+"Registra l'accantonamento IFRS di 12.000 € solo nel ledger 2L",
+"Verifica il bridge 500.000 € → 482.000 € (−6.000 € ammortamento, −12.000 € accantonamento)"
+]
+},
+{
+"id": 3,
+"title": "FI-AA — Asset Accounting",
+"hours": 8,
+"tasks": [
+"Registra acquisto cespite da 240.000 € più IVA",
+"Calcola ammortamento parallelo",
+"Registra l'impairment IFRS di 25.000 € e ricalcola l'ammortamento (25.833,33 €)",
+"Registra la vendita dell'automezzo (plusvalenza 4.000 €)",
+"Verifica registro cespiti e saldo FI"
+]
+},
+{
+"id": 4,
+"title": "IFRS 16 — Leasing",
+"hours": 8,
+"tasks": [
+"Rileva diritto d’uso e passività iniziale",
+"Calcola interessi e ammortamento 2027",
+"Confronta costo OIC e IFRS"
+]
+},
+{
+"id": 5,
+"title": "Segment Reporting / IFRS 8",
+"hours": 8,
+"tasks": [
+"Assegna ricavi e costi ai segmenti",
+"Calcola risultati Transenne e Componenti",
+"Riconcilia costi corporate"
+]
+},
+{
+"id": 6,
+"title": "Functional Area",
+"hours": 8,
+"tasks": [
+"Classifica costi per natura",
+"Attribuisci costi a PROD/SALES/ADMIN/R&D",
+"Riconcilia EBIT per natura e funzione"
+]
+},
+{
+"id": 7,
+"title": "SAP MM / IAS 2",
+"hours": 8,
+"tasks": [
+"Registra entrata merci e GR/IR",
+"Calcola FIFO/LIFO/media",
+"Registra la differenza inventariale di 48 €",
+"Valuta rimanenze al NRV (svalutazione 5.000 €) e riconcilia"
+]
+},
+{
+"id": 8,
+"title": "Cost Center e Margin Analysis",
+"hours": 8,
+"tasks": [
+"Controlla budget manutenzione (scostamento +18.000 €)",
+"Alloca 198.000 € fra i centri (118.800 € / 79.200 €)",
+"Analizza margini e scostamenti (−76.000 €)"
+]
+},
+{
+"id": 9,
+"title": "Closing OIC / IFRS",
+"hours": 8,
+"tasks": [
+"Contabilizza quattro assestamenti",
+"Riconcilia stato patrimoniale OIC",
+"Completa bridge IFRS e quadratura",
+"Estensione: valuta il credito in USD e le imposte anticipate"
+]
+},
+{
+"id": 10,
+"title": "Ricavi IFRS 15 e strumenti finanziari IFRS 9",
+"hours": 10,
+"tasks": [
+"Ripartisci il prezzo di 66.000 € fra transenne, montaggio e manutenzione",
+"Rileva fattura e ricavi 2027 (57.264,70 €)",
+"Calcola il TIE e il costo ammortizzato del finanziamento",
+"Calcola le perdite attese sui crediti (accantonamento 2.800 €)",
+"Registra il derivato di copertura sul cambio"
+]
+},
+{
+"id": 11,
+"title": "Immateriali, aggregazioni, fiscalità differita, fondi",
+"hours": 10,
+"tasks": [
+"Separa ricerca e sviluppo e capitalizza 60.000 € in IFRS",
+"Calcola fair value netto e avviamento (125.200 €)",
+"Registra imposte anticipate e differite",
+"Classifica le cause e misura il fondo rischi",
+"Prepara il bridge OIC/IFRS dei moduli 10–11 (+63.428,80 €)"
+]
+},
+{
+"id": 12,
+"title": "Esame finale integrato",
+"hours": 4,
+"tasks": [
+"Completa prova OIC",
+"Completa prova IFRS",
+"Completa analisi segmenti",
+"Redigi relazione CFO"
+]
+}
+],
+"contenuti": {
+"1": [
+{
+"type": "h",
+"text": "1.1 — Il ruolo della contabilità generale"
+},
+{
+"type": "p",
+"text": "La contabilità generale registra i fatti di gestione e permette la redazione del bilancio. In SAP S/4HANA la contabilità FI è integrata con clienti, fornitori, cespiti, logistica e controlling. Un documento FI contiene società, esercizio, data documento, data registrazione, valuta, tipo documento, riferimento e righe con conti e dimensioni gestionali."
+},
+{
+"type": "h",
+"text": "1.2 — La partita doppia"
+},
+{
+"type": "p",
+"text": "Ogni registrazione deve rispettare DARE = AVERE. Le attività aumentano in Dare; passività e patrimonio netto aumentano in Avere; i costi aumentano in Dare e i ricavi in Avere. Dare e Avere non equivalgono a entrata e uscita di cassa."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Merci/servizi",
+"1.000",
+""
+],
+[
+"IVA a credito",
+"220",
+""
+],
+[
+"Debiti fornitori",
+"",
+"1.220"
+],
+[
+"Totale",
+"1.220",
+"1.220"
+]
+]
+},
+{
+"type": "p",
+"text": "La fattura di acquisto non implica il pagamento. Il pagamento successivo riduce banca e debiti."
+},
+{
+"type": "h",
+"text": "1.3 — Architettura societaria"
+},
+{
+"type": "table",
+"rows": [
+[
+"Oggetto",
+"Valore didattico",
+"Scopo"
+],
+[
+"Company Code",
+"IT01",
+"Società italiana"
+],
+[
+"Chart of Accounts",
+"FTGR",
+"Piano dei conti di gruppo"
+],
+[
+"Fiscal Year Variant",
+"K4",
+"Esercizio gennaio–dicembre"
+],
+[
+"Leading Ledger",
+"0L",
+"Bilancio OIC nel caso"
+],
+[
+"Non-leading Ledger",
+"2L",
+"Reporting IFRS nel caso"
+],
+[
+"Controlling Area",
+"FT01",
+"Controllo di gestione"
+],
+[
+"Profit Center",
+"PC-TRANS / PC-COMP",
+"Risultato delle linee"
+],
+[
+"Segment",
+"TRANSENNE / COMPONENTI",
+"Reporting settoriale"
+],
+[
+"Functional Area",
+"PROD / SALES / ADMIN / R&D",
+"Costi per funzione"
+]
+]
+},
+{
+"type": "h",
+"text": "1.4 — Universal Journal (ACDOCA)"
+},
+{
+"type": "p",
+"text": "ACDOCA costituisce l’elemento centrale del Universal Journal per numerose registrazioni FI/CO. La disponibilità di campi e viste dipende dal processo. Non è corretto affermare che ogni dettaglio applicativo o ogni dato anagrafico risieda esclusivamente in ACDOCA. Il documento mantiene la tracciabilità tra società, conto, ledger, importo e dimensioni gestionali."
+},
+{
+"type": "h",
+"text": "1.5 — Libro giornale, mastrini e bilancio di verifica"
+},
+{
+"type": "p",
+"text": "Il libro giornale espone i documenti in sequenza cronologica. Il mastro aggrega le movimentazioni per conto. Il bilancio di verifica controlla saldi Dare/Avere e costituisce la base per la chiusura. Una quadratura aritmetica non dimostra da sola la corretta competenza o classificazione."
+},
+{
+"type": "h",
+"text": "1.6 — Esempio integrato cliente"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti clienti",
+"2.440",
+""
+],
+[
+"Ricavi vendite",
+"",
+"2.000"
+],
+[
+"IVA a debito",
+"",
+"440"
+],
+[
+"Totale",
+"2.440",
+"2.440"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Banca",
+"2.440",
+""
+],
+[
+"Crediti clienti",
+"",
+"2.440"
+],
+[
+"Totale",
+"2.440",
+"2.440"
+]
+]
+},
+{
+"type": "h",
+"text": "1.7 — SAP Fiori e SAP GUI"
+},
+{
+"type": "p",
+"text": "I riferimenti classici includono FB50 (registrazione Co.Ge.), FB03 (visualizzazione documento), FS00 (anagrafica conti), BP (Business Partner). In SAP S/4HANA Cloud Public Edition il flusso può essere disponibile soltanto tramite app Fiori. I nomi delle tile e i permessi dipendono dal ruolo e dalla release. L’allievo deve leggere la testata, controllare il conto, simulare il documento e verificare l’esito."
+},
+{
+"type": "h",
+"text": "1.8 — Laboratorio e verifica"
+},
+{
+"type": "p",
+"text": "Registrare fattura fornitore, fattura cliente, incasso e pagamento; ricostruire giornale e mastrini; controllare le dimensioni IT01, Profit Center e Segment. Quattro indicatori: registrazione 25; correttezza Dare/Avere 25; anagrafiche e dimensioni 25; report e quadratura 25. Domande: che cosa identifica un documento FI? Che differenza c’è fra Profit Center e Company Code? Perché una registrazione quadrata può essere errata?"
+}
+],
+"2": [
+{
+"type": "h",
+"text": "2.1 — Parallel Accounting"
+},
+{
+"type": "p",
+"text": "Una multinazionale può avere necessità di produrre reporting secondo principi differenti. SAP FI-GL supporta la contabilità parallela con ledger. Nel caso 0L è associato al reporting OIC e 2L al reporting IFRS: scelta di laboratorio, non regola generale SAP."
+},
+{
+"type": "h",
+"text": "2.2 — Registrazioni comuni e specifiche"
+},
+{
+"type": "p",
+"text": "Una fattura ordinaria corretta può essere rilevante per entrambi i principi. Una differenza nella vita utile di un cespite o una rettifica di reporting può invece essere specifica di un principio. Occorre evitare che la stessa rettifica sia registrata due volte, ad esempio sia in una valutazione parallela automatica sia in una scrittura manuale."
+},
+{
+"type": "h",
+"text": "2.3 — Esempio cespite con vite utili differenti"
+},
+{
+"type": "table",
+"rows": [
+[
+"Dato",
+"OIC 0L",
+"IFRS 2L"
+],
+[
+"Costo iniziale",
+"240.000 €",
+"240.000 €"
+],
+[
+"Vita utile",
+"10 anni",
+"8 anni"
+],
+[
+"Ammortamento annuo lineare",
+"24.000 €",
+"30.000 €"
+],
+[
+"Differenza annua",
+"—",
+"6.000 € maggiore"
+]
+]
+},
+{
+"type": "p",
+"text": "Assumiamo valore residuo zero, disponibilità per l’uso all’inizio dell’esercizio, nessuna componente aggiuntiva e ammortamento lineare. La diversa vita utile deve essere giustificata da stime documentate: non basta selezionare un ledger."
+},
+{
+"type": "h",
+"text": "2.4 — Accantonamento specifico IFRS"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Oneri per accantonamento IFRS",
+"12.000",
+""
+],
+[
+"Fondo rischi IFRS",
+"",
+"12.000"
+],
+[
+"Totale",
+"12.000",
+"12.000"
+]
+]
+},
+{
+"type": "p",
+"text": "La rettifica è esemplificativa e presuppone che siano soddisfatti i requisiti del principio applicabile. Non ogni passività potenziale genera un fondo."
+},
+{
+"type": "h",
+"text": "2.5 — Bridge del risultato"
+},
+{
+"type": "table",
+"rows": [
+[
+"Passaggio",
+"Risultato"
+],
+[
+"Risultato OIC ante rettifiche",
+"500.000 €"
+],
+[
+"Maggior ammortamento IFRS",
+"−6.000 €"
+],
+[
+"Accantonamento IFRS",
+"−12.000 €"
+],
+[
+"Risultato IFRS ante imposte",
+"482.000 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Le imposte differite richiedono analisi secondo IAS 12; la semplice differenza di risultato non equivale automaticamente a una differenza fiscale temporanea."
+},
+{
+"type": "h",
+"text": "2.6 — Riconciliazione e audit trail"
+},
+{
+"type": "p",
+"text": "Per ogni rettifica conservare: motivazione normativa, importo, ledger, data, documento, contropartita, approvazione, impatto sul conto economico e stato patrimoniale. Verificare che 0L e 2L quadrino autonomamente e che la riconciliazione fra i due risultati sia completa."
+},
+{
+"type": "h",
+"text": "2.7 — Esercizio guidato"
+},
+{
+"type": "p",
+"text": "Riprodurre la differenza di ammortamento di 6.000 € e l’accantonamento di 12.000 €. Elaborare il bridge 500.000 € → 482.000 €. Quattro indicatori da 25: classificazione; scritture; riconciliazione; documentazione. Quiz: quando una registrazione deve essere specifica di ledger? Perché una rettifica IFRS non modifica necessariamente l’operazione logistica originaria?"
+}
+],
+"3": [
+{
+"type": "h",
+"text": "3.1 — Anagrafica cespite e classi"
+},
+{
+"type": "p",
+"text": "FI-AA gestisce le immobilizzazioni mediante anagrafiche, classi cespite, aree di valutazione, acquisizioni, trasferimenti, ammortamenti e dismissioni. Nel caso: area 01 per OIC e area 30 per IFRS sono convenzioni illustrative da verificare nel customizing; non sono obblighi universali."
+},
+{
+"type": "h",
+"text": "3.2 — Acquisto dell’impianto"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Impianti",
+"240.000",
+""
+],
+[
+"IVA a credito (22%)",
+"52.800",
+""
+],
+[
+"Debiti fornitori",
+"",
+"292.800"
+],
+[
+"Totale",
+"292.800",
+"292.800"
+]
+]
+},
+{
+"type": "p",
+"text": "Assumiamo IVA integralmente detraibile. La capitalizzazione segue la natura del bene e le condizioni del principio applicabile."
+},
+{
+"type": "h",
+"text": "3.3 — Ammortamento parallelo"
+},
+{
+"type": "table",
+"rows": [
+[
+"Esercizio",
+"Valore netto OIC",
+"Valore netto IFRS"
+],
+[
+"Acquisto",
+"240.000 €",
+"240.000 €"
+],
+[
+"Fine 2027",
+"216.000 €",
+"210.000 €"
+],
+[
+"Fine 2028 prima impairment",
+"192.000 €",
+"180.000 €"
+],
+[
+"Fine 2028 dopo impairment IFRS",
+"192.000 €",
+"155.000 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Ammortamento annuale: 24.000 € OIC e 30.000 € IFRS. A fine 2028 un test di impairment (IAS 36) individua una perdita di valore di 25.000 €: il valore IFRS scende da 180.000 € a 155.000 € (Dare Svalutazione impianti / Avere Fondo svalutazione impianti, solo ledger 2L). Dopo l'impairment l'ammortamento va ricalcolato sulla vita residua di 6 anni: 155.000 / 6 = 25.833,33 € annui dal 2029. L'ammortamento OIC resta 24.000 €, salvo perdita durevole valutata secondo OIC 9."
+},
+{
+"type": "h",
+"text": "3.4 — Dismissione di un automezzo"
+},
+{
+"type": "p",
+"text": "Costo storico 60.000 €, fondo ammortamento 42.000 €, valore netto 18.000 €. Prezzo di vendita 22.000 € + IVA 4.840 €, totale credito 26.840 €. Plusvalenza 4.000 €. Prima della vendita si registra l'ammortamento fino alla data di dismissione."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti clienti",
+"26.840",
+""
+],
+[
+"Fondo ammortamento",
+"42.000",
+""
+],
+[
+"Automezzi",
+"",
+"60.000"
+],
+[
+"IVA a debito",
+"",
+"4.840"
+],
+[
+"Plusvalenza",
+"",
+"4.000"
+],
+[
+"Totale",
+"68.840",
+"68.840"
+]
+]
+},
+{
+"type": "h",
+"text": "3.5 — Verifiche SAP e laboratorio"
+},
+{
+"type": "p",
+"text": "Riferimenti classici, se supportati: AS01/AS02/AS03 per anagrafica; AW01N per analisi valori; F-90 per acquisto integrato; AFAB per ammortamenti; FB03 per documento FI. Verificare aree, date, conti e quadrature FI-AA/FI-GL. Quattro indicatori da 25: acquisizione, ammortamenti, impairment/dismissione, riconciliazione."
+}
+],
+"4": [
+{
+"type": "h",
+"text": "4.1 — Differenza tra OIC e IFRS 16"
+},
+{
+"type": "p",
+"text": "Nel modello OIC patrimoniale del caso, il canone di leasing finanziario viene imputato a conto economico con l’informativa pertinente. Nel modello generale IFRS 16 il locatario rileva diritto d’uso e passività. Sono previste eccezioni per determinate locazioni brevi e beni di modesto valore. Occorre verificare componenti di servizio, pagamenti variabili, opzioni, durata e tasso."
+},
+{
+"type": "h",
+"text": "4.2 — Contratto dell’impianto"
+},
+{
+"type": "table",
+"rows": [
+[
+"Dato",
+"Valore"
+],
+[
+"Data inizio",
+"1 gennaio 2027"
+],
+[
+"Durata",
+"4 anni"
+],
+[
+"Canone",
+"30.000 € annui posticipati"
+],
+[
+"Tasso di attualizzazione",
+"5%"
+],
+[
+"Costi diretti iniziali / incentivi",
+"0 €"
+],
+[
+"Opzione acquisto",
+"Assente"
+]
+]
+},
+{
+"type": "p",
+"text": "Valore attuale dei quattro canoni = 30.000 × [1−(1,05)^−4] / 0,05 = 106.378,52 €. Diritto d’uso e passività iniziali sono uguali nelle ipotesi adottate."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Diritto d’uso impianti",
+"106.378,52",
+""
+],
+[
+"Passività leasing",
+"",
+"106.378,52"
+],
+[
+"Totale",
+"106.378,52",
+"106.378,52"
+]
+]
+},
+{
+"type": "h",
+"text": "4.3 — Piano finanziario"
+},
+{
+"type": "table",
+"rows": [
+[
+"Anno",
+"Debito iniziale",
+"Interessi",
+"Canone",
+"Debito finale"
+],
+[
+"2027",
+"106.378,52",
+"5.318,93",
+"30.000,00",
+"81.697,45"
+],
+[
+"2028",
+"81.697,45",
+"4.084,87",
+"30.000,00",
+"55.782,32"
+],
+[
+"2029",
+"55.782,32",
+"2.789,12",
+"30.000,00",
+"28.571,44"
+],
+[
+"2030",
+"28.571,44",
+"1.428,56",
+"30.000,00",
+"0,00"
+],
+[
+"Totale",
+"",
+"13.621,48",
+"120.000,00",
+""
+]
+]
+},
+{
+"type": "p",
+"text": "Gli interessi dell'ultimo anno sono 1.428,56 € anziché 1.428,57 €: il centesimo di arrotondamento si assorbe nell'ultima rata e il debito si chiude esattamente a zero. Controllo: canoni 120.000 − valore iniziale 106.378,52 = interessi totali 13.621,48 €. Ammortamento annuo diritto d'uso = 106.378,52 / 4 = 26.594,63 €."
+},
+{
+"type": "h",
+"text": "4.4 — Scritture del 2027"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Interessi passivi leasing",
+"5.318,93",
+""
+],
+[
+"Passività leasing",
+"",
+"5.318,93"
+],
+[
+"Totale",
+"5.318,93",
+"5.318,93"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Passività leasing",
+"30.000",
+""
+],
+[
+"Banca",
+"",
+"30.000"
+],
+[
+"Totale",
+"30.000",
+"30.000"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Ammortamento diritto d’uso",
+"26.594,63",
+""
+],
+[
+"Fondo ammortamento ROU",
+"",
+"26.594,63"
+],
+[
+"Totale",
+"26.594,63",
+"26.594,63"
+]
+]
+},
+{
+"type": "p",
+"text": "Costo IFRS 2027: 26.594,63 + 5.318,93 = 31.913,56 €. Costo OIC: 30.000 €. Differenza sul risultato IFRS rispetto a OIC: −1.913,56 €. Il diritto d’uso netto è 79.783,89 €; la passività residua è 81.697,45 €. Nel ledger OIC 0L il pagamento è registrato come canone (Dare Canoni di leasing / Avere Banca 30.000 €): il pagamento è un fatto unico, letto in modo diverso dai due ledger."
+},
+{
+"type": "h",
+"text": "4.5 — Integrazione SAP e modifiche contrattuali"
+},
+{
+"type": "p",
+"text": "FI-AA da solo non costituisce un sistema completo di gestione dei contratti di leasing. Le funzionalità di lease accounting possono dipendere da SAP Contract and Lease Management, RE-FX o altri componenti e dalla soluzione installata. In caso di modifica contrattuale occorre verificare le regole IFRS 16 di rimisurazione e il tasso applicabile, non aggiungere semplicemente un canone."
+},
+{
+"type": "h",
+"text": "4.6 — Laboratorio"
+},
+{
+"type": "p",
+"text": "Calcolare PV, registrare diritto d’uso e passività, produrre piano quadriennale, registrare interessi/pagamenti/ammortamenti e bridge OIC/IFRS. Quattro indicatori da 25: contratto; attualizzazione; scritture; riconciliazione. Quiz: qual è il valore iniziale? Quanto sono gli interessi del primo anno? Qual è il costo IFRS 2027?"
+}
+],
+"5": [
+{
+"type": "h",
+"text": "5.1 — Management approach e CODM"
+},
+{
+"type": "p",
+"text": "IFRS 8 identifica i segmenti operativi in relazione alle informazioni regolarmente esaminate dal Chief Operating Decision Maker per allocare risorse e valutare performance. Un Segment SAP non coincide automaticamente con un segmento IFRS 8. Occorre valutare perimetro, aggregazione e disclosure."
+},
+{
+"type": "h",
+"text": "5.2 — Organizzazione e dimensioni"
+},
+{
+"type": "table",
+"rows": [
+[
+"Oggetto",
+"Transenne",
+"Componenti"
+],
+[
+"Profit Center",
+"PC-TRANS",
+"PC-COMP"
+],
+[
+"Segment",
+"TRANSENNE",
+"COMPONENTI"
+],
+[
+"Company Code",
+"IT01",
+"IT01"
+]
+]
+},
+{
+"type": "p",
+"text": "La stessa società può comprendere più segmenti. Il Profit Center è una dimensione gestionale, il Segment supporta il reporting. La derivazione deve essere verificata nelle righe contabili."
+},
+{
+"type": "h",
+"text": "5.3 — Conto economico attribuito"
+},
+{
+"type": "table",
+"rows": [
+[
+"Voce",
+"Transenne",
+"Componenti",
+"Totale"
+],
+[
+"Ricavi",
+"1.200.000",
+"800.000",
+"2.000.000"
+],
+[
+"Costi industriali",
+"720.000",
+"520.000",
+"1.240.000"
+],
+[
+"Margine industriale",
+"480.000",
+"280.000",
+"760.000"
+],
+[
+"Costi commerciali",
+"120.000",
+"60.000",
+"180.000"
+],
+[
+"Costi amministrativi",
+"90.000",
+"70.000",
+"160.000"
+],
+[
+"Risultato attribuito",
+"270.000",
+"150.000",
+"420.000"
+]
+]
+},
+{
+"type": "p",
+"text": "Margini: 22,5% Transenne; 18,75% Componenti; 21% totale attribuito. Costi corporate ulteriori non attribuiti 50.000 € → risultato operativo aziendale 370.000 €. Il report è gestionale: IFRS 8 richiede la misura effettivamente utilizzata dal CODM e le riconciliazioni pertinenti."
+},
+{
+"type": "h",
+"text": "5.4 — Fattura con Profit Center"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti clienti",
+"61.000",
+""
+],
+[
+"Ricavi transenne",
+"",
+"50.000"
+],
+[
+"IVA a debito",
+"",
+"11.000"
+],
+[
+"Totale",
+"61.000",
+"61.000"
+]
+]
+},
+{
+"type": "p",
+"text": "Attribuzione didattica: IT01, PC-TRANS, TRANSENNE. Per una fattura mista da 100.000 € imponibile + IVA 22%, il credito 122.000 € può essere attribuito, con regole di splitting appropriate, per 73.200 € a Transenne e 48.800 € a Componenti. La ripartizione non genera due crediti giuridici autonomi."
+},
+{
+"type": "h",
+"text": "5.5 — Document Splitting e allocazioni"
+},
+{
+"type": "p",
+"text": "Il document splitting, se configurato, permette attribuzioni e bilanciamento secondo dimensioni come Profit Center o Segment. Costi comuni 100.000 € attribuiti in base ai ricavi 60%/40% → 60.000 € / 40.000 €. Il driver deve essere motivato; non tutti i costi vanno necessariamente attribuiti."
+},
+{
+"type": "h",
+"text": "5.6 — Laboratorio e test"
+},
+{
+"type": "p",
+"text": "Verificare anagrafiche, registrare fatture con dimensioni, produrre P&L segmenti, allocare costi, riconciliare 420.000 € a 370.000 €. Indicatori: struttura 25; attribuzioni 25; analisi 25; riconciliazione 25. Quiz: definizione CODM; margine Transenne; ruolo document splitting; costi corporate."
+}
+],
+"6": [
+{
+"type": "h",
+"text": "6.1 — Natura e funzione"
+},
+{
+"type": "p",
+"text": "Natura = tipo di costo (personale, materie, servizi). Funzione = destinazione economica (produzione, vendite, amministrazione, ricerca). IAS 1 è sostituito da IFRS 18 per esercizi dal 1 gennaio 2027 salvo anticipazione; i prospetti del corso sono semplificati e non costituiscono un formato IFRS 18 completo."
+},
+{
+"type": "h",
+"text": "6.2 — Conto economico per natura"
+},
+{
+"type": "table",
+"rows": [
+[
+"Voce",
+"Importo"
+],
+[
+"Ricavi",
+"2.000.000"
+],
+[
+"Materie prime",
+"−800.000"
+],
+[
+"Personale",
+"−450.000"
+],
+[
+"Servizi",
+"−180.000"
+],
+[
+"Ammortamenti",
+"−120.000"
+],
+[
+"Altri costi",
+"−80.000"
+],
+[
+"Risultato operativo",
+"370.000"
+]
+]
+},
+{
+"type": "h",
+"text": "6.3 — Conto economico per funzione"
+},
+{
+"type": "table",
+"rows": [
+[
+"Voce",
+"Importo"
+],
+[
+"Ricavi",
+"2.000.000"
+],
+[
+"Costo del venduto",
+"−1.250.000"
+],
+[
+"Margine lordo",
+"750.000"
+],
+[
+"Costi commerciali",
+"−180.000"
+],
+[
+"Amministrazione",
+"−150.000"
+],
+[
+"R&D",
+"−50.000"
+],
+[
+"Risultato operativo",
+"370.000"
+]
+]
+},
+{
+"type": "h",
+"text": "6.4 — Matrice natura × funzione (migliaia €)"
+},
+{
+"type": "table",
+"rows": [
+[
+"Natura",
+"PROD",
+"SALES",
+"ADMIN",
+"R&D",
+"Totale"
+],
+[
+"Materie",
+"800",
+"0",
+"0",
+"0",
+"800"
+],
+[
+"Personale",
+"250",
+"100",
+"70",
+"30",
+"450"
+],
+[
+"Servizi",
+"80",
+"50",
+"40",
+"10",
+"180"
+],
+[
+"Ammortamenti",
+"100",
+"10",
+"10",
+"0",
+"120"
+],
+[
+"Altri costi",
+"20",
+"20",
+"30",
+"10",
+"80"
+],
+[
+"Totale",
+"1.250",
+"180",
+"150",
+"50",
+"1.630"
+]
+]
+},
+{
+"type": "p",
+"text": "La matrice quadra sia per natura sia per funzione. I costi sostenuti non coincidono sempre con il costo del venduto quando esistono variazioni di rimanenze; il caso ipotizza assenza di tali variazioni."
+},
+{
+"type": "h",
+"text": "6.5 — Scrittura commerciale e derivazione"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Personale commerciale",
+"4.000",
+""
+],
+[
+"Debiti personale",
+"",
+"4.000"
+],
+[
+"Totale",
+"4.000",
+"4.000"
+]
+]
+},
+{
+"type": "p",
+"text": "Centro di costo CC-COMM; Functional Area SALES; Profit Center PC-TRANS; Segment TRANSENNE. Una registrazione può essere presente in più report dimensionali senza duplicare il costo."
+},
+{
+"type": "h",
+"text": "6.6 — Costo del venduto e rimanenze"
+},
+{
+"type": "p",
+"text": "1.000 pezzi prodotti a 150 € = 150.000 €; 800 venduti → costo venduto 120.000 €; 200 in magazzino → 30.000 €. Occorre verificare corretta capitalizzazione e valutazione."
+},
+{
+"type": "h",
+"text": "6.7 — Laboratorio e verifica"
+},
+{
+"type": "p",
+"text": "Costruire matrice natura/funzione, ottenere margine lordo 750.000 € e utile operativo 370.000 €, controllare i costi non attribuiti. Indicatori: natura 25; Functional Area 25; P&L funzione 25; riconciliazione 25. Quiz: differenza natura/funzione, costo venduto, quadratura."
+}
+],
+"7": [
+{
+"type": "h",
+"text": "7.1 — OIC 13 e IAS 2"
+},
+{
+"type": "p",
+"text": "Le rimanenze sono valutate secondo i criteri del principio applicabile. FIFO e costo medio ponderato sono formule consentite da IAS 2; LIFO non è consentito. OIC 13 ammette LIFO nei casi previsti. La formula di costo non coincide necessariamente con il flusso fisico."
+},
+{
+"type": "h",
+"text": "7.2 — Tre acquisti e un consumo"
+},
+{
+"type": "table",
+"rows": [
+[
+"Data",
+"Pezzi",
+"Costo unitario",
+"Valore"
+],
+[
+"5 gennaio",
+"100",
+"10 €",
+"1.000 €"
+],
+[
+"12 gennaio",
+"100",
+"12 €",
+"1.200 €"
+],
+[
+"20 gennaio",
+"100",
+"14 €",
+"1.400 €"
+],
+[
+"Totale",
+"300",
+"—",
+"3.600 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Consumo 180 pezzi; residuo 120. Tutti gli acquisti precedono il consumo."
+},
+{
+"type": "table",
+"rows": [
+[
+"Metodo",
+"Costo consumo",
+"Rimanenze finali"
+],
+[
+"FIFO",
+"1.960 €",
+"1.640 €"
+],
+[
+"LIFO continuo didattico",
+"2.360 €",
+"1.240 €"
+],
+[
+"Media ponderata",
+"2.160 €",
+"1.440 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Differenza IFRS FIFO meno OIC LIFO = +400 € di rimanenze e, nelle ipotesi del caso, di risultato ante imposte. Non si devono modificare le quantità logistiche per produrre la differenza di valore."
+},
+{
+"type": "h",
+"text": "7.3 — Integrazione acquisti MM/FI"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Rimanenze componenti",
+"1.000",
+""
+],
+[
+"GR/IR",
+"",
+"1.000"
+],
+[
+"Totale",
+"1.000",
+"1.000"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"GR/IR",
+"1.000",
+""
+],
+[
+"IVA a credito",
+"220",
+""
+],
+[
+"Debiti fornitori",
+"",
+"1.220"
+],
+[
+"Totale",
+"1.220",
+"1.220"
+]
+]
+},
+{
+"type": "p",
+"text": "Entrata merci e fattura sono eventi distinti. GR/IR è un conto transitorio da riconciliare, non da azzerare automaticamente."
+},
+{
+"type": "h",
+"text": "7.4 — Movimenti classici"
+},
+{
+"type": "table",
+"rows": [
+[
+"Codice",
+"Uso tipico"
+],
+[
+"101",
+"Entrata merci"
+],
+[
+"102",
+"Storno entrata 101"
+],
+[
+"201",
+"Uscita per centro di costo"
+],
+[
+"261",
+"Prelievo per ordine"
+],
+[
+"301",
+"Trasferimento tra stabilimenti"
+],
+[
+"311",
+"Trasferimento tra ubicazioni"
+],
+[
+"601",
+"Uscita per consegna vendita"
+],
+[
+"701/702",
+"Differenze inventariali secondo tipo stock"
+]
+]
+},
+{
+"type": "h",
+"text": "7.5 — Inventario fisico"
+},
+{
+"type": "p",
+"text": "Disponibilità SAP 120 pezzi; conta 116; differenza 4 pezzi. Valorizzata al costo medio ponderato dell'esempio (12 €) la differenza passiva è 48 €. Registrazione: Dare Differenze inventariali passive 48 € / Avere Rimanenze 48 €. Con un'altra formula di costo il valore unitario cambia. Conservare verbale e documento materiale."
+},
+{
+"type": "h",
+"text": "7.6 — Net Realisable Value"
+},
+{
+"type": "p",
+"text": "500 prodotti finiti: costo 100 € ciascuno, prezzo stimato 95 €, costi necessari alla vendita 5 €. NRV = 90 €; svalutazione = (100−90) × 500 = 5.000 €. Dare svalutazione rimanenze / Avere fondo svalutazione rimanenze."
+},
+{
+"type": "h",
+"text": "7.7 — Parallel valuation in SAP"
+},
+{
+"type": "p",
+"text": "Due ledger FI non garantiscono automaticamente due valorizzazioni MM FIFO/LIFO. Material Ledger, metodi di costing e rettifiche di reporting richiedono architettura appropriata. Distinguere quantità fisiche, valorizzazione SAP e rettifiche OIC/IFRS."
+},
+{
+"type": "h",
+"text": "7.8 — Laboratorio"
+},
+{
+"type": "p",
+"text": "Registrare acquisti e fatture, calcolare FIFO/LIFO/media, riconciliare OIC/IFRS, contare scorte, registrare differenza e svalutazione NRV. Indicatori 25 ciascuno: logistica/FI; valutazione; inventario/NRV; riconciliazione. Quiz: metodo vietato IAS 2; FIFO finale; GR/IR; NRV; ledger e valutazioni parallele."
+}
+],
+"8": [
+{
+"type": "h",
+"text": "8.1 — Cost Center e responsabilità"
+},
+{
+"type": "table",
+"rows": [
+[
+"Cost Center",
+"Funzione"
+],
+[
+"CC-PROD",
+"Produzione"
+],
+[
+"CC-MAN",
+"Manutenzione"
+],
+[
+"CC-COMM",
+"Vendite"
+],
+[
+"CC-AMM",
+"Amministrazione"
+],
+[
+"CC-RIC",
+"Ricerca"
+]
+]
+},
+{
+"type": "p",
+"text": "FI registra il costo; CO ne identifica la responsabilità. Il centro di costo non coincide necessariamente con il Profit Center."
+},
+{
+"type": "h",
+"text": "8.2 — Budget manutenzione"
+},
+{
+"type": "p",
+"text": "Budget 180.000 €, consuntivo 198.000 € → scostamento +18.000 €, +10% sfavorevole per un centro di costo. Occorre analizzare driver operativi prima di giudicare la performance."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Manutenzioni esterne",
+"5.000",
+""
+],
+[
+"IVA a credito",
+"1.100",
+""
+],
+[
+"Debiti fornitori",
+"",
+"6.100"
+],
+[
+"Totale",
+"6.100",
+"6.100"
+]
+]
+},
+{
+"type": "p",
+"text": "Il costo di 5.000 € è attribuito a CC-MAN. L’IVA detraibile non è un costo operativo."
+},
+{
+"type": "h",
+"text": "8.3 — Allocazione manutenzione"
+},
+{
+"type": "table",
+"rows": [
+[
+"Destinatario",
+"Ore",
+"Percentuale",
+"Quota"
+],
+[
+"Transenne",
+"1.200",
+"60%",
+"118.800 €"
+],
+[
+"Componenti",
+"800",
+"40%",
+"79.200 €"
+],
+[
+"Totale",
+"2.000",
+"100%",
+"198.000 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Non sommare costo primario e allocazioni interne come due costi esterni. Il metodo può essere distribuzione, assessment o activity allocation a seconda della configurazione."
+},
+{
+"type": "h",
+"text": "8.4 — Margin Analysis per prodotto"
+},
+{
+"type": "table",
+"rows": [
+[
+"Prodotto",
+"Ricavi",
+"Costo venduto",
+"Margine",
+"Margine %"
+],
+[
+"T100",
+"900.000",
+"540.000",
+"360.000",
+"40%"
+],
+[
+"T200",
+"300.000",
+"210.000",
+"90.000",
+"30%"
+],
+[
+"C100",
+"800.000",
+"520.000",
+"280.000",
+"35%"
+],
+[
+"Totale",
+"2.000.000",
+"1.270.000",
+"730.000",
+"36,5%"
+]
+]
+},
+{
+"type": "p",
+"text": "Questo è un dataset gestionale autonomo rispetto al Modulo 6, nel quale il costo del venduto era 1.250.000 €. Non mescolare i due prospetti senza bridge."
+},
+{
+"type": "h",
+"text": "8.5 — Redditività per cliente"
+},
+{
+"type": "table",
+"rows": [
+[
+"Cliente",
+"Ricavi",
+"Costo venduto",
+"Costi attribuiti",
+"Margine"
+],
+[
+"Edil Sigma",
+"500.000",
+"300.000",
+"80.000",
+"120.000"
+],
+[
+"Costruzioni Alfa",
+"400.000",
+"250.000",
+"30.000",
+"120.000"
+],
+[
+"Beta Cantieri",
+"300.000",
+"210.000",
+"45.000",
+"45.000"
+]
+]
+},
+{
+"type": "p",
+"text": "Margini percentuali: Edil Sigma 24%; Alfa 30%; Beta 15%. Il maggior fatturato non implica automaticamente maggior redditività."
+},
+{
+"type": "h",
+"text": "8.6 — Scostamenti prezzo/volume/costo"
+},
+{
+"type": "table",
+"rows": [
+[
+"Variabile",
+"Budget",
+"Consuntivo"
+],
+[
+"Quantità T100",
+"10.000",
+"9.000"
+],
+[
+"Prezzo",
+"100 €",
+"98 €"
+],
+[
+"Costo unitario",
+"60 €",
+"62 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Margine budget 400.000 €; consuntivo 324.000 €; scostamento −76.000 €. Scomposizione: volume (9.000−10.000)×40 = −40.000 €; prezzo 9.000×(98−100) = −18.000 €; costo −9.000×(62−60)=−18.000 €. Totale −76.000 €."
+},
+{
+"type": "h",
+"text": "8.7 — Riconciliazione FI/CO"
+},
+{
+"type": "p",
+"text": "Margine lordo 730.000 € meno commerciali 180.000 €, amministrazione 150.000 € e costi corporate 50.000 € → risultato operativo 350.000 €. La misura di Margin Analysis può escludere costi corporate: il bridge è obbligatorio. Indicatori: cost center 25; allocazioni 25; margin analysis 25; scostamenti/report 25."
+}
+],
+"9": [
+{
+"type": "h",
+"text": "9.1 — Calendario D+5"
+},
+{
+"type": "table",
+"rows": [
+[
+"Fase",
+"Attività"
+],
+[
+"D",
+"Completare registrazioni FI/MM/SD"
+],
+[
+"D+1",
+"Banche, clienti, fornitori, GR/IR"
+],
+[
+"D+2",
+"Cespiti, leasing, magazzino, ratei/risconti"
+],
+[
+"D+3",
+"Allocazioni CO e segmenti"
+],
+[
+"D+4",
+"Rettifiche OIC/IFRS"
+],
+[
+"D+5",
+"Reporting package CFO"
+]
+]
+},
+{
+"type": "p",
+"text": "Il calendario è gestionale, non un termine legale."
+},
+{
+"type": "h",
+"text": "9.2 — Stato patrimoniale preliminare"
+},
+{
+"type": "table",
+"rows": [
+[
+"Attività",
+"Valore"
+],
+[
+"Immobilizzazioni nette",
+"500.000"
+],
+[
+"Rimanenze",
+"200.000"
+],
+[
+"Crediti clienti",
+"300.000"
+],
+[
+"Banca",
+"150.000"
+],
+[
+"Totale",
+"1.150.000"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Passività e netto",
+"Valore"
+],
+[
+"Capitale e riserve",
+"450.000"
+],
+[
+"Debiti finanziari",
+"200.000"
+],
+[
+"Debiti fornitori",
+"250.000"
+],
+[
+"Altri debiti e fondi",
+"100.000"
+],
+[
+"Utile preliminare",
+"150.000"
+],
+[
+"Totale",
+"1.150.000"
+]
+]
+},
+{
+"type": "h",
+"text": "9.3 — Assestamenti"
+},
+{
+"type": "table",
+"rows": [
+[
+"Operazione",
+"Dare",
+"Avere",
+"Effetto risultato"
+],
+[
+"Fattura manutenzione da ricevere",
+"Costi 12.000",
+"Fatture da ricevere 12.000",
+"−12.000"
+],
+[
+"Ammortamento",
+"Ammortamenti 20.000",
+"Fondo 20.000",
+"−20.000"
+],
+[
+"Svalutazione magazzino",
+"Svalutazione 5.000",
+"Fondo 5.000",
+"−5.000"
+],
+[
+"Interessi maturati",
+"Ratei attivi 2.000",
+"Interessi attivi 2.000",
+"+2.000"
+]
+]
+},
+{
+"type": "p",
+"text": "Utile OIC assestato = 150.000−12.000−20.000−5.000+2.000 = 115.000 €. Attività OIC: 480.000 immobilizzazioni +195.000 magazzino +300.000 crediti +2.000 ratei +150.000 banca = 1.127.000 €. Passività 562.000 €, patrimonio netto 565.000 €."
+},
+{
+"type": "h",
+"text": "9.4 — Riconciliazioni"
+},
+{
+"type": "p",
+"text": "Clienti FI-GL 300.000 € = FI-AR 300.000 €. Fornitori FI-GL 250.000 € = FI-AP 250.000 €. Banca contabile 150.000 € e banca estratto 147.500 €: pagamento in transito 2.500 €, già registrato, non va duplicato. GR/IR creditore 8.000 € per merci ricevute non fatturate è già compreso negli altri debiti/fondi; non sommarlo due volte."
+},
+{
+"type": "h",
+"text": "9.5 — Bridge IFRS"
+},
+{
+"type": "table",
+"rows": [
+[
+"Rettifica",
+"Effetto sul risultato"
+],
+[
+"Maggior ammortamento",
+"−6.000 €"
+],
+[
+"Maggior valore magazzino",
+"+4.000 €"
+],
+[
+"Leasing IFRS 16",
+"−1.913,56 €"
+],
+[
+"Totale",
+"−3.913,56 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Risultato IFRS ante imposte = 111.086,44 €. Il diritto d’uso netto è 79.783,89 €, la passività leasing 81.697,45 €. Effetto totale attività +77.783,89 €, passività +81.697,45 €, patrimonio netto −3.913,56 €. Nota: il caso di chiusura assume una differenza FIFO/LIFO di +4.000 € sull'intero magazzino al 31/12/2027; l'esempio di +400 € del Modulo 7 riguarda un solo articolo ed è un esercizio di calcolo."
+},
+{
+"type": "table",
+"rows": [
+[
+"Grandezza",
+"OIC",
+"IFRS"
+],
+[
+"Attività",
+"1.127.000",
+"1.204.783,89"
+],
+[
+"Passività",
+"562.000",
+"643.697,45"
+],
+[
+"Patrimonio netto",
+"565.000",
+"561.086,44"
+],
+[
+"Passività + netto",
+"1.127.000",
+"1.204.783,89"
+]
+]
+},
+{
+"type": "p",
+"text": "Il caso esclude imposte correnti e differite; per un bilancio completo occorre valutare IAS 12 e la presentazione IFRS 18."
+},
+{
+"type": "h",
+"text": "9.6 — Estensione: partite in valuta (IAS 21 e OIC 26)"
+},
+{
+"type": "p",
+"text": "Fattura di 100.000 USD del 15/11/2027 al cambio 1,10 → 90.909,09 €. Al 31/12 il cambio è 1,08 → 92.592,59 €. Il credito è una posta monetaria: IAS 21 e OIC 26 la convertono al cambio di chiusura con effetto a conto economico, quindi qui non nasce una differenza OIC/IFRS. Nel bilancio OIC l'utile netto su cambi non realizzato va accantonato, in sede di approvazione, in una riserva non distribuibile fino al realizzo (art. 2426 n. 8-bis c.c.). In SAP: FAGL_FCV / Perform Foreign Currency Valuation, prima in prova. All'incasso del 15/02/2028 al cambio 1,09 (91.743,12 €) l'utile realizzato rispetto al cambio storico è 834,03 €; dopo lo storno della valutazione l'effetto netto 2028 è −849,47 €. Esercizio di estensione: non modifica i totali di 9.3 e 9.5."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti clienti",
+"1.683,50",
+""
+],
+[
+"Utili su cambi da valutazione",
+"",
+"1.683,50"
+],
+[
+"Totale",
+"1.683,50",
+"1.683,50"
+]
+]
+},
+{
+"type": "h",
+"text": "9.7 — Estensione: imposte differite (IAS 12)"
+},
+{
+"type": "p",
+"text": "La base imponibile segue il bilancio OIC, quindi le rettifiche IFRS creano differenze temporanee: impianti −6.000 € (deducibile), rimanenze +4.000 € (imponibile), leasing netto −1.913,56 € (deducibile). Netto deducibile 3.913,56 €. Con la sola IRES al 24% (ipotesi didattica, senza IRAP) le imposte anticipate nette sono 939,25 €: Dare Crediti per imposte anticipate / Avere Imposte differite (provento), solo ledger 2L, se è probabile un reddito imponibile futuro. Le soluzioni del Modulo 10 restano ante imposte."
+},
+{
+"type": "h",
+"text": "9.8 — Controlli finali e fascicolo"
+},
+{
+"type": "p",
+"text": "Verificare FI-AA, magazzino, allocazioni CO, Segment e Functional Area, quadrature per ledger, partite aperte e GR/IR. Il fascicolo include trial balance, riconciliazioni banca/AR/AP, registro cespiti, lease schedule, inventory valuation, CO closing, Segment Report, bridge OIC/IFRS e approvazione CFO. Indicatori: assestamenti 25; riconciliazioni 25; IFRS 25; reporting 25."
+}
+],
+"10": [
+{
+"type": "p",
+"text": "Durata: 10 ore. Obiettivi: applicare il modello in cinque fasi dei ricavi; ripartire il prezzo fra le obbligazioni; valutare un finanziamento al costo ammortizzato; stimare le perdite attese sui crediti; contabilizzare un derivato su cambi."
+},
+{
+"type": "h",
+"text": "10.1 — Il modello in cinque fasi"
+},
+{
+"type": "p",
+"text": "IFRS 15 riconosce i ricavi in cinque fasi: (1) identificare il contratto; (2) identificare le obbligazioni di fare (performance obligations); (3) determinare il prezzo; (4) ripartire il prezzo fra le obbligazioni in base ai prezzi di vendita a sé stanti; (5) rilevare il ricavo quando, o man mano che, l'obbligazione è adempiuta. OIC 34 (in vigore dagli esercizi 2024) introduce nel bilancio OIC una logica simile: individuazione delle unità elementari di contabilizzazione e ripartizione del prezzo, con semplificazioni legate alla rilevanza."
+},
+{
+"type": "h",
+"text": "10.2 — Caso: fornitura con montaggio e manutenzione"
+},
+{
+"type": "p",
+"text": "Il 1° luglio 2027 Ferro & Transenne firma con un Comune un contratto unico da 66.000 € + IVA per 500 transenne, il montaggio e la manutenzione per 24 mesi. Consegna e montaggio sono completati il 1° luglio; la fattura dell'intero importo è emessa lo stesso giorno."
+},
+{
+"type": "table",
+"rows": [
+[
+"Obbligazione",
+"Prezzo a sé stante",
+"Quota del prezzo (66/68)",
+"Quando si rileva"
+],
+[
+"500 transenne",
+"50.000,00",
+"48.529,41",
+"Alla consegna (momento)"
+],
+[
+"Montaggio",
+"6.000,00",
+"5.823,53",
+"A montaggio completato (momento)"
+],
+[
+"Manutenzione 24 mesi",
+"12.000,00",
+"11.647,06",
+"Nel tempo, 1/24 al mese"
+],
+[
+"Totale",
+"68.000,00",
+"66.000,00",
+""
+]
+]
+},
+{
+"type": "p",
+"text": "Lo sconto di 2.000 € (68.000 − 66.000) si ripartisce in proporzione su tutte le obbligazioni, non solo su una."
+},
+{
+"type": "p",
+"text": "Fattura del 1° luglio 2027:"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti clienti",
+"80.520,00",
+""
+],
+[
+"Ricavi vendita transenne",
+"",
+"48.529,41"
+],
+[
+"Ricavi per servizi di montaggio",
+"",
+"5.823,53"
+],
+[
+"Passività contrattuali (manutenzione da eseguire)",
+"",
+"11.647,06"
+],
+[
+"IVA a debito",
+"",
+"14.520,00"
+],
+[
+"Totale",
+"80.520,00",
+"80.520,00"
+]
+]
+},
+{
+"type": "p",
+"text": "31 dicembre 2027 — manutenzione di 6 mesi su 24:"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Passività contrattuali",
+"2.911,76",
+""
+],
+[
+"Ricavi per manutenzione",
+"",
+"2.911,76"
+],
+[
+"Totale",
+"2.911,76",
+"2.911,76"
+]
+]
+},
+{
+"type": "p",
+"text": "Ricavi 2027 = 48.529,41 + 5.823,53 + 2.911,76 = 57.264,70 €. Passività contrattuale al 31/12/2027 = 8.735,30 € (5.823,53 nel 2028, 2.911,77 nel 2029). L'IVA segue le regole fiscali della fattura, non il ritmo dei ricavi."
+},
+{
+"type": "p",
+"text": "OIC e IFRS. In questo caso OIC 34 porta allo stesso risultato. Le differenze si trovano in casi più complessi: corrispettivi variabili, componenti finanziarie significative, costi per ottenere il contratto, licenze. Vanno analizzate contratto per contratto."
+},
+{
+"type": "h",
+"text": "10.3 — Finanziamento al costo ammortizzato"
+},
+{
+"type": "p",
+"text": "Il 1° gennaio 2027 la società riceve un finanziamento di 200.000 € a 3 anni, interessi nominali 4% annui posticipati (8.000 €), rimborso in un'unica soluzione a scadenza, commissioni iniziali 6.000 €. Incasso netto 194.000 €."
+},
+{
+"type": "p",
+"text": "Il tasso di interesse effettivo (TIE) è il tasso che rende il valore attuale dei flussi uguale all'incasso netto: 194.000 = 8.000/(1+r) + 8.000/(1+r)2 + 208.000/(1+r)3 → r = 5,1038%."
+},
+{
+"type": "table",
+"rows": [
+[
+"Anno",
+"Valore iniziale",
+"Interessi al TIE",
+"Cedola pagata",
+"Valore finale"
+],
+[
+"2027",
+"194.000,00",
+"9.901,31",
+"8.000,00",
+"195.901,31"
+],
+[
+"2028",
+"195.901,31",
+"9.998,35",
+"8.000,00",
+"197.899,66"
+],
+[
+"2029",
+"197.899,66",
+"10.100,34",
+"208.000,00",
+"0,00"
+],
+[
+"Totale",
+"",
+"30.000,00",
+"",
+""
+]
+]
+},
+{
+"type": "p",
+"text": "Controllo: interessi totali 30.000 € = cedole 24.000 € + commissioni 6.000 €."
+},
+{
+"type": "p",
+"text": "Scritture IFRS 9 (e OIC 19 per il bilancio ordinario):"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Banca",
+"194.000,00",
+""
+],
+[
+"Debiti verso banche",
+"",
+"194.000,00"
+],
+[
+"Totale",
+"194.000,00",
+"194.000,00"
+]
+]
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Interessi passivi",
+"9.901,31",
+""
+],
+[
+"Debiti verso banche",
+"",
+"1.901,31"
+],
+[
+"Banca",
+"",
+"8.000,00"
+],
+[
+"Totale",
+"9.901,31",
+"9.901,31"
+]
+]
+},
+{
+"type": "p",
+"text": "Differenza con l'OIC. OIC 19 prevede il costo ammortizzato anche nel bilancio OIC ordinario. Le società che redigono il bilancio in forma abbreviata (art. 2435-bis c.c.) possono non applicarlo: in quel caso il debito resta a 200.000 €, le commissioni diventano un risconto attivo ripartito in 2.000 € all'anno e il costo 2027 è 10.000 € (8.000 + 2.000). Differenza 2027: IFRS +98,69 € sul risultato."
+},
+{
+"type": "h",
+"text": "10.4 — Perdite attese sui crediti"
+},
+{
+"type": "p",
+"text": "IFRS 9 richiede di stimare le perdite attese (expected credit losses) anche sui crediti non ancora scaduti; per i crediti commerciali è ammesso l'approccio semplificato con una matrice per anzianità. OIC 15 valuta i crediti al presumibile valore di realizzo con un fondo svalutazione basato sulle perdite stimate."
+},
+{
+"type": "table",
+"rows": [
+[
+"Fascia",
+"Crediti",
+"Tasso di perdita",
+"Perdita attesa"
+],
+[
+"Non scaduti",
+"200.000",
+"1%",
+"2.000"
+],
+[
+"Scaduti 0--30 giorni",
+"60.000",
+"3%",
+"1.800"
+],
+[
+"Scaduti 31--90 giorni",
+"30.000",
+"10%",
+"3.000"
+],
+[
+"Scaduti oltre 90 giorni",
+"10.000",
+"40%",
+"4.000"
+],
+[
+"Totale",
+"300.000",
+"",
+"10.800"
+]
+]
+},
+{
+"type": "p",
+"text": "Il fondo esistente è di 8.000 €: si accantonano 2.800 € (Dare Svalutazione crediti / Avere Fondo svalutazione crediti). I tassi devono derivare dall'esperienza storica corretta con informazioni prospettiche."
+},
+{
+"type": "h",
+"text": "10.5 — Derivato di copertura sul cambio"
+},
+{
+"type": "p",
+"text": "Per il credito di 100.000 USD del modulo 9.6 (fattura al cambio 1,10), il 15 novembre 2027 la società vende a termine 100.000 USD al 15 febbraio 2028 al cambio 1,10: incasserà comunque 90.909,09 €. Al 31 dicembre, nell'ipotesi semplificata che il cambio a termine coincida con quello a pronti (1,08), il contratto vale −1.683,50 € (90.909,09 − 92.592,59)."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Oneri su strumenti derivati",
+"1.683,50",
+""
+],
+[
+"Strumenti finanziari derivati passivi",
+"",
+"1.683,50"
+],
+[
+"Totale",
+"1.683,50",
+"1.683,50"
+]
+]
+},
+{
+"type": "p",
+"text": "La perdita sul derivato compensa l'utile su cambi di 1.683,50 € del credito: l'effetto netto sul risultato è zero. È proprio lo scopo della copertura. IFRS 9 e OIC 32 rilevano i derivati al fair value; l'hedge accounting formale richiede documentazione e test di efficacia e qui non serve, perché credito e derivato passano entrambi dal conto economico."
+},
+{
+"type": "h",
+"text": "10.6 — In SAP"
+},
+{
+"type": "table",
+"rows": [
+[
+"Tema",
+"Dove"
+],
+[
+"Ricavi per obbligazione",
+"SD (condizioni di prezzo e posizioni separate) e, dove installato, SAP Revenue Accounting and Reporting"
+],
+[
+"Passività contrattuali",
+"Conto di risconto passivo, rilascio periodico o automatico da RAR"
+],
+[
+"Finanziamenti",
+"Treasury and Risk Management (Transaction Manager) oppure registrazioni FI con piano del costo ammortizzato"
+],
+[
+"Perdite attese",
+"Report di anzianità crediti (es. S_ALR_87012178) e registrazione del fondo; in alcune soluzioni, funzioni dedicate di valutazione"
+],
+[
+"Derivati",
+"Treasury and Risk Management, valutazione di fine periodo e hedge management"
+]
+]
+},
+{
+"type": "h",
+"text": "10.7 — Laboratorio"
+},
+{
+"type": "p",
+"text": "• Compilare la tabella di ripartizione del prezzo (66.000 €) e verificare che la somma torni.\n• Registrare la fattura del 1° luglio con le tre righe di ricavo e la passività contrattuale.\n• Registrare al 31/12 il rilascio di 2.911,76 € e calcolare i ricavi 2027 (57.264,70 €).\n• Calcolare il TIE del finanziamento e il piano del costo ammortizzato; registrare incasso e interessi 2027.\n• Calcolare la matrice delle perdite attese e l'accantonamento di 2.800 €.\n• Registrare il derivato al 31/12 e verificare che compensi l'utile su cambi del credito."
+},
+{
+"type": "p",
+"text": "Errori tipici. Rilevare tutto il ricavo alla firma del contratto; applicare lo sconto a una sola obbligazione; registrare le commissioni come costo immediato con il costo ammortizzato; calcolare il fondo crediti solo sugli scaduti oltre 90 giorni."
+},
+{
+"type": "h",
+"text": "10.8 — Verifica"
+},
+{
+"type": "p",
+"text": "Indicatori: ricavi 25; costo ammortizzato 25; crediti e perdite attese 25; derivati e riconciliazione 25."
+},
+{
+"type": "table",
+"rows": [
+[
+"Domanda",
+"Risposta"
+],
+[
+"Quanti ricavi si rilevano nel 2027?",
+"57.264,70 €."
+],
+[
+"Qual è il TIE del finanziamento?",
+"5,1038%."
+],
+[
+"Quanto si accantona al fondo svalutazione crediti?",
+"10.800 − 8.000 = 2.800 €."
+],
+[
+"Perché il derivato non cambia il risultato?",
+"Perché la sua perdita compensa l'utile su cambi del credito coperto."
+]
+]
+}
+],
+"11": [
+{
+"type": "p",
+"text": "Durata: 10 ore. Obiettivi: decidere quando capitalizzare i costi di sviluppo; calcolare l'avviamento di un'acquisizione; rilevare imposte anticipate e differite in OIC e IFRS; classificare e misurare i fondi rischi."
+},
+{
+"type": "h",
+"text": "11.1 — Costi di ricerca e sviluppo (IAS 38 / OIC 24)"
+},
+{
+"type": "p",
+"text": "Nel 2027 la società progetta la nuova transenna modulare T300: costi di ricerca 40.000 € (gennaio--giugno) e di sviluppo 60.000 € (luglio--dicembre, quando il progetto supera i criteri di fattibilità tecnica, intenzione e capacità di completarlo, benefici futuri, risorse e misurabilità). La T300 è in vendita dal 1° gennaio 2028; vita utile stimata 5 anni."
+},
+{
+"type": "table",
+"rows": [
+[
+"Voce",
+"IFRS (IAS 38)",
+"OIC (OIC 24, politica del caso)"
+],
+[
+"Ricerca 40.000 €",
+"Costo 2027",
+"Costo 2027"
+],
+[
+"Sviluppo 60.000 €",
+"Capitalizzazione obbligatoria se i criteri sono soddisfatti",
+"Capitalizzazione facoltativa: il caso sceglie di spesarla"
+],
+[
+"Ammortamento dal 2028",
+"12.000 € annui",
+"—"
+],
+[
+"Effetto sul risultato 2027",
+"—",
+"IFRS +60.000 € rispetto a OIC"
+]
+]
+},
+{
+"type": "p",
+"text": "In OIC i costi di ricerca sono sempre costi dell'esercizio. Se la società capitalizza lo sviluppo, fino al completo ammortamento può distribuire utili solo se restano riserve disponibili sufficienti (art. 2426 n. 5 c.c.)."
+},
+{
+"type": "p",
+"text": "Registrazione IFRS (ledger 2L): Dare Costi di sviluppo capitalizzati 60.000 / Avere Costi di sviluppo (rettifica del costo spesato) 60.000."
+},
+{
+"type": "h",
+"text": "11.2 — Aggregazione aziendale (IFRS 3 / OIC 17)"
+},
+{
+"type": "p",
+"text": "Il 31 dicembre 2027 Ferro & Transenne acquista il 100% di Componenti Umbria S.r.l. pagando 900.000 €. Il patrimonio netto contabile della società acquisita è 600.000 €. Valutando attività e passività al fair value emergono: impianti +150.000 €, marchio e lista clienti non iscritti +100.000 €, una garanzia da rilevare −20.000 €. Sulle rettifiche si calcolano le imposte differite (ipotesi IRES 24%, senza IRAP)."
+},
+{
+"type": "table",
+"rows": [
+[
+"Passaggio",
+"Importo (€)"
+],
+[
+"Patrimonio netto contabile",
+"600.000"
+],
+[
+"Maggior valore impianti",
+"+150.000"
+],
+[
+"Marchio e lista clienti",
+"+100.000"
+],
+[
+"Fondo garanzie",
+"−20.000"
+],
+[
+"Imposte differite su 230.000 (24%)",
+"−55.200"
+],
+[
+"Fair value delle attività nette",
+"774.800"
+],
+[
+"Prezzo pagato",
+"900.000"
+],
+[
+"Avviamento",
+"125.200"
+]
+]
+},
+{
+"type": "p",
+"text": "Scrittura di consolidamento (eliminazione della partecipazione):"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Patrimonio netto della controllata",
+"600.000",
+""
+],
+[
+"Impianti",
+"150.000",
+""
+],
+[
+"Marchio e lista clienti",
+"100.000",
+""
+],
+[
+"Avviamento",
+"125.200",
+""
+],
+[
+"Partecipazione in Componenti Umbria",
+"",
+"900.000"
+],
+[
+"Fondo garanzie",
+"",
+"20.000"
+],
+[
+"Fondo imposte differite",
+"",
+"55.200"
+],
+[
+"Totale",
+"975.200",
+"975.200"
+]
+]
+},
+{
+"type": "p",
+"text": "Differenza OIC/IFRS sull'avviamento. In IFRS l'avviamento non si ammortizza: si sottopone ogni anno al test di impairment (IAS 36). In OIC si ammortizza sulla vita utile, al massimo 20 anni; se la vita utile non è stimabile, entro 10 anni. Con 10 anni l'ammortamento OIC è 12.520 € annui: dal 2028 il risultato consolidato IFRS è più alto di 12.520 € all'anno, salvo perdite di valore."
+},
+{
+"type": "p",
+"text": "Con una quota inferiore al 100% si aggiunge il calcolo delle interessenze di minoranza: IFRS 3 consente di valutarle al fair value (avviamento pieno) o in proporzione alle attività nette."
+},
+{
+"type": "h",
+"text": "11.3 — Fiscalità differita (IAS 12 / OIC 25)"
+},
+{
+"type": "p",
+"text": "Le imposte differite nascono quando un valore contabile differisce dal valore fiscale e la differenza si annullerà in futuro. Esistono anche nel bilancio OIC (OIC 25), non solo in IFRS."
+},
+{
+"type": "table",
+"rows": [
+[
+"Differenza temporanea",
+"Principio",
+"Tipo",
+"Imposta (24%)"
+],
+[
+"Fondo rischi legali dell'11.4, non deducibile finché non si paga (art. 107 c. 4 TUIR): 30.000 € in OIC, 26.669,89 € in IFRS",
+"OIC e IFRS",
+"Deducibile",
+"Imposte anticipate 7.200,00 € (OIC) e 6.400,77 € (IFRS)"
+],
+[
+"Plusvalenza 4.000 € dell'automezzo (modulo 3) tassata in 5 quote (art. 86 c. 4 TUIR): 3.200 € rinviati",
+"OIC e IFRS",
+"Imponibile",
+"Imposte differite 768,00 €"
+],
+[
+"Sviluppo capitalizzato solo in IFRS (11.1): 60.000 € già dedotti fiscalmente",
+"Solo IFRS",
+"Imponibile",
+"Imposte differite 14.400,00 €"
+],
+[
+"Rettifiche IFRS della chiusura (9.7): 3.913,56 €",
+"Solo IFRS",
+"Deducibile",
+"Imposte anticipate 939,25 €"
+]
+]
+},
+{
+"type": "p",
+"text": "Esempio di registrazione (fondo rischi legali, ledger OIC 0L):"
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Crediti per imposte anticipate",
+"7.200,00",
+""
+],
+[
+"Imposte anticipate (provento)",
+"",
+"7.200,00"
+],
+[
+"Totale",
+"7.200,00",
+"7.200,00"
+]
+]
+},
+{
+"type": "p",
+"text": "Nel ledger IFRS 2L l'importo è 6.400,77 € (26.669,89 × 24%)."
+},
+{
+"type": "p",
+"text": "Le imposte anticipate si iscrivono solo se è ragionevolmente certo (OIC) o probabile (IFRS) un reddito imponibile futuro sufficiente. La compensazione fra anticipate e differite è ammessa solo alle condizioni dei principi (stessa autorità fiscale e diritto alla compensazione). L'IRAP, esclusa per semplicità, va calcolata a parte sulla propria base imponibile."
+},
+{
+"type": "h",
+"text": "11.4 — Fondi rischi e passività potenziali (IAS 37 / OIC 31)"
+},
+{
+"type": "table",
+"rows": [
+[
+"Probabilità dell'uscita",
+"Trattamento in IFRS e OIC"
+],
+[
+"Probabile",
+"Fondo, se l'importo è stimabile in modo attendibile"
+],
+[
+"Possibile",
+"Solo informativa in nota integrativa"
+],
+[
+"Remota",
+"Nessuna rilevazione"
+]
+]
+},
+{
+"type": "p",
+"text": "Caso. Un cliente cita la società per un difetto di fornitura chiedendo 50.000 €. Il legale ritiene probabile una transazione a 30.000 €, pagabile fra 3 anni. Una seconda causa da 80.000 € è giudicata possibile: va solo descritta in nota integrativa."
+},
+{
+"type": "p",
+"text": "IAS 37 richiede l'attualizzazione quando l'effetto del tempo è rilevante: al tasso del 4%, 30.000 / 1,043 = 26.669,89 €. Nel 2028 il fondo cresce di 1.066,80 € (26.669,89 × 4%), registrati come oneri finanziari. Nel caso didattico il bilancio OIC iscrive il fondo a 30.000 € senza attualizzazione (scelta da verificare caso per caso con OIC 31). Differenza 2027: IFRS +3.330,11 € sul risultato."
+},
+{
+"type": "table",
+"rows": [
+[
+"Conto",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Accantonamento per rischi legali",
+"26.669,89",
+""
+],
+[
+"Fondo rischi legali",
+"",
+"26.669,89"
+],
+[
+"Totale",
+"26.669,89",
+"26.669,89"
+]
+]
+},
+{
+"type": "p",
+"text": "IAS 37 vieta i fondi per costi operativi futuri e ammette i fondi di ristrutturazione solo con un'obbligazione implicita (piano dettagliato e comunicato agli interessati)."
+},
+{
+"type": "h",
+"text": "11.5 — In SAP"
+},
+{
+"type": "table",
+"rows": [
+[
+"Tema",
+"Dove"
+],
+[
+"Sviluppo capitalizzato",
+"Cespite immateriale in FI-AA o progetto PS/ordine interno con regola di liquidazione al cespite in corso"
+],
+[
+"Avviamento e consolidamento",
+"SAP S/4HANA Finance for Group Reporting (eliminazione partecipazioni, rettifiche di fair value)"
+],
+[
+"Imposte differite",
+"Registrazioni specifiche di ledger o soluzioni dedicate al calcolo delle imposte differite"
+],
+[
+"Fondi rischi",
+"Registrazioni FI per ledger; attualizzazione con piano di calcolo esterno o funzioni dedicate"
+]
+]
+},
+{
+"type": "h",
+"text": "11.6 — Laboratorio"
+},
+{
+"type": "p",
+"text": "• Separare ricerca e sviluppo e registrare nel ledger 2L la capitalizzazione di 60.000 €.\n• Calcolare il fair value delle attività nette di Componenti Umbria (774.800 €) e l'avviamento (125.200 €).\n• Registrare la scrittura di eliminazione della partecipazione e verificare che quadri a 975.200 €.\n• Compilare la tabella delle differenze temporanee e calcolare imposte anticipate e differite.\n• Classificare le due cause, registrare il fondo IFRS attualizzato (26.669,89 €) e preparare la nota sulla causa possibile.\n• Preparare il bridge OIC/IFRS 2027 dei soli moduli 10--11: +98,69 € (finanziamento) +60.000 € (sviluppo) +3.330,11 € (fondo) = +63.428,80 € prima delle imposte; le imposte anticipate e differite si calcolano con la tabella 11.3."
+},
+{
+"type": "p",
+"text": "Errori tipici. Capitalizzare i costi di ricerca; ammortizzare l'avviamento nel ledger IFRS; dimenticare le imposte differite sulle rettifiche di fair value; iscrivere un fondo per una causa solo possibile; pensare che la fiscalità differita esista solo in IFRS."
+},
+{
+"type": "h",
+"text": "11.7 — Verifica"
+},
+{
+"type": "p",
+"text": "Indicatori: immateriali 25; aggregazioni 25; fiscalità differita 25; fondi e riconciliazione 25."
+},
+{
+"type": "table",
+"rows": [
+[
+"Domanda",
+"Risposta"
+],
+[
+"Quanto vale l'avviamento di Componenti Umbria?",
+"900.000 − 774.800 = 125.200 €."
+],
+[
+"Si ammortizza l'avviamento in IFRS?",
+"No: si sottopone al test di impairment annuale."
+],
+[
+"Imposte anticipate OIC sul fondo rischi legali di 30.000 €?",
+"30.000 × 24% = 7.200 €."
+],
+[
+"Valore IFRS del fondo per la causa probabile?",
+"30.000 / 1,043 = 26.669,89 €."
+]
+]
+}
+],
+"12": [
+{
+"type": "h",
+"text": "12.1 — Incarico"
+},
+{
+"type": "p",
+"text": "Il CFO richiede il reporting OIC e IFRS della società IT01 al 31 dicembre 2027, le quadrature patrimoniali, il prospetto per segmenti e un memorandum. L’esame è un reporting package individuale verso la Holding, non un consolidamento completo di più società. Le prove riguardano la chiusura dei moduli 1–9; i temi dei moduli 10 e 11 si verificano con le prove di quei moduli e con la domanda orale finale."
+},
+{
+"type": "h",
+"text": "12.2 — Prova 1: OIC (25 punti)"
+},
+{
+"type": "p",
+"text": "Dati iniziali: attività 1.150.000 €, passività e netto 1.150.000 €, utile preliminare 150.000 €. Registrare manutenzioni da ricevere 12.000 €, ammortamento 20.000 €, svalutazione magazzino 5.000 €, ratei attivi 2.000 €. Soluzione: utile OIC ante imposte 115.000 €; totale SP 1.127.000 €."
+},
+{
+"type": "h",
+"text": "12.3 — Prova 2: IFRS (25 punti)"
+},
+{
+"type": "p",
+"text": "Rettifiche: ammortamento aggiuntivo −6.000 €, magazzino +4.000 €, leasing −1.913,56 €. Soluzione: utile IFRS ante imposte 111.086,44 €; attività 1.204.783,89 €; passività 643.697,45 €; netto 561.086,44 €."
+},
+{
+"type": "h",
+"text": "12.4 — Prova 3: segmenti (25 punti)"
+},
+{
+"type": "p",
+"text": "Transenne: ricavi 1.200.000 €, costi industriali 720.000 €, commerciali 120.000 €, amministrativi 90.000 € → risultato 270.000 € e margine 22,5%. Componenti: ricavi 800.000 €, costi 520.000 +60.000 +70.000 € → risultato 150.000 € e margine 18,75%. Costi corporate 50.000 € → risultato operativo gestionale 370.000 €. Il prospetto è autonomo e non riconciliato con l’utile IFRS del caso patrimoniale."
+},
+{
+"type": "h",
+"text": "12.5 — Prova 4: reporting package (25 punti)"
+},
+{
+"type": "p",
+"text": "Produrre trial balance, giornale, bilancio OIC, rettifiche IFRS, bridge, SP IFRS, Segment Report, closing checklist e memorandum. Il memorandum deve evidenziare risultati OIC/IFRS, differenze, quadrature, limiti e controlli da completare."
+},
+{
+"type": "h",
+"text": "12.6 — Introduzione al consolidamento"
+},
+{
+"type": "p",
+"text": "Vendita infragruppo 50.000 €, costo 35.000 €, merce interamente invenduta alla data di chiusura: utile interno 15.000 € da eliminare in consolidamento. Eliminare ricavi e costi infragruppo e ridurre le rimanenze consolidate di 15.000 €; eliminare anche eventuali crediti/debiti reciproci. Le operazioni sono di consolidamento e non si sostituiscono alle scritture individuali. SAP S/4HANA Finance for Group Reporting può supportare il processo secondo l’architettura installata."
+},
+{
+"type": "table",
+"rows": [
+[
+"Scrittura di consolidamento",
+"DARE (€)",
+"AVERE (€)"
+],
+[
+"Ricavi infragruppo",
+"50.000",
+""
+],
+[
+"Costo del venduto infragruppo",
+"",
+"35.000"
+],
+[
+"Rimanenze (eliminazione utile interno)",
+"",
+"15.000"
+],
+[
+"Totale",
+"50.000",
+"50.000"
+]
+]
+},
+{
+"type": "h",
+"text": "12.7 — Griglia di valutazione"
+},
+{
+"type": "table",
+"rows": [
+[
+"Indicatore",
+"Punti",
+"Criterio"
+],
+[
+"Contabilità OIC",
+"25",
+"Scritture e quadrature"
+],
+[
+"Reporting IFRS",
+"25",
+"Bridge e SP"
+],
+[
+"Analisi gestionale",
+"25",
+"Segmenti e margini"
+],
+[
+"Fascicolo CFO",
+"25",
+"Evidenze e relazione"
+],
+[
+"Totale",
+"100",
+"Soglia 75; errori sostanziali non risolti impediscono superamento"
+]
+]
+},
+{
+"type": "h",
+"text": "12.8 — Memorandum modello"
+},
+{
+"type": "p",
+"text": "Alla Direzione Finanziaria di FT International Holding. Oggetto: chiusura 2027 IT01. Risultato OIC ante imposte 115.000 €; rettifiche IFRS nette −3.913,56 €; risultato IFRS ante imposte 111.086,44 €. Stato patrimoniale OIC 1.127.000 €; IFRS 1.204.783,89 €. Nel prospetto gestionale autonomo Transenne presenta margine 22,5% e Componenti 18,75%. La simulazione esclude imposte correnti e differite, disclosure IFRS complete e consolidamento delle altre società. Le riconciliazioni sono complete limitatamente alle ipotesi fornite."
+}
+]
+},
+"quiz": {
+"1": [
+[
+"L'Universal Journal è associato a quale tabella?",
+[
+"ACDOCA",
+"MARA",
+"Solo BKPF"
+],
+0
+],
+[
+"Una fattura fornitore da 1.000 € più IVA 22% genera un debito di?",
+[
+"1.000 €",
+"1.220 €",
+"220 €"
+],
+1
+],
+[
+"In partita doppia deve valere?",
+[
+"Dare = Avere",
+"Dare > Avere",
+"Avere = ricavi"
+],
+0
+],
+[
+"Che cosa identifica in modo univoco un documento FI?",
+[
+"Società, numero documento ed esercizio",
+"Solo il numero documento",
+"Conto e importo"
+],
+0
+]
+],
+"2": [
+[
+"Quale ledger è leading nel nostro laboratorio?",
+[
+"2L",
+"0L",
+"3L"
+],
+1
+],
+[
+"240.000 € in 8 anni danno un ammortamento annuo di?",
+[
+"24.000 €",
+"30.000 €",
+"20.000 €"
+],
+1
+],
+[
+"Che effetto ha il maggior ammortamento IFRS sul risultato rispetto all'OIC?",
+[
+"−6.000 €",
+"+6.000 €",
+"Nessuno"
+],
+0
+],
+[
+"Qual è il risultato IFRS ante imposte del bridge del modulo?",
+[
+"482.000 €",
+"494.000 €",
+"500.000 €"
+],
+0
+]
+],
+"3": [
+[
+"La contabilità cespiti si chiama?",
+[
+"FI-AA",
+"SD",
+"FI-AR"
+],
+0
+],
+[
+"Ammortamento IFRS su 240.000 € in 8 anni?",
+[
+"30.000 €",
+"24.000 €",
+"12.000 €"
+],
+0
+],
+[
+"Ammortamento IFRS annuo dopo l'impairment del 2028 (155.000 € su 6 anni)?",
+[
+"25.833,33 €",
+"30.000 €",
+"19.375,00 €"
+],
+0
+],
+[
+"Plusvalenza sulla vendita dell'automezzo (netto 18.000 €, prezzo 22.000 €)?",
+[
+"4.000 €",
+"22.000 €",
+"8.840 €"
+],
+0
+]
+],
+"4": [
+[
+"IFRS 16 per il locatario prevede generalmente?",
+[
+"Diritto d'uso e passività",
+"Solo il costo dei canoni",
+"Solo un ricavo"
+],
+0
+],
+[
+"L'ammortamento annuo del diritto d'uso del caso è?",
+[
+"30.000 €",
+"26.594,63 €",
+"5.318,93 €"
+],
+1
+],
+[
+"Gli interessi del primo anno sono?",
+[
+"5.318,93 €",
+"30.000 €",
+"26.594,63 €"
+],
+0
+],
+[
+"Qual è il costo IFRS del 2027?",
+[
+"31.913,56 €",
+"30.000,00 €",
+"26.594,63 €"
+],
+0
+]
+],
+"5": [
+[
+"IFRS 8 adotta un approccio?",
+[
+"Management approach",
+"Solo fiscale",
+"Solo per natura"
+],
+0
+],
+[
+"Il risultato attribuito a Transenne è?",
+[
+"270.000 €",
+"150.000 €",
+"370.000 €"
+],
+0
+],
+[
+"A quanto ammontano i costi corporate non attribuiti?",
+[
+"50.000 €",
+"5.000 €",
+"500.000 €"
+],
+0
+],
+[
+"Quanto del credito di 122.000 € della fattura mista va a Transenne?",
+[
+"73.200 €",
+"60.000 €",
+"48.800 €"
+],
+0
+]
+],
+"6": [
+[
+"SALES è una?",
+[
+"Functional Area",
+"Società",
+"Valuta"
+],
+0
+],
+[
+"Il risultato operativo dell'esempio è?",
+[
+"370.000 €",
+"750.000 €",
+"1.630.000 €"
+],
+0
+],
+[
+"Un costo classificato per natura e per funzione è?",
+[
+"Duplicato",
+"Lo stesso costo letto con due dimensioni",
+"Una passività"
+],
+1
+],
+[
+"Costo del venduto di 800 pezzi prodotti a 150 €?",
+[
+"120.000 €",
+"150.000 €",
+"30.000 €"
+],
+0
+]
+],
+"7": [
+[
+"Quale metodo IAS 2 non ammette?",
+[
+"LIFO",
+"FIFO",
+"Media ponderata"
+],
+0
+],
+[
+"Rimanenze finali FIFO del caso?",
+[
+"1.640 €",
+"1.240 €",
+"1.440 €"
+],
+0
+],
+[
+"Il conto GR/IR riconcilia?",
+[
+"Entrate merci e fatture",
+"Banche e stipendi",
+"Imposte e crediti"
+],
+0
+],
+[
+"Svalutazione NRV di 500 pezzi (costo 100 €, NRV 90 €)?",
+[
+"5.000 €",
+"500 €",
+"10.000 €"
+],
+0
+]
+],
+"8": [
+[
+"Scostamento della manutenzione?",
+[
+"18.000 € sfavorevole",
+"18.000 € favorevole",
+"0 €"
+],
+0
+],
+[
+"Allocazione della manutenzione a Transenne?",
+[
+"118.800 €",
+"79.200 €",
+"198.000 €"
+],
+0
+],
+[
+"Margine percentuale di T100?",
+[
+"40%",
+"30%",
+"35%"
+],
+0
+],
+[
+"Effetto volume sullo scostamento di T100?",
+[
+"−40.000 €",
+"−18.000 €",
+"−76.000 €"
+],
+0
+]
+],
+"9": [
+[
+"Utile OIC assestato?",
+[
+"115.000 €",
+"150.000 €",
+"111.086,44 €"
+],
+0
+],
+[
+"Utile IFRS ante imposte?",
+[
+"111.086,44 €",
+"115.000 €",
+"370.000 €"
+],
+0
+],
+[
+"Totale attività IFRS?",
+[
+"1.204.783,89 €",
+"1.127.000 €",
+"1.150.000 €"
+],
+0
+],
+[
+"Credito di 100.000 USD da cambio 1,10 a 1,08: differenza al 31/12?",
+[
+"Utile 1.683,50 €",
+"Perdita 1.683,50 €",
+"Nessuna"
+],
+0
+]
+],
+"10": [
+[
+"Quanti ricavi si rilevano nel 2027 sul contratto con il Comune?",
+[
+"57.264,70 €",
+"66.000,00 €",
+"54.352,94 €"
+],
+0
+],
+[
+"Come si ripartisce lo sconto di 2.000 €?",
+[
+"Su tutte le obbligazioni, in proporzione ai prezzi a sé stanti",
+"Solo sulla manutenzione",
+"Solo sulle transenne"
+],
+0
+],
+[
+"Qual è il TIE del finanziamento con commissioni di 6.000 €?",
+[
+"5,10%",
+"4,00%",
+"3,00%"
+],
+0
+],
+[
+"Accantonamento al fondo svalutazione crediti (perdite attese 10.800 €, fondo esistente 8.000 €)?",
+[
+"2.800 €",
+"10.800 €",
+"4.000 €"
+],
+0
+]
+],
+"11": [
+[
+"Avviamento di Componenti Umbria?",
+[
+"125.200 €",
+"300.000 €",
+"225.000 €"
+],
+0
+],
+[
+"Come si tratta l'avviamento in IFRS?",
+[
+"Test di impairment annuale, nessun ammortamento",
+"Ammortamento in 10 anni",
+"Ammortamento in 20 anni"
+],
+0
+],
+[
+"Una causa giudicata «possibile» richiede?",
+[
+"Solo informativa in nota integrativa",
+"Un fondo rischi",
+"Nessuna informazione"
+],
+0
+],
+[
+"I costi di ricerca si…",
+[
+"Rilevano sempre a costo",
+"Capitalizzano sempre",
+"Capitalizzano solo in IFRS"
+],
+0
+]
+],
+"12": [
+[
+"Esame: punti per indicatore?",
+[
+"25",
+"20",
+"10"
+],
+0
+],
+[
+"Soglia di superamento?",
+[
+"75/100",
+"50/100",
+"90/100"
+],
+0
+],
+[
+"Utile interno su vendita infragruppo di 50.000 € con costo 35.000 €?",
+[
+"15.000 €",
+"50.000 €",
+"35.000 €"
+],
+0
+],
+[
+"Rettifiche IFRS nette rispetto al risultato OIC?",
+[
+"−3.913,56 €",
+"+3.913,56 €",
+"−6.000,00 €"
+],
+0
+]
+]
+},
+"attesi": {
+"1": {
+"supplier": 1220,
+"invoice": 2440
+},
+"2": {
+"depdiff": -6000,
+"bridge": 482000
+},
+"3": {
+"depreciation": 30000,
+"newdep": 25833.33,
+"gain": 4000
+},
+"4": {
+"rou": 106378.52,
+"interest": 5318.93,
+"ifrscost": 31913.56
+},
+"5": {
+"segments": 370000,
+"trans": 270000
+},
+"6": {
+"ebit": 370000,
+"gross": 750000
+},
+"7": {
+"fifo": 1640,
+"lifo": 1240,
+"average": 1440,
+"nrv": 5000
+},
+"8": {
+"alloc": 118800,
+"variance": -76000
+},
+"9": {
+"oic": 115000,
+"ifrs": 111086.44,
+"assets": 1204783.89
+},
+"10": {
+"revenue": 57264.7,
+"contract": 8735.3,
+"eir": 5.1038,
+"ecl": 2800,
+"loanint": 9901.31
+},
+"11": {
+"fvnet": 774800,
+"goodwill": 125200,
+"dta": 7200,
+"provision": 26669.89,
+"bridge1011": 63428.8
+},
+"12": {
+"oic": 115000,
+"ifrs": 111086.44,
+"segments": 370000
+}
+},
+"scritture": {
+"1": [
+{
+"t": "Fattura fornitore",
+"l": null,
+"d": [
+[
+"Merci/servizi",
+1000
+],
+[
+"IVA a credito",
+220
+]
+],
+"a": [
+[
+"Debiti fornitori",
+1220
+]
+]
+},
+{
+"t": "Fattura cliente",
+"l": null,
+"d": [
+[
+"Crediti clienti",
+2440
+]
+],
+"a": [
+[
+"Ricavi vendite",
+2000
+],
+[
+"IVA a debito",
+440
+]
+]
+},
+{
+"t": "Incasso cliente",
+"l": null,
+"d": [
+[
+"Banca",
+2440
+]
+],
+"a": [
+[
+"Crediti clienti",
+2440
+]
+]
+},
+{
+"t": "Pagamento fornitore",
+"l": null,
+"d": [
+[
+"Debiti fornitori",
+1220
+]
+],
+"a": [
+[
+"Banca",
+1220
+]
+]
+}
+],
+"2": [
+{
+"t": "Ammortamento OIC",
+"l": "0L",
+"d": [
+[
+"Ammortamenti",
+24000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+24000
+]
+]
+},
+{
+"t": "Ammortamento IFRS",
+"l": "2L",
+"d": [
+[
+"Ammortamenti",
+30000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+30000
+]
+]
+},
+{
+"t": "Accantonamento IFRS",
+"l": "2L",
+"d": [
+[
+"Oneri per accantonamento IFRS",
+12000
+]
+],
+"a": [
+[
+"Fondo rischi IFRS",
+12000
+]
+]
+}
+],
+"3": [
+{
+"t": "Acquisto impianto",
+"l": null,
+"d": [
+[
+"Impianti",
+240000
+],
+[
+"IVA a credito",
+52800
+]
+],
+"a": [
+[
+"Debiti fornitori",
+292800
+]
+]
+},
+{
+"t": "Ammortamento OIC",
+"l": "0L",
+"d": [
+[
+"Ammortamenti",
+24000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+24000
+]
+]
+},
+{
+"t": "Ammortamento IFRS",
+"l": "2L",
+"d": [
+[
+"Ammortamenti",
+30000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+30000
+]
+]
+},
+{
+"t": "Impairment IFRS",
+"l": "2L",
+"d": [
+[
+"Svalutazione impianti",
+25000
+]
+],
+"a": [
+[
+"Fondo svalutazione impianti",
+25000
+]
+]
+},
+{
+"t": "Vendita automezzo",
+"l": null,
+"d": [
+[
+"Crediti clienti",
+26840
+],
+[
+"Fondo ammortamento",
+42000
+]
+],
+"a": [
+[
+"Automezzi",
+60000
+],
+[
+"IVA a debito",
+4840
+],
+[
+"Plusvalenza",
+4000
+]
+]
+}
+],
+"4": [
+{
+"t": "Rilevazione iniziale IFRS 16",
+"l": "2L",
+"d": [
+[
+"Diritto d'uso impianti",
+106378.52
+]
+],
+"a": [
+[
+"Passività per leasing",
+106378.52
+]
+]
+},
+{
+"t": "Interessi 2027",
+"l": "2L",
+"d": [
+[
+"Interessi passivi su leasing",
+5318.93
+]
+],
+"a": [
+[
+"Passività per leasing",
+5318.93
+]
+]
+},
+{
+"t": "Pagamento canone (IFRS)",
+"l": "2L",
+"d": [
+[
+"Passività per leasing",
+30000
+]
+],
+"a": [
+[
+"Banca",
+30000
+]
+]
+},
+{
+"t": "Ammortamento diritto d'uso",
+"l": "2L",
+"d": [
+[
+"Ammortamento diritto d'uso",
+26594.63
+]
+],
+"a": [
+[
+"Fondo ammortamento diritto d'uso",
+26594.63
+]
+]
+},
+{
+"t": "Canone di leasing (OIC)",
+"l": "0L",
+"d": [
+[
+"Canoni di leasing",
+30000
+]
+],
+"a": [
+[
+"Banca",
+30000
+]
+]
+}
+],
+"5": [
+{
+"t": "Fattura con Profit Center",
+"l": null,
+"d": [
+[
+"Crediti clienti",
+61000
+]
+],
+"a": [
+[
+"Ricavi transenne",
+50000
+],
+[
+"IVA a debito",
+11000
+]
+]
+}
+],
+"6": [
+{
+"t": "Personale commerciale",
+"l": null,
+"d": [
+[
+"Personale commerciale",
+4000
+]
+],
+"a": [
+[
+"Debiti verso il personale",
+4000
+]
+]
+}
+],
+"7": [
+{
+"t": "Entrata merci",
+"l": null,
+"d": [
+[
+"Rimanenze componenti",
+1000
+]
+],
+"a": [
+[
+"Fatture da ricevere (GR/IR)",
+1000
+]
+]
+},
+{
+"t": "Fattura fornitore MIRO",
+"l": null,
+"d": [
+[
+"Fatture da ricevere (GR/IR)",
+1000
+],
+[
+"IVA a credito",
+220
+]
+],
+"a": [
+[
+"Debiti fornitori",
+1220
+]
+]
+},
+{
+"t": "Differenza inventariale",
+"l": null,
+"d": [
+[
+"Differenze inventariali passive",
+48
+]
+],
+"a": [
+[
+"Rimanenze",
+48
+]
+]
+},
+{
+"t": "Svalutazione NRV",
+"l": null,
+"d": [
+[
+"Svalutazione rimanenze",
+5000
+]
+],
+"a": [
+[
+"Fondo svalutazione rimanenze",
+5000
+]
+]
+}
+],
+"8": [
+{
+"t": "Manutenzione esterna",
+"l": null,
+"d": [
+[
+"Manutenzioni esterne",
+5000
+],
+[
+"IVA a credito",
+1100
+]
+],
+"a": [
+[
+"Debiti fornitori",
+6100
+]
+]
+}
+],
+"9": [
+{
+"t": "Fattura da ricevere",
+"l": null,
+"d": [
+[
+"Costi di manutenzione",
+12000
+]
+],
+"a": [
+[
+"Fatture da ricevere",
+12000
+]
+]
+},
+{
+"t": "Ammortamento di chiusura",
+"l": null,
+"d": [
+[
+"Ammortamenti",
+20000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+20000
+]
+]
+},
+{
+"t": "Svalutazione magazzino",
+"l": null,
+"d": [
+[
+"Svalutazione rimanenze",
+5000
+]
+],
+"a": [
+[
+"Fondo svalutazione rimanenze",
+5000
+]
+]
+},
+{
+"t": "Ratei attivi",
+"l": null,
+"d": [
+[
+"Ratei attivi",
+2000
+]
+],
+"a": [
+[
+"Interessi attivi",
+2000
+]
+]
+},
+{
+"t": "Valutazione cambi",
+"l": null,
+"d": [
+[
+"Crediti clienti",
+1683.5
+]
+],
+"a": [
+[
+"Utili su cambi da valutazione",
+1683.5
+]
+]
+},
+{
+"t": "Imposte anticipate IFRS",
+"l": "2L",
+"d": [
+[
+"Crediti per imposte anticipate",
+939.25
+]
+],
+"a": [
+[
+"Imposte differite (provento)",
+939.25
+]
+]
+}
+],
+"10": [
+{
+"t": "Fattura contratto con il Comune",
+"l": null,
+"d": [
+[
+"Crediti clienti",
+80520
+]
+],
+"a": [
+[
+"Ricavi vendita transenne",
+48529.41
+],
+[
+"Ricavi per servizi di montaggio",
+5823.53
+],
+[
+"Passività contrattuali",
+11647.06
+],
+[
+"IVA a debito",
+14520
+]
+]
+},
+{
+"t": "Rilascio manutenzione 2027",
+"l": null,
+"d": [
+[
+"Passività contrattuali",
+2911.76
+]
+],
+"a": [
+[
+"Ricavi per manutenzione",
+2911.76
+]
+]
+},
+{
+"t": "Incasso del finanziamento",
+"l": null,
+"d": [
+[
+"Banca",
+194000
+]
+],
+"a": [
+[
+"Debiti verso banche",
+194000
+]
+]
+},
+{
+"t": "Interessi 2027 al costo ammortizzato",
+"l": null,
+"d": [
+[
+"Interessi passivi",
+9901.31
+]
+],
+"a": [
+[
+"Debiti verso banche",
+1901.31
+],
+[
+"Banca",
+8000
+]
+]
+},
+{
+"t": "Perdite attese sui crediti",
+"l": null,
+"d": [
+[
+"Svalutazione crediti",
+2800
+]
+],
+"a": [
+[
+"Fondo svalutazione crediti",
+2800
+]
+]
+},
+{
+"t": "Derivato su cambi al 31/12",
+"l": null,
+"d": [
+[
+"Oneri su strumenti derivati",
+1683.5
+]
+],
+"a": [
+[
+"Strumenti finanziari derivati passivi",
+1683.5
+]
+]
+}
+],
+"11": [
+{
+"t": "Capitalizzazione sviluppo IFRS",
+"l": "2L",
+"d": [
+[
+"Costi di sviluppo capitalizzati",
+60000
+]
+],
+"a": [
+[
+"Costi di sviluppo",
+60000
+]
+]
+},
+{
+"t": "Eliminazione partecipazione",
+"l": null,
+"d": [
+[
+"Patrimonio netto della controllata",
+600000
+],
+[
+"Impianti",
+150000
+],
+[
+"Marchio e lista clienti",
+100000
+],
+[
+"Avviamento",
+125200
+]
+],
+"a": [
+[
+"Partecipazione in Componenti Umbria",
+900000
+],
+[
+"Fondo garanzie",
+20000
+],
+[
+"Fondo imposte differite",
+55200
+]
+]
+},
+{
+"t": "Fondo rischi legali OIC",
+"l": "0L",
+"d": [
+[
+"Accantonamento per rischi legali",
+30000
+]
+],
+"a": [
+[
+"Fondo rischi legali",
+30000
+]
+]
+},
+{
+"t": "Fondo rischi legali IFRS attualizzato",
+"l": "2L",
+"d": [
+[
+"Accantonamento per rischi legali",
+26669.89
+]
+],
+"a": [
+[
+"Fondo rischi legali",
+26669.89
+]
+]
+},
+{
+"t": "Imposte anticipate OIC sul fondo",
+"l": "0L",
+"d": [
+[
+"Crediti per imposte anticipate",
+7200
+]
+],
+"a": [
+[
+"Imposte anticipate (provento)",
+7200
+]
+]
+},
+{
+"t": "Imposte anticipate IFRS sul fondo",
+"l": "2L",
+"d": [
+[
+"Crediti per imposte anticipate",
+6400.77
+]
+],
+"a": [
+[
+"Imposte anticipate (provento)",
+6400.77
+]
+]
+},
+{
+"t": "Imposte differite sullo sviluppo IFRS",
+"l": "2L",
+"d": [
+[
+"Imposte differite (onere)",
+14400
+]
+],
+"a": [
+[
+"Fondo imposte differite",
+14400
+]
+]
+}
+],
+"12": [
+{
+"t": "Eliminazione utile infragruppo",
+"l": null,
+"d": [
+[
+"Ricavi infragruppo",
+50000
+]
+],
+"a": [
+[
+"Costo del venduto infragruppo",
+35000
+],
+[
+"Rimanenze",
+15000
+]
+]
+},
+{
+"t": "Fattura da ricevere",
+"l": null,
+"d": [
+[
+"Costi di manutenzione",
+12000
+]
+],
+"a": [
+[
+"Fatture da ricevere",
+12000
+]
+]
+},
+{
+"t": "Ammortamento di chiusura",
+"l": null,
+"d": [
+[
+"Ammortamenti",
+20000
+]
+],
+"a": [
+[
+"Fondo ammortamento",
+20000
+]
+]
+},
+{
+"t": "Svalutazione magazzino",
+"l": null,
+"d": [
+[
+"Svalutazione rimanenze",
+5000
+]
+],
+"a": [
+[
+"Fondo svalutazione rimanenze",
+5000
+]
+]
+},
+{
+"t": "Ratei attivi",
+"l": null,
+"d": [
+[
+"Ratei attivi",
+2000
+]
+],
+"a": [
+[
+"Interessi attivi",
+2000
+]
+]
+}
+]
+},
+"conti": [
+"Accantonamento per rischi legali",
+"Ammortamenti",
+"Ammortamento diritto d'uso",
+"Automezzi",
+"Avviamento",
+"Banca",
+"Canoni di leasing",
+"Costi di manutenzione",
+"Costi di sviluppo",
+"Costi di sviluppo capitalizzati",
+"Costo del venduto infragruppo",
+"Crediti clienti",
+"Crediti per imposte anticipate",
+"Debiti fornitori",
+"Debiti verso banche",
+"Debiti verso il personale",
+"Differenze inventariali passive",
+"Diritto d'uso impianti",
+"Fatture da ricevere",
+"Fatture da ricevere (GR/IR)",
+"Fondo ammortamento",
+"Fondo ammortamento diritto d'uso",
+"Fondo garanzie",
+"Fondo imposte differite",
+"Fondo rischi IFRS",
+"Fondo rischi legali",
+"Fondo svalutazione crediti",
+"Fondo svalutazione impianti",
+"Fondo svalutazione rimanenze",
+"Impianti",
+"Imposte anticipate (provento)",
+"Imposte differite (onere)",
+"Imposte differite (provento)",
+"Interessi attivi",
+"Interessi passivi",
+"Interessi passivi su leasing",
+"IVA a credito",
+"IVA a debito",
+"Manutenzioni esterne",
+"Marchio e lista clienti",
+"Merci/servizi",
+"Oneri per accantonamento IFRS",
+"Oneri su strumenti derivati",
+"Partecipazione in Componenti Umbria",
+"Passività contrattuali",
+"Passività per leasing",
+"Patrimonio netto della controllata",
+"Personale commerciale",
+"Plusvalenza",
+"Ratei attivi",
+"Ricavi infragruppo",
+"Ricavi per manutenzione",
+"Ricavi per servizi di montaggio",
+"Ricavi transenne",
+"Ricavi vendita transenne",
+"Ricavi vendite",
+"Rimanenze",
+"Rimanenze componenti",
+"Strumenti finanziari derivati passivi",
+"Svalutazione crediti",
+"Svalutazione impianti",
+"Svalutazione rimanenze",
+"Utili su cambi da valutazione"
+],
+"etichette": {
+"supplier": "Totale fattura fornitore (€)",
+"invoice": "Totale fattura cliente (€)",
+"depdiff": "Effetto del maggior ammortamento IFRS sul risultato (€, con segno)",
+"bridge": "Risultato IFRS ante imposte del bridge (€)",
+"newdep": "Ammortamento IFRS dopo l’impairment (€)",
+"gain": "Plusvalenza automezzo (€)",
+"ifrscost": "Costo IFRS 2027 del leasing (€)",
+"trans": "Risultato attribuito Transenne (€)",
+"gross": "Margine lordo per funzione (€)",
+"nrv": "Svalutazione NRV (€)",
+"alloc": "Manutenzione allocata a Transenne (€)",
+"revenue": "Ricavi 2027 del contratto con il Comune (€)",
+"contract": "Passività contrattuale al 31/12/2027 (€)",
+"eir": "TIE del finanziamento (%, es. 5,1038)",
+"ecl": "Accantonamento perdite attese (€)",
+"loanint": "Interessi 2027 al costo ammortizzato (€)",
+"fvnet": "Fair value attività nette acquisite (€)",
+"goodwill": "Avviamento (€)",
+"dta": "Imposte anticipate OIC sul fondo rischi legali (€)",
+"provision": "Fondo rischi legali IFRS attualizzato (€)",
+"bridge1011": "Bridge OIC/IFRS moduli 10–11 ante imposte (€)",
+"assets": "Totale attività IFRS (€)",
+"depreciation": "Ammortamento IFRS (€)",
+"rou": "Diritto d’uso iniziale (€)",
+"interest": "Interessi anno 1 (€)",
+"segments": "Risultato segmenti netto corporate (€)",
+"ebit": "Risultato operativo (€)",
+"fifo": "Rimanenze FIFO (€)",
+"lifo": "Rimanenze LIFO (€)",
+"average": "Rimanenze media (€)",
+"variance": "Scostamento totale (€)",
+"oic": "Utile OIC (€)",
+"ifrs": "Utile IFRS (€)"
+}
+}

@@ -1,0 +1,19 @@
+{% extends "ragioneria_internazionale/_modulo.html" %}
+{% block pagina %}
+<section class="ri-card">
+<h2>Test del modulo</h2>
+<p>{{ domande | length }} domande. Si supera con almeno {{ sv.SOGLIA }}/100, la stessa soglia del corso. {% if stato_r and stato_r.quiz_tentativi %}Tentativi fatti: {{ stato_r.quiz_tentativi }} · ultimo punteggio <b>{{ stato_r.quiz_punti }}/100 · {{ 'superato' if stato_r.quiz_superato else 'da ripetere' }}</b>.{% endif %}</p>
+<form method="post">
+<input type="hidden" name="csrf" value="{{ csrf_token() }}">
+{% for d in domande %}
+<fieldset class="ri-dom"><legend><b>{{ d.i + 1 }}. {{ d.testo }}</b></legend>
+{% for j, testo in d.opzioni %}
+<label class="{% if mostra and j == d.giusta %}giusta{% elif mostra and j == d.scelta %}errata{% endif %}"><input type="radio" name="q{{ d.i }}" value="{{ j }}" {{ 'checked' if d.scelta == j }}> {{ testo }}{% if mostra and j == d.giusta %} ✓{% endif %}</label>
+{% endfor %}
+</fieldset>
+{% endfor %}
+<p><button class="msa-btn">Correggi il test</button></p>
+</form>
+</section>
+{% endblock %}
+{% block tutor %}<ol><li>Rispondi a tutte le domande.</li><li>Premi «Correggi»: vedi la risposta giusta di ogni domanda.</li><li>Ripassa il manuale e ripeti se serve.</li></ol>{% endblock %}
