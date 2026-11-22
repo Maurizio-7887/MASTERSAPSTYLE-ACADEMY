@@ -1,0 +1,15 @@
+{% extends "ragioneria_internazionale/_modulo.html" %}
+{% block pagina %}
+<section class="ri-card">
+<h2>Obiettivi operativi</h2>
+<p>Sei Senior Accountant di <b>IT01 — Ferro & Transenne International</b>. Completa le attività del modulo con registrazioni verificabili, riconciliazioni e relazione al CFO. Spunta un passo solo quando lo hai davvero eseguito.</p>
+<form method="post" action="{{ url_for('ragioneria_internazionale.passi', n=n) }}">
+<input type="hidden" name="csrf" value="{{ csrf_token() }}">
+{% for t in m.tasks %}
+<label style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #e3e9ef"><input type="checkbox" name="passo" value="{{ loop.index0 }}" {{ 'checked' if loop.index0 in spuntati }}> <span><b>Passo {{ loop.index }}.</b> {{ t }}</span></label>
+{% endfor %}
+<p><button class="msa-btn">Salva i passi</button> <a class="msa-btn sec" href="{{ url_for('ragioneria_internazionale.manuale', n=n) }}">Apri il manuale del modulo →</a></p>
+</form>
+</section>
+{% endblock %}
+{% block tutor %}<ol><li>Leggi gli obiettivi.</li><li>Studia il manuale del modulo.</li><li>Fai laboratorio, libro giornale e test, in quest'ordine.</li></ol><div class="ri-hint"><b>Dopo:</b> apri il Manuale.</div>{% endblock %}

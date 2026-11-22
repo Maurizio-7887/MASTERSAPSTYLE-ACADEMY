@@ -1,0 +1,27 @@
+{% extends "ragioneria_internazionale/_base.html" %}
+{% block titolo %}{{ al.nome }} · ragioneria internazionale{% endblock %}
+{% block ri %}
+{% include "docente/_menu.html" %}
+<h1>{{ al.nome }} <small>({{ al.username }})</small></h1>
+<p>Tempo di lavoro stimato nel corso: <b>{{ durata(sec) }}</b> · {{ azioni }} azioni · ultima attività {{ ora_italiana(ultima) }} · <a href="{{ url_for('ragioneria_internazionale.docente') }}">← tutta la classe</a></p>
+{% for d in dettagli %}{% set x = d.rip %}
+<section class="ri-card" id="m{{ x.n }}">
+<h2>Modulo {{ x.n }} · {{ x.m.title }} {% if x.completo %}<span class="ri-ok">✓ completo</span>{% endif %}</h2>
+<p>Passi {{ x.passi }}/{{ x.passi_tot }} · Laboratorio {{ x.lab_giusti }}/{{ x.lab_campi }} · Scritture del manuale {{ x.scritture }}/{{ x.scritture_tot }} · Test {{ x.quiz if x.quiz is not none else '—' }}/100 ({{ d.tentativi }} tentativi) · Autovalutazione {{ x.auto if x.auto is not none else '—' }}/100</p>
+{% if d.valori %}<details><summary>Risultati del laboratorio</summary><table class="ri-tab"><tr><th>Campo</th><th>Scritto</th><th>Atteso</th><th>Esito</th></tr>
+{% for k, att in sv.ATTESI[x.n].items() %}<tr><td>{{ sv.ETICHETTE[k] }}</td><td class="n">{{ d.valori.get(k, '') }}</td><td class="n">{{ att | euro }}</td><td class="{{ 'ri-ok' if d.esito.get(k) else 'ri-ko' }}">{{ '✓' if d.esito.get(k) else '✗' }}</td></tr>{% endfor %}</table></details>{% endif %}
+{% if d.docs %}<details><summary>Libro giornale ({{ d.docs | length }} documenti)</summary><table class="ri-tab"><tr><th>Ledger</th><th>Rif.</th><th>Righe</th><th>Esito</th></tr>
+{% for doc in d.docs %}<tr><td>{{ doc.ledger }}</td><td>{{ doc.riferimento }}<br><small>{{ ora_italiana(doc.creato) }}</small></td><td><small>{% for r in righe_di(doc) %}{{ r.conto }} {{ 'D' if r.dare else 'A' }} {{ ((r.dare or r.avere) / 100) | euro }}<br>{% endfor %}</small></td><td class="{{ 'ri-ok' if doc.ok else 'ri-ko' }}"><small>{{ doc.esito }}</small></td></tr>{% endfor %}</table></details>{% endif %}
+<form method="post" action="{{ url_for('ragioneria_internazionale.voto', uid=al.id, n=x.n) }}" style="margin-top:10px">
+<input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<div class="ri-voti">{% for i in d.ind %}<div><label><b>{{ i }}</b></label><input type="number" min="0" max="25" step="1" name="p{{ loop.index0 }}" value="{{ d.voto[loop.index0] if d.voto else '' }}"></div>{% endfor %}</div>
+<p><textarea name="nota" rows="2" style="width:100%;padding:8px;border:1px solid #c6d5e0;border-radius:8px" placeholder="Nota per l'allievo (la vede nella pagina Valutazione)">{{ d.nota }}</textarea></p>
+<button class="msa-btn">Salva il voto</button> {% if d.voto %}<b>{{ d.voto | sum }}/100</b> <small>corretto il {{ ora_italiana(d.corretto) }}</small>{% endif %}
+</form>
+</section>
+{% endfor %}
+<section class="ri-card"><h2>Diario delle azioni (ultime 80)</h2>
+<table class="ri-tab"><tr><th>Quando</th><th>Modulo</th><th>Tipo</th><th>Che cosa</th></tr>
+{% for e in diario %}<tr><td>{{ ora_italiana(e.quando) }}</td><td>{{ e.modulo or '' }}</td><td>{{ e.tipo }}</td><td>{{ e.testo }}</td></tr>{% else %}<tr><td colspan="4">Nessuna azione ancora.</td></tr>{% endfor %}
+</table></section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "ragioneria_internazionale/_base.html" %}
+{% block titolo %}Ragioneria internazionale IFRS e OIC{% endblock %}
+{% block ri %}
+<div class="ri-hero"><small>FIRENZE · AMMINISTRAZIONE · TERZO PASSO</small>
+  <h1>🌍 Ragioneria internazionale IFRS e OIC</h1>
+  <p>12 moduli · {{ ore }} ore · il caso Ferro & Transenne International con il bilancio OIC (ledger 0L) e il reporting IFRS (ledger 2L), dal libro giornale fino allo stato patrimoniale quadrato e al bridge fra i due risultati.</p></div>
+<div class="ri-hint"><b>Quando farlo:</b> dopo aver imparato bene l'esercizio ERP e la ragioneria OIC (teoria e quiz). Qui non si lavora sul simulatore ERP: ogni modulo ha manuale, laboratorio, libro giornale, test e valutazione, e il docente vede il tuo lavoro.</div>
+<p><b>Moduli completati: {{ completi }} / {{ rip | length }}</b> <small class="ri-nd">(completo = laboratorio giusto, tutte le scritture del manuale registrate e test superato)</small></p>
+<div class="ri-griglia">
+{% for x in rip %}
+  <a href="{{ url_for('ragioneria_internazionale.obiettivi', n=x.n) }}">
+    <span class="num">MODULO {{ '%02d' % x.n }}</span> {% if x.completo %}<b class="ri-ok">✓ completo</b>{% endif %}
+    <h3 style="margin:4px 0 6px">{{ x.m.title }}</h3>
+    <small>{{ x.m.hours }} ore · passi {{ x.passi }}/{{ x.passi_tot }} · laboratorio {{ x.lab_giusti }}/{{ x.lab_campi }} · scritture {{ x.scritture }}/{{ x.scritture_tot }} · test {{ x.quiz if x.quiz is not none else '—' }}{% if x.voto is not none %} · <b>voto {{ x.voto }}/100</b>{% endif %}</small>
+  </a>
+{% endfor %}
+</div>
+{% endblock %}
