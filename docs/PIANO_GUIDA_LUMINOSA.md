@@ -65,7 +65,7 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 | 2 | Master ERP PMI (`MASTERERP-PMI-ACADEMY`) | ✅ | 22 esercizi, 91 passi, robot fino in fondo (PR #1, #2) | — | — | — |
 | 3 | Laboratorio 0 e Blocco 2 (file HTML Firenze) | ✅ | Luce, nuvoletta, pannello docente | — | — | — |
 | 4 | MasterExecutive (`MASTEREXECUTIVE-ASSISTANT`) | 🟡 | Virgilio dice cosa fare; laboratorio documenti commerciali con campo che brilla in giallo | Nuvoletta «cosa stiamo facendo»; luce nei simulatori di fatturazione e negli scenari | 1 sessione | **1** (allievi Regione Umbria) |
-| 5 | MasterPayroll UF4 (`MASTERPAYROLL-ACADEMY`) | 🟡 | 2 esercizi guidati, 75 passi con caselle (`passi` con `campi`) | Luce + nuvoletta + spiegazioni | 1 sessione | **2** |
+| 5 | MasterPayroll UF4 (`MASTERPAYROLL-ACADEMY`) | ✅ | 2 esercizi guidati, 75 passi: luce dalle etichette dei passi + nuvoletta + 61 spiegazioni (PR #3) | Merge e controllo del deploy | — | — |
 | 6 | MasterSupplyChain (`MASTERSUPPLYCHAIN-ACADEMY`) | 🟡 | Esercitazione «30 giorni» con finestrella guida (`app/scm/guida.py`, ~20 passi) | Luce + nuvoletta; passi dentro le pagine del simulatore | 1 sessione | **3** |
 | 7 | MASTER-PROJECT (`MASTER-PROJECT`) | ✅ | Tutor con 19 passi: luce automatica + nuvoletta + spiegazioni (PR #11) | Merge e controllo del deploy | — | — |
 | 8 | MasterLedger Academy (`MasterLedger-Academy`) | 🔴 | 299 blocchi in 16 percorsi; esercizio 2026/2027; laboratori automotive (14 pagine), BPC (9), chiusura (7), libro (7), qualità (5), autoimpiego, prova | Guida passo passo da scrivere; partire da ragioneria base e avanzato | 3–4 sessioni | **5** |
@@ -75,7 +75,7 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 | 12 | Master Automation Academy (`MASTER-AUTOMATION-ACADEMY`) | ⏸️ | 6 moduli con quiz; simulatori non ancora caricati | Caricare i simulatori, poi la guida | dopo l'import | — |
 | 13 | PowerAutomate-and-Fabric | ⏸️ | Repository vuoto | — | — | — |
 
-**Totale stimato:** 11 sessioni (gruppo 🟡: 3 sessioni; gruppo 🔴: 7–8 sessioni).
+**Totale stimato:** 10 sessioni (gruppo 🟡: 2 sessioni; gruppo 🔴: 7–8 sessioni).
 
 ## 5. Lista di controllo per corso
 
@@ -86,9 +86,11 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 - [ ] Prova del robot · test · deploy
 
 ### 5 · MasterPayroll UF4
-- [ ] Luce automatica dai `campi` dei 75 passi
-- [ ] Nuvoletta + spiegazioni per «ottobre–dicembre 2026» (35 passi) e «esercizio completo» (40 passi)
-- [ ] Prova del robot · test · deploy
+- [x] Luce automatica dai `campi` dei 75 passi (caselle trovate dalle etichette)
+- [x] Nuvoletta + spiegazioni per «ottobre–dicembre 2026» (35 passi) e «esercizio completo» (40 passi)
+- [x] Test (51 passano) · prova nel browser: passo della malattia fatto seguendo solo la luce, 8 passi controllati
+- [ ] Prova del robot su tutti i 75 passi (molti passi sono letture o azioni su tabelle: da fare a mano)
+- [ ] Merge della PR #3 e controllo del deploy
 
 ### 6 · MasterSupplyChain
 - [ ] Luce + nuvoletta sui passi di `app/scm/guida.py`
@@ -129,3 +131,4 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 | 22/11/2026 | Master ERP PMI | «Verifica E12» severa: serve il risconto dell'assicurazione, non basta quello del leasing (PR #2, pubblicato) |
 | 22/11/2026 | Tutti | Inventario dei corsi e creazione di questo piano |
 | 22/11/2026 | MASTER-PROJECT | Luce automatica e nuvoletta sui 19 passi del tutor, 19 spiegazioni (PR #11, da unire) |
+| 22/11/2026 | MasterPayroll UF4 | Luce e nuvoletta nell'esercizio passo passo, 61 spiegazioni per 75 passi (PR #3, da unire) |
