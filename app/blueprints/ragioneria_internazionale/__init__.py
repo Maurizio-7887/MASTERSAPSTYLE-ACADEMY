@@ -6,9 +6,9 @@ libro giornale, test e valutazione. Le correzioni le fa il server; il docente ve
 e che cosa ha fatto, e mette il voto. Non movimenta la contabilità del simulatore ERP."""
 import json
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, url_for
 
-from ...accesso import solo_docente, utente_corrente
+from ...accesso import csrf_token, solo_docente, utente_corrente
 from ...db import Utente, adesso, db
 from . import servizi as sv
 from .modelli import RiEvento, RiModulo, RiScrittura
@@ -26,7 +26,11 @@ def _modulo(n):
 def _ctx(n, pagina, **kw):
     u = utente_corrente()
     sv.segna_pagina(u.id, n, pagina)
-    return dict(u=u, n=n, m=sv.MODULI[n], pagina=pagina, moduli=sv.MODULI, r=sv.riepilogo_modulo(u.id, n), sv=sv, **kw)
+    r = sv.riepilogo_modulo(u.id, n)
+    guida = dict(sv.guida(u.id, n), n=n, pagina=pagina, url_aiuto=url_for(".aiuto", n=n), csrf=csrf_token(),
+                 lab_ok=r["lab_ok"], quiz_ok=r["quiz_ok"], completo=r["completo"],
+                 prossimo=url_for(".obiettivi", n=n + 1) if n + 1 in sv.MODULI else "")
+    return dict(u=u, n=n, m=sv.MODULI[n], pagina=pagina, moduli=sv.MODULI, r=r, sv=sv, guida=guida, **kw)
 
 
 # ── ALLIEVO ──────────────────────────────────────────────────────────────────
@@ -178,6 +182,20 @@ def valutazione(n):
     return render_template("ragioneria_internazionale/valutazione.html", auto=sv.js(r.autovalutazione, []) if r else [],
                            voto=sv.js(r.voto, []) if r else [], nota=r.nota_docente if r else "",
                            corretto=r.corretto_il if r else None, ind=sv.indicatori(n), **_ctx(n, "valutazione"))
+
+
+@bp.post("/modulo/<int:n>/aiuto")
+def aiuto(n):
+    """«Guida aggiuntiva»: mostra il valore nella nuvoletta e lo registra, così il docente vede chi si è fatto aiutare."""
+    _modulo(n)
+    u = utente_corrente()
+    cosa, chiave = (request.form.get("cosa") or "")[:10], (request.form.get("chiave") or "")[:20]
+    testo = sv.aiuto(u.id, n, cosa, chiave)
+    if testo is None:
+        return jsonify(ok=False, testo="Aiuto non disponibile per questo punto."), 400
+    sv.evento(u.id, n, "aiuto", f"Guida aggiuntiva ({cosa}{' ' + chiave if chiave else ''}): {testo}")
+    db.session.commit()
+    return jsonify(ok=True, testo=testo)
 
 
 # ── DOCENTE ──────────────────────────────────────────────────────────────────

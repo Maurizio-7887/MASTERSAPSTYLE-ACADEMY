@@ -24,4 +24,7 @@
     <p class="ri-nd">Scenario: IT01 · 2027 · Profit Center PC-TRANS / PC-COMP · ledger 0L e 2L (configurazione didattica).</p>
   </aside>
 </div>
+<script>window.RI_GUIDA = {{ guida | tojson }};</script>
+<link rel="stylesheet" href="{{ url_for('ragioneria_internazionale.static', filename='ri-guida.css') }}">
+<script src="{{ url_for('ragioneria_internazionale.static', filename='ri-guida.js') }}" defer></script>
 {% endblock %}

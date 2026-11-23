@@ -3,12 +3,12 @@
 {% block ri %}
 {% include "docente/_menu.html" %}
 <h1>🎓 Ragioneria internazionale IFRS e OIC — lavoro della classe</h1>
-<p class="ri-nd">Per ogni modulo: ✓ completo (laboratorio giusto, scritture del manuale registrate, test superato) · L = laboratorio giusto · T = test superato · numero = voto del docente. Il tempo è stimato dalle azioni nel corso (pause oltre 10 minuti escluse).</p>
+<p class="ri-nd">Per ogni modulo: ✓ completo (laboratorio giusto, scritture del manuale registrate, test superato) · L = laboratorio giusto · T = test superato · numero = voto del docente · 💡n = volte che ha usato la «Guida aggiuntiva» (ha visto il valore). Il tempo è stimato dalle azioni nel corso (pause oltre 10 minuti escluse).</p>
 <div class="msa-scroll"><table class="ri-tab">
 <tr><th>Allievo</th><th>Tempo</th><th>Ultima attività</th>{% for k in moduli %}<th title="{{ moduli[k].title }}">M{{ k }}</th>{% endfor %}<th>Da correggere</th><th></th></tr>
 {% for r in righe %}
 <tr><td><b>{{ r.u.nome }}</b><br><small>{{ r.u.username }}</small></td><td>{{ durata(r.sec) }}<br><small>{{ r.azioni }} azioni</small></td><td>{{ ora_italiana(r.ultima) }}</td>
-{% for x in r.rip %}<td style="text-align:center">{% if x.voto is not none %}<b>{{ x.voto }}</b>{% elif x.completo %}<b class="ri-ok">✓</b>{% else %}<small>{{ 'L' if x.lab_ok }}{{ 'T' if x.quiz_ok }}{% if not x.lab_ok and not x.quiz_ok and (x.scritture or x.passi or x.quiz is not none) %}…{% endif %}</small>{% endif %}</td>{% endfor %}
+{% for x in r.rip %}<td style="text-align:center">{% if x.voto is not none %}<b>{{ x.voto }}</b>{% elif x.completo %}<b class="ri-ok">✓</b>{% else %}<small>{{ 'L' if x.lab_ok }}{{ 'T' if x.quiz_ok }}{% if not x.lab_ok and not x.quiz_ok and (x.scritture or x.passi or x.quiz is not none) %}…{% endif %}</small>{% endif %}{% if x.aiuti %}<br><small title="Guide aggiuntive usate">💡{{ x.aiuti }}</small>{% endif %}</td>{% endfor %}
 <td class="n">{{ r.da_correggere }}</td>
 <td><a href="{{ url_for('ragioneria_internazionale.docente_allievo', uid=r.u.id) }}">Dettaglio e voto</a></td></tr>
 {% else %}<tr><td colspan="17">Nessun allievo attivo.</td></tr>{% endfor %}

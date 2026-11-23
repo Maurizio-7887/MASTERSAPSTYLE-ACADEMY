@@ -7,7 +7,7 @@
 {% for d in dettagli %}{% set x = d.rip %}
 <section class="ri-card" id="m{{ x.n }}">
 <h2>Modulo {{ x.n }} · {{ x.m.title }} {% if x.completo %}<span class="ri-ok">✓ completo</span>{% endif %}</h2>
-<p>Passi {{ x.passi }}/{{ x.passi_tot }} · Laboratorio {{ x.lab_giusti }}/{{ x.lab_campi }} · Scritture del manuale {{ x.scritture }}/{{ x.scritture_tot }} · Test {{ x.quiz if x.quiz is not none else '—' }}/100 ({{ d.tentativi }} tentativi) · Autovalutazione {{ x.auto if x.auto is not none else '—' }}/100</p>
+<p>Passi {{ x.passi }}/{{ x.passi_tot }} · Laboratorio {{ x.lab_giusti }}/{{ x.lab_campi }} · Scritture del manuale {{ x.scritture }}/{{ x.scritture_tot }} · Test {{ x.quiz if x.quiz is not none else '—' }}/100 ({{ d.tentativi }} tentativi) · <b title="Quante volte ha premuto «Guida aggiuntiva» e ha visto il valore">💡 Aiuti {{ x.aiuti }}</b> · Autovalutazione {{ x.auto if x.auto is not none else '—' }}/100</p>
 {% if d.valori %}<details><summary>Risultati del laboratorio</summary><table class="ri-tab"><tr><th>Campo</th><th>Scritto</th><th>Atteso</th><th>Esito</th></tr>
 {% for k, att in sv.ATTESI[x.n].items() %}<tr><td>{{ sv.ETICHETTE[k] }}</td><td class="n">{{ d.valori.get(k, '') }}</td><td class="n">{{ att | euro }}</td><td class="{{ 'ri-ok' if d.esito.get(k) else 'ri-ko' }}">{{ '✓' if d.esito.get(k) else '✗' }}</td></tr>{% endfor %}</table></details>{% endif %}
 {% if d.docs %}<details><summary>Libro giornale ({{ d.docs | length }} documenti)</summary><table class="ri-tab"><tr><th>Ledger</th><th>Rif.</th><th>Righe</th><th>Esito</th></tr>

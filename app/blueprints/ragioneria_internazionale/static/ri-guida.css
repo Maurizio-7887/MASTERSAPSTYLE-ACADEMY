@@ -1,0 +1,17 @@
+/* Guida luminosa della ragioneria internazionale: luce forte, nuvoletta corta che non copre la casella */
+.ri-brilla{outline:4px solid #FF8A00!important;outline-offset:3px;box-shadow:0 0 0 8px rgba(255,170,0,.30),0 0 18px 6px rgba(255,140,0,.55)!important;border-radius:6px;animation:riBrilla 1.1s ease-in-out infinite;position:relative;z-index:5}
+input.ri-brilla,select.ri-brilla{background:#FFFBE6!important}
+@keyframes riBrilla{0%,100%{outline-color:#FF8A00}50%{outline-color:#FFD24D}}
+#ri-bolla{position:fixed;z-index:99990;max-width:300px;box-sizing:border-box;background:#FFFBE6;color:#1d1d1d;border:2px solid #FFB000;border-radius:10px;padding:7px 10px;font:12.5px/1.35 "Segoe UI",Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#ri-bolla[hidden]{display:none}
+#ri-bolla .ri-gb-dove{font-size:11px;font-weight:700;color:#3b2a5c;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ri-bolla .ri-gb-fai{font-size:13.5px;margin:2px 0}
+#ri-bolla .ri-gb-fai code{background:#FFD84D;border-radius:3px;padding:0 5px;font-weight:700}
+#ri-bolla .ri-gb-serve{font-size:11.5px;color:#4a4a4a;margin-top:4px}
+#ri-bolla .ri-gb-btn{margin-top:6px;border:0;border-radius:7px;padding:4px 10px;background:#6a4fa0;color:#fff;font:700 12px "Segoe UI",Arial,sans-serif;cursor:pointer}
+#ri-bolla .ri-gb-aiuto{margin-top:6px;background:#fff;border:1px dashed #6a4fa0;border-radius:6px;padding:4px 7px;font-weight:700;color:#3b2a5c}
+#ri-bolla::after{content:"";position:absolute;border:8px solid transparent}
+#ri-bolla.sotto::after{left:var(--freccia,20px);bottom:100%;border-bottom-color:#FFB000}
+#ri-bolla.sopra::after{left:var(--freccia,20px);top:100%;border-top-color:#FFB000}
+#ri-bolla.destra::after{top:14px;right:100%;border-right-color:#FFB000}
+#ri-bolla.sinistra::after{top:14px;left:100%;border-left-color:#FFB000}

@@ -182,3 +182,27 @@ class Docente(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+class GuidaLuminosa(unittest.TestCase):
+    def test_guida_senza_valori_e_guida_aggiuntiva_registrata(self):
+        """La pagina porta la guida (luce + nuvoletta) ma NON i valori; «Guida aggiuntiva» li dà e lascia traccia per il docente."""
+        import json
+        c = nuovo_allievo("ri_guida")
+        html = c.get(f"{URL}/modulo/1/laboratorio").get_data(as_text=True)
+        self.assertIn("ri-guida.js", html)
+        dati = json.loads(re.search(r"window.RI_GUIDA = (\{.*?\});</script>", html).group(1))
+        self.assertTrue(dati["lab"] and all(x["paragrafo"] for x in dati["lab"]))
+        self.assertNotIn("1220", json.dumps(dati))
+        self.assertNotIn("1.220", json.dumps(dati))
+        t = csrf(html)
+        r = c.post(f"{URL}/modulo/1/aiuto", data={"csrf": t, "cosa": "lab", "chiave": "supplier"})
+        self.assertTrue(r.get_json()["testo"].endswith("1.220"))
+        r = c.post(f"{URL}/modulo/1/aiuto", data={"csrf": t, "cosa": "riga", "chiave": "0"})
+        self.assertIn("Dare 1.000", r.get_json()["testo"])
+        self.assertEqual(c.post(f"{URL}/modulo/1/aiuto", data={"csrf": t, "cosa": "lab", "chiave": "nulla"}).status_code, 400)
+        with app.app_context():
+            self.assertEqual(sv.riepilogo_modulo(uid("ri_guida"), 1)["aiuti"], 2)
+        d = docente()
+        self.assertIn("Aiuti 2", d.get(f"{URL}/docente/allievo/{uid('ri_guida')}").get_data(as_text=True))
