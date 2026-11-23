@@ -155,7 +155,8 @@ def riepilogo_modulo(uid, n, r=None):
             "scritture": fatte, "scritture_tot": len(SCRITTURE.get(n, [])),
             "quiz": r.quiz_punti if r else None, "quiz_ok": bool(r and r.quiz_superato),
             "auto": sum(auto) if auto else None, "voto": sum(voto) if voto else None,
-            "completo": bool(r and r.lab_ok and r.quiz_superato and fatte >= len(SCRITTURE.get(n, [])))}
+            "completo": bool(r and r.lab_ok and r.quiz_superato and fatte >= len(SCRITTURE.get(n, []))),
+            "aiuti": RiEvento.query.filter_by(utente_id=uid, modulo=n, tipo="aiuto").count()}
 
 
 def riepilogo(uid):
@@ -181,3 +182,74 @@ def segna_pagina(uid, n, pagina):
         return
     evento(uid, n, "pagina", pagina)
     db.session.commit()
+
+
+# ── guida luminosa: che cosa deve brillare, dove si trova nel manuale, aiuto con il valore ────────
+def euro_it(v):
+    """1220 → «1.220»; 57264.7 → «57.264,70» (come scritto nel manuale)."""
+    v = float(v)
+    s = f"{abs(v):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    s = s[:-3] if s.endswith(",00") else s
+    return ("-" if v < 0 else "") + s
+
+
+def paragrafo(n, *aghi):
+    """Titolo del paragrafo del manuale del modulo n che contiene uno dei testi cercati ('' se nessuno)."""
+    titolo = ""
+    for b in CONTENUTI.get(n, []):
+        if b.get("type") == "h":
+            titolo = b.get("text", "")
+            continue
+        testo = (b.get("text") or "") + " " + " ".join(" ".join(str(c) for c in r) for r in b.get("rows", []))
+        if any(a and a in testo for a in aghi):
+            return titolo
+    return ""
+
+
+def prossima_scrittura(uid, n):
+    """La prima scrittura del manuale non ancora registrata correttamente (None se tutte fatte)."""
+    fatte = scritture_fatte(uid, n)
+    for e in SCRITTURE.get(n, []):
+        if e["t"] not in fatte:
+            return e
+    return None
+
+
+def righe_scrittura(e):
+    return [(c, "Dare", v) for c, v in e["d"]] + [(c, "Avere", v) for c, v in e["a"]]
+
+
+def guida(uid, n):
+    """Dati per la luce e la nuvoletta, SENZA i valori: quelli si chiedono con «Guida aggiuntiva»."""
+    e = prossima_scrittura(uid, n)
+    return {
+        "lab": [{"k": k, "etichetta": ETICHETTE[k],
+                 "paragrafo": paragrafo(n, euro_it(v), euro_it(abs(v)))} for k, v in ATTESI[n].items()],
+        "scrittura": None if e is None else {
+            "titolo": e["t"], "righe": len(e["d"]) + len(e["a"]),
+            "paragrafo": paragrafo(n, e["t"], euro_it(e["d"][0][1]))},
+        "scritture_fatte": len(scritture_fatte(uid, n)), "scritture_tot": len(SCRITTURE.get(n, [])),
+        "aiuti": RiEvento.query.filter_by(utente_id=uid, modulo=n, tipo="aiuto").count(),
+    }
+
+
+def aiuto(uid, n, cosa, chiave):
+    """Il valore chiesto con «Guida aggiuntiva» (testo per la nuvoletta) o None se la richiesta non è valida."""
+    if cosa == "lab" and chiave in ATTESI[n]:
+        v = ATTESI[n][chiave]
+        return f"{ETICHETTE[chiave]}: {euro_it(v)}"
+    e = prossima_scrittura(uid, n)
+    if e is None:
+        return None
+    if cosa == "ledger":
+        return (f"Ledger {e['l']}: questa scrittura vale solo per {'IFRS' if e['l'] == '2L' else 'OIC'}." if e["l"]
+                else "Ledger 0L: è una scrittura comune ai due principi, si registra una volta sola.")
+    if cosa == "testo":
+        return f"Per esempio: «{e['t']}»."
+    if cosa == "riga" and chiave.isdigit():
+        r = righe_scrittura(e)
+        i = int(chiave)
+        if i < len(r):
+            c, lato, v = r[i]
+            return f"Riga {i + 1}: conto «{c}» · {lato} {euro_it(v)} €"
+    return None
