@@ -6,7 +6,7 @@ Senza la guida gli allievi non sanno cosa fare.
 
 > **Come si usa questo file.** È il documento di lavoro comune: ogni volta che sistemiamo un corso si aggiorna
 > la tabella «Stato», si spuntano le caselle del corso e si aggiunge una riga in fondo al «Diario».
-> Ultimo aggiornamento: **22/11/2026**.
+> Ultimo aggiornamento: **23/11/2026**.
 
 ---
 
@@ -64,15 +64,15 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 | 1 | Master ERP Enterprise / Firenze / Executive ERP (`MASTERSAPSTYLE-ACADEMY`) | ✅ | 9 esercizi, tutti i passi con luce e spiegazione (PR #50) | — | — | — |
 | 2 | Master ERP PMI (`MASTERERP-PMI-ACADEMY`) | ✅ | 22 esercizi, 91 passi, robot fino in fondo (PR #1, #2) | — | — | — |
 | 3 | Laboratorio 0 e Blocco 2 (file HTML Firenze) | ✅ | Luce, nuvoletta, pannello docente | — | — | — |
-| 4 | MasterExecutive (`MASTEREXECUTIVE-ASSISTANT`) | 🟡 | Laboratorio documenti commerciali: luce + nuvoletta fatte (PR #11). Virgilio dice cosa fare | 9 simulatori (fattura, protocollo, prima nota, agenda, email, verbale, evento, accessi, documenti commerciali) senza passi: vanno scritti i passi per ogni caso; in modalità esame la guida deve restare spenta | 1–2 sessioni | **1** (allievi Regione Umbria) |
+| 4 | MasterExecutive (`MASTEREXECUTIVE-ASSISTANT`) | ✅ | Laboratorio documenti commerciali (PR #11) + 9 simulatori con passi, luce e nuvoletta, spenta in esame (PR #12) | Merge della PR #12 fuori orario e controllo del deploy | — | — |
 | 5 | MasterPayroll UF4 (`MASTERPAYROLL-ACADEMY`) | 🟡 | 2 esercizi guidati, 75 passi con caselle (`passi` con `campi`) | Luce + nuvoletta + spiegazioni | 1 sessione | **2** |
-| 6 | MasterSupplyChain (`MASTERSUPPLYCHAIN-ACADEMY`) | 🟡 | Esercitazione «30 giorni» con finestrella guida (`app/scm/guida.py`, ~20 passi) | Luce + nuvoletta; passi dentro le pagine del simulatore | 1 sessione | **3** |
+| 6 | MasterSupplyChain (`MASTERSUPPLYCHAIN-ACADEMY`) | ✅ | Esercitazione «30 giorni», 20 passi: «cosa stiamo facendo» + azione che brilla + nuvoletta (PR #4, pubblicato) | — | — | — |
 | 7 | MASTER-PROJECT (`MASTER-PROJECT`) | ✅ | Tutor con 19 passi: luce automatica + nuvoletta + spiegazioni (PR #11, pubblicato) | — | — | — |
 | 8 | MasterLedger Academy (`MasterLedger-Academy`) | 🔴 | 299 blocchi in 16 percorsi; esercizio 2026/2027; laboratori automotive (14 pagine), BPC (9), chiusura (7), libro (7), qualità (5), autoimpiego, prova | Guida passo passo da scrivere; partire da ragioneria base e avanzato | 3–4 sessioni | **5** |
 | 9 | MASTER-ACADEMY (`MASTER-ACADEMY`) | 🔴 | 5 schede di esercitazione (mese di Ferro & Transenne) su 5 programmi collegati | Passi con luce dentro i 5 programmi | 2 sessioni | 6 |
 | 10 | Simulatore AHR (`Simulatore-AHR`) | 🔴 | 25 pagine di gestionale, nessun esercizio | Prima l'esercizio, poi la guida | 1 sessione | 7 |
 | 11 | CRM Academy (`Crm_Gustinicchi_Academy`) | 🔴 | CRM vero con registro esercitazioni, nessun esercizio guidato | Esercizio guidato (se lo vogliamo) | 1 sessione | 8 |
-| 12 | Master Automation Academy (`MASTER-AUTOMATION-ACADEMY`) | ⏸️ | 6 moduli con quiz; simulatori non ancora caricati | Caricare i simulatori, poi la guida | dopo l'import | — |
+| 12 | Master Automation Academy (`MASTER-AUTOMATION-ACADEMY`) | ✅ | Power Automate, Fabric, DevOps, laboratorio BI e caso quadro: luce + nuvoletta in tutti gli esercizi (PR #7) | Merge della PR #7 e controllo del deploy | — | — |
 | 13 | PowerAutomate-and-Fabric | ⏸️ | Repository vuoto | — | — | — |
 
 **Totale stimato:** 11 sessioni (gruppo 🟡: 3 sessioni; gruppo 🔴: 7–8 sessioni).
@@ -80,10 +80,11 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 ## 5. Lista di controllo per corso
 
 ### 4 · MasterExecutive
-- [x] Nuvoletta nel laboratorio documenti commerciali (introduzione ed esercitazione) — PR #11
-- [ ] Merge della PR #11 e controllo del deploy
-- [ ] Passi guidati per i 9 simulatori (`templates/sim/*.html`), caso per caso: oggi c'è solo il testo del caso e «Verifica il lavoro»
-- [ ] Luce + nuvoletta nei simulatori, **spenta in modalità esame** (`ctx.esame`)
+- [x] Nuvoletta nel laboratorio documenti commerciali (introduzione ed esercitazione) — PR #11, pubblicato
+- [x] Passi guidati per i 9 simulatori (`app/simulatori/guida.py`, 49 passi con i valori dei casi)
+- [x] Luce + nuvoletta nei simulatori, **spenta in modalità esame** (test automatico)
+- [x] Robot che segue solo la luce: 9 simulatori su 9 al 100% su database nuovo · 36 test passano
+- [ ] Merge della PR #12 fuori dall'orario di lezione e controllo del deploy
 - [ ] Spiegazioni «cosa stiamo facendo» per ogni passo
 - [ ] Prova del robot · test · deploy
 
@@ -100,6 +101,14 @@ Legenda: ✅ fatto · 🟡 guida presente, mancano luce/nuvoletta · 🔴 guida 
 - [x] Luce automatica (prima solo con «Mostrami dove») + nuvoletta sui 19 passi
 - [x] Test (84 passano) · prova nel browser sui passi 1–11
 - [x] Merge della PR #11 e controllo del deploy
+
+### 12 · Master Automation Academy
+- [x] Power Automate: schede, domande, «+», catalogo, ogni campo dei parametri, «Applica», «▷ Test» — robot: 15 esercizi
+- [x] Fabric e DevOps: lezione, verifica, 7 fasi del designer — robot: Fabric 6, DevOps 17 esercizi
+- [x] Laboratorio BI: passaggi in ordine, controllo, aggiornamento, risposta — robot: 12 missioni
+- [x] Caso quadro: la tappa che brilla, la luce porta all'esercizio della tappa e poi torna al caso — robot: 5 tappe su 5
+- [x] Corretto: le tappe bloccate facevano ripetere il test all'infinito, ora la luce manda al caso quadro
+- [ ] Merge della PR #7 e controllo del deploy
 
 ### 8 · MasterLedger Academy
 - [ ] Ragioneria base (R1–R6, E1–E7)
