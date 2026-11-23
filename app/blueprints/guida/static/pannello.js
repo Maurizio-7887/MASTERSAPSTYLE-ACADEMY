@@ -864,6 +864,13 @@
   function nascondiBolla() { if (tickPunti.el) posizionaBolla(tickPunti.el); }   // compatibilità: ora la si riposiziona soltanto
   // Contenuto della nuvoletta = COPIA del suggeritore «Ora tocca a te» del pannello, con in testa che cosa stiamo facendo.
   function cortoB(t, n) { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; t = t.slice(0, n - 1); return t.replace(/\s+\S*$/, '') + '…'; }
+  function bollaApri(p) {
+    var stiamo = p.grande && !GENERICO.test(p.grande) ? p.grande : (p.perche || p.attesa || '');
+    return '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · PASSO ' + (pos + 1) + ' DI ' + N + '</span><b>' + esc(p.titolo || '') + '</b>' +
+      (stiamo ? '<em>' + esc(cortoB(stiamo, 220)) + '</em>' : '') + '</div>' +
+      '<div class="msa-gb-ora"><div class="msa-g-ora-t">🔘 A CHE COSA SERVE «APRI ➜»</div><div class="msa-g-ora-serve">Ti porta nella schermata dove si fa questo passo: <b>' + esc(p.percorso || '') + '</b></div>' +
+      '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">Il passo ' + (pos + 1) + ' non si fa in questa pagina ma in un’altra schermata (quello che vedi qui è già a posto): premi <b>«Apri ➜»</b>, poi la casella da usare comincerà a brillare.</div></div>';
+  }
   function contenutoBolla(p, box) {
     var stiamo = p.grande && !GENERICO.test(p.grande) ? p.grande : (p.perche || p.attesa || '');
     var h = '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · PASSO ' + (pos + 1) + ' DI ' + N + '</span><b>' + esc(p.titolo || '') + '</b>' +
@@ -1033,6 +1040,13 @@
     bolla.style.width = bw + 'px';
     var r = el.getBoundingClientRect(), bh = bolla.offsetHeight || 140, gap = 12, top, left, verso;
     var dentroV = function (t) { return Math.max(8, Math.min(t, H - bh - 8)); };
+    if (radice.contains(el) && r.left - gap - bw >= 8) {   // pulsante del pannello (es. «Apri ➜»): nuvoletta a sinistra, non sopra il pannello
+      verso = 'sinistra'; left = r.left - gap - bw; top = dentroV(r.top + r.height / 2 - bh / 2);
+      bolla.style.top = top + 'px'; bolla.style.left = left + 'px';
+      ['sopra', 'sotto', 'destra', 'sinistra'].forEach(function (v) { bolla.classList.toggle(v, v === verso); });
+      bolla.style.setProperty('--frecciaY', Math.max(12, Math.min(bh - 24, r.top + r.height / 2 - top - 8)) + 'px');
+      return;
+    }
     if (r.bottom + gap + bh <= H - 8) { verso = 'sotto'; top = r.bottom + gap; left = Math.max(8, Math.min(r.left, limite - bw)); }
     else if (r.top - gap - bh >= 8) { verso = 'sopra'; top = r.top - gap - bh; left = Math.max(8, Math.min(r.left, limite - bw)); }
     else if (r.right + gap + bw <= limite) { verso = 'destra'; left = r.right + gap; top = dentroV(r.top + r.height / 2 - bh / 2); }
@@ -1168,7 +1182,19 @@
         if ((d2.t === 'campo') && (!document.activeElement || document.activeElement === document.body)) { try { ora.el.focus({preventScroll: true}); } catch (e) { /* niente fuoco */ } }
       }
       if (!bolla.hidden) posizionaBolla(ora.el);
-    } else { bolla.hidden = true; ultimoPunto = chiave; }
+    } else {
+      // Il passo si fa in un'ALTRA schermata: nella pagina non c'è niente da far brillare, quindi brilla «Apri ➜»
+      // del pannello, con la nuvoletta che spiega dove si va e perché (prima la pagina sembrava «finita» e muta).
+      var vaiEl = ora && !suQuestaPagina(p) && urlPasso(p) ? radice.querySelector('.msa-g-vai:not(.qui)') : null;
+      if (vaiEl) {
+        vaiEl.classList.add('msa-g-brilla');
+        var htmlV = bollaApri(p);
+        if (htmlV !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlV; bolla.setAttribute('data-firma', htmlV); }
+        bolla.hidden = Date.now() < mostraDopo;
+        if (!bolla.hidden) posizionaBolla(vaiEl);
+      } else bolla.hidden = true;
+      ultimoPunto = chiave;
+    }
     tickPunti.el = ora && ora.el; tickPunti.k = ora ? ora.k : -1;
   }
   corpo.addEventListener('click', function (e) {
