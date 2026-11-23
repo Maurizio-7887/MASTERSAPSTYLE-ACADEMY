@@ -865,11 +865,32 @@
   // Contenuto della nuvoletta = COPIA del suggeritore «Ora tocca a te» del pannello, con in testa che cosa stiamo facendo.
   function cortoB(t, n) { t = String(t || '').replace(/\s+/g, ' ').trim(); if (t.length <= n) return t; t = t.slice(0, n - 1); return t.replace(/\s+\S*$/, '') + '…'; }
   function bollaApri(p) {
+    return '<div class="msa-gb-dove">📌 Passo ' + (pos + 1) + ' di ' + N + ' · ' + esc(cortoB(p.titolo || '', 60)) + '</div>' +
+      '<div class="msa-gb-fai">🎯 Premi <b>«Apri ➜»</b>: questo passo si fa in un’altra schermata</div>' +
+      '<div class="msa-gb-serve">🔘 Ti porta in: ' + esc(cortoB(p.percorso || '', 90)) + '</div>';
+  }
+  function bollaApriLunga(p) {
     var stiamo = p.grande && !GENERICO.test(p.grande) ? p.grande : (p.perche || p.attesa || '');
     return '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · PASSO ' + (pos + 1) + ' DI ' + N + '</span><b>' + esc(p.titolo || '') + '</b>' +
       (stiamo ? '<em>' + esc(cortoB(stiamo, 220)) + '</em>' : '') + '</div>' +
       '<div class="msa-gb-ora"><div class="msa-g-ora-t">🔘 A CHE COSA SERVE «APRI ➜»</div><div class="msa-g-ora-serve">Ti porta nella schermata dove si fa questo passo: <b>' + esc(p.percorso || '') + '</b></div>' +
       '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">Il passo ' + (pos + 1) + ' non si fa in questa pagina ma in un’altra schermata (quello che vedi qui è già a posto): premi <b>«Apri ➜»</b>, poi la casella da usare comincerà a brillare.</div></div>';
+  }
+  // Nuvoletta CORTA accanto alla casella: dove siamo, che cosa fare (con il valore), a che cosa serve. Tre righe:
+  // le spiegazioni lunghe restano nel pannello, così la nuvoletta non copre la pagina.
+  function bollaCorta(p, d, el) {
+    var et = d.etichetta || d.nome || '', sel = el && el.tagName === 'SELECT', az;
+    if (d.t === 'pulsante') az = '🖱️ Premi <b>«' + esc((el && (el.textContent || el.value) || d.nome || '').trim().slice(0, 50)) + '»</b>';
+    else if (d.t === 'leggi') az = '👀 ' + esc(cortoB(d.nome || et, 90));
+    else {
+      var v = d.testo !== undefined && d.testo !== '' ? d.testo : (d.valore !== undefined ? vis(d) : '');
+      az = (sel || d.testo ? '👆 Scegli' : '✍️ Scrivi') + (v !== '' ? ' <code class="msa-gb-val">' + esc(cortoB(v, 60)) + '</code>' : '') + (et ? ' in «' + esc(cortoB(et, 40)) + '»' : '');
+    }
+    var serve = String(d.serve || '').replace(/^📍.*$/, '').trim();
+    if (!serve || serve === et || /^Scrivi nel campo|^Scegli nel campo/.test(serve)) serve = '';
+    return '<div class="msa-gb-dove">📌 Passo ' + (pos + 1) + ' di ' + N + ' · ' + esc(cortoB(p.titolo || '', 60)) + '</div>' +
+      '<div class="msa-gb-fai">🎯 ' + az + '</div>' +
+      (serve ? '<div class="msa-gb-serve">🔘 ' + esc(cortoB(serve, 120)) + '</div>' : '');
   }
   function contenutoBolla(p, box) {
     var stiamo = p.grande && !GENERICO.test(p.grande) ? p.grande : (p.perche || p.attesa || '');
@@ -1074,10 +1095,9 @@
     if (!el) { bolla.hidden = true; return; }
     el.classList.add('msa-g-brilla');
     var d = q.documento || {};
-    var htmlQ = '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · LABORATORIO DI RAGIONERIA</span><b>Ricostruisci la scrittura</b><em>' +
-      esc(cortoB('Documento ' + (d.numero || d.id || '') + ' del ' + (d.data || '') + ': ' + (d.descrizione || d.tipo || '') + '. L’operazione che hai fatto ha già scritto nel libro giornale: ora la scrivi tu in partita doppia, per vedere se l’hai capita.', 230)) + '</em></div>' +
-      '<div class="msa-g-ora-t">🔘 A CHE COSA SERVE «' + esc(nome) + '»</div><div class="msa-g-ora-serve">' + esc(serve) + '</div>' +
-      '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">' + esc(ora) + '</div>';
+    var htmlQ = '<div class="msa-gb-dove">📌 Ricostruisci la scrittura · doc. ' + esc(d.numero || d.id || '') + '</div>' +
+      '<div class="msa-gb-fai">🎯 ' + esc(ora) + '</div>' +
+      '<div class="msa-gb-serve">🔘 «' + esc(nome) + '»: ' + esc(serve) + '</div>';
     if (htmlQ !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlQ; bolla.setAttribute('data-firma', htmlQ); }
     bolla.hidden = false; posizionaBolla(el);
     tickPunti.el = null;
@@ -1091,7 +1111,7 @@
   function posizionaBolla(el) {
     if (!el || !document.body.contains(el) || bolla.hidden) return;
     var W = window.innerWidth, H = window.innerHeight, limite = W - (pannello.hidden ? 8 : 400);
-    var bw = Math.max(240, Math.min(380, limite - 8, W - 16));
+    var bw = Math.max(240, Math.min(300, limite - 8, W - 16));
     bolla.style.width = bw + 'px';
     var r = el.getBoundingClientRect(), bh = bolla.offsetHeight || 140, gap = 12, top, left, verso;
     var dentroV = function (t) { return Math.max(8, Math.min(t, H - bh - 8)); };
@@ -1229,9 +1249,12 @@
       ora.el.classList.add('msa-g-brilla');
       var d2 = ora.d;
       // la nuvoletta ripete il suggeritore «Ora tocca a te» (azione, valore, perché, attenzione, correzioni) + che cosa stiamo facendo
-      var htmlB = contenutoBolla(p, c.querySelector('.msa-g-ora'));
+      var htmlB = bollaCorta(p, d2, ora.el);
       if (htmlB !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlB; bolla.setAttribute('data-firma', htmlB); }
       bolla.hidden = Date.now() < mostraDopo;
+      // la casella deve SEMPRE vedersi: se è fuori dallo schermo la pagina ci scorre sopra e la nuvoletta aspetta
+      var rr = ora.el.getBoundingClientRect();
+      if (rr.bottom < 70 || rr.top > window.innerHeight - 50) { try { ora.el.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch (e) { /* vecchio browser */ } bolla.hidden = true; }
       if (chiave !== ultimoPunto || forza) {
         ultimoPunto = chiave;
         try { ora.el.scrollIntoView({block: 'center', behavior: 'smooth'}); } catch (e) { /* vecchio browser */ }
@@ -1252,26 +1275,26 @@
       var manoEl = !ora && !vaiEl && !regEl && !stati[pos] ? radice.querySelector('.msa-g-mano') : null;
       if (manoEl) {
         manoEl.classList.add('msa-g-brilla');
-        var htmlM = contenutoBolla(p, null) +
-          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «✓ Fatto»</div><div class="msa-g-ora-serve">Questo passo non registra niente nel programma: si spunta a mano. Il pulsante conferma che hai letto e controllato e ti porta al passo successivo.</div>' +
-          '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">Leggi «Cosa devi vedere» nel pannello, poi premi «✓ Fatto».</div>';
+        var htmlM = '<div class="msa-gb-dove">📌 Passo ' + (pos + 1) + ' di ' + N + ' · ' + esc(cortoB(p.titolo || '', 60)) + '</div>' +
+          '<div class="msa-gb-fai">🎯 Leggi il pannello, poi premi <b>«✓ Fatto»</b></div>' +
+          '<div class="msa-gb-serve">🔘 Questo passo si spunta a mano: «✓ Fatto» conferma e va al passo dopo.</div>';
         if (htmlM !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlM; bolla.setAttribute('data-firma', htmlM); }
         bolla.hidden = Date.now() < mostraDopo;
         if (!bolla.hidden) posizionaBolla(manoEl);
       } else if (regEl) {
         regEl.classList.add('msa-g-brilla');
-        var htmlR = contenutoBolla(p, c.querySelector('.msa-g-ora')) +
-          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «' + esc((regEl.textContent || regEl.value || '').trim()) + '»</div><div class="msa-g-ora-serve">È il pulsante che registra davvero l’operazione. Se dopo averlo premuto il passo non si spunta, nella pagina c’è un messaggio (rosso o accanto a una casella): correggi quella casella e premilo di nuovo.</div>';
+        var htmlR = '<div class="msa-gb-dove">📌 Passo ' + (pos + 1) + ' di ' + N + ' · ' + esc(cortoB(p.titolo || '', 60)) + '</div>' +
+          '<div class="msa-gb-fai">🎯 Premi <b>«' + esc((regEl.textContent || regEl.value || '').trim().slice(0, 40)) + '»</b>: non è ancora registrato</div>' +
+          '<div class="msa-gb-serve">🔘 Registra l’operazione. Se c’è un messaggio rosso nella pagina, correggi quella casella e ripremi.</div>';
         if (htmlR !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlR; bolla.setAttribute('data-firma', htmlR); }
         bolla.hidden = Date.now() < mostraDopo;
         if (!bolla.hidden) posizionaBolla(regEl);
       } else
       if (fattoEl) {
         fattoEl.classList.add('msa-g-brilla');
-        var htmlF = contenutoBolla(p, c.querySelector('.msa-g-ora')) +
-          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «' + esc(fattoEl.textContent.trim()) + '»</div><div class="msa-g-ora-serve">' +
-          (ora.d.t === 'leggi' ? 'Qui non c’è niente da scrivere: leggi il punto qui sopra e premi il pulsante per confermare che l’hai letto e passare al punto successivo.'
-            : 'Non trovo la casella in questa schermata: quando l’hai fatto tu, premi il pulsante per confermarlo e passare al punto successivo.') + '</div>';
+        var htmlF = '<div class="msa-gb-dove">📌 Passo ' + (pos + 1) + ' di ' + N + ' · ' + esc(cortoB(p.titolo || '', 60)) + '</div>' +
+          '<div class="msa-gb-fai">🎯 ' + (ora.d.t === 'leggi' ? 'Leggi nel pannello, poi premi <b>«✓ Fatto»</b>' : 'Fallo nella pagina, poi premi <b>«✓ Fatto»</b>') + '</div>' +
+          '<div class="msa-gb-serve">🔘 ' + (ora.d.t === 'leggi' ? 'Qui non c’è niente da scrivere: «✓ Fatto» conferma che hai letto e va avanti.' : 'Non trovo la casella: «✓ Fatto» conferma che l’hai fatto tu.') + '</div>';
         if (htmlF !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlF; bolla.setAttribute('data-firma', htmlF); }
         bolla.hidden = Date.now() < mostraDopo;
         if (!bolla.hidden) posizionaBolla(fattoEl);
