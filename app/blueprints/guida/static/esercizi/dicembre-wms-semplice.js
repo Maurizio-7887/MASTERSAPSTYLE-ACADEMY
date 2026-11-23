@@ -421,8 +421,29 @@
   }
   // un campo del passo ([etichetta, valore]): valore breve = casella da compilare; valore spiegato = da leggere,
   // ma la casella brilla lo stesso; «Pulsante» = il pulsante da premere
+  // «Posizione n» della prima nota = «conto · Dare|Avere · importo»: diventa tre caselle della riga n della tabella
+  // (prima, se la riga non c'è ancora, il pulsante «+ Aggiungi posizione»)
+  function posizione(p, nome, v) {
+    var m = /^Posizione\s+(\d+)$/i.exec(String(nome || '')), x = /^(.+?)\s+·\s+(Dare|Avere)\s+·\s+([\d.,]+)$/i.exec(String(v || ''));
+    if (!m || !x || !p.fatto) return null;
+    var n = +m[1], riga = 'Riga ' + n, out = [];
+    if (n > 2) out.push({auto: true, t: 'pulsante', nome: '+ Aggiungi posizione', bottone: 'Aggiungi posizione', soloSeManca: n,
+      serve: 'Aggiunge una riga vuota alla scrittura: ti serve la riga ' + n + '.'});
+    out.push({auto: true, t: 'campo', dove: riga + ', menu «Conto Co.Ge.»', etichetta: 'Conto Co.Ge.', nome: riga + ' · Conto Co.Ge.', testo: x[1], serve: 'Il conto della riga ' + n + ' della scrittura.'});
+    out.push({auto: true, t: 'campo', dove: riga + ', menu «Dare / Avere»', etichetta: 'Dare / Avere', nome: riga + ' · Dare / Avere', testo: x[2].charAt(0).toUpperCase() + x[2].slice(1).toLowerCase(), serve: 'Da che parte del conto va l’importo: Dare (sinistra) o Avere (destra).'});
+    out.push({auto: true, t: 'campo', dove: riga + ', casella «Importo EUR»', etichetta: 'Importo EUR', nome: riga + ' · Importo EUR', valore: x[3], serve: 'L’importo in euro della riga ' + n + '.'});
+    return out;
+  }
   function daCampo(p, nome, v) {
+    var pos = posizione(p, nome, v); if (pos) return pos;
     nome = String(nome || ''); v = v == null ? '' : String(v);
+    // «Data documento e di registrazione» = due caselle con la stessa data
+    // «Simula / Verifica, poi Registra documento» = due pulsanti, uno dopo l'altro
+    if (/^Pulsante$/i.test(nome) && /,\s*poi\s+/i.test(v)) return v.split(/,\s*poi\s+/i).map(function (x) { return daCampo(p, nome, x.replace(/^premi\s+/i, '')); });
+    if (p.fatto && /^Data documento e di registrazione$/i.test(nome)) return [daCampo(p, 'Data documento', v), daCampo(p, 'Data registrazione', v)];
+    // testo libero da SCRIVERE (testata, descrizione, causale): anche se è lungo è una casella da compilare, non da leggere
+    if (p.fatto && /^(Testo testata|Testo|Descrizione|Causale|Testo posizione)$/i.test(nome) && v && !/[;«]/.test(v) && v.length <= 120)
+      return {auto: true, t: 'campo', etichetta: nome, nome: nome, valore: v, serve: 'Scrivi nel campo «' + nome + '»: è la descrizione che resta nel libro giornale.'};
     if (/^Pulsante$/i.test(nome)) { var b = v.split(/[;:—]| NON /)[0].trim(); return {auto: true, t: 'pulsante', nome: b, bottone: b, serve: v}; }
     if (!p.fatto || v.length > 45 || /[;=«]|^(vuoto|quell[ao]|prima|il |la |le |lo |gli |dal |no$|sì$)/i.test(v) || /\s\(/.test(v) && !/^[A-Z0-9-]+\s/.test(v))
       return {auto: true, t: 'leggi', etichetta: nome, nome: nome + ': ' + v, serve: nome};
@@ -439,10 +460,10 @@
         if (x.riquadro) riquadro = x.riquadro; else if (/^(Poi|Pagina)\b/i.test(x.dove)) riquadro = ''; else x.riquadro = riquadro;
         out.push(x);
       }
-      else if (Array.isArray(f)) out.push(daCampo(p, f[0], f[1]));
+      else if (Array.isArray(f)) out = out.concat(daCampo(p, f[0], f[1]));
       else if (typeof f === 'string' && !GENERICHE.test(f)) out.push({auto: true, t: 'leggi', nome: f, serve: f});
     });
-    if (!righe.length) (p.campi || []).forEach(function (c) { out.push(daCampo(p, c[0], c[1])); });
+    if (!righe.length) (p.campi || []).forEach(function (c) { out = out.concat(daCampo(p, c[0], c[1])); });
     // l'ultima voce del percorso («… → Paga la rata») è il riquadro giusto, spesso il nome stesso del pulsante
     var fine = String(p.percorso || '').split(';')[0].split('→').pop().replace(/\(.*?\)/g, '').trim();
     out.forEach(function (d) { if (!d.riquadro && fine && !d.dove) d.riquadro = fine; });

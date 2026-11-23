@@ -982,6 +982,20 @@
         var s = somiglia(t, ne, 4);
         if (s) { s += nelRiquadro(c, d.riquadro); if (s > score) { score = s; best = c; } }
       });
+      if (!best && /Riga\s+\d+/i.test(d.dove || '')) {
+        // caselle in tabella (es. le posizioni della prima nota FB50): colonna dal titolo, riga da «Riga n» del passo
+        var rn = /Riga\s+(\d+)/i.exec(d.dove || '');
+        [].forEach.call(document.querySelectorAll('table'), function (tb) {
+          if (!visibileP(tb)) return;
+          var col = -1, sc = 0;
+          [].forEach.call(tb.querySelectorAll('thead th'), function (th, i) { var x = somiglia(normT(th.textContent), ne, 4); if (x > sc) { sc = x; col = i; } });
+          if (col < 0) return;
+          var righe = [].filter.call(tb.querySelectorAll('tbody tr'), function (r) { return r.cells.length > col; });
+          var riga = righe[rn ? +rn[1] - 1 : 0]; if (!riga) return;
+          var c = riga.cells[col].querySelector('input,select,textarea'); if (!visibileP(c)) return;
+          var s2 = sc + nelRiquadro(c, d.riquadro); if (s2 > score) { score = s2; best = c; }
+        });
+      }
     }
     if (best) { var id = E.codice + '-' + pos + '-' + k; best.setAttribute('data-msa-g', id); d.sel = '[data-msa-g="' + id + '"]'; }
     return best;
@@ -1008,6 +1022,7 @@
     var key = chiaveP(p, k);
     if (d.auto) {
       if (stati[pos] || memP('letto')[key]) return true;
+      if (d.soloSeManca) { var tb = document.querySelector('select.fi-conto'); tb = tb && tb.closest('tbody'); if (tb && tb.querySelectorAll('tr').length >= d.soloSeManca) return true; }
       if (d.t === 'leggi' || !el) return false;
       if (d.t === 'pulsante') return !!memP('clic')[key];
       return valoreOkP(el, d);
@@ -1027,6 +1042,46 @@
   }
   function vis(d) { if (d.mostra !== undefined) return d.mostra; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d.valore)); return m ? m[3] + '/' + m[2] + '/' + m[1] : d.valore; }
   function tipoLabel(d) { if (d.auto && d.t === 'campo') return d.testo || d.tipoEl === 'SELECT' ? '👆 Scegli' : '✍️ Scrivi'; if (d.auto && d.t === 'leggi') return '👉'; return d.t === 'campo' ? '✍️ Scrivi' : d.t === 'scelta' ? '👆 Scegli' : d.t === 'pulsante' ? '🖱️ Premi' : '👀 Leggi'; }
+  // ── Laboratorio di ragioneria («Ricostruisci la scrittura»): brilla la prossima casella da compilare, con la
+  // nuvoletta che spiega a che cosa serve. Non suggerisce MAI conti, sezioni o importi: è la prova dell'allievo.
+  function tickQuiz() {
+    var sec = corpo.querySelector('.msa-ragioneria'), S = stato(), q = quiz && quiz.pendente(S);
+    if (!sec || !q || pannello.hidden || suggSpento()) { spegniPunti(); return; }
+    var gruppi = {}; ((q.documento || {}).righe || []).forEach(function (r) { gruppi[r.conto + '|' + r.dareAvere] = 1; });
+    var minimo = Math.max(1, Object.keys(gruppi).length), el = null, nome = '', serve = '', ora = '';
+    var cont = sec.querySelector('.msa-q-continua'), ver = sec.querySelector('.msa-q-verifica'), aiuto = sec.querySelector('.msa-q-aiuto');
+    if (cont) {
+      el = cont; nome = cont.textContent.trim(); serve = 'Chiude questa prova (il risultato resta nel registro del docente) e ti riporta all’esercizio.';
+      ora = 'Confronta la tua scrittura con quella del giornale, poi premi «' + nome + '».';
+    } else {
+      var righe = sec.querySelectorAll('.msa-q-riga');
+      for (var i = 0; i < righe.length && !el; i++) {
+        var r = righe[i], co = r.querySelector('.msa-q-conto'), se = r.querySelector('.msa-q-sezione'), im = r.querySelector('.msa-q-importo');
+        if (!co || !se || !im || co.disabled) continue;
+        if (!co.value.trim() && !se.value && !im.value.trim() && i >= minimo) continue;   // le righe in più si lasciano vuote
+        var n = 'Riga ' + (i + 1);
+        if (!co.value.trim()) { el = co; nome = n + ' · Conto'; serve = 'Qui scegli il conto movimentato: scrivi il codice o una parola della descrizione e scegli dall’elenco del piano dei conti.'; ora = 'Pensa all’operazione appena fatta: quale conto si muove? Cercalo e sceglilo.'; }
+        else if (!se.value) { el = se; nome = n + ' · Sezione'; serve = 'Dice se il conto si scrive in DARE (a sinistra) o in AVERE (a destra) del mastro.'; ora = 'Scegli Dare o Avere per questo conto.'; }
+        else if (!im.value.trim()) { el = im; nome = n + ' · Importo €'; serve = 'L’importo in euro che entra nel conto in quella sezione (con la virgola per i centesimi).'; ora = 'Scrivi l’importo di questa riga.'; }
+      }
+      if (!el && ver) {
+        el = ver; nome = 'Verifica la mia scrittura'; serve = 'Controlla conti, sezioni e importi rispetto alla scrittura vera del giornale e ti segna le righe sbagliate.';
+        ora = sec.querySelector('.msa-q-errore') ? 'Correggi le righe segnate in rosso, poi premi di nuovo «Verifica la mia scrittura».' + (aiuto ? ' Se proprio non ci riesci, c’è «Mostra soluzione (con aiuto)».' : '') : 'Hai compilato le righe: premi «Verifica la mia scrittura».';
+      }
+    }
+    var vecchi = document.querySelectorAll('.msa-g-brilla');
+    for (var j = 0; j < vecchi.length; j++) if (vecchi[j] !== el) vecchi[j].classList.remove('msa-g-brilla');
+    if (!el) { bolla.hidden = true; return; }
+    el.classList.add('msa-g-brilla');
+    var d = q.documento || {};
+    var htmlQ = '<div class="msa-gb-stiamo"><span>📌 COSA STIAMO FACENDO · LABORATORIO DI RAGIONERIA</span><b>Ricostruisci la scrittura</b><em>' +
+      esc(cortoB('Documento ' + (d.numero || d.id || '') + ' del ' + (d.data || '') + ': ' + (d.descrizione || d.tipo || '') + '. L’operazione che hai fatto ha già scritto nel libro giornale: ora la scrivi tu in partita doppia, per vedere se l’hai capita.', 230)) + '</em></div>' +
+      '<div class="msa-g-ora-t">🔘 A CHE COSA SERVE «' + esc(nome) + '»</div><div class="msa-g-ora-serve">' + esc(serve) + '</div>' +
+      '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">' + esc(ora) + '</div>';
+    if (htmlQ !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlQ; bolla.setAttribute('data-firma', htmlQ); }
+    bolla.hidden = false; posizionaBolla(el);
+    tickPunti.el = null;
+  }
   function spegniPunti() {
     var a = document.querySelectorAll('.msa-g-brilla'); for (var i = 0; i < a.length; i++) a[i].classList.remove('msa-g-brilla');
     bolla.hidden = true; ultimoPunto = '';
@@ -1084,7 +1139,8 @@
   function tickPunti(forza) {
     if (!bolla) return;   // il motore parte dopo il primo disegno: il primo giro lo fa il timer
     var p = PASSI[pos], c = corpo.querySelector('.msa-g-ora-c');
-    if (!p || !p.punti || !c || pannello.hidden || inQuiz()) { if (!p || !p.punti || pannello.hidden || inQuiz()) spegniPunti(); return; }
+    if (inQuiz()) { tickQuiz(); return; }
+    if (!p || !p.punti || !c || pannello.hidden) { if (!p || !p.punti || pannello.hidden) spegniPunti(); return; }
     if (suggSpento()) {
       spegniPunti(); firmaPunti = 'spento';
       if (!c.querySelector('.msa-g-sugg-on')) c.innerHTML = '<div class="msa-g-ora spento"><button type="button" class="msa-g-sugg-on lab-btn sec">💡 Riaccendi il suggeritore giallo</button><small>Il suggeritore è spento: restano il testo del passo e «Cosa devi vedere».</small></div>';
@@ -1186,7 +1242,40 @@
       // Il passo si fa in un'ALTRA schermata: nella pagina non c'è niente da far brillare, quindi brilla «Apri ➜»
       // del pannello, con la nuvoletta che spiega dove si va e perché (prima la pagina sembrava «finita» e muta).
       var vaiEl = ora && !suQuestaPagina(p) && urlPasso(p) ? radice.querySelector('.msa-g-vai:not(.qui)') : null;
-      if (vaiEl) {
+      var fattoEl = !vaiEl && ora ? c.querySelector('.msa-g-letto') : null;
+      // tutti i punti fatti ma l'operazione non è registrata: torna a brillare il pulsante che registra
+      var regEl = null;
+      if (!ora && !vaiEl && p.fatto && !stati[pos]) {
+        for (var z = elenco.length - 1; z >= 0 && !regEl; z--) if (elenco[z].d.t === 'pulsante' && elenco[z].el && visibileP(elenco[z].el)) regEl = elenco[z].el;
+      }
+      // passo da spuntare a mano (lettura) con tutti i punti fatti: brilla il «✓ Fatto» verde del pannello
+      var manoEl = !ora && !vaiEl && !regEl && !stati[pos] ? radice.querySelector('.msa-g-mano') : null;
+      if (manoEl) {
+        manoEl.classList.add('msa-g-brilla');
+        var htmlM = contenutoBolla(p, null) +
+          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «✓ Fatto»</div><div class="msa-g-ora-serve">Questo passo non registra niente nel programma: si spunta a mano. Il pulsante conferma che hai letto e controllato e ti porta al passo successivo.</div>' +
+          '<div class="msa-g-ora-t" style="margin-top:6px">🎯 ORA TOCCA A TE</div><div class="msa-g-ora-serve">Leggi «Cosa devi vedere» nel pannello, poi premi «✓ Fatto».</div>';
+        if (htmlM !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlM; bolla.setAttribute('data-firma', htmlM); }
+        bolla.hidden = Date.now() < mostraDopo;
+        if (!bolla.hidden) posizionaBolla(manoEl);
+      } else if (regEl) {
+        regEl.classList.add('msa-g-brilla');
+        var htmlR = contenutoBolla(p, c.querySelector('.msa-g-ora')) +
+          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «' + esc((regEl.textContent || regEl.value || '').trim()) + '»</div><div class="msa-g-ora-serve">È il pulsante che registra davvero l’operazione. Se dopo averlo premuto il passo non si spunta, nella pagina c’è un messaggio (rosso o accanto a una casella): correggi quella casella e premilo di nuovo.</div>';
+        if (htmlR !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlR; bolla.setAttribute('data-firma', htmlR); }
+        bolla.hidden = Date.now() < mostraDopo;
+        if (!bolla.hidden) posizionaBolla(regEl);
+      } else
+      if (fattoEl) {
+        fattoEl.classList.add('msa-g-brilla');
+        var htmlF = contenutoBolla(p, c.querySelector('.msa-g-ora')) +
+          '<div class="msa-g-ora-t" style="margin-top:6px">🔘 A CHE COSA SERVE «' + esc(fattoEl.textContent.trim()) + '»</div><div class="msa-g-ora-serve">' +
+          (ora.d.t === 'leggi' ? 'Qui non c’è niente da scrivere: leggi il punto qui sopra e premi il pulsante per confermare che l’hai letto e passare al punto successivo.'
+            : 'Non trovo la casella in questa schermata: quando l’hai fatto tu, premi il pulsante per confermarlo e passare al punto successivo.') + '</div>';
+        if (htmlF !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlF; bolla.setAttribute('data-firma', htmlF); }
+        bolla.hidden = Date.now() < mostraDopo;
+        if (!bolla.hidden) posizionaBolla(fattoEl);
+      } else if (vaiEl) {
         vaiEl.classList.add('msa-g-brilla');
         var htmlV = bollaApri(p);
         if (htmlV !== bolla.getAttribute('data-firma')) { bolla.innerHTML = htmlV; bolla.setAttribute('data-firma', htmlV); }
