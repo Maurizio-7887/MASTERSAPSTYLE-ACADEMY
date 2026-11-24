@@ -22,7 +22,8 @@ try {
 
   const all = w.MSA_ESERCIZIO.passi;
   const originalIndex = all.findIndex(p => p.titolo === 'Leggi la mappa delle ubicazioni');
-  assert.equal(originalIndex, 59, 'il controllo deve riguardare proprio il passo 60');
+  // il numero del passo cambia quando si aggiungono passi prima (es. inventario di fine anno): si cerca per titolo
+  assert.ok(originalIndex >= 0, 'il passo «Leggi la mappa delle ubicazioni» esiste');
   const step60 = all[originalIndex];
   assert.match(step60.campi[1][1], /annota il codice UdC e la sua ubicazione effettiva/i,
     'anche i dati dettagliati del passo 60 indicano di annotare UdC e ubicazione reale');

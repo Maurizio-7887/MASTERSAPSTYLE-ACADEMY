@@ -23,11 +23,30 @@ const st0 = vuoto.MSA_GUIDA_API.stati();
 const giaFatti = st0.map((x, i) => x ? i : null).filter(x => x !== null);
 if (giaFatti.join() !== '0') { errori++; console.log('✗ su azienda nuova risultano già fatti: ' + giaFatti.map(i => passi[i].titolo).join(', ')); }
 if (vuoto.MSA_GUIDA_API.passo() !== 1) { errori++; console.log('✗ la finestra dovrebbe aprirsi sul passo 2, è sul ' + (vuoto.MSA_GUIDA_API.passo() + 1)); }
-// spunta a mano: resta nello stato del simulatore
-vuoto.MSA_GUIDA_API.apri(true);
-vuoto.MSA_GUIDA_API.vaiA(passi.findIndex(p => !p.fatto));
-vuoto.document.querySelector('.msa-g-mano').click();
-const salvato = JSON.parse(vuoto.localStorage.getItem(K));
-if (!salvato.msaGuida || !salvato.msaGuida['guidato-dic-2026'][passi.find(p => !p.fatto).titolo]) { errori++; console.log('✗ la spunta a mano non è salvata nello stato'); }
+// spunta a mano: resta nello stato del simulatore. Il pannello non lascia saltare in avanti oltre passi
+// non fatti, quindi si prova su un esercizio minimo: un'operazione già registrata e poi una lettura.
+{
+  const dom = new JSDOM('<!doctype html><body></body>', {url: 'https://sim.local/vuoto/', runScripts: 'outside-only', pretendToBeVisual: true});
+  const m = dom.window;
+  m.localStorage.setItem(K, JSON.stringify({registrazioni: [], fi: {costituzione: '2026-12-01', preset: 'nuova'}, sdmm: {}, pp: {}, centriDiCosto: []}));
+  m.MSA_GUIDA = {esercizio: 'prova-spunta', chiave: K, url: {}};
+  m.MSA_ESERCIZIO = {codice: 'prova-spunta', titolo: 'Prova spunta', passi: [
+    {titolo: 'Azienda costituita', dove: {}, fatto: function () { return true; }},
+    {titolo: 'Leggi il bilancio', dove: {}}]};
+  m.eval(fs.readFileSync(path.join(dir, 'pannello.js'), 'utf8'));
+  m.MSA_GUIDA_API.apri(true);
+  m.MSA_GUIDA_API.vaiA(1);
+  const btn = m.document.querySelector('.msa-g-mano');
+  if (!btn) { errori++; console.log('✗ sulla lettura manca il pulsante «✓ Fatto»'); }
+  else {
+    btn.click();
+    const salvato = JSON.parse(m.localStorage.getItem(K));
+    if (!salvato.msaGuida || !salvato.msaGuida['prova-spunta']['Leggi il bilancio']) { errori++; console.log('✗ la spunta a mano non è salvata nello stato'); }
+  }
+  // e sull'esercizio vero non si salta in avanti oltre i passi non fatti
+  vuoto.MSA_GUIDA_API.apri(true);
+  vuoto.MSA_GUIDA_API.vaiA(passi.findIndex(p => !p.fatto));
+  if (vuoto.MSA_GUIDA_API.passo() !== 1) { errori++; console.log('✗ la finestra ha saltato passi non fatti'); }
+}
 console.log(errori ? `❌ ${errori} errori` : `✅ guida passo passo: ${passi.length} passi, ${auto} spuntati da soli sullo stato finale, nessuno su azienda nuova`);
 process.exit(errori ? 1 : 0);

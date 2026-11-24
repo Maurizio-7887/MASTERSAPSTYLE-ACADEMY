@@ -588,6 +588,7 @@ window.WMGuida = (function () {
       lc: 'Seleziona la consegna del reclamo sintetico per risalire ai lotti e alle colate; non invia richiami reali.',
       sn: 'Numero di serie del singolo pezzo, per esempio SN000001. Premi Visualizza o Invio; non inserire un lotto o una UdC.',
       cosa: 'Scegli se stampare codici ubicazione oppure UdC presenti; il comando Stampa non crea stock.',
+      'et-codice': 'Scegli l’unico codice da stampare: un’ubicazione (es. 01-03-1) oppure una UdC del materiale indicato. La stampa contiene solo questa etichetta e non sposta merce.',
       'rf-ris': 'Magazziniere simulato che esegue o conta; questa scelta non assegna automaticamente tutti i compiti.',
       'rf-data': data,
       'rf-da': 'Leggi il codice esatto dell’origine del compito e premi Invio. La merce resta qui fino alla conferma.',

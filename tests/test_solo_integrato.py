@@ -48,7 +48,11 @@ for v in ['vuoto', 'completo']:
             if ep == 'portale.materiale':
                 assert args.get('file') in {'Esercitazione_Ragioneria_con_WMS.pdf', 'Esercitazione_Ragioneria_con_WMS.docx', 'Esercitazione_Dicembre_2026.docx', 'Esercitazione_Dicembre_Magazzino.docx', 'Esercitazione_Completa_FORMAS.pdf'}, (u, href)
             assert args.get('codice') not in {'s4', 'hmlv', 'rem', 'pian', 'rep'}, (u, href)
-        if '/m/' in u or u == f'/{v}/':
+        if u == f'/{v}/':
+            # Launchpad: niente tutor operativo (scelta del 10/11), ma il salvataggio sì
+            assert config(html, 'MSA_SYNC')['versione'] == 'erp-ft'
+            assert 'window.MSA_GUIDA' not in html, u
+        if '/m/' in u:
             assert config(html, 'MSA_SYNC')['versione'] == 'erp-ft'
             guide = config(html, 'MSA_GUIDA')
             assert guide['esercizio'] == 'dicembre-wms', u  # uso libero: dicembre 2026 con riapertura

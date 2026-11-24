@@ -267,9 +267,14 @@ class Lavoro:
                 "dc_costituzione": (s.get("costituzione") or {}).get("data") or "",
                 "dc_capitale_versato": round(-s26("30") - s26("08"), 2),
                 "dc_ordini_pp": sum(1 for o in s.get("produzione") or [] if (o.get("data") or "").startswith("2026-12")),
-                "dc_scorte": "/".join(str(round(g.get(m, 0))) for m in (("FERRO", "SL-TAGLIO", "TR-STD") if s.get("produzioneModello") == "wip-fasi-v1" else ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD"))),
+                # giacenza al 31/12/2026: l'esercitazione prosegue nel 2027 (ferro di febbraio), si tolgono i movimenti successivi
+                "dc_scorte": "/".join(str(round(g.get(m, 0) - sum((x.get("qta") or 0) for x in s.get("movimenti") or []
+                                                                    if (x.get("materiale") or x.get("mat")) == m and (x.get("data") or "") > "2026-12-31")))
+                                      for m in (("FERRO", "SL-TAGLIO", "TR-STD") if s.get("produzioneModello") == "wip-fasi-v1" else ("FERRO", "SL-TAGLIO", "SL-PIEGA", "TR-STD"))),
                 "dc_rimanenze": round(s26("12") + s26("07") + s26("13"), 2),
-                "dc_colli": len((s.get("sped") or {}).get("colli") or []),
+                # colli delle consegne del 2026: quelli di febbraio 2027 appartengono al nuovo esercizio
+                "dc_colli": sum(1 for c in (s.get("sped") or {}).get("colli") or []
+                                if next((d.get("data") or "" for d in s.get("consegne") or [] if d.get("numero") == c.get("consegna")), "") <= "2026-12-31"),
                 "dc_rottamazione": s26("69"), "dc_differenza_inventario": s26("65"),
                 # inventario periodico di fine anno: kg di ferro mancanti rettificati (movimento 711)
                 "dc_ammanco_ferro": round(-sum((x.get("qta") or 0) for x in ((s.get("wm") or {}).get("registrazioni") or [])

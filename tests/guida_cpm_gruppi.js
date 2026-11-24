@@ -15,5 +15,6 @@ const primo = e.findIndex(x => !x.fatto);
 assert.equal(primo, 4, 'il prossimo punto è la casella di 4220, non di nuovo «scegli 4210»');
 e = f([P('scelta', false), P('pulsante', false), P('leggi', false)]);
 assert.equal(e[0].fatto, false, 'senza salvataggio verificato la scelta resta da fare');
-assert(js.includes('if (p.cpmVerificato) segnaGruppiSalvati(elenco);'));
+// la chiamata vale per i passi CPM verificati (e, dal 2026-11, anche per i punti automatici)
+assert(/if \(p\.cpmVerificato\b[^\n]*\)\s*segnaGruppiSalvati\(elenco\);/.test(js), 'segnaGruppiSalvati chiamato per i passi CPM verificati');
 console.log('OK: i punti di un centro già salvato restano fatti, niente avanti e indietro tra 4210 e 4220.');

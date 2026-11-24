@@ -21,7 +21,9 @@ console.log('OK guida ordine: ' + n + ' campi trovati');
   const N = w2.SD4.avvia(key2); N.avvia({modo: 'costituzione', data: '2026-12-01'});
   const pag = (f, pagina) => { w2.LAB_PAGINA = {chiave: key2, pagina}; w2.document.getElementById('lab').innerHTML = ''; w2.eval(read(f)); };
   const src = read('app/blueprints/guida/static/esercizi/dicembre-wms.js');
-  const get = nome => new Function(/function PMIGO[\s\S]*?\n  }\n  function PPAGA[\s\S]*?\n  }\n/.exec(src)[0] + '; return ' + nome + ';')();
+  // le due funzioni si estraggono una per una: fra loro nel file ce ne possono essere altre (es. PVF)
+  const fn = nome => new RegExp('function ' + nome + '[\\s\\S]*?\\n  }\\n').exec(src)[0];
+  const get = nome => new Function(fn('PMIGO') + fn('PPAGA') + '; return ' + nome + ';')();
   w2.MM4.ordine({fornitore: 'F100', materiale: 'FERRO', qta: 3000, prezzo: 1, data: '2026-12-03'});
   pag('app/blueprints/erp_acquisti/static/mm-pagine.js', 'entrate');
   get('PMIGO')({ddt: 'x', lotto: 'x', dann: '1', danno: 'x', data: '2026-12-04'}, () => false).forEach((d, k) => { n++; assert.ok(w2.document.querySelector(d.sel), 'MIGO punto ' + (k + 1) + ' ' + d.sel); });
