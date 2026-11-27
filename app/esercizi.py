@@ -478,6 +478,17 @@ def attesi_esercizio(codice, stato=None):
                   else (k, label, v, tol) for k, label, v, tol in attesi] + _DICEMBRE_SPESE_NUOVI
     if codice == "dicembre-wms" and stato is not None and _dicembre_con_ammanco_ferro(stato):
         attesi = [_ammanco_ferro(*a) for a in attesi] + _DICEMBRE_AMMANCO_NUOVI
+    if codice == "dicembre-wms" and stato is not None and _dicembre_con_export_febbraio(stato):
+        # febbraio 2027, export Kraus (60 TR-STD, 2 colli) e Liberty (40 TR-STD, 1 collo): 1.000 kg di ferro comprati,
+        # 800 kg consumati dalle 100 transenne, quindi +200 kg di ferro e +3 colli con SSCC; il resto non cambia.
+        def _export(k, label, v, tol):
+            if k == "dc_scorte" and isinstance(v, str) and "/" in v:
+                ferro, resto = v.split("/", 1)
+                return (k, label.replace("ferro kg", "ferro kg (con l’export di febbraio)", 1), f"{int(ferro) + _EXPORT_FERRO_KG}/{resto}", tol)
+            if k == "dc_colli":
+                return (k, label + " (7 a dicembre + 3 dell’export di febbraio)", v + _EXPORT_COLLI, tol)
+            return (k, label, v, tol)
+        attesi = [_export(*a) for a in attesi]
     if codice in ("dicembre-magazzino", "dicembre-magazzino-30") and stato is not None and _dicembre_con_ammanco_ferro(stato):
         # stessi 12 kg nel corso magazzino: cambia solo la giacenza del ferro (niente imposte né utile)
         attesi = [(k, label.replace("ferro kg", "ferro kg (dopo l'ammanco di 12)"), "728/" + v[4:], tol)
@@ -497,6 +508,16 @@ _DICEMBRE_AMMANCO_DELTA = {"dc_rimanenze": -11.40, "dc_differenza_inventario": 1
 _DICEMBRE_AMMANCO_NUOVI = [
     ("dc_ammanco_ferro", "Ammanco di ferro all'inventario (kg, colata COL-1206)", 12, 0),
 ]
+
+
+_EXPORT_FERRO_KG = 200
+_EXPORT_COLLI = 3
+
+
+def _dicembre_con_export_febbraio(stato):
+    """Vero quando le merci per Kraus (C520) e Liberty (C530) sono uscite dal magazzino (export di febbraio 2027)."""
+    uscite = {(c or {}).get("cliente") for c in ((stato or {}).get("consegne") or []) if (c or {}).get("pgi")}
+    return {"C520", "C530"} <= uscite
 
 
 def _dicembre_con_ammanco_ferro(stato):
