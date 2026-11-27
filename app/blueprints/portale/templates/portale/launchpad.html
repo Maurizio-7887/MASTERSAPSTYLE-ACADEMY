@@ -15,36 +15,48 @@
     <p>Un solo ambiente per SD, MM, PP, WMS e contabilità. Scegli il modulo: dentro trovi le sue funzioni.</p>
   </div>
   <section aria-labelledby="scelta-corso-principale" style="margin:0 0 24px">
-  <h2 class="msa-gruppo" id="scelta-corso-principale">🎓 I TRE ACCESSI AI CORSI · SCEGLI IL TUO</h2>
+  <h2 class="msa-gruppo" id="scelta-corso-principale">🎓 I CORSI DISPONIBILI · SCEGLI IL TUO</h2>
   <div class="msa-tiles" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
-    <a class="msa-tile grande g-magazzino" data-corso="firenze-magazzino-30" href="{{ url_for('portale.lezioni_magazzino',versione=versione,percorso='firenze') }}" style="border:2px solid #3c94bb;border-radius:13px">
+    {% if corsi_visibili is none or 'magazzino-firenze' in corsi_visibili %}
+<a class="msa-tile grande g-magazzino" data-corso="firenze-magazzino-30" href="{{ url_for('portale.lezioni_magazzino',versione=versione,percorso='firenze') }}" style="border:2px solid #3c94bb;border-radius:13px">
       <span class="ic" aria-hidden="true">💻</span><b>FIRENZE · MAGAZZINO 30 ORE</b>
       <p>Corso breve · «Dicembre in magazzino · essenziale»: 54 passaggi semplici, dall’ordine del cliente al camion e all’inventario. Nessuna partita doppia.</p>
       <strong>APRI TEORIA E PRATICA FIRENZE →</strong>
     </a>
-    <a class="msa-tile grande g-magazzino" data-corso="pistoia-magazzino-80" href="{{ url_for('portale.lezioni_magazzino',versione=versione,percorso='pistoia') }}" style="border:2px solid #1d8168;border-radius:13px">
+{% endif %}
+    {% if corsi_visibili is none or 'magazzino-pistoia' in corsi_visibili %}
+<a class="msa-tile grande g-magazzino" data-corso="pistoia-magazzino-80" href="{{ url_for('portale.lezioni_magazzino',versione=versione,percorso='pistoia') }}" style="border:2px solid #1d8168;border-radius:13px">
       <span class="ic" aria-hidden="true">📦</span><b>PISTOIA · MAGAZZINO 80 ORE</b>
       <p>Corso lungo UF 8–11 · «Dicembre in magazzino» completo: 92 passaggi su tutto il magazzino; alla fine il libro giornale dell’esercitazione mostrato e spiegato operazione per operazione (nessuna scrittura da fare). Prova pratica inventariale UF 9 (40 ore).</p>
       <strong>APRI TEORIA E PRATICA PISTOIA →</strong>
     </a>
-    <a class="msa-tile grande g-contabilita" data-corso="firenze-amministrazione" href="{{ url_for('erp_dati.avvio',versione=versione,esercizio_guida='dicembre-wms') }}" style="border:2px solid #8066a6;border-radius:13px">
+{% endif %}
+    {% if corsi_visibili is none or 'ragioneria' in corsi_visibili %}
+<a class="msa-tile grande g-contabilita" data-corso="firenze-amministrazione" href="{{ url_for('erp_dati.avvio',versione=versione,esercizio_guida='dicembre-wms') }}" style="border:2px solid #8066a6;border-radius:13px">
       <span class="ic" aria-hidden="true">🏛️</span><b>FIRENZE · AMMINISTRAZIONE</b>
       <p>MASTER SAP STYLE completo · contabilità, bilancio, SD/MM/PP, FI e CO.</p>
       <strong>APRI FIRENZE AMMINISTRAZIONE →</strong>
     </a>
+{% endif %}
   </div>
-  <a class="msa-tile g-contabilita" data-modulo="firenze-amministrazione-quiz" href="{{ url_for('ragioneria_quiz.indice') }}" style="display:block;margin-top:12px;border:2px dashed #8066a6;border-radius:13px">
+  {% if corsi_visibili is none or 'ragioneria' in corsi_visibili %}
+<a class="msa-tile g-contabilita" data-modulo="firenze-amministrazione-quiz" href="{{ url_for('ragioneria_quiz.indice') }}" style="display:block;margin-top:12px;border:2px dashed #8066a6;border-radius:13px">
     <span class="ic" aria-hidden="true">🧮</span><b>FIRENZE · AMMINISTRAZIONE — RAGIONERIA: TEORIA E QUIZ</b>
     <p>240 domande a risposta chiusa in 20 unità: Dare/Avere, mastrini, libro giornale, acquisti, vendite, incassi e pagamenti, IVA, stipendi, mutui, leasing, anticipo fatture, cespiti, ratei e risconti, chiusure. Allenamento con correzione immediata, verifiche e prova finale.</p>
     <strong>APRI LA RAGIONERIA →</strong>
   </a>
-  <a class="msa-tile g-contabilita" data-modulo="firenze-amministrazione-ifrs" href="{{ url_for('ragioneria_internazionale.indice') }}" style="display:block;margin-top:12px;border:2px dashed #6a4fa0;border-radius:13px">
+{% endif %}
+  {% if corsi_visibili is none or 'ragioneria' in corsi_visibili %}
+<a class="msa-tile g-contabilita" data-modulo="firenze-amministrazione-ifrs" href="{{ url_for('ragioneria_internazionale.indice') }}" style="display:block;margin-top:12px;border:2px dashed #6a4fa0;border-radius:13px">
     <span class="ic" aria-hidden="true">🌍</span><b>FIRENZE · AMMINISTRAZIONE — RAGIONERIA INTERNAZIONALE IFRS E OIC (MULTINAZIONALI)</b>
     <p><strong>Terzo passo, dopo l'esercizio ERP e la ragioneria OIC.</strong> 12 moduli, 100 ore: ledger paralleli OIC/IFRS, cespiti e impairment, leasing IFRS 16, segmenti, magazzino IAS 2, ricavi IFRS 15, strumenti finanziari IFRS 9, immateriali, aggregazioni aziendali, fiscalità differita, fondi rischi, chiusura con il bridge OIC/IFRS ed esame finale. Ogni modulo: manuale, laboratorio, libro giornale con correzione, test e voto del docente.</p>
     <strong>APRI LA RAGIONERIA INTERNAZIONALE →</strong>
   </a>
+{% endif %}
+  {% if corsi_visibili is not none and not corsi_visibili %}<p>Nessun corso assegnato. Contatta il docente.</p>{% endif %}
   <p style="margin:9px 0 0;font-size:.9rem"><strong>Attenzione:</strong> è un'unica applicazione ERP. I pulsanti scelgono la guida, non creano tre aziende diverse. Evita di usare lo stesso account per più classi.</p>
   </section>
+  {% if corsi_visibili is none %}
   {% macro tile_modulo(m) %}
     <a class="msa-modulo g-{{ m.colore }}" data-modulo="{{ m.codice }}" href="{{ url_for('portale.modulo_lp', versione=versione, codice=m.codice) }}">
       <span class="sigla sap">{{ m.sigla }}</span>
@@ -95,6 +107,7 @@
     <a class="msa-tile g-impostazioni" href="{{ url_for('portale.materiale', file='Esercitazione_Completa_FORMAS.pdf') }}"><b>Guida completa stampabile (PDF)</b><p>Consegne operative, dati da inserire, risultati, domande e mappa dei comandi. Laboratori separati dal caso principale; verifiche manuali non equivalgono a certificazione automatica.</p></a>
   </div>
   </details>
+  {% endif %}
   <p class="msa-lp-nota">Il lavoro si salva da solo sul portale, unico per tutti i moduli integrati: lo ritrovi accedendo da qualsiasi computer. Quando hai finito un esercizio consegnalo dalla tua area (👤 in alto) per ricevere la correzione. Programma didattico ispirato a SAP: non è SAP e non sostituisce adempimenti fiscali o consulenza.</p>
 </main>
 <div class="msa-lp-piede">MASTERSAPSTYLE Academy · Maurizio Gustinicchi Consulting</div>
