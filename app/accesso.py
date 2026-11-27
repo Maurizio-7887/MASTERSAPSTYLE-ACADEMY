@@ -85,6 +85,8 @@ def controlla_accesso():
         return redirect(url_for("accessi.password"))
     corsi = corsi_assegnati(u)
     if corsi is not None:
+        if ep.startswith(("ragioneria_quiz.", "ragioneria_internazionale.")) and "ragioneria" not in corsi:
+            abort(403, "Corso non autorizzato dal docente.")
         scelta = request.args.get("esercizio_guida") or request.form.get("esercizio") if not api else request.args.get("esercizio_guida")
         if scelta and not guida_autorizzata(u, scelta):
             abort(403, "Corso non autorizzato dal docente.")
