@@ -2,13 +2,13 @@
 {% if guida is not defined or not guida %}{% set guida = config_guida(versione) %}{% endif %}
 {% if guida %}
 <link rel="stylesheet" href="{{ url_for('guida.static', filename='pannello.css') }}">
-{% if guida.esercizio in ['dicembre-magazzino-30', 'dicembre-magazzino', 'dicembre-wms'] %}
-<form method="post" action="{{ url_for('riprendi.nuovo') }}" style="margin:12px 0;text-align:right" onsubmit="return confirm('RESET TOTALE: vuoi azzerare l’azienda e tutti i progressi del sistema integrato? Il docente conserverà una copia del lavoro salvato.');">
+{% if guida.esercizio in ['dicembre-magazzino-30', 'dicembre-magazzino', 'dicembre-wms', 'firenze-30', 'magazziniere-5', 'ragioneria-wms'] %}
+<form method="post" action="{{ url_for('riprendi.nuovo') }}" id="msa-reset-totale" style="position:fixed;bottom:18px;left:210px;z-index:1000;text-align:left" onsubmit="return confirm('RESET TOTALE: vuoi azzerare l’azienda e tutti i progressi del sistema integrato? Il docente conserverà una copia del lavoro salvato.');">
   <input type="hidden" name="csrf" value="{{ csrf_token() }}">
   <input type="hidden" name="esercizio" value="{{ guida.esercizio }}">
   <input type="hidden" name="conferma" value="si">
   <button type="submit" style="background:#b00020;color:white;border:0;border-radius:6px;padding:10px 16px;font-weight:700;cursor:pointer">♻ RESET TOTALE – RICOMINCIA DA ZERO</button>
-  <small style="display:block;margin-top:4px">Azzera anche gli altri esercizi del sistema integrato.</small>
+  <small style="display:block;background:white;color:#222;padding:3px">Archivio condiviso: leggere la conferma.</small>
 </form>
 {% endif %}
 
