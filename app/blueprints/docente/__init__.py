@@ -239,6 +239,29 @@ def monitoraggio_backup(uid):
                              "Cache-Control": "no-store"})
 
 
+CORSI_AULA = {"magazzino-firenze": "Magazzino Firenze", "magazzino-pistoia": "Magazzino Pistoia", "ragioneria": "Ragioneria e bilancio"}
+
+
+def abilitazioni_aula(uid):
+    record = db.session.get(Impostazione, f"corsi-aula-{uid}")
+    return None if record is None else set(record.valore.split(",")) & set(CORSI_AULA)
+
+
+@bp.route("/allievo/<int:uid>/corsi", methods=["POST"])
+def salva_corsi(uid):
+    _allievo(uid)
+    scelti = set(request.form.getlist("corsi")) & set(CORSI_AULA)
+    chiave = f"corsi-aula-{uid}"
+    record = db.session.get(Impostazione, chiave)
+    if record is None:
+        record = Impostazione(chiave=chiave, valore="")
+        db.session.add(record)
+    record.valore = ",".join(sorted(scelti))
+    db.session.commit()
+    flash("Assegnazioni dei corsi salvate.", "ok")
+    return redirect(url_for("docente.allievo", uid=uid))
+
+
 @bp.route("/allievo/<int:uid>", methods=["GET", "POST"])
 def allievo(uid):
     u = _allievo(uid)
@@ -259,7 +282,7 @@ def allievo(uid):
     consegne = u.consegne.order_by(Consegna.consegnata.desc()).all()
     sec = u.secondi_totali()
     return render_template("docente/allievo.html", u=u, sessioni=sessioni, consegne=consegne, secondi=sec,
-                           costo=costo(sec, u.tariffa()), tariffa_generale=costo_orario_generale(), esercizi=ESERCIZI, costo_f=costo, lavori=lavori)
+                           costo=costo(sec, u.tariffa()), tariffa_generale=costo_orario_generale(), esercizi=ESERCIZI, costo_f=costo, lavori=lavori, corsi_aula=CORSI_AULA, abilitazioni=abilitazioni_aula(uid))
 
 
 def _quiz_aperti(dati):
