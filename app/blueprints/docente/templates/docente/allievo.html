@@ -3,6 +3,19 @@
 {% block contenuto %}
 <h1>{{ u.nome }} <span style="font-size:13px;color:var(--f-attenuato)">({{ u.username }})</span></h1>
 {% include "docente/_menu.html" %}
+<div class="msa-card" style="margin:16px 0;border-top:4px solid #176b45">
+<h2>Abilitazioni ai corsi</h2>
+{% if abilitazioni is none %}<p>Assegnazioni non ancora configurate.</p>{% endif %}
+<form method="post" action="{{ url_for('docente.salva_corsi', uid=u.id) }}">
+<input type="hidden" name="csrf" value="{{ csrf_token() }}">
+{% for codice, titolo in corsi_aula.items() %}
+<p><label><input type="checkbox" name="corsi" value="{{ codice }}" {% if abilitazioni is not none and codice in abilitazioni %}checked{% endif %}> {{ titolo }}</label></p>
+{% endfor %}
+<button class="msa-btn" type="submit">Salva autorizzazioni</button>
+</form>
+<p class="msa-nota">Prima fase: le assegnazioni sono registrate; il blocco degli accessi e la separazione degli archivi non sono ancora attivi.</p>
+</div>
+
 <div class="msa-kpis">
   <div class="msa-card"><div class="l">Tempo collegato totale</div><div class="v">{{ durata(secondi) }}</div></div>
   <div class="msa-card" style="border-top-color:var(--f-arancio)"><div class="l">Costo potenziale (€)</div><div class="v">{{ costo | euro }}</div></div>
