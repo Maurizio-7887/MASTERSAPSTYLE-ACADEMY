@@ -3,9 +3,9 @@
 La ripartenza è fatta dal server: il lavoro attuale va in archivio (il docente lo può ripristinare dal pannello «Passa il comando»),
 lo stato salvato viene tolto e la pagina di conferma pulisce anche la copia nel browser, così niente lo ricarica per errore.
 """
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
-from ...accesso import utente_corrente
+from ...accesso import utente_corrente, guida_autorizzata
 from ...db import ArchivioLavoro, AvanzamentoGuida, StatoLavoro, adesso, db
 from ...esercizi import ESERCIZI
 from ...report import report as report_lavoro
@@ -19,7 +19,7 @@ PREDEFINITO = "dicembre-wms"
 
 
 def esercizi_integrati():
-    return [(k, v["titolo"]) for k, v in ESERCIZI.items() if v.get("versione") == SLOT]
+    return [(k, v["titolo"]) for k, v in ESERCIZI.items() if v.get("versione") == SLOT and guida_autorizzata(utente_corrente(), k)]
 
 
 def lavoro_di(u):
@@ -40,7 +40,11 @@ def ha_lavoro(u):
 @bp.route("/")
 def scelta():
     u = utente_corrente()
-    return render_template("riprendi/scelta.html", u=u, lavoro=lavoro_di(u), esercizi=esercizi_integrati(), predefinito=PREDEFINITO,
+    disponibili = esercizi_integrati()
+    if not disponibili:
+        abort(403, "Nessun corso autorizzato dal docente.")
+    predefinito = PREDEFINITO if PREDEFINITO in dict(disponibili) else disponibili[0][0]
+    return render_template("riprendi/scelta.html", u=u, lavoro=lavoro_di(u), esercizi=disponibili, predefinito=predefinito,
                            continua=url_for("portale.ingresso", versione=VERSIONE_URL))
 
 
@@ -49,7 +53,7 @@ def nuovo():
     u = utente_corrente()
     codice = request.form.get("esercizio") or PREDEFINITO
     if codice not in dict(esercizi_integrati()):
-        codice = PREDEFINITO
+        abort(403, "Esercizio non autorizzato.")
     if request.form.get("conferma") != "si":
         flash("Per ricominciare conferma con la casella «Sì, cancella e ricomincia».", "errore")
         return redirect(url_for("riprendi.scelta"))
