@@ -6,7 +6,7 @@
 """
 from flask import Blueprint, url_for, request, session, jsonify
 
-from ...accesso import utente_corrente, csrf_valido, csrf_token
+from ...accesso import utente_corrente, csrf_valido, csrf_token, corsi_assegnati, guida_autorizzata, CORSI_GUIDE
 from ...pagine import LABORATORI, tutte_le_pagine
 from ...db import AvanzamentoGuida, StatoLavoro, adesso, db
 
@@ -113,7 +113,13 @@ def config_guida(versione, esercizio=None, chiave=None):
         esercizio = session.get("guida_integrata", "dicembre-wms")   # uso libero: l’esercizio di dicembre 2026 con riapertura
         if esercizio not in scelte:
             esercizio = "dicembre-wms"
-    if not esercizio or utente_corrente() is None:
+        corsi = corsi_assegnati(utente_corrente())
+        if corsi is not None and not guida_autorizzata(utente_corrente(), esercizio):
+            preferite = ["dicembre-magazzino-30", "dicembre-magazzino", "dicembre-wms"]
+            esercizio = next((e for e in preferite if guida_autorizzata(utente_corrente(), e)), None)
+            if esercizio:
+                session["guida_integrata"] = esercizio
+    if not esercizio or utente_corrente() is None or not guida_autorizzata(utente_corrente(), esercizio):
         return None
     esercizio = guida_secondo_lavoro(esercizio, utente_corrente())
     url = {f"{a['blueprint']}.{p['endpoint']}": url_for(f"{a['blueprint']}.{p['endpoint']}", versione=versione) for a, p in tutte_le_pagine()}
