@@ -37,7 +37,7 @@ for ep in endpoints:
         assert config(r.get_data(as_text=True))['esercizio'] == 'dicembre-wms', ep
 for nuova in ('/vuoto/s4/contabilita-s4/passive', '/vuoto/s4/contabilita-s4/sopravvenienze', '/vuoto/s4/tesoreria/anticipi', '/vuoto/s4/chiusura/assestamenti'):
     assert c.get(nuova).status_code == 200, nuova
-assert config(c.get('/vuoto/?esercizio_guida=ragioneria-wms').get_data(as_text=True))['esercizio'] == 'ragioneria-wms'
+assert config(c.get('/vuoto/s4/dati/?esercizio_guida=ragioneria-wms').get_data(as_text=True))['esercizio'] == 'ragioneria-wms'
 
 stato = (Path(__file__).parent / 'dicembre-wms-finale.json').read_text()
 ind = Lavoro(json.loads(stato)).indicatori()

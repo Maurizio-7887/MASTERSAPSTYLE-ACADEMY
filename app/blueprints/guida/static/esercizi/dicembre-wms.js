@@ -685,7 +685,7 @@
      campi:[['Data documento e di registrazione','29/01/2027'],['Testo testata','bonifico compenso netto amministratore gennaio'],['Riferimento','CA-2027-01'],['Posizione 1','27.10 Debiti verso amministratori · Dare · 1360,18'],['Posizione 2','10 Banca c/c · Avere · 1360,18'],['Pulsante','Simula / Verifica, poi Registra documento']],
      attesa:'D 27.10 / A 10 Banca 1.360,18. Restano aperti INPS 700,60 e ritenute 406,29: si versano con l’F24 entro il 16/02/2027.',
      fatto:function(h){return primaNota(h,'2027-01-29',[['27.10','DARE',1360.18],['10','AVERE',1360.18]]);}},
-    {nuovo:true,g:'16b · Amministratore e scontrini',data:'29/01/2027',titolo:'Leggi: compenso, rimborso e principio di cassa',dove:{ep:F+'mastrini'},percorso:'FI → Contabilità → Mastrini per conto',
+    {nuovo:true,g:'16b · Amministratore e scontrini',data:'29/01/2027',titolo:'Leggi: compenso, rimborso e principio di cassa',dove:{ep:F+'mastro'},percorso:'FI → Contabilità → Mastrini per conto',
      campi:[['Conto 27.10','a zero: compenso netto e rimborso spese pagati'],['Conto 28 e 29','700,60 e 406,29 aperti fino all’F24 di febbraio (codice 1001 per le ritenute, causale C10 per la gestione separata)'],['Compenso o rimborso?','Compenso: costo con contributi e ritenute. Rimborso a piè di lista: costo, niente contributi né ritenute, purché documentato e (per vitto e alloggio) pagato in modo tracciabile'],['Principio di cassa','Un compenso di dicembre pagato a gennaio si deduce l’anno dopo (salvo pagamento entro il 12 gennaio, «cassa allargata»)']],
      nota:'Spunta a mano dopo il controllo dei mastrini.'},
     // ── 16c · NUOVO: acquisti e vendite con l'estero (UE ed extra-UE, euro e dollari) ──
