@@ -3,6 +3,7 @@ import json
 
 from flask import Blueprint, abort, g, redirect, render_template, request, send_from_directory, url_for, session
 
+from ...accesso import corsi_assegnati, utente_corrente
 from ...pagine import ATTIVITA, MODULI, VERSIONI, app_modulo, modulo
 from ...simulatore import STATIC, mappa_url, meta
 
@@ -49,7 +50,7 @@ def home():
 
 def _lp(versione, **extra):
     return render_template(extra.pop("template"), versione=versione, versioni=VERSIONI, attivita_tutte=ATTIVITA, attivita=None,
-                           moduli=MODULI, materiali=[], chiave_storage="ferro-transenne-fi-2026-erp-ft-civilistico", **extra)
+                           moduli=MODULI, materiali=[], corsi_visibili=corsi_assegnati(utente_corrente()), chiave_storage="ferro-transenne-fi-2026-erp-ft-civilistico", **extra)
 
 
 @bp.route("/<versione>/")
