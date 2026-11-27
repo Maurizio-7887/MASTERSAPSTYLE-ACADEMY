@@ -5,7 +5,7 @@ lo stato salvato viene tolto e la pagina di conferma pulisce anche la copia nel 
 """
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 
-from ...accesso import utente_corrente, guida_autorizzata
+from ...accesso import utente_corrente, guida_autorizzata, corsi_assegnati
 from ...db import ArchivioLavoro, AvanzamentoGuida, StatoLavoro, adesso, db
 from ...esercizi import ESERCIZI
 from ...report import report as report_lavoro
@@ -57,6 +57,9 @@ def nuovo():
     if request.form.get("conferma") != "si":
         flash("Per ricominciare conferma con la casella «Sì, cancella e ricomincia».", "errore")
         return redirect(url_for("riprendi.scelta"))
+    corsi = corsi_assegnati(u)
+    if corsi is not None and len(corsi) > 1:
+        abort(409, "Reset sospeso: hai più corsi abilitati e gli archivi ERP sono ancora condivisi. Contatta il docente per non perdere il lavoro degli altri corsi.")
     s = StatoLavoro.query.filter_by(utente_id=u.id, versione=SLOT).first()
     if s is not None:
         db.session.add(ArchivioLavoro(utente_id=u.id, versione=SLOT, dati=s.dati, motivo=f"ricominciato da zero dall'allievo · {adesso():%d/%m/%Y %H:%M}"))
