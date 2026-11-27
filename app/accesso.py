@@ -4,7 +4,7 @@ from functools import wraps
 
 from flask import abort, g, jsonify, redirect, request, session, url_for
 
-from .db import Utente, db
+from .db import Utente, Impostazione, db
 
 # pagine visibili senza accesso
 PUBBLICHE = {"accessi.accesso", "integrazioni.iscrizione_executive", "portale.home", "portale.health", "portale.materiale", "static",
@@ -48,6 +48,25 @@ def csrf_valido(token):
     return bool(atteso) and bool(token) and secrets.compare_digest(str(atteso), str(token))
 
 
+CORSI_GUIDE = {
+    "magazzino-firenze": {"dicembre-magazzino-30", "firenze-30"},
+    "magazzino-pistoia": {"dicembre-magazzino", "magazziniere-5"},
+    "ragioneria": {"dicembre-wms", "ragioneria-wms", "ragioneria-wms-chiusura", "guidato-dic-2026", "s4-integrato", "completo-formas"},
+}
+
+
+def corsi_assegnati(u):
+    if not u or u.docente:
+        return None
+    record = db.session.get(Impostazione, f"corsi-aula-{u.id}")
+    return None if record is None else set(record.valore.split(",")) & set(CORSI_GUIDE)
+
+
+def guida_autorizzata(u, esercizio):
+    corsi = corsi_assegnati(u)
+    return corsi is None or any(esercizio in CORSI_GUIDE[c] for c in corsi)
+
+
 def controlla_accesso():
     """before_request: login obbligatorio fuori dalle pagine pubbliche; POST protetti da CSRF."""
     ep = request.endpoint or ""
@@ -64,6 +83,17 @@ def controlla_accesso():
             abort(400, "Modulo scaduto: ricarica la pagina e riprova.")
     if u.deve_cambiare_password and ep not in {"accessi.password", "accessi.esci"} and not api:
         return redirect(url_for("accessi.password"))
+    corsi = corsi_assegnati(u)
+    if corsi is not None:
+        scelta = request.args.get("esercizio_guida") or request.form.get("esercizio") if not api else request.args.get("esercizio_guida")
+        if scelta and not guida_autorizzata(u, scelta):
+            abort(403, "Corso non autorizzato dal docente.")
+        if ep == "guida.registra_progresso" and not guida_autorizzata(u, (request.view_args or {}).get("esercizio")):
+            return jsonify(errore="Corso non autorizzato"), 403
+        if ep == "portale.lezioni_magazzino" and "magazzino-" + (request.view_args or {}).get("percorso", "") not in corsi:
+            abort(403)
+        if ep.startswith("portale.uf9_") and "magazzino-pistoia" not in corsi:
+            abort(403)
     from .blueprints.privati import controlla_prova     # corsi per privati: in prova solo programma e prime lezioni
     return controlla_prova(u)
 
